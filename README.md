@@ -1,0 +1,36 @@
+# thesandbox.page
+
+A testing ground for web experiments, built with [Astro](https://astro.build) and TypeScript. Deployed to GitHub Pages at [thesandbox.page](https://thesandbox.page).
+
+## Requirements
+
+- Node.js 22.12 or later
+- pnpm 12 (pinned in `package.json` via `packageManager`; `corepack enable` picks it up)
+
+## Commands
+
+Run from the repo root.
+
+| Command        | Action                                          |
+| :------------- | :---------------------------------------------- |
+| `pnpm install` | Install dependencies                            |
+| `pnpm dev`     | Start the dev server at `http://localhost:4321` |
+| `pnpm check`   | Type-check `.astro` and `.ts` files             |
+| `pnpm build`   | Build the static site to `./dist/`              |
+| `pnpm preview` | Serve the production build locally              |
+
+Run `pnpm check` and `pnpm build` before opening a pull request; both must pass.
+
+## Project structure
+
+```text
+public/        Static assets served as-is
+src/pages/     Routes; each file becomes a page
+src/theme/     Design tokens and shared components (see src/theme/README.md)
+```
+
+## Toolchain notes
+
+- `pnpm-workspace.yaml` approves esbuild's build script; without it `pnpm install` exits 1
+- TypeScript is pinned to 6.x because `@astrojs/check` supports `^5 || ^6` only
+- `CLAUDE.md` is a symlink to `AGENTS.md`; edit `AGENTS.md`. On Windows, clone with `core.symlinks=true` to keep it a link
