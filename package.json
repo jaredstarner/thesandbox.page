@@ -1,7 +1,7 @@
 {
   "name": "thesandbox.page",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.0-semantic-release",
   "private": true,
   "packageManager": "pnpm@12.8.1",
   "engines": {
@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "semantic-release": "^25.0.9",
     "typescript": "^6.0.3"
   }
 }
