@@ -34,3 +34,11 @@ src/theme/     Design tokens and shared components (see src/theme/README.md)
 - `pnpm-workspace.yaml` approves esbuild's build script; without it `pnpm install` exits 1
 - TypeScript is pinned to 6.x because `@astrojs/check` supports `^5 || ^6` only
 - `CLAUDE.md` is a symlink to `AGENTS.md`; edit `AGENTS.md`. On Windows, clone with `core.symlinks=true` to keep it a link
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). Report security issues privately per [SECURITY.md](SECURITY.md).
+
+## License
+
+[MIT](LICENSE)
