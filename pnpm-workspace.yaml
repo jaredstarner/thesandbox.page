@@ -1,2 +1,7 @@
 allowBuilds:
   esbuild: true
+
+# Workaround for Dependabot reading only the first document of a pnpm 12 lockfile
+# (dependabot-core#15904). Keeps the lockfile to one document; side effect: pnpm no
+# longer enforces the packageManager version. Remove once #15904 ships.
+pmOnFail: ignore

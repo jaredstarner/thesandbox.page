@@ -33,6 +33,7 @@ src/theme/     Design tokens and shared components (see src/theme/README.md)
 
 - `pnpm-workspace.yaml` approves esbuild's build script; without it `pnpm install` exits 1
 - TypeScript is pinned to 6.x because `@astrojs/check` supports `^5 || ^6` only
+- `pmOnFail: ignore` in `pnpm-workspace.yaml` keeps `pnpm-lock.yaml` to one YAML document so Dependabot can read it ([dependabot-core#15904](https://github.com/dependabot/dependabot-core/issues/15904)); pnpm no longer enforces `packageManager`, so CI pins the pnpm version. Remove it once that issue is fixed
 - `CLAUDE.md` is a symlink to `AGENTS.md`; edit `AGENTS.md`. On Windows, clone with `core.symlinks=true` to keep it a link
 
 ## Contributing
