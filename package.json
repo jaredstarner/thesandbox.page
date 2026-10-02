@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.0.0-semantic-release",
   "private": true,
+  "license": "MIT",
   "packageManager": "pnpm@12.8.1",
   "engines": {
     "node": ">=22.12.0"
