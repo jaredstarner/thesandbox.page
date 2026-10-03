@@ -1,0 +1,60 @@
+/*
+ * Design tokens. The default theme is a night beach; light mode shifts to noon.
+ * --font-display is defined by Astro's Fonts API (astro.config.mjs).
+ */
+:root {
+  /* Color */
+  --color-sky-top: #0b0f2a;
+  --color-sky-bottom: #2b2050;
+  --color-bg: var(--color-sky-top);
+  --color-ink: #f2ecdf;
+  --color-muted: #a9a3c4;
+  --color-surface: rgb(15 18 40 / 0.86);
+  --color-border: rgb(242 236 223 / 0.16);
+  --color-accent: #7ff0e0;
+  --color-sand: #d9b779;
+  --color-sand-title: #f6e3b4;
+  --color-relic: #7ff0e0;
+
+  /* Type */
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: clamp(1.75rem, 1.2rem + 2.5vw, 3rem);
+  --text-display: clamp(3rem, 1.5rem + 8vw, 9rem);
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+  --space-6: 4rem;
+
+  /* Shape */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 700ms;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-sky-top: #8fd3ff;
+    --color-sky-bottom: #fdf3d8;
+    --color-ink: #2b2118;
+    --color-muted: #6d5a45;
+    --color-surface: rgb(255 250 238 / 0.9);
+    --color-border: rgb(43 33 24 / 0.16);
+    --color-accent: #0f766e;
+    --color-sand: #e2c48a;
+    --color-sand-title: #a8732f;
+    --color-relic: #0f766e;
+  }
+}
