@@ -4,7 +4,7 @@ Metadata for every experiment, one JSON file per experiment. The home page and `
 
 An experiment has two parts:
 
-1. A page at `src/pages/<slug>/index.astro` (or any page format Astro routes), served at `/<slug>/`, plus any components, scripts, and assets it alone uses, in the same folder
+1. A page at `src/pages/<slug>/index.astro` (or any page format Astro routes), served at `/<slug>/`, plus any components, scripts, and assets it alone uses, in the same folder. Prefix those helper files with `_` (for example `_app.ts`) so Astro doesn't route them as pages or endpoints
 2. A metadata file here, named `<slug>.json`
 
 ```json

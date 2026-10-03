@@ -1,0 +1,264 @@
+---
+import Base from '../../layouts/Base.astro';
+import BackHome from '../../theme/BackHome.astro';
+---
+
+<Base
+  title="Singing sand"
+  description="A Chladni plate: drive a bolted square plate at a pitch, or sing to it, and watch sand gather on the lines that stay still."
+>
+  <BackHome />
+
+  <div class="stage" data-plate>
+    <div class="readout" aria-live="polite">
+      <p class="hz" data-hz>&nbsp;</p>
+      <p class="mode" data-mode>&nbsp;</p>
+    </div>
+
+    <div class="plate">
+      <canvas class="wave" data-wave-layer hidden aria-hidden="true"></canvas>
+      <canvas class="sand" data-sand aria-label="A square plate covered in sand. Press to pour more."></canvas>
+      <span class="bolt" aria-hidden="true"></span>
+    </div>
+
+    <div class="controls">
+      <div class="tuner">
+        <button type="button" data-prev aria-label="Previous resonance">&lsaquo;</button>
+        <input type="range" min="0" max="1000" step="1" aria-label="Pitch" data-freq />
+        <button type="button" data-next aria-label="Next resonance">&rsaquo;</button>
+      </div>
+      <div class="toggles">
+        <button type="button" data-sound aria-pressed="false">Sound off</button>
+        <button type="button" data-sing aria-pressed="false">Sing to it</button>
+        <button type="button" data-wave aria-pressed="false">Show the wave</button>
+        <button type="button" data-scatter>Scatter</button>
+      </div>
+      <p class="status" data-status></p>
+    </div>
+  </div>
+
+  <article>
+    <h1>Singing sand</h1>
+    <p>
+      In 1787 Ernst Chladni sprinkled sand on a metal plate, clamped it at the centre, and drew a violin bow along its
+      edge. The plate rang, and the sand ran off the parts that were shaking and piled up on the lines that weren't. Each
+      note left a different figure.
+    </p>
+    <p>
+      This plate is idealised. Each pattern is a pair of standing waves, <code>cos(nπx)·cos(mπy) ± cos(mπx)·cos(nπy)</code>,
+      and its pitch grows with <code>n² + m²</code>, as a real square plate's does. Only the modes that are still at the
+      centre are kept, since that's where the plate is bolted. Every mode answers the drive with a resonance peak, so
+      between peaks the plate barely moves, and the sand stops where it is.
+    </p>
+    <p>
+      The sand follows two rules. Each grain gets a random kick in proportion to how hard its spot is shaking, and it
+      drifts a little downhill toward stiller plate. Nobody tells it where the lines are; it finds them.
+    </p>
+    <p>
+      <strong>Sing to it</strong> asks for your microphone. Your voice stays in the browser: the page finds its pitch by
+      autocorrelation, matching the wave against itself to measure one period, and drives the plate at that frequency.
+      The plate only moves while it hears a steady note. Use the arrows to jump straight to the next resonance, or press
+      on the plate to pour more sand.
+    </p>
+  </article>
+</Base>
+
+<script>
+  import { startPlate } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-plate]');
+  if (root) startPlate(root);
+</script>
+
+<style>
+  .stage {
+    --plate-size: min(88vw, calc(100dvh - 15rem), 42rem);
+    --plate-edge: #3a4258;
+    --plate-light: #262c40;
+    --plate-dark: #10131f;
+
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: var(--space-3);
+    min-height: 100dvh;
+    padding: calc(var(--space-5) + var(--space-2)) var(--space-3) var(--space-4);
+    background: radial-gradient(circle at 50% 40%, var(--color-sky-bottom), var(--color-sky-top) 75%);
+  }
+
+  /* ---- readout -------------------------------------------------------------- */
+
+  .readout {
+    text-align: center;
+  }
+
+  .readout p {
+    margin: 0;
+  }
+
+  .hz {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .mode {
+    color: var(--color-muted);
+    font-family: var(--font-display);
+    font-style: italic;
+    transition: color var(--duration-base) var(--ease-out);
+  }
+
+  [data-resonant] .mode {
+    color: var(--color-relic);
+  }
+
+  /* ---- plate ---------------------------------------------------------------- */
+
+  .plate {
+    position: relative;
+    width: var(--plate-size);
+    aspect-ratio: 1;
+    border: 1px solid var(--plate-edge);
+    border-radius: var(--radius-sm);
+    background:
+      linear-gradient(135deg, rgb(255 255 255 / 0.06), transparent 40%),
+      radial-gradient(circle at 35% 30%, var(--plate-light), var(--plate-dark) 80%);
+    box-shadow:
+      0 24px 60px rgb(0 0 0 / 0.45),
+      inset 0 0 0 1px rgb(255 255 255 / 0.04);
+    transition: box-shadow var(--duration-slow) var(--ease-out);
+  }
+
+  [data-resonant] .plate {
+    box-shadow:
+      0 24px 60px rgb(0 0 0 / 0.45),
+      0 0 40px color-mix(in srgb, var(--color-relic) 25%, transparent),
+      inset 0 0 0 1px rgb(255 255 255 / 0.04);
+  }
+
+  .plate canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .sand {
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .wave {
+    image-rendering: auto;
+  }
+
+  .wave[hidden] {
+    display: none;
+  }
+
+  /* The plate is bolted here, so every pattern is still at the centre. */
+  .bolt {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    translate: -50% -50%;
+    background: radial-gradient(circle at 35% 35%, #8a93ab, #2a3044 70%);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.6);
+    pointer-events: none;
+  }
+
+  /* ---- controls --------------------------------------------------------------- */
+
+  .controls {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+    width: min(100%, 42rem);
+  }
+
+  .tuner {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    width: 100%;
+  }
+
+  .tuner input {
+    flex: 1;
+    min-width: 0;
+    accent-color: var(--color-relic);
+  }
+
+  .toggles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+
+  button {
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font: inherit;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .tuner button {
+    padding-inline: var(--space-2);
+    font-size: var(--text-lg);
+    line-height: 1;
+  }
+
+  button:hover:not(:disabled) {
+    border-color: var(--color-accent);
+  }
+
+  button[aria-pressed='true'] {
+    border-color: var(--color-relic);
+    color: var(--color-relic);
+  }
+
+  button:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .status {
+    min-height: 1.4em;
+    margin: 0;
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+
+  /* ---- write-up --------------------------------------------------------------- */
+
+  article {
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-3);
+  }
+
+  article h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mode,
+    .plate {
+      transition: none;
+    }
+  }
+</style>
