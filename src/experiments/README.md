@@ -4,7 +4,7 @@ Metadata for every experiment, one JSON file per experiment. The home page and `
 
 An experiment has two parts:
 
-1. A page at `src/pages/experiments/<slug>/index.astro` (or any page format Astro routes), plus any components, scripts, and assets it alone uses, in the same folder
+1. A page at `src/pages/<slug>/index.astro` (or any page format Astro routes), served at `/<slug>/`, plus any components, scripts, and assets it alone uses, in the same folder
 2. A metadata file here, named `<slug>.json`
 
 ```json
@@ -25,6 +25,6 @@ An experiment has two parts:
 | `tags` | No | Techniques or APIs the experiment uses |
 | `issue` | No | Issue number, when there is one |
 
-The schema lives in `src/content.config.ts`. The build fails if a metadata file has no matching page.
+The schema lives in `src/content.config.ts`. The build fails if a metadata file has no matching page, or if its slug is taken by a site page (`experiments`, `404`, or any other page in `src/pages/` that is not an experiment).
 
 Experiments stay up as a showcase: change or extend them freely, but remove one only with a stated reason in the pull request.
