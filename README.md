@@ -24,9 +24,12 @@ Run `pnpm check` and `pnpm build` before opening a pull request; both must pass.
 ## Project structure
 
 ```text
-public/        Static assets served as-is
-src/pages/     Routes; each file becomes a page
-src/theme/     Design tokens and shared components (see src/theme/README.md)
+public/            Static assets served as-is
+src/experiments/   Experiment metadata, one JSON file each (see src/experiments/README.md)
+src/home/          The home page's falling-sand field
+src/layouts/       Page layouts
+src/pages/         Routes; each file becomes a page. Experiments live in src/pages/experiments/<slug>/
+src/theme/         Design tokens and shared components (see src/theme/README.md)
 ```
 
 ## Toolchain notes
