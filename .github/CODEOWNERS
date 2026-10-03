@@ -1,2 +1,4 @@
-# Default reviewer for everything in the repo.
-* @jaredstarner
+# Automation and release config control the production gate, so changes to
+# them need the owner's review. Everything else merges without one.
+/.github/ @jaredstarner
+/.releaserc.json @jaredstarner
