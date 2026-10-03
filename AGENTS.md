@@ -27,10 +27,10 @@ Testing ground for web experiments: static Astro, strict TypeScript, deployed to
   - **New**: a new experiment on its own page
   - **Extend**: build on an existing experiment or page
   - **Rework**: redo something with a new technique or platform feature; say why in the PR
-  - **Teardown**: replace the home page or shared site chrome; rare
+  - **Teardown**: replace the home page or shared site chrome; rare. The replaced home page is not deleted: it moves to its own experiment page with metadata, so it stays in the showcase
 - Experiments live at `src/pages/experiments/<slug>/` with metadata in `src/experiments/<slug>.json` (see `src/experiments/README.md`). They stay up as a showcase; remove one only with a stated reason in the PR
 - Nothing may cost the owner money. Ideas that need an account, an API key, or a GitHub feature start as an issue
-- Versions are home page eras: `feat` for anything new or added, `fix` or `perf` for fixes and polish, and a `BREAKING CHANGE:` footer only for a teardown
+- Versions: `feat` for anything new or added, `fix` or `perf` for fixes and polish. A `BREAKING CHANGE:` footer is reserved for a teardown, which starts a new home page era
 - Labels live in `.github/labels.yml`. `sandbox` marks issues approved for `/sandbox` runs; only the owner and collaborators apply it, and issue forms must never add it. Run labels: `experiment`, `extend`, `rework`, `teardown`; `sandbox-failed` marks a run that could not pass its checks
 
 ## Development
