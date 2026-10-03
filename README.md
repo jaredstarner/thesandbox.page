@@ -28,7 +28,7 @@ public/            Static assets served as-is
 src/experiments/   Experiment metadata, one JSON file each (see src/experiments/README.md)
 src/home/          The home page's falling-sand field
 src/layouts/       Page layouts
-src/pages/         Routes; each file becomes a page. Experiments live in src/pages/experiments/<slug>/
+src/pages/         Routes; each file becomes a page. Experiments live in src/pages/<slug>/; /experiments/ lists them
 src/theme/         Design tokens and shared components (see src/theme/README.md)
 ```
 
