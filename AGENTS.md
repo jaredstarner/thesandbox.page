@@ -11,8 +11,11 @@ Testing ground for web experiments: static Astro, strict TypeScript, deployed to
   - `feat` releases a minor version, `fix` and `perf` a patch, `!` or `BREAKING CHANGE` a major
   - `build`, `chore`, `ci`, `docs`, `refactor`, `style`, and `test` release nothing
 - Run `pnpm check` and `pnpm build` before pushing; CI runs both as the required `check-and-build` check
-- PRs auto-merge once `check-and-build` passes
-- Merging to `main` deploys to GitHub Pages and runs semantic-release
+- Name branches `<type>/<short-description>`, using a Conventional Commit type (for example `fix/nav-overflow`)
+- Required checks: `check-and-build`, `dependency-review`, and CodeQL; no approval is needed except for changes under `.github/` or to `.releaserc.json`, which need the owner's review (`.github/CODEOWNERS`)
+- Enable auto-merge on PRs; they merge once checks pass. If a PR from the owner (including `/sandbox` runs) is waiting on code owner review, merge it with the admin bypass after checks pass
+- Merging to `main` runs the Production workflow: deploy to GitHub Pages, then semantic-release. Merges by anyone other than the owner wait for owner approval on the `production` environment
+- Never push tags; semantic-release creates every version tag
 - Releases are git tags plus GitHub releases only; do not edit the `package.json` version or add a CHANGELOG
 - Agents stop for a local review before pushing a branch
 - Design tokens and shared components go in `src/theme/` (see `src/theme/README.md`)
