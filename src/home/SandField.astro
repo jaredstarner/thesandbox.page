@@ -1,0 +1,339 @@
+---
+import type { Experiment } from '../experiments/list';
+import type { RelicItem } from './sand';
+
+interface Props {
+  experiments: Experiment[];
+}
+
+const { experiments } = Astro.props;
+
+// With nothing built yet, bury a single hint instead.
+const relics: RelicItem[] =
+  experiments.length > 0
+    ? experiments.map(({ title, summary, href }) => ({ title, summary, href }))
+    : [
+        {
+          title: 'Nothing built yet',
+          summary: 'Check back tomorrow.',
+          href: 'https://github.com/jaredstarner/thesandbox.page/releases',
+        },
+      ];
+
+// A new sky every build: two star layers that twinkle out of step.
+function stars(count: number, maxSize: number): string {
+  return Array.from({ length: count }, () => {
+    const x = (Math.random() * 100).toFixed(2);
+    const y = (Math.random() * 62).toFixed(2);
+    const size = (0.6 + Math.random() * maxSize).toFixed(1);
+    return `radial-gradient(circle ${size}px at ${x}% ${y}%, var(--color-star), transparent)`;
+  }).join(', ');
+}
+const sky = `--stars-a: ${stars(45, 1.2)}; --stars-b: ${stars(30, 1.6)};`;
+---
+
+<div class="field" style={sky} data-sand data-items={JSON.stringify(relics)}>
+  <div class="stars stars-a" aria-hidden="true"></div>
+  <div class="stars stars-b" aria-hidden="true"></div>
+  <div class="orb" aria-hidden="true"></div>
+  <canvas aria-hidden="true"></canvas>
+  <div class="relics" data-relics></div>
+
+  <header class="intro">
+    <h1 class="visually-hidden">thesandbox.page</h1>
+    <p>a testing ground for web experiments</p>
+  </header>
+
+  <p class="hint" aria-hidden="true">crumble the title &middot; drag to dig for what's buried &middot; shift-drag to pour</p>
+
+  <nav class="controls" aria-label="Sandbox controls">
+    <button type="button" data-theme-toggle aria-label="Switch to noon">Noon</button>
+    <button type="button" data-tool="dig" aria-label="Tool: dig. Switch tool">Digging</button>
+    <button type="button" data-reset>New beach</button>
+    <button type="button" data-open-list>Experiments</button>
+  </nav>
+
+  <dialog class="list" aria-labelledby="list-heading">
+    <h2 id="list-heading">Experiments</h2>
+    {
+      experiments.length === 0 ? (
+        <p>Nothing built yet. Check back tomorrow.</p>
+      ) : (
+        <ol>
+          {experiments.map((experiment) => (
+            <li>
+              <a href={experiment.href}>{experiment.title}</a>
+              <span>{experiment.summary}</span>
+            </li>
+          ))}
+        </ol>
+      )
+    }
+    <p><a href="/experiments/">All experiments</a></p>
+    <form method="dialog"><button>Back to the sand</button></form>
+  </dialog>
+
+  <noscript>
+    <div class="noscript">
+      <p class="noscript-title">thesandbox.page</p>
+      <p>The sand needs JavaScript. The experiments don't: <a href="/experiments/">see them all</a>.</p>
+    </div>
+  </noscript>
+</div>
+
+<script>
+  import { startSand, type RelicItem } from './sand';
+  import { getTheme, setTheme } from '../theme/theme';
+
+  const root = document.querySelector<HTMLElement>('[data-sand]');
+  if (root) {
+    const items = JSON.parse(root.dataset.items ?? '[]') as RelicItem[];
+    startSand(root, items);
+
+    const dialog = root.querySelector('dialog');
+    root.querySelector('[data-open-list]')?.addEventListener('click', () => dialog?.showModal());
+
+    // The button names the theme it switches to.
+    const themeButton = root.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+    const labelTheme = (): void => {
+      if (!themeButton) return;
+      const next = getTheme() === 'dark' ? 'Noon' : 'Night';
+      themeButton.textContent = next;
+      themeButton.setAttribute('aria-label', `Switch to ${next.toLowerCase()}`);
+    };
+    labelTheme();
+    themeButton?.addEventListener('click', () => {
+      setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+      labelTheme();
+    });
+  }
+</script>
+
+<style>
+  .field {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: linear-gradient(var(--color-sky-top), var(--color-sky-bottom) 75%);
+  }
+
+  .stars {
+    position: absolute;
+    inset: 0;
+    animation: twinkle 6s ease-in-out infinite alternate;
+  }
+
+  .stars-a {
+    background: var(--stars-a);
+  }
+
+  .stars-b {
+    background: var(--stars-b);
+    animation-delay: -3s;
+    animation-duration: 9s;
+  }
+
+  @keyframes twinkle {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.35;
+    }
+  }
+
+  .orb {
+    position: absolute;
+    top: 9%;
+    right: 12%;
+    width: clamp(48px, 8vw, 110px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--color-orb);
+    box-shadow: 0 0 60px 20px var(--color-orb-glow);
+  }
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .relics {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .relics :global(.relic) {
+    position: absolute;
+    display: grid;
+    gap: 2px;
+    max-width: min(16rem, 40vw);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-relic);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-size: var(--text-sm);
+    text-align: center;
+    text-decoration: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -90%) scale(0.9);
+    transition:
+      opacity var(--duration-slow) var(--ease-out),
+      transform var(--duration-slow) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .relics :global(.relic.revealed) {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate(-50%, -125%) scale(1);
+  }
+
+  .relics :global(.relic:hover),
+  .relics :global(.relic:focus-visible) {
+    box-shadow: 0 0 24px var(--color-relic);
+  }
+
+  .relics :global(.relic strong) {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    color: var(--color-relic);
+  }
+
+  .intro {
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-3);
+    pointer-events: none;
+  }
+
+  .intro p {
+    margin: 0;
+    font-family: var(--font-display);
+    font-style: italic;
+    color: var(--color-muted);
+  }
+
+  .hint {
+    position: absolute;
+    bottom: var(--space-3);
+    left: var(--space-3);
+    margin: 0;
+    max-width: calc(100% - 2 * var(--space-3));
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+    pointer-events: none;
+  }
+
+  .controls {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-2);
+  }
+
+  button {
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font: inherit;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  button:hover {
+    border-color: var(--color-accent);
+  }
+
+  .list {
+    width: min(32rem, calc(100% - 2 * var(--space-3)));
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    backdrop-filter: blur(12px);
+  }
+
+  .list::backdrop {
+    background: rgb(0 0 0 / 0.4);
+  }
+
+  .list h2 {
+    margin-top: 0;
+    font-family: var(--font-display);
+  }
+
+  .list ol {
+    padding: 0;
+    list-style: none;
+  }
+
+  .list li {
+    display: grid;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .list li span {
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+  }
+
+  .noscript {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    padding: var(--space-3);
+    text-align: center;
+  }
+
+  .noscript-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: 800;
+    color: var(--color-sand-title);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stars {
+      animation: none;
+    }
+  }
+
+  @media (hover: none) {
+    .hint {
+      font-size: 0.75rem;
+    }
+  }
+</style>

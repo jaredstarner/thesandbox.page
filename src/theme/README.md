@@ -4,8 +4,10 @@ The site's design tokens and shared styles. Like everything else here, they are 
 
 | File | Holds |
 | :--- | :--- |
-| `tokens.css` | Color, type, space, shape, and motion tokens; night beach by default, noon in light mode |
+| `tokens.css` | Color, type, space, shape, and motion tokens; night beach by default, noon under `data-theme="light"` |
 | `base.css` | Minimal global styles every page gets through `src/layouts/Base.astro` |
+| `theme.ts` | Read and set the theme; the choice is stored in `localStorage` and applied before first paint by `Base.astro` |
+| `BackHome.astro` | A fixed link back to the home page, for experiments that want one |
 
 The display font (`--font-display`, Fraunces) is configured with Astro's Fonts API in `astro.config.mjs` and self-hosted at build time.
 

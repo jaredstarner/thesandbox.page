@@ -1,17 +1,11 @@
 ---
+import Base from '../layouts/Base.astro';
+import SandField from '../home/SandField.astro';
+import { getExperiments } from '../experiments/list';
 
+const experiments = await getExperiments();
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>thesandbox.page</title>
-	</head>
-	<body>
-		<h1>thesandbox.page</h1>
-	</body>
-</html>
+<Base>
+  <SandField experiments={experiments} />
+</Base>
