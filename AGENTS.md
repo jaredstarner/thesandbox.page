@@ -8,7 +8,7 @@ Testing ground for web experiments: static Astro, strict TypeScript, deployed to
 - Sign every commit; the `main` ruleset rejects unsigned commits
 - Keep commits small and focused; PRs merge with a merge commit, so each commit lands on `main`
 - Write commit messages as [Conventional Commits](https://www.conventionalcommits.org); semantic-release reads them
-  - `feat` releases a minor version, `fix` and `perf` a patch, `!` or `BREAKING CHANGE` a major
+  - `feat` releases a minor version, `fix` and `perf` a patch, and a `BREAKING CHANGE:` footer a major. The `!` shorthand (`feat!:`) is not recognized by the release config and releases nothing
   - `build`, `chore`, `ci`, `docs`, `refactor`, `style`, and `test` release nothing
 - Run `pnpm check` and `pnpm build` before pushing; CI runs both as the required `check-and-build` check
 - Name branches `<type>/<short-description>`, using a Conventional Commit type (for example `fix/nav-overflow`)
@@ -17,8 +17,21 @@ Testing ground for web experiments: static Astro, strict TypeScript, deployed to
 - Merging to `main` runs the Production workflow: deploy to GitHub Pages, then semantic-release. Merges by anyone other than the owner wait for owner approval on the `production` environment
 - Never push tags; semantic-release creates every version tag
 - Releases are git tags plus GitHub releases only; do not edit the `package.json` version or add a CHANGELOG
-- Agents stop for a local review before pushing a branch
+- Agents stop for a local review before pushing a branch, except scheduled `/sandbox` runs, which ship once checks pass
 - Design tokens and shared components go in `src/theme/` (see `src/theme/README.md`)
+
+## The sandbox
+
+- The site itself is the sandbox: anything on it can change. The layout, theme, and home page are a starting point, not a contract
+- Kinds of change, most common first:
+  - **New**: a new experiment on its own page
+  - **Extend**: build on an existing experiment or page
+  - **Rework**: redo something with a new technique or platform feature; say why in the PR
+  - **Teardown**: replace the home page or shared site chrome; rare. The replaced home page is not deleted: it moves to its own experiment page with metadata, so it stays in the showcase
+- Experiments live at `src/pages/experiments/<slug>/` with metadata in `src/experiments/<slug>.json` (see `src/experiments/README.md`). They stay up as a showcase; remove one only with a stated reason in the PR
+- Nothing may cost the owner money. Ideas that need an account, an API key, or a GitHub feature start as an issue
+- Versions: `feat` for anything new or added, `fix` or `perf` for fixes and polish. A `BREAKING CHANGE:` footer is reserved for a teardown, which starts a new home page era
+- Labels live in `.github/labels.yml`. `sandbox` marks issues approved for `/sandbox` runs; only the owner and collaborators apply it, and issue forms must never add it. Run labels: `experiment`, `extend`, `rework`, `teardown`; `sandbox-failed` marks a run that could not pass its checks
 
 ## Development
 

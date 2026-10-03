@@ -1,0 +1,44 @@
+---
+import { Font } from 'astro:assets';
+import '../theme/tokens.css';
+import '../theme/base.css';
+
+interface Props {
+  /** Page title; the site name is appended. Omit on the home page. */
+  title?: string;
+  description?: string;
+}
+
+const { title, description = 'A testing ground for web experiments.' } = Astro.props;
+const fullTitle = title ? `${title} · thesandbox.page` : 'thesandbox.page';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      // Apply the stored theme before first paint (see src/theme/theme.ts).
+      try {
+        if (localStorage.getItem('theme') === 'light') document.documentElement.dataset.theme = 'light';
+      } catch {}
+    </script>
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <Font cssVariable="--font-display" preload />
+    <title>{fullTitle}</title>
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
