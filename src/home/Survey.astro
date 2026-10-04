@@ -1,0 +1,676 @@
+---
+import type { Experiment } from '../experiments/list';
+import { plotCell } from './plots';
+
+interface Props {
+  experiments: Experiment[];
+}
+
+const { experiments } = Astro.props;
+
+// Every experiment claims a plot of its own, numbered in the order they land.
+const highest = Math.max(0, ...experiments.map((e) => e.plot ?? 0));
+const owners = new Map<number, string>();
+for (const experiment of experiments) {
+  if (experiment.plot === undefined) {
+    throw new Error(
+      `src/experiments/${experiment.slug}.json claims no plot on the home page's survey. Add "plot": ${highest + 1} (the next free plot).`,
+    );
+  }
+  const owner = owners.get(experiment.plot);
+  if (owner) {
+    throw new Error(`Plot ${experiment.plot} is claimed by both ${owner} and ${experiment.slug}; give ${experiment.slug} plot ${highest + 1}.`);
+  }
+  owners.set(experiment.plot, experiment.slug);
+}
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const longDate = (date: Date): string => `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+
+interface Plot {
+  id: string;
+  plot: number;
+  href: string;
+  title: string;
+  summary: string;
+  date?: Date;
+  x: number;
+  y: number;
+}
+
+const place = (plot: number): { x: number; y: number } => {
+  const [x, y] = plotCell(plot);
+  return { x, y };
+};
+
+// The register sits at the origin; the newest claim comes first in the list.
+const plots: Plot[] = [
+  {
+    id: 'register',
+    plot: 0,
+    href: '/experiments/',
+    title: 'The Register',
+    summary: 'The survey office: every experiment on record, with its date and whether your browser can run it.',
+    ...place(0),
+  },
+  ...experiments
+    .toSorted((a, b) => b.plot! - a.plot!)
+    .map(({ slug, plot, href, title, summary, date }) => ({ id: slug, plot: plot!, href, title, summary, date, ...place(plot!) })),
+];
+---
+
+<div class="sv" data-survey data-lod="mid">
+  <canvas class="sv-terrain" data-terrain aria-hidden="true"></canvas>
+
+  <header class="sv-cartouche" data-chrome>
+    <h1>thesandbox.page</h1>
+    <p class="sv-sub">A survey of web experiments, staked out one plot at a time</p>
+    <p class="sv-sheet">Sheet 1 &middot; Scale varies &middot; Surveyed daily</p>
+  </header>
+
+  <section class="sv-claims" aria-labelledby="sv-claims-heading">
+    <h2 id="sv-claims-heading" class="sv-claims-heading">Plots</h2>
+    <ol class="sv-plots" data-plots>
+      {
+        plots.map((p) => (
+          <li class="sv-plot" id={p.id} data-plot={p.plot} data-x={p.x} data-y={p.y} style={`--px: ${p.x}; --py: ${p.y}`}>
+            <a class:list={['sv-parcel', { 'sv-office': p.plot === 0 }]} href={p.href} draggable="false">
+              <span class="sv-label">
+                <span class="sv-no">{p.plot === 0 ? 'Survey office' : `Plot ${p.plot}`}</span>
+                <span class="sv-title">{p.title}</span>
+                {p.date && (
+                  <span class="sv-date">
+                    Claimed <time datetime={p.date.toISOString().slice(0, 10)}>{longDate(p.date)}</time>
+                  </span>
+                )}
+                <span class="sv-summary">{p.summary}</span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <svg class="sv-north" data-chrome viewBox="0 0 40 64" aria-hidden="true">
+    <path d="M20 4 L30 44 L20 37 L10 44 Z" />
+    <path class="sv-north-half" d="M20 4 L20 37 L10 44 Z" />
+    <text x="20" y="60" text-anchor="middle">N</text>
+  </svg>
+
+  <footer class="sv-foot" data-chrome>
+    <div class="sv-scale" aria-hidden="true">
+      <span class="sv-scale-bar" data-scale></span>
+      <span class="sv-scale-label" data-scale-label>1 section</span>
+    </div>
+    <p class="sv-readout" data-readout aria-hidden="true">N 0.00 &nbsp;E 0.00</p>
+    <p class="sv-hint">Drag to pan, scroll or pinch to zoom, Tab through the plots</p>
+  </footer>
+
+  <nav class="sv-controls" data-chrome aria-label="Map">
+    <button type="button" data-act="zoom-in" aria-label="Zoom in">+</button>
+    <button type="button" data-act="zoom-out" aria-label="Zoom out">&minus;</button>
+    <button type="button" data-act="fit">All plots</button>
+    <button type="button" data-act="next">Next plot</button>
+    <button type="button" data-act="stumble">Stumble</button>
+    <a href="/experiments/">Register</a>
+  </nav>
+
+  <noscript>
+    <p class="sv-noscript">The map needs JavaScript. Every plot is listed above, and <a href="/experiments/">the register</a> has them all.</p>
+  </noscript>
+</div>
+
+<script>
+  import { startSurvey } from './survey';
+
+  const root = document.querySelector<HTMLElement>('[data-survey]');
+  if (root) startSurvey(root);
+</script>
+
+<style>
+  .sv {
+    --sv-paper: #f3eee0;
+    --sv-ink: #2b2a26;
+    --sv-ink-soft: #5d584c;
+    --sv-red: #c8473b;
+    --sv-brown: #a8703a;
+    --sv-blue: #3f7fa6;
+    --sv-chip: rgb(243 238 224 / 0.9);
+    --cx: 0;
+    --cy: 0;
+    --z: 110;
+
+    min-height: 100dvh;
+    background-color: var(--sv-paper);
+    background-image:
+      linear-gradient(rgb(200 71 59 / 0.16) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(200 71 59 / 0.16) 1px, transparent 1px);
+    background-size: 64px 64px;
+    color: var(--sv-ink);
+    font-family: var(--font-survey), 'Arial Narrow', sans-serif;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .sv :where(*, *::before, *::after),
+  .sv :global(:where(.sv-stake, .sv-stake *)) {
+    box-sizing: border-box;
+  }
+
+  .sv a {
+    color: inherit;
+  }
+
+  .sv-terrain {
+    display: none;
+  }
+
+  /* ---- cartouche --------------------------------------------------------- */
+
+  .sv-cartouche {
+    position: relative;
+    z-index: 3;
+    width: fit-content;
+    max-width: min(440px, calc(100vw - 32px));
+    margin: 16px;
+    padding: 14px 18px 12px;
+    background: var(--sv-chip);
+    border: 1.5px solid var(--sv-ink);
+    box-shadow:
+      inset 0 0 0 3px var(--sv-paper),
+      inset 0 0 0 4px var(--sv-ink);
+  }
+
+  .sv-cartouche h1 {
+    margin: 0;
+    font-size: clamp(1.45rem, 4.6vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .sv-sub {
+    margin: 0.4em 0 0;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .sv-sheet {
+    margin: 0.55em 0 0;
+    color: var(--sv-red);
+    font-family: var(--font-survey-mono), ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ---- plots: a plat book without script --------------------------------- */
+
+  .sv-claims-heading {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .sv-plots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0 16px 24px;
+    list-style: none;
+  }
+
+  .sv-parcel {
+    display: block;
+    height: 100%;
+    padding: 14px;
+    background: var(--sv-chip);
+    border: 1.5px dashed var(--sv-red);
+    text-decoration: none;
+  }
+
+  .sv :global(.sv-label) {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sv :global(.sv-no) {
+    color: var(--sv-red);
+    font-family: var(--font-survey-mono), ui-monospace, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sv :global(.sv-title) {
+    font-size: 1.05rem;
+    font-weight: 750;
+    line-height: 1.1;
+  }
+
+  .sv :global(.sv-date) {
+    color: var(--sv-ink-soft);
+    font-size: 0.78rem;
+  }
+
+  .sv :global(.sv-summary) {
+    margin-top: 4px;
+    font-size: 0.85rem;
+  }
+
+  .sv-north,
+  .sv-foot,
+  .sv-controls {
+    display: none;
+  }
+
+  .sv-noscript {
+    margin: 0 16px 24px;
+    font-style: italic;
+  }
+
+  /* ---- the map ------------------------------------------------------------ */
+
+  :global(html.sv-js) .sv {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    min-height: 0;
+    background-image: none;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  :global(html.sv-js) .sv:global(.sv-grabbing) {
+    cursor: grabbing;
+  }
+
+  :global(html.sv-js) .sv:global(.sv-flat) {
+    background-image:
+      linear-gradient(rgb(200 71 59 / 0.28) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(200 71 59 / 0.28) 1px, transparent 1px);
+    background-size: calc(var(--z) * 1px) calc(var(--z) * 1px);
+    background-position: calc(50% - (var(--cx) + 0.5) * var(--z) * 1px) calc(50% - (var(--cy) + 0.5) * var(--z) * 1px);
+  }
+
+  :global(html.sv-js) .sv-terrain {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  :global(html.sv-js) .sv:global(.sv-flat) .sv-terrain {
+    display: none;
+  }
+
+  :global(html.sv-js) .sv-cartouche {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    margin: 0;
+    cursor: auto;
+  }
+
+  :global(html.sv-js) .sv-claims {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  :global(html.sv-js) .sv-plots {
+    display: block;
+    padding: 0;
+  }
+
+  .sv :global(.sv-plot) {
+    position: relative;
+  }
+
+  :global(html.sv-js) .sv :global(.sv-plot) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    /* The reveal fades with filter, not opacity: the computed opacity stays 1, so a
+       style snapshot taken mid-reveal matches one taken after it. */
+    filter: opacity(0);
+    transform: translate(calc((var(--px) - var(--cx)) * var(--z) * 1px), calc((var(--py) - var(--cy)) * var(--z) * 1px));
+    transition: filter 0.6s ease-out;
+  }
+
+  :global(html.sv-js) .sv :global(.sv-plot.sv-on) {
+    filter: none;
+  }
+
+  :global(html.sv-js) .sv :global(.sv-parcel) {
+    position: absolute;
+    top: calc(var(--z) * -0.5px);
+    left: calc(var(--z) * -0.5px);
+    display: grid;
+    width: calc(var(--z) * 1px);
+    height: calc(var(--z) * 1px);
+    padding: 0;
+    place-items: center;
+    background:
+      linear-gradient(var(--sv-red), var(--sv-red)) 0 0 / 5px 5px no-repeat,
+      linear-gradient(var(--sv-red), var(--sv-red)) 100% 0 / 5px 5px no-repeat,
+      linear-gradient(var(--sv-red), var(--sv-red)) 0 100% / 5px 5px no-repeat,
+      linear-gradient(var(--sv-red), var(--sv-red)) 100% 100% / 5px 5px no-repeat,
+      rgb(200 71 59 / 0.07);
+    border: 1.5px dashed var(--sv-red);
+    pointer-events: auto;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
+  }
+
+  :global(html.sv-js) .sv-office {
+    border-style: solid;
+    border-color: var(--sv-ink);
+  }
+
+  :global(html.sv-js) .sv :global(.sv-label) {
+    align-items: center;
+    width: clamp(112px, calc(var(--z) * 0.86px), 270px);
+    padding: 4px 8px 5px;
+    text-align: center;
+    background: var(--sv-chip);
+    box-shadow: 0 1px 0 rgb(43 42 38 / 0.18);
+  }
+
+  :global(html.sv-js) .sv-parcel:hover,
+  :global(html.sv-js) .sv-parcel:focus-visible {
+    z-index: 2;
+    background-color: rgb(200 71 59 / 0.16);
+    border-style: solid;
+  }
+
+  :global(html.sv-js) .sv-parcel:focus-visible {
+    outline: 3px solid var(--sv-ink);
+    outline-offset: 3px;
+  }
+
+  :global(html.sv-js) .sv :global(.sv-plot:has(:hover, :focus-visible)) {
+    z-index: 2;
+  }
+
+  /* Detail by zoom: a number from afar, a title nearer, the full entry close up. */
+  :global(html.sv-js) .sv[data-lod='far'] :global(:is(.sv-title, .sv-date, .sv-summary)),
+  :global(html.sv-js) .sv[data-lod='mid'] :global(:is(.sv-date, .sv-summary)) {
+    display: none;
+  }
+
+  :global(html.sv-js) .sv[data-lod='far'] :global(.sv-label) {
+    width: auto;
+    padding: 1px 5px;
+  }
+
+  :global(html.sv-js) .sv[data-lod='mid'] :global(.sv-stake .sv-date) {
+    display: block;
+  }
+
+  :global(html.sv-js) .sv[data-lod='mid'] :global(.sv-label) {
+    width: max-content;
+    max-width: clamp(112px, calc(var(--z) * 1.6px), 200px);
+  }
+
+  :global(html.sv-js) .sv[data-lod='near'] :global(.sv-summary) {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+  }
+
+  /* The stake for the next plot, which the next experiment will claim. */
+  :global(html.sv-js) .sv :global(.sv-stake .sv-parcel) {
+    background: rgb(63 127 166 / 0.06);
+    border: 1.5px dotted var(--sv-blue);
+    cursor: default;
+  }
+
+  .sv :global(.sv-stake .sv-no),
+  .sv :global(.sv-stake [data-countdown]) {
+    color: var(--sv-blue);
+  }
+
+  .sv :global(.sv-stake [data-countdown]) {
+    font-family: var(--font-survey-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sv :global(.sv-flag) {
+    position: absolute;
+    top: -26px;
+    left: -1px;
+    width: 2px;
+    height: 30px;
+    background: var(--sv-ink);
+  }
+
+  .sv :global(.sv-flag)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 2px;
+    width: 16px;
+    height: 11px;
+    background: var(--sv-blue);
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    transform-origin: left center;
+    animation: sv-wave 2.4s ease-in-out infinite alternate;
+  }
+
+  @keyframes sv-wave {
+    from {
+      transform: skewY(-6deg) scaleX(1);
+    }
+    to {
+      transform: skewY(5deg) scaleX(0.82);
+    }
+  }
+
+  :global(html.sv-js) .sv :global(.sv-plot.sv-picked .sv-parcel) {
+    animation: sv-picked 0.8s ease-out 3;
+  }
+
+  @keyframes sv-picked {
+    from {
+      box-shadow: 0 0 0 0 rgb(200 71 59 / 0.7);
+    }
+    to {
+      box-shadow: 0 0 0 22px rgb(200 71 59 / 0);
+    }
+  }
+
+  /* ---- map furniture ------------------------------------------------------ */
+
+  :global(html.sv-js) .sv-north {
+    display: block;
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 30px;
+    padding: 6px 7px 4px;
+    background: var(--sv-chip);
+    fill: var(--sv-paper);
+    stroke: var(--sv-ink);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+
+  .sv-north .sv-north-half {
+    fill: var(--sv-ink);
+  }
+
+  .sv-north text {
+    fill: var(--sv-ink);
+    stroke: none;
+    font: 700 14px var(--font-survey), sans-serif;
+  }
+
+  :global(html.sv-js) .sv-foot {
+    display: block;
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    max-width: calc(100vw - 32px);
+    padding: 8px 10px;
+    background: var(--sv-chip);
+    cursor: auto;
+  }
+
+  .sv-scale {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .sv-scale-bar {
+    width: 100px;
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--sv-ink) 0 25%, var(--sv-paper) 25% 50%);
+    border: 1px solid var(--sv-ink);
+  }
+
+  .sv-scale-label,
+  .sv-readout {
+    font-family: var(--font-survey-mono), ui-monospace, monospace;
+    font-size: 0.72rem;
+  }
+
+  .sv-readout {
+    margin: 4px 0 0;
+    color: var(--sv-ink-soft);
+    white-space: pre;
+  }
+
+  .sv-hint {
+    margin: 4px 0 0;
+    color: var(--sv-ink-soft);
+    font-size: 0.75rem;
+  }
+
+  :global(html.sv-js) .sv-controls {
+    display: flex;
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+    max-width: calc(100vw - 32px);
+    cursor: auto;
+  }
+
+  .sv-controls :is(button, a) {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px 12px;
+    color: var(--sv-ink);
+    background: var(--sv-chip);
+    border: 1.5px solid var(--sv-ink);
+    border-radius: 0;
+    font: 700 0.8rem/1 var(--font-survey), sans-serif;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .sv-controls a {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .sv-controls :is(button, a):hover {
+    background: var(--sv-ink);
+    color: var(--sv-paper);
+  }
+
+  .sv-controls :is(button, a):focus-visible {
+    outline: 3px solid var(--sv-red);
+    outline-offset: 2px;
+  }
+
+  .sv-controls [data-act='zoom-in'],
+  .sv-controls [data-act='zoom-out'] {
+    font-size: 1.1rem;
+  }
+
+  @media (max-width: 640px) {
+    .sv-cartouche {
+      padding: 10px 12px 9px;
+    }
+
+    .sv-cartouche h1 {
+      font-size: 1.3rem;
+    }
+
+    .sv-sub {
+      font-size: 0.85rem;
+    }
+
+    .sv-sheet {
+      font-size: 0.62rem;
+    }
+
+    :global(html.sv-js) .sv-north,
+    .sv-hint,
+    .sv-controls [data-act='zoom-in'],
+    .sv-controls [data-act='zoom-out'] {
+      display: none;
+    }
+
+    :global(html.sv-js) .sv-foot {
+      bottom: 68px;
+      padding: 6px 8px;
+    }
+
+    :global(html.sv-js) .sv-controls {
+      left: 16px;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+    }
+
+    .sv-controls :is(button, a) {
+      flex: 1 1 auto;
+      justify-content: center;
+      padding: 8px 6px;
+      font-size: 0.7rem;
+      letter-spacing: 0.03em;
+    }
+  }
+
+  /* Pinch replaces the zoom buttons, and there is no pointer to read out. */
+  @media (pointer: coarse) {
+    .sv-controls [data-act='zoom-in'],
+    .sv-controls [data-act='zoom-out'],
+    .sv-readout {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.sv-js) .sv :global(.sv-plot),
+    :global(html.sv-js) .sv-parcel {
+      transition: none;
+    }
+
+    .sv :global(.sv-flag)::after,
+    :global(html.sv-js) .sv :global(.sv-plot.sv-picked .sv-parcel) {
+      animation: none;
+    }
+  }
+</style>
