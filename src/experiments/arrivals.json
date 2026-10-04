@@ -1,0 +1,6 @@
+{
+  "title": "Arrivals",
+  "summary": "A split-flap arrivals board for Wikipedia: every row is an edit landing somewhere in the world right now, and the board pops out into a window that floats over everything.",
+  "date": "2026-10-04",
+  "tags": ["split-flap", "eventsource", "document-picture-in-picture", "container-queries", "web-audio", "live-data"]
+}
