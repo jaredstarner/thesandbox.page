@@ -2,8 +2,9 @@
 import { Font } from 'astro:assets';
 import Bare from '../../layouts/Bare.astro';
 import { getExperiments } from '../../experiments/list';
-import { buildFolios, formatEntryDate } from './_register';
+import { buildFolios, dateKeys, formatEntryDate } from './_register';
 import { baselineNote } from './_baseline';
+import { classify } from './_class';
 import { TECHNIQUES, normalizeTag, techniqueLabel } from './_tests';
 import { bookcloth, leafFibre, leafRaked, watermark, monogramPaths } from './_textures';
 
@@ -26,6 +27,27 @@ const medium = (tags: string[], requires: string[] = []) => {
     };
   });
 };
+
+// The foot's Baseline line, computed from web-features at build time.
+const tracked = new Map<string, number | null>();
+for (const experiment of experiments) {
+  for (const tag of experiment.tags) {
+    const key = normalizeTag(tag);
+    const note = baselineNote(TECHNIQUES[key]?.webFeature);
+    if (note) tracked.set(key, note.year);
+  }
+}
+const recent = [...tracked.values()].filter((year) => year !== null && year >= 2025).length;
+const notYet = [...tracked.values()].filter((year) => year === null).length;
+const baselineLine =
+  tracked.size === 0
+    ? ''
+    : `Of the ${tracked.size} techniques ${total === 1 ? 'it uses' : 'these objects use'} that Baseline tracks, ${recent} reached Baseline in 2025 or later` +
+      (notYet > 0 ? ` and ${notYet} ${notYet === 1 ? 'has' : 'have'} not reached it yet.` : '.');
+
+type Entry = (typeof folios)[number]['entries'][number];
+const searchText = (entry: Entry, word: string, labels: string[]) =>
+  `|${[entry.title, entry.summary, ...entry.tags, ...labels, word, ...dateKeys(entry)].join('|').toLowerCase()}|`;
 
 const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:${leafRaked};--tex-watermark:${watermark};`;
 ---
@@ -69,7 +91,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
         </dl>
       </section>
 
-      <form class="call-slip" role="search" onsubmit="return false">
+      <form class="call-slip" role="search">
         <label class="call-field">
           <span>Call for object:</span>
           <input type="search" name="q" autocomplete="off" spellcheck="false" />
@@ -90,6 +112,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
                 <h2 class="folio-head" id={`${folio.id}-title`}>
                   {folio.label} <span>· Folio {folio.number}</span>
                 </h2>
+                <p class="folio-empty">{folio.label}: no matches</p>
                 <div class="sheet">
                   <div class="col-heads" aria-hidden="true">
                     <span>Line</span>
@@ -102,6 +125,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
                   <ol class="rows">
                     {folio.entries.map((entry) => {
                       const techniques = medium(entry.tags, entry.requires);
+                      const objectClass = classify(entry.tags, entry.requires);
                       return (
                         <li
                           class="row"
@@ -109,15 +133,53 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
                           data-acc={entry.accession}
                           data-tags={entry.tags.join(' ')}
                           data-requires={entry.requires?.join(' ')}
+                          data-class={objectClass.cls}
+                          data-search={searchText(entry, objectClass.word, techniques.map((t) => t.label))}
                         >
                           <span class="c-line">{entry.line}</span>
-                          <span class="c-acc">{entry.accession}</span>
+                          <span class="c-acc">
+                            {entry.accession}
+                            <span class="acc-class">Class: {objectClass.word}</span>
+                          </span>
                           <time class="c-date" datetime={entry.iso}>
                             {formatEntryDate(entry.date)}
                           </time>
                           <div class="c-object">
                             <a href={entry.href}>{entry.title}</a>
                             <p>{entry.summary}</p>
+                            <details class="report">
+                              <summary>Condition report</summary>
+                              <dl class="r-body">
+                                <dt>Object class</dt>
+                                <dd>
+                                  <strong class="r-class">{objectClass.word}.</strong> {objectClass.reason}
+                                </dd>
+                                <dt>Handling</dt>
+                                <dd>{objectClass.handling.join(' ')}</dd>
+                                <dt>Evidence</dt>
+                                <dd>
+                                  <ul class="r-evidence">
+                                    {techniques.map((t) => (
+                                      <li data-key={t.key} data-testable={t.testable ? '' : undefined}>
+                                        <span class="r-line">
+                                          <span class="light" aria-hidden="true" />
+                                          <span class="r-tech">{t.label}</span>
+                                          <span class="r-role">
+                                            {t.required ? 'required' : t.testable ? 'enhancement' : 'technique note'}
+                                          </span>
+                                        </span>
+                                        <span class="r-state">{t.testable ? 'Not surveyed' : 'Nothing to test in a browser'}</span>
+                                        {t.baseline && <span class="r-base">{t.baseline.long}</span>}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </dd>
+                                <dt class="r-env-t" hidden>Environment</dt>
+                                <dd class="r-env" hidden>
+                                  <ul />
+                                </dd>
+                              </dl>
+                            </details>
                           </div>
                           <ul class="c-medium">
                             {techniques.map((t) => (
@@ -131,10 +193,11 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
                           <div class="c-condition">
                             <div class="stamp" aria-hidden="true">
                               <span class="s-band">Condition</span>
-                              <span class="s-verdict">Functional</span>
-                              <span class="s-date">03 OCT 2026 14:02</span>
+                              <span class="s-verdict" />
+                              <span class="s-date" />
                             </div>
                             <p class="cond-text">Not surveyed</p>
+                            <p class="cond-memory" hidden />
                           </div>
                         </li>
                       );
@@ -161,6 +224,11 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
 
       <footer class="leaf-foot">
         <p class="tally">{total} {total === 1 ? 'object' : 'objects'} in the register. Not yet surveyed.</p>
+        {baselineLine && <p class="tally-baseline">{baselineLine}</p>}
+        <p class="tally-memory" hidden />
+        <p class="foot-actions">
+          <button type="button" class="resurvey" data-resurvey disabled>Re-survey</button>
+        </p>
         <div class="foot-marks">
           <div class="perforation" aria-hidden="true"></div>
           <svg class="seal" viewBox="-60 -60 120 120" width="112" height="112" aria-hidden="true">
@@ -194,6 +262,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
           Conditions are detected from feature support in this browser at the time of survey. Detection shows an API is
           present, not that it behaves correctly. Nothing measured here leaves your browser.
         </p>
+        <p class="sr-only" aria-live="polite" data-announce></p>
       </footer>
     </main>
   </div>
@@ -214,8 +283,13 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
 </Bare>
 
 <script>
+  import { callSlip } from './_callslip';
   import { survey } from './_survey';
-  survey();
+
+  const slip = callSlip();
+  const surveyNow = () => survey().then(() => slip.refresh());
+  document.querySelector('[data-resurvey]')?.addEventListener('click', surveyNow);
+  surveyNow();
 </script>
 
 <style>
@@ -631,12 +705,22 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     font-weight: 500;
   }
 
+  .acc-class {
+    display: block;
+    font-family: var(--f-form);
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--form);
+  }
+
   .c-object {
     padding: 0 var(--pad) 0 calc(var(--pad) + 4px);
     min-width: 0;
   }
 
-  .c-object a {
+  .c-object > a {
     display: inline;
     font-family: var(--f-entry);
     font-style: italic;
@@ -649,13 +733,13 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     transition: background-size 0.25s ease;
   }
 
-  .c-object a:hover,
-  .c-object a:focus-visible {
+  .c-object > a:hover,
+  .c-object > a:focus-visible {
     background-size: 100% 1px;
     outline: none;
   }
 
-  .c-object p {
+  .c-object > p {
     margin: 0;
     font-family: var(--f-entry);
     font-size: 16px;
@@ -703,22 +787,22 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     font-style: normal;
   }
 
-  .c-medium li[data-state='detected'] .light {
+  li[data-state='detected'] .light {
     background: var(--ink-green);
     border-color: var(--ink-green);
   }
 
-  .c-medium li[data-state='absent'] .light {
+  li[data-state='absent'] .light {
     background: var(--ink-amber);
     border-color: var(--ink-amber);
   }
 
-  .c-medium li[data-state='failed-required'] .light {
+  li[data-state='failed-required'] .light {
     background: var(--ink-red);
     border-color: var(--ink-red);
   }
 
-  .c-medium li[data-state='grey'] .light {
+  li[data-state='grey'] .light {
     background: #a3a7aa;
     border-color: #a3a7aa;
   }
@@ -874,6 +958,243 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     color: var(--ink-graphite);
   }
 
+  /* ---- survey state ------------------------------------------------------- */
+
+  .row:not([data-verdict]) .stamp {
+    visibility: hidden;
+  }
+
+  .row[data-verdict='not-surveyed'] .stamp {
+    display: none;
+  }
+
+  .row[hidden],
+  .folio-empty,
+  .folio[data-empty] > :not(.folio-empty) {
+    display: none;
+  }
+
+  .folio[data-empty] > .folio-empty {
+    display: block;
+  }
+
+  .folio-empty {
+    margin: 0;
+    padding: 0 var(--pad);
+    font-family: var(--f-data);
+    font-size: 12.5px;
+    line-height: var(--line);
+    color: var(--ink-graphite);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .cond-memory {
+    margin: 6px 0 0;
+    font-family: var(--f-data);
+    font-size: 10.5px;
+    line-height: 14px;
+    color: var(--ink-graphite);
+  }
+
+  .cond-memory[hidden],
+  .tally-memory[hidden] {
+    display: none;
+  }
+
+  .redacted {
+    display: inline-block;
+    width: 12ch;
+    height: 0.95em;
+    margin-right: 10px;
+    vertical-align: -0.15em;
+    background: var(--ink);
+    mix-blend-mode: multiply;
+  }
+
+  .conditions dl > div:nth-child(3n) .redacted {
+    width: 8ch;
+  }
+
+  .conditions dl > div:nth-child(3n + 1) .redacted {
+    width: 15ch;
+  }
+
+  .withheld {
+    color: var(--ink-graphite);
+  }
+
+  /* ---- condition report --------------------------------------------------- */
+
+  .report > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--f-form);
+    font-weight: 700;
+    font-size: 10.5px;
+    line-height: var(--line);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--form);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .report > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .report > summary::before {
+    content: '';
+    border-style: solid;
+    border-width: 4px 0 4px 6px;
+    border-color: transparent transparent transparent currentColor;
+    transition: rotate 0.15s ease;
+  }
+
+  .report[open] > summary::before {
+    rotate: 90deg;
+  }
+
+  .r-body {
+    display: grid;
+    grid-template-columns: 13ch minmax(0, 1fr);
+    margin: 0;
+    font-family: var(--f-data);
+    font-size: 12px;
+    line-height: var(--line);
+  }
+
+  .r-body dt {
+    font-family: var(--f-form);
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--form);
+  }
+
+  .r-body dd {
+    margin: 0;
+    min-width: 0;
+    color: var(--ink);
+  }
+
+  .r-body [hidden] {
+    display: none;
+  }
+
+  .r-class {
+    font-family: var(--f-form);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .r-evidence,
+  .r-env ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .r-evidence li {
+    padding-left: 14px;
+    color: var(--ink-graphite);
+    overflow-wrap: anywhere;
+  }
+
+  .r-line {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    margin-left: -14px;
+    color: var(--ink);
+  }
+
+  .r-line .light {
+    align-self: center;
+    margin-top: 0;
+    flex: none;
+  }
+
+  .r-evidence li:not([data-testable]) .light {
+    visibility: hidden;
+  }
+
+  .r-tech {
+    font-family: var(--f-form);
+    font-weight: 500;
+    font-size: 13px;
+  }
+
+  .r-role {
+    font-family: var(--f-form);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-graphite);
+  }
+
+  .r-state + .r-base::before {
+    content: ' · ';
+  }
+
+  /* ---- foot actions ------------------------------------------------------- */
+
+  .tally-baseline {
+    margin: 0;
+    font-family: var(--f-entry);
+    font-size: 16px;
+    line-height: var(--line);
+  }
+
+  .tally-memory {
+    margin: 0;
+    font-family: var(--f-data);
+    font-size: 12.5px;
+    line-height: var(--line);
+    color: var(--ink-graphite);
+  }
+
+  .foot-actions {
+    margin: var(--line) 0 0;
+  }
+
+  .resurvey {
+    appearance: none;
+    border: 1px solid var(--form);
+    background: transparent;
+    color: var(--form);
+    font: 700 11px/1 var(--f-form);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+
+  .resurvey:hover:not(:disabled) {
+    background: var(--form);
+    color: var(--leaf);
+  }
+
+  .resurvey:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   /* ---- explicit placement, so breakpoints can refold the row -------------- */
 
   .c-line {
@@ -900,7 +1221,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     grid-column: cond;
   }
 
-  .row > * {
+  :where(.row > *) {
     grid-row: 1;
   }
 
@@ -916,7 +1237,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     }
 
     .sheet {
-      --c-cond: 136px;
+      --c-cond: 144px;
       grid-template-columns:
         [line] var(--c-line) [acc] var(--c-acc) [date] var(--c-date) [object medium] minmax(0, 1fr)
         [cond] var(--c-cond) [end];
@@ -955,8 +1276,10 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
       display: none;
     }
 
+    /* Shares the accession cell, two lines down: under the number and its class. */
     .c-date {
-      grid-row: 2;
+      grid-row: 1;
+      margin-top: calc(var(--line) * 2);
       color: var(--ink-graphite);
     }
 
@@ -1066,7 +1389,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
       padding: var(--line) 0;
     }
 
-    .row > * {
+    :where(.row > *) {
       grid-row: auto;
       grid-column: 1;
     }
@@ -1078,6 +1401,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     .c-acc,
     .c-date {
       grid-row: 1;
+      grid-column: 1;
       padding: 0;
     }
 
@@ -1090,14 +1414,14 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
       display: contents;
     }
 
-    .c-object a {
+    .c-object > a {
       grid-row: 2;
       grid-column: 1;
       align-self: start;
       font-size: 20px;
     }
 
-    .c-object p {
+    .c-object > p {
       grid-row: 3;
       grid-column: 1 / -1;
     }
@@ -1117,14 +1441,35 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     }
 
     .c-condition {
-      grid-row: 1 / span 2;
-      grid-column: 2;
-      padding: 0;
+      display: contents;
     }
 
     .stamp {
       --s: 0.72;
+      grid-row: 1 / span 2;
+      grid-column: 2;
       margin: 2px 0 0;
+    }
+
+    .report {
+      grid-row: 5;
+      grid-column: 1 / -1;
+    }
+
+    .r-body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .r-body dt {
+      margin-top: 6px;
+      line-height: 22px;
+    }
+
+    .cond-memory {
+      grid-row: 6;
+      grid-column: 1 / -1;
+      margin: 0;
+      line-height: var(--line);
     }
 
     .cond-text {
