@@ -7,9 +7,11 @@ interface Props {
   /** Page title; the site name is appended. Omit on the home page. */
   title?: string;
   description?: string;
+  /** Set false to leave out the site's icons, for a page that links its own in the head slot. */
+  icon?: boolean;
 }
 
-const { title, description = 'A testing ground for web experiments.' } = Astro.props;
+const { title, description = 'A testing ground for web experiments.', icon = true } = Astro.props;
 const fullTitle = title ? `${title} · thesandbox.page` : 'thesandbox.page';
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -27,8 +29,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     </script>
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
+    {icon && <link rel="icon" type="image/png" sizes="32x32" href="/favicon-hdr.png" />}
+    {icon && <link rel="apple-touch-icon" href="/apple-touch-icon.png" />}
     <link rel="canonical" href={canonical} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={fullTitle} />
