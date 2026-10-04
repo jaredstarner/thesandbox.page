@@ -1,0 +1,660 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+
+const wikis = [
+  ['all', 'Every Wikipedia'],
+  ['en', 'English'],
+  ['de', 'German'],
+  ['fr', 'French'],
+  ['es', 'Spanish'],
+  ['it', 'Italian'],
+  ['pt', 'Portuguese'],
+  ['nl', 'Dutch'],
+  ['pl', 'Polish'],
+  ['sv', 'Swedish'],
+  ['ru', 'Russian'],
+  ['uk', 'Ukrainian'],
+  ['ja', 'Japanese'],
+  ['zh', 'Chinese'],
+];
+---
+
+<Bare
+  title="Arrivals"
+  description="A split-flap arrivals board for Wikipedia: every row is an edit landing somewhere in the world right now."
+>
+  <Font cssVariable="--font-flap" slot="head" />
+
+  <main class="hall" data-arrivals>
+    <a class="home" href="/">thesandbox.page</a>
+
+    <div class="dock" data-dock>
+      <section class="board" data-board aria-label="Arrivals board">
+        <header class="board-head">
+          <div class="board-title">
+            <svg viewBox="0 0 32 32" aria-hidden="true">
+              <path
+                d="M3 27h26v2H3zM4.2 16.4l2.3-.6 3 2.6 5.2-1.4-4.6-8.4 2.8-.8 8 7 5.6-1.5a2 2 0 0 1 1 3.9L8.6 22.3z"
+                fill="currentColor"></path>
+            </svg>
+            <h1>Arrivals</h1>
+          </div>
+          <p class="board-sub">Wikipedia edits, as they land</p>
+          <div class="clock" data-clock role="img"></div>
+        </header>
+
+        <div class="grid" data-grid></div>
+
+        <footer class="board-foot" data-foot data-state="connecting">
+          <span class="status"><span class="status-lamp"></span><span data-status>Connecting</span></span>
+          <span class="tally" data-tally aria-live="off"></span>
+          <span class="holding" data-hold hidden>Holding while you look</span>
+        </footer>
+      </section>
+
+      <div class="away" data-away hidden>
+        <p>The board is in its own window, floating over everything else.</p>
+        <button type="button" data-return>Bring it back</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <label class="from">
+        <span>From</span>
+        <select data-wiki>{wikis.map(([value, name]) => <option value={value}>{name}</option>)}</select>
+      </label>
+      <button type="button" data-bots aria-pressed="false">Hide bots</button>
+      <button type="button" data-sound aria-pressed="false">Sound off</button>
+      <button type="button" data-pop aria-pressed="false" hidden>Pop out</button>
+    </div>
+    <p class="pop-note" data-pop-note hidden>
+      Chrome, Edge, and Firefox 151 or later can pop the board out into a window that stays on top of everything.
+    </p>
+  </main>
+
+  <article class="notes">
+    <h2>What's landing</h2>
+    <p>
+      Every row is an edit to a Wikipedia article, seconds old. <strong>From</strong> is the language
+      edition, <strong>Bytes</strong> is how much the article grew or shrank, and <strong>Remarks</strong> says what
+      kind of edit it was: a new page, a revert, a bot, an editor without an account, or a minor fix. Ordinary edits have simply
+      landed. Click a row to open the change on Wikipedia.
+    </p>
+    <p>
+      Wikipedia takes far more edits than a board can show, so this is a sample. Once the board has settled, it waits a
+      few seconds, then brings in the newest arrival and pushes the rest down a row, the way a real board does. Point at
+      the board and it holds still until you let go.
+    </p>
+
+    <h2>How the flaps work</h2>
+    <p>
+      Each character is a drum of printed flaps, in a fixed order: a blank, the alphabet, the digits, then punctuation.
+      To change from <code>D</code> to <code>B</code>, a cell can't skip ahead; it flips through every flap
+      from <code>E</code> round to <code>B</code>. That's why some cells settle at once and others clatter on for
+      seconds, and why the whole board ripples instead of updating in one go.
+    </p>
+    <p>
+      Every flip is two half-flaps. The top half falls from upright to flat, still showing the old character, and the
+      bottom half carries on from flat to hanging, showing the new one, with a small bounce at the stop. There is no
+      canvas and no animation library: each cell is four <code>&lt;span&gt;</code> halves,
+      turned with <code>rotateX()</code> in one shared <code>requestAnimationFrame</code> loop. Accents, Cyrillic, and
+      kanji aren't printed on the drum, so their cells rattle through a few random flaps and then show the character anyway.
+      Right-to-left and shaped scripts, such as Arabic and Hindi, come apart one character to a cell, so the board
+      skips their titles. The sound is made on the spot with Web Audio: a burst of noise a few milliseconds long,
+      filtered to a hard plastic tick, layered more thickly as more flaps land at once.
+    </p>
+
+    <h2>Popping out</h2>
+    <p>
+      <strong>Pop out</strong> uses the Document Picture-in-Picture API to move the live board, not a copy, into a
+      small window that stays on top of your other apps. The page copies its styles across, hands the board's animation
+      loop and timers to the new window so it keeps moving after you switch tabs, and takes the board back when you
+      close the window.
+    </p>
+
+    <h2>Where the edits come from</h2>
+    <p>
+      Wikimedia publishes every change to its wikis as a public stream of server-sent events, which the page reads with
+      an <code>EventSource</code>. If the stream goes quiet, the page polls each wiki's recent-changes API instead, and
+      the footer says so. Reverts are a guess from the edit summary, which is free text, so some slip through.
+    </p>
+    <p class="credits">
+      Edit data from <a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams_HTTP_Service"
+        >Wikimedia EventStreams</a
+      > and the MediaWiki API. Set in <a href="https://fonts.google.com/specimen/Roboto+Condensed">Roboto Condensed</a>,
+      SIL Open Font License, served from this site.
+    </p>
+  </article>
+</Bare>
+
+<script>
+  import { startArrivals } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-arrivals]');
+  if (root) startArrivals(root);
+</script>
+
+<style is:global>
+  /* Global on purpose: the board's rows and cells are built by script, and the
+     same rules have to follow the board into a picture-in-picture window. */
+
+  :root {
+    --hall: #0b0c0e;
+    --housing: #141518;
+    --housing-edge: #26282d;
+    --flap-top: #2a2b2f;
+    --flap-top-end: #232428;
+    --flap-bottom: #1e1f22;
+    --flap-bottom-end: #19191c;
+    --ink: #f3f0e6;
+    --sign: #ffc634;
+    --muted: #8d8a82;
+    --kind-new: #5fd68a;
+    --kind-revert: #ff6a55;
+    --kind-bot: #7fb2ff;
+    --kind-anon: #e8b04a;
+    --flap-font: var(--font-flap), 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(120% 70% at 50% -10%, #23201a 0%, transparent 60%),
+      var(--hall);
+    color: var(--ink);
+    font: 400 1rem/1.6 var(--flap-font);
+  }
+
+  .hall {
+    box-sizing: border-box;
+    min-height: 100dvh;
+    padding: 4.5rem 1rem 3rem;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 1.25rem;
+  }
+
+  .home {
+    position: absolute;
+    top: 1.25rem;
+    left: 1.25rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .home:hover,
+  .home:focus-visible {
+    color: var(--sign);
+  }
+
+  .dock {
+    width: min(100%, 72rem);
+  }
+
+  /* The board. */
+
+  .board {
+    box-sizing: border-box;
+    width: 100%;
+    padding: clamp(0.75rem, 2.2vw, 1.75rem);
+    border: 1px solid var(--housing-edge);
+    border-radius: 0.6rem;
+    background: linear-gradient(#18191c, var(--housing));
+    box-shadow:
+      inset 0 1px 0 #ffffff12,
+      inset 0 -2px 0 #00000080,
+      0 2rem 4rem -1rem #000000d0;
+  }
+
+  .board-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 1rem;
+    margin-bottom: clamp(0.6rem, 1.6vw, 1.2rem);
+    color: var(--sign);
+  }
+
+  .board-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    font-size: clamp(1.4rem, 4.4vw, 2.6rem);
+  }
+
+  .board-title svg {
+    width: 1.1em;
+    height: 1.1em;
+    flex: none;
+  }
+
+  .board-title h1 {
+    margin: 0;
+    font: 700 1em/1 var(--flap-font);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .board-sub {
+    grid-row: 2;
+    margin: 0.3rem 0 0;
+    color: var(--muted);
+    font-size: clamp(0.7rem, 1.6vw, 0.9rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .clock {
+    grid-row: 1 / 3;
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.12em;
+    --u: clamp(1.1rem, 3.4vw, 2rem);
+  }
+
+  .clock .cell {
+    font-size: calc(var(--u) * 1.12);
+  }
+
+  .colon {
+    font: 700 calc(var(--u) * 1.1) / 1 var(--flap-font);
+    color: var(--ink);
+    animation: blink 2s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0.2;
+    }
+  }
+
+  .grid {
+    container-type: inline-size;
+    display: grid;
+    gap: calc(100cqi / var(--units) * 0.32);
+  }
+
+  .grid > .row {
+    --u: calc(100cqi / var(--units));
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--u) * 0.8);
+    color: inherit;
+    text-decoration: none;
+    border-radius: calc(var(--u) * 0.15);
+    outline-offset: calc(var(--u) * 0.2);
+  }
+
+  .row[href]:hover .cell,
+  .row[href]:focus-visible .cell {
+    --flap-top: #34353a;
+    --flap-top-end: #2c2d31;
+    --flap-bottom: #26272b;
+    --flap-bottom-end: #202124;
+  }
+
+  .row.head {
+    color: var(--sign);
+    font: 700 calc(var(--u) * 0.62) / 1 var(--flap-font);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .row.head .col {
+    width: calc(var(--u) * (var(--w) - 0.12));
+  }
+
+  .row.head .col-change {
+    text-align: right;
+  }
+
+  .lamp {
+    flex: none;
+    width: calc(var(--u) * 0.5);
+    height: calc(var(--u) * 0.5);
+    border-radius: 50%;
+    background: #2b2c30;
+    box-shadow: inset 0 1px 1px #00000080;
+    transition:
+      background-color 0.4s,
+      box-shadow 0.4s;
+  }
+
+  .row.head .lamp {
+    visibility: hidden;
+  }
+
+  .row[data-kind='new'] .lamp {
+    --lit: var(--kind-new);
+  }
+  .row[data-kind='revert'] .lamp {
+    --lit: var(--kind-revert);
+  }
+  .row[data-kind='bot'] .lamp {
+    --lit: var(--kind-bot);
+  }
+  .row[data-kind='anon'] .lamp {
+    --lit: var(--kind-anon);
+  }
+
+  .row[data-kind] .lamp {
+    background: var(--lit, #3a3b40);
+    box-shadow: 0 0 calc(var(--u) * 0.6) var(--lit, transparent);
+  }
+
+  .row[data-kind='new'] .col-remarks {
+    color: var(--kind-new);
+  }
+  .row[data-kind='revert'] .col-remarks {
+    color: var(--kind-revert);
+  }
+  .row[data-kind='bot'] .col-remarks {
+    color: var(--kind-bot);
+  }
+  .row[data-kind='anon'] .col-remarks {
+    color: var(--kind-anon);
+  }
+
+  .col {
+    display: flex;
+    flex: none;
+    gap: calc(var(--u) * 0.12);
+  }
+
+  /* One character: a still top and bottom, and two flaps that move. */
+
+  .cell {
+    position: relative;
+    display: block;
+    flex: none;
+    width: calc(var(--u) * 0.88);
+    height: calc(var(--u) * 1.45);
+    perspective: calc(var(--u) * 5);
+    font: 700 calc(var(--u) * 1.12) / 1 var(--flap-font);
+    text-align: center;
+  }
+
+  .clock .cell {
+    width: calc(var(--u) * 0.88);
+    height: calc(var(--u) * 1.45);
+  }
+
+  .half {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 50%;
+    overflow: hidden;
+    backface-visibility: hidden;
+  }
+
+  .half > span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 200%;
+    display: grid;
+    place-items: center;
+  }
+
+  .half > .wide {
+    font-size: 0.74em;
+  }
+
+  .half.top {
+    top: 0;
+    border-radius: calc(var(--u) * 0.1) calc(var(--u) * 0.1) 0 0;
+    background: linear-gradient(var(--flap-top), var(--flap-top-end));
+    transform-origin: 50% 100%;
+  }
+
+  .half.top > span {
+    top: 0;
+  }
+
+  .half.bottom {
+    bottom: 0;
+    border-radius: 0 0 calc(var(--u) * 0.1) calc(var(--u) * 0.1);
+    background: linear-gradient(var(--flap-bottom), var(--flap-bottom-end));
+    transform-origin: 50% 0;
+  }
+
+  .half.bottom > span {
+    bottom: 0;
+  }
+
+  .flap {
+    display: none;
+    z-index: 1;
+    will-change: transform;
+  }
+
+  .flipping .flap {
+    display: block;
+  }
+
+  /* The hinge: a hairline gap where the two halves meet. */
+  .cell::after {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    right: 0;
+    top: calc(50% - 0.5px);
+    height: 1px;
+    background: #000000b0;
+  }
+
+  .board-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 1.4rem;
+    margin-top: clamp(0.6rem, 1.6vw, 1.2rem);
+    color: var(--muted);
+    font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  .status-lamp {
+    width: 0.6em;
+    height: 0.6em;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  [data-state='live'] .status-lamp {
+    background: var(--kind-new);
+    box-shadow: 0 0 0.6em var(--kind-new);
+    animation: blink 2.4s ease-in-out infinite;
+  }
+
+  [data-state='polling'] .status-lamp {
+    background: var(--kind-anon);
+  }
+
+  [data-state='down'] .status-lamp {
+    background: var(--kind-revert);
+  }
+
+  .holding {
+    margin-left: auto;
+    color: var(--sign);
+  }
+
+  .holding[hidden] {
+    display: none;
+  }
+
+  .away {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    padding: 3rem 1rem;
+    border: 1px dashed var(--housing-edge);
+    border-radius: 0.6rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .away[hidden] {
+    display: none;
+  }
+
+  .away p {
+    margin: 0;
+  }
+
+  /* Controls. */
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+  }
+
+  .controls button,
+  .away button,
+  .from {
+    box-sizing: border-box;
+    min-height: 2.5rem;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--housing-edge);
+    border-radius: 0.35rem;
+    background: var(--housing);
+    color: var(--ink);
+    font: 700 0.85rem/1 var(--flap-font);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .controls button:hover,
+  .away button:hover,
+  .from:hover {
+    border-color: var(--muted);
+  }
+
+  .controls button[aria-pressed='true'] {
+    border-color: var(--sign);
+    color: var(--sign);
+  }
+
+  .controls button[hidden] {
+    display: none;
+  }
+
+  .from {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .from span {
+    color: var(--sign);
+  }
+
+  .from select {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+  }
+
+  .from select option {
+    background: var(--housing);
+  }
+
+  .pop-note {
+    max-width: 40rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .pop-note[hidden] {
+    display: none;
+  }
+
+  /* Notes under the board. */
+
+  .notes {
+    box-sizing: border-box;
+    max-width: 44rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 5rem;
+    color: #c9c5bb;
+    font-size: 1.05rem;
+  }
+
+  .notes h2 {
+    margin: 2.2rem 0 0.6rem;
+    color: var(--sign);
+    font: 700 1rem/1.2 var(--flap-font);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .notes strong {
+    color: var(--ink);
+  }
+
+  .notes code {
+    color: var(--ink);
+    font-size: 0.92em;
+  }
+
+  .notes a {
+    color: var(--ink);
+  }
+
+  .credits {
+    margin-top: 2.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* Popped out: the board fills its own small window. */
+
+  body.pip {
+    display: grid;
+    min-height: 100vh;
+    background: var(--housing);
+  }
+
+  body.pip .board {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 4vw;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .colon,
+    [data-state='live'] .status-lamp {
+      animation: none;
+    }
+  }
+</style>
