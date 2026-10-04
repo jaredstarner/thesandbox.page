@@ -14,8 +14,11 @@ export interface Experiment {
 
 // Experiments live at the site root: src/pages/<slug>/index.*, served at /<slug>/.
 // Any page format Astro routes works for an experiment's index page.
-const folderPages = import.meta.glob('/src/pages/*/index.*');
-const filePages = import.meta.glob('/src/pages/*.*');
+// Only the paths are used. `?raw` keeps Vite from importing the page modules
+// themselves, which would carry every page's styles onto any page that lists
+// experiments.
+const folderPages = import.meta.glob('/src/pages/*/index.*', { query: '?raw', import: 'default' });
+const filePages = import.meta.glob('/src/pages/*.*', { query: '?raw', import: 'default' });
 
 // Site pages that are not experiments; no experiment may take their URL.
 const siteFolders = new Set(['experiments']);
