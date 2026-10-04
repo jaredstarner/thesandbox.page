@@ -28,6 +28,8 @@ export interface Technique {
   context?: (env: SurveyEnvironment) => string | null | Promise<string | null>;
   /** An ID in the web-features dataset, for the build-time Baseline note. */
   webFeature?: string;
+  /** A handling note for objects that use this technique, in the register's procedure voice. */
+  handling?: string;
 }
 
 const ALIASES: Record<string, string> = {
@@ -132,6 +134,7 @@ export const TECHNIQUES: Record<string, Technique> = {
     label: 'Scroll-driven animations',
     webFeature: 'scroll-driven-animations',
     test: () => supports('animation-timeline: view()', 'animation-timeline: view()'),
+    handling: 'Moves as you scroll.',
     context: (env) =>
       env.reducedMotion
         ? 'Reduced motion: requested in this browser.'
@@ -161,6 +164,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   'web-audio': {
     label: 'Web Audio',
     webFeature: 'web-audio',
+    handling: 'May make sound.',
     test: () => {
       if (typeof AudioContext === 'function') return { state: 'detected', detail: 'AudioContext present, not started' };
       if ('webkitAudioContext' in window) return { state: 'detected', detail: 'prefixed webkitAudioContext only' };
@@ -182,6 +186,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   getusermedia: {
     label: 'getUserMedia',
     webFeature: 'media-capture',
+    handling: 'May ask for your microphone. This register never does.',
     test: async () => {
       if (!window.isSecureContext) return { state: 'blocked', detail: 'not a secure context' };
       if (typeof navigator.mediaDevices?.getUserMedia !== 'function') {
@@ -199,6 +204,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   webgl: {
     label: 'WebGL',
     webFeature: 'webgl',
+    handling: 'Renders on the GPU.',
     test: () => {
       const gl = context('webgl');
       releaseGl(gl);
@@ -209,6 +215,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   webgl2: {
     label: 'WebGL 2',
     webFeature: 'webgl2',
+    handling: 'Renders on the GPU.',
     test: () => {
       const gl = context('webgl2');
       releaseGl(gl);
@@ -219,6 +226,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   webgpu: {
     label: 'WebGPU',
     webFeature: 'webgpu',
+    handling: 'Renders on the GPU.',
     test: async () => {
       const gpu = (navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } }).gpu;
       if (!gpu) return { state: 'absent', detail: 'navigator.gpu missing' };
@@ -274,6 +282,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   'device-orientation': {
     label: 'Device orientation',
     webFeature: 'device-orientation-events',
+    handling: 'Responds to how the device is held, and may ask for motion access.',
     test: () => {
       if (typeof DeviceOrientationEvent !== 'function') return { state: 'absent', detail: 'DeviceOrientationEvent missing' };
       const needsPermission =
@@ -287,12 +296,14 @@ export const TECHNIQUES: Record<string, Technique> = {
   gamepad: {
     label: 'Gamepad',
     webFeature: 'gamepad',
+    handling: 'Accepts a game controller.',
     test: () =>
       present(typeof navigator.getGamepads === 'function', 'navigator.getGamepads() present', 'Gamepad API missing'),
   },
   'web-midi': {
     label: 'Web MIDI',
     webFeature: 'web-midi',
+    handling: 'May ask for access to MIDI devices.',
     test: () =>
       present(
         typeof (navigator as Navigator & { requestMIDIAccess?: unknown }).requestMIDIAccess === 'function',
@@ -303,6 +314,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   'speech-synthesis': {
     label: 'Speech synthesis',
     webFeature: 'speech-synthesis',
+    handling: 'May speak aloud.',
     test: () => present('speechSynthesis' in window, 'speechSynthesis present', 'speechSynthesis missing'),
   },
   // Technique notes: no browser dependency, so no test and no light.
