@@ -49,6 +49,19 @@ type Entry = (typeof folios)[number]['entries'][number];
 const searchText = (entry: Entry, word: string, labels: string[]) =>
   `|${[entry.title, entry.summary, ...entry.tags, ...labels, word, ...dateKeys(entry)].join('|').toLowerCase()}|`;
 
+// Each stamp's ink filter, angle, offset, and pressure come from a hash of its
+// accession number, so a row lands the same way on every visit.
+const hash = (text: string) => {
+  let h = 2166136261;
+  for (const char of text) h = Math.imul(h ^ char.charCodeAt(0), 16777619);
+  return h >>> 0;
+};
+const stampStyle = (accession: string) => {
+  const h = hash(accession);
+  const rot = (((h >>> 3) % 51) / 10 - 2.5).toFixed(1);
+  return `--ink:url(#ink-${(h % 8) + 1});--rot:${rot}deg;--jx:${((h >>> 9) % 5) - 2}px;--jy:${((h >>> 13) % 5) - 2}px;--press:${(h >>> 17) % 360}deg`;
+};
+
 const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:${leafRaked};--tex-watermark:${watermark};`;
 ---
 
@@ -191,7 +204,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
                             ))}
                           </ul>
                           <div class="c-condition">
-                            <div class="stamp" aria-hidden="true">
+                            <div class="stamp" aria-hidden="true" style={stampStyle(entry.accession)}>
                               <span class="s-band">Condition</span>
                               <span class="s-verdict" />
                               <span class="s-date" />
@@ -235,10 +248,16 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
             <defs>
               <path id="seal-ring" d="M 0 -45 A 45 45 0 1 1 0 45 A 45 45 0 1 1 0 -45" />
               <filter id="seal-emboss" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
-                <feGaussianBlur in="SourceAlpha" stdDeviation="1.2" result="height" />
-                <feDiffuseLighting in="height" surfaceScale="2.5" diffuseConstant="1" lighting-color="#fff">
-                  <feDistantLight class="seal-light" azimuth="300" elevation="30" />
+                <feGaussianBlur in="SourceAlpha" stdDeviation="1.4" result="height" />
+                <feDiffuseLighting class="seal-relief" in="height" surfaceScale="2.5" diffuseConstant="1" lighting-color="#fff" result="lit">
+                  <feDistantLight class="seal-light" azimuth="340" elevation="30" />
                 </feDiffuseLighting>
+                <!-- Pull the relief toward mid grey: a blind emboss reads as light and shadow, not ink. -->
+                <feComponentTransfer in="lit">
+                  <feFuncR type="linear" slope="0.5" intercept="0.25" />
+                  <feFuncG type="linear" slope="0.5" intercept="0.25" />
+                  <feFuncB type="linear" slope="0.5" intercept="0.25" />
+                </feComponentTransfer>
               </filter>
             </defs>
             <g filter="url(#seal-emboss)">
@@ -265,6 +284,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
         <p class="sr-only" aria-live="polite" data-announce></p>
       </footer>
     </main>
+    <button type="button" class="skip-survey" data-skip-survey hidden>Skip survey</button>
   </div>
 
   <svg class="ink-filters" width="0" height="0" aria-hidden="true" focusable="false">
@@ -284,12 +304,28 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
 
 <script>
   import { callSlip } from './_callslip';
+  import { Ceremony, giltSheen } from './_ceremony';
   import { survey } from './_survey';
 
   const slip = callSlip();
-  const surveyNow = () => survey().then(() => slip.refresh());
-  document.querySelector('[data-resurvey]')?.addEventListener('click', surveyNow);
-  surveyNow();
+  let ceremony: Ceremony | null = null;
+
+  async function surveyNow(rerun: boolean) {
+    ceremony?.skip();
+    const current = (ceremony = new Ceremony(rerun));
+    const outcome = await survey({
+      environment: (values, repeatVisit) => current.printEnvironment(values, repeatVisit),
+      refresh: (values) => current.printRefresh(values),
+    });
+    slip.refresh();
+    current.present(outcome);
+  }
+
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  document.querySelector('[data-resurvey]')?.addEventListener('click', () => surveyNow(true));
+  giltSheen();
+  // Start once the register's fonts are in, so the form prints in its own type.
+  void Promise.race([document.fonts.ready.then(() => wait(300)), wait(1500)]).then(() => surveyNow(false));
 </script>
 
 <style>
@@ -857,8 +893,11 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     color: var(--ink-c);
     text-align: center;
     mix-blend-mode: multiply;
-    rotate: -1.6deg;
-    filter: url(#ink-3);
+    rotate: var(--rot, -1.6deg);
+    translate: var(--jx, 0) var(--jy, 0);
+    filter: var(--ink, url(#ink-3));
+    /* Pressure: one edge of the die bites harder than the other. */
+    mask-image: linear-gradient(var(--press, 200deg), rgb(0 0 0 / 0.72), #000 55%);
   }
 
   .s-band {
@@ -935,6 +974,8 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
 
   .foot-marks {
     display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
     align-items: center;
     justify-content: space-between;
     margin-top: var(--line);
@@ -960,8 +1001,29 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
 
   /* ---- survey state ------------------------------------------------------- */
 
-  .row:not([data-verdict]) .stamp {
+  .row:not([data-stamped]) .stamp {
     visibility: hidden;
+  }
+
+  .row[data-stamped] .stamp {
+    opacity: 0.92;
+  }
+
+  /* Results are written before the lamp arrives; keep them readable to assistive tech, unseen until stamped. */
+  .row[data-awaiting] .cond-text,
+  .row[data-awaiting] .cond-memory {
+    color: transparent;
+  }
+
+  .c-medium li[data-state] .light {
+    animation: light-in 0.2s ease-out;
+  }
+
+  @keyframes light-in {
+    from {
+      transform: scale(0.2);
+      opacity: 0;
+    }
   }
 
   .row[data-verdict='not-surveyed'] .stamp {
@@ -1001,7 +1063,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     display: none;
   }
 
-  .redacted {
+  .conditions :global(.redacted) {
     display: inline-block;
     width: 12ch;
     height: 0.95em;
@@ -1011,15 +1073,15 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     mix-blend-mode: multiply;
   }
 
-  .conditions dl > div:nth-child(3n) .redacted {
+  .conditions dl > div:nth-child(3n) :global(.redacted) {
     width: 8ch;
   }
 
-  .conditions dl > div:nth-child(3n + 1) .redacted {
+  .conditions dl > div:nth-child(3n + 1) :global(.redacted) {
     width: 15ch;
   }
 
-  .withheld {
+  .conditions :global(.withheld) {
     color: var(--ink-graphite);
   }
 
@@ -1138,6 +1200,111 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
 
   .r-state + .r-base::before {
     content: ' · ';
+  }
+
+  /* ---- the survey lamp ---------------------------------------------------- */
+
+  /*
+   * A raking light band. The band translates down the sheet while its paper
+   * counter-translates, so the raked texture and watermark stay fixed to the
+   * leaf: both moves are transforms. The raked tile is mid grey where flat,
+   * so hard-light leaves the page unchanged except where fibres catch the light.
+   */
+  .cloth :global(.lamp) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 220px;
+    overflow: hidden;
+    pointer-events: none;
+    mix-blend-mode: hard-light;
+    mask-image: linear-gradient(to bottom, transparent, #000 34%, #000 66%, transparent);
+    will-change: transform;
+  }
+
+  .cloth :global(.lamp)::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(70% 50% at 50% 50%, rgb(255 255 255 / 0.3), transparent 75%);
+  }
+
+  .cloth :global(.lamp-paper) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    will-change: transform;
+  }
+
+  /* Low contrast pulls the raked tile toward mid grey: tooth, not scanlines. */
+  .cloth :global(.lamp-paper)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--tex-raked);
+    background-size: 384px 384px;
+    filter: contrast(0.24);
+  }
+
+  .cloth :global(.lamp-mark) {
+    position: absolute;
+    left: 50%;
+    width: 200px;
+    height: 250px;
+    margin: -125px 0 0 -100px;
+    background: var(--tex-watermark) center / contain no-repeat;
+    opacity: 0.55;
+  }
+
+  /* ---- perforation -------------------------------------------------------- */
+
+  .perforation {
+    --pitch: 5px;
+    --hole: 3px;
+    position: relative;
+    flex: none;
+    width: calc(var(--cols, 0) * var(--pitch));
+    height: calc(7 * var(--pitch));
+  }
+
+  /* Each hole shows the bookcloth through the leaf. */
+  .perforation :global(i) {
+    position: absolute;
+    left: calc(var(--c) * var(--pitch));
+    top: calc(var(--r) * var(--pitch));
+    width: var(--hole);
+    height: var(--hole);
+    border-radius: 50%;
+    background: var(--tex-cloth), var(--cloth);
+    background-size: 240px 240px, auto;
+    background-position: calc(var(--c) * var(--pitch) * -1) calc(var(--r) * var(--pitch) * -1);
+    box-shadow:
+      inset 0 1px 1.2px rgb(0 0 0 / 0.75),
+      0 0.6px 0 rgb(255 255 255 / 0.65);
+  }
+
+  /* ---- skip ----------------------------------------------------------------- */
+
+  .skip-survey {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 20;
+    padding: 10px 14px;
+    border: 1px solid rgb(200 162 74 / 0.7);
+    background: var(--cloth-deep);
+    color: var(--gilt-hi);
+    font: 700 11px/1 var(--f-form);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgb(0 0 0 / 0.4);
+  }
+
+  .skip-survey[hidden] {
+    display: none;
   }
 
   /* ---- foot actions ------------------------------------------------------- */
@@ -1407,6 +1574,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
 
     .c-date {
       justify-self: end;
+      margin-top: 0;
       color: var(--ink-graphite);
     }
 
@@ -1442,6 +1610,16 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
 
     .c-condition {
       display: contents;
+    }
+
+    .perforation {
+      --pitch: 3.2px;
+      --hole: 2px;
+    }
+
+    .seal {
+      width: 88px;
+      height: 88px;
     }
 
     .stamp {
@@ -1486,6 +1664,12 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
 
     .blanks .c-line {
       display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .c-medium li[data-state] .light {
+      animation: none;
     }
   }
 </style>
