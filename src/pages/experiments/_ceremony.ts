@@ -2,7 +2,8 @@
 // Conditions in. Phase 2 runs a raking lamp down the ledger as its rows come
 // into view, ticking each technique and bringing a dated stamp down on the
 // row. Phase 3 prints the tally, punches the survey time through the leaf,
-// and raises the seal. The survey has already written every result; this is
+// and raises the seal. Repeat visits and Re-survey run the same ceremony at a
+// brisker pace. The survey has already written every result; this is
 // presentation only. Reduced motion, Skip survey, or a key press while
 // something is moving shows the end state at once.
 import { fillForm, type EnvironmentValues } from './_environment';
@@ -12,7 +13,7 @@ type Mode = 'full' | 'fast' | 'instant';
 
 /** The lamp surveys at most this many rows; later rows stamp briefly as they appear. */
 const LAMP_ROWS = 6;
-const LAMP_HEIGHT = 220;
+const LAMP_HEIGHT = 240;
 const EASE = 'cubic-bezier(0.45, 0, 0.25, 1)';
 
 /** Keys that move around the page never skip the survey. */
@@ -152,12 +153,7 @@ export class Ceremony {
       this.footObserver.observe(foot);
     }
 
-    if (this.mode === 'full') {
-      void this.runLamp();
-    } else {
-      this.lampDone = true;
-      void this.phase1.then(() => this.setBusy(false));
-    }
+    void this.runLamp();
   }
 
   /** Complete everything now. Safe to call more than once. */
@@ -185,7 +181,7 @@ export class Ceremony {
       this.pending.delete(next);
       if (!lamp) lamp = this.enterLamp(sheet, next);
       await this.moveLamp(lamp, this.lampTarget(next));
-      await this.tick(next, 60);
+      await this.tick(next, this.brisk ? 25 : 60);
       await this.stampFull(next);
       surveyed++;
     }
@@ -224,12 +220,12 @@ export class Ceremony {
 
   private enterLamp(sheet: HTMLElement, first: HTMLElement): Lamp {
     const el = document.createElement('div');
-    el.className = 'lamp';
+    el.className = 'survey-lamp';
     el.setAttribute('aria-hidden', 'true');
     const paper = document.createElement('div');
-    paper.className = 'lamp-paper';
+    paper.className = 'survey-lamp-paper';
     const mark = document.createElement('div');
-    mark.className = 'lamp-mark';
+    mark.className = 'survey-lamp-mark';
     paper.append(mark);
     el.append(paper);
     sheet.append(el);
@@ -251,7 +247,7 @@ export class Ceremony {
   /** The band and its paper move in opposite directions, so the texture stays put while the light travels. */
   private async moveLamp(lamp: Lamp, y: number) {
     const from = lamp.y;
-    const duration = Math.min(720, 280 + Math.abs(y - from) * 0.8);
+    const duration = Math.min(720, 280 + Math.abs(y - from) * 0.8) * (this.brisk ? 0.6 : 1);
     const options = { duration, easing: EASE };
     const band = this.animate(lamp.el, [{ transform: `translateY(${from}px)` }, { transform: `translateY(${y}px)` }], options);
     this.animate(lamp.paper, [{ transform: `translateY(${-from}px)` }, { transform: `translateY(${-y}px)` }], options);
@@ -295,13 +291,14 @@ export class Ceremony {
     const stamp = row.querySelector<HTMLElement>('.stamp');
     this.reveal(row);
     if (!stamp || getComputedStyle(stamp).display === 'none' || this.skipped) return;
+    const pace = this.brisk ? 0.65 : 1;
     const approach = this.animate(
       stamp,
       [
         { opacity: 0, transform: 'scale(1.08)' },
         { opacity: 0.3, transform: 'scale(1)' },
       ],
-      { duration: 120, easing: 'ease-in' },
+      { duration: 120 * pace, easing: 'ease-in' },
     );
     await this.until(approach);
     const contact = this.animate(stamp, [{ opacity: 1 }, { opacity: 1 }], { duration: 50 });
@@ -313,9 +310,9 @@ export class Ceremony {
         { opacity: 1, transform: 'scale(1)' },
         { opacity: 0.92, transform: 'scale(1.004)' },
       ],
-      { duration: 260, easing: 'ease-out' },
+      { duration: 260 * pace, easing: 'ease-out' },
     );
-    await this.sleep(140);
+    await this.sleep(140 * pace);
   }
 
   /** The compressed stamp for rows the lamp did not reach. */
@@ -359,7 +356,7 @@ export class Ceremony {
   private async playFoot() {
     this.footPlayed = true;
     this.setBusy(true);
-    const quick = this.mode === 'fast';
+    const quick = this.brisk;
     for (const line of this.writeTally()) this.inkIn(line, 0, 220);
     const holes = this.punch();
     const gap = quick ? 2 : 6;
@@ -461,7 +458,7 @@ export class Ceremony {
     for (const wake of [...this.wakers]) wake();
     for (const animation of this.animations) animation.finish();
     this.animations.clear();
-    for (const lamp of document.querySelectorAll('.lamp')) lamp.remove();
+    for (const lamp of document.querySelectorAll('.survey-lamp')) lamp.remove();
     for (const row of allRows()) {
       if (row.dataset.verdict) {
         for (const li of row.querySelectorAll<HTMLElement>('.c-medium li[data-result]')) li.dataset.state = li.dataset.result!;
@@ -493,6 +490,11 @@ export class Ceremony {
   }
 
   // ---- plumbing -------------------------------------------------------------
+
+  /** Repeat visits and Re-survey run the ceremony at a brisker pace. */
+  private get brisk() {
+    return this.mode === 'fast';
+  }
 
   private setBusy(busy: boolean) {
     this.busy = busy && !this.skipped;

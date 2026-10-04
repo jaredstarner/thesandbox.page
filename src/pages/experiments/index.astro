@@ -322,7 +322,12 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
   }
 
   const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-  document.querySelector('[data-resurvey]')?.addEventListener('click', () => surveyNow(true));
+  // Re-survey brings the ledger back into view so the lamp has rows to cross.
+  document.querySelector('[data-resurvey]')?.addEventListener('click', () => {
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelector('.folio')?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+    void surveyNow(true);
+  });
   giltSheen();
   // Start once the register's fonts are in, so the form prints in its own type.
   void Promise.race([document.fonts.ready.then(() => wait(300)), wait(1500)]).then(() => surveyNow(false));
@@ -1210,12 +1215,12 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
    * leaf: both moves are transforms. The raked tile is mid grey where flat,
    * so hard-light leaves the page unchanged except where fibres catch the light.
    */
-  .cloth :global(.lamp) {
+  .cloth :global(.survey-lamp) {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 220px;
+    height: 240px;
     overflow: hidden;
     pointer-events: none;
     mix-blend-mode: hard-light;
@@ -1223,14 +1228,14 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     will-change: transform;
   }
 
-  .cloth :global(.lamp)::after {
+  .cloth :global(.survey-lamp)::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(70% 50% at 50% 50%, rgb(255 255 255 / 0.3), transparent 75%);
+    background: linear-gradient(to bottom, transparent 8%, rgb(255 250 236 / 0.36) 50%, transparent 92%);
   }
 
-  .cloth :global(.lamp-paper) {
+  .cloth :global(.survey-lamp-paper) {
     position: absolute;
     top: 0;
     left: 0;
@@ -1239,23 +1244,23 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
   }
 
   /* Low contrast pulls the raked tile toward mid grey: tooth, not scanlines. */
-  .cloth :global(.lamp-paper)::before {
+  .cloth :global(.survey-lamp-paper)::before {
     content: '';
     position: absolute;
     inset: 0;
     background: var(--tex-raked);
     background-size: 384px 384px;
-    filter: contrast(0.24);
+    filter: contrast(0.34);
   }
 
-  .cloth :global(.lamp-mark) {
+  .cloth :global(.survey-lamp-mark) {
     position: absolute;
     left: 50%;
     width: 200px;
     height: 250px;
     margin: -125px 0 0 -100px;
     background: var(--tex-watermark) center / contain no-repeat;
-    opacity: 0.55;
+    opacity: 0.65;
   }
 
   /* ---- perforation -------------------------------------------------------- */
