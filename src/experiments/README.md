@@ -7,6 +7,8 @@ An experiment has two parts:
 1. A page at `src/pages/<slug>/index.astro` (or any page format Astro routes), served at `/<slug>/`, plus any components, scripts, and assets it alone uses, in the same folder. Prefix those helper files with `_` (for example `_app.ts`) so Astro doesn't route them as pages or endpoints. Each experiment owns its look: start from `src/layouts/Bare.astro`, which carries the document head and nothing else. The site's look (`src/layouts/Base.astro` and `src/theme/`) is opt-in
 2. A metadata file here, named `<slug>.json`
 
+An experiment that wants its own font adds it to `fonts` in `astro.config.mjs` and loads it with Astro's `<Font cssVariable="..." />` in its page head (`slot="head"` on `Bare.astro`). The font is downloaded at build time and only reaches pages that load it.
+
 ```json
 {
   "title": "Scroll-driven sand",
