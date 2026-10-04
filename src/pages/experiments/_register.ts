@@ -33,6 +33,33 @@ export function formatEntryDate(date: Date): string {
 
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
+const shortMonth = new Intl.DateTimeFormat('en', { month: 'short', timeZone: 'UTC' });
+const longMonth = new Intl.DateTimeFormat('en', { month: 'long', timeZone: 'UTC' });
+
+/**
+ * Every way the call slip accepts this entry's date, lowercased: "3 oct",
+ * "03 oct 2026", "october 3", "2026-10-03", the lot "1003", the year, and the
+ * accession number. The client matches a date-shaped query against whole keys,
+ * so "3 oct" never finds 13 Oct.
+ */
+export function dateKeys(entry: RegisterEntry): string[] {
+  const day = entry.date.getUTCDate();
+  const year = entry.date.getUTCFullYear();
+  const mon = shortMonth.format(entry.date).toLowerCase();
+  const month = longMonth.format(entry.date).toLowerCase();
+  const days = [String(day), pad2(day)];
+  return [
+    ...days.flatMap((d) => [`${d} ${mon}`, `${d} ${month}`, `${d} ${mon} ${year}`, `${d} ${month} ${year}`]),
+    `${mon} ${day}`,
+    `${month} ${day}`,
+    `${month} ${year}`,
+    entry.iso,
+    entry.lot,
+    String(year),
+    entry.accession.toLowerCase(),
+  ];
+}
+
 /**
  * Accession numbers are TSP.YYYY.MMDD.N: year, the day's lot, and the object's
  * ordinal within that lot, ordered by slug ascending with no zero padding.
