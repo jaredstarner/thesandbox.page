@@ -35,7 +35,23 @@ const SUBSTEPS = 2;
 const POUR_RATE = 7;
 const REVEAL_OPEN_RATIO = 0.6;
 
+/** A small seeded generator (mulberry32), for layouts that must repeat exactly. */
+export function seeded(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 export function startSand(root: HTMLElement, items: RelicItem[]): void {
+  // The dune and the relics are laid out from a seed, so the first beach is the
+  // same on every load and the relic links' styles repeat exactly; "New beach"
+  // carries on through the sequence. Grain shades stay truly random.
+  const layoutRandom = seeded(20261004);
   const canvas = root.querySelector('canvas');
   const relicLayer = root.querySelector<HTMLElement>('[data-relics]');
   const toolButton = root.querySelector<HTMLButtonElement>('[data-tool]');
@@ -160,15 +176,15 @@ export function startSand(root: HTMLElement, items: RelicItem[]): void {
   function buildDune(): number[] {
     const portrait = W / H < 0.9;
     const base = Math.max(H * (portrait ? 0.34 : 0.3), 26);
-    const phase1 = Math.random() * Math.PI * 2;
-    const phase2 = Math.random() * Math.PI * 2;
+    const phase1 = layoutRandom() * Math.PI * 2;
+    const phase2 = layoutRandom() * Math.PI * 2;
     const heights: number[] = [];
     for (let x = 0; x < W; x++) {
       const h =
         base +
         H * 0.06 * Math.sin((x / W) * Math.PI * 2.2 + phase1) +
         H * 0.025 * Math.sin((x / W) * Math.PI * 8.5 + phase2) +
-        Math.random() * 1.5;
+        layoutRandom() * 1.5;
       heights.push(Math.max(4, Math.round(h)));
       for (let y = H - heights[x]!; y < H; y++) place(x, y, SAND);
     }
@@ -185,10 +201,10 @@ export function startSand(root: HTMLElement, items: RelicItem[]): void {
     const slot = W / shown.length;
 
     shown.forEach((item, k) => {
-      const jitter = (Math.random() - 0.5) * slot * 0.3;
+      const jitter = (layoutRandom() - 0.5) * slot * 0.3;
       const x = Math.round(Math.min(W - w - 2, Math.max(2, slot * k + slot / 2 - w / 2 + jitter)));
       const surface = H - Math.min(...heights.slice(x, x + w));
-      const y = Math.min(H - h - 2, surface + 4 + Math.floor(Math.random() * 6));
+      const y = Math.min(H - h - 2, surface + 4 + Math.floor(layoutRandom() * 6));
 
       for (let dy = 0; dy < h; dy++) {
         for (let dx = 0; dx < w; dx++) {
