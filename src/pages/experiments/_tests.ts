@@ -65,6 +65,11 @@ const ALIASES: Record<string, string> = {
   speech: 'speech-synthesis',
   speechsynthesis: 'speech-synthesis',
   'progress-function': 'progress',
+  'event-source': 'eventsource',
+  sse: 'eventsource',
+  'server-sent-events': 'eventsource',
+  'doc-pip': 'document-picture-in-picture',
+  'document-pip': 'document-picture-in-picture',
 };
 
 /** Lowercase, drop "()" and a leading ":", hyphenate spaces, then map aliases. */
@@ -317,8 +322,29 @@ export const TECHNIQUES: Record<string, Technique> = {
     handling: 'May speak aloud.',
     test: () => present('speechSynthesis' in window, 'speechSynthesis present', 'speechSynthesis missing'),
   },
+  eventsource: {
+    label: 'Server-sent events',
+    webFeature: 'server-sent-events',
+    handling: 'Streams live data from an outside source while open.',
+    test: () => present(typeof EventSource === 'function', 'EventSource present', 'EventSource missing'),
+  },
+  'document-picture-in-picture': {
+    label: 'Document Picture-in-Picture',
+    webFeature: 'document-picture-in-picture',
+    handling: 'May open a floating window when you ask it to.',
+    test: () => {
+      if (!window.isSecureContext) return { state: 'blocked', detail: 'not a secure context' };
+      return present(
+        'documentPictureInPicture' in window,
+        'window.documentPictureInPicture present',
+        'window.documentPictureInPicture missing',
+      );
+    },
+  },
   // Technique notes: no browser dependency, so no test and no light.
   css: { label: 'CSS' },
+  'split-flap': { label: 'Split-flap' },
+  'live-data': { label: 'Live data' },
   html: { label: 'HTML' },
   svg: { label: 'SVG' },
   javascript: { label: 'JavaScript' },
