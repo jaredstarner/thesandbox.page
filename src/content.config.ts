@@ -11,6 +11,7 @@ const experiments = defineCollection({
     summary: z.string(),
     date: z.coerce.date(),
     tags: z.array(z.string()).default([]),
+    requires: z.array(z.string()).optional(),
     issue: z.number().int().positive().optional(),
   }),
 });

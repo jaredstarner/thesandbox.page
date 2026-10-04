@@ -23,6 +23,7 @@ An experiment has two parts:
 | `summary` | Yes | One sentence |
 | `date` | Yes | Date first shipped, `YYYY-MM-DD` |
 | `tags` | No | Techniques or APIs the experiment uses |
+| `requires` | No | The tags it cannot function without; every other tag is an enhancement. `/experiments/` tests them in the visitor's browser |
 | `issue` | No | Issue number, when there is one |
 
 The schema lives in `src/content.config.ts`. The build fails if a metadata file has no matching page, or if its slug is taken by a site page (`experiments`, `404`, or any other page in `src/pages/` that is not an experiment).

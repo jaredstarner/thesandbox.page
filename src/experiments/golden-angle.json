@@ -2,5 +2,6 @@
   "title": "The golden angle",
   "summary": "Eight hundred seeds placed by CSS sibling-index() alone, with no JavaScript; scroll to twist the angle and watch the spiral fall into spokes.",
   "date": "2026-10-03",
-  "tags": ["css", "sibling-index", "sibling-count", "progress", "scroll-driven-animations", "at-property", "has"]
+  "tags": ["css", "sibling-index", "sibling-count", "progress", "scroll-driven-animations", "at-property", "has"],
+  "requires": ["sibling-index", "sibling-count", "progress"]
 }
