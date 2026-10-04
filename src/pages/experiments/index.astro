@@ -5,10 +5,13 @@ import { getExperiments } from '../../experiments/list';
 import { buildFolios, dateKeys, formatEntryDate } from './_register';
 import { baselineNote } from './_baseline';
 import { classify } from './_class';
+import { stressEntries } from './_stress';
 import { TECHNIQUES, normalizeTag, techniqueLabel } from './_tests';
 import { bookcloth, leafFibre, leafRaked, watermark, monogramPaths } from './_textures';
 
-const experiments = await getExperiments();
+// REGISTER_STRESS=300 adds that many synthetic objects, to check the register at scale. Development only.
+const env = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env ?? {};
+const experiments = [...(await getExperiments()), ...stressEntries(Number(env.REGISTER_STRESS ?? 0))];
 const folios = buildFolios(experiments);
 const total = experiments.length;
 const FOLIO_MIN_LINES = 12;
@@ -71,6 +74,14 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     <Font cssVariable="--font-register-form" preload />
     <Font cssVariable="--font-register-data" preload />
     <Font cssVariable="--font-register-entry" preload />
+    <noscript>
+      <style is:inline>
+        .cloth .row .cond-text { font-size: 0; }
+        .cloth .row .cond-text::after { content: 'Not surveyed (script disabled)'; font-size: 11px; }
+        .cloth .leaf .call-slip, .cloth .leaf .foot-actions { display: none; }
+        .cloth .row .light { visibility: hidden; }
+      </style>
+    </noscript>
   </Fragment>
 
   <div class="cloth" style={cssVars}>
@@ -80,7 +91,9 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     <main class="leaf">
       <header class="leaf-head">
         <h1>Accession Register</h1>
-        <p class="folio-of">Folio {folios.length === 0 ? 0 : 1} of {folios.length}</p>
+        <p class="folio-of">
+          {folios.length <= 1 ? `Folio ${folios.length} of ${folios.length}` : `${folios.length} folios`}
+        </p>
         <p class="pencil">{total} {total === 1 ? 'object' : 'objects'} accessioned</p>
       </header>
 
@@ -115,6 +128,24 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
         </label>
         <output class="call-tally" aria-hidden="true">{total} of {total} objects</output>
       </form>
+
+      {
+        folios.length > 1 && (
+          <nav class="folio-index" aria-labelledby="folio-index-title">
+            <h2 id="folio-index-title">Index of folios</h2>
+            <ol>
+              {folios.map((folio) => (
+                <li>
+                  <a href={`#${folio.id}`}>{folio.label}</a>
+                  <span>
+                    Folio {folio.number} · {folio.entries.length} {folio.entries.length === 1 ? 'object' : 'objects'}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )
+      }
 
       <div id="folios">
         {
@@ -619,6 +650,62 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     text-transform: none;
     color: var(--ink-graphite);
     line-height: calc(var(--line) * 2 - 8px);
+  }
+
+  /* ---- index of folios ---------------------------------------------------- */
+
+  .folio-index {
+    margin-top: var(--line);
+    color: var(--form);
+  }
+
+  .folio-index h2 {
+    margin: 0;
+    font-family: var(--f-form);
+    font-weight: 700;
+    font-size: 11px;
+    line-height: var(--line);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--form);
+  }
+
+  .folio-index ol {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    column-gap: 28px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .folio-index li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--rule);
+    line-height: var(--line);
+  }
+
+  .folio-index a {
+    font-family: var(--f-entry);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .folio-index a:hover,
+  .folio-index a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .folio-index span {
+    font-family: var(--f-data);
+    font-size: 11.5px;
+    color: var(--ink-graphite);
+    white-space: nowrap;
   }
 
   /* ---- folios ------------------------------------------------------------- */
@@ -1675,6 +1762,46 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
   @media (prefers-reduced-motion: reduce) {
     .c-medium li[data-state] .light {
       animation: none;
+    }
+  }
+
+  /* Forced colours: plain system colours, no textures, blends, or lamp. */
+  @media (forced-colors: active) {
+    .cloth,
+    .leaf,
+    .sheet,
+    .col-heads,
+    .folio-head {
+      background: Canvas;
+    }
+
+    .leaf {
+      box-shadow: none;
+      border: 1px solid CanvasText;
+    }
+
+    .gilt {
+      color: CanvasText;
+      background: none;
+      filter: none;
+    }
+
+    .stamp {
+      filter: none;
+      mask-image: none;
+      mix-blend-mode: normal;
+    }
+
+    .cloth :global(.survey-lamp),
+    .seal {
+      display: none;
+    }
+
+    .perforation :global(i),
+    .conditions :global(.redacted) {
+      forced-color-adjust: none;
+      background: CanvasText;
+      box-shadow: none;
     }
   }
 </style>
