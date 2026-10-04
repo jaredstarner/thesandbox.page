@@ -1,11 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
-import SandField from '../home/SandField.astro';
-import { getExperiments } from '../experiments/list';
-
-const experiments = await getExperiments();
+import SandField from './falling-sand/_SandField.astro';
 ---
 
 <Base>
-  <SandField experiments={experiments} />
+  <SandField />
 </Base>

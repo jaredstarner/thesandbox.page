@@ -26,7 +26,6 @@ Run `pnpm check` and `pnpm build` before opening a pull request; both must pass.
 ```text
 public/            Static assets served as-is
 src/experiments/   Experiment metadata, one JSON file each (see src/experiments/README.md)
-src/home/          The home page's falling-sand field
 src/layouts/       Page layouts: Base (the site's look) and Bare (document head only, for experiments)
 src/pages/         Routes; each file becomes a page. Experiments live in src/pages/<slug>/; /experiments/ lists them
 src/theme/         Design tokens and shared components (see src/theme/README.md)

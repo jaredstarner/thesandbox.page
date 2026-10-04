@@ -1,0 +1,7 @@
+{
+  "title": "Falling sand",
+  "summary": "The site's first home page, retired to its own plot: a beach of falling sand where the title crumbles at a touch and the first three experiments lie buried for digging.",
+  "date": "2026-10-03",
+  "tags": ["canvas", "cellular-automaton", "physics"],
+  "requires": ["canvas"]
+}
