@@ -19,9 +19,14 @@ export type EnvironmentField =
   | 'permissions'
   | 'network';
 
+export type EnvironmentValues = Record<EnvironmentField, string | null>;
+
 export interface EnvironmentReading {
-  values: Record<EnvironmentField, string | null>;
+  /** Every field but the refresh rate, which takes a few dozen frames to measure. */
+  values: EnvironmentValues;
   env: SurveyEnvironment;
+  /** Resolves with the measured rate; the survey copies it into env.refreshHz. */
+  refresh: Promise<number | null>;
 }
 
 type NavigatorExtras = Navigator & {
@@ -197,19 +202,19 @@ export function measureRefresh(frames = 40, timeout = 1500): Promise<number | nu
   });
 }
 
+/** The refresh field's text; null prints as a failed measurement. */
+export const refreshText = (hz: number | null) => (hz ? `About ${hz} Hz, measured` : null);
+
 export async function readEnvironment(): Promise<EnvironmentReading> {
-  const [refreshHz, microphone, camera] = await Promise.all([
-    measureRefresh().catch(() => null),
-    queryPermission('microphone'),
-    queryPermission('camera'),
-  ]);
+  const refresh = measureRefresh().catch(() => null);
+  const [microphone, camera] = await Promise.all([queryPermission('microphone'), queryPermission('camera')]);
   const dpr = window.devicePixelRatio || 1;
-  const values: Record<EnvironmentField, string | null> = {
+  const values: EnvironmentValues = {
     browser: safe(browser),
     viewport: `${window.innerWidth} × ${window.innerHeight} CSS px at ${Number(dpr.toFixed(2))}x`,
     gamut: safe(gamut),
     range: safe(range),
-    refresh: refreshHz ? `About ${refreshHz} Hz, measured` : null,
+    refresh: null,
     pointer: safe(pointer),
     motion: safe(motion),
     scheme: safe(scheme),
@@ -222,7 +227,8 @@ export async function readEnvironment(): Promise<EnvironmentReading> {
   };
   return {
     values,
-    env: { dpr, refreshHz, reducedMotion: mq('(prefers-reduced-motion: reduce)'), microphone, camera },
+    env: { dpr, refreshHz: null, reducedMotion: mq('(prefers-reduced-motion: reduce)'), microphone, camera },
+    refresh,
   };
 }
 
@@ -232,10 +238,16 @@ const NOT_MEASURED: Partial<Record<EnvironmentField, string>> = {
   refresh: 'not measured: too few frames arrived during the survey',
 };
 
-/** Print a reading into the form. Withheld values get a redaction bar and say so in words. */
-export function fillForm(values: Record<EnvironmentField, string | null>) {
+/**
+ * Print fields into the form and return the cells written, in form order.
+ * Withheld values get a redaction bar and say so in words.
+ */
+export function fillForm(values: Partial<EnvironmentValues>): HTMLElement[] {
+  const written: HTMLElement[] = [];
   for (const cell of document.querySelectorAll<HTMLElement>('[data-env]')) {
     const field = cell.dataset.env as EnvironmentField;
+    if (!(field in values)) continue;
+    written.push(cell);
     const value = values[field] ?? NOT_MEASURED[field] ?? null;
     cell.replaceChildren();
     cell.removeAttribute('data-withheld');
@@ -252,4 +264,5 @@ export function fillForm(values: Record<EnvironmentField, string | null>) {
     cell.append(bar, words);
     cell.dataset.withheld = '';
   }
+  return written;
 }

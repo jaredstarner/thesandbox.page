@@ -1,7 +1,8 @@
-// Client survey: fills the Survey Conditions form, runs the test table in this
-// browser, stamps each row, writes its condition report, and remembers each
-// verdict for this viewer. Nothing measured here leaves the browser.
-import { fillForm, readEnvironment } from './_environment';
+// Client survey: measures this browser, runs the test table, and writes each
+// row's verdict, condition report, and memory note. What the visitor sees
+// arrive (form values inking in, lights, stamps, the foot) is the ceremony's
+// job; this module only writes the results. Nothing measured leaves the browser.
+import { readEnvironment, refreshText, type EnvironmentValues } from './_environment';
 import { TECHNIQUES, normalizeTag, type SurveyEnvironment, type TestResult } from './_tests';
 import { FUNCTIONAL_VERDICTS, VERDICT_WORDS, assess, type Finding, type Verdict } from './_verdict';
 
@@ -74,6 +75,14 @@ function since(iso: string, now: Date): string | null {
 
 // ---- one row ----------------------------------------------------------------
 
+const lightState = (result: TestResult, required: boolean) =>
+  result.state === 'detected' ? 'detected' : required ? 'failed-required' : result.state === 'absent' ? 'absent' : 'grey';
+
+/**
+ * Write a row's results. The Medium column's lights get data-result, which the
+ * ceremony turns into data-state as the lamp ticks them; the condition report
+ * sits in a closed disclosure, so its lights take data-state at once.
+ */
 async function surveyRow(row: HTMLElement, env: SurveyEnvironment, now: Date): Promise<Verdict> {
   const tags = (row.dataset.tags ?? '').split(' ').filter(Boolean);
   const requiresAttr = row.dataset.requires;
@@ -88,17 +97,14 @@ async function surveyRow(row: HTMLElement, env: SurveyEnvironment, now: Date): P
     const result = pending ? await pending : null;
     findings.push({ key, label: technique?.label ?? tag, required: required.has(key), result });
     if (result) {
-      const state =
-        result.state === 'detected'
-          ? 'detected'
-          : required.has(key)
-            ? 'failed-required'
-            : result.state === 'absent'
-              ? 'absent'
-              : 'grey';
-      for (const li of row.querySelectorAll<HTMLElement>(`[data-key="${key}"]`)) li.dataset.state = state;
-      const evidence = row.querySelector(`.r-evidence [data-key="${key}"] .r-state`);
-      if (evidence) evidence.textContent = `${stateWords[result.state]} (${result.detail})`;
+      const state = lightState(result, required.has(key));
+      const light = row.querySelector<HTMLElement>(`.c-medium [data-key="${key}"]`);
+      if (light) light.dataset.result = state;
+      const evidence = row.querySelector<HTMLElement>(`.r-evidence [data-key="${key}"]`);
+      if (evidence) {
+        evidence.dataset.state = state;
+        evidence.querySelector('.r-state')!.textContent = `${stateWords[result.state]} (${result.detail})`;
+      }
     }
     const note = technique?.context ? await Promise.resolve(technique.context(env)).catch(() => null) : null;
     if (note) notes.add(note);
@@ -132,13 +138,29 @@ async function surveyRow(row: HTMLElement, env: SurveyEnvironment, now: Date): P
 
 // ---- the whole survey -------------------------------------------------------
 
-/** Run the survey. Never throws: if anything fails, the page says so instead of guessing. */
-export async function survey(): Promise<void> {
+export interface SurveyHooks {
+  /** The form's values are known (all but the refresh rate). */
+  environment(values: Partial<EnvironmentValues>, repeatVisit: boolean): void;
+  /** The refresh rate has been measured, or could not be. */
+  refresh(values: Partial<EnvironmentValues>): void;
+}
+
+export interface SurveyOutcome {
+  rows: HTMLElement[];
+  at: Date;
+  /** "2 of 2 objects functional in this browser." */
+  tally: string;
+  /** The foot's memory line, or null on a first visit. */
+  memory: string | null;
+  /** True when this viewer has surveyed before and no verdict changed. */
+  unchanged: boolean;
+}
+
+/** Run the survey and write its results. Returns null, after saying so on the page, if it could not run. */
+export async function survey(hooks: SurveyHooks): Promise<SurveyOutcome | null> {
   const page = document.documentElement;
   const rows = [...document.querySelectorAll<HTMLElement>('.row')];
   const resurvey = document.querySelector<HTMLButtonElement>('[data-resurvey]');
-  const tally = document.querySelector('.tally');
-  const tallyMemory = document.querySelector<HTMLElement>('.tally-memory');
   const announcer = document.querySelector('[data-announce]');
 
   page.dataset.survey = 'running';
@@ -148,47 +170,45 @@ export async function survey(): Promise<void> {
   try {
     const now = new Date();
     const previous = recall();
-    const { values, env } = await readEnvironment();
-    fillForm(values);
+    const reading = await readEnvironment();
+    hooks.environment(reading.values, previous !== null);
+    reading.env.refreshHz = await reading.refresh;
+    hooks.refresh({ refresh: refreshText(reading.env.refreshHz) });
 
     const verdicts: Record<string, Verdict> = {};
     let changed = 0;
+    const when = previous && since(previous.at, now);
     for (const row of rows) {
-      const verdict = await surveyRow(row, env, now);
+      const verdict = await surveyRow(row, reading.env, now);
       const acc = row.dataset.acc!;
       verdicts[acc] = verdict;
 
       const was = previous?.verdicts[acc];
+      const differs = was !== undefined && Object.hasOwn(VERDICT_WORDS, was) && was !== verdict;
       const memoryNote = row.querySelector<HTMLElement>('.cond-memory');
-      const when = previous && since(previous.at, now);
       if (memoryNote) {
-        const differs = was !== undefined && Object.hasOwn(VERDICT_WORDS, was) && was !== verdict;
         memoryNote.hidden = !differs;
         memoryNote.textContent = differs
           ? `Condition changed since your survey ${when ?? 'last time'}: was ${VERDICT_WORDS[was].toUpperCase()}.`
           : '';
-        if (differs) changed++;
       }
+      if (differs) changed++;
     }
 
     const functional = Object.values(verdicts).filter((v) => FUNCTIONAL_VERDICTS.has(v)).length;
     const total = rows.length;
-    const line = `${functional} of ${total} ${total === 1 ? 'object' : 'objects'} functional in this browser.`;
-    if (tally) tally.textContent = line;
-    if (announcer) announcer.textContent = line;
+    const tally = `${functional} of ${total} ${total === 1 ? 'object' : 'objects'} functional in this browser.`;
+    if (announcer) announcer.textContent = tally;
 
-    if (tallyMemory) {
-      const when = previous && since(previous.at, now);
-      tallyMemory.hidden = !when;
-      tallyMemory.textContent = !when
-        ? ''
-        : changed === 0
-          ? `Re-surveyed: no change since your survey ${when}.`
-          : `${changed} ${changed === 1 ? 'condition' : 'conditions'} changed since your survey ${when}.`;
-    }
+    const memory = !when
+      ? null
+      : changed === 0
+        ? `Re-surveyed: no change since your survey ${when}.`
+        : `${changed} ${changed === 1 ? 'condition' : 'conditions'} changed since your survey ${when}.`;
 
     remember({ at: now.toISOString(), verdicts });
     page.dataset.survey = 'done';
+    return { rows, at: now, tally, memory, unchanged: !!when && changed === 0 };
   } catch (error) {
     console.error('Accession register: the survey could not run.', error);
     for (const row of rows) {
@@ -196,8 +216,10 @@ export async function survey(): Promise<void> {
       const text = row.querySelector('.cond-text');
       if (text) text.textContent = 'Survey could not run in this browser';
     }
+    const tally = document.querySelector('.tally');
     if (tally) tally.textContent = 'The survey could not run in this browser.';
     page.dataset.survey = 'failed';
+    return null;
   } finally {
     if (resurvey) resurvey.disabled = false;
   }
