@@ -358,8 +358,8 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
   }
 
   /*
-   * getExperiments() globs every page module, so the site theme's global CSS
-   * rides along into this page's head. These selectors outrank it.
+   * Bare brings no document styles, so the register sets its own. Keyed to
+   * .cloth, so they only ever apply on this page.
    */
   :global(html:has(> body > .cloth)) {
     background: var(--cloth-deep);
