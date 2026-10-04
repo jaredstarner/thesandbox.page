@@ -44,5 +44,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Georgia', 'serif'],
     },
+    {
+      // The split-flap face on /arrivals/.
+      provider: fontProviders.fontsource(),
+      name: 'Roboto Condensed',
+      cssVariable: '--font-flap',
+      weights: ['100 900'],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext', 'cyrillic', 'greek', 'vietnamese'],
+      fallbacks: ['Arial Narrow', 'Arial', 'sans-serif'],
+    },
   ],
 });
