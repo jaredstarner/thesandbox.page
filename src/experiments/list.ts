@@ -10,6 +10,8 @@ export interface Experiment {
   /** Tags the experiment cannot function without; every other tag is an enhancement. */
   requires?: string[];
   issue?: number;
+  /** Its plot on the home page's survey map. */
+  plot?: number;
 }
 
 // Experiments live at the site root: src/pages/<slug>/index.*, served at /<slug>/.

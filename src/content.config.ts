@@ -13,6 +13,8 @@ const experiments = defineCollection({
     tags: z.array(z.string()).default([]),
     requires: z.array(z.string()).optional(),
     issue: z.number().int().positive().optional(),
+    // The experiment's plot on the home page's survey map; see src/home/README.md.
+    plot: z.number().int().positive().optional(),
   }),
 });
 
