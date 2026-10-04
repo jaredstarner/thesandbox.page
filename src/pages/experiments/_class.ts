@@ -30,13 +30,16 @@ export function classify(tags: string[], requires?: string[]): Classification {
   ];
   if (handling.length === 0) handling.push('No special handling.');
 
-  if (!requires || requires.length === 0) {
+  if (!requires) {
     return {
       cls: 'uncatalogued',
       word: 'Uncatalogued',
       reason: 'Requirements not catalogued, so the register cannot say which browsers can display it.',
       handling,
     };
+  }
+  if (requires.length === 0) {
+    return { cls: 'stable', word: 'Stable', reason: 'It requires nothing in particular: every technique it uses is an enhancement.', handling };
   }
 
   const required = requires.map((tag) => {
