@@ -343,13 +343,15 @@ const plots: Plot[] = [
     left: 50%;
     width: 0;
     height: 0;
-    opacity: 0;
+    /* The reveal fades with filter, not opacity: the computed opacity stays 1, so a
+       style snapshot taken mid-reveal matches one taken after it. */
+    filter: opacity(0);
     transform: translate(calc((var(--px) - var(--cx)) * var(--z) * 1px), calc((var(--py) - var(--cy)) * var(--z) * 1px));
-    transition: opacity 0.6s ease-out;
+    transition: filter 0.6s ease-out;
   }
 
   :global(html.sv-js) .sv :global(.sv-plot.sv-on) {
-    opacity: 1;
+    filter: none;
   }
 
   :global(html.sv-js) .sv :global(.sv-parcel) {

@@ -14,8 +14,8 @@ const experiments = await getExperiments();
     // Switch to the map before first paint; without script the plots stay a list.
     document.documentElement.classList.add('sv-js');
   </script>
-  <style is:global slot="head">
-    body {
+  <style is:global>
+    body:has(.sv) {
       margin: 0;
     }
   </style>
