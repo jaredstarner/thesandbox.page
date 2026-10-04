@@ -35,7 +35,7 @@ function route(drum: string[], from: string, to: string): string[] {
 }
 
 // Full-width characters (kanji, kana, hangul) print smaller to fit the cell.
-const WIDE = /[p{Script=Han}p{Script=Hiragana}p{Script=Katakana}p{Script=Hangul}　-〿＀-￯]/u;
+const WIDE = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\u3000-\u303f\uff00-\uffef]/u;
 
 /** Prints a character on one half of a cell. */
 function paint(face: HTMLSpanElement, char: string): void {
