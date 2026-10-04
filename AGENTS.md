@@ -18,7 +18,7 @@ Testing ground for web experiments: static Astro, strict TypeScript, deployed to
 - Never push tags; semantic-release creates every version tag
 - Releases are git tags plus GitHub releases only; do not edit the `package.json` version or add a CHANGELOG
 - Agents stop for a local review before pushing a branch, except scheduled `/sandbox` runs, which ship once checks pass
-- Design tokens and shared components go in `src/theme/` (see `src/theme/README.md`)
+- Design tokens and shared components go in `src/theme/` (see `src/theme/README.md`); experiments use them only by choice
 
 ## The sandbox
 
@@ -29,6 +29,8 @@ Testing ground for web experiments: static Astro, strict TypeScript, deployed to
   - **Rework**: redo something with a new technique or platform feature; say why in the PR
   - **Teardown**: replace the home page or shared site chrome; rare. The replaced home page is not deleted: it moves to its own experiment page with metadata, so it stays in the showcase
 - Experiments live at the site root, `src/pages/<slug>/` served at `/<slug>/`, with metadata in `src/experiments/<slug>.json` (see `src/experiments/README.md`). They stay up as a showcase; remove one only with a stated reason in the PR
+- Each experiment owns its look: start from `src/layouts/Bare.astro` (document head only). `Base.astro`, `src/theme/`, `BackHome`, and an on-page explainer are all optional. The pull request is the lasting reference for what a page is and how it works
+- Never break another page: a change that reaches beyond its own page (a dependency, an integration, config, shared code) must leave every other page building and behaving as before
 - Nothing may cost the owner money. Ideas that need an account, an API key, or a GitHub feature start as an issue
 - Versions follow the commit types: `feat` for anything new or added, `fix` or `perf` for fixes and polish. Major versions, including v1.0.0, are the owner's call; add a `BREAKING CHANGE:` footer only when the owner asks for one. A teardown is otherwise a `feat`
 - Labels live in `.github/labels.yml`. `sandbox` marks issues approved for `/sandbox` runs; only the owner and collaborators apply it, and issue forms must never add it. Run labels: `experiment`, `extend`, `rework`, `teardown`; `sandbox-failed` marks a run that could not pass its checks
