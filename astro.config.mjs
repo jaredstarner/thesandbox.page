@@ -54,5 +54,24 @@ export default defineConfig({
       subsets: ['latin', 'latin-ext', 'cyrillic', 'greek', 'vietnamese'],
       fallbacks: ['Arial Narrow', 'Arial', 'sans-serif'],
     },
+    // The home page's survey map: a face drawn from US highway signage, and its mono.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Overpass',
+      cssVariable: '--font-survey',
+      weights: ['100 900'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Arial Narrow', 'Arial', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Overpass Mono',
+      cssVariable: '--font-survey-mono',
+      weights: ['300 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });

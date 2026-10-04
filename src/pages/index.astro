@@ -1,8 +1,23 @@
 ---
-import Base from '../layouts/Base.astro';
-import SandField from './falling-sand/_SandField.astro';
+import { Font } from 'astro:assets';
+import Bare from '../layouts/Bare.astro';
+import Survey from '../home/Survey.astro';
+import { getExperiments } from '../experiments/list';
+
+const experiments = await getExperiments();
 ---
 
-<Base>
-  <SandField />
-</Base>
+<Bare>
+  <Font cssVariable="--font-survey" preload slot="head" />
+  <Font cssVariable="--font-survey-mono" slot="head" />
+  <script is:inline slot="head">
+    // Switch to the map before first paint; without script the plots stay a list.
+    document.documentElement.classList.add('sv-js');
+  </script>
+  <style is:global slot="head">
+    body {
+      margin: 0;
+    }
+  </style>
+  <Survey experiments={experiments} />
+</Bare>
