@@ -1,71 +1,1807 @@
 ---
-import Base from '../../layouts/Base.astro';
-import BackHome from '../../theme/BackHome.astro';
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
 import { getExperiments } from '../../experiments/list';
+import { buildFolios, dateKeys, formatEntryDate } from './_register';
+import { baselineNote } from './_baseline';
+import { classify } from './_class';
+import { stressEntries } from './_stress';
+import { TECHNIQUES, normalizeTag, techniqueLabel } from './_tests';
+import { bookcloth, leafFibre, leafRaked, watermark, monogramPaths } from './_textures';
 
-const experiments = await getExperiments();
-const dateFormat = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeZone: 'UTC' });
+// REGISTER_STRESS=300 adds that many synthetic objects, to check the register at scale. Development only.
+const env = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env ?? {};
+const experiments = [...(await getExperiments()), ...stressEntries(Number(env.REGISTER_STRESS ?? 0))];
+const folios = buildFolios(experiments);
+const total = experiments.length;
+const FOLIO_MIN_LINES = 12;
+
+const medium = (tags: string[], requires: string[] = []) => {
+  const required = new Set(requires.map(normalizeTag));
+  return tags.map((tag) => {
+    const key = normalizeTag(tag);
+    const technique = TECHNIQUES[key];
+    return {
+      key,
+      label: techniqueLabel(tag),
+      testable: typeof technique?.test === 'function',
+      required: required.has(key),
+      baseline: baselineNote(technique?.webFeature),
+    };
+  });
+};
+
+// The foot's Baseline line, computed from web-features at build time.
+const tracked = new Map<string, number | null>();
+for (const experiment of experiments) {
+  for (const tag of experiment.tags) {
+    const key = normalizeTag(tag);
+    const note = baselineNote(TECHNIQUES[key]?.webFeature);
+    if (note) tracked.set(key, note.year);
+  }
+}
+const recent = [...tracked.values()].filter((year) => year !== null && year >= 2025).length;
+const notYet = [...tracked.values()].filter((year) => year === null).length;
+const baselineLine =
+  tracked.size === 0
+    ? ''
+    : `Of the ${tracked.size} techniques ${total === 1 ? 'it uses' : 'these objects use'} that Baseline tracks, ${recent} reached Baseline in 2025 or later` +
+      (notYet > 0 ? ` and ${notYet} ${notYet === 1 ? 'has' : 'have'} not reached it yet.` : '.');
+
+type Entry = (typeof folios)[number]['entries'][number];
+const searchText = (entry: Entry, word: string, labels: string[]) =>
+  `|${[entry.title, entry.summary, ...entry.tags, ...labels, word, ...dateKeys(entry)].join('|').toLowerCase()}|`;
+
+// Each stamp's ink filter, angle, offset, and pressure come from a hash of its
+// accession number, so a row lands the same way on every visit.
+const hash = (text: string) => {
+  let h = 2166136261;
+  for (const char of text) h = Math.imul(h ^ char.charCodeAt(0), 16777619);
+  return h >>> 0;
+};
+const stampStyle = (accession: string) => {
+  const h = hash(accession);
+  const rot = (((h >>> 3) % 51) / 10 - 2.5).toFixed(1);
+  return `--ink:url(#ink-${(h % 8) + 1});--rot:${rot}deg;--jx:${((h >>> 9) % 5) - 2}px;--jy:${((h >>> 13) % 5) - 2}px;--press:${(h >>> 17) % 360}deg`;
+};
+
+const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:${leafRaked};--tex-watermark:${watermark};`;
 ---
 
-<Base title="Experiments" description="Every experiment on thesandbox.page, newest first.">
-  <BackHome />
-  <main>
-    <h1>Experiments</h1>
+<Bare title="Accession register" description="The register of every object in thesandbox.page, surveyed in your browser.">
+  <Fragment slot="head">
+    <meta name="robots" content="noindex" />
+    <Font cssVariable="--font-register-form" preload />
+    <Font cssVariable="--font-register-data" preload />
+    <Font cssVariable="--font-register-entry" preload />
+    <noscript>
+      <style is:inline>
+        .cloth .row .cond-text { font-size: 0; }
+        .cloth .row .cond-text::after { content: 'Not surveyed (script disabled)'; font-size: 11px; }
+        .cloth .leaf .call-slip, .cloth .leaf .foot-actions { display: none; }
+        .cloth .row .light { visibility: hidden; }
+      </style>
+    </noscript>
+  </Fragment>
+
+  <div class="cloth" style={cssVars}>
+    <a class="skip" href="#folios">Skip to the register</a>
+    <p class="gilt" aria-hidden="true">Register of Objects · Vol. I · thesandbox.page</p>
+
+    <main class="leaf">
+      <header class="leaf-head">
+        <h1>Accession Register</h1>
+        <p class="folio-of">
+          {folios.length <= 1 ? `Folio ${folios.length} of ${folios.length}` : `${folios.length} folios`}
+        </p>
+        <p class="pencil">{total} {total === 1 ? 'object' : 'objects'} accessioned</p>
+      </header>
+
+      <section class="conditions" aria-labelledby="conditions-title">
+        <h2 id="conditions-title">Survey Conditions</h2>
+        <dl>
+          <div><dt>Browser (reported)</dt><dd data-env="browser">Not surveyed</dd></div>
+          <div><dt>Viewport</dt><dd data-env="viewport">Not surveyed</dd></div>
+          <div><dt>Colour gamut</dt><dd data-env="gamut">Not surveyed</dd></div>
+          <div><dt>Dynamic range</dt><dd data-env="range">Not surveyed</dd></div>
+          <div><dt>Refresh rate</dt><dd data-env="refresh">Not surveyed</dd></div>
+          <div><dt>Pointer</dt><dd data-env="pointer">Not surveyed</dd></div>
+          <div><dt>Motion</dt><dd data-env="motion">Not surveyed</dd></div>
+          <div><dt>Contrast · scheme</dt><dd data-env="scheme">Not surveyed</dd></div>
+          <div><dt>Language · time zone</dt><dd data-env="locale">Not surveyed</dd></div>
+          <div><dt>Logical cores</dt><dd data-env="cores">Not surveyed</dd></div>
+          <div><dt>Device memory</dt><dd data-env="memory">Not surveyed</dd></div>
+          <div><dt>GPU</dt><dd data-env="gpu">Not surveyed</dd></div>
+          <div><dt>Microphone · camera</dt><dd data-env="permissions">Not surveyed</dd></div>
+          <div><dt>Network</dt><dd data-env="network">Not surveyed</dd></div>
+        </dl>
+      </section>
+
+      <form class="call-slip" role="search">
+        <label class="call-field">
+          <span>Call for object:</span>
+          <input type="search" name="q" autocomplete="off" spellcheck="false" />
+        </label>
+        <label class="call-check">
+          <input type="checkbox" name="functional" disabled />
+          <span>Only objects functional in this browser</span>
+        </label>
+        <output class="call-tally" aria-hidden="true">{total} of {total} objects</output>
+      </form>
+
+      {
+        folios.length > 1 && (
+          <nav class="folio-index" aria-labelledby="folio-index-title">
+            <h2 id="folio-index-title">Index of folios</h2>
+            <ol>
+              {folios.map((folio) => (
+                <li>
+                  <a href={`#${folio.id}`}>{folio.label}</a>
+                  <span>
+                    Folio {folio.number} · {folio.entries.length} {folio.entries.length === 1 ? 'object' : 'objects'}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )
+      }
+
+      <div id="folios">
+        {
+          folios.map((folio) => {
+            const blanks = Math.max(0, FOLIO_MIN_LINES - folio.entries.length);
+            return (
+              <section class="folio" id={folio.id} aria-labelledby={`${folio.id}-title`}>
+                <h2 class="folio-head" id={`${folio.id}-title`}>
+                  {folio.label} <span>· Folio {folio.number}</span>
+                </h2>
+                <p class="folio-empty">{folio.label}: no matches</p>
+                <div class="sheet">
+                  <div class="col-heads" aria-hidden="true">
+                    <span>Line</span>
+                    <span>Accession No.</span>
+                    <span>Accessioned</span>
+                    <span>Object</span>
+                    <span>Medium</span>
+                    <span>Condition</span>
+                  </div>
+                  <ol class="rows">
+                    {folio.entries.map((entry) => {
+                      const techniques = medium(entry.tags, entry.requires);
+                      const objectClass = classify(entry.tags, entry.requires);
+                      return (
+                        <li
+                          class="row"
+                          id={entry.slug}
+                          data-acc={entry.accession}
+                          data-tags={entry.tags.join(' ')}
+                          data-requires={entry.requires?.join(' ')}
+                          data-class={objectClass.cls}
+                          data-search={searchText(entry, objectClass.word, techniques.map((t) => t.label))}
+                        >
+                          <span class="c-line">{entry.line}</span>
+                          <span class="c-acc">
+                            {entry.accession}
+                            <span class="acc-class">Class: {objectClass.word}</span>
+                          </span>
+                          <time class="c-date" datetime={entry.iso}>
+                            {formatEntryDate(entry.date)}
+                          </time>
+                          <div class="c-object">
+                            <a href={entry.href}>{entry.title}</a>
+                            <p>{entry.summary}</p>
+                            <details class="report">
+                              <summary>Condition report</summary>
+                              <dl class="r-body">
+                                <dt>Object class</dt>
+                                <dd>
+                                  <strong class="r-class">{objectClass.word}.</strong> {objectClass.reason}
+                                </dd>
+                                <dt>Handling</dt>
+                                <dd>{objectClass.handling.join(' ')}</dd>
+                                <dt>Evidence</dt>
+                                <dd>
+                                  <ul class="r-evidence">
+                                    {techniques.map((t) => (
+                                      <li data-key={t.key} data-testable={t.testable ? '' : undefined}>
+                                        <span class="r-line">
+                                          <span class="light" aria-hidden="true" />
+                                          <span class="r-tech">{t.label}</span>
+                                          <span class="r-role">
+                                            {t.required ? 'required' : t.testable ? 'enhancement' : 'technique note'}
+                                          </span>
+                                        </span>
+                                        <span class="r-state">{t.testable ? 'Not surveyed' : 'Nothing to test in a browser'}</span>
+                                        {t.baseline && <span class="r-base">{t.baseline.long}</span>}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </dd>
+                                <dt class="r-env-t" hidden>Environment</dt>
+                                <dd class="r-env" hidden>
+                                  <ul />
+                                </dd>
+                              </dl>
+                            </details>
+                          </div>
+                          <ul class="c-medium">
+                            {techniques.map((t) => (
+                              <li data-key={t.key} data-testable={t.testable ? '' : undefined} data-required={t.required ? '' : undefined}>
+                                <span class="light" aria-hidden="true" />
+                                <span class="t-label">{t.label}</span>
+                                {t.baseline && <span class="t-base">{t.baseline.short.replace('Baseline ', '')}</span>}
+                              </li>
+                            ))}
+                          </ul>
+                          <div class="c-condition">
+                            <div class="stamp" aria-hidden="true" style={stampStyle(entry.accession)}>
+                              <span class="s-band">Condition</span>
+                              <span class="s-verdict" />
+                              <span class="s-date" />
+                            </div>
+                            <p class="cond-text">Not surveyed</p>
+                            <p class="cond-memory" hidden />
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                  <ol class="blanks" aria-hidden="true" start={folio.entries.length + 1}>
+                    {Array.from({ length: blanks }, (_, i) => (
+                      <li>
+                        <span class="c-line">{folio.entries.length + i + 1}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <span class="vr vr-1" aria-hidden="true" />
+                  <span class="vr vr-2" aria-hidden="true" />
+                  <span class="vr vr-3" aria-hidden="true" />
+                  <span class="vr vr-4" aria-hidden="true" />
+                  <span class="vr vr-5" aria-hidden="true" />
+                </div>
+              </section>
+            );
+          })
+        }
+      </div>
+
+      <footer class="leaf-foot">
+        <p class="tally">{total} {total === 1 ? 'object' : 'objects'} in the register. Not yet surveyed.</p>
+        {baselineLine && <p class="tally-baseline">{baselineLine}</p>}
+        <p class="tally-memory" hidden />
+        <p class="foot-actions">
+          <button type="button" class="resurvey" data-resurvey disabled>Re-survey</button>
+        </p>
+        <div class="foot-marks">
+          <div class="perforation" aria-hidden="true"></div>
+          <svg class="seal" viewBox="-60 -60 120 120" width="112" height="112" aria-hidden="true">
+            <defs>
+              <path id="seal-ring" d="M 0 -45 A 45 45 0 1 1 0 45 A 45 45 0 1 1 0 -45" />
+              <filter id="seal-emboss" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="1.4" result="height" />
+                <feDiffuseLighting class="seal-relief" in="height" surfaceScale="2.5" diffuseConstant="1" lighting-color="#fff" result="lit">
+                  <feDistantLight class="seal-light" azimuth="340" elevation="30" />
+                </feDiffuseLighting>
+                <!-- Pull the relief toward mid grey: a blind emboss reads as light and shadow, not ink. -->
+                <feComponentTransfer in="lit">
+                  <feFuncR type="linear" slope="0.5" intercept="0.25" />
+                  <feFuncG type="linear" slope="0.5" intercept="0.25" />
+                  <feFuncB type="linear" slope="0.5" intercept="0.25" />
+                </feComponentTransfer>
+              </filter>
+            </defs>
+            <g filter="url(#seal-emboss)">
+            <g fill="none" stroke="#000" stroke-width="1.2">
+              <circle r="56" />
+              <circle r="52" stroke-width="0.6" />
+              <circle r="36" stroke-width="0.8" />
+            </g>
+            <text font-size="9.4" letter-spacing="1.6">
+              <textPath href="#seal-ring" startOffset="0">REGISTER OF OBJECTS · THESANDBOX.PAGE ·</textPath>
+            </text>
+            <g transform="scale(0.36)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+              <path d={monogramPaths.t} stroke-width="7" />
+              <path d={monogramPaths.s} stroke-width="6" />
+              <path d={monogramPaths.p} stroke-width="6" />
+            </g>
+            </g>
+          </svg>
+        </div>
+        <p class="foot-note">
+          Conditions are detected from feature support in this browser at the time of survey. Detection shows an API is
+          present, not that it behaves correctly. Nothing measured here leaves your browser.
+        </p>
+        <p class="sr-only" aria-live="polite" data-announce></p>
+      </footer>
+    </main>
+    <button type="button" class="skip-survey" data-skip-survey hidden>Skip survey</button>
+  </div>
+
+  <svg class="ink-filters" width="0" height="0" aria-hidden="true" focusable="false">
     {
-      experiments.length === 0 ? (
-        <p class="empty">Nothing built yet. Check back tomorrow.</p>
-      ) : (
-        <ol>
-          {experiments.map((experiment) => (
-            <li>
-              <a href={experiment.href}>{experiment.title}</a>
-              <p>{experiment.summary}</p>
-              <time datetime={experiment.date.toISOString().slice(0, 10)}>
-                {dateFormat.format(experiment.date)}
-              </time>
-            </li>
-          ))}
-        </ol>
-      )
+      [1, 2, 3, 4, 5, 6, 7, 8].map((seed) => (
+        <filter id={`ink-${seed}`} x="-8%" y="-12%" width="116%" height="124%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed={seed} result="warp" />
+          <feDisplacementMap in="SourceGraphic" in2="warp" scale="2.6" xChannelSelector="R" yChannelSelector="G" result="moved" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.7 0.45" numOctaves="2" seed={seed + 20} result="grain" />
+          <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -5.5 0 0 0 4.1" result="skips" />
+          <feComposite in="moved" in2="skips" operator="in" />
+        </filter>
+      ))
     }
-  </main>
-</Base>
+  </svg>
+</Bare>
+
+<script>
+  import { callSlip } from './_callslip';
+  import { Ceremony, giltSheen } from './_ceremony';
+  import { survey } from './_survey';
+
+  const slip = callSlip();
+  let ceremony: Ceremony | null = null;
+
+  async function surveyNow(rerun: boolean) {
+    ceremony?.skip();
+    const current = (ceremony = new Ceremony(rerun));
+    const outcome = await survey({
+      environment: (values, repeatVisit) => current.printEnvironment(values, repeatVisit),
+      refresh: (values) => current.printRefresh(values),
+    });
+    slip.refresh();
+    current.present(outcome);
+  }
+
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  // Re-survey brings the ledger back into view so the lamp has rows to cross.
+  document.querySelector('[data-resurvey]')?.addEventListener('click', () => {
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelector('.folio')?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+    void surveyNow(true);
+  });
+  giltSheen();
+  // Start once the register's fonts are in, so the form prints in its own type.
+  void Promise.race([document.fonts.ready.then(() => wait(300)), wait(1500)]).then(() => surveyNow(false));
+</script>
 
 <style>
-  main {
-    max-width: 40rem;
+  :root {
+    --cloth: #1e3a2c;
+    --cloth-deep: #142619;
+    --leaf: #f2f4f0;
+    --leaf-edge: #d9ded8;
+    --rule: rgb(168 192 216 / 0.7);
+    --vermilion: #d0452b;
+    --form: #1f3a5f;
+    --ink: #1a1c1e;
+    --ink-green: #1e6b4a;
+    --ink-amber: #b5731a;
+    --ink-red: #b3261e;
+    --ink-graphite: #5a5e62;
+    --gilt: #c8a24a;
+    --gilt-hi: #f3dc94;
+    --line: 28px;
+    --pad: 10px;
+    --f-form: var(--font-register-form), 'Arial Narrow', sans-serif;
+    --f-data: var(--font-register-data), ui-monospace, monospace;
+    --f-entry: var(--font-register-entry), Georgia, serif;
+    color-scheme: light;
+  }
+
+  /*
+   * Bare brings no document styles, so the register sets its own. Keyed to
+   * .cloth, so they only ever apply on this page.
+   */
+  :global(html:has(> body > .cloth)) {
+    background: var(--cloth-deep);
+  }
+
+  :global(body:has(> .cloth)) {
+    margin: 0;
+    min-height: 0;
+    background: var(--cloth);
+    color: var(--ink);
+    font-family: var(--f-entry);
+    line-height: normal;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  .cloth,
+  .cloth *,
+  .cloth *::before,
+  .cloth *::after {
+    box-sizing: border-box;
+  }
+
+  .cloth :focus-visible {
+    outline: 2px solid var(--vermilion);
+    outline-offset: 2px;
+  }
+
+  .cloth {
+    min-height: 100vh;
+    color: var(--ink);
+    font-family: var(--f-entry);
+    padding: 0 56px 56px;
+    background:
+      radial-gradient(120% 80% at 50% 0%, rgb(255 255 255 / 0.05), transparent 60%),
+      var(--tex-cloth),
+      var(--cloth);
+    background-size: auto, 240px 240px, auto;
+  }
+
+  .skip {
+    position: absolute;
+    left: 16px;
+    top: -60px;
+    padding: 8px 12px;
+    background: var(--leaf);
+    color: var(--form);
+    font-family: var(--f-form);
+    z-index: 10;
+  }
+
+  .skip:focus {
+    top: 12px;
+  }
+
+  .gilt {
     margin: 0 auto;
-    padding: var(--space-6) var(--space-3);
+    padding: 34px 0 30px;
+    max-width: 1180px;
+    text-align: center;
+    font-family: var(--f-form);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: transparent;
+    background: linear-gradient(var(--gilt-angle, 105deg), #9c7a2c 0%, var(--gilt) 30%, var(--gilt-hi) 48%, var(--gilt) 62%, #8e6e26 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    filter: drop-shadow(0 -1px 0 rgb(0 0 0 / 0.45)) drop-shadow(0 1px 0 rgb(255 255 255 / 0.08));
+  }
+
+  .leaf {
+    position: relative;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 40px var(--line);
+    background: var(--tex-fibre), var(--leaf);
+    background-size: 320px 320px, auto;
+    box-shadow:
+      0 0 0 1px var(--leaf-edge),
+      0 1px 2px rgb(0 0 0 / 0.25),
+      0 18px 40px -12px rgb(0 0 0 / 0.55),
+      inset 0 0 60px rgb(31 58 95 / 0.05);
+  }
+
+  /* ---- leaf head ---------------------------------------------------------- */
+
+  .leaf-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: end;
+    padding-top: calc(var(--line) * 2);
+    padding-bottom: 12px;
+    border-bottom: 3px double var(--vermilion);
+    color: var(--form);
   }
 
   h1 {
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
+    grid-row: 1 / 3;
+    margin: 0;
+    font-family: var(--f-form);
     font-weight: 700;
+    font-size: 40px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
-  ol {
+  .folio-of {
+    margin: 0;
+    text-align: right;
+    font-family: var(--f-form);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .pencil {
+    margin: 4px 0 0;
+    text-align: right;
+    font-family: var(--f-data);
+    font-size: 13px;
+    color: var(--ink-graphite);
+  }
+
+  /* ---- survey conditions form -------------------------------------------- */
+
+  .conditions {
+    margin-top: var(--line);
+    border: 1px solid var(--form);
+    outline: 1px solid var(--form);
+    outline-offset: 2px;
+  }
+
+  .conditions h2,
+  .folio-head {
+    margin: 0;
+    font-family: var(--f-form);
+    font-weight: 700;
+    font-size: 11px;
+    line-height: var(--line);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--form);
+  }
+
+  .conditions h2 {
+    padding: 0 var(--pad);
+    border-bottom: 1px solid var(--form);
+  }
+
+  .conditions dl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 0;
+  }
+
+  .conditions dl > div {
+    display: grid;
+    grid-template-columns: 17ch 1fr;
+    min-height: var(--line);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .conditions dl > div:nth-child(odd) {
+    border-right: 1px solid var(--form);
+  }
+
+  .conditions dt {
+    padding: 0 var(--pad);
+    font-family: var(--f-form);
+    font-weight: 500;
+    font-size: 11px;
+    line-height: var(--line);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--form);
+    border-right: 1px solid var(--rule);
+  }
+
+  .conditions dd {
+    margin: 0;
+    padding: 0 var(--pad);
+    font-family: var(--f-data);
+    font-size: 12.5px;
+    line-height: var(--line);
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+
+  /* ---- call slip ---------------------------------------------------------- */
+
+  .call-slip {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0 28px;
+    align-items: end;
+    margin-top: var(--line);
+    padding: 0 var(--pad);
+    border-top: 1px solid var(--form);
+    border-bottom: 1px solid var(--form);
+    min-height: calc(var(--line) * 2);
+    color: var(--form);
+    font-family: var(--f-form);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .call-field {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    line-height: calc(var(--line) * 2 - 8px);
+  }
+
+  .call-field input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    border-bottom: 1px dotted var(--form);
+    background: transparent;
+    font: 400 15px/1.6 var(--f-data);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink);
+    padding: 0 4px;
+  }
+
+  .call-field input:focus {
+    outline: none;
+    border-bottom: 1px solid var(--vermilion);
+  }
+
+  .call-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: calc(var(--line) * 2 - 8px);
+  }
+
+  .call-check input {
+    accent-color: var(--form);
+  }
+
+  .call-check:has(input:disabled) {
+    opacity: 0.5;
+  }
+
+  .call-tally {
+    font-family: var(--f-data);
+    font-size: 12.5px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink-graphite);
+    line-height: calc(var(--line) * 2 - 8px);
+  }
+
+  /* ---- index of folios ---------------------------------------------------- */
+
+  .folio-index {
+    margin-top: var(--line);
+    color: var(--form);
+  }
+
+  .folio-index h2 {
+    margin: 0;
+    font-family: var(--f-form);
+    font-weight: 700;
+    font-size: 11px;
+    line-height: var(--line);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--form);
+  }
+
+  .folio-index ol {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    column-gap: 28px;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  li {
-    padding: var(--space-3) 0;
-    border-bottom: 1px solid var(--color-border);
+  .folio-index li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--rule);
+    line-height: var(--line);
   }
 
-  li a {
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
+  .folio-index a {
+    font-family: var(--f-entry);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--ink);
+    text-decoration: none;
   }
 
-  li p {
-    margin: var(--space-1) 0;
+  .folio-index a:hover,
+  .folio-index a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
-  time,
-  .empty {
-    color: var(--color-muted);
-    font-size: var(--text-sm);
+  .folio-index span {
+    font-family: var(--f-data);
+    font-size: 11.5px;
+    color: var(--ink-graphite);
+    white-space: nowrap;
+  }
+
+  /* ---- folios ------------------------------------------------------------- */
+
+  .folio {
+    margin-top: calc(var(--line) * 2);
+  }
+
+  .folio-head {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--leaf);
+    padding: 0 var(--pad);
+  }
+
+  .folio-head span {
+    color: var(--ink-graphite);
+    font-weight: 500;
+  }
+
+  .sheet {
+    --c-line: calc(3ch + var(--pad) * 2);
+    --c-acc: calc(17ch + var(--pad) * 2);
+    --c-date: calc(11ch + var(--pad) * 2);
+    --c-medium: 24ch;
+    --c-cond: 150px;
+
+    position: relative;
+    display: grid;
+    grid-template-columns:
+      [line] var(--c-line) [acc] var(--c-acc) [date] var(--c-date) [object] minmax(28ch, 1fr)
+      [medium] calc(var(--c-medium) + var(--pad) * 2) [cond] var(--c-cond) [end];
+    grid-template-rows: [heads] auto [body] auto [blank] auto [foot];
+    font-family: var(--f-data);
+    font-size: 12.5px;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 calc(var(--line) - 1px),
+      var(--rule) calc(var(--line) - 1px) var(--line)
+    );
+    border-bottom: 1px solid var(--form);
+  }
+
+  .col-heads {
+    grid-column: line / end;
+    grid-row: heads;
+    display: grid;
+    grid-template-columns: subgrid;
+    border-top: 1px solid var(--form);
+    border-bottom: 3px double var(--vermilion);
+    background: var(--leaf);
+    position: relative;
+    z-index: 1;
+  }
+
+  .col-heads span {
+    padding: 0 var(--pad);
+    font-family: var(--f-form);
+    font-weight: 700;
+    font-size: 10.5px;
+    line-height: calc(var(--line) * 2 - 4px);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--form);
+    white-space: nowrap;
+  }
+
+  .rows,
+  .blanks {
+    grid-column: line / end;
+    display: grid;
+    grid-template-columns: subgrid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .rows {
+    grid-row: body;
+  }
+
+  .blanks {
+    grid-row: blank;
+  }
+
+  .row,
+  .blanks > li {
+    grid-column: line / end;
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: start;
+    position: relative;
+  }
+
+  .row {
+    padding-bottom: var(--line);
+  }
+
+  .blanks > li {
+    height: calc(var(--line) * 2);
+  }
+
+  .c-line,
+  .c-acc,
+  .c-date {
+    padding: 0 var(--pad);
+    line-height: var(--line);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .c-line {
+    text-align: right;
+    color: var(--form);
+    opacity: 0.75;
+    font-size: 11px;
+  }
+
+  .blanks .c-line {
+    opacity: 0.35;
+  }
+
+  .c-acc {
+    font-weight: 500;
+  }
+
+  .acc-class {
+    display: block;
+    font-family: var(--f-form);
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--form);
+  }
+
+  .c-object {
+    padding: 0 var(--pad) 0 calc(var(--pad) + 4px);
+    min-width: 0;
+  }
+
+  .c-object > a {
+    display: inline;
+    font-family: var(--f-entry);
+    font-style: italic;
+    font-size: 22px;
+    line-height: var(--line);
+    font-variation-settings: 'opsz' 48;
+    color: var(--ink);
+    text-decoration: none;
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 0.25s ease;
+  }
+
+  .c-object > a:hover,
+  .c-object > a:focus-visible {
+    background-size: 100% 1px;
+    outline: none;
+  }
+
+  .c-object > p {
+    margin: 0;
+    font-family: var(--f-entry);
+    font-size: 16px;
+    line-height: var(--line);
+    font-variation-settings: 'opsz' 14;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  .c-medium {
+    list-style: none;
+    margin: 0;
+    padding: 0 var(--pad);
+  }
+
+  .c-medium li {
+    display: grid;
+    grid-template-columns: 7px 1fr auto;
+    align-items: baseline;
+    gap: 7px;
+    min-height: var(--line);
+    font-family: var(--f-form);
+    font-weight: 500;
+    font-size: 13px;
+    line-height: var(--line);
+    color: var(--ink);
+  }
+
+  .light {
+    align-self: start;
+    margin-top: 11px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: 1px solid var(--ink-graphite);
+    background: transparent;
+  }
+
+  .c-medium li:not([data-testable]) .light {
+    visibility: hidden;
+  }
+
+  .c-medium li:not([data-testable]) .t-label {
+    color: var(--ink-graphite);
+    font-style: normal;
+  }
+
+  li[data-state='detected'] .light {
+    background: var(--ink-green);
+    border-color: var(--ink-green);
+  }
+
+  li[data-state='absent'] .light {
+    background: var(--ink-amber);
+    border-color: var(--ink-amber);
+  }
+
+  li[data-state='failed-required'] .light {
+    background: var(--ink-red);
+    border-color: var(--ink-red);
+  }
+
+  li[data-state='grey'] .light {
+    background: #a3a7aa;
+    border-color: #a3a7aa;
+  }
+
+  .row[data-verdict='reduced'] .stamp {
+    --ink-c: var(--ink-amber);
+  }
+
+  .row[data-verdict='inoperable'] .stamp {
+    --ink-c: var(--ink-red);
+  }
+
+  .row[data-verdict='uncertain'] .stamp {
+    --ink-c: var(--ink-graphite);
+  }
+
+  .ink-filters {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .t-base {
+    font-family: var(--f-data);
+    font-size: 10.5px;
+    color: var(--ink-graphite);
+  }
+
+  .c-condition {
+    padding: 0 var(--pad);
+    position: relative;
+  }
+
+  .cond-text {
+    margin: 0;
+    font-family: var(--f-data);
+    font-size: 11px;
+    line-height: var(--line);
+    color: var(--ink-graphite);
+  }
+
+  .stamp {
+    --ink-c: var(--ink-green);
+    --s: 1;
+    display: grid;
+    grid-template-rows: calc(var(--s) * 17px) 1fr calc(var(--s) * 17px);
+    width: calc(var(--s) * 132px);
+    height: calc(var(--s) * 78px);
+    margin: 3px 0 0;
+    border: calc(var(--s) * 4px) double var(--ink-c);
+    color: var(--ink-c);
+    text-align: center;
+    mix-blend-mode: multiply;
+    rotate: var(--rot, -1.6deg);
+    translate: var(--jx, 0) var(--jy, 0);
+    filter: var(--ink, url(#ink-3));
+    /* Pressure: one edge of the die bites harder than the other. */
+    mask-image: linear-gradient(var(--press, 200deg), rgb(0 0 0 / 0.72), #000 55%);
+  }
+
+  .s-band {
+    font-family: var(--f-form);
+    font-weight: 700;
+    font-size: calc(var(--s) * 9px);
+    letter-spacing: 0.3em;
+    line-height: calc(var(--s) * 15px);
+    border-bottom: 1px solid currentColor;
+    text-transform: uppercase;
+  }
+
+  .s-verdict {
+    align-self: center;
+    font-family: var(--f-form);
+    font-weight: 700;
+    font-size: calc(var(--s) * 17px);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .s-date {
+    font-family: var(--f-data);
+    font-weight: 500;
+    font-size: calc(var(--s) * 9.5px);
+    line-height: calc(var(--s) * 15px);
+    border-top: 1px solid currentColor;
+    white-space: nowrap;
+  }
+
+  .vr {
+    grid-row: heads / foot;
+    pointer-events: none;
+    border-left: 1px solid var(--rule);
+  }
+
+  .vr-1 {
+    grid-column: acc;
+    border-left: 0;
+    border-inline: 3px double var(--vermilion);
+  }
+
+  .vr-2 {
+    grid-column: date;
+    border-left: 0;
+  }
+
+  .vr-3 {
+    grid-column: object;
+  }
+
+  .vr-4 {
+    grid-column: medium;
+  }
+
+  .vr-5 {
+    grid-column: cond;
+  }
+
+  /* ---- foot --------------------------------------------------------------- */
+
+  .leaf-foot {
+    margin-top: calc(var(--line) * 2);
+    color: var(--form);
+  }
+
+  .tally {
+    margin: 0;
+    font-family: var(--f-entry);
+    font-size: 16px;
+    line-height: var(--line);
+  }
+
+  .foot-marks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--line);
+    min-height: 112px;
+  }
+
+  .seal {
+    font-family: var(--f-form);
+    font-weight: 700;
+    mix-blend-mode: hard-light;
+    overflow: visible;
+  }
+
+  .foot-note {
+    max-width: 68ch;
+    margin: var(--line) 0 0;
+    font-family: var(--f-form);
+    font-size: 12px;
+    line-height: 20px;
+    letter-spacing: 0.02em;
+    color: var(--ink-graphite);
+  }
+
+  /* ---- survey state ------------------------------------------------------- */
+
+  .row:not([data-stamped]) .stamp {
+    visibility: hidden;
+  }
+
+  .row[data-stamped] .stamp {
+    opacity: 0.92;
+  }
+
+  /* Results are written before the lamp arrives; keep them readable to assistive tech, unseen until stamped. */
+  .row[data-awaiting] .cond-text,
+  .row[data-awaiting] .cond-memory {
+    color: transparent;
+  }
+
+  .c-medium li[data-state] .light {
+    animation: light-in 0.2s ease-out;
+  }
+
+  @keyframes light-in {
+    from {
+      transform: scale(0.2);
+      opacity: 0;
+    }
+  }
+
+  .row[data-verdict='not-surveyed'] .stamp {
+    display: none;
+  }
+
+  .row[hidden],
+  .folio-empty,
+  .folio[data-empty] > :not(.folio-empty) {
+    display: none;
+  }
+
+  .folio[data-empty] > .folio-empty {
+    display: block;
+  }
+
+  .folio-empty {
+    margin: 0;
+    padding: 0 var(--pad);
+    font-family: var(--f-data);
+    font-size: 12.5px;
+    line-height: var(--line);
+    color: var(--ink-graphite);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .cond-memory {
+    margin: 6px 0 0;
+    font-family: var(--f-data);
+    font-size: 10.5px;
+    line-height: 14px;
+    color: var(--ink-graphite);
+  }
+
+  .cond-memory[hidden],
+  .tally-memory[hidden] {
+    display: none;
+  }
+
+  .conditions :global(.redacted) {
+    display: inline-block;
+    width: 12ch;
+    height: 0.95em;
+    margin-right: 10px;
+    vertical-align: -0.15em;
+    background: var(--ink);
+    mix-blend-mode: multiply;
+  }
+
+  .conditions dl > div:nth-child(3n) :global(.redacted) {
+    width: 8ch;
+  }
+
+  .conditions dl > div:nth-child(3n + 1) :global(.redacted) {
+    width: 15ch;
+  }
+
+  .conditions :global(.withheld) {
+    color: var(--ink-graphite);
+  }
+
+  /* ---- condition report --------------------------------------------------- */
+
+  .report > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--f-form);
+    font-weight: 700;
+    font-size: 10.5px;
+    line-height: var(--line);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--form);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .report > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .report > summary::before {
+    content: '';
+    border-style: solid;
+    border-width: 4px 0 4px 6px;
+    border-color: transparent transparent transparent currentColor;
+    transition: rotate 0.15s ease;
+  }
+
+  .report[open] > summary::before {
+    rotate: 90deg;
+  }
+
+  .r-body {
+    display: grid;
+    grid-template-columns: 13ch minmax(0, 1fr);
+    margin: 0;
+    font-family: var(--f-data);
+    font-size: 12px;
+    line-height: var(--line);
+  }
+
+  .r-body dt {
+    font-family: var(--f-form);
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--form);
+  }
+
+  .r-body dd {
+    margin: 0;
+    min-width: 0;
+    color: var(--ink);
+  }
+
+  .r-body [hidden] {
+    display: none;
+  }
+
+  .r-class {
+    font-family: var(--f-form);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .r-evidence,
+  .r-env ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .r-evidence li {
+    padding-left: 14px;
+    color: var(--ink-graphite);
+    overflow-wrap: anywhere;
+  }
+
+  .r-line {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    margin-left: -14px;
+    color: var(--ink);
+  }
+
+  .r-line .light {
+    align-self: center;
+    margin-top: 0;
+    flex: none;
+  }
+
+  .r-evidence li:not([data-testable]) .light {
+    visibility: hidden;
+  }
+
+  .r-tech {
+    font-family: var(--f-form);
+    font-weight: 500;
+    font-size: 13px;
+  }
+
+  .r-role {
+    font-family: var(--f-form);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-graphite);
+  }
+
+  .r-state + .r-base::before {
+    content: ' · ';
+  }
+
+  /* ---- the survey lamp ---------------------------------------------------- */
+
+  /*
+   * A raking light band. The band translates down the sheet while its paper
+   * counter-translates, so the raked texture and watermark stay fixed to the
+   * leaf: both moves are transforms. The raked tile is mid grey where flat,
+   * so hard-light leaves the page unchanged except where fibres catch the light.
+   */
+  .cloth :global(.survey-lamp) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 240px;
+    overflow: hidden;
+    pointer-events: none;
+    mix-blend-mode: hard-light;
+    mask-image: linear-gradient(to bottom, transparent, #000 34%, #000 66%, transparent);
+    will-change: transform;
+  }
+
+  .cloth :global(.survey-lamp)::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 8%, rgb(255 250 236 / 0.36) 50%, transparent 92%);
+  }
+
+  .cloth :global(.survey-lamp-paper) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    will-change: transform;
+  }
+
+  /* Low contrast pulls the raked tile toward mid grey: tooth, not scanlines. */
+  .cloth :global(.survey-lamp-paper)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--tex-raked);
+    background-size: 384px 384px;
+    filter: contrast(0.34);
+  }
+
+  .cloth :global(.survey-lamp-mark) {
+    position: absolute;
+    left: 50%;
+    width: 200px;
+    height: 250px;
+    margin: -125px 0 0 -100px;
+    background: var(--tex-watermark) center / contain no-repeat;
+    opacity: 0.65;
+  }
+
+  /* ---- perforation -------------------------------------------------------- */
+
+  .perforation {
+    --pitch: 5px;
+    --hole: 3px;
+    position: relative;
+    flex: none;
+    width: calc(var(--cols, 0) * var(--pitch));
+    height: calc(7 * var(--pitch));
+  }
+
+  /* Each hole shows the bookcloth through the leaf. */
+  .perforation :global(i) {
+    position: absolute;
+    left: calc(var(--c) * var(--pitch));
+    top: calc(var(--r) * var(--pitch));
+    width: var(--hole);
+    height: var(--hole);
+    border-radius: 50%;
+    background: var(--tex-cloth), var(--cloth);
+    background-size: 240px 240px, auto;
+    background-position: calc(var(--c) * var(--pitch) * -1) calc(var(--r) * var(--pitch) * -1);
+    box-shadow:
+      inset 0 1px 1.2px rgb(0 0 0 / 0.75),
+      0 0.6px 0 rgb(255 255 255 / 0.65);
+  }
+
+  /* ---- skip ----------------------------------------------------------------- */
+
+  .skip-survey {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 20;
+    padding: 10px 14px;
+    border: 1px solid rgb(200 162 74 / 0.7);
+    background: var(--cloth-deep);
+    color: var(--gilt-hi);
+    font: 700 11px/1 var(--f-form);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgb(0 0 0 / 0.4);
+  }
+
+  .skip-survey[hidden] {
+    display: none;
+  }
+
+  /* ---- foot actions ------------------------------------------------------- */
+
+  .tally-baseline {
+    margin: 0;
+    font-family: var(--f-entry);
+    font-size: 16px;
+    line-height: var(--line);
+  }
+
+  .tally-memory {
+    margin: 0;
+    font-family: var(--f-data);
+    font-size: 12.5px;
+    line-height: var(--line);
+    color: var(--ink-graphite);
+  }
+
+  .foot-actions {
+    margin: var(--line) 0 0;
+  }
+
+  .resurvey {
+    appearance: none;
+    border: 1px solid var(--form);
+    background: transparent;
+    color: var(--form);
+    font: 700 11px/1 var(--f-form);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+
+  .resurvey:hover:not(:disabled) {
+    background: var(--form);
+    color: var(--leaf);
+  }
+
+  .resurvey:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ---- explicit placement, so breakpoints can refold the row -------------- */
+
+  .c-line {
+    grid-column: line;
+  }
+
+  .c-acc {
+    grid-column: acc;
+  }
+
+  .c-date {
+    grid-column: date;
+  }
+
+  .c-object {
+    grid-column: object;
+  }
+
+  .c-medium {
+    grid-column: medium;
+  }
+
+  .c-condition {
+    grid-column: cond;
+  }
+
+  :where(.row > *) {
+    grid-row: 1;
+  }
+
+  /* ---- tablet: Medium folds under the Object cell ------------------------ */
+
+  @media (max-width: 1023.98px) {
+    .cloth {
+      padding: 0 24px 24px;
+    }
+
+    .leaf {
+      padding: 0 24px var(--line);
+    }
+
+    .sheet {
+      --c-cond: 144px;
+      grid-template-columns:
+        [line] var(--c-line) [acc] var(--c-acc) [date] var(--c-date) [object medium] minmax(0, 1fr)
+        [cond] var(--c-cond) [end];
+    }
+
+    .col-heads span:nth-child(5),
+    .vr-4 {
+      display: none;
+    }
+
+    .c-medium {
+      grid-row: 2;
+      padding-left: calc(var(--pad) + 4px);
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: 18px;
+    }
+
+    .c-medium li {
+      grid-template-columns: 7px auto auto;
+    }
+
+    .c-condition {
+      grid-row: 1 / span 2;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .sheet {
+      grid-template-columns:
+        [line] var(--c-line) [acc date] var(--c-acc) [object medium] minmax(0, 1fr) [cond] var(--c-cond) [end];
+    }
+
+    .col-heads span:nth-child(3),
+    .vr-2 {
+      display: none;
+    }
+
+    /* Shares the accession cell, two lines down: under the number and its class. */
+    .c-date {
+      grid-row: 1;
+      margin-top: calc(var(--line) * 2);
+      color: var(--ink-graphite);
+    }
+
+    .c-acc {
+      grid-row: 1;
+    }
+  }
+
+  /* ---- phone: one block per object on the ruled lines -------------------- */
+
+  @media (max-width: 639.98px) {
+    :root {
+      --pad: 0px;
+    }
+
+    .cloth {
+      padding: 0 10px 10px;
+    }
+
+    .gilt {
+      padding: 18px 0 16px;
+      font-size: 10.5px;
+      letter-spacing: 0.24em;
+    }
+
+    .leaf {
+      padding: 0 16px var(--line);
+    }
+
+    .leaf-head {
+      grid-template-columns: 1fr;
+      padding-top: var(--line);
+    }
+
+    h1 {
+      grid-row: auto;
+      font-size: 30px;
+    }
+
+    .folio-of,
+    .pencil {
+      text-align: left;
+    }
+
+    .folio-of {
+      margin-top: 10px;
+    }
+
+    .conditions dl {
+      grid-template-columns: 1fr;
+    }
+
+    .conditions dl > div {
+      grid-template-columns: 1fr;
+      padding: 0 10px;
+    }
+
+    .conditions dl > div:nth-child(odd) {
+      border-right: 0;
+    }
+
+    .conditions dt {
+      border-right: 0;
+      padding: 0;
+      line-height: 22px;
+      padding-top: 6px;
+    }
+
+    .conditions dd {
+      padding: 0;
+    }
+
+    .call-slip {
+      grid-template-columns: 1fr;
+      padding: 0 10px;
+    }
+
+    .call-field,
+    .call-check,
+    .call-tally {
+      line-height: var(--line);
+    }
+
+    .call-field {
+      padding-top: var(--line);
+    }
+
+    .sheet {
+      display: block;
+      font-size: 12.5px;
+    }
+
+    .col-heads,
+    .vr {
+      display: none;
+    }
+
+    .rows,
+    .blanks {
+      display: block;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: 10px;
+      padding: var(--line) 0;
+    }
+
+    :where(.row > *) {
+      grid-row: auto;
+      grid-column: 1;
+    }
+
+    .c-line {
+      display: none;
+    }
+
+    .c-acc,
+    .c-date {
+      grid-row: 1;
+      grid-column: 1;
+      padding: 0;
+    }
+
+    .c-date {
+      justify-self: end;
+      margin-top: 0;
+      color: var(--ink-graphite);
+    }
+
+    .c-object {
+      display: contents;
+    }
+
+    .c-object > a {
+      grid-row: 2;
+      grid-column: 1;
+      align-self: start;
+      font-size: 20px;
+    }
+
+    .c-object > p {
+      grid-row: 3;
+      grid-column: 1 / -1;
+    }
+
+    .c-medium {
+      grid-row: 4;
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: 14px;
+      padding: 0;
+    }
+
+    .c-medium li {
+      grid-template-columns: 7px auto auto;
+      font-size: 12.5px;
+    }
+
+    .c-condition {
+      display: contents;
+    }
+
+    .perforation {
+      --pitch: 3.2px;
+      --hole: 2px;
+    }
+
+    .seal {
+      width: 88px;
+      height: 88px;
+    }
+
+    .stamp {
+      --s: 0.72;
+      grid-row: 1 / span 2;
+      grid-column: 2;
+      margin: 2px 0 0;
+    }
+
+    .report {
+      grid-row: 5;
+      grid-column: 1 / -1;
+    }
+
+    .r-body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .r-body dt {
+      margin-top: 6px;
+      line-height: 22px;
+    }
+
+    .cond-memory {
+      grid-row: 6;
+      grid-column: 1 / -1;
+      margin: 0;
+      line-height: var(--line);
+    }
+
+    .cond-text {
+      display: none;
+    }
+
+    .blanks > li {
+      height: var(--line);
+    }
+
+    .blanks > li:nth-child(n + 4) {
+      display: none;
+    }
+
+    .blanks .c-line {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .c-medium li[data-state] .light {
+      animation: none;
+    }
+  }
+
+  /* Forced colours: plain system colours, no textures, blends, or lamp. */
+  @media (forced-colors: active) {
+    .cloth,
+    .leaf,
+    .sheet,
+    .col-heads,
+    .folio-head {
+      background: Canvas;
+    }
+
+    .leaf {
+      box-shadow: none;
+      border: 1px solid CanvasText;
+    }
+
+    .gilt {
+      color: CanvasText;
+      background: none;
+      filter: none;
+    }
+
+    .stamp {
+      filter: none;
+      mask-image: none;
+      mix-blend-mode: normal;
+    }
+
+    .cloth :global(.survey-lamp),
+    .seal {
+      display: none;
+    }
+
+    .perforation :global(i),
+    .conditions :global(.redacted) {
+      forced-color-adjust: none;
+      background: CanvasText;
+      box-shadow: none;
+    }
   }
 </style>

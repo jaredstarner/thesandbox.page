@@ -7,6 +7,8 @@ export interface Experiment {
   summary: string;
   date: Date;
   tags: string[];
+  /** Tags the experiment cannot function without; every other tag is an enhancement. */
+  requires?: string[];
   issue?: number;
 }
 
