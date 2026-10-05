@@ -300,10 +300,13 @@ const plots: Plot[] = [
 
   /* ---- the map ------------------------------------------------------------ */
 
+  /* Clip rather than hide: a hidden overflow still scrolls, and a deep link or a
+     focused plot would scroll the whole map out of place. */
   :global(html.sv-js) .sv {
     position: fixed;
     inset: 0;
     overflow: hidden;
+    overflow: clip;
     min-height: 0;
     background-image: none;
     cursor: grab;

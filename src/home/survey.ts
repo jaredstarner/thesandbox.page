@@ -378,6 +378,12 @@ export function startSurvey(root: HTMLElement): void {
 
   // ---- start ----------------------------------------------------------------
 
+  // Where overflow: clip is unsupported, undo any scroll a deep link or focus causes.
+  root.addEventListener('scroll', () => {
+    root.scrollTop = 0;
+    root.scrollLeft = 0;
+  });
+
   new ResizeObserver(() => {
     dirty = true;
     request();
