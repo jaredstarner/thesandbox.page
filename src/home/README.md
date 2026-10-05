@@ -1,6 +1,6 @@
 # src/home
 
-The home page: a survey map of the site. Every experiment claims a plot of land, and the next plot is staked out ahead of the next run. The register at `/experiments/` is the survey office, a building on its own two-section lot out to the north-west. The page opens on the stake and draws the land outward from it.
+The home page: a survey map of the site. Every experiment claims a plot of land, and the next plot is staked out ahead of the next run. The register at `/experiments/` is the survey office, on a plot of its own out to the north-west, marked by a theodolite on its tripod. The page opens on the stake and draws the land outward from it.
 
 | File | Role |
 | :--- | :--- |

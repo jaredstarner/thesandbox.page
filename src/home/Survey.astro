@@ -79,22 +79,21 @@ const plots: Plot[] = [
           <li class="sv-plot" id={p.id} data-plot={p.plot} data-x={p.x} data-y={p.y} style={`--px: ${p.x}; --py: ${p.y}; --size: ${p.size}`}>
             <a class:list={['sv-parcel', { 'sv-office': p.plot === 0 }]} href={p.href} draggable="false">
               {p.plot === 0 && (
-                <svg class="sv-building" viewBox="0 0 100 100" aria-hidden="true">
-                  <defs>
-                    <pattern id="sv-roof-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                      <line x1="0" y1="0" x2="0" y2="5" />
-                    </pattern>
-                  </defs>
-                  <ellipse class="sv-b-ground" cx="50" cy="87" rx="40" ry="5" />
-                  <rect x="65" y="17" width="8" height="18" />
-                  <path class="sv-b-roof" d="M12 47 L50 17 L88 47 Z" />
-                  <rect x="19" y="47" width="62" height="38" />
-                  <rect class="sv-b-ink" x="44" y="61" width="12" height="24" />
-                  <rect x="26" y="55" width="12" height="11" />
-                  <rect x="62" y="55" width="12" height="11" />
-                  <circle cx="50" cy="35" r="4.5" />
-                  <path d="M50 17 V3" />
-                  <path class="sv-b-flag" d="M50 3 L63 6.5 L50 10 Z" />
+                <svg class="sv-instrument" viewBox="0 0 100 100" aria-hidden="true">
+                  <path class="sv-i-sight" d="M76 25 L98 19" />
+                  <path d="M43 53 L22 89 M57 53 L78 89 M50 54 L53 86" />
+                  <path class="sv-i-thin" d="M31 73 l4 2 M69 73 l-4 2 M18 89 H26 M74 89 H82 M50 86 H56" />
+                  <path class="sv-i-thin" d="M50 53 V70" />
+                  <path class="sv-i-bob" d="M48 70 H52 L50 75 Z" />
+                  <ellipse cx="50" cy="51" rx="13" ry="2.6" />
+                  <path d="M41 49 L44 42 H56 L59 49 Z" />
+                  <rect x="41" y="25" width="4" height="17" />
+                  <rect x="55" y="25" width="4" height="17" />
+                  <circle cx="50" cy="26" r="7" />
+                  <path class="sv-i-thin" d="M50 19 v2 M57 26 h-2 M43 26 h2 M50 33 v-2" />
+                  <rect x="25" y="22" width="42" height="8" rx="2" />
+                  <rect x="66" y="20" width="9" height="12" rx="1" />
+                  <rect x="20" y="23.5" width="6" height="5" />
                 </svg>
               )}
               <span class="sv-label">
@@ -135,7 +134,6 @@ const plots: Plot[] = [
     <button type="button" data-act="fit">All plots</button>
     <button type="button" data-act="next">Next plot</button>
     <button type="button" data-act="stumble">Stumble</button>
-    <a href="/experiments/">Register</a>
   </nav>
 
   <noscript>
@@ -300,10 +298,13 @@ const plots: Plot[] = [
 
   /* ---- the map ------------------------------------------------------------ */
 
+  /* Clip rather than hide: a hidden overflow still scrolls, and a deep link or a
+     focused plot would scroll the whole map out of place. */
   :global(html.sv-js) .sv {
     position: fixed;
     inset: 0;
     overflow: hidden;
+    overflow: clip;
     min-height: 0;
     background-image: none;
     cursor: grab;
@@ -401,7 +402,7 @@ const plots: Plot[] = [
       border-color 0.2s;
   }
 
-  /* The survey office: a two-section lot with the building drawn on it. */
+  /* The survey office: its own plot, with the office drawn behind its card. */
   :global(html.sv-js) .sv .sv-office {
     place-items: end center;
     background-color: rgb(243 238 224 / 0.55);
@@ -409,11 +410,12 @@ const plots: Plot[] = [
     border-color: var(--sv-ink);
   }
 
-  .sv-building {
+  /* The office's mark: a theodolite on its tripod, drawn in the map's ink. */
+  .sv-instrument {
     display: none;
   }
 
-  :global(html.sv-js) .sv-building {
+  :global(html.sv-js) .sv-instrument {
     display: block;
     position: absolute;
     inset: 8%;
@@ -424,31 +426,28 @@ const plots: Plot[] = [
     pointer-events: none;
   }
 
-  .sv-building :is(rect, path, circle, ellipse) {
+  .sv-instrument :is(rect, path, circle, ellipse) {
     vector-effect: non-scaling-stroke;
   }
 
-  .sv-building line {
-    stroke: var(--sv-red);
-    stroke-width: 1.2;
+  .sv-instrument .sv-i-thin {
+    fill: none;
+    stroke-width: 0.9;
   }
 
-  .sv-building .sv-b-roof {
-    fill: url(#sv-roof-hatch);
-  }
-
-  .sv-building .sv-b-ink {
-    fill: var(--sv-ink);
-  }
-
-  .sv-building .sv-b-flag {
+  .sv-instrument .sv-i-bob {
     fill: var(--sv-red);
     stroke: none;
   }
 
-  .sv-building .sv-b-ground {
-    fill: rgb(43 42 38 / 0.12);
-    stroke: none;
+  .sv-instrument .sv-i-sight {
+    fill: none;
+    stroke: var(--sv-red);
+    stroke-dasharray: 5 4;
+  }
+
+  :global(html.sv-js) .sv .sv-office .sv-summary {
+    display: none;
   }
 
   :global(html.sv-js) .sv .sv-office .sv-label {
@@ -645,8 +644,8 @@ const plots: Plot[] = [
     position: absolute;
     top: 18px;
     right: 18px;
-    width: 30px;
-    padding: 6px 7px 4px;
+    width: 46px;
+    padding: 8px 10px 6px;
     background: var(--sv-chip);
     fill: var(--sv-paper);
     stroke: var(--sv-ink);
