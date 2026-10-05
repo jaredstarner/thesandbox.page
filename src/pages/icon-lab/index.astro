@@ -178,8 +178,9 @@ const programs = [
       <section class="panel" data-panel="gamut" hidden aria-labelledby="h-gamut">
         <h1 id="h-gamut">Wide color and HDR, in the tab</h1>
         <p>
-          Two test icons, written byte by byte by this page as PNG files that name their color space in a
-          <code>cICP</code> chunk. Put one in the tab, then compare the tab with the copies here.
+          Two test icons, written byte by byte by this page as PNG files that name their color space in a <code
+            >cICP</code
+          > chunk. Put one in the tab, then compare the tab with the copies here.
         </p>
         <div class="row" role="group" aria-label="Test icon">
           <button type="button" class="btn" data-gamut="p3" aria-pressed="true">Wide color</button>
@@ -197,7 +198,8 @@ const programs = [
             <img alt="HDR test icon" data-gamut-img="hdr" width="32" height="32" />
             <figcaption>
               Left, white at 203 nits, the brightness of SDR white. Right, white at 1,000 nits. On an HDR screen, in a
-              browser that keeps HDR, the right half glows brighter than white.
+              browser that keeps HDR, the right half glows brighter than the page's white. On an ordinary screen, tone
+              mapping can still leave the right half a little lighter.
             </figcaption>
           </figure>
         </div>
