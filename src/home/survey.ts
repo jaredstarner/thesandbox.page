@@ -52,7 +52,7 @@ export function startSurvey(root: HTMLElement): void {
   const [stakeX, stakeY] = plotCell(nextPlot);
   const stake = buildStake(nextPlot, stakeX, stakeY);
   plotList.after(stake.el);
-  const settled = Math.max(...plots.map((p) => Math.hypot(p.x, p.y) + (p.plot === 0 ? 1 : 0)), Math.hypot(stakeX, stakeY)) + 1.5;
+  const settled = Math.max(...plots.map((p) => Math.hypot(p.x, p.y)), Math.hypot(stakeX, stakeY)) + 1.5;
 
   // ---- camera ---------------------------------------------------------------
 
@@ -318,8 +318,7 @@ export function startSurvey(root: HTMLElement): void {
   plotList.addEventListener('focusin', (event) => {
     const item = plots.find((p) => p.el.contains(event.target as Node));
     if (!item || pointers.size) return;
-    const size = item.plot === 0 ? 2 : 1;
-    flyTo({ x: item.x, y: item.y, zoom: Math.max(cam.zoom, ENTRY_ZOOM / size) }, 700);
+    flyTo({ x: item.x, y: item.y, zoom: Math.max(cam.zoom, ENTRY_ZOOM) }, 700);
   });
 
   // ---- controls -------------------------------------------------------------
@@ -394,7 +393,7 @@ export function startSurvey(root: HTMLElement): void {
     return plots.find((p) => p.el.id === hash);
   };
   const plotView = (p: (typeof plots)[number]): Camera =>
-    settle({ x: p.x, y: p.y, zoom: p.plot === 0 ? ENTRY_ZOOM / 2 : ENTRY_ZOOM });
+    settle({ x: p.x, y: p.y, zoom: ENTRY_ZOOM });
   window.addEventListener('hashchange', () => {
     const p = linkedPlot();
     if (p) flyTo(plotView(p));

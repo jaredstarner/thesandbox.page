@@ -6,8 +6,8 @@
 // plot takes one section of its block, picked from its number, so the settled
 // land looks homesteaded rather than tiled. A plot's place depends only on its
 // number: claiming a new plot never moves an old one. The survey office (the
-// register) has a block of its own out to the north-west, which the spiral
-// steps over.
+// register) takes one section of a block of its own out to the north-west,
+// which the spiral steps over.
 
 /** Block coordinates of the nth step of a square spiral; step 0 is the origin. */
 function spiral(step: number): [number, number] {
@@ -43,8 +43,8 @@ const OFFICE_STEP = (() => {
   }
 })();
 
-/** The survey office: the centre of its whole 2-by-2 block, and its size in sections. */
-export const OFFICE = { x: OFFICE_BLOCK[0] * 2 + 0.5, y: OFFICE_BLOCK[1] * 2 + 0.5, size: 2 };
+/** The survey office: the section of its block nearest the plots, one plot in size. */
+export const OFFICE = { x: OFFICE_BLOCK[0] * 2 + 1, y: OFFICE_BLOCK[1] * 2 + 1, size: 1 };
 
 /** The section a plot occupies; plot 1 is at the origin's block. */
 export function plotCell(plot: number): [number, number] {
