@@ -5,7 +5,7 @@ import { PALETTE } from './_palette';
 
 type Tool = 'pen' | 'fill' | 'erase';
 
-const STORE_KEY = 'icon-lab:paint';
+const STORE_KEY = 'favicon-lab:paint';
 
 export function createPaint(lab: Lab): Program {
   const panel = lab.panel('paint');

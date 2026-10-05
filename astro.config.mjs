@@ -74,7 +74,7 @@ export default defineConfig({
       fallbacks: ['ui-monospace', 'monospace'],
     },
     {
-      // The pixel labels on /icon-lab/.
+      // The pixel labels on /favicon-lab/.
       provider: fontProviders.fontsource(),
       name: 'Silkscreen',
       cssVariable: '--font-iconlab',

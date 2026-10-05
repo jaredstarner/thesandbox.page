@@ -7,7 +7,7 @@ import type { Lab, Program } from './_lab';
 // tab, whose timers run on time, just nudges the hidden ones to redraw, since
 // a hidden tab's timers are held back but its messages are not.
 
-const CHANNEL = 'icon-lab:strip';
+const CHANNEL = 'favicon-lab:strip';
 const STEP_MS = 110;
 const BEAT_MS = 2000;
 const LIVE_MS = 6500;

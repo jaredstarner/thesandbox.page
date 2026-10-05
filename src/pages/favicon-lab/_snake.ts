@@ -5,7 +5,7 @@ import type { Lab, Program } from './_lab';
 
 const N = 16;
 const CELL = 2;
-const BEST_KEY = 'icon-lab:snake-best';
+const BEST_KEY = 'favicon-lab:snake-best';
 
 type Dir = 'up' | 'down' | 'left' | 'right';
 type Cell = { x: number; y: number };
