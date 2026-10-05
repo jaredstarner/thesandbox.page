@@ -4,5 +4,5 @@
   "date": "2026-10-04",
   "tags": ["split-flap", "eventsource", "document-picture-in-picture", "container-queries", "web-audio", "live-data"],
   "requires": ["eventsource"],
-  "plot": 3
+  "plot": 4
 }
