@@ -86,7 +86,7 @@ export function startLab(root: HTMLElement): void {
     lab.showCanvas();
     const program = programs[id];
     if (program) program.start();
-    else lab.title('Icon lab');
+    else lab.title('Favicon lab');
   };
 
   for (const button of buttons) {

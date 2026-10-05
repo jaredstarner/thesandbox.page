@@ -21,14 +21,14 @@ const programs = [
 ---
 
 <Bare
-  title="Icon lab"
+  title="Favicon lab"
   description="This page takes over its own tab icon: play Snake in it, paint it, watch it slow down when you look away, test it for HDR, and run a sign across a row of tabs."
   icon={false}
 >
-  <Font cssVariable="--font-iconlab" slot="head" />
+  <Font cssVariable="--font-faviconlab" slot="head" />
   <link rel="icon" type="image/svg+xml" href={startHref} slot="head" data-lab-icon />
 
-  <div class="iconlab" data-iconlab>
+  <div class="faviconlab" data-faviconlab>
     <p class="lookup" aria-hidden="true"><span class="lookup-arrow">↑</span> The real one is up there</p>
 
     <section class="window" aria-label="This tab, enlarged">
@@ -39,14 +39,14 @@ const programs = [
             <img class="tab-img" alt="" data-screen-img hidden />
             <div class="cover" data-cover hidden><span>No peeking.<br />Look up.</span></div>
           </div>
-          <span class="tab-title" data-tab-title>Icon lab</span>
+          <span class="tab-title" data-tab-title>Favicon lab</span>
           <span class="tab-x" aria-hidden="true">×</span>
         </div>
-        <a class="tab-new" href="/icon-lab/#strip" target="_blank" aria-label="Open the lab in a new tab">+</a>
+        <a class="tab-new" href="/favicon-lab/#strip" target="_blank" aria-label="Open the lab in a new tab">+</a>
       </div>
       <div class="toolbar" aria-hidden="true">
         <span class="nav-glyphs">‹ › ↻</span>
-        <span class="url">thesandbox.page/icon-lab/<span data-url-hash></span></span>
+        <span class="url">thesandbox.page/favicon-lab/<span data-url-hash></span></span>
       </div>
     </section>
 
@@ -220,7 +220,7 @@ const programs = [
           showing Strip joins the sign and holds one letter, and the message scrolls from tab to tab along your tab strip.
         </p>
         <div class="row">
-          <a class="btn" href="/icon-lab/#strip" target="_blank" data-strip-open>Open another tab</a>
+          <a class="btn" href="/favicon-lab/#strip" target="_blank" data-strip-open>Open another tab</a>
           <div class="row" role="group" aria-label="Sign">
             <button type="button" class="btn" data-strip-mode="run" aria-pressed="true">Run the sign</button>
             <button type="button" class="btn" data-strip-mode="number" aria-pressed="false">Number the tabs</button>
@@ -265,20 +265,20 @@ const programs = [
 <script>
   import { startLab } from './_app';
 
-  const root = document.querySelector<HTMLElement>('[data-iconlab]');
+  const root = document.querySelector<HTMLElement>('[data-faviconlab]');
   if (root) startLab(root);
 </script>
 
 <style is:global>
   /* Global on purpose: script builds tabs on the sign. Every rule is keyed
-     under .iconlab, and the page's variables live there, not on :root. */
+     under .faviconlab, and the page's variables live there, not on :root. */
 
-  body:has(.iconlab) {
+  body:has(.faviconlab) {
     margin: 0;
     background: var(--frame);
   }
 
-  .iconlab {
+  .faviconlab {
     --frame: light-dark(#dde1e7, #1c1e23);
     --tab: light-dark(#ffffff, #2d3037);
     --tab-idle: light-dark(#e8ebf0, #24262c);
@@ -288,7 +288,7 @@ const programs = [
     --line: light-dark(#c9ced7, #3a3e47);
     --amber: #ffb000;
     --amber-ink: light-dark(#7a4f00, #ffc94d);
-    --pixel: var(--font-iconlab), ui-monospace, monospace;
+    --pixel: var(--font-faviconlab), ui-monospace, monospace;
     --ui: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --icon: clamp(88px, 21vw, 232px);
 
@@ -301,17 +301,17 @@ const programs = [
     padding-top: 3.25rem;
   }
 
-  .iconlab *,
-  .iconlab *::before,
-  .iconlab *::after {
+  .faviconlab *,
+  .faviconlab *::before,
+  .faviconlab *::after {
     box-sizing: inherit;
   }
 
-  .iconlab [hidden] {
+  .faviconlab [hidden] {
     display: none !important;
   }
 
-  .iconlab .lookup {
+  .faviconlab .lookup {
     position: absolute;
     top: 0.75rem;
     left: 1rem;
@@ -322,13 +322,13 @@ const programs = [
     text-transform: uppercase;
   }
 
-  .iconlab .lookup-arrow {
+  .faviconlab .lookup-arrow {
     display: inline-block;
     font-size: 1.1rem;
-    animation: iconlab-nudge 1.6s ease-in-out infinite;
+    animation: faviconlab-nudge 1.6s ease-in-out infinite;
   }
 
-  @keyframes iconlab-nudge {
+  @keyframes faviconlab-nudge {
     50% {
       transform: translateY(-0.3rem);
     }
@@ -336,11 +336,11 @@ const programs = [
 
   /* The window: a browser's tab strip and toolbar, ten times over. */
 
-  .iconlab .window {
+  .faviconlab .window {
     container: window / inline-size;
   }
 
-  .iconlab .tabs {
+  .faviconlab .tabs {
     display: flex;
     align-items: flex-end;
     gap: 0;
@@ -348,7 +348,7 @@ const programs = [
     min-width: 0;
   }
 
-  .iconlab .tab {
+  .faviconlab .tab {
     --size: var(--icon);
     position: relative;
     display: flex;
@@ -362,15 +362,15 @@ const programs = [
     color: var(--muted);
   }
 
-  .iconlab .tab.is-self {
+  .faviconlab .tab.is-self {
     background: var(--tab);
     color: var(--ink);
     z-index: 1;
   }
 
   /* The flared feet that join the active tab to the toolbar. */
-  .iconlab .tab.is-self::before,
-  .iconlab .tab.is-self::after {
+  .faviconlab .tab.is-self::before,
+  .faviconlab .tab.is-self::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -378,17 +378,17 @@ const programs = [
     height: calc(var(--size) * 0.14);
   }
 
-  .iconlab .tab.is-self::before {
+  .faviconlab .tab.is-self::before {
     left: calc(var(--size) * -0.14);
     background: radial-gradient(circle at 0 0, transparent 70%, var(--tab) 71%);
   }
 
-  .iconlab .tab.is-self::after {
+  .faviconlab .tab.is-self::after {
     right: calc(var(--size) * -0.14);
     background: radial-gradient(circle at 100% 0, transparent 70%, var(--tab) 71%);
   }
 
-  .iconlab .tab:not(.is-self) + .tab:not(.is-self)::before {
+  .faviconlab .tab:not(.is-self) + .tab:not(.is-self)::before {
     content: '';
     position: absolute;
     left: 0;
@@ -397,7 +397,7 @@ const programs = [
     border-left: max(1px, calc(var(--size) * 0.012)) solid var(--line);
   }
 
-  .iconlab .tab-icon {
+  .faviconlab .tab-icon {
     position: relative;
     flex: none;
     width: var(--size);
@@ -406,8 +406,8 @@ const programs = [
       calc(var(--size) / 8);
   }
 
-  .iconlab .tab-icon canvas,
-  .iconlab .tab-icon img {
+  .faviconlab .tab-icon canvas,
+  .faviconlab .tab-icon img {
     display: block;
     width: 100%;
     height: 100%;
@@ -415,7 +415,7 @@ const programs = [
   }
 
   /* A faint pixel grid over the mirror, as if seen through a loupe. */
-  .iconlab .tab-icon::after {
+  .faviconlab .tab-icon::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -425,15 +425,15 @@ const programs = [
       linear-gradient(to bottom, light-dark(#0000000f, #ffffff0f) 1px, transparent 1px) 0 0 / 100% calc(var(--size) / 32);
   }
 
-  .iconlab .tab-icon.is-smooth img {
+  .faviconlab .tab-icon.is-smooth img {
     image-rendering: auto;
   }
 
-  .iconlab .tab-icon.is-smooth::after {
+  .faviconlab .tab-icon.is-smooth::after {
     display: none;
   }
 
-  .iconlab .cover {
+  .faviconlab .cover {
     position: absolute;
     inset: 0;
     z-index: 1;
@@ -446,7 +446,7 @@ const programs = [
     text-transform: uppercase;
   }
 
-  .iconlab .tab-title {
+  .faviconlab .tab-title {
     flex: 0 1 auto;
     min-width: 0;
     overflow: hidden;
@@ -456,13 +456,13 @@ const programs = [
     letter-spacing: -0.01em;
   }
 
-  .iconlab .tab-x {
+  .faviconlab .tab-x {
     flex: none;
     font: 300 calc(var(--size) * 0.3) / 1 var(--ui);
     color: var(--muted);
   }
 
-  .iconlab .tab-new {
+  .faviconlab .tab-new {
     flex: none;
     align-self: center;
     margin-left: calc(var(--icon) * 0.12);
@@ -473,13 +473,13 @@ const programs = [
     padding: 0 calc(var(--icon) * 0.08);
   }
 
-  .iconlab .tab-new:hover,
-  .iconlab .tab-new:focus-visible {
+  .faviconlab .tab-new:hover,
+  .faviconlab .tab-new:focus-visible {
     color: var(--ink);
     background: var(--tab-idle);
   }
 
-  .iconlab .toolbar {
+  .faviconlab .toolbar {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -490,12 +490,12 @@ const programs = [
     border-bottom: 1px solid var(--line);
   }
 
-  .iconlab .nav-glyphs {
+  .faviconlab .nav-glyphs {
     letter-spacing: 0.5em;
     white-space: nowrap;
   }
 
-  .iconlab .url {
+  .faviconlab .url {
     flex: 1;
     min-width: 0;
     overflow: hidden;
@@ -508,23 +508,23 @@ const programs = [
   }
 
   /* With many tabs on the sign, they share the width. */
-  .iconlab .tabs[data-count] .tab {
+  .faviconlab .tabs[data-count] .tab {
     --size: clamp(28px, calc((100cqi - 6rem) / var(--count) * 0.42), var(--icon));
     flex: 1 1 0;
   }
 
-  .iconlab .tabs[data-count] .tab-x {
+  .faviconlab .tabs[data-count] .tab-x {
     display: none;
   }
 
   /* The page below the toolbar. */
 
-  .iconlab .page {
+  .faviconlab .page {
     background: var(--page-bg);
     padding: 1.5rem 1rem 2rem;
   }
 
-  .iconlab .programs {
+  .faviconlab .programs {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
     gap: 0.5rem;
@@ -532,7 +532,7 @@ const programs = [
     margin: 0 auto 1.5rem;
   }
 
-  .iconlab .programs button {
+  .faviconlab .programs button {
     display: grid;
     gap: 0.2rem;
     text-align: left;
@@ -545,63 +545,63 @@ const programs = [
     font: inherit;
   }
 
-  .iconlab .programs button[aria-pressed='true'] {
+  .faviconlab .programs button[aria-pressed='true'] {
     border-color: var(--amber);
     box-shadow: inset 0 0 0 2px var(--amber);
   }
 
-  .iconlab .program-name {
+  .faviconlab .program-name {
     font: 700 0.95rem/1.1 var(--pixel);
     text-transform: uppercase;
     letter-spacing: 0.03em;
   }
 
-  .iconlab .program-blurb {
+  .faviconlab .program-blurb {
     font-size: 0.85rem;
     color: var(--muted);
   }
 
-  .iconlab .panel,
-  .iconlab .notes {
+  .faviconlab .panel,
+  .faviconlab .notes {
     max-width: 62rem;
     margin: 0 auto;
   }
 
-  .iconlab .panel h1,
-  .iconlab .panel h2,
-  .iconlab .notes h2 {
+  .faviconlab .panel h1,
+  .faviconlab .panel h2,
+  .faviconlab .notes h2 {
     font: 700 1.15rem/1.3 var(--pixel);
     text-transform: uppercase;
     letter-spacing: 0.02em;
     margin: 1.5rem 0 0.5rem;
   }
 
-  .iconlab .panel h1 {
+  .faviconlab .panel h1 {
     font-size: clamp(1.2rem, 3.4vw, 1.6rem);
     margin-top: 0;
   }
 
-  .iconlab .panel p,
-  .iconlab .panel ul,
-  .iconlab .notes p {
+  .faviconlab .panel p,
+  .faviconlab .panel ul,
+  .faviconlab .notes p {
     max-width: 40rem;
   }
 
-  .iconlab .note,
-  .iconlab .chart-key {
+  .faviconlab .note,
+  .faviconlab .chart-key {
     color: var(--muted);
     font-size: 0.9rem;
   }
 
-  .iconlab code {
+  .faviconlab code {
     font: 0.9em ui-monospace, monospace;
   }
 
-  .iconlab a {
+  .faviconlab a {
     color: var(--amber-ink);
   }
 
-  .iconlab .row {
+  .faviconlab .row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -609,11 +609,11 @@ const programs = [
     margin: 1rem 0;
   }
 
-  .iconlab .row .row {
+  .faviconlab .row .row {
     margin: 0;
   }
 
-  .iconlab .btn {
+  .faviconlab .btn {
     display: inline-block;
     padding: 0.5rem 0.9rem;
     border: 1px solid var(--line);
@@ -627,45 +627,45 @@ const programs = [
     cursor: pointer;
   }
 
-  .iconlab .btn:hover {
+  .faviconlab .btn:hover {
     border-color: var(--muted);
   }
 
-  .iconlab .btn[aria-pressed='true'] {
+  .faviconlab .btn[aria-pressed='true'] {
     background: var(--amber);
     border-color: var(--amber);
     color: #16120c;
   }
 
-  .iconlab :focus-visible {
+  .faviconlab :focus-visible {
     outline: 2px solid var(--amber);
     outline-offset: 2px;
   }
 
-  .iconlab .readout {
+  .faviconlab .readout {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem 1.5rem;
     margin: 0 0 0 0.5rem;
   }
 
-  .iconlab .readout div {
+  .faviconlab .readout div {
     display: grid;
   }
 
-  .iconlab .readout dt {
+  .faviconlab .readout dt {
     font: 400 0.7rem/1.2 var(--pixel);
     text-transform: uppercase;
     color: var(--muted);
   }
 
-  .iconlab .readout dd {
+  .faviconlab .readout dd {
     margin: 0;
     font: 700 1.1rem/1.3 var(--pixel);
     font-variant-numeric: tabular-nums;
   }
 
-  .iconlab .pad {
+  .faviconlab .pad {
     display: grid;
     grid-template: '. up .' 'left . right' '. down .' / 3.25rem 3.25rem 3.25rem;
     gap: 0.25rem;
@@ -673,25 +673,25 @@ const programs = [
     touch-action: manipulation;
   }
 
-  .iconlab .pad .btn {
+  .faviconlab .pad .btn {
     padding: 0.7rem 0;
     font-size: 1rem;
   }
 
-  .iconlab [data-dir='up'] {
+  .faviconlab [data-dir='up'] {
     grid-area: up;
   }
-  .iconlab [data-dir='left'] {
+  .faviconlab [data-dir='left'] {
     grid-area: left;
   }
-  .iconlab [data-dir='right'] {
+  .faviconlab [data-dir='right'] {
     grid-area: right;
   }
-  .iconlab [data-dir='down'] {
+  .faviconlab [data-dir='down'] {
     grid-area: down;
   }
 
-  .iconlab .report {
+  .faviconlab .report {
     margin: 1rem 0;
     padding: 1rem;
     border: 1px solid var(--line);
@@ -699,52 +699,52 @@ const programs = [
     background: var(--tab);
   }
 
-  .iconlab .report p {
+  .faviconlab .report p {
     margin-top: 0;
   }
 
-  .iconlab .chart {
+  .faviconlab .chart {
     display: block;
     width: 100%;
     height: auto;
     font: 400 11px var(--pixel);
   }
 
-  .iconlab .chart .grid {
+  .faviconlab .chart .grid {
     stroke: var(--line);
     stroke-width: 1;
   }
 
-  .iconlab .chart .axis {
+  .faviconlab .chart .axis {
     stroke: var(--muted);
     stroke-width: 1;
   }
 
-  .iconlab .chart .mark {
+  .faviconlab .chart .mark {
     stroke: var(--muted);
     stroke-dasharray: 4 4;
   }
 
-  .iconlab .chart .label {
+  .faviconlab .chart .label {
     fill: var(--muted);
   }
 
-  .iconlab .chart .dot {
+  .faviconlab .chart .dot {
     fill: var(--amber);
     fill-opacity: 0.85;
   }
 
-  .iconlab .chart .dot.hum {
+  .faviconlab .chart .dot.hum {
     fill: #4fc85f;
   }
 
-  .iconlab .palette {
+  .faviconlab .palette {
     display: grid;
     grid-template-columns: repeat(8, 2.5rem);
     gap: 0.35rem;
   }
 
-  .iconlab .swatch {
+  .faviconlab .swatch {
     width: 2.5rem;
     height: 2.5rem;
     border: 1px solid var(--line);
@@ -753,24 +753,24 @@ const programs = [
     cursor: pointer;
   }
 
-  .iconlab .swatch[aria-pressed='true'] {
+  .faviconlab .swatch[aria-pressed='true'] {
     box-shadow:
       0 0 0 2px var(--page-bg),
       0 0 0 4px var(--amber);
   }
 
-  .iconlab .specimens {
+  .faviconlab .specimens {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
     gap: 1rem;
     margin: 1rem 0;
   }
 
-  .iconlab .specimens figure {
+  .faviconlab .specimens figure {
     margin: 0;
   }
 
-  .iconlab .specimens img {
+  .faviconlab .specimens img {
     display: block;
     width: 8rem;
     height: 8rem;
@@ -778,24 +778,24 @@ const programs = [
     margin-bottom: 0.5rem;
   }
 
-  .iconlab .specimens figcaption {
+  .faviconlab .specimens figcaption {
     font-size: 0.9rem;
     color: var(--muted);
   }
 
-  .iconlab .field {
+  .faviconlab .field {
     display: grid;
     gap: 0.3rem;
     max-width: 28rem;
   }
 
-  .iconlab .field span {
+  .faviconlab .field span {
     font: 400 0.75rem/1.2 var(--pixel);
     text-transform: uppercase;
     color: var(--muted);
   }
 
-  .iconlab .field input {
+  .faviconlab .field input {
     padding: 0.55rem 0.75rem;
     border: 1px solid var(--line);
     border-radius: 0.5rem;
@@ -805,11 +805,11 @@ const programs = [
     text-transform: uppercase;
   }
 
-  .iconlab .status {
+  .faviconlab .status {
     font-weight: 600;
   }
 
-  .iconlab .roster {
+  .faviconlab .roster {
     display: grid;
     gap: 0.35rem;
     padding: 0;
@@ -818,7 +818,7 @@ const programs = [
     max-width: 28rem;
   }
 
-  .iconlab .roster li {
+  .faviconlab .roster li {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -828,42 +828,42 @@ const programs = [
     background: var(--tab);
   }
 
-  .iconlab .roster li.is-self {
+  .faviconlab .roster li.is-self {
     border-color: var(--amber);
   }
 
-  .iconlab .roster .who {
+  .faviconlab .roster .who {
     flex: 1;
     font: 700 0.85rem/1.2 var(--pixel);
     text-transform: uppercase;
   }
 
-  .iconlab .roster .btn {
+  .faviconlab .roster .btn {
     padding: 0.3rem 0.55rem;
   }
 
-  .iconlab .noscript {
+  .faviconlab .noscript {
     max-width: 62rem;
     margin: 0 auto 1rem;
     color: var(--muted);
   }
 
-  .iconlab .notes {
+  .faviconlab .notes {
     padding: 1rem 1rem 3rem;
     color: var(--ink);
   }
 
-  .iconlab .notes h2 {
+  .faviconlab .notes h2 {
     margin-top: 2rem;
   }
 
-  .iconlab .credits {
+  .faviconlab .credits {
     color: var(--muted);
     font-size: 0.85rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .iconlab .lookup-arrow {
+    .faviconlab .lookup-arrow {
       animation: none;
     }
   }
