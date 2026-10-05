@@ -32,7 +32,7 @@ export function stressEntries(count: number): Experiment[] {
       summary: 'A synthetic entry for checking the register at scale. It has no page.',
       date: new Date(start - Math.floor(i / 2) * DAY),
       tags,
-      // Every third object leaves requirements uncatalogued, to exercise that path.
+      // Every third object leaves requirements uncataloged, to exercise that path.
       requires: i % 3 === 0 ? undefined : [tags[0]!],
     };
   });

@@ -4,7 +4,7 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg.r
 
 /**
  * Bottle-green buckram: two anisotropic noise fields, one for the warp and one
- * for the weft, multiplied into a weave and coloured between the cloth's shade
+ * for the weft, multiplied into a weave and colored between the cloth's shade
  * and its lit thread.
  */
 export const bookcloth = uri(`
@@ -27,8 +27,8 @@ export const bookcloth = uri(`
   <rect width="240" height="240" filter="url(#w)"/>
 </svg>`);
 
-/** The leaf in flat light: a faint fibre noise, barely above the paper colour. */
-export const leafFibre = uri(`
+/** The leaf in flat light: a faint fiber noise, barely above the paper color. */
+export const leafFiber = uri(`
 <svg xmlns="http://www.w3.org/2000/svg" width="320" height="320">
   <filter id="f" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
     <feTurbulence type="fractalNoise" baseFrequency="0.5 0.32" numOctaves="3" seed="21" stitchTiles="stitch"/>
@@ -42,8 +42,8 @@ export const leafFibre = uri(`
 </svg>`);
 
 /**
- * The leaf under a raking lamp: fibre relief plus laid and chain lines, lit by
- * a low distant light from the top. Mid grey is "no change", so the tile is
+ * The leaf under a raking lamp: fiber relief plus laid and chain lines, lit by
+ * a low distant light from the top. Mid gray is "no change", so the tile is
  * composited with hard-light: shadows darken, lit faces lift.
  */
 export const leafRaked = uri(`
@@ -56,9 +56,9 @@ export const leafRaked = uri(`
       <rect x="47" width="2.4" height="384" fill="#000"/>
     </pattern>
     <filter id="r" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.09 0.16" numOctaves="4" seed="11" stitchTiles="stitch" result="fibre"/>
-      <feColorMatrix in="fibre" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.4 0 0 0 -0.2" result="fibreA"/>
-      <feComposite in="SourceAlpha" in2="fibreA" operator="arithmetic" k1="0" k2="0.55" k3="0.9" k4="0" result="height"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.09 0.16" numOctaves="4" seed="11" stitchTiles="stitch" result="fiber"/>
+      <feColorMatrix in="fiber" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.4 0 0 0 -0.2" result="fiberA"/>
+      <feComposite in="SourceAlpha" in2="fiberA" operator="arithmetic" k1="0" k2="0.55" k3="0.9" k4="0" result="height"/>
       <feDiffuseLighting in="height" surfaceScale="2.2" diffuseConstant="1.6" lighting-color="#ffffff" result="lit">
         <feDistantLight azimuth="270" elevation="18"/>
       </feDiffuseLighting>

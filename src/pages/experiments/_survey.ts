@@ -76,7 +76,7 @@ function since(iso: string, now: Date): string | null {
 // ---- one row ----------------------------------------------------------------
 
 const lightState = (result: TestResult, required: boolean) =>
-  result.state === 'detected' ? 'detected' : required ? 'failed-required' : result.state === 'absent' ? 'absent' : 'grey';
+  result.state === 'detected' ? 'detected' : required ? 'failed-required' : result.state === 'absent' ? 'absent' : 'gray';
 
 /**
  * Write a row's results. The Medium column's lights get data-result, which the

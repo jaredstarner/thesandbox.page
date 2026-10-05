@@ -4,7 +4,7 @@
 import { baselineNote } from './_baseline';
 import { TECHNIQUES, normalizeTag } from './_tests';
 
-export type ObjectClass = 'stable' | 'volatile' | 'uncatalogued';
+export type ObjectClass = 'stable' | 'volatile' | 'uncataloged';
 
 export interface Classification {
   cls: ObjectClass;
@@ -22,7 +22,7 @@ const list = (items: string[]) =>
 /**
  * Stable: everything the object requires is Baseline widely available.
  * Volatile: it requires something newly available or not yet Baseline.
- * Uncatalogued: requirements are not catalogued, or Baseline has no data on them.
+ * Uncataloged: requirements are not cataloged, or Baseline has no data on them.
  */
 export function classify(tags: string[], requires?: string[]): Classification {
   const handling = [
@@ -32,9 +32,9 @@ export function classify(tags: string[], requires?: string[]): Classification {
 
   if (!requires) {
     return {
-      cls: 'uncatalogued',
-      word: 'Uncatalogued',
-      reason: 'Requirements not catalogued, so the register cannot say which browsers can display it.',
+      cls: 'uncataloged',
+      word: 'Uncataloged',
+      reason: 'Requirements not cataloged, so the register cannot say which browsers can display it.',
       handling,
     };
   }
@@ -71,8 +71,8 @@ export function classify(tags: string[], requires?: string[]): Classification {
   }
   if (untracked.length > 0) {
     return {
-      cls: 'uncatalogued',
-      word: 'Uncatalogued',
+      cls: 'uncataloged',
+      word: 'Uncataloged',
       reason: `Requires ${list(untracked.map((r) => r.label))}, which Baseline does not track.`,
       handling,
     };
