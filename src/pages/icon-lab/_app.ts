@@ -1,5 +1,6 @@
 import { PROGRAM_IDS, type Lab, type Program, type ProgramId } from './_lab';
 import { createClock } from './_clock';
+import { createNative } from './_native';
 import { createPaint } from './_paint';
 import { createSnake } from './_snake';
 
@@ -64,6 +65,7 @@ export function startLab(root: HTMLElement): void {
     snake: createSnake(lab),
     clock: createClock(lab),
     paint: createPaint(lab),
+    native: createNative(lab),
   };
 
   let current: ProgramId | null = null;
