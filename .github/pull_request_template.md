@@ -15,4 +15,4 @@
 ## Checklist
 
 - [ ] Commits are signed and use Conventional Commit messages
-- [ ] Shared tokens and components live in `src/theme/`
+- [ ] Changes outside the page leave other pages unchanged (built HTML compared with `main`)
