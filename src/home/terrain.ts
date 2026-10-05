@@ -10,10 +10,15 @@ export interface View {
   y: number;
   /** CSS pixels per world unit. */
   zoom: number;
-  /** World radius of the land drawn so far; the rest is blank sheet. */
+  /** World radius of the land drawn so far, around the reveal point; the rest is blank sheet. */
   reveal: number;
+  revealX: number;
+  revealY: number;
   /** World radius of the settled land, which rises out of the water. */
   settled: number;
+  /** The survey office, which sits on a hill of its own. */
+  officeX: number;
+  officeY: number;
 }
 
 export interface Terrain {
@@ -34,7 +39,9 @@ uniform vec2 uCenter;
 uniform float uZoom;
 uniform float uDpr;
 uniform float uReveal;
+uniform vec2 uRevealAt;
 uniform float uSettled;
+uniform vec2 uOffice;
 out vec4 outColor;
 
 // 2D simplex noise by Ian McEwan and Stefan Gustavson (Ashima Arts), MIT licence.
@@ -83,7 +90,9 @@ float height(vec2 w) {
   vec2 warp = vec2(fbm(p * 0.5 + vec2(3.1, 7.7), 2), fbm(p * 0.5 + vec2(-5.2, 1.3), 2));
   float h = fbm(p + 0.6 * warp, 5) - 0.06;
   float lift = 1.0 - smoothstep(uSettled - 2.0, uSettled + 10.0, length(w));
-  return h + 0.42 * lift;
+  vec2 office = w - uOffice;
+  float hill = exp(-dot(office, office) / 7.0);
+  return h + 0.42 * lift + 0.7 * hill;
 }
 
 // Coverage of lines spaced every interval through value v, width in device px.
@@ -150,8 +159,8 @@ void main() {
   float sectionAlpha = 0.32 * smoothstep(14.0, 40.0, zoomCss);
   float townAlpha = 0.55 * smoothstep(3.0, 9.0, zoomCss);
 
-  // The reveal: land is drawn outwards from the register; beyond is blank sheet.
-  float dist = length(w);
+  // The reveal: land is drawn outwards from the stake; beyond is blank sheet.
+  float dist = length(w - uRevealAt);
   float drawn = smoothstep(uReveal, uReveal - 1.2, dist);
   float inkEdge = smoothstep(1.2, 0.0, abs(dist - uReveal + 0.4)) * step(0.01, uReveal) * (1.0 - step(1e4, uReveal));
   color = mix(paper, ground, drawn);
@@ -204,7 +213,9 @@ export function createTerrain(canvas: HTMLCanvasElement): Terrain | null {
     zoom: at('uZoom'),
     dpr: at('uDpr'),
     reveal: at('uReveal'),
+    revealAt: at('uRevealAt'),
     settled: at('uSettled'),
+    office: at('uOffice'),
   };
 
   // Keep the backing store under about four million pixels; the shader runs per pixel.
@@ -230,7 +241,9 @@ export function createTerrain(canvas: HTMLCanvasElement): Terrain | null {
       gl.uniform1f(uniforms.zoom, view.zoom * scale);
       gl.uniform1f(uniforms.dpr, scale);
       gl.uniform1f(uniforms.reveal, view.reveal);
+      gl.uniform2f(uniforms.revealAt, view.revealX, view.revealY);
       gl.uniform1f(uniforms.settled, view.settled);
+      gl.uniform2f(uniforms.office, view.officeX, view.officeY);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     },
   };

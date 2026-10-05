@@ -1,18 +1,19 @@
 # src/home
 
-The home page: a survey map of the site. Every experiment claims a plot of land; the register at `/experiments/` is the survey office at the origin, and the next plot is staked out ahead of the next run.
+The home page: a survey map of the site. Every experiment claims a plot of land, and the next plot is staked out ahead of the next run. The register at `/experiments/` is the survey office, a building on its own two-section lot out to the north-west. The page opens on the stake and draws the land outward from it.
 
 | File | Role |
 | :--- | :--- |
 | `Survey.astro` | Markup and styles. Every plot is a real link in an ordered list; without script the list is the page |
-| `survey.ts` | Camera and input: drag, wheel, pinch, keyboard, fly-to, the next stake and its countdown |
+| `survey.ts` | Camera and input: drag, wheel, pinch, keyboard, fly-to, deep links (`/#<slug>`), the next stake and its estimated countdown to about 09:00 ET |
 | `terrain.ts` | The land: one WebGL2 fragment shader draws contours, water, woodland, and section lines from seeded noise |
-| `plots.ts` | Where a plot sits, from its number alone. Shared by the build and the browser |
+| `plots.ts` | Where a plot sits, from its number alone, and where the office sits. Shared by the build and the browser |
 
 ## Plots
 
 - An experiment's `plot` lives in its metadata (`src/experiments/<slug>.json`). A new experiment claims the highest plot in use plus one
-- A plot's place depends only on its number, so claiming one never moves another. Never change or reuse another experiment's plot
+- Plots are numbered in the order experiments arrived on the site. A plot's place depends only on its number (plot 1 at the origin, then a square spiral that steps over the office's block), so claiming one never moves another. Never change or reuse another experiment's plot
+- Every label stays inside its plot: each plot is a CSS size container, and its number, title, date, and summary appear only as they fit. Very far out a plot shows its bare number
 - The build fails if an experiment has no plot or two share one, and the error names the next free plot
 
 ## Rules the page keeps

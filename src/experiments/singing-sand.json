@@ -4,5 +4,5 @@
   "date": "2026-10-03",
   "tags": ["canvas", "web-audio", "getusermedia", "autocorrelation", "physics"],
   "requires": ["canvas"],
-  "plot": 2
+  "plot": 3
 }

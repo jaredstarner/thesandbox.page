@@ -1,6 +1,6 @@
 ---
 import type { Experiment } from '../experiments/list';
-import { plotCell } from './plots';
+import { OFFICE, plotCell } from './plots';
 
 interface Props {
   experiments: Experiment[];
@@ -36,30 +36,33 @@ interface Plot {
   date?: Date;
   x: number;
   y: number;
+  /** Width of its lot in sections. */
+  size: number;
 }
 
-const place = (plot: number): { x: number; y: number } => {
+const place = (plot: number): { x: number; y: number; size: number } => {
   const [x, y] = plotCell(plot);
-  return { x, y };
+  return { x, y, size: 1 };
 };
 
-// The register sits at the origin; the newest claim comes first in the list.
+// The newest claim comes first, so a new experiment adds the first list item.
+// The register, the survey office, comes last, out on its own lot.
 const plots: Plot[] = [
+  ...experiments
+    .toSorted((a, b) => b.plot! - a.plot!)
+    .map(({ slug, plot, href, title, summary, date }) => ({ id: slug, plot: plot!, href, title, summary, date, ...place(plot!) })),
   {
     id: 'register',
     plot: 0,
     href: '/experiments/',
     title: 'The Register',
     summary: 'The survey office: every experiment on record, with its date and whether your browser can run it.',
-    ...place(0),
+    ...OFFICE,
   },
-  ...experiments
-    .toSorted((a, b) => b.plot! - a.plot!)
-    .map(({ slug, plot, href, title, summary, date }) => ({ id: slug, plot: plot!, href, title, summary, date, ...place(plot!) })),
 ];
 ---
 
-<div class="sv" data-survey data-lod="mid">
+<div class="sv" data-survey>
   <canvas class="sv-terrain" data-terrain aria-hidden="true"></canvas>
 
   <header class="sv-cartouche" data-chrome>
@@ -73,10 +76,29 @@ const plots: Plot[] = [
     <ol class="sv-plots" data-plots>
       {
         plots.map((p) => (
-          <li class="sv-plot" id={p.id} data-plot={p.plot} data-x={p.x} data-y={p.y} style={`--px: ${p.x}; --py: ${p.y}`}>
+          <li class="sv-plot" id={p.id} data-plot={p.plot} data-x={p.x} data-y={p.y} style={`--px: ${p.x}; --py: ${p.y}; --size: ${p.size}`}>
             <a class:list={['sv-parcel', { 'sv-office': p.plot === 0 }]} href={p.href} draggable="false">
+              {p.plot === 0 && (
+                <svg class="sv-building" viewBox="0 0 100 100" aria-hidden="true">
+                  <defs>
+                    <pattern id="sv-roof-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                      <line x1="0" y1="0" x2="0" y2="5" />
+                    </pattern>
+                  </defs>
+                  <ellipse class="sv-b-ground" cx="50" cy="87" rx="40" ry="5" />
+                  <rect x="65" y="17" width="8" height="18" />
+                  <path class="sv-b-roof" d="M12 47 L50 17 L88 47 Z" />
+                  <rect x="19" y="47" width="62" height="38" />
+                  <rect class="sv-b-ink" x="44" y="61" width="12" height="24" />
+                  <rect x="26" y="55" width="12" height="11" />
+                  <rect x="62" y="55" width="12" height="11" />
+                  <circle cx="50" cy="35" r="4.5" />
+                  <path d="M50 17 V3" />
+                  <path class="sv-b-flag" d="M50 3 L63 6.5 L50 10 Z" />
+                </svg>
+              )}
               <span class="sv-label">
-                <span class="sv-no">{p.plot === 0 ? 'Survey office' : `Plot ${p.plot}`}</span>
+                <span class="sv-no">{p.plot === 0 ? 'Survey office' : <Fragment><span class="sv-no-word">{'Plot '}</span>{p.plot}</Fragment>}</span>
                 <span class="sv-title">{p.title}</span>
                 {p.date && (
                   <span class="sv-date">
@@ -355,12 +377,14 @@ const plots: Plot[] = [
   }
 
   :global(html.sv-js) .sv :global(.sv-parcel) {
+    --side: calc(var(--z) * var(--size, 1) * 1px);
+
     position: absolute;
-    top: calc(var(--z) * -0.5px);
-    left: calc(var(--z) * -0.5px);
+    top: calc(var(--side) * -0.5);
+    left: calc(var(--side) * -0.5);
     display: grid;
-    width: calc(var(--z) * 1px);
-    height: calc(var(--z) * 1px);
+    width: var(--side);
+    height: var(--side);
     padding: 0;
     place-items: center;
     background:
@@ -370,24 +394,171 @@ const plots: Plot[] = [
       linear-gradient(var(--sv-red), var(--sv-red)) 100% 100% / 5px 5px no-repeat,
       rgb(200 71 59 / 0.07);
     border: 1.5px dashed var(--sv-red);
+    container: parcel / size;
     pointer-events: auto;
     transition:
       background-color 0.2s,
       border-color 0.2s;
   }
 
-  :global(html.sv-js) .sv-office {
+  /* The survey office: a two-section lot with the building drawn on it. */
+  :global(html.sv-js) .sv .sv-office {
+    place-items: end center;
+    background-color: rgb(243 238 224 / 0.55);
     border-style: solid;
     border-color: var(--sv-ink);
   }
 
+  .sv-building {
+    display: none;
+  }
+
+  :global(html.sv-js) .sv-building {
+    display: block;
+    position: absolute;
+    inset: 8%;
+    fill: var(--sv-paper);
+    stroke: var(--sv-ink);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    pointer-events: none;
+  }
+
+  .sv-building :is(rect, path, circle, ellipse) {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .sv-building line {
+    stroke: var(--sv-red);
+    stroke-width: 1.2;
+  }
+
+  .sv-building .sv-b-roof {
+    fill: url(#sv-roof-hatch);
+  }
+
+  .sv-building .sv-b-ink {
+    fill: var(--sv-ink);
+  }
+
+  .sv-building .sv-b-flag {
+    fill: var(--sv-red);
+    stroke: none;
+  }
+
+  .sv-building .sv-b-ground {
+    fill: rgb(43 42 38 / 0.12);
+    stroke: none;
+  }
+
+  :global(html.sv-js) .sv .sv-office .sv-label {
+    position: relative;
+    margin-bottom: 5cqh;
+  }
+
+  /*
+   * Detail by the plot's own size, so every label stays inside its plot: each
+   * lot is a size container, and a part of the label shows only once it fits.
+   * Very far out a plot shows its bare number, then "Plot n", then its title,
+   * then the date, then the summary, more of it the larger the plot.
+   */
   :global(html.sv-js) .sv :global(.sv-label) {
+    position: relative;
     align-items: center;
-    width: clamp(112px, calc(var(--z) * 0.86px), 270px);
-    padding: 4px 8px 5px;
+    max-width: 88cqw;
+    max-height: 88cqh;
+    overflow: hidden;
+    padding: 1px 5px;
     text-align: center;
     background: var(--sv-chip);
     box-shadow: 0 1px 0 rgb(43 42 38 / 0.18);
+  }
+
+  :global(html.sv-js) .sv :global(:is(.sv-no-word, .sv-title, .sv-date, .sv-eta, .sv-summary)) {
+    display: none;
+  }
+
+  :global(html.sv-js) .sv :global(.sv-title) {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+
+  :global(html.sv-js) .sv :global(.sv-summary) {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+
+  @container parcel (width < 18px) {
+    :global(html.sv-js) .sv :global(.sv-label) {
+      display: none;
+    }
+  }
+
+  @container parcel (width < 130px) {
+    :global(html.sv-js) .sv-office .sv-label {
+      display: none;
+    }
+  }
+
+  @container parcel (width >= 66px) {
+    :global(html.sv-js) .sv :global(.sv-no-word) {
+      display: inline;
+    }
+  }
+
+  @container parcel (width >= 100px) {
+    :global(html.sv-js) .sv :global(.sv-label) {
+      width: 88cqw;
+      padding: 3px 6px 4px;
+    }
+
+    :global(html.sv-js) .sv :global(.sv-title) {
+      display: -webkit-box;
+      font-size: 0.9rem;
+    }
+  }
+
+  @container parcel (width >= 150px) {
+    :global(html.sv-js) .sv :global(.sv-label) {
+      padding: 4px 8px 5px;
+    }
+
+    :global(html.sv-js) .sv :global(.sv-title) {
+      font-size: 1.05rem;
+    }
+  }
+
+  @container parcel (width >= 210px) {
+    :global(html.sv-js) .sv :global(:is(.sv-date, .sv-eta)) {
+      display: block;
+    }
+  }
+
+  /* The stake's message is short enough to fit sooner. */
+  @container parcel (width >= 150px) {
+    :global(html.sv-js) .sv :global(.sv-stake :is(.sv-date, .sv-eta)) {
+      display: block;
+    }
+  }
+
+  @container parcel (width >= 260px) {
+    :global(html.sv-js) .sv :global(.sv-summary) {
+      display: -webkit-box;
+    }
+  }
+
+  @container parcel (width >= 340px) {
+    :global(html.sv-js) .sv :global(.sv-summary) {
+      -webkit-line-clamp: 5;
+    }
+  }
+
+  @container parcel (width >= 440px) {
+    :global(html.sv-js) .sv :global(.sv-summary) {
+      -webkit-line-clamp: 8;
+    }
   }
 
   :global(html.sv-js) .sv-parcel:hover,
@@ -406,33 +577,6 @@ const plots: Plot[] = [
     z-index: 2;
   }
 
-  /* Detail by zoom: a number from afar, a title nearer, the full entry close up. */
-  :global(html.sv-js) .sv[data-lod='far'] :global(:is(.sv-title, .sv-date, .sv-summary)),
-  :global(html.sv-js) .sv[data-lod='mid'] :global(:is(.sv-date, .sv-summary)) {
-    display: none;
-  }
-
-  :global(html.sv-js) .sv[data-lod='far'] :global(.sv-label) {
-    width: auto;
-    padding: 1px 5px;
-  }
-
-  :global(html.sv-js) .sv[data-lod='mid'] :global(.sv-stake .sv-date) {
-    display: block;
-  }
-
-  :global(html.sv-js) .sv[data-lod='mid'] :global(.sv-label) {
-    width: max-content;
-    max-width: clamp(112px, calc(var(--z) * 1.6px), 200px);
-  }
-
-  :global(html.sv-js) .sv[data-lod='near'] :global(.sv-summary) {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 4;
-  }
-
   /* The stake for the next plot, which the next experiment will claim. */
   :global(html.sv-js) .sv :global(.sv-stake .sv-parcel) {
     background: rgb(63 127 166 / 0.06);
@@ -441,11 +585,11 @@ const plots: Plot[] = [
   }
 
   .sv :global(.sv-stake .sv-no),
-  .sv :global(.sv-stake [data-countdown]) {
+  .sv :global(.sv-stake .sv-eta) {
     color: var(--sv-blue);
   }
 
-  .sv :global(.sv-stake [data-countdown]) {
+  .sv :global(.sv-stake .sv-eta) {
     font-family: var(--font-survey-mono), ui-monospace, monospace;
     font-variant-numeric: tabular-nums;
   }

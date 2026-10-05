@@ -4,5 +4,5 @@
   "date": "2026-10-03",
   "tags": ["css", "sibling-index", "sibling-count", "progress", "scroll-driven-animations", "at-property", "has"],
   "requires": ["sibling-index", "sibling-count", "progress"],
-  "plot": 1
+  "plot": 2
 }

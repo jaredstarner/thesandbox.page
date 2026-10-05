@@ -2,7 +2,7 @@
 // Plots are real links in the page; this script only moves them. It sets three
 // custom properties on the root (--cx, --cy, --z) and CSS places every plot.
 
-import { plotCell } from './plots';
+import { OFFICE, plotCell } from './plots';
 import { createTerrain, type Terrain } from './terrain';
 
 interface Camera {
@@ -14,12 +14,14 @@ interface Camera {
 const MIN_ZOOM = 5;
 const MAX_ZOOM = 520;
 const WORLD_LIMIT = 2000;
-const MID_ZOOM = 44;
-const NEAR_ZOOM = 150;
+// Plots size their own labels (see Survey.astro); these zooms only pick where
+// flights land: close enough for a title, or for the full entry.
+const TITLE_ZOOM = 130;
+const ENTRY_ZOOM = 280;
 const DRAG_SLOP = 6;
-const RUN_HOUR = 8;
-const RUN_MINUTE = 14;
-const RUN_ZONE = 'America/New_York';
+// The daily run starts at 08:14 ET and its page is usually live by about 09:00.
+const SURVEY_HOUR = 9;
+const SURVEY_ZONE = 'America/New_York';
 
 const clamp = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
 const ease = (t: number): number => 1 - Math.pow(1 - t, 3);
@@ -50,7 +52,7 @@ export function startSurvey(root: HTMLElement): void {
   const [stakeX, stakeY] = plotCell(nextPlot);
   const stake = buildStake(nextPlot, stakeX, stakeY);
   plotList.after(stake.el);
-  const settled = Math.max(...plots.map((p) => Math.hypot(p.x, p.y)), Math.hypot(stakeX, stakeY)) + 1.5;
+  const settled = Math.max(...plots.map((p) => Math.hypot(p.x, p.y) + (p.plot === 0 ? 1 : 0)), Math.hypot(stakeX, stakeY)) + 1.5;
 
   // ---- camera ---------------------------------------------------------------
 
@@ -74,15 +76,16 @@ export function startSurvey(root: HTMLElement): void {
     };
   }
 
+  // Every claim and the stake; the office stays out on its own lot.
   function fitAll(): Camera {
-    const xs = [...plots.map((p) => p.x), stakeX];
-    const ys = [...plots.map((p) => p.y), stakeY];
+    const xs = [...claims.map((p) => p.x), stakeX];
+    const ys = [...claims.map((p) => p.y), stakeY];
     const minX = Math.min(...xs) - 0.5;
     const maxX = Math.max(...xs) + 0.5;
     const minY = Math.min(...ys) - 0.5;
     const maxY = Math.max(...ys) + 0.5;
     // Leave room for the labels at the edges, the title block, and the controls.
-    const zoom = Math.min((viewW() * 0.92 - 150) / (maxX - minX + 0.4), (viewH() * 0.62) / (maxY - minY + 1.2), NEAR_ZOOM * 1.2);
+    const zoom = Math.min((viewW() * 0.92) / (maxX - minX + 0.4), (viewH() * 0.62) / (maxY - minY + 1.2), ENTRY_ZOOM);
     return settle({ x: (minX + maxX) / 2, y: (minY + maxY) / 2 - 0.04 * (viewH() / zoom), zoom });
   }
 
@@ -132,7 +135,6 @@ export function startSurvey(root: HTMLElement): void {
 
   // ---- drawing --------------------------------------------------------------
 
-  let lod = '';
   let revealedUpTo = -1;
 
   function draw(now: number): void {
@@ -150,7 +152,7 @@ export function startSurvey(root: HTMLElement): void {
 
     if (reveal < 1e5) {
       if (!revealStart) revealStart = now;
-      const reach = Math.hypot(Math.abs(cam.x) + viewW() / cam.zoom / 2, Math.abs(cam.y) + viewH() / cam.zoom / 2) + 2;
+      const reach = Math.hypot(Math.abs(cam.x - stakeX) + viewW() / cam.zoom / 2, Math.abs(cam.y - stakeY) + viewH() / cam.zoom / 2) + 2;
       const t = clamp((now - revealStart) / 2200, 0, 1);
       reveal = t >= 1 ? 1e5 : ease(t) * reach;
       dirty = true;
@@ -161,13 +163,11 @@ export function startSurvey(root: HTMLElement): void {
       root.style.setProperty('--cx', cam.x.toFixed(4));
       root.style.setProperty('--cy', cam.y.toFixed(4));
       root.style.setProperty('--z', cam.zoom.toFixed(3));
-      const nextLod = cam.zoom >= NEAR_ZOOM ? 'near' : cam.zoom >= MID_ZOOM ? 'mid' : 'far';
-      if (nextLod !== lod) root.dataset.lod = lod = nextLod;
-      terrain?.render({ x: cam.x, y: cam.y, zoom: cam.zoom, reveal, settled });
+      terrain?.render({ x: cam.x, y: cam.y, zoom: cam.zoom, reveal, revealX: stakeX, revealY: stakeY, settled, officeX: OFFICE.x, officeY: OFFICE.y });
       if (reveal !== revealedUpTo) {
         revealedUpTo = reveal;
-        for (const p of plots) p.el.classList.toggle('sv-on', Math.hypot(p.x, p.y) <= reveal);
-        stake.el.classList.toggle('sv-on', Math.hypot(stakeX, stakeY) <= reveal);
+        for (const p of plots) p.el.classList.toggle('sv-on', Math.hypot(p.x - stakeX, p.y - stakeY) <= reveal);
+        stake.el.classList.add('sv-on');
       }
       updateScale();
     }
@@ -318,7 +318,8 @@ export function startSurvey(root: HTMLElement): void {
   plotList.addEventListener('focusin', (event) => {
     const item = plots.find((p) => p.el.contains(event.target as Node));
     if (!item || pointers.size) return;
-    flyTo({ x: item.x, y: item.y, zoom: Math.max(cam.zoom, NEAR_ZOOM * 1.15) }, 700);
+    const size = item.plot === 0 ? 2 : 1;
+    flyTo({ x: item.x, y: item.y, zoom: Math.max(cam.zoom, ENTRY_ZOOM / size) }, 700);
   });
 
   // ---- controls -------------------------------------------------------------
@@ -327,12 +328,12 @@ export function startSurvey(root: HTMLElement): void {
     'zoom-in': () => flyTo({ ...cam, zoom: cam.zoom * 1.8 }, 320),
     'zoom-out': () => flyTo({ ...cam, zoom: cam.zoom / 1.8 }, 320),
     fit: () => flyTo(fitAll()),
-    next: () => flyTo({ x: stakeX, y: stakeY, zoom: NEAR_ZOOM * 1.25 }),
+    next: () => flyTo(onStake()),
     stumble: () => {
       if (claims.length === 0) return;
-      const here = claims.filter((p) => Math.hypot(p.x - cam.x, p.y - cam.y) > 0.5 || cam.zoom < NEAR_ZOOM);
+      const here = claims.filter((p) => Math.hypot(p.x - cam.x, p.y - cam.y) > 0.5 || cam.zoom < ENTRY_ZOOM);
       const pick = here[Math.floor(Math.random() * here.length)] ?? claims[0];
-      flyTo({ x: pick.x, y: pick.y, zoom: NEAR_ZOOM * 1.4 }, 1100);
+      flyTo({ x: pick.x, y: pick.y, zoom: ENTRY_ZOOM * 1.1 }, 1100);
       pick.el.classList.add('sv-picked');
       window.setTimeout(() => pick.el.classList.remove('sv-picked'), 2400);
     },
@@ -350,14 +351,14 @@ export function startSurvey(root: HTMLElement): void {
     el.style.setProperty('--py', String(y));
     el.innerHTML = `<div class="sv-parcel" role="note" aria-label="Plot ${plot}, staked for the next experiment">
       <span class="sv-flag" aria-hidden="true"></span>
-      <span class="sv-label"><span class="sv-no">Plot ${plot}</span><span class="sv-title">Staked</span>
-      <span class="sv-date">Next survey 08:14 ET, in <span data-countdown>--:--:--</span></span></span></div>`;
+      <span class="sv-label"><span class="sv-no"><span class="sv-no-word">Plot </span>${plot}</span><span class="sv-title">Staked</span>
+      <span class="sv-date">Check back soon for the next survey</span><span class="sv-eta" title="Estimated time to the next survey">~<span data-countdown>--:--:--</span></span></span></div>`;
     return { el };
   }
 
   const countdown = stake.el.querySelector<HTMLElement>('[data-countdown]');
   const zoneClock = new Intl.DateTimeFormat('en-US', {
-    timeZone: RUN_ZONE,
+    timeZone: SURVEY_ZONE,
     hour: 'numeric',
     minute: 'numeric',
     second: 'numeric',
@@ -367,7 +368,7 @@ export function startSurvey(root: HTMLElement): void {
     if (!countdown) return;
     const parts = Object.fromEntries(zoneClock.formatToParts(new Date()).map((p) => [p.type, p.value]));
     const now = Number(parts.hour) * 3600 + Number(parts.minute) * 60 + Number(parts.second);
-    let left = RUN_HOUR * 3600 + RUN_MINUTE * 60 - now;
+    let left = SURVEY_HOUR * 3600 - now;
     if (left <= 0) left += 86400;
     const pad = (n: number): string => String(n).padStart(2, '0');
     countdown.textContent = `${pad(Math.floor(left / 3600))}:${pad(Math.floor((left % 3600) / 60))}:${pad(left % 60)}`;
@@ -382,17 +383,22 @@ export function startSurvey(root: HTMLElement): void {
     request();
   }).observe(root);
 
-  const hash = decodeURIComponent(location.hash.slice(1));
-  const linked = plots.find((p) => p.el.id === hash);
-  // Open on the whole survey while it fits at a readable scale; once it outgrows
-  // the screen (sooner on phones), open on the newest claim instead.
-  const whole = fitAll();
-  const newest = claims.reduce<(typeof claims)[number] | undefined>((a, b) => (a && a.plot > b.plot ? a : b), undefined);
-  const opening =
-    whole.zoom >= MID_ZOOM || !newest
-      ? whole
-      : settle({ x: (newest.x + stakeX) / 2, y: (newest.y + stakeY) / 2, zoom: MID_ZOOM * 1.5 });
-  Object.assign(cam, linked ? settle({ x: linked.x, y: linked.y, zoom: NEAR_ZOOM * 1.25 }) : opening);
+  const linkedPlot = (): (typeof plots)[number] | undefined => {
+    const hash = decodeURIComponent(location.hash.slice(1));
+    return plots.find((p) => p.el.id === hash);
+  };
+  const plotView = (p: (typeof plots)[number]): Camera =>
+    settle({ x: p.x, y: p.y, zoom: p.plot === 0 ? ENTRY_ZOOM / 2 : ENTRY_ZOOM });
+  window.addEventListener('hashchange', () => {
+    const p = linkedPlot();
+    if (p) flyTo(plotView(p));
+  });
+  const linked = linkedPlot();
+  // Open on the stake, close enough to read it, and draw the land out from there.
+  function onStake(): Camera {
+    return settle({ x: stakeX, y: stakeY, zoom: clamp(Math.min(viewW(), viewH()) * 0.22, 160, 200) });
+  }
+  Object.assign(cam, linked ? plotView(linked) : onStake());
   root.classList.add('sv-live');
   request();
 }

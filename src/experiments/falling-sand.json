@@ -4,5 +4,5 @@
   "date": "2026-10-04",
   "tags": ["canvas", "cellular-automaton", "physics"],
   "requires": ["canvas"],
-  "plot": 4
+  "plot": 1
 }
