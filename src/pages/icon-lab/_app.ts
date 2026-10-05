@@ -1,4 +1,5 @@
 import { PROGRAM_IDS, type Lab, type Program, type ProgramId } from './_lab';
+import { createSnake } from './_snake';
 
 const isProgram = (value: string): value is ProgramId => (PROGRAM_IDS as readonly string[]).includes(value);
 
@@ -57,7 +58,9 @@ export function startLab(root: HTMLElement): void {
     },
   };
 
-  const programs: Partial<Record<ProgramId, Program>> = {};
+  const programs: Partial<Record<ProgramId, Program>> = {
+    snake: createSnake(lab),
+  };
 
   let current: ProgramId | null = null;
 
