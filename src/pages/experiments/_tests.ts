@@ -341,7 +341,30 @@ export const TECHNIQUES: Record<string, Technique> = {
       );
     },
   },
+  'broadcast-channel': {
+    label: 'BroadcastChannel',
+    webFeature: 'broadcast-channel',
+    handling: 'Talks to its own copies in your other tabs, and nowhere else.',
+    test: () => present(typeof BroadcastChannel === 'function', 'BroadcastChannel present', 'BroadcastChannel missing'),
+  },
+  'compression-streams': {
+    label: 'Compression streams',
+    webFeature: 'compression-streams',
+    test: () =>
+      present(typeof CompressionStream === 'function', 'CompressionStream present', 'CompressionStream missing'),
+  },
+  'page-visibility': {
+    label: 'Page Visibility',
+    webFeature: 'page-visibility',
+    test: () =>
+      present(
+        typeof document.visibilityState === 'string',
+        `document.visibilityState present (${document.visibilityState})`,
+        'document.visibilityState missing',
+      ),
+  },
   // Technique notes: no browser dependency, so no test and no light.
+  favicon: { label: 'Favicon' },
   css: { label: 'CSS' },
   'split-flap': { label: 'Split-flap' },
   'live-data': { label: 'Live data' },
