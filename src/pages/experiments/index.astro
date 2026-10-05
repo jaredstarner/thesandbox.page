@@ -7,7 +7,7 @@ import { baselineNote } from './_baseline';
 import { classify } from './_class';
 import { stressEntries } from './_stress';
 import { TECHNIQUES, normalizeTag, techniqueLabel } from './_tests';
-import { bookcloth, leafFibre, leafRaked, watermark, monogramPaths } from './_textures';
+import { bookcloth, leafFiber, leafRaked, watermark, monogramPaths } from './_textures';
 
 // REGISTER_STRESS=300 adds that many synthetic objects, to check the register at scale. Development only.
 const env = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env ?? {};
@@ -65,7 +65,7 @@ const stampStyle = (accession: string) => {
   return `--ink:url(#ink-${(h % 8) + 1});--rot:${rot}deg;--jx:${((h >>> 9) % 5) - 2}px;--jy:${((h >>> 13) % 5) - 2}px;--press:${(h >>> 17) % 360}deg`;
 };
 
-const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:${leafRaked};--tex-watermark:${watermark};`;
+const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:${leafRaked};--tex-watermark:${watermark};`;
 ---
 
 <Bare title="Accession register" description="The register of every object in thesandbox.page, surveyed in your browser.">
@@ -102,7 +102,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
         <dl>
           <div><dt>Browser (reported)</dt><dd data-env="browser">Not surveyed</dd></div>
           <div><dt>Viewport</dt><dd data-env="viewport">Not surveyed</dd></div>
-          <div><dt>Colour gamut</dt><dd data-env="gamut">Not surveyed</dd></div>
+          <div><dt>Color gamut</dt><dd data-env="gamut">Not surveyed</dd></div>
           <div><dt>Dynamic range</dt><dd data-env="range">Not surveyed</dd></div>
           <div><dt>Refresh rate</dt><dd data-env="refresh">Not surveyed</dd></div>
           <div><dt>Pointer</dt><dd data-env="pointer">Not surveyed</dd></div>
@@ -283,7 +283,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
                 <feDiffuseLighting class="seal-relief" in="height" surfaceScale="2.5" diffuseConstant="1" lighting-color="#fff" result="lit">
                   <feDistantLight class="seal-light" azimuth="340" elevation="30" />
                 </feDiffuseLighting>
-                <!-- Pull the relief toward mid grey: a blind emboss reads as light and shadow, not ink. -->
+                <!-- Pull the relief toward mid gray: a blind emboss reads as light and shadow, not ink. -->
                 <feComponentTransfer in="lit">
                   <feFuncR type="linear" slope="0.5" intercept="0.25" />
                   <feFuncG type="linear" slope="0.5" intercept="0.25" />
@@ -468,7 +468,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     max-width: 1180px;
     margin: 0 auto;
     padding: 0 40px var(--line);
-    background: var(--tex-fibre), var(--leaf);
+    background: var(--tex-fiber), var(--leaf);
     background-size: 320px 320px, auto;
     box-shadow:
       0 0 0 1px var(--leaf-edge),
@@ -930,7 +930,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     border-color: var(--ink-red);
   }
 
-  li[data-state='grey'] .light {
+  li[data-state='gray'] .light {
     background: #a3a7aa;
     border-color: #a3a7aa;
   }
@@ -1299,8 +1299,8 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
   /*
    * A raking light band. The band translates down the sheet while its paper
    * counter-translates, so the raked texture and watermark stay fixed to the
-   * leaf: both moves are transforms. The raked tile is mid grey where flat,
-   * so hard-light leaves the page unchanged except where fibres catch the light.
+   * leaf: both moves are transforms. The raked tile is mid gray where flat,
+   * so hard-light leaves the page unchanged except where fibers catch the light.
    */
   .cloth :global(.survey-lamp) {
     position: absolute;
@@ -1330,7 +1330,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     will-change: transform;
   }
 
-  /* Low contrast pulls the raked tile toward mid grey: tooth, not scanlines. */
+  /* Low contrast pulls the raked tile toward mid gray: tooth, not scanlines. */
   .cloth :global(.survey-lamp-paper)::before {
     content: '';
     position: absolute;
@@ -1765,7 +1765,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fibre:${leafFibre};--tex-raked:$
     }
   }
 
-  /* Forced colours: plain system colours, no textures, blends, or lamp. */
+  /* Forced colors: plain system colors, no textures, blends, or lamp. */
   @media (forced-colors: active) {
     .cloth,
     .leaf,

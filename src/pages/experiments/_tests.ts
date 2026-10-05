@@ -363,7 +363,7 @@ export async function queryPermission(name: 'microphone' | 'camera'): Promise<Pe
   }
 }
 
-/** The display label for any tag, catalogued or not. */
+/** The display label for any tag, cataloged or not. */
 export function techniqueLabel(tag: string): string {
   return TECHNIQUES[normalizeTag(tag)]?.label ?? tag;
 }

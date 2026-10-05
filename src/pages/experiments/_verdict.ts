@@ -67,13 +67,13 @@ export function assess(findings: Finding[], hasRequires: boolean, requiredWithou
     return {
       verdict: 'not-surveyed',
       word: VERDICT_WORDS['not-surveyed'],
-      reason: 'nothing catalogued that this browser can be tested for',
+      reason: 'nothing cataloged that this browser can be tested for',
     };
   }
   const failures = tested.filter(failed);
   if (failures.length === 0) return { verdict: 'functional', word: VERDICT_WORDS.functional, reason: '' };
   if (!hasRequires) {
-    return { verdict: 'uncertain', word: VERDICT_WORDS.uncertain, reason: `${why(failures)}; requirements not catalogued` };
+    return { verdict: 'uncertain', word: VERDICT_WORDS.uncertain, reason: `${why(failures)}; requirements not cataloged` };
   }
   const requiredFailures = failures.filter((f) => f.required);
   if (requiredFailures.length > 0) {

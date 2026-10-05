@@ -128,7 +128,7 @@ function scheme(): string | null {
   const parts = [
     color && `${color === 'dark' ? 'Dark' : 'Light'} scheme`,
     contrast && { more: 'more contrast', less: 'less contrast', custom: 'custom contrast', 'no-preference': 'standard contrast' }[contrast],
-    forced && 'forced colours',
+    forced && 'forced colors',
   ].filter(Boolean) as string[];
   const text = parts.join(' · ');
   return text.charAt(0).toUpperCase() + text.slice(1);
