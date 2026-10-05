@@ -4,6 +4,7 @@ import { createGamut } from './_gamut';
 import { createNative } from './_native';
 import { createPaint } from './_paint';
 import { createSnake } from './_snake';
+import { createStrip } from './_strip';
 
 const isProgram = (value: string): value is ProgramId => (PROGRAM_IDS as readonly string[]).includes(value);
 
@@ -68,6 +69,7 @@ export function startLab(root: HTMLElement): void {
     paint: createPaint(lab),
     native: createNative(lab),
     gamut: createGamut(lab),
+    strip: createStrip(lab),
   };
 
   let current: ProgramId | null = null;
