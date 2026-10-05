@@ -73,5 +73,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    {
+      // The pixel labels on /icon-lab/.
+      provider: fontProviders.fontsource(),
+      name: 'Silkscreen',
+      cssVariable: '--font-iconlab',
+      weights: [400, 700],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });

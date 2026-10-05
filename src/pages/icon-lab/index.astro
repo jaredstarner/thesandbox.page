@@ -1,0 +1,832 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { PALETTE } from './_palette';
+
+// The icon the tab shows before the script takes over, and without script.
+const startIcon =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
+  '<rect width="32" height="32" rx="6" fill="#16120c"/>' +
+  '<rect x="9" y="9" width="14" height="14" rx="2" fill="#ffb000"/></svg>';
+const startHref = `data:image/svg+xml,${encodeURIComponent(startIcon)}`;
+
+const programs = [
+  { id: 'snake', name: 'Snake', blurb: 'Play it in the tab' },
+  { id: 'clock', name: 'Clock', blurb: 'Leave, then come back' },
+  { id: 'paint', name: 'Paint', blurb: 'Draw your own' },
+  { id: 'native', name: 'Native', blurb: 'No script at all' },
+  { id: 'gamut', name: 'Gamut', blurb: 'Wide color and HDR' },
+  { id: 'strip', name: 'Strip', blurb: 'A sign across tabs' },
+];
+---
+
+<Bare
+  title="Icon lab"
+  description="This page takes over its own tab icon: play Snake in it, paint it, watch it slow down when you look away, test it for HDR, and run a sign across a row of tabs."
+  icon={false}
+>
+  <Font cssVariable="--font-iconlab" slot="head" />
+  <link rel="icon" type="image/svg+xml" href={startHref} slot="head" data-lab-icon />
+
+  <div class="iconlab" data-iconlab>
+    <p class="lookup" aria-hidden="true"><span class="lookup-arrow">↑</span> The real one is up there</p>
+
+    <section class="window" aria-label="This tab, enlarged">
+      <div class="tabs" data-tabs>
+        <div class="tab is-self" data-self-tab>
+          <div class="tab-icon">
+            <canvas width="32" height="32" data-screen aria-label="This tab's icon, enlarged" role="img"></canvas>
+            <img class="tab-img" alt="" data-screen-img hidden />
+            <div class="cover" data-cover hidden><span>No peeking.<br />Look up.</span></div>
+          </div>
+          <span class="tab-title" data-tab-title>Icon lab</span>
+          <span class="tab-x" aria-hidden="true">×</span>
+        </div>
+        <a class="tab-new" href="/icon-lab/#strip" target="_blank" aria-label="Open the lab in a new tab">+</a>
+      </div>
+      <div class="toolbar" aria-hidden="true">
+        <span class="nav-glyphs">‹ › ↻</span>
+        <span class="url">thesandbox.page/icon-lab/<span data-url-hash></span></span>
+      </div>
+    </section>
+
+    <main class="page">
+      <noscript>
+        <p class="noscript">Every program here draws the tab icon from script, so with script off there is only the amber square.</p>
+      </noscript>
+
+      <nav class="programs" aria-label="Programs" data-programs>
+        {
+          programs.map((p) => (
+            <button type="button" data-program={p.id} aria-pressed="false">
+              <span class="program-name">{p.name}</span>
+              <span class="program-blurb">{p.blurb}</span>
+            </button>
+          ))
+        }
+      </nav>
+
+      <section class="panel" data-panel="snake" hidden aria-labelledby="h-snake">
+        <h1 id="h-snake">Snake, in your tab</h1>
+        <p>
+          The game runs in this tab's icon, up in your browser's tab strip. Steer with the arrow keys or WASD, or the pad
+          below. The score is in the tab's title. Until you press a key, the snake plays itself.
+        </p>
+        <div class="row">
+          <button type="button" class="btn" data-snake-play>New game</button>
+          <button type="button" class="btn" data-snake-cover aria-pressed="false">Cover the mirror</button>
+          <dl class="readout">
+            <div><dt>Score</dt><dd data-snake-score>0</dd></div>
+            <div><dt>Best</dt><dd data-snake-best>0</dd></div>
+          </dl>
+        </div>
+        <div class="pad" data-snake-pad>
+          <button type="button" class="btn" data-dir="up" aria-label="Up">▲</button>
+          <button type="button" class="btn" data-dir="left" aria-label="Left">◀</button>
+          <button type="button" class="btn" data-dir="right" aria-label="Right">▶</button>
+          <button type="button" class="btn" data-dir="down" aria-label="Down">▼</button>
+        </div>
+        <p class="note">
+          A tab icon is 16 pixels square, or 32 on a sharp screen, so the board is 16 cells across, two pixels each. Phones
+          often don't show tab icons at all; there, the mirror above is all you get.
+        </p>
+      </section>
+
+      <section class="panel" data-panel="clock" hidden aria-labelledby="h-clock">
+        <h1 id="h-clock">A clock that slows down when you leave</h1>
+        <p>
+          The icon is a clock with a sweeping second hand, redrawn by a timer four times a second. Switch to another tab
+          and watch this one's icon and title. Browsers save power by holding back timers in background tabs, so the hand
+          stops sweeping and starts to jump. Come back and this page shows what it managed while you were gone.
+        </p>
+        <div class="row">
+          <button type="button" class="btn" data-clock-hum aria-pressed="false">Hum</button>
+          <dl class="readout">
+            <div><dt>Redraws, last second</dt><dd data-clock-rate>0</dd></div>
+            <div><dt>Away</dt><dd data-clock-away>Not yet</dd></div>
+          </dl>
+        </div>
+        <p class="note">
+          <strong>Hum</strong> plays a quiet tone. Chrome doesn't hold back a tab that has made a sound in the last 30
+          seconds, so try leaving with it on, then with it off.
+        </p>
+        <div class="report" data-clock-report hidden>
+          <p data-clock-summary></p>
+          <svg class="chart" data-clock-chart role="img" aria-label="Gaps between redraws while you were away"></svg>
+          <p class="chart-key">
+            Each dot is one redraw, placed by when it happened and how long since the one before. Four a second sits on
+            the bottom line.
+          </p>
+        </div>
+        <h2>Chrome's rules</h2>
+        <ul>
+          <li>In a visible tab, timers run on time.</li>
+          <li>In a hidden tab, they wake at most once a second.</li>
+          <li>
+            Hidden for five minutes, silent for 30 seconds, with a chain of five or more timers: at most once a minute.
+          </li>
+          <li><code>requestAnimationFrame</code> doesn't run at all in a hidden tab.</li>
+        </ul>
+        <p>Firefox and Safari have rules of their own. The chart shows what your browser actually did.</p>
+      </section>
+
+      <section class="panel" data-panel="paint" hidden aria-labelledby="h-paint">
+        <h1 id="h-paint">Paint your own</h1>
+        <p>
+          Draw on the big icon above, and your tab follows along. The picture is kept in this browser; <strong
+            >Save</strong
+          > downloads it as a 32 pixel PNG.
+        </p>
+        <div class="row" role="group" aria-label="Tool">
+          <button type="button" class="btn" data-paint-tool="pen" aria-pressed="true">Pen</button>
+          <button type="button" class="btn" data-paint-tool="fill" aria-pressed="false">Fill</button>
+          <button type="button" class="btn" data-paint-tool="erase" aria-pressed="false">Eraser</button>
+          <button type="button" class="btn" data-paint-clear>Clear</button>
+          <button type="button" class="btn" data-paint-save>Save</button>
+        </div>
+        <div class="palette" role="group" aria-label="Color">
+          {
+            PALETTE.map((color, i) => (
+              <button
+                type="button"
+                class="swatch"
+                style={`--swatch: ${color}`}
+                data-paint-color={color}
+                aria-pressed={i === 9 ? 'true' : 'false'}
+                aria-label={`Color ${color}`}
+              />
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="panel" data-panel="native" hidden aria-labelledby="h-native">
+        <h1 id="h-native">An icon that moves by itself</h1>
+        <p>
+          Every other program here redraws the icon from script, frame after frame. This one hands the browser a single
+          SVG file with an animation inside, and stops. If the icon in your tab spins, your browser animates icons on its
+          own: Firefox does. If it sits still, your browser draws the first frame and keeps it: Chromium does, and a
+          request to change that was closed as not planned.
+        </p>
+        <div class="row" role="group" aria-label="Animation">
+          <button type="button" class="btn" data-native="css" aria-pressed="true">CSS animation</button>
+          <button type="button" class="btn" data-native="smil" aria-pressed="false">SMIL animation</button>
+        </div>
+        <p class="note">The big copy above is the same file shown as an image in the page, where every browser animates it.</p>
+      </section>
+
+      <section class="panel" data-panel="gamut" hidden aria-labelledby="h-gamut">
+        <h1 id="h-gamut">Wide color and HDR, in the tab</h1>
+        <p>
+          Two test icons, written byte by byte by this page as PNG files that name their color space in a
+          <code>cICP</code> chunk. Put one in the tab, then compare the tab with the copies here.
+        </p>
+        <div class="row" role="group" aria-label="Test icon">
+          <button type="button" class="btn" data-gamut="p3" aria-pressed="true">Wide color</button>
+          <button type="button" class="btn" data-gamut="hdr" aria-pressed="false">HDR</button>
+        </div>
+        <div class="specimens">
+          <figure>
+            <img alt="Wide color test icon" data-gamut-img="p3" width="32" height="32" />
+            <figcaption>
+              Left, the reddest red in sRGB. Right, the reddest red in Display P3. On a wide-gamut screen, in a browser that
+              keeps the color, the right half is redder.
+            </figcaption>
+          </figure>
+          <figure>
+            <img alt="HDR test icon" data-gamut-img="hdr" width="32" height="32" />
+            <figcaption>
+              Left, white at 203 nits, the brightness of SDR white. Right, white at 1,000 nits. On an HDR screen, in a
+              browser that keeps HDR, the right half glows brighter than white.
+            </figcaption>
+          </figure>
+        </div>
+        <dl class="readout">
+          <div><dt>Screen gamut</dt><dd data-gamut-gamut>Unknown</dd></div>
+          <div><dt>Dynamic range</dt><dd data-gamut-range>Unknown</dd></div>
+        </dl>
+        <p class="note" data-gamut-note>
+          If the copies here show the difference and the tab doesn't, your browser flattens its tab icons. If neither
+          does, your screen or browser can't show it, and this test can't tell you more.
+        </p>
+      </section>
+
+      <section class="panel" data-panel="strip" hidden aria-labelledby="h-strip">
+        <h1 id="h-strip">A sign across your tabs</h1>
+        <p>
+          Open this page in a few more tabs, side by side, with the <strong>+</strong> above or the link below. Every tab
+          showing Strip joins the sign and holds one letter, and the message scrolls from tab to tab along your tab strip.
+        </p>
+        <div class="row">
+          <a class="btn" href="/icon-lab/#strip" target="_blank" data-strip-open>Open another tab</a>
+          <div class="row" role="group" aria-label="Sign">
+            <button type="button" class="btn" data-strip-mode="run" aria-pressed="true">Run the sign</button>
+            <button type="button" class="btn" data-strip-mode="number" aria-pressed="false">Number the tabs</button>
+          </div>
+        </div>
+        <label class="field">
+          <span>Message</span>
+          <input type="text" maxlength="60" spellcheck="false" autocomplete="off" data-strip-text />
+        </label>
+        <p class="status" data-strip-status aria-live="polite">This is the only tab on the sign.</p>
+        <ol class="roster" data-strip-roster></ol>
+        <p class="note">
+          Tabs take their places in the order they joined, which is usually left to right. If yours are out of order,
+          number them, then drag the tabs to match or move them here.
+        </p>
+      </section>
+    </main>
+
+    <footer class="notes">
+      <h2>How it works</h2>
+      <p>
+        A tab icon is a <code>&lt;link rel="icon"&gt;</code> in the page's head. Point it at a new picture and the
+        browser repaints the tab. Every program here but Native and Gamut draws a 32 by 32 canvas, turns it into a PNG
+        data URL, and swaps the link, up to about ten times a second. The big icon at the top is that same canvas, scaled
+        up without smoothing.
+      </p>
+      <p>
+        The tabs on the sign find each other over a <code>BroadcastChannel</code>. A hidden tab's timers are held back,
+        but its messages aren't, so the tab you're looking at keeps time and nudges the rest, and each one works out its
+        own letter from the clock.
+      </p>
+      <p class="credits">
+        Labels set in <a href="https://fonts.google.com/specimen/Silkscreen">Silkscreen</a> by Jason Kottke, SIL Open Font
+        License, served from this site. The letters on the sign are a 5 by 7 font drawn for this page. <a href="/"
+          >Back to thesandbox.page</a
+        >
+      </p>
+    </footer>
+  </div>
+</Bare>
+
+<script>
+  import { startLab } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-iconlab]');
+  if (root) startLab(root);
+</script>
+
+<style is:global>
+  /* Global on purpose: script builds tabs on the sign. Every rule is keyed
+     under .iconlab, and the page's variables live there, not on :root. */
+
+  body:has(.iconlab) {
+    margin: 0;
+    background: var(--frame);
+  }
+
+  .iconlab {
+    --frame: light-dark(#dde1e7, #1c1e23);
+    --tab: light-dark(#ffffff, #2d3037);
+    --tab-idle: light-dark(#e8ebf0, #24262c);
+    --page-bg: light-dark(#f7f8fa, #131519);
+    --ink: light-dark(#1c2028, #e9ebef);
+    --muted: light-dark(#5d6470, #9ba2ad);
+    --line: light-dark(#c9ced7, #3a3e47);
+    --amber: #ffb000;
+    --amber-ink: light-dark(#7a4f00, #ffc94d);
+    --pixel: var(--font-iconlab), ui-monospace, monospace;
+    --ui: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --icon: clamp(88px, 21vw, 232px);
+
+    color-scheme: light dark;
+    box-sizing: border-box;
+    min-height: 100dvh;
+    color: var(--ink);
+    background: var(--frame);
+    font: 400 1rem/1.6 var(--ui);
+    padding-top: 3.25rem;
+  }
+
+  .iconlab *,
+  .iconlab *::before,
+  .iconlab *::after {
+    box-sizing: inherit;
+  }
+
+  .iconlab .lookup {
+    position: absolute;
+    top: 0.75rem;
+    left: 1rem;
+    margin: 0;
+    font: 400 0.8rem/1 var(--pixel);
+    letter-spacing: 0.04em;
+    color: var(--amber-ink);
+    text-transform: uppercase;
+  }
+
+  .iconlab .lookup-arrow {
+    display: inline-block;
+    font-size: 1.1rem;
+    animation: iconlab-nudge 1.6s ease-in-out infinite;
+  }
+
+  @keyframes iconlab-nudge {
+    50% {
+      transform: translateY(-0.3rem);
+    }
+  }
+
+  /* The window: a browser's tab strip and toolbar, ten times over. */
+
+  .iconlab .window {
+    container: window / inline-size;
+  }
+
+  .iconlab .tabs {
+    display: flex;
+    align-items: flex-end;
+    gap: 0;
+    padding: 0 1rem;
+    min-width: 0;
+  }
+
+  .iconlab .tab {
+    --size: var(--icon);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: calc(var(--size) * 0.16);
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    padding: calc(var(--size) * 0.14) calc(var(--size) * 0.2);
+    border-radius: calc(var(--size) * 0.14) calc(var(--size) * 0.14) 0 0;
+    color: var(--muted);
+  }
+
+  .iconlab .tab.is-self {
+    background: var(--tab);
+    color: var(--ink);
+    z-index: 1;
+  }
+
+  /* The flared feet that join the active tab to the toolbar. */
+  .iconlab .tab.is-self::before,
+  .iconlab .tab.is-self::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: calc(var(--size) * 0.14);
+    height: calc(var(--size) * 0.14);
+  }
+
+  .iconlab .tab.is-self::before {
+    left: calc(var(--size) * -0.14);
+    background: radial-gradient(circle at 0 0, transparent 70%, var(--tab) 71%);
+  }
+
+  .iconlab .tab.is-self::after {
+    right: calc(var(--size) * -0.14);
+    background: radial-gradient(circle at 100% 0, transparent 70%, var(--tab) 71%);
+  }
+
+  .iconlab .tab:not(.is-self) + .tab:not(.is-self)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 25%;
+    bottom: 25%;
+    border-left: max(1px, calc(var(--size) * 0.012)) solid var(--line);
+  }
+
+  .iconlab .tab-icon {
+    position: relative;
+    flex: none;
+    width: var(--size);
+    height: var(--size);
+    background: repeating-conic-gradient(light-dark(#e6e8ec, #2a2c31) 0 25%, transparent 0 50%) 0 0 / calc(var(--size) / 8)
+      calc(var(--size) / 8);
+  }
+
+  .iconlab .tab-icon canvas,
+  .iconlab .tab-icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+
+  /* A faint pixel grid over the mirror, as if seen through a loupe. */
+  .iconlab .tab-icon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(to right, light-dark(#0000000f, #ffffff0f) 1px, transparent 1px) 0 0 / calc(var(--size) / 32) 100%,
+      linear-gradient(to bottom, light-dark(#0000000f, #ffffff0f) 1px, transparent 1px) 0 0 / 100% calc(var(--size) / 32);
+  }
+
+  .iconlab .tab-icon.is-smooth img {
+    image-rendering: auto;
+  }
+
+  .iconlab .cover {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    background: repeating-linear-gradient(45deg, #16120c 0 10px, #241c10 10px 20px);
+    color: var(--amber);
+    font: 400 calc(var(--size) * 0.09) / 1.4 var(--pixel);
+    text-transform: uppercase;
+  }
+
+  .iconlab .tab-title {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font: 400 calc(var(--size) * 0.36) / 1.2 var(--ui);
+    letter-spacing: -0.01em;
+  }
+
+  .iconlab .tab-x {
+    flex: none;
+    font: 300 calc(var(--size) * 0.3) / 1 var(--ui);
+    color: var(--muted);
+  }
+
+  .iconlab .tab-new {
+    flex: none;
+    align-self: center;
+    margin-left: calc(var(--icon) * 0.12);
+    font: 300 calc(var(--icon) * 0.5) / 1 var(--ui);
+    color: var(--muted);
+    text-decoration: none;
+    border-radius: 50%;
+    padding: 0 calc(var(--icon) * 0.08);
+  }
+
+  .iconlab .tab-new:hover,
+  .iconlab .tab-new:focus-visible {
+    color: var(--ink);
+    background: var(--tab-idle);
+  }
+
+  .iconlab .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 1rem;
+    background: var(--tab);
+    color: var(--muted);
+    font: 400 clamp(0.85rem, 2.2vw, 1.15rem) / 1.2 var(--ui);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .iconlab .nav-glyphs {
+    letter-spacing: 0.5em;
+    white-space: nowrap;
+  }
+
+  .iconlab .url {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    background: var(--frame);
+    color: var(--ink);
+  }
+
+  /* With many tabs on the sign, they share the width. */
+  .iconlab .tabs[data-count] .tab {
+    --size: clamp(28px, calc((100cqi - 6rem) / var(--count) * 0.42), var(--icon));
+    flex: 1 1 0;
+  }
+
+  .iconlab .tabs[data-count] .tab-x {
+    display: none;
+  }
+
+  /* The page below the toolbar. */
+
+  .iconlab .page {
+    background: var(--page-bg);
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .iconlab .programs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 0.5rem;
+    max-width: 62rem;
+    margin: 0 auto 1.5rem;
+  }
+
+  .iconlab .programs button {
+    display: grid;
+    gap: 0.2rem;
+    text-align: left;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 0.6rem;
+    background: var(--tab);
+    color: var(--ink);
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .iconlab .programs button[aria-pressed='true'] {
+    border-color: var(--amber);
+    box-shadow: inset 0 0 0 2px var(--amber);
+  }
+
+  .iconlab .program-name {
+    font: 700 0.95rem/1.1 var(--pixel);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .iconlab .program-blurb {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .iconlab .panel,
+  .iconlab .notes {
+    max-width: 62rem;
+    margin: 0 auto;
+  }
+
+  .iconlab .panel h1,
+  .iconlab .panel h2,
+  .iconlab .notes h2 {
+    font: 700 1.15rem/1.3 var(--pixel);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  .iconlab .panel h1 {
+    font-size: clamp(1.2rem, 3.4vw, 1.6rem);
+    margin-top: 0;
+  }
+
+  .iconlab .panel p,
+  .iconlab .panel ul,
+  .iconlab .notes p {
+    max-width: 40rem;
+  }
+
+  .iconlab .note,
+  .iconlab .chart-key {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .iconlab code {
+    font: 0.9em ui-monospace, monospace;
+  }
+
+  .iconlab a {
+    color: var(--amber-ink);
+  }
+
+  .iconlab .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+
+  .iconlab .row .row {
+    margin: 0;
+  }
+
+  .iconlab .btn {
+    display: inline-block;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+    background: var(--tab);
+    color: var(--ink);
+    font: 700 0.8rem/1.2 var(--pixel);
+    text-transform: uppercase;
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+  }
+
+  .iconlab .btn:hover {
+    border-color: var(--muted);
+  }
+
+  .iconlab .btn[aria-pressed='true'] {
+    background: var(--amber);
+    border-color: var(--amber);
+    color: #16120c;
+  }
+
+  .iconlab :focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+
+  .iconlab .readout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin: 0 0 0 0.5rem;
+  }
+
+  .iconlab .readout div {
+    display: grid;
+  }
+
+  .iconlab .readout dt {
+    font: 400 0.7rem/1.2 var(--pixel);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .iconlab .readout dd {
+    margin: 0;
+    font: 700 1.1rem/1.3 var(--pixel);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .iconlab .pad {
+    display: grid;
+    grid-template: '. up .' 'left . right' '. down .' / 3.25rem 3.25rem 3.25rem;
+    gap: 0.25rem;
+    margin: 1rem 0;
+    touch-action: manipulation;
+  }
+
+  .iconlab .pad .btn {
+    padding: 0.7rem 0;
+    font-size: 1rem;
+  }
+
+  .iconlab [data-dir='up'] {
+    grid-area: up;
+  }
+  .iconlab [data-dir='left'] {
+    grid-area: left;
+  }
+  .iconlab [data-dir='right'] {
+    grid-area: right;
+  }
+  .iconlab [data-dir='down'] {
+    grid-area: down;
+  }
+
+  .iconlab .report {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: 0.6rem;
+    background: var(--tab);
+  }
+
+  .iconlab .report p {
+    margin-top: 0;
+  }
+
+  .iconlab .chart {
+    display: block;
+    width: 100%;
+    height: auto;
+    font: 400 11px var(--pixel);
+  }
+
+  .iconlab .palette {
+    display: grid;
+    grid-template-columns: repeat(8, 2.5rem);
+    gap: 0.35rem;
+  }
+
+  .iconlab .swatch {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--line);
+    border-radius: 0.4rem;
+    background: var(--swatch);
+    cursor: pointer;
+  }
+
+  .iconlab .swatch[aria-pressed='true'] {
+    box-shadow:
+      0 0 0 2px var(--page-bg),
+      0 0 0 4px var(--amber);
+  }
+
+  .iconlab .specimens {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .iconlab .specimens figure {
+    margin: 0;
+  }
+
+  .iconlab .specimens img {
+    display: block;
+    width: 8rem;
+    height: 8rem;
+    image-rendering: pixelated;
+    margin-bottom: 0.5rem;
+  }
+
+  .iconlab .specimens figcaption {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  .iconlab .field {
+    display: grid;
+    gap: 0.3rem;
+    max-width: 28rem;
+  }
+
+  .iconlab .field span {
+    font: 400 0.75rem/1.2 var(--pixel);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .iconlab .field input {
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+    background: var(--tab);
+    color: var(--ink);
+    font: 700 1rem/1.2 var(--pixel);
+    text-transform: uppercase;
+  }
+
+  .iconlab .status {
+    font-weight: 600;
+  }
+
+  .iconlab .roster {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0;
+    margin: 0.5rem 0 1rem;
+    list-style: none;
+    max-width: 28rem;
+  }
+
+  .iconlab .roster li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+    background: var(--tab);
+  }
+
+  .iconlab .roster li.is-self {
+    border-color: var(--amber);
+  }
+
+  .iconlab .roster .who {
+    flex: 1;
+    font: 700 0.85rem/1.2 var(--pixel);
+    text-transform: uppercase;
+  }
+
+  .iconlab .roster .btn {
+    padding: 0.3rem 0.55rem;
+  }
+
+  .iconlab .noscript {
+    max-width: 62rem;
+    margin: 0 auto 1rem;
+    color: var(--muted);
+  }
+
+  .iconlab .notes {
+    padding: 1rem 1rem 3rem;
+    color: var(--ink);
+  }
+
+  .iconlab .notes h2 {
+    margin-top: 2rem;
+  }
+
+  .iconlab .credits {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .iconlab .lookup-arrow {
+      animation: none;
+    }
+  }
+</style>

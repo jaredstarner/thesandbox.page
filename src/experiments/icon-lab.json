@@ -1,0 +1,9 @@
+{
+  "title": "Icon lab",
+  "summary": "This page takes over its own tab icon: play Snake in it, paint it, watch it slow down when you look away, test it for HDR, and run a scrolling sign across a row of tabs.",
+  "date": "2026-10-05",
+  "tags": ["favicon", "canvas", "broadcast-channel", "compression-streams", "page-visibility", "web-audio", "svg"],
+  "requires": ["canvas"],
+  "issue": 19,
+  "plot": 5
+}
