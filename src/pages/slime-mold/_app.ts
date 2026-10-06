@@ -69,7 +69,8 @@ export async function startSlime(root: HTMLElement): Promise<void> {
     view.cx = cx;
     view.cy = top + (bottom - top) / 2;
     view.scale = d / (2 * (DISH_RADIUS + 12));
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Past about 1.75 device pixels per agar cell, extra pixels only cost frames.
+    const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, (1.75 * SIZE) / d));
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     plate.setView(canvas.width, canvas.height, view.cx * dpr, view.cy * dpr, view.scale * dpr);

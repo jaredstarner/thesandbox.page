@@ -75,13 +75,29 @@ fn dryAt(p: vec2f) -> f32 {
   return select(0.0, dry[max(m, 0)], m >= 0);
 }
 
+fn smell(c: vec2i) -> f32 {
+  let n = i32(P.size);
+  let q = clamp(c, vec2i(0), vec2i(n - 1));
+  let i = u32(q.y * n + q.x);
+  // Slime that already covers an oat saturates the sum, so a fed oat stops pulling.
+  return min(trail[i] + scent[i], 420.0);
+}
+
+/** Bilinear, so the grid's axes don't steer the agents. */
+fn smellAt(p: vec2f) -> f32 {
+  let q = p - 0.5;
+  let c = vec2i(floor(q));
+  let f = q - floor(q);
+  let a = mix(smell(c), smell(c + vec2i(1, 0)), f.x);
+  let b = mix(smell(c + vec2i(0, 1)), smell(c + vec2i(1, 1)), f.x);
+  return mix(a, b, f.y);
+}
+
 fn sense(p: vec2f, heading: f32) -> f32 {
   let q = p + vec2f(cos(heading), sin(heading)) * P.sensorDist;
   if (distance(q, dishCenter()) > P.dishRadius) { return -1.0; }
-  let i = cellOf(q);
-  if (walls[i] != 0u) { return -50.0; }
-  // Slime that already covers an oat saturates the sum, so a fed oat stops pulling.
-  var v = min(trail[i] + scent[i], 420.0) - 80.0 * dryAt(q);
+  if (walls[cellOf(q)] != 0u) { return -50.0; }
+  var v = smellAt(q) - 80.0 * dryAt(q);
   if (P.lamp.w > 0.5) {
     let d = distance(q, P.lamp.xy);
     if (d < P.lamp.z) { v -= 40.0 * (1.2 - d / P.lamp.z); }
@@ -150,16 +166,18 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
     dst[i] = 0.0;
     return;
   }
+  // A 1-2-1 kernel spreads more evenly in every direction than a box blur does.
   var sum = 0.0;
   let last = i32(n) - 1;
   for (var dy = -1; dy <= 1; dy++) {
     for (var dx = -1; dx <= 1; dx++) {
       let x = clamp(i32(id.x) + dx, 0, last);
       let y = clamp(i32(id.y) + dy, 0, last);
-      sum += src[u32(y) * n + u32(x)];
+      let w = f32((2 - abs(dx)) * (2 - abs(dy)));
+      sum += src[u32(y) * n + u32(x)] * w;
     }
   }
-  var v = mix(src[i], sum / 9.0, P.diffuse) * P.keep + dep;
+  var v = mix(src[i], sum / 16.0, P.diffuse) * P.keep + dep;
   if (P.lamp.w > 0.5 && distance(p, P.lamp.xy) < P.lamp.z) {
     v *= 0.8;
   }
