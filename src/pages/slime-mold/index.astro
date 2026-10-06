@@ -110,10 +110,11 @@ import Bare from '../../layouts/Bare.astro';
         around Tokyo, and the mold grew a network comparable with the region's railways.
       </p>
       <p>
-        This plate doesn't model the tubes. It follows Jeff Jones's 2010 agent model: about a million particles, each
-        sensing a chemical trail ahead of it, left, and right, turning toward the strongest, stepping forward, and
-        depositing more trail. The trail spreads and fades each step, and oats keep their patch of agar topped up. Nobody
-        draws the network; it comes out of a million agents following that rule.
+        This plate doesn't model the tubes. It follows Jeff Jones's 2010 agent model: particles, each sensing a chemical
+        trail ahead of it, left, and right, turning toward the strongest, stepping forward, and depositing more trail. The
+        trail spreads and fades each step. Each oat gives off a scent the agents follow too, until slime covers it and it
+        stops pulling. A plate starts as about sixteen thousand agents in the middle, which divide until there are about
+        a million. Nobody draws the network; it comes out of a million agents following that rule.
       </p>
       <p>
         Agents alone never give up a corridor, so the maze brings in a second model: Tero, Kobayashi, and Nakagaki's
@@ -130,15 +131,16 @@ import Bare from '../../layouts/Bare.astro';
         <li><b>Scrape</b> clears salt, trail, and oats.</li>
         <li><b>Engineer</b> draws the minimum spanning tree between the oats, the shortest set of straight lines that connects them all, so you can set the mold's answer against it.</li>
         <li><b>Maze</b> pours a fresh plate with a salt maze, fills every corridor with slime, and feeds both ends. Give it half a minute.</li>
-        <li><b>Strain</b> swaps the agents' rules. Small changes in sensor angle turn networks into lattices, rings, or foam.</li>
+        <li><b>Strain</b> swaps the agents' rules. Small changes in how far and how wide they sense turn a network into veins, ropes, whorls, a lattice, or lace. Pour a fresh plate to see a strain grow from the start.</li>
       </ul>
       <h3>How it runs</h3>
       <p>
         Everything happens on your GPU with WebGPU. Every step, one compute shader moves every agent and adds its
-        deposits to the agar with atomic adds, a second blurs and fades the trail into a second buffer, and a third tops up
-        the agar under each oat. A fragment shader then lights the trail as a height field, so dense veins catch the light
-        like wet tubes. The CPU handles only your clicks, the engineer's lines, and the maze's flow model, which is
-        small: one equation per maze cell, solved a few times a second.
+        deposits to the agar with atomic adds, and a second blurs and fades the trail into a second buffer. The oats'
+        scent sits in a buffer of its own, worked out again only when an oat comes or goes. A fragment shader then lights
+        the trail as a height field, so dense veins catch the light like wet tubes. The CPU handles only your clicks, the
+        engineer's lines, and the maze's flow model, which is small: one equation per maze cell, solved again every few
+        steps.
       </p>
       <p class="credits">
         Set in Instrument Serif and Fragment Mono, both under the SIL Open Font License, served from this site. Everything
