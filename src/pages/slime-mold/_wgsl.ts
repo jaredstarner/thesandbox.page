@@ -22,6 +22,9 @@ struct Params {
   time: f32,
   strokeCount: u32,
   jitter: f32,
+  mazeOrigin: vec2f,
+  mazePitch: f32,
+  mazeCells: u32,
 }
 
 @group(0) @binding(0) var<uniform> P: Params;
@@ -45,6 +48,15 @@ fn cellOf(p: vec2f) -> u32 {
   let c = clamp(vec2i(floor(p)), vec2i(0), vec2i(n - 1));
   return u32(c.y * n + c.x);
 }
+
+/** Index of the maze cell under p, or -1 outside the maze (or with no maze). */
+fn mazeCell(p: vec2f) -> i32 {
+  if (P.mazeCells == 0u) { return -1; }
+  let c = floor((p - P.mazeOrigin) / P.mazePitch);
+  let m = f32(P.mazeCells);
+  if (c.x < 0.0 || c.y < 0.0 || c.x >= m || c.y >= m) { return -1; }
+  return i32(c.y * m + c.x);
+}
 `;
 
 /** Move every agent one step: sense, turn, step, deposit. */
@@ -55,13 +67,19 @@ ${PARAMS}
 @group(0) @binding(3) var<storage, read_write> deposit: array<atomic<u32>>;
 @group(0) @binding(4) var<storage, read> walls: array<u32>;
 @group(0) @binding(5) var<storage, read> scent: array<f32>;
+@group(0) @binding(6) var<storage, read> dry: array<f32>;
+
+fn dryAt(p: vec2f) -> f32 {
+  let m = mazeCell(p);
+  return select(0.0, dry[max(m, 0)], m >= 0);
+}
 
 fn sense(p: vec2f, heading: f32) -> f32 {
   let q = p + vec2f(cos(heading), sin(heading)) * P.sensorDist;
   if (distance(q, dishCenter()) > P.dishRadius) { return -1.0; }
   let i = cellOf(q);
   if (walls[i] != 0u) { return -50.0; }
-  var v = trail[i] + scent[i];
+  var v = trail[i] + scent[i] - 80.0 * dryAt(q);
   if (P.lamp.w > 0.5) {
     let d = distance(q, P.lamp.xy);
     if (d < P.lamp.z) { v -= 40.0 * (1.2 - d / P.lamp.z); }
@@ -99,7 +117,7 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
   } else {
     a.x = next.x;
     a.y = next.y;
-    atomicAdd(&deposit[there], u32(P.deposit * 256.0));
+    atomicAdd(&deposit[there], u32(P.deposit * 256.0 * (1.0 - dryAt(next))));
   }
   agents[i] = a;
 }
@@ -112,6 +130,7 @@ ${PARAMS}
 @group(0) @binding(2) var<storage, read_write> dst: array<f32>;
 @group(0) @binding(3) var<storage, read_write> deposit: array<atomic<u32>>;
 @group(0) @binding(4) var<storage, read> walls: array<u32>;
+@group(0) @binding(5) var<storage, read> dry: array<f32>;
 
 @compute @workgroup_size(16, 16)
 fn main(@builtin(global_invocation_id) id: vec3u) {
@@ -136,6 +155,11 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
   var v = mix(src[i], sum / 9.0, P.diffuse) * P.keep + dep;
   if (P.lamp.w > 0.5 && distance(p, P.lamp.xy) < P.lamp.z) {
     v *= 0.8;
+  }
+  // A maze corridor the flow has abandoned dries out.
+  let m = mazeCell(p);
+  if (m >= 0) {
+    v *= 1.0 - 0.06 * dry[m];
   }
   dst[i] = min(v, 400.0);
 }

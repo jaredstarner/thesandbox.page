@@ -1,5 +1,6 @@
 // A salt maze for the plate: a recursive-backtracker maze in the square
-// inside the dish, drawn as salt walls, with an oat in two far corners.
+// inside the dish, with a few extra walls knocked out so some routes loop and
+// one is shortest, drawn as salt walls, with an oat in two far corners.
 
 import type { Food } from './_plate';
 
@@ -9,9 +10,15 @@ export interface Maze {
   /** True where an agent may start: inside the maze's corridors. */
   open: (x: number, y: number) => boolean;
   bounds: { x0: number; y0: number; side: number };
+  cells: number;
+  pitch: number;
+  /** Open passages between cells, as cell index pairs (row-major). */
+  links: [number, number][];
+  /** The cells holding the two oats. */
+  ends: [number, number];
 }
 
-export function buildMaze(size: number, dishRadius: number, cells = 9): Maze {
+export function buildMaze(size: number, dishRadius: number, cells = 9, loops = 7): Maze {
   const side = Math.floor(dishRadius * Math.SQRT2 * 0.94);
   const x0 = Math.floor(size / 2 - side / 2);
   const y0 = x0;
@@ -44,6 +51,28 @@ export function buildMaze(size: number, dishRadius: number, cells = 9): Maze {
     else south[n] = 0;
     seen[n] = 1;
     stack.push(n);
+  }
+
+  // Knock out a few more walls so the maze has loops, and so routes of different lengths.
+  for (let k = 0, tries = 0; k < loops && tries < 500; tries++) {
+    const c = Math.floor(Math.random() * cells * cells);
+    const cx = c % cells;
+    const cy = Math.floor(c / cells);
+    if (Math.random() < 0.5) {
+      if (cx < cells - 1 && east[c]) {
+        east[c] = 0;
+        k++;
+      }
+    } else if (cy < cells - 1 && south[c]) {
+      south[c] = 0;
+      k++;
+    }
+  }
+
+  const links: [number, number][] = [];
+  for (let c = 0; c < cells * cells; c++) {
+    if (c % cells < cells - 1 && !east[c]) links.push([c, c + 1]);
+    if (Math.floor(c / cells) < cells - 1 && !south[c]) links.push([c, c + cells]);
   }
 
   const walls = new Uint32Array(size * size);
@@ -81,5 +110,9 @@ export function buildMaze(size: number, dishRadius: number, cells = 9): Maze {
     open: (x, y) =>
       x > x0 + h && x < x0 + side - h && y > y0 + h && y < y0 + side - h && !walls[Math.floor(y) * size + Math.floor(x)],
     bounds: { x0, y0, side },
+    cells,
+    pitch,
+    links,
+    ends: [0, cells * cells - 1],
   };
 }

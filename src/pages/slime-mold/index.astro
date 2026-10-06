@@ -115,6 +115,13 @@ import Bare from '../../layouts/Bare.astro';
         depositing more trail. The trail spreads and fades each step, and oats keep their patch of agar topped up. Nobody
         draws the network; it comes out of a million agents following that rule.
       </p>
+      <p>
+        Agents alone never give up a corridor, so the maze brings in a second model: Tero, Kobayashi, and Nakagaki's
+        2007 flow model, run on the maze's grid of corridors. It pushes protoplasm from one oat to the other; tubes that
+        carry the flow thicken, and tubes that don't wither. Here a tube answers flow a little more than in proportion,
+        so two routes of equal length can't share it forever. Corridors whose tubes wither dry out, the agents leave
+        them, and what's left runs along a shortest route.
+      </p>
       <h3>On the bench</h3>
       <ul>
         <li><b>Oat</b> drops food; click an oat to take it away.</li>
@@ -122,6 +129,7 @@ import Bare from '../../layouts/Bare.astro';
         <li><b>Lamp</b> shines a light while you hold it down; agents turn away and the trail fades under it.</li>
         <li><b>Scrape</b> clears salt, trail, and oats.</li>
         <li><b>Engineer</b> draws the minimum spanning tree between the oats, the shortest set of straight lines that connects them all, so you can set the mold's answer against it.</li>
+        <li><b>Maze</b> pours a fresh plate with a salt maze, fills every corridor with slime, and feeds both ends. Give it half a minute.</li>
         <li><b>Strain</b> swaps the agents' rules. Small changes in sensor angle turn networks into lattices, rings, or foam.</li>
       </ul>
       <h3>How it runs</h3>
@@ -129,7 +137,8 @@ import Bare from '../../layouts/Bare.astro';
         Everything happens on your GPU with WebGPU. Every step, one compute shader moves every agent and adds its
         deposits to the agar with atomic adds, a second blurs and fades the trail into a second buffer, and a third tops up
         the agar under each oat. A fragment shader then lights the trail as a height field, so dense veins catch the light
-        like wet tubes. The CPU only handles your clicks and the engineer's lines.
+        like wet tubes. The CPU handles only your clicks, the engineer's lines, and the maze's flow model, which is
+        small: one equation per maze cell, solved a few times a second.
       </p>
       <p class="credits">
         Set in Instrument Serif and Fragment Mono, both under the SIL Open Font License, served from this site. Everything

@@ -1,6 +1,7 @@
 // Wires the slime mold page: finds a GPU, pours a plate, and runs the loop.
 
 import { DISH_RADIUS, MAX_FOODS, Plate, SIZE, type Food } from './_plate';
+import { FlowSolver } from './_flow';
 import { buildMaze } from './_maze';
 import { spanningTree } from './_mst';
 import { STRAINS, toRules, type Strain } from './_strains';
@@ -152,7 +153,28 @@ export async function startSlime(root: HTMLElement): Promise<void> {
     plateNo.textContent = String(pours);
   }
 
+  // In a maze, Tero's flow model decides which corridors the slime abandons.
+  let flow: FlowSolver | null = null;
+  const FLOW_START = 900;
+  const STEPS_PER_FLOW = 5;
+  let flowSteps = 0;
+  const smooth = (a: number, b: number, x: number) => {
+    const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+  };
+  function advanceFlow() {
+    if (!flow || plate.steps < FLOW_START) return;
+    let ran = false;
+    while (flowSteps + STEPS_PER_FLOW <= plate.steps - FLOW_START) {
+      flow.iterate(0.04);
+      flowSteps += STEPS_PER_FLOW;
+      ran = true;
+    }
+    if (ran) plate.setDryness(flow.levels().map((level) => 1 - smooth(0.03, 0.4, level)));
+  }
+
   function fresh() {
+    flow = null;
     plate.foods = scatterOats(11);
     plate.pour(inoculate(SIZE / 2, SIZE / 2));
     poured();
@@ -177,7 +199,9 @@ export async function startSlime(root: HTMLElement): Promise<void> {
       data[i * 4 + 2] = Math.random() * Math.PI * 2;
     }
     plate.foods = m.oats;
-    plate.pour(data, m.walls);
+    plate.pour(data, m.walls, { x0, y0, pitch: m.pitch, cells: m.cells });
+    flow = new FlowSolver(m.cells * m.cells, m.links, m.ends[0], m.ends[1]);
+    flowSteps = 0;
     poured();
     oatsChanged();
   }
@@ -308,6 +332,7 @@ export async function startSlime(root: HTMLElement): Promise<void> {
     }
     if (paused) plate.applyStrokes();
     else plate.step(speed);
+    advanceFlow();
     plate.render(now / 1000);
     if (photo) {
       photo = false;

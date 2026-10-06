@@ -77,8 +77,13 @@ const P = {
   time: 21,
   strokeCount: 22,
   jitter: 23,
+  mazeOrigin: 24,
+  mazePitch: 26,
+  mazeCells: 27,
 } as const;
-const PARAM_BYTES = 96;
+const PARAM_BYTES = 112;
+/** The most maze cells the dryness buffer holds (16 by 16). */
+const MAX_MAZE_CELLS = 256;
 const FOOD_STRENGTH = 120;
 
 export class Plate {
@@ -102,6 +107,7 @@ export class Plate {
     walls: GPUBuffer;
     foods: GPUBuffer;
     scent: GPUBuffer;
+    dry: GPUBuffer;
     strokes: GPUBuffer;
   };
   private pipelines!: {
@@ -139,6 +145,7 @@ export class Plate {
       walls: make(cells, storage, 'walls'),
       foods: make(MAX_FOODS * 16, storage, 'foods'),
       scent: make(cells, storage, 'scent'),
+      dry: make(MAX_MAZE_CELLS * 4, storage, 'dry'),
       strokes: make(MAX_STROKES * 32, storage, 'strokes'),
     };
     this.u32[P.size] = SIZE;
@@ -190,8 +197,8 @@ export class Plate {
       });
     const both = (fn: (k: number) => GPUBindGroup) => [fn(0), fn(1)];
     this.groups = {
-      agents: both((k) => group(agents, [b.params, b.agents, b.trail[k], b.deposit, b.walls, b.scent])),
-      diffuse: both((k) => group(diffuse, [b.params, b.trail[k], b.trail[1 - k], b.deposit, b.walls])),
+      agents: both((k) => group(agents, [b.params, b.agents, b.trail[k], b.deposit, b.walls, b.scent, b.dry])),
+      diffuse: both((k) => group(diffuse, [b.params, b.trail[k], b.trail[1 - k], b.deposit, b.walls, b.dry])),
       scent: group(scent, [b.params, b.scent, b.foods]),
       stamp: both((k) => group(stamp, [b.params, b.walls, b.trail[k], b.strokes])),
       render: both((k) => group(render, [b.params, b.trail[k], b.walls, b.foods])),
@@ -199,7 +206,12 @@ export class Plate {
   }
 
   /** Clears the agar and salt, then places agents from a packed x, y, heading, 0 array. */
-  pour(agents: Float32Array, walls?: Uint32Array): void {
+  pour(agents: Float32Array, walls?: Uint32Array, maze?: { x0: number; y0: number; pitch: number; cells: number }): void {
+    this.f32[P.mazeOrigin] = maze?.x0 ?? 0;
+    this.f32[P.mazeOrigin + 1] = maze?.y0 ?? 0;
+    this.f32[P.mazePitch] = maze?.pitch ?? 1;
+    this.u32[P.mazeCells] = maze?.cells ?? 0;
+    this.setDryness(new Float32Array(MAX_MAZE_CELLS));
     const encoder = this.device.createCommandEncoder();
     for (const buffer of [...this.buffers.trail, this.buffers.deposit, this.buffers.walls]) encoder.clearBuffer(buffer);
     this.device.queue.submit([encoder.finish()]);
@@ -208,6 +220,11 @@ export class Plate {
     this.strokes = [];
     this.steps = 0;
     this.foodsDirty = true;
+  }
+
+  /** How dry each maze cell is, 0 (wet) to 1 (abandoned), row-major. */
+  setDryness(levels: Float32Array): void {
+    this.device.queue.writeBuffer(this.buffers.dry, 0, levels.subarray(0, MAX_MAZE_CELLS));
   }
 
   /** Queues a salt or scrape stroke for the next step. */
