@@ -9,8 +9,8 @@ import { DIALS, STRAINS, toRules, type Strain } from './_strains';
 const MAX_AGENTS = 1 << 20;
 const MIN_AGENTS = 1 << 17;
 /** A fresh plate starts this small and grows by division. */
-const SEED_AGENTS = 1 << 14;
-const INOCULUM_RADIUS = 26;
+const SEED_AGENTS = 1 << 12;
+const INOCULUM_RADIUS = 40;
 
 export async function startSlime(root: HTMLElement): Promise<void> {
   const unsupported = root.querySelector<HTMLElement>('[data-unsupported]')!;
