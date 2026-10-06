@@ -15,12 +15,12 @@ export interface Strain {
 }
 
 export const STRAINS: Strain[] = [
-  { name: 'Network', sensorAngle: 22.5, sensorDist: 9, turnAngle: 45, stepSize: 1, deposit: 5, fade: 10 },
-  { name: 'Veins', sensorAngle: 25, sensorDist: 14, turnAngle: 15, stepSize: 1, deposit: 5, fade: 25 },
+  { name: 'Network', sensorAngle: 35, sensorDist: 20, turnAngle: 35, stepSize: 1, deposit: 6, fade: 10 },
   { name: 'Ropes', sensorAngle: 12, sensorDist: 26, turnAngle: 20, stepSize: 1.4, deposit: 4, fade: 6 },
+  { name: 'Veins', sensorAngle: 25, sensorDist: 14, turnAngle: 15, stepSize: 1, deposit: 5, fade: 25 },
   { name: 'Whorls', sensorAngle: 10, sensorDist: 40, turnAngle: 10, stepSize: 2, deposit: 3, fade: 8 },
-  { name: 'Lattice', sensorAngle: 60, sensorDist: 20, turnAngle: 60, stepSize: 1.5, deposit: 3, fade: 15 },
-  { name: 'Lace', sensorAngle: 30, sensorDist: 4, turnAngle: 30, stepSize: 1, deposit: 5, fade: 10 },
+  { name: 'Branches', sensorAngle: 60, sensorDist: 20, turnAngle: 60, stepSize: 1.5, deposit: 6, fade: 6 },
+  { name: 'Spokes', sensorAngle: 22.5, sensorDist: 9, turnAngle: 45, stepSize: 1, deposit: 5, fade: 10 },
 ];
 
 export interface Dial {
