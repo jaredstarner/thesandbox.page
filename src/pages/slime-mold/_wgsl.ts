@@ -25,6 +25,7 @@ struct Params {
   mazeOrigin: vec2f,
   mazePitch: f32,
   mazeCells: u32,
+  born: u32,
 }
 
 @group(0) @binding(0) var<uniform> P: Params;
@@ -79,7 +80,8 @@ fn sense(p: vec2f, heading: f32) -> f32 {
   if (distance(q, dishCenter()) > P.dishRadius) { return -1.0; }
   let i = cellOf(q);
   if (walls[i] != 0u) { return -50.0; }
-  var v = trail[i] + scent[i] - 80.0 * dryAt(q);
+  // Slime that already covers an oat saturates the sum, so a fed oat stops pulling.
+  var v = min(trail[i] + scent[i], 420.0) - 80.0 * dryAt(q);
   if (P.lamp.w > 0.5) {
     let d = distance(q, P.lamp.xy);
     if (d < P.lamp.z) { v -= 40.0 * (1.2 - d / P.lamp.z); }
@@ -93,6 +95,11 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
   if (i >= P.agents) { return; }
   var a = agents[i];
   let seed = hash(i ^ hash(P.frame * 2654435761u));
+  if (i >= P.born) {
+    // Just divided: start where a random living agent is, facing a random way.
+    let parent = agents[hash(seed ^ 0x165667b1u) % max(P.born, 1u)];
+    a = vec4f(parent.xy, rand(seed ^ 0x27d4eb2du) * 6.2831853, 0.0);
+  }
   let f = sense(a.xy, a.z);
   let l = sense(a.xy, a.z + P.sensorAngle);
   let r = sense(a.xy, a.z - P.sensorAngle);

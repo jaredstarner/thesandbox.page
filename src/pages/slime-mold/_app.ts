@@ -8,6 +8,8 @@ import { DIALS, STRAINS, toRules, type Strain } from './_strains';
 
 const MAX_AGENTS = 1 << 20;
 const MIN_AGENTS = 1 << 17;
+/** A fresh plate starts this small and grows by division. */
+const SEED_AGENTS = 1 << 14;
 const INOCULUM_RADIUS = 26;
 
 export async function startSlime(root: HTMLElement): Promise<void> {
@@ -123,20 +125,21 @@ export async function startSlime(root: HTMLElement): Promise<void> {
 
   function scatterOats(count: number): Food[] {
     const c = SIZE / 2;
-    const oats: Food[] = [{ x: c, y: c }];
+    const oats: Food[] = [];
     for (let tries = 0; oats.length < count && tries < 4000; tries++) {
       const a = Math.random() * Math.PI * 2;
       const r = Math.sqrt(Math.random()) * (DISH_RADIUS - 60);
       const x = c + Math.cos(a) * r;
       const y = c + Math.sin(a) * r;
-      if (oats.every((o) => Math.hypot(o.x - x, o.y - y) > 120)) oats.push({ x, y });
+      // Keep the inoculation site bare, so the colony has to go looking.
+      if (Math.hypot(x - c, y - c) > 110 && oats.every((o) => Math.hypot(o.x - x, o.y - y) > 120)) oats.push({ x, y });
     }
     return oats;
   }
 
   function inoculate(x: number, y: number): Float32Array {
-    const data = new Float32Array(MAX_AGENTS * 4);
-    for (let i = 0; i < MAX_AGENTS; i++) {
+    const data = new Float32Array(SEED_AGENTS * 4);
+    for (let i = 0; i < SEED_AGENTS; i++) {
       const a = Math.random() * Math.PI * 2;
       const r = Math.sqrt(Math.random()) * INOCULUM_RADIUS;
       data[i * 4] = x + Math.cos(a) * r;
@@ -176,7 +179,7 @@ export async function startSlime(root: HTMLElement): Promise<void> {
   function fresh() {
     flow = null;
     plate.foods = scatterOats(11);
-    plate.pour(inoculate(SIZE / 2, SIZE / 2));
+    plate.pour(inoculate(SIZE / 2, SIZE / 2), SEED_AGENTS);
     poured();
     oatsChanged();
   }
@@ -199,7 +202,7 @@ export async function startSlime(root: HTMLElement): Promise<void> {
       data[i * 4 + 2] = Math.random() * Math.PI * 2;
     }
     plate.foods = m.oats;
-    plate.pour(data, m.walls, { x0, y0, pitch: m.pitch, cells: m.cells });
+    plate.pour(data, MAX_AGENTS, m.walls, { x0, y0, pitch: m.pitch, cells: m.cells });
     flow = new FlowSolver(m.cells * m.cells, m.links, m.ends[0], m.ends[1]);
     flowSteps = 0;
     poured();
@@ -366,7 +369,10 @@ export async function startSlime(root: HTMLElement): Promise<void> {
       sampled++;
       if (dt > 30) slow++;
       if (sampled >= 90) {
-        if (slow > 60 && plate.agents > MIN_AGENTS) plate.agents >>= 1;
+        if (slow > 60 && speed <= 2 && plate.target > MIN_AGENTS) {
+          plate.target >>= 1;
+          plate.agents = Math.min(plate.agents, plate.target);
+        }
         sampled = 0;
         slow = 0;
       }

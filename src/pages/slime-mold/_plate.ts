@@ -80,8 +80,11 @@ const P = {
   mazeOrigin: 24,
   mazePitch: 26,
   mazeCells: 27,
+  born: 28,
 } as const;
-const PARAM_BYTES = 112;
+const PARAM_BYTES = 128;
+/** Per-step growth of a young colony, until it reaches the target population. */
+const GROWTH = 1.004;
 /** The most maze cells the dryness buffer holds (16 by 16). */
 const MAX_MAZE_CELLS = 256;
 const FOOD_STRENGTH = 120;
@@ -89,6 +92,9 @@ const FOOD_STRENGTH = 120;
 export class Plate {
   readonly device: GPUDevice;
   readonly maxAgents: number;
+  /** The population the colony grows toward; lowered when frames run long. */
+  target: number;
+  /** Agents alive now. */
   agents: number;
   rules: Rules;
   foods: Food[] = [];
@@ -132,6 +138,7 @@ export class Plate {
     this.device = device;
     this.context = context;
     this.maxAgents = maxAgents;
+    this.target = maxAgents;
     this.agents = maxAgents;
     this.rules = rules;
     const cells = SIZE * SIZE * 4;
@@ -205,8 +212,16 @@ export class Plate {
     };
   }
 
-  /** Clears the agar and salt, then places agents from a packed x, y, heading, 0 array. */
-  pour(agents: Float32Array, walls?: Uint32Array, maze?: { x0: number; y0: number; pitch: number; cells: number }): void {
+  /** Clears the agar and salt, then places agents from a packed x, y, heading, 0 array. The
+      colony starts with `alive` of them and grows by division toward the target. */
+  pour(
+    agents: Float32Array,
+    alive: number,
+    walls?: Uint32Array,
+    maze?: { x0: number; y0: number; pitch: number; cells: number },
+  ): void {
+    this.agents = Math.min(alive, this.target);
+    this.u32[P.born] = this.agents;
     this.f32[P.mazeOrigin] = maze?.x0 ?? 0;
     this.f32[P.mazeOrigin + 1] = maze?.y0 ?? 0;
     this.f32[P.mazePitch] = maze?.pitch ?? 1;
@@ -246,7 +261,7 @@ export class Plate {
 
   private writeParams(): void {
     const { f32, u32, rules, lamp } = this;
-    u32[P.agents] = Math.min(this.agents, this.maxAgents);
+    u32[P.agents] = this.agents;
     u32[P.frame] = this.steps;
     u32[P.foodCount] = Math.min(this.foods.length, MAX_FOODS);
     f32[P.sensorAngle] = rules.sensorAngle;
@@ -290,7 +305,10 @@ export class Plate {
         this.strokes.forEach((k, i) => data.set([k.ax, k.ay, k.bx, k.by, k.radius, k.salt ? 1 : 0, 0, 0], i * 8));
         device.queue.writeBuffer(this.buffers.strokes, 0, data);
       }
+      this.u32[P.born] = this.agents;
+      if (this.agents < this.target) this.agents = Math.min(this.target, Math.ceil(this.agents * GROWTH) + 1);
       this.writeParams();
+      this.u32[P.born] = this.agents;
       const encoder = device.createCommandEncoder();
       const pass = encoder.beginComputePass();
       const k = this.current;
@@ -301,7 +319,7 @@ export class Plate {
       }
       pass.setPipeline(pipelines.agents);
       pass.setBindGroup(0, groups.agents[k]!);
-      pass.dispatchWorkgroups(Math.ceil(Math.min(this.agents, this.maxAgents) / 256));
+      pass.dispatchWorkgroups(Math.ceil(this.agents / 256));
       pass.setPipeline(pipelines.diffuse);
       pass.setBindGroup(0, groups.diffuse[k]!);
       pass.dispatchWorkgroups(cellGroups, cellGroups);
