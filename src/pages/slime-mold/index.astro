@@ -28,7 +28,16 @@ import Bare from '../../layouts/Bare.astro';
     </header>
 
     <p class="unsupported" data-unsupported hidden></p>
-    <noscript><p class="unsupported">This plate grows on the GPU with JavaScript. Turn scripts on to culture it.</p></noscript>
+    <noscript>
+      <p class="unsupported">This plate grows on the GPU with JavaScript. Turn scripts on to culture it.</p>
+      <style is:inline>
+        .slime .readout,
+        .slime .tools,
+        .slime .actions > :not([popovertarget='slime-notes']) {
+          display: none;
+        }
+      </style>
+    </noscript>
 
     <nav class="bench" aria-label="Lab bench">
       <fieldset class="tools" data-tools>

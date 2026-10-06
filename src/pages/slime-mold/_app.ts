@@ -15,10 +15,15 @@ const INOCULUM_RADIUS = 40;
 export async function startSlime(root: HTMLElement): Promise<void> {
   const unsupported = root.querySelector<HTMLElement>('[data-unsupported]')!;
   const bench = root.querySelector<HTMLElement>('.bench')!;
+  // Without a plate, keep only the lab notes on the bench.
   const fail = (message: string) => {
     unsupported.textContent = message;
     unsupported.hidden = false;
-    bench.hidden = true;
+    root.querySelector<HTMLElement>('.readout')!.hidden = true;
+    root.querySelector<HTMLElement>('[data-tools]')!.hidden = true;
+    for (const control of root.querySelectorAll<HTMLElement>('.actions > *')) {
+      if (control.getAttribute('popovertarget') !== 'slime-notes') control.hidden = true;
+    }
   };
 
   const gpu = navigator.gpu;
