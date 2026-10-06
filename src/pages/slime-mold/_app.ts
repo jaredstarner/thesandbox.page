@@ -7,6 +7,8 @@ import { spanningTree } from './_mst';
 import { DIALS, STRAINS, toRules, type Strain } from './_strains';
 
 const MAX_AGENTS = 1 << 20;
+/** A maze holds fewer, so the surviving route reads as a tube, not packed corridors. */
+const MAZE_AGENTS = 1 << 17;
 const MIN_AGENTS = 1 << 17;
 /** A fresh plate starts this small and grows by division. */
 const SEED_AGENTS = 1 << 12;
@@ -194,9 +196,9 @@ export async function startSlime(root: HTMLElement): Promise<void> {
   // Nakagaki's maze: fill every corridor with slime, feed both ends, and wait.
   function maze() {
     const m = buildMaze(SIZE, DISH_RADIUS);
-    const data = new Float32Array(MAX_AGENTS * 4);
+    const data = new Float32Array(MAZE_AGENTS * 4);
     const { x0, y0, side } = m.bounds;
-    for (let i = 0; i < MAX_AGENTS; i++) {
+    for (let i = 0; i < MAZE_AGENTS; i++) {
       let x = 0;
       let y = 0;
       do {
@@ -208,7 +210,11 @@ export async function startSlime(root: HTMLElement): Promise<void> {
       data[i * 4 + 2] = Math.random() * Math.PI * 2;
     }
     plate.foods = m.oats;
-    plate.pour(data, MAX_AGENTS, m.walls, { x0, y0, pitch: m.pitch, cells: m.cells });
+    plate.pour(data, MAZE_AGENTS, {
+      limit: MAZE_AGENTS,
+      walls: m.walls,
+      maze: { x0, y0, pitch: m.pitch, cells: m.cells },
+    });
     flow = new FlowSolver(m.cells * m.cells, m.links, m.ends[0], m.ends[1]);
     flowSteps = 0;
     poured();

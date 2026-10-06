@@ -99,6 +99,8 @@ export class Plate {
   target: number;
   /** Agents alive now. */
   agents: number;
+  /** The most this plate's colony may grow to, whatever the target. */
+  private limit: number;
   rules: Rules;
   foods: Food[] = [];
   lamp: Lamp = { x: 0, y: 0, radius: 60, on: false };
@@ -144,6 +146,7 @@ export class Plate {
     this.maxAgents = maxAgents;
     this.target = maxAgents;
     this.agents = maxAgents;
+    this.limit = maxAgents;
     this.rules = rules;
     const cells = SIZE * SIZE * 4;
     const storage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST;
@@ -219,14 +222,15 @@ export class Plate {
   }
 
   /** Clears the agar and salt, then places agents from a packed x, y, heading, 0 array. The
-      colony starts with `alive` of them and grows by division toward the target. */
+      colony starts with `alive` of them and grows by division toward the target, or `limit`. */
   pour(
     agents: Float32Array,
     alive: number,
-    walls?: Uint32Array,
-    maze?: { x0: number; y0: number; pitch: number; cells: number },
+    options: { limit?: number; walls?: Uint32Array; maze?: { x0: number; y0: number; pitch: number; cells: number } } = {},
   ): void {
-    this.agents = Math.min(alive, this.target);
+    const { walls, maze } = options;
+    this.limit = Math.min(options.limit ?? this.maxAgents, this.maxAgents);
+    this.agents = Math.min(alive, this.target, this.limit);
     this.u32[P.born] = this.agents;
     this.f32[P.mazeOrigin] = maze?.x0 ?? 0;
     this.f32[P.mazeOrigin + 1] = maze?.y0 ?? 0;
@@ -314,7 +318,8 @@ export class Plate {
         device.queue.writeBuffer(this.buffers.strokes, 0, data);
       }
       this.u32[P.born] = this.agents;
-      if (this.agents < this.target) this.agents = Math.min(this.target, Math.ceil(this.agents * GROWTH) + 1);
+      const most = Math.min(this.target, this.limit);
+      if (this.agents < most) this.agents = Math.min(most, Math.ceil(this.agents * GROWTH) + 1);
       this.writeParams();
       this.u32[P.born] = this.agents;
       const encoder = device.createCommandEncoder();
