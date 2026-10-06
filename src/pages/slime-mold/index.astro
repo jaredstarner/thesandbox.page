@@ -1,0 +1,560 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Slime mold"
+  description="A petri dish where a million WebGPU agents play Physarum polycephalum: feed it oat flakes and it grows a transport network between them."
+>
+  <Font cssVariable="--font-slime-label" slot="head" />
+  <Font cssVariable="--font-slime-data" slot="head" />
+
+  <main class="slime" data-slime>
+    <canvas class="plate" data-plate aria-label="A petri dish of agar. A yellow slime mold grows across it toward oat flakes."
+    ></canvas>
+    <svg class="drafting" data-drafting aria-hidden="true"></svg>
+
+    <header class="label">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1><i>Physarum polycephalum</i></h1>
+      <p class="sub">Slime mold &middot; plate <span data-plate-no>1</span></p>
+      <dl class="readout">
+        <div><dt>Step</dt><dd data-step>0</dd></div>
+        <div><dt>Agents</dt><dd data-pop>0</dd></div>
+        <div><dt>Oats</dt><dd data-oats>0</dd></div>
+      </dl>
+      <p class="engineer" data-engineer-readout hidden></p>
+    </header>
+
+    <p class="unsupported" data-unsupported hidden></p>
+    <noscript><p class="unsupported">This plate grows on the GPU with JavaScript. Turn scripts on to culture it.</p></noscript>
+
+    <nav class="bench" aria-label="Lab bench">
+      <fieldset class="tools" data-tools>
+        <legend class="visually-hidden">Tool</legend>
+        <label title="Oat flake: food. Click to drop one, click one to take it away">
+          <input type="radio" name="tool" value="oat" checked />
+          <svg viewBox="0 0 24 24" aria-hidden="true"
+            ><ellipse cx="12" cy="12" rx="8" ry="5.2" transform="rotate(-28 12 12)"></ellipse><path
+              d="M7.5 14.5c3-1 6-3.6 8.8-6.4"></path></svg
+          >
+          <span>Oat</span>
+        </label>
+        <label title="Salt: the mold won't cross it. Drag to draw walls">
+          <input type="radio" name="tool" value="salt" />
+          <svg viewBox="0 0 24 24" aria-hidden="true"
+            ><rect x="4" y="6" width="5" height="5" rx="0.6"></rect><rect
+              x="13"
+              y="4"
+              width="6"
+              height="6"
+              rx="0.6"
+              transform="rotate(14 16 7)"></rect><rect x="9" y="13" width="6" height="6" rx="0.6" transform="rotate(-10 12 16)"
+            ></rect></svg
+          >
+          <span>Salt</span>
+        </label>
+        <label title="Lamp: it shies from light. Hold to shine">
+          <input type="radio" name="tool" value="lamp" />
+          <svg viewBox="0 0 24 24" aria-hidden="true"
+            ><circle cx="12" cy="12" r="4"></circle><path
+              d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"
+            ></path></svg
+          >
+          <span>Lamp</span>
+        </label>
+        <label title="Scrape: clear salt, slime, and oats. Drag over the agar">
+          <input type="radio" name="tool" value="scrape" />
+          <svg viewBox="0 0 24 24" aria-hidden="true"
+            ><path d="M4 18 14 8l3 3L7 21H4z"></path><path d="m14 8 3-3 3 3-3 3"></path></svg
+          >
+          <span>Scrape</span>
+        </label>
+      </fieldset>
+
+      <div class="actions">
+        <button type="button" data-engineer aria-pressed="false" title="Draw the shortest network an engineer would lay between the oats"
+          >Engineer</button
+        >
+        <button type="button" data-maze title="Pour a fresh plate with a salt maze and an oat at each end">Maze</button>
+        <button type="button" data-fresh title="Pour a fresh plate and inoculate the center">Fresh plate</button>
+        <button type="button" data-pause aria-pressed="false">Pause</button>
+        <button type="button" data-speed title="Simulation steps per frame">2&times;</button>
+        <button type="button" data-photo title="Save the plate as a PNG">Photograph</button>
+        <button type="button" popovertarget="slime-knobs">Strain</button>
+        <button type="button" popovertarget="slime-notes">Notes</button>
+      </div>
+    </nav>
+
+    <section class="knobs" id="slime-knobs" popover aria-label="Strain">
+      <h2>Strain</h2>
+      <div class="strains" data-strains></div>
+      <div class="sliders" data-sliders></div>
+      <p class="hint">
+        Each agent looks ahead with three sensors, turns toward the strongest scent, steps forward, and leaves a little scent
+        behind. These dials set how.
+      </p>
+    </section>
+
+    <article class="notes" id="slime-notes" popover aria-labelledby="slime-notes-title">
+      <button type="button" class="close" popovertarget="slime-notes" popovertargetaction="hide" aria-label="Close notes"
+        >&times;</button
+      >
+      <h2 id="slime-notes-title">Lab notes</h2>
+      <p>
+        <i>Physarum polycephalum</i> is a single cell that can spread wider than a dinner plate. It has no brain and no nerves, and it still
+        finds food, avoids light and salt, and links what it finds with a network of tubes that is cheap to build and
+        hard to break. In 2000, Toshiyuki Nakagaki's group grew one through a maze and watched it shrink back to the
+        shortest route between two oat flakes. In 2010, Atsushi Tero and colleagues set oats out in the shape of the cities
+        around Tokyo, and the mold grew a network comparable with the region's railways.
+      </p>
+      <p>
+        This plate doesn't model the tubes. It follows Jeff Jones's 2010 agent model: about a million particles, each
+        sensing a chemical trail ahead of it, left, and right, turning toward the strongest, stepping forward, and
+        depositing more trail. The trail spreads and fades each step, and oats keep their patch of agar topped up. Nobody
+        draws the network; it comes out of a million agents following that rule.
+      </p>
+      <h3>On the bench</h3>
+      <ul>
+        <li><b>Oat</b> drops food; click an oat to take it away.</li>
+        <li><b>Salt</b> draws walls the agents won't cross.</li>
+        <li><b>Lamp</b> shines a light while you hold it down; agents turn away and the trail fades under it.</li>
+        <li><b>Scrape</b> clears salt, trail, and oats.</li>
+        <li><b>Engineer</b> draws the minimum spanning tree between the oats, the shortest set of straight lines that connects them all, so you can set the mold's answer against it.</li>
+        <li><b>Strain</b> swaps the agents' rules. Small changes in sensor angle turn networks into lattices, rings, or foam.</li>
+      </ul>
+      <h3>How it runs</h3>
+      <p>
+        Everything happens on your GPU with WebGPU. Every step, one compute shader moves every agent and adds its
+        deposits to the agar with atomic adds, a second blurs and fades the trail into a second buffer, and a third tops up
+        the agar under each oat. A fragment shader then lights the trail as a height field, so dense veins catch the light
+        like wet tubes. The CPU only handles your clicks and the engineer's lines.
+      </p>
+      <p class="credits">
+        Set in Instrument Serif and Fragment Mono, both under the SIL Open Font License, served from this site. Everything
+        else is drawn by the page.
+      </p>
+    </article>
+  </main>
+</Bare>
+
+<script>
+  import { startSlime } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-slime]');
+  if (root) startSlime(root);
+</script>
+
+<style is:global>
+  /* Global on purpose: script builds the strain controls and the engineer's
+     lines. Every rule is keyed under .slime, and its variables live there. */
+
+  body:has(.slime) {
+    margin: 0;
+    background: #0b0907;
+    overflow: hidden;
+  }
+
+  .slime {
+    --table: #0b0907;
+    --ink: #f1e8d4;
+    --muted: #a39780;
+    --line: rgb(241 232 212 / 0.16);
+    --glass: rgb(24 19 14 / 0.72);
+    --slime: #f4c811;
+    --label: var(--font-slime-label), Georgia, serif;
+    --data: var(--font-slime-data), ui-monospace, monospace;
+
+    color-scheme: dark;
+    position: fixed;
+    inset: 0;
+    overflow: clip;
+    color: var(--ink);
+    background: var(--table);
+    font: 400 0.8125rem/1.5 var(--data);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .slime .plate {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .slime .drafting {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .slime .drafting line {
+    stroke: #8fd3ff;
+    stroke-width: 1.25;
+    stroke-dasharray: 6 4;
+    stroke-linecap: round;
+  }
+
+  .slime .drafting circle {
+    fill: none;
+    stroke: #8fd3ff;
+    stroke-width: 1.25;
+  }
+
+  .slime .label {
+    position: absolute;
+    top: max(1rem, env(safe-area-inset-top));
+    left: max(1rem, env(safe-area-inset-left));
+    max-width: min(22rem, calc(100% - 2rem));
+    pointer-events: none;
+  }
+
+  .slime .label a,
+  .slime .label .engineer {
+    pointer-events: auto;
+  }
+
+  .slime .home {
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+
+  .slime .home:hover,
+  .slime .home:focus-visible {
+    color: var(--ink);
+  }
+
+  .slime h1 {
+    margin: 0.35rem 0 0;
+    font: 400 clamp(1.6rem, 4.2vw, 2.6rem) / 1 var(--label);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .slime .sub {
+    margin: 0.3rem 0 0.75rem;
+    font: italic 400 1.05rem/1.2 var(--label);
+    color: var(--muted);
+  }
+
+  .slime .readout {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0;
+  }
+
+  .slime .readout div {
+    display: grid;
+  }
+
+  .slime .readout dt {
+    color: var(--muted);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .slime .readout dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .slime .engineer {
+    margin: 0.6rem 0 0;
+    color: #8fd3ff;
+  }
+
+  .slime .unsupported {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    translate: -50% -50%;
+    width: min(28rem, calc(100% - 3rem));
+    margin: 0;
+    padding: 1.25rem 1.4rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: var(--glass);
+    font: 400 1.15rem/1.45 var(--label);
+    text-align: center;
+  }
+
+  .slime .bench {
+    position: absolute;
+    left: 50%;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    translate: -50% 0;
+    width: max-content;
+    max-width: calc(100% - 1.5rem);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 1.1rem;
+    background: var(--glass);
+    backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow: 0 18px 50px rgb(0 0 0 / 0.45);
+  }
+
+  .slime .tools {
+    display: flex;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .slime .tools label {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 0.1rem;
+    min-width: 3.4rem;
+    padding: 0.35rem 0.4rem 0.3rem;
+    border-radius: 0.7rem;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .slime .tools input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .slime .tools svg {
+    width: 1.35rem;
+    height: 1.35rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .slime .tools label:hover {
+    color: var(--ink);
+  }
+
+  .slime .tools label:has(input:checked) {
+    color: #1a1406;
+    background: var(--slime);
+  }
+
+  .slime .tools label:has(input:focus-visible),
+  .slime button:focus-visible,
+  .slime select:focus-visible,
+  .slime input[type='range']:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .slime .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem;
+  }
+
+  .slime button {
+    appearance: none;
+    margin: 0;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--ink);
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .slime button:hover {
+    border-color: rgb(241 232 212 / 0.4);
+  }
+
+  .slime button[aria-pressed='true'] {
+    border-color: var(--slime);
+    color: var(--slime);
+  }
+
+  .slime [popover] {
+    margin: 0;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    background: rgb(20 16 12 / 0.92);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.55);
+  }
+
+  .slime [popover]::backdrop {
+    background: transparent;
+  }
+
+  .slime .knobs {
+    inset: auto max(1rem, env(safe-area-inset-right)) 6.5rem auto;
+    width: min(20rem, calc(100% - 2rem));
+    max-height: calc(100dvh - 9rem);
+    overflow: auto;
+    padding: 1rem 1.1rem 1.1rem;
+  }
+
+  .slime .knobs h2,
+  .slime .notes h2 {
+    margin: 0 0 0.75rem;
+    font: 400 1.6rem/1.1 var(--label);
+  }
+
+  .slime .strains {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .slime .strains button {
+    padding: 0.3rem 0.6rem;
+  }
+
+  .slime .sliders {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .slime .sliders label {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.15rem 0.5rem;
+    color: var(--muted);
+  }
+
+  .slime .sliders output {
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .slime .sliders input {
+    grid-column: 1 / -1;
+    width: 100%;
+    accent-color: var(--slime);
+  }
+
+  .slime .hint {
+    margin: 1rem 0 0;
+    color: var(--muted);
+    font: italic 400 1rem/1.35 var(--label);
+  }
+
+  .slime .notes {
+    inset: 50% auto auto 50%;
+    translate: -50% -50%;
+    width: min(36rem, calc(100% - 2rem));
+    max-height: calc(100dvh - 2rem);
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 1.4rem 1.6rem 1.2rem;
+    font: 400 1.1rem/1.5 var(--label);
+  }
+
+  .slime .notes h3 {
+    margin: 1.25rem 0 0.35rem;
+    font: 400 0.75rem/1.4 var(--data);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .slime .notes p,
+  .slime .notes ul {
+    margin: 0 0 0.75rem;
+  }
+
+  .slime .notes ul {
+    padding-left: 1.1rem;
+  }
+
+  .slime .notes li {
+    margin-bottom: 0.3rem;
+  }
+
+  .slime .notes b {
+    font: 400 0.8125rem/1 var(--data);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--slime);
+  }
+
+  .slime .notes .credits {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .slime .notes .close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+
+  .slime [hidden] {
+    display: none !important;
+  }
+
+  .slime .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .slime .label {
+      top: 0.75rem;
+      left: 0.9rem;
+    }
+
+    .slime .sub {
+      margin-bottom: 0.4rem;
+    }
+
+    .slime .bench {
+      gap: 0.4rem;
+      padding: 0.4rem;
+      bottom: max(0.6rem, env(safe-area-inset-bottom));
+    }
+
+    .slime .tools label {
+      min-width: 3rem;
+    }
+
+    .slime button {
+      padding: 0.4rem 0.55rem;
+      font-size: 0.75rem;
+    }
+
+    .slime .knobs {
+      inset: auto 0.75rem 9.5rem 0.75rem;
+      width: auto;
+      max-height: calc(100dvh - 12rem);
+    }
+  }
+</style>
