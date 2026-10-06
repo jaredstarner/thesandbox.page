@@ -1,7 +1,7 @@
 // The petri dish on the GPU: buffers, pipelines, one simulation step, and the
 // render. Everything that touches WebGPU lives here.
 
-import { AGENTS, DIFFUSE, FEED, RENDER, STAMP } from './_wgsl';
+import { AGENTS, DIFFUSE, RENDER, SCENT, STAMP } from './_wgsl';
 
 // TypeScript's DOM library types WebGPU's interfaces but not these two pieces.
 declare const GPUBufferUsage: { readonly UNIFORM: number; readonly STORAGE: number; readonly COPY_DST: number };
@@ -12,8 +12,8 @@ export const SIZE = 1024;
 export const DISH_RADIUS = 500;
 export const MAX_FOODS = 48;
 export const MAX_STROKES = 64;
-/** Radius of the agar each oat keeps topped up, in cells. */
-export const FOOD_RADIUS = 11;
+/** How far an oat's scent reaches, in cells. */
+export const FOOD_REACH = 80;
 
 export interface Rules {
   /** Radians either side of straight ahead. */
@@ -79,7 +79,7 @@ const P = {
   jitter: 23,
 } as const;
 const PARAM_BYTES = 96;
-const FOOD_STRENGTH = 60;
+const FOOD_STRENGTH = 120;
 
 export class Plate {
   readonly device: GPUDevice;
@@ -101,19 +101,20 @@ export class Plate {
     deposit: GPUBuffer;
     walls: GPUBuffer;
     foods: GPUBuffer;
+    scent: GPUBuffer;
     strokes: GPUBuffer;
   };
   private pipelines!: {
     agents: GPUComputePipeline;
     diffuse: GPUComputePipeline;
-    feed: GPUComputePipeline;
+    scent: GPUComputePipeline;
     stamp: GPUComputePipeline;
     render: GPURenderPipeline;
   };
   private groups!: {
     agents: GPUBindGroup[];
     diffuse: GPUBindGroup[];
-    feed: GPUBindGroup[];
+    scent: GPUBindGroup;
     stamp: GPUBindGroup[];
     render: GPUBindGroup[];
   };
@@ -137,6 +138,7 @@ export class Plate {
       deposit: make(cells, storage, 'deposit'),
       walls: make(cells, storage, 'walls'),
       foods: make(MAX_FOODS * 16, storage, 'foods'),
+      scent: make(cells, storage, 'scent'),
       strokes: make(MAX_STROKES * 32, storage, 'strokes'),
     };
     this.u32[P.size] = SIZE;
@@ -165,10 +167,10 @@ export class Plate {
         compute: { module: device.createShaderModule({ code, label }), entryPoint: 'main' },
       });
     const renderModule = device.createShaderModule({ code: RENDER, label: 'render' });
-    const [agents, diffuse, feed, stamp, render] = await Promise.all([
+    const [agents, diffuse, scent, stamp, render] = await Promise.all([
       compute(AGENTS, 'agents'),
       compute(DIFFUSE, 'diffuse'),
-      compute(FEED, 'feed'),
+      compute(SCENT, 'scent'),
       compute(STAMP, 'stamp'),
       device.createRenderPipelineAsync({
         label: 'render',
@@ -178,7 +180,7 @@ export class Plate {
         primitive: { topology: 'triangle-list' },
       }),
     ]);
-    this.pipelines = { agents, diffuse, feed, stamp, render };
+    this.pipelines = { agents, diffuse, scent, stamp, render };
 
     const b = this.buffers;
     const group = (pipeline: GPUComputePipeline | GPURenderPipeline, resources: GPUBuffer[]) =>
@@ -188,9 +190,9 @@ export class Plate {
       });
     const both = (fn: (k: number) => GPUBindGroup) => [fn(0), fn(1)];
     this.groups = {
-      agents: both((k) => group(agents, [b.params, b.agents, b.trail[k], b.deposit, b.walls])),
+      agents: both((k) => group(agents, [b.params, b.agents, b.trail[k], b.deposit, b.walls, b.scent])),
       diffuse: both((k) => group(diffuse, [b.params, b.trail[k], b.trail[1 - k], b.deposit, b.walls])),
-      feed: both((k) => group(feed, [b.params, b.trail[1 - k], b.foods])),
+      scent: group(scent, [b.params, b.scent, b.foods]),
       stamp: both((k) => group(stamp, [b.params, b.walls, b.trail[k], b.strokes])),
       render: both((k) => group(render, [b.params, b.trail[k], b.walls, b.foods])),
     };
@@ -243,11 +245,20 @@ export class Plate {
     this.device.queue.writeBuffer(this.buffers.params, 0, this.params);
   }
 
+  /** Uploads the oats and recomputes their scent, when they have changed. */
   private writeFoods(): void {
     if (!this.foodsDirty) return;
     const data = new Float32Array(MAX_FOODS * 4);
-    this.foods.slice(0, MAX_FOODS).forEach((f, i) => data.set([f.x, f.y, FOOD_RADIUS, FOOD_STRENGTH], i * 4));
+    this.foods.slice(0, MAX_FOODS).forEach((f, i) => data.set([f.x, f.y, FOOD_REACH, FOOD_STRENGTH], i * 4));
     this.device.queue.writeBuffer(this.buffers.foods, 0, data);
+    this.writeParams();
+    const encoder = this.device.createCommandEncoder();
+    const pass = encoder.beginComputePass();
+    pass.setPipeline(this.pipelines.scent);
+    pass.setBindGroup(0, this.groups.scent);
+    pass.dispatchWorkgroups(Math.ceil(SIZE / 16), Math.ceil(SIZE / 16));
+    pass.end();
+    this.device.queue.submit([encoder.finish()]);
     this.foodsDirty = false;
   }
 
@@ -277,13 +288,6 @@ export class Plate {
       pass.setPipeline(pipelines.diffuse);
       pass.setBindGroup(0, groups.diffuse[k]!);
       pass.dispatchWorkgroups(cellGroups, cellGroups);
-      const foods = Math.min(this.foods.length, MAX_FOODS);
-      if (foods) {
-        const span = Math.ceil((FOOD_RADIUS * 2 + 1) / 8);
-        pass.setPipeline(pipelines.feed);
-        pass.setBindGroup(0, groups.feed[k]!);
-        pass.dispatchWorkgroups(span, span, foods);
-      }
       pass.end();
       device.queue.submit([encoder.finish()]);
       this.strokes = [];

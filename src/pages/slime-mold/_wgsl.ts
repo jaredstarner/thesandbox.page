@@ -54,13 +54,14 @@ ${PARAMS}
 @group(0) @binding(2) var<storage, read> trail: array<f32>;
 @group(0) @binding(3) var<storage, read_write> deposit: array<atomic<u32>>;
 @group(0) @binding(4) var<storage, read> walls: array<u32>;
+@group(0) @binding(5) var<storage, read> scent: array<f32>;
 
 fn sense(p: vec2f, heading: f32) -> f32 {
   let q = p + vec2f(cos(heading), sin(heading)) * P.sensorDist;
   if (distance(q, dishCenter()) > P.dishRadius) { return -1.0; }
   let i = cellOf(q);
   if (walls[i] != 0u) { return -50.0; }
-  var v = trail[i];
+  var v = trail[i] + scent[i];
   if (P.lamp.w > 0.5) {
     let d = distance(q, P.lamp.xy);
     if (d < P.lamp.z) { v -= 40.0 * (1.2 - d / P.lamp.z); }
@@ -140,23 +141,26 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
 }
 `;
 
-/** Keep the agar under each oat topped up. One workgroup layer per oat. */
-export const FEED = /* wgsl */ `
+/** The oats' scent: strongest at each oat and fading out to its reach (f.z).
+    Agents smell it on top of the trail, but it is never drawn as slime.
+    Runs only when the oats change. */
+export const SCENT = /* wgsl */ `
 ${PARAMS}
-@group(0) @binding(1) var<storage, read_write> dst: array<f32>;
+@group(0) @binding(1) var<storage, read_write> scent: array<f32>;
 @group(0) @binding(2) var<storage, read> foods: array<vec4f>;
 
-@compute @workgroup_size(8, 8)
+@compute @workgroup_size(16, 16)
 fn main(@builtin(global_invocation_id) id: vec3u) {
-  if (id.z >= P.foodCount) { return; }
-  let f = foods[id.z];
-  let off = vec2f(id.xy) - vec2f(f.z);
-  if (length(off) > f.z) { return; }
-  let c = vec2i(floor(f.xy + off));
-  let n = i32(P.size);
-  if (any(c < vec2i(0)) || any(c >= vec2i(n))) { return; }
-  let i = u32(c.y * n + c.x);
-  dst[i] = max(dst[i], f.w);
+  let n = P.size;
+  if (id.x >= n || id.y >= n) { return; }
+  let p = vec2f(id.xy) + 0.5;
+  var s = 0.0;
+  for (var k = 0u; k < P.foodCount; k++) {
+    let f = foods[k];
+    let t = max(1.0 - distance(p, f.xy) / f.z, 0.0);
+    s += f.w * t * t;
+  }
+  scent[id.y * n + id.x] = s;
 }
 `;
 
@@ -221,7 +225,7 @@ fn trailAt(p: vec2f) -> f32 {
 }
 
 fn height(p: vec2f) -> f32 {
-  return 1.0 - exp(-trailAt(p) * 0.06);
+  return 1.0 - exp(-trailAt(p) * 0.012);
 }
 
 fn lattice(x: i32, y: i32) -> f32 {
@@ -238,6 +242,8 @@ fn noise(p: vec2f) -> f32 {
 }
 
 const LIGHT = vec3f(-0.45, -0.55, 0.7);
+/** An oat flake's half-width, in cells. */
+const OAT = 11.0;
 
 @fragment
 fn fs(in: VSOut) -> @location(0) vec4f {
@@ -290,7 +296,7 @@ fn fs(in: VSOut) -> @location(0) vec4f {
       let ang = rand(u32(f.x * 13.0) ^ (u32(f.y * 7.0) * 2246822519u)) * 3.14159;
       let d = p - f.xy;
       let cs = vec2f(cos(ang), sin(ang));
-      let lq = vec2f(dot(d, cs), dot(d, vec2f(-cs.y, cs.x))) / vec2f(f.z * 1.7, f.z * 1.15);
+      let lq = vec2f(dot(d, cs), dot(d, vec2f(-cs.y, cs.x))) / vec2f(OAT * 1.7, OAT * 1.15);
       let q = dot(lq, lq);
       let s = smoothstep(1.35, 0.6, length(lq - vec2f(-0.25, -0.3)));
       inside *= 1.0 - 0.35 * s * step(1.0, q);
