@@ -81,8 +81,11 @@ const P = {
   mazePitch: 26,
   mazeCells: 27,
   born: 28,
+  capacity: 29,
 } as const;
 const PARAM_BYTES = 128;
+/** Most agents one agar cell holds in a step. */
+const CAPACITY = 3;
 /** Per-step growth of a young colony, until it reaches the target population. */
 const GROWTH = 1.004;
 /** The most maze cells the dryness buffer holds (16 by 16). */
@@ -110,6 +113,7 @@ export class Plate {
     agents: GPUBuffer;
     trail: [GPUBuffer, GPUBuffer];
     deposit: GPUBuffer;
+    crowd: GPUBuffer;
     walls: GPUBuffer;
     foods: GPUBuffer;
     scent: GPUBuffer;
@@ -149,6 +153,7 @@ export class Plate {
       agents: make(maxAgents * 16, storage, 'agents'),
       trail: [make(cells, storage, 'trail a'), make(cells, storage, 'trail b')],
       deposit: make(cells, storage, 'deposit'),
+      crowd: make(cells, storage, 'crowd'),
       walls: make(cells, storage, 'walls'),
       foods: make(MAX_FOODS * 16, storage, 'foods'),
       scent: make(cells, storage, 'scent'),
@@ -156,6 +161,7 @@ export class Plate {
       strokes: make(MAX_STROKES * 32, storage, 'strokes'),
     };
     this.u32[P.size] = SIZE;
+    this.u32[P.capacity] = CAPACITY;
     this.f32[P.dishRadius] = DISH_RADIUS;
   }
 
@@ -204,8 +210,8 @@ export class Plate {
       });
     const both = (fn: (k: number) => GPUBindGroup) => [fn(0), fn(1)];
     this.groups = {
-      agents: both((k) => group(agents, [b.params, b.agents, b.trail[k], b.deposit, b.walls, b.scent, b.dry])),
-      diffuse: both((k) => group(diffuse, [b.params, b.trail[k], b.trail[1 - k], b.deposit, b.walls, b.dry])),
+      agents: both((k) => group(agents, [b.params, b.agents, b.trail[k], b.deposit, b.walls, b.scent, b.dry, b.crowd])),
+      diffuse: both((k) => group(diffuse, [b.params, b.trail[k], b.trail[1 - k], b.deposit, b.walls, b.dry, b.crowd])),
       scent: group(scent, [b.params, b.scent, b.foods]),
       stamp: both((k) => group(stamp, [b.params, b.walls, b.trail[k], b.strokes])),
       render: both((k) => group(render, [b.params, b.trail[k], b.walls, b.foods])),
@@ -228,7 +234,9 @@ export class Plate {
     this.u32[P.mazeCells] = maze?.cells ?? 0;
     this.setDryness(new Float32Array(MAX_MAZE_CELLS));
     const encoder = this.device.createCommandEncoder();
-    for (const buffer of [...this.buffers.trail, this.buffers.deposit, this.buffers.walls]) encoder.clearBuffer(buffer);
+    for (const buffer of [...this.buffers.trail, this.buffers.deposit, this.buffers.crowd, this.buffers.walls]) {
+      encoder.clearBuffer(buffer);
+    }
     this.device.queue.submit([encoder.finish()]);
     if (walls) this.device.queue.writeBuffer(this.buffers.walls, 0, walls);
     this.device.queue.writeBuffer(this.buffers.agents, 0, agents);

@@ -26,6 +26,7 @@ struct Params {
   mazePitch: f32,
   mazeCells: u32,
   born: u32,
+  capacity: u32,
 }
 
 @group(0) @binding(0) var<uniform> P: Params;
@@ -69,6 +70,7 @@ ${PARAMS}
 @group(0) @binding(4) var<storage, read> walls: array<u32>;
 @group(0) @binding(5) var<storage, read> scent: array<f32>;
 @group(0) @binding(6) var<storage, read> dry: array<f32>;
+@group(0) @binding(7) var<storage, read_write> crowd: array<atomic<u32>>;
 
 fn dryAt(p: vec2f) -> f32 {
   let m = mazeCell(p);
@@ -134,13 +136,22 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
   let here = cellOf(a.xy);
   let there = cellOf(next);
   // Agents never step into salt, but one caught under fresh salt may walk out.
-  let blocked = distance(next, dishCenter()) > P.dishRadius || (walls[there] != 0u && walls[here] == 0u);
-  if (blocked) {
+  var moved = false;
+  if (distance(next, dishCenter()) <= P.dishRadius && (walls[there] == 0u || walls[here] != 0u)) {
+    // A cell holds only a few agents (Jones's exclusion rule), so a colony can't
+    // pile into one tube; the overflow has to go somewhere else.
+    if (there == here || atomicAdd(&crowd[there], 1u) < P.capacity) {
+      a.x = next.x;
+      a.y = next.y;
+      moved = true;
+      atomicAdd(&deposit[there], u32(P.deposit * 256.0 * (1.0 - dryAt(next))));
+    } else {
+      atomicSub(&crowd[there], 1u);
+    }
+  }
+  if (!moved) {
     a.z = rand(seed ^ 0x85ebca6bu) * 6.2831853;
-  } else {
-    a.x = next.x;
-    a.y = next.y;
-    atomicAdd(&deposit[there], u32(P.deposit * 256.0 * (1.0 - dryAt(next))));
+    atomicAdd(&crowd[here], 1u);
   }
   agents[i] = a;
 }
@@ -154,6 +165,7 @@ ${PARAMS}
 @group(0) @binding(3) var<storage, read_write> deposit: array<atomic<u32>>;
 @group(0) @binding(4) var<storage, read> walls: array<u32>;
 @group(0) @binding(5) var<storage, read> dry: array<f32>;
+@group(0) @binding(6) var<storage, read_write> crowd: array<atomic<u32>>;
 
 @compute @workgroup_size(16, 16)
 fn main(@builtin(global_invocation_id) id: vec3u) {
@@ -161,6 +173,7 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
   if (id.x >= n || id.y >= n) { return; }
   let i = id.y * n + id.x;
   let dep = f32(atomicExchange(&deposit[i], 0u)) * (1.0 / 256.0);
+  atomicStore(&crowd[i], 0u);
   let p = vec2f(id.xy) + 0.5;
   if (walls[i] != 0u || distance(p, dishCenter()) > P.dishRadius) {
     dst[i] = 0.0;
