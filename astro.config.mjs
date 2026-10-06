@@ -83,5 +83,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    // The specimen label and lab notes on /slime-mold/.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Instrument Serif',
+      cssVariable: '--font-slime-label',
+      weights: [400],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Fragment Mono',
+      cssVariable: '--font-slime-data',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });

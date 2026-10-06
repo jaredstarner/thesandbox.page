@@ -1,0 +1,8 @@
+{
+  "title": "Slime mold",
+  "summary": "A petri dish where a million WebGPU agents play Physarum polycephalum: drop oat flakes and it grows a transport network between them, shy away from a lamp, and thread a maze of salt.",
+  "date": "2026-10-06",
+  "tags": ["webgpu", "wgsl", "compute-shaders", "agent-based-model", "svg"],
+  "requires": ["webgpu"],
+  "plot": 6
+}
