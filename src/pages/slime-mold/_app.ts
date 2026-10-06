@@ -1,6 +1,7 @@
 // Wires the slime mold page: finds a GPU, pours a plate, and runs the loop.
 
 import { DISH_RADIUS, MAX_FOODS, Plate, SIZE, type Food } from './_plate';
+import { buildMaze } from './_maze';
 import { spanningTree } from './_mst';
 import { STRAINS, toRules, type Strain } from './_strains';
 
@@ -158,6 +159,29 @@ export async function startSlime(root: HTMLElement): Promise<void> {
     oatsChanged();
   }
   fresh();
+
+  // Nakagaki's maze: fill every corridor with slime, feed both ends, and wait.
+  function maze() {
+    const m = buildMaze(SIZE, DISH_RADIUS);
+    const data = new Float32Array(MAX_AGENTS * 4);
+    const { x0, y0, side } = m.bounds;
+    for (let i = 0; i < MAX_AGENTS; i++) {
+      let x = 0;
+      let y = 0;
+      do {
+        x = x0 + Math.random() * side;
+        y = y0 + Math.random() * side;
+      } while (!m.open(x, y));
+      data[i * 4] = x;
+      data[i * 4 + 1] = y;
+      data[i * 4 + 2] = Math.random() * Math.PI * 2;
+    }
+    plate.foods = m.oats;
+    plate.pour(data, m.walls);
+    poured();
+    oatsChanged();
+  }
+  root.querySelector('[data-maze]')!.addEventListener('click', maze);
 
   // The bench: oats by click, salt and scraping by drag, the lamp while held.
   type Tool = 'oat' | 'salt' | 'lamp' | 'scrape';
