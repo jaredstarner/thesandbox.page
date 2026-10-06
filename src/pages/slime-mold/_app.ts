@@ -318,7 +318,8 @@ export async function startSlime(root: HTMLElement): Promise<void> {
     strainButtons.forEach((button, i) => button.setAttribute('aria-pressed', String(STRAINS[i]!.name === strain.name)));
     for (const { dial, input, output } of dials) {
       input.value = String(strain[dial.key]);
-      output.textContent = `${strain[dial.key]}${dial.unit}`;
+      const value = strain[dial.key];
+      output.textContent = `${value}${value === 1 ? dial.unit.replace(/s$/, '') : dial.unit}`;
     }
   }
   applyStrain();
