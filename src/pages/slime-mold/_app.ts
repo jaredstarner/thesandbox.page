@@ -1,6 +1,6 @@
 // Wires the slime mold page: finds a GPU, pours a plate, and runs the loop.
 
-import { DISH_RADIUS, Plate, SIZE, type Food } from './_plate';
+import { DISH_RADIUS, MAX_FOODS, Plate, SIZE, type Food } from './_plate';
 import { STRAINS, toRules, type Strain } from './_strains';
 
 const MAX_AGENTS = 1 << 20;
@@ -102,6 +102,78 @@ export async function startSlime(root: HTMLElement): Promise<void> {
     plate.pour(inoculate(SIZE / 2, SIZE / 2));
   }
   fresh();
+
+  // The bench: oats by click, salt and scraping by drag, the lamp while held.
+  type Tool = 'oat' | 'salt' | 'lamp' | 'scrape';
+  let tool: Tool = 'oat';
+  root.querySelector('[data-tools]')!.addEventListener('change', (event) => {
+    tool = (event.target as HTMLInputElement).value as Tool;
+  });
+
+  const toSim = (event: PointerEvent) => {
+    const box = canvas.getBoundingClientRect();
+    return {
+      x: (event.clientX - box.left - view.cx) / view.scale + SIZE / 2,
+      y: (event.clientY - box.top - view.cy) / view.scale + SIZE / 2,
+    };
+  };
+  const inDish = (p: { x: number; y: number }, margin = 0) =>
+    Math.hypot(p.x - SIZE / 2, p.y - SIZE / 2) < DISH_RADIUS - margin;
+  const OAT_GRAB = 20;
+  const SALT_RADIUS = 7;
+  const SCRAPE_RADIUS = 24;
+
+  let drag: { x: number; y: number } | null = null;
+  function scrapeOats(p: { x: number; y: number }) {
+    const before = plate.foods.length;
+    plate.foods = plate.foods.filter((o) => Math.hypot(o.x - p.x, o.y - p.y) > SCRAPE_RADIUS + 6);
+    if (plate.foods.length !== before) plate.markFoods();
+  }
+  function drawTo(p: { x: number; y: number }) {
+    if (!drag) return;
+    const radius = tool === 'salt' ? SALT_RADIUS : SCRAPE_RADIUS;
+    plate.stroke({ ax: drag.x, ay: drag.y, bx: p.x, by: p.y, radius, salt: tool === 'salt' });
+    if (tool === 'scrape') scrapeOats(p);
+    drag = p;
+  }
+
+  canvas.addEventListener('pointerdown', (event) => {
+    const p = toSim(event);
+    if (tool === 'oat') {
+      if (!inDish(p, 14)) return;
+      const hit = plate.foods.findIndex((o) => Math.hypot(o.x - p.x, o.y - p.y) < OAT_GRAB);
+      if (hit >= 0) plate.foods.splice(hit, 1);
+      else if (plate.foods.length < MAX_FOODS) plate.foods.push(p);
+      plate.markFoods();
+      return;
+    }
+    try {
+      canvas.setPointerCapture(event.pointerId);
+    } catch {
+      // A pointer that is already gone can't be captured; the drag still works inside the canvas.
+    }
+    if (tool === 'lamp') {
+      plate.lamp = { x: p.x, y: p.y, radius: 72, on: true };
+      return;
+    }
+    drag = p;
+    drawTo(p);
+  });
+  canvas.addEventListener('pointermove', (event) => {
+    const p = toSim(event);
+    if (tool === 'lamp' && plate.lamp.on) {
+      plate.lamp.x = p.x;
+      plate.lamp.y = p.y;
+    } else if (drag) {
+      drawTo(p);
+    }
+  });
+  const release = () => {
+    drag = null;
+    plate.lamp.on = false;
+  };
+  canvas.addEventListener('pointerup', release);
+  canvas.addEventListener('pointercancel', release);
 
   let speed = 2;
   let frames = 0;
