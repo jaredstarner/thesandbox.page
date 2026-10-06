@@ -1,6 +1,7 @@
 // Wires the slime mold page: finds a GPU, pours a plate, and runs the loop.
 
 import { DISH_RADIUS, MAX_FOODS, Plate, SIZE, type Food } from './_plate';
+import { spanningTree } from './_mst';
 import { STRAINS, toRules, type Strain } from './_strains';
 
 const MAX_AGENTS = 1 << 20;
@@ -68,7 +69,53 @@ export async function startSlime(root: HTMLElement): Promise<void> {
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     plate.setView(canvas.width, canvas.height, view.cx * dpr, view.cy * dpr, view.scale * dpr);
+    drawEngineer();
   }
+
+  // The engineer's answer: straight lines, the shortest set that joins every oat.
+  const SVG = 'http://www.w3.org/2000/svg';
+  const MM_PER_CELL = 90 / (2 * DISH_RADIUS);
+  const drafting = root.querySelector<SVGSVGElement>('[data-drafting]')!;
+  const engineerButton = root.querySelector<HTMLButtonElement>('[data-engineer]')!;
+  const engineerReadout = root.querySelector<HTMLElement>('[data-engineer-readout]')!;
+  let engineer = false;
+  function drawEngineer() {
+    drafting.replaceChildren();
+    engineerReadout.hidden = !engineer;
+    if (!engineer) return;
+    const css = (v: number, c: number) => (v - SIZE / 2) * view.scale + c;
+    const edges = spanningTree(plate.foods);
+    for (const e of edges) {
+      const line = document.createElementNS(SVG, 'line');
+      line.setAttribute('x1', String(css(e.a.x, view.cx)));
+      line.setAttribute('y1', String(css(e.a.y, view.cy)));
+      line.setAttribute('x2', String(css(e.b.x, view.cx)));
+      line.setAttribute('y2', String(css(e.b.y, view.cy)));
+      drafting.append(line);
+    }
+    for (const o of plate.foods) {
+      const ring = document.createElementNS(SVG, 'circle');
+      ring.setAttribute('cx', String(css(o.x, view.cx)));
+      ring.setAttribute('cy', String(css(o.y, view.cy)));
+      ring.setAttribute('r', String(Math.max(6, 22 * view.scale)));
+      drafting.append(ring);
+    }
+    const total = edges.reduce((sum, e) => sum + e.length, 0) * MM_PER_CELL;
+    engineerReadout.textContent =
+      plate.foods.length < 2
+        ? 'Engineer: drop two oats or more.'
+        : `Engineer: ${Math.round(total)} mm of straight track joins ${plate.foods.length} oats in a 90 mm dish.`;
+  }
+  engineerButton.addEventListener('click', () => {
+    engineer = !engineer;
+    engineerButton.setAttribute('aria-pressed', String(engineer));
+    drawEngineer();
+  });
+  function oatsChanged() {
+    plate.markFoods();
+    drawEngineer();
+  }
+
   new ResizeObserver(layout).observe(root);
   layout();
 
@@ -108,6 +155,7 @@ export async function startSlime(root: HTMLElement): Promise<void> {
     plate.foods = scatterOats(11);
     plate.pour(inoculate(SIZE / 2, SIZE / 2));
     poured();
+    oatsChanged();
   }
   fresh();
 
@@ -135,7 +183,7 @@ export async function startSlime(root: HTMLElement): Promise<void> {
   function scrapeOats(p: { x: number; y: number }) {
     const before = plate.foods.length;
     plate.foods = plate.foods.filter((o) => Math.hypot(o.x - p.x, o.y - p.y) > SCRAPE_RADIUS + 6);
-    if (plate.foods.length !== before) plate.markFoods();
+    if (plate.foods.length !== before) oatsChanged();
   }
   function drawTo(p: { x: number; y: number }) {
     if (!drag) return;
@@ -152,7 +200,7 @@ export async function startSlime(root: HTMLElement): Promise<void> {
       const hit = plate.foods.findIndex((o) => Math.hypot(o.x - p.x, o.y - p.y) < OAT_GRAB);
       if (hit >= 0) plate.foods.splice(hit, 1);
       else if (plate.foods.length < MAX_FOODS) plate.foods.push(p);
-      plate.markFoods();
+      oatsChanged();
       return;
     }
     try {
