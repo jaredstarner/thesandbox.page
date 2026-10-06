@@ -97,9 +97,17 @@ export async function startSlime(root: HTMLElement): Promise<void> {
     return data;
   }
 
+  const plateNo = root.querySelector<HTMLElement>('[data-plate-no]')!;
+  let pours = 0;
+  function poured() {
+    pours++;
+    plateNo.textContent = String(pours);
+  }
+
   function fresh() {
     plate.foods = scatterOats(11);
     plate.pour(inoculate(SIZE / 2, SIZE / 2));
+    poured();
   }
   fresh();
 
@@ -175,7 +183,40 @@ export async function startSlime(root: HTMLElement): Promise<void> {
   canvas.addEventListener('pointerup', release);
   canvas.addEventListener('pointercancel', release);
 
+  // Time: pause, speed, a fresh plate, and a photograph of this one.
+  const SPEEDS = [1, 2, 4, 8];
   let speed = 2;
+  let paused = false;
+  let photo = false;
+  const pauseButton = root.querySelector<HTMLButtonElement>('[data-pause]')!;
+  const speedButton = root.querySelector<HTMLButtonElement>('[data-speed]')!;
+  pauseButton.addEventListener('click', () => {
+    paused = !paused;
+    pauseButton.setAttribute('aria-pressed', String(paused));
+    pauseButton.textContent = paused ? 'Resume' : 'Pause';
+  });
+  speedButton.addEventListener('click', () => {
+    speed = SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length]!;
+    speedButton.textContent = `${speed}×`;
+  });
+  root.querySelector('[data-fresh]')!.addEventListener('click', fresh);
+  root.querySelector('[data-photo]')!.addEventListener('click', () => {
+    photo = true;
+  });
+
+  // A WebGPU canvas can only be read in the same task that drew it.
+  function takePhoto() {
+    const name = `physarum-plate-${pours}-step-${plate.steps}.png`;
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = name;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 10_000);
+    }, 'image/png');
+  }
+
   let frames = 0;
   let last = performance.now();
   let slow = 0;
@@ -193,8 +234,13 @@ export async function startSlime(root: HTMLElement): Promise<void> {
         slow = 0;
       }
     }
-    plate.step(speed);
+    if (paused) plate.applyStrokes();
+    else plate.step(speed);
     plate.render(now / 1000);
+    if (photo) {
+      photo = false;
+      takePhoto();
+    }
     if (frames++ % 8 === 0) {
       readout.step.textContent = number.format(plate.steps);
       readout.pop.textContent = number.format(plate.agents);
