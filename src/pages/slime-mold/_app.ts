@@ -34,7 +34,7 @@ export async function startSlime(root: HTMLElement): Promise<void> {
     fail(
       gpu
         ? 'This browser has WebGPU but found no GPU adapter to grow the plate on. Try another browser, or check that hardware acceleration is on.'
-        : "This plate grows on the GPU with WebGPU, and this browser doesn't offer it. Recent Chrome, Edge, Safari, and Firefox do.",
+        : "This plate grows on the GPU with WebGPU, and this browser doesn't offer it. Recent Chrome, Edge, and Safari do.",
     );
     return;
   }
