@@ -4,7 +4,7 @@ import { DISH_RADIUS, MAX_FOODS, Plate, SIZE, type Food } from './_plate';
 import { FlowSolver } from './_flow';
 import { buildMaze } from './_maze';
 import { spanningTree } from './_mst';
-import { STRAINS, toRules, type Strain } from './_strains';
+import { DIALS, STRAINS, toRules, type Strain } from './_strains';
 
 const MAX_AGENTS = 1 << 20;
 const MIN_AGENTS = 1 << 17;
@@ -278,6 +278,47 @@ export async function startSlime(root: HTMLElement): Promise<void> {
   };
   canvas.addEventListener('pointerup', release);
   canvas.addEventListener('pointercancel', release);
+
+  // The strain: presets, and a dial for each rule.
+  const strainButtons = STRAINS.map((preset) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = preset.name;
+    button.addEventListener('click', () => {
+      Object.assign(strain, preset);
+      applyStrain();
+    });
+    return button;
+  });
+  root.querySelector('[data-strains]')!.append(...strainButtons);
+  const dials = DIALS.map((dial) => {
+    const field = document.createElement('label');
+    const name = document.createElement('span');
+    name.textContent = dial.label;
+    const output = document.createElement('output');
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.min = String(dial.min);
+    input.max = String(dial.max);
+    input.step = String(dial.step);
+    input.addEventListener('input', () => {
+      strain[dial.key] = Number(input.value);
+      strain.name = '';
+      applyStrain();
+    });
+    field.append(name, output, input);
+    return { dial, input, output, field };
+  });
+  root.querySelector('[data-sliders]')!.append(...dials.map((d) => d.field));
+  function applyStrain() {
+    plate.rules = toRules(strain);
+    strainButtons.forEach((button, i) => button.setAttribute('aria-pressed', String(STRAINS[i]!.name === strain.name)));
+    for (const { dial, input, output } of dials) {
+      input.value = String(strain[dial.key]);
+      output.textContent = `${strain[dial.key]}${dial.unit}`;
+    }
+  }
+  applyStrain();
 
   // Time: pause, speed, a fresh plate, and a photograph of this one.
   const SPEEDS = [1, 2, 4, 8];
