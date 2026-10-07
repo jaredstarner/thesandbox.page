@@ -112,5 +112,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    {
+      // The book face the brush sets on /word-brush/.
+      provider: fontProviders.fontsource(),
+      name: 'EB Garamond',
+      cssVariable: '--font-wordbrush',
+      weights: ['400 800'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Garamond', 'Georgia', 'serif'],
+    },
   ],
 });
