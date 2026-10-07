@@ -33,6 +33,8 @@ export function startWordBrush(root: HTMLElement): void {
   const own = $<HTMLTextAreaElement>('[data-own]');
   const brushInput = $<HTMLInputElement>('[data-brush]');
   const sizeInput = $<HTMLInputElement>('[data-size]');
+  const masthead = $<HTMLElement>('.masthead');
+  const stick = $<HTMLElement>('.stick');
 
   if (typeof Intl === 'undefined' || typeof Intl.Segmenter !== 'function') {
     if (hint) hint.textContent = 'This brush needs Intl.Segmenter, which this browser lacks.';
@@ -95,6 +97,7 @@ export function startWordBrush(root: HTMLElement): void {
     canvas!.width = Math.round(W * dpr);
     canvas!.height = Math.round(H * dpr);
     mask.resize(W, H);
+    measureKeepOut();
     rebuildMask();
     if (ready) retype();
   }
@@ -111,8 +114,48 @@ export function startWordBrush(root: HTMLElement): void {
     const inset = state.size * 0.12;
     const k0 = Math.max(0, Math.floor(changed[0] / lh) - 1);
     const k1 = Math.min(count - 1, Math.ceil(changed[1] / lh) + 1);
-    for (let k = k0; k <= k1; k++) rows[k] = mask.spans(k * lh, lh, minWidth, inset);
+    // A gap left between the page furniture has to be roomy to be worth setting.
+    const carved = Math.max(minWidth, state.size * 5);
+    for (let k = k0; k <= k1; k++) rows[k] = carve(mask.spans(k * lh, lh, minWidth, inset), k * lh, lh, carved);
     needsLayout = true;
+  }
+
+  // The type keeps clear of the title, the tally, and the tools, and flows
+  // around them like a column around a picture.
+  let keepOut: number[][] = [];
+  function measureKeepOut(): void {
+    const pad = 10;
+    keepOut = [masthead, stick]
+      .filter((el): el is HTMLElement => !!el)
+      .map((el) => el.getBoundingClientRect())
+      .map((r) => [r.left - pad, r.top - pad, r.right + pad, r.bottom + pad]);
+    // Popovers open just above the tools, however many rows they wrap to.
+    if (stick) root.style.setProperty('--stick-top', `${Math.round(H - stick.getBoundingClientRect().top)}px`);
+    // The tally changes width as it counts, so it gets a fixed corner.
+    if (tally) {
+      const r = tally.getBoundingClientRect();
+      keepOut.push([W - Math.min(W * 0.48, 440), r.top - pad, W, r.top + (W < 640 ? 40 : 22) + pad]);
+    }
+  }
+
+  function carve(spans: number[], y: number, height: number, minWidth: number): number[] {
+    let out = spans;
+    for (const [x0, y0, x1, y1] of keepOut) {
+      if (y1 <= y || y0 >= y + height) continue;
+      const next: number[] = [];
+      for (let i = 0; i < out.length; i += 2) {
+        const a = out[i];
+        const b = out[i + 1];
+        if (x1 <= a || x0 >= b) {
+          next.push(a, b);
+          continue;
+        }
+        if (x0 - a >= minWidth) next.push(a, x0);
+        if (b - x1 >= minWidth) next.push(x1, b);
+      }
+      out = next;
+    }
+    return out;
   }
 
   function draw(): void {
@@ -516,6 +559,7 @@ export function startWordBrush(root: HTMLElement): void {
 
   loadFace().then(() => {
     ready = true;
+    measureKeepOut();
     retype();
   });
 }
