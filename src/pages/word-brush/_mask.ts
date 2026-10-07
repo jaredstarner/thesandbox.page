@@ -1,7 +1,7 @@
 // The painted mask: where the brush has made room for type. Strokes are kept
 // as data, in CSS pixels, so the mask can be rebuilt after an undo or a resize.
 // The mask itself is a canvas at one cell per CELL CSS pixels, painted in the
-// wash colour; its alpha channel is what the type reads.
+// wash color; its alpha channel is what the type reads.
 
 export const CELL = 2;
 
@@ -116,13 +116,13 @@ export class Mask {
     this.mark(x - r, y - r, x + r, y + r);
   }
 
-  /** Fill polygons, optionally only inside a circle (for drawing a shape in). */
-  fill(mode: Mode, rings: number[][], clip?: { x: number; y: number; r: number }): void {
+  /** Fill polygons, optionally only between two heights (for pouring a shape in). */
+  fill(mode: Mode, rings: number[][], band?: [number, number]): void {
     const ctx = this.begin(mode);
     ctx.save();
-    if (clip) {
+    if (band) {
       ctx.beginPath();
-      ctx.arc(clip.x, clip.y, clip.r, 0, Math.PI * 2);
+      ctx.rect(-CELL, band[0], (this.cols + 2) * CELL, band[1] - band[0]);
       ctx.clip();
     }
     ctx.beginPath();
@@ -145,7 +145,31 @@ export class Mask {
     }
     ctx.fill('evenodd');
     ctx.restore();
-    if (x0 <= x1) this.mark(x0 - CELL, y0 - CELL, x1 + CELL, y1 + CELL);
+    if (band) {
+      y0 = Math.max(y0, band[0]);
+      y1 = Math.min(y1, band[1]);
+    }
+    if (x0 <= x1 && y0 <= y1) this.mark(x0 - CELL, y0 - CELL, x1 + CELL, y1 + CELL);
+  }
+
+  /** The top and bottom of a recorded stroke. */
+  static extent(stroke: Stroke): [number, number] {
+    let y0 = Infinity;
+    let y1 = -Infinity;
+    if (stroke.kind === 'fill') {
+      for (const ring of stroke.rings) {
+        for (let i = 1; i < ring.length; i += 2) {
+          y0 = Math.min(y0, ring[i]);
+          y1 = Math.max(y1, ring[i]);
+        }
+      }
+    } else {
+      for (let i = 0; i < stroke.pts.length; i += 3) {
+        y0 = Math.min(y0, stroke.pts[i + 1] - stroke.pts[i + 2] / 2);
+        y1 = Math.max(y1, stroke.pts[i + 1] + stroke.pts[i + 2] / 2);
+      }
+    }
+    return [y0, y1];
   }
 
   /** Paint a whole recorded stroke. */

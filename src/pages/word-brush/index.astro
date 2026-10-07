@@ -1,6 +1,8 @@
 ---
 import { Font } from 'astro:assets';
 import Bare from '../../layouts/Bare.astro';
+import { PASSAGES } from './_texts';
+import { SHAPES } from './_shapes';
 ---
 
 <Bare
@@ -24,7 +26,109 @@ import Bare from '../../layouts/Bare.astro';
     </header>
 
     <p class="tally" data-tally aria-live="polite"></p>
-    <p class="hint" data-hint>Draw anywhere on the sheet</p>
+    <p class="hint" data-hint>Draw anywhere on the sheet<small>or let Shapes draw one for you</small></p>
+
+    <nav class="stick" aria-label="Brush and type">
+      <fieldset class="tools">
+        <legend class="vh">Tool</legend>
+        <label title="Brush: makes room for type (B)">
+          <input type="radio" name="wb-tool" value="paint" checked data-tool />
+          <span>Brush</span>
+        </label>
+        <label title="Eraser: takes room away (E). Right-drag erases too">
+          <input type="radio" name="wb-tool" value="erase" data-tool />
+          <span>Eraser</span>
+        </label>
+      </fieldset>
+      <label class="dial" title="Brush width ([ and ])">
+        <span>Width</span>
+        <input type="range" min="24" max="260" step="2" value="90" data-brush />
+      </label>
+      <label class="dial" title="Type size">
+        <span>Type</span>
+        <input type="range" min="10" max="34" step="1" value="16" data-size />
+      </label>
+      <span class="rule" aria-hidden="true"></span>
+      <button type="button" popovertarget="wb-texts">Text</button>
+      <button type="button" popovertarget="wb-shapes">Shapes</button>
+      <span class="rule" aria-hidden="true"></span>
+      <button type="button" data-undo disabled title="Undo (Ctrl+Z)">Undo</button>
+      <button type="button" data-clear disabled>Clear</button>
+      <button type="button" data-save disabled title="Save the sheet as a PNG">Save</button>
+      <button type="button" class="about" popovertarget="wb-notes" aria-label="About this page">?</button>
+    </nav>
+
+    <div class="pop" id="wb-texts" popover>
+      <h2>Set the text</h2>
+      <fieldset class="passages">
+        <legend class="vh">Passage</legend>
+        {
+          PASSAGES.map((p, i) => (
+            <label>
+              <input type="radio" name="wb-passage" value={p.id} checked={i === 0} data-passage />
+              <span class="title">{p.title}</span>
+              <span class="credit">{p.credit}</span>
+            </label>
+          ))
+        }
+        <label>
+          <input type="radio" name="wb-passage" value="setter" data-passage />
+          <span class="title">The typesetter itself</span>
+          <span class="credit">The source of the code that lays out these words</span>
+        </label>
+        <label>
+          <input type="radio" name="wb-passage" value="own" data-passage />
+          <span class="title">Your own words</span>
+          <span class="credit">Type or paste anything below</span>
+        </label>
+      </fieldset>
+      <textarea data-own rows="4" placeholder="Type here, and the drawing fills with it as you go" hidden></textarea>
+      <div class="options">
+        <label><input type="checkbox" data-italic /> Italic</label>
+        <label title="Fill each separate drawing on its own, top to bottom, before the next"
+          ><input type="checkbox" data-byshape checked /> Read shape by shape</label
+        >
+        <label><input type="checkbox" data-wash /> Keep the wash</label>
+      </div>
+    </div>
+
+    <div class="pop" id="wb-shapes" popover>
+      <h2>Draw one for me</h2>
+      <div class="shapes">
+        {
+          SHAPES.map((s) => (
+            <button type="button" data-shape={s.id}>
+              {s.label}
+            </button>
+          ))
+        }
+      </div>
+      <p class="aside">A shape replaces the sheet; Undo brings your drawing back. Tail and Wings set the poems that first took those shapes.</p>
+    </div>
+
+    <div class="pop notes" id="wb-notes" popover>
+      <h2>Word brush</h2>
+      <p>
+        A calligram sets words in the shape of what they say. George Herbert shaped each stanza of Easter Wings like a pair of
+        wings in 1633; Lewis Carroll printed the Mouse’s Tale as a winding tail in 1865; Apollinaire made his letters fall as rain
+        in 1918. This brush does it live: whatever you draw, a passage pours through it.
+      </p>
+      <p>
+        Every stroke paints a coarse mask. Each row of type asks the mask where it has room, and <a
+          href="https://github.com/chenglou/pretext">Pretext</a
+        >, Cheng Lou’s text layout library, breaks the passage into lines that fit exactly those widths, carrying on from where the
+        last line stopped. It measures with the browser’s own font engine but never touches the DOM, so the whole sheet reflows on
+        every frame of a stroke. Each line is then justified to its edges, and every word glides to its new place, so the type moves
+        like a liquid when you draw or erase.
+      </p>
+      <p class="keys">B brush · E eraser · [ and ] width · right-drag erases · Ctrl+Z undo</p>
+      <p class="credits">
+        Set in EB Garamond by Georg Duffner and Octavio Pardo, under the SIL Open Font License, served from this site. Layout by
+        Pretext, under the MIT License. The passages are in the public domain: Lewis Carroll (1865), George Herbert (1633),
+        William Shakespeare (1609), Walt Whitman (1892 text), and Cicero (45 BC), whose De finibus is where lorem ipsum comes from.
+        <a href="/">Back to thesandbox.page</a>
+      </p>
+    </div>
 
     <noscript>
       <p class="hint">The brush sets its type with JavaScript. Turn scripts on to draw.</p>
@@ -168,8 +272,248 @@ import Bare from '../../layouts/Bare.astro';
     transition: opacity 0.6s;
   }
 
+  .wordbrush .hint small {
+    display: block;
+    margin-top: 4px;
+    font-size: 15px;
+    text-align: center;
+    opacity: 0.8;
+  }
+
   .wordbrush .hint[data-gone] {
     opacity: 0;
+  }
+
+  .wordbrush .vh {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* The tools: one strip along the foot of the sheet, like a composing stick. */
+  .wordbrush .stick {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: calc(100vw - 32px);
+    padding: 6px 8px;
+    translate: -50% 0;
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow:
+      inset 0 0 0 3px var(--paper-deep),
+      inset 0 0 0 4px var(--rule),
+      0 10px 30px -18px rgb(60 40 20 / 0.6);
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.06em;
+    font-size: 17px;
+  }
+
+  .wordbrush .stick button,
+  .wordbrush .tools label,
+  .wordbrush .shapes button {
+    appearance: none;
+    padding: 4px 10px 6px;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    font: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+  }
+
+  .wordbrush .stick button:hover:not(:disabled),
+  .wordbrush .tools label:hover,
+  .wordbrush .shapes button:hover {
+    border-color: var(--rule);
+  }
+
+  .wordbrush .stick button:disabled {
+    color: rgb(36 27 21 / 0.32);
+    cursor: default;
+  }
+
+  .wordbrush .stick button:focus-visible,
+  .wordbrush .tools label:has(:focus-visible),
+  .wordbrush .shapes button:focus-visible,
+  .wordbrush .pop :focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 1px;
+  }
+
+  .wordbrush .tools {
+    display: flex;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .wordbrush .tools input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .wordbrush .tools label:has(:checked) {
+    color: var(--paper);
+    background: var(--ink);
+  }
+
+  .wordbrush .tools label:has([value='erase']:checked) {
+    background: var(--red);
+  }
+
+  .wordbrush .dial {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 4px;
+  }
+
+  .wordbrush .dial input {
+    width: 92px;
+    accent-color: var(--ink);
+  }
+
+  .wordbrush .rule {
+    align-self: stretch;
+    width: 1px;
+    margin: 2px 2px;
+    background: var(--rule);
+  }
+
+  .wordbrush .about {
+    font-variant-caps: normal;
+    font-style: italic;
+  }
+
+  .wordbrush .pop {
+    position: fixed;
+    inset: auto auto 78px 50%;
+    width: min(460px, calc(100vw - 32px));
+    max-height: calc(100dvh - 120px);
+    margin: 0;
+    padding: 16px 20px 18px;
+    overflow: auto;
+    translate: -50% 0;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: 0 18px 50px -24px rgb(60 40 20 / 0.7);
+    font: inherit;
+  }
+
+  .wordbrush .pop h2 {
+    margin: 0 0 10px;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .wordbrush .passages {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .wordbrush .passages label {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 10px;
+    padding: 5px 8px;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+
+  .wordbrush .passages label:has(:checked) {
+    background: var(--paper-deep);
+  }
+
+  .wordbrush .passages input {
+    grid-row: span 2;
+    margin: 5px 0 0;
+    accent-color: var(--red);
+  }
+
+  .wordbrush .passages .credit {
+    color: var(--ink-soft);
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  .wordbrush .pop textarea {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px 10px;
+    color: var(--ink);
+    background: #fbf8f1;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    font: inherit;
+    resize: vertical;
+  }
+
+  .wordbrush .options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .wordbrush .options input {
+    accent-color: var(--red);
+  }
+
+  .wordbrush .shapes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 6px;
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.06em;
+  }
+
+  .wordbrush .shapes button {
+    border-color: var(--rule);
+  }
+
+  .wordbrush .shapes button:hover {
+    color: var(--paper);
+    background: var(--ink);
+  }
+
+  .wordbrush .pop .aside,
+  .wordbrush .notes .credits {
+    margin: 12px 0 0;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  .wordbrush .notes p {
+    margin: 0 0 10px;
+  }
+
+  .wordbrush .notes .keys {
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.05em;
+  }
+
+  .wordbrush .notes a {
+    color: var(--red);
   }
 
   @media (max-width: 640px) {
@@ -182,13 +526,36 @@ import Bare from '../../layouts/Bare.astro';
     }
 
     .wordbrush .tally {
-      top: auto;
-      bottom: 132px;
+      top: 20px;
       right: 16px;
+      max-width: 46vw;
+      font-size: 14px;
     }
 
     .wordbrush .hint {
       font-size: 19px;
+    }
+
+    .wordbrush .stick {
+      bottom: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2px 4px;
+      width: calc(100vw - 32px);
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    .wordbrush .stick .rule {
+      display: none;
+    }
+
+    .wordbrush .dial input {
+      width: 70px;
+    }
+
+    .wordbrush .pop {
+      bottom: 120px;
     }
   }
 </style>

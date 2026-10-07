@@ -83,10 +83,10 @@ export class Typesetter {
   }
 
   /**
-   * Fill the rows. rows[k] lists the spans of the band at k * lineHeight as
-   * flat x0, x1 pairs.
+   * Set lines into spans, in the order given: flat triples of row k (the band
+   * at k * lineHeight), x0, and x1.
    */
-  place(rows: number[][]): Placement {
+  place(order: number[]): Placement {
     const out: Piece[] = [];
     const prepared = this.prepared;
     if (!prepared) return { pieces: out, words: 0, passes: 0 };
@@ -98,76 +98,124 @@ export class Typesetter {
     let words = 0;
     let lastChar = 0;
 
-    rows: for (let k = 0; k < rows.length; k++) {
-      const spans = rows[k];
-      const y = k * lh + baseline;
-      for (let s = 0; s < spans.length; s += 2) {
-        const x0 = spans[s];
-        const room = spans[s + 1] - x0;
-        const line = layoutNextLine(prepared, cursor, room);
-        if (!line) break rows;
-        cursor = line.end;
+    for (let s = 0; s < order.length; s += 3) {
+      const y = order[s] * lh + baseline;
+      const x0 = order[s + 1];
+      const room = order[s + 2] - x0;
+      const line = layoutNextLine(prepared, cursor, room);
+      if (!line) break;
+      cursor = line.end;
 
-        // Walk the line's segments into words and gaps.
-        const start = line.start;
-        const end = line.end;
-        const lineWords: { id: number; text: string; w: number; gapBefore: boolean }[] = [];
-        let gap = false;
-        const last = end.graphemeIndex > 0 ? end.segmentIndex : end.segmentIndex - 1;
-        for (let i = start.segmentIndex; i <= last; i++) {
-          if (GAP_KINDS.has(kinds[i])) {
-            gap = lineWords.length > 0;
-            continue;
-          }
-          const from = i === start.segmentIndex ? start.graphemeIndex : 0;
-          const to = i === end.segmentIndex ? end.graphemeIndex : -1;
-          let text = segments[i];
-          let w = widths[i];
-          if (from > 0 || to >= 0) {
-            const g = split(text);
-            text = g.slice(from, to >= 0 ? to : g.length).join('');
-            w = this.width(text);
-          }
-          if (!text) continue;
-          // A word broken across lines keeps one id per piece.
-          const id = i * 1024 + Math.min(from, 1023);
-          const prev = lineWords[lineWords.length - 1];
-          if (prev && !gap) {
-            // Glued to the previous segment (punctuation, a broken script run).
-            prev.text += text;
-            prev.w += w;
-          } else {
-            lineWords.push({ id, text, w, gapBefore: gap });
-            if (from === 0) words++;
-          }
-          gap = false;
-          lastChar = this.starts[i];
+      // Walk the line's segments into words and gaps.
+      const start = line.start;
+      const end = line.end;
+      const lineWords: { id: number; text: string; w: number; gapBefore: boolean }[] = [];
+      let gap = false;
+      const last = end.graphemeIndex > 0 ? end.segmentIndex : end.segmentIndex - 1;
+      for (let i = start.segmentIndex; i <= last; i++) {
+        if (GAP_KINDS.has(kinds[i])) {
+          gap = lineWords.length > 0;
+          continue;
         }
-        if (lineWords.length === 0) continue;
+        const from = i === start.segmentIndex ? start.graphemeIndex : 0;
+        const to = i === end.segmentIndex ? end.graphemeIndex : -1;
+        let text = segments[i];
+        let w = widths[i];
+        if (from > 0 || to >= 0) {
+          const g = split(text);
+          text = g.slice(from, to >= 0 ? to : g.length).join('');
+          w = this.width(text);
+        }
+        if (!text) continue;
+        // A word broken across lines keeps one id per piece.
+        const id = i * 1024 + Math.min(from, 1023);
+        const prev = lineWords[lineWords.length - 1];
+        if (prev && !gap) {
+          // Glued to the previous segment (punctuation, a broken script run).
+          prev.text += text;
+          prev.w += w;
+        } else {
+          lineWords.push({ id, text, w, gapBefore: gap });
+          if (from === 0) words++;
+        }
+        gap = false;
+        lastChar = this.starts[i];
+      }
+      if (lineWords.length === 0) continue;
 
-        // Justify to the span: spread the slack over the gaps, up to a limit,
-        // and centre whatever is left.
-        const space = this.width(' ');
-        let natural = 0;
-        let gaps = 0;
-        for (const w of lineWords) {
-          if (w.gapBefore) {
-            natural += space;
-            gaps++;
-          }
-          natural += w.w;
+      // Justify to the span: spread the slack over the gaps, up to a limit,
+      // and center whatever is left.
+      const space = this.width(' ');
+      let natural = 0;
+      let gaps = 0;
+      for (const w of lineWords) {
+        if (w.gapBefore) {
+          natural += space;
+          gaps++;
         }
-        const slack = Math.max(0, room - natural);
-        const extra = gaps > 0 ? Math.min(slack / gaps, maxGap) : 0;
-        let x = x0 + (slack - extra * gaps) / 2;
-        for (const w of lineWords) {
-          if (w.gapBefore) x += space + extra;
-          out.push({ id: w.id, text: w.text, x, y, rubric: RUBRICS.has(w.text) });
-          x += w.w;
-        }
+        natural += w.w;
+      }
+      const slack = Math.max(0, room - natural);
+      const extra = gaps > 0 ? Math.min(slack / gaps, maxGap) : 0;
+      let x = x0 + (slack - extra * gaps) / 2;
+      for (const w of lineWords) {
+        if (w.gapBefore) x += space + extra;
+        out.push({ id: w.id, text: w.text, x, y, rubric: RUBRICS.has(w.text) });
+        x += w.w;
       }
     }
     const passes = out.length ? Math.floor(lastChar / this.passLength) + 1 : 0;
     return { pieces: out, words, passes };
   }
+}
+
+/**
+ * The order to fill spans in. Straight across reads every row of the sheet
+ * left to right, top to bottom. By shape finds the connected regions (spans
+ * that overlap the span above join its region) and fills each region top to
+ * bottom before starting the next, so two separate drawings each read on
+ * their own. Returns flat triples of row, x0, x1.
+ */
+export function readingOrder(rows: number[][], byShape: boolean): number[] {
+  const flat: number[] = [];
+  const index: number[][] = [];
+  for (let k = 0; k < rows.length; k++) {
+    const spans = rows[k];
+    const ids: number[] = [];
+    for (let i = 0; i < spans.length; i += 2) {
+      ids.push(flat.length / 3);
+      flat.push(k, spans[i], spans[i + 1]);
+    }
+    index.push(ids);
+  }
+  if (!byShape) return flat;
+
+  const n = flat.length / 3;
+  const parent = new Int32Array(n);
+  for (let i = 0; i < n; i++) parent[i] = i;
+  const find = (i: number) => {
+    while (parent[i] !== i) {
+      parent[i] = parent[parent[i]];
+      i = parent[i];
+    }
+    return i;
+  };
+  for (let k = 1; k < index.length; k++) {
+    for (const a of index[k]) {
+      for (const b of index[k - 1]) {
+        if (flat[a * 3 + 1] < flat[b * 3 + 2] && flat[b * 3 + 1] < flat[a * 3 + 2]) {
+          const ra = find(a);
+          const rb = find(b);
+          // Keep the earlier span as the root, so a region sorts by where it starts.
+          if (ra !== rb) parent[Math.max(ra, rb)] = Math.min(ra, rb);
+        }
+      }
+    }
+  }
+  const order = Array.from({ length: n }, (_, i) => i);
+  const root = order.map(find);
+  order.sort((a, b) => root[a] - root[b] || a - b);
+  const out: number[] = [];
+  for (const i of order) out.push(flat[i * 3], flat[i * 3 + 1], flat[i * 3 + 2]);
+  return out;
 }
