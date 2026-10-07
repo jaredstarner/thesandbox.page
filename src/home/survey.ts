@@ -19,8 +19,10 @@ const WORLD_LIMIT = 2000;
 const TITLE_ZOOM = 130;
 const ENTRY_ZOOM = 280;
 const DRAG_SLOP = 6;
-// The daily run starts at 08:14 ET and its page is usually live by about 09:00.
-const SURVEY_HOUR = 9;
+// The stake counts down to this time in SURVEY_ZONE: when a run's page is
+// usually live. Source: the sandbox-daily routine's start time plus a typical
+// run. When the routine moves, change only the next line.
+const SURVEY_AT = { hour: 7, minute: 30 }; // sandbox-daily starts 06:14 ET
 const SURVEY_ZONE = 'America/New_York';
 
 const clamp = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
@@ -367,7 +369,7 @@ export function startSurvey(root: HTMLElement): void {
     if (!countdown) return;
     const parts = Object.fromEntries(zoneClock.formatToParts(new Date()).map((p) => [p.type, p.value]));
     const now = Number(parts.hour) * 3600 + Number(parts.minute) * 60 + Number(parts.second);
-    let left = SURVEY_HOUR * 3600 - now;
+    let left = SURVEY_AT.hour * 3600 + SURVEY_AT.minute * 60 - now;
     if (left <= 0) left += 86400;
     const pad = (n: number): string => String(n).padStart(2, '0');
     countdown.textContent = `${pad(Math.floor(left / 3600))}:${pad(Math.floor((left % 3600) / 60))}:${pad(left % 60)}`;
