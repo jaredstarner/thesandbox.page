@@ -320,7 +320,7 @@ export function fishSprite(sp: Species, len: number, frame: 0 | 1, silhouette = 
   const px = new Uint32Array(w * h);
   const put = (x: number, y: number, c: number) => {
     if (x < 0 || y < 0 || x >= w || y >= h) return;
-    px[y * w + x] = rgb(silhouette ? 0x1c2433 : c);
+    px[y * w + x] = rgb(silhouette ? 0x4a5570 : c);
   };
   const halfAt = (u: number) => Math.max(0.6, (H / 2) * Math.pow(Math.max(0, 1 - ((u - 0.55) / 0.56) ** 2), 0.75));
 
@@ -423,7 +423,7 @@ export function bootSprite(silhouette = false): Sprite {
   BOOT_ROWS.forEach((row, y) => {
     for (let x = 0; x < w; x++) {
       if (row[x] === '.') continue;
-      px[y * w + x] = rgb(silhouette ? 0x1c2433 : row[x] === 's' ? 0x1d1714 : y < 3 && x === 1 ? 0x4c372c : 0x3a2a22);
+      px[y * w + x] = rgb(silhouette ? 0x4a5570 : row[x] === 's' ? 0x1d1714 : y < 3 && x === 1 ? 0x4c372c : 0x3a2a22);
     }
   });
   return { w, h, px };

@@ -104,7 +104,8 @@ export function startFishing(root: HTMLElement): void {
     cols = new Float32Array((vw + 1) * 2);
     renderer.resize(vw + 1, vh + 1);
     const span = BAND_BOTTOM - BAND_TOP;
-    camY = vh >= span ? BAND_TOP - Math.floor((vh - span) / 2) : BAND_BOTTOM - vh;
+    // A tall screen gives most of its spare height to the sky.
+    camY = vh >= span ? BAND_TOP - Math.floor((vh - span) * 0.7) : BAND_BOTTOM - vh;
   };
   resize();
   new ResizeObserver(resize).observe(canvas);

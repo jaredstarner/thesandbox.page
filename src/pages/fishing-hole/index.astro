@@ -126,6 +126,14 @@ import Bare from '../../layouts/Bare.astro';
     -webkit-tap-highlight-color: transparent;
   }
 
+  .fishing,
+  .fishing * {
+    box-sizing: border-box;
+    /* The face's fi and fl ligatures draw as broken glyphs. Important,
+       because every font shorthand below would reset it. */
+    font-variant-ligatures: none !important;
+  }
+
   .fishing .view {
     position: absolute;
     inset: 0;
@@ -150,6 +158,9 @@ import Bare from '../../layouts/Bare.astro';
   }
 
   .fishing .top {
+    text-shadow:
+      var(--pixel) var(--pixel) 0 rgb(0 0 0 / 0.6),
+      0 0 0.7rem rgb(10 14 24 / 0.55);
     position: absolute;
     top: 0.9rem;
     left: 1rem;
@@ -446,7 +457,7 @@ import Bare from '../../layouts/Bare.astro';
   }
 
   .fishing .log .unknown {
-    opacity: 0.55;
+    opacity: 0.8;
   }
 
   .fishing .log .count {
