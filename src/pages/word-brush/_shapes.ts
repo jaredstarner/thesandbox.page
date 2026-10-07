@@ -18,8 +18,9 @@ const fill = (ring: number[], mode: FillStroke['mode'] = 'paint'): FillStroke =>
 function stage(w: number, h: number) {
   const top = Math.min(110, h * 0.14);
   const bottom = Math.min(110, h * 0.16);
-  const s = Math.min(w * 0.86, h - top - bottom);
-  return { s, cx: w / 2, cy: top + (h - top - bottom) / 2 };
+  const tall = h - top - bottom;
+  const s = Math.min(w * 0.86, tall);
+  return { s, tall, cx: w / 2, cy: top + tall / 2 };
 }
 
 const circle = (cx: number, cy: number, r: number, n = 96) => {
@@ -38,13 +39,15 @@ export const SHAPES: Shape[] = [
     label: 'Tail',
     passage: 'tale',
     build(w, h, type) {
-      const { s, cx, cy } = stage(w, h);
+      const { s, tall, cx, cy } = stage(w, h);
+      // On a tall screen the tail can run longer than it is wide.
+      const len = Math.min(tall, s * 1.5);
       const pts: number[] = [];
       const n = 220;
       for (let i = 0; i < n; i++) {
         const t = i / (n - 1);
         const x = cx + s * 0.2 * Math.sin(t * Math.PI * 3.3 + 0.5) * (1 - 0.45 * t) - s * 0.04;
-        const y = cy - s * 0.47 + s * 0.94 * t;
+        const y = cy - len * 0.47 + len * 0.94 * t;
         const width = Math.max(type * 1.6, s * (0.3 * Math.pow(1 - t, 1.15) + 0.02));
         pts.push(x, y, width);
       }
@@ -98,15 +101,16 @@ export const SHAPES: Shape[] = [
     id: 'rain',
     label: 'Rain',
     build(w, h, type) {
-      const { s, cy } = stage(w, h);
+      const { s, tall, cy } = stage(w, h);
       const width = Math.max(type * 5.5, s * 0.11);
+      const reach = Math.min(tall, s * 1.4);
       const count = Math.max(3, Math.min(8, Math.floor((w * 0.86) / (width * 1.9))));
       const span = w * 0.8;
       const out: Stroke[] = [];
       for (let i = 0; i < count; i++) {
         const x = w / 2 - span / 2 + (span * (i + 0.5)) / count;
-        const len = (s - width) * (0.62 + 0.3 * Math.abs(Math.sin(i * 2.4 + 1)));
-        const y0 = cy - s / 2 + width / 2 + (i % 3) * s * 0.03;
+        const len = (reach - width) * (0.62 + 0.3 * Math.abs(Math.sin(i * 2.4 + 1)));
+        const y0 = cy - reach / 2 + width / 2 + (i % 3) * s * 0.03;
         const pts: number[] = [];
         for (let j = 0; j <= 30; j++) {
           const t = j / 30;

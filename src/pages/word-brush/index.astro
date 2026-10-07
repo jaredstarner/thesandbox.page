@@ -126,8 +126,8 @@ import { SHAPES } from './_shapes';
         Set in EB Garamond by Georg Duffner and Octavio Pardo, under the SIL Open Font License, served from this site. Layout by
         Pretext, under the MIT License. The passages are in the public domain: Lewis Carroll (1865), George Herbert (1633),
         William Shakespeare (1609), Walt Whitman (1892 text), and Cicero (45 BC), whose De finibus is where lorem ipsum comes from.
-        <a href="/">Back to thesandbox.page</a>
       </p>
+      <p class="credits"><a href="/">Back to thesandbox.page</a></p>
     </div>
 
     <noscript>
@@ -398,9 +398,10 @@ import { SHAPES } from './_shapes';
 
   .wordbrush .pop {
     position: fixed;
-    inset: auto auto 78px 50%;
+    inset: auto auto calc(var(--stick-top, 66px) + 10px) 50%;
+    box-sizing: border-box;
     width: min(460px, calc(100vw - 32px));
-    max-height: calc(100dvh - 120px);
+    max-height: calc(100dvh - var(--stick-top, 66px) - 40px);
     margin: 0;
     padding: 16px 20px 18px;
     overflow: auto;
@@ -551,11 +552,17 @@ import { SHAPES } from './_shapes';
     }
 
     .wordbrush .dial input {
-      width: 70px;
+      width: 60px;
     }
 
-    .wordbrush .pop {
-      bottom: 120px;
+    .wordbrush .dial {
+      gap: 4px;
+      padding: 0 2px;
+    }
+
+    .wordbrush .stick button,
+    .wordbrush .tools label {
+      padding: 3px 7px 5px;
     }
   }
 </style>
