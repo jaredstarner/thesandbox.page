@@ -57,9 +57,9 @@ export class Fight {
       else this.startRest();
     }
 
-    const target = reeling ? 0.22 + this.pull * 1.15 : this.pull * 0.35;
+    const target = reeling ? 0.25 + this.pull * 1.3 : this.pull * 0.35;
     this.tension += (target - this.tension) * Math.min(1, dt * 5);
-    if (this.tension > 1) this.strain += dt * (1 + (this.tension - 1) * 4);
+    if (this.tension > 1) this.strain += dt * (0.6 + (this.tension - 1) * 1.5);
     else this.strain = Math.max(0, this.strain - dt * 0.7);
     if (this.strain >= 1) return 'snap';
 

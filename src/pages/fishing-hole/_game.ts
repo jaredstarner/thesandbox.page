@@ -36,7 +36,7 @@ const TAP = 0.22;
 const REEL_SPEED = 22;
 const GRAVITY = 150;
 export const MIN_DEPTH_FT = 1;
-export const MAX_DEPTH_FT = 10;
+export const MAX_DEPTH_FT = 12;
 
 const LINE = rgb(0xe8f1f4);
 const LINE_UNDER = rgb(0xcfe3ea, 200);
