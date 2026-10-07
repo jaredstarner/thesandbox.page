@@ -2,6 +2,7 @@
 
 import { Mask, type LineStroke, type Mode, type Stroke } from './_mask';
 import { Typesetter, type Placement } from './_flow';
+import { Ink } from './_ink';
 import { PASSAGES } from './_texts';
 
 const INK = '#241b15';
@@ -16,6 +17,8 @@ export function startWordBrush(root: HTMLElement): void {
 
   const mask = new Mask();
   const setter = new Typesetter();
+  const ink = new Ink();
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)');
   const family = getComputedStyle(root).getPropertyValue('--font-wordbrush').trim() || 'serif';
 
   const state = {
@@ -24,6 +27,7 @@ export function startWordBrush(root: HTMLElement): void {
     size: window.innerWidth < 640 ? 14 : 16,
     passage: PASSAGES[0],
     strokes: [] as Stroke[],
+    keepWash: false,
   };
 
   let W = 0;
@@ -78,16 +82,15 @@ export function startWordBrush(root: HTMLElement): void {
   function draw(): void {
     ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx!.clearRect(0, 0, W, H);
-    ctx!.globalAlpha = 0.14;
-    ctx!.imageSmoothingEnabled = true;
-    ctx!.drawImage(mask.canvas, 0, 0, W, H);
-    ctx!.globalAlpha = 1;
+    if (wash > 0.002) {
+      ctx!.globalAlpha = wash;
+      ctx!.imageSmoothingEnabled = true;
+      ctx!.drawImage(mask.canvas, 0, 0, W, H);
+      ctx!.globalAlpha = 1;
+    }
     ctx!.font = font();
     ctx!.textBaseline = 'alphabetic';
-    for (const p of placement.pieces) {
-      ctx!.fillStyle = p.rubric ? RED : INK;
-      ctx!.fillText(p.text, p.x, p.y);
-    }
+    ink.draw(ctx!, INK, RED);
   }
 
   function writeTally(): void {
@@ -98,9 +101,18 @@ export function startWordBrush(root: HTMLElement): void {
       : '';
   }
 
+  // The wash shows the brush's reach while drawing, then fades so only the
+  // type is left, unless it is kept.
+  let wash = 0;
+  let washHold = 0;
+  const washTarget = () => (live || washHold > 0 ? 0.16 : state.keepWash ? 0.1 : 0);
+
   let frameRequested = false;
-  function frame(): void {
+  let last = 0;
+  function frame(now: number): void {
     frameRequested = false;
+    const dt = Math.min(0.05, last ? (now - last) / 1000 : 1 / 60);
+    last = now;
     const changed = mask.sync();
     if (changed) rowsDirty = rowsDirty ? [Math.min(rowsDirty[0], changed[0]), Math.max(rowsDirty[1], changed[1])] : changed;
     if (rowsDirty) {
@@ -110,9 +122,20 @@ export function startWordBrush(root: HTMLElement): void {
     if (needsLayout) {
       placement = setter.place(rows);
       needsLayout = false;
+      ink.update(placement.pieces, setter.lineHeight * 1.5, still.matches ? 0 : state.size * 0.22);
       writeTally();
     }
+    let busy = ink.step(dt, still.matches);
+    washHold = Math.max(0, washHold - dt);
+    const target = washTarget();
+    if (wash !== target) {
+      wash = still.matches ? target : wash + (target - wash) * (1 - Math.exp(-dt * (target > wash ? 12 : 2.2)));
+      if (Math.abs(wash - target) < 0.002) wash = target;
+      busy = true;
+    }
     draw();
+    if (busy || live || washHold > 0) request();
+    else last = 0;
   }
   function request(): void {
     if (frameRequested) return;
@@ -163,6 +186,8 @@ export function startWordBrush(root: HTMLElement): void {
     state.strokes.push(live);
     live = null;
     pointer = -1;
+    washHold = 0.9;
+    request();
   };
   canvas.addEventListener('pointerup', finish);
   canvas.addEventListener('pointercancel', finish);
