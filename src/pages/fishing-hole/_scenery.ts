@@ -4,7 +4,6 @@
 
 import { Layer, rgb, sprite, type Sprite } from './_pixels';
 import {
-  BOOT_X,
   DECK_Y,
   DOCK_X0,
   DOCK_X1,
@@ -43,7 +42,6 @@ const LANTERN_FRAME = rgb(0x2b2b33);
 const LANTERN_GLASS = rgb(0xf1d48a);
 const LANTERN_DARK = rgb(0x8a7d62);
 
-const BOOT: Sprite = sprite(['.bb..', '.bb..', '.bbbb', 'sssss'], { b: 0x3a2a22, s: 0x1d1714 });
 const TACKLE: Sprite = sprite(['.hhh.', 'ggggg', 'gGggg', 'ggggg'], { h: 0x2c3a2c, g: 0x3f7a4a, G: 0xd6c25a });
 
 function treeSprite(t: Tree, seed: number): Sprite {
@@ -140,8 +138,6 @@ export function drawBed(layer: Layer, s: SceneryState): void {
   const branchTop = Math.round(restL + (restR - restL) * (19 / (LOG.x1 - LOG.x0))) - 5;
   for (let i = 1; i <= 5; i++) layer.set(branchX + Math.round(i * 0.7), branchTop - i, i === 5 ? BARK_LIT : BARK);
   layer.set(branchX + 4, branchTop - 5, BARK);
-
-  layer.blit(BOOT, BOOT_X - 2, bedAt(BOOT_X) - 3);
 
   for (const w of WEEDS) {
     const base = bedAt(w.x);

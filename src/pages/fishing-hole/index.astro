@@ -41,6 +41,7 @@ import Bare from '../../layouts/Bare.astro';
       <canvas class="card-fish" data-card-fish width="32" height="12"></canvas>
       <h2 data-card-name></h2>
       <p class="card-size" data-card-size></p>
+      <p class="card-metric" data-card-metric></p>
       <p class="card-note" data-card-note></p>
       <button type="button" data-release>Release</button>
     </section>
@@ -317,6 +318,13 @@ import Bare from '../../layouts/Bare.astro';
   .fishing .card-size {
     margin: 0;
     font-size: 1.125rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fishing .card-metric {
+    margin: -0.2rem 0 0;
+    font-size: 0.8125rem;
+    opacity: 0.7;
     font-variant-numeric: tabular-nums;
   }
 

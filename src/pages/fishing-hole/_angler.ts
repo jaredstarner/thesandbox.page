@@ -76,11 +76,21 @@ export class Angler {
     return [hx + Math.cos(this.angle) * ROD_LENGTH, hy - Math.sin(this.angle) * ROD_LENGTH];
   }
 
-  /**
-   * Draw the angler and rod. The tip bends toward (lx, ly) by tension (0 to 1+).
-   * Returns the bent tip, where the line starts.
-   */
-  draw(layer: Layer, lx: number, ly: number, tension: number): [number, number] {
+  /** The rod's tip, bent toward (lx, ly) by tension (0 to 1 and over). */
+  tip(lx: number, ly: number, tension: number): [number, number] {
+    let [tx, ty] = this.straightTip();
+    // The tip is pulled toward the line, and droops a little anyway.
+    const ux = lx - tx;
+    const uy = ly - ty;
+    const len = Math.hypot(ux, uy) || 1;
+    const bend = Math.min(1.3, Math.max(0, tension)) * 8;
+    tx += (ux / len) * bend;
+    ty += (uy / len) * bend + 1;
+    return [tx, ty];
+  }
+
+  /** Draw the angler and the rod out to its tip. */
+  draw(layer: Layer, tx: number, ty: number): void {
     layer.blit(BODY, this.x, this.top);
     const [hx, hy] = this.hand;
     const [sx, sy] = this.shoulder;
@@ -89,14 +99,6 @@ export class Angler {
 
     const dx = Math.cos(this.angle);
     const dy = -Math.sin(this.angle);
-    let [tx, ty] = [hx + dx * ROD_LENGTH, hy + dy * ROD_LENGTH];
-    // Bend: the tip is pulled toward the line, and droops a little anyway.
-    const ux = lx - tx;
-    const uy = ly - ty;
-    const len = Math.hypot(ux, uy) || 1;
-    const bend = Math.min(1.3, Math.max(0, tension)) * 8;
-    tx += (ux / len) * bend;
-    ty += (uy / len) * bend + 1;
     const cx = hx + dx * ROD_LENGTH * 0.55;
     const cy = hy + dy * ROD_LENGTH * 0.55;
 
@@ -115,6 +117,5 @@ export class Angler {
       py = y;
     }
     layer.set(hx + Math.round(dx * 3), hy + Math.round(dy * 3) + 1, REEL);
-    return [tx, ty];
   }
 }

@@ -1,12 +1,12 @@
 // The fishing hole: wires the lake, the angler, and the page's controls together.
 
-import { Angler } from './_angler';
 import { moonPhase, moonProgress, partOfDay, skyAt, sunProgress } from './_daylight';
+import type { Fish } from './_fish';
+import { Game } from './_game';
 import { Renderer } from './_gl';
-import { Rope } from './_line';
-import { Layer, rgb } from './_pixels';
+import { Layer, type Sprite } from './_pixels';
 import { drawBack, drawBed, drawDock } from './_scenery';
-import { Water } from './_water';
+import { BOOT_ID, bootSprite, fishSprite } from './_species';
 import { WORLD_W, bedAt } from './_world';
 
 const STEP = 1 / 60;
@@ -14,17 +14,12 @@ const STEP = 1 / 60;
 const BAND_TOP = -50;
 const BAND_BOTTOM = 96;
 
-const LINE = rgb(0xe8f1f4);
-const FLOAT_RED = rgb(0xe5413a);
-const FLOAT_WHITE = rgb(0xf4f1ea);
-
 /** The hour to show: the visitor's clock, or ?hour=21.5 to visit another time. */
-function clockHour(): { hour: number; fixed: boolean } {
+function clockHour(): number {
   const param = new URLSearchParams(location.search).get('hour');
-  const fixed = param !== null && param.trim() !== '' && Number.isFinite(Number(param));
-  if (fixed) return { hour: ((Number(param) % 24) + 24) % 24, fixed };
+  if (param !== null && param.trim() !== '' && Number.isFinite(Number(param))) return ((Number(param) % 24) + 24) % 24;
   const d = new Date();
-  return { hour: d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600, fixed: false };
+  return d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
 }
 
 function clockText(hour: number): string {
@@ -34,10 +29,51 @@ function clockText(hour: number): string {
   return `${h12}:${String(m).padStart(2, '0')} ${h < 12 ? 'am' : 'pm'} · ${partOfDay(hour)}`;
 }
 
+/** Inches and pounds-and-ounces, then centimeters and kilograms. */
+export function sizeText(cm: number, kg: number): [string, string] {
+  const inches = (cm / 2.54).toFixed(1);
+  let lb = Math.floor(kg * 2.20462);
+  let oz = Math.round((kg * 2.20462 - lb) * 16);
+  if (oz === 16) {
+    lb += 1;
+    oz = 0;
+  }
+  const weight = lb === 0 ? `${oz} oz` : `${lb} lb ${oz} oz`;
+  return [`${inches} in · ${weight}`, `${cm.toFixed(1)} cm · ${kg.toFixed(2)} kg`];
+}
+
+/** Paint a sprite into a small canvas, one canvas pixel per sprite pixel. */
+export function paintSprite(canvas: HTMLCanvasElement, s: Sprite): void {
+  canvas.width = s.w + 2;
+  canvas.height = s.h + 2;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const img = ctx.createImageData(s.w, s.h);
+  new Uint32Array(img.data.buffer).set(s.px);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.putImageData(img, 1, 1);
+}
+
+export function spriteOf(f: Fish, silhouette = false): Sprite {
+  return f.sp.id === BOOT_ID ? bootSprite(silhouette) : fishSprite(f.sp, f.px, 0, silhouette);
+}
+
 export function startFishing(root: HTMLElement): void {
-  const canvas = root.querySelector<HTMLCanvasElement>('[data-view]');
-  const unsupported = root.querySelector<HTMLElement>('[data-unsupported]');
-  const clock = root.querySelector<HTMLElement>('[data-clock]');
+  const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel);
+  const canvas = $<HTMLCanvasElement>('[data-view]');
+  const unsupported = $('[data-unsupported]');
+  const clock = $('[data-clock]');
+  const hint = $('[data-hint]');
+  const depthOut = $('[data-depth]');
+  const shallower = $<HTMLButtonElement>('[data-shallower]');
+  const deeper = $<HTMLButtonElement>('[data-deeper]');
+  const card = $('[data-card]');
+  const cardFish = $<HTMLCanvasElement>('[data-card-fish]');
+  const cardName = $('[data-card-name]');
+  const cardSize = $('[data-card-size]');
+  const cardMetric = $('[data-card-metric]');
+  const cardNote = $('[data-card-note]');
+  const releaseButton = $<HTMLButtonElement>('[data-release]');
   if (!canvas) return;
 
   const fail = (message: string) => {
@@ -48,7 +84,7 @@ export function startFishing(root: HTMLElement): void {
     root.dataset.state = 'unsupported';
   };
 
-  const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, preserveDrawingBuffer: false });
+  const gl = canvas.getContext('webgl2', { antialias: false, alpha: false });
   if (!gl) {
     fail('This lake is drawn with WebGL 2, which this browser did not open.');
     return;
@@ -62,11 +98,9 @@ export function startFishing(root: HTMLElement): void {
     return;
   }
 
+  const game = new Game();
   const sprites = new Layer();
   const glow = new Layer();
-  const water = new Water();
-  const angler = new Angler();
-  const rope = new Rope();
   let cols = new Float32Array(0);
 
   // ---- view -----------------------------------------------------------------
@@ -75,6 +109,7 @@ export function startFishing(root: HTMLElement): void {
   let vh = 0;
   let camX = 0;
   let camY = 0;
+  let camReady = false;
 
   const resize = () => {
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
@@ -95,35 +130,130 @@ export function startFishing(root: HTMLElement): void {
   resize();
   new ResizeObserver(resize).observe(canvas);
 
+  const cameraTarget = () => {
+    if (vw >= WORLD_W) return (WORLD_W - vw) / 2;
+    const t = Math.max(game.angler.x - vw * 0.2, game.focusX - vw * 0.7);
+    return Math.max(0, Math.min(WORLD_W - vw, t));
+  };
+
+  // ---- input ----------------------------------------------------------------
+  const popoverOpen = () => root.querySelector(':popover-open') !== null;
+
+  canvas.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || popoverOpen()) return;
+    event.preventDefault();
+    canvas.setPointerCapture(event.pointerId);
+    game.pressDown();
+  });
+  const up = () => game.pressUp();
+  canvas.addEventListener('pointerup', up);
+  canvas.addEventListener('pointercancel', up);
+  canvas.addEventListener('lostpointercapture', up);
+  canvas.addEventListener('contextmenu', (event) => event.preventDefault());
+
+  const isControl = (el: EventTarget | null) => el instanceof HTMLElement && el.closest('button, a, input, [popover]') !== null;
+  window.addEventListener('keydown', (event) => {
+    if (event.key === ' ' || event.key === 'Enter') {
+      if (isControl(event.target) || popoverOpen()) return;
+      event.preventDefault();
+      if (!event.repeat) game.pressDown();
+    } else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      if (popoverOpen()) return;
+      event.preventDefault();
+      setDepth(game.depthFt + (event.key === 'ArrowDown' ? 1 : -1));
+    }
+  });
+  window.addEventListener('keyup', (event) => {
+    if (event.key === ' ' || event.key === 'Enter') game.pressUp();
+  });
+  window.addEventListener('blur', up);
+
+  let wheelAt = 0;
+  canvas.addEventListener(
+    'wheel',
+    (event) => {
+      event.preventDefault();
+      const now = performance.now();
+      if (now - wheelAt < 120 || Math.abs(event.deltaY) < 1) return;
+      wheelAt = now;
+      setDepth(game.depthFt + Math.sign(event.deltaY));
+    },
+    { passive: false },
+  );
+
+  const setDepth = (ft: number) => {
+    if (!game.canSetDepth) return;
+    game.setDepth(ft);
+  };
+  shallower?.addEventListener('click', () => setDepth(game.depthFt - 1));
+  deeper?.addEventListener('click', () => setDepth(game.depthFt + 1));
+  releaseButton?.addEventListener('click', () => {
+    game.pressDown();
+    game.pressUp();
+  });
+  // A mouse click leaves focus on a button, where Space would press it again.
+  for (const b of root.querySelectorAll('button')) {
+    b.addEventListener('click', (event) => {
+      if (event.detail > 0) b.blur();
+    });
+  }
+
+  // ---- the catch card ---------------------------------------------------------
+  game.on((e) => {
+    if (e.type === 'land' && card) {
+      const f = e.fish;
+      if (cardFish) paintSprite(cardFish, spriteOf(f));
+      if (cardName) cardName.textContent = f.sp.name;
+      const [imperial, metric] = sizeText(f.cm, f.kg);
+      if (cardSize) cardSize.textContent = f.sp.id === BOOT_ID ? 'Size 10 · 1 lb 5 oz' : imperial;
+      if (cardMetric) cardMetric.textContent = f.sp.id === BOOT_ID ? '' : metric;
+      if (cardNote) cardNote.textContent = f.sp.note;
+      card.hidden = false;
+    } else if (e.type === 'release' && card) {
+      card.hidden = true;
+    }
+  });
+
   // ---- loop -----------------------------------------------------------------
   let time = 0;
   let last = performance.now();
   let acc = 0;
-  let lastClock = '';
+  const shown = { clock: '', hint: '', state: '', depth: '', depthOn: true };
 
   const frame = (now: number) => {
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
     acc += dt;
+    const hour = clockHour();
+    const sky = skyAt(hour);
+    game.water.night = sky.night;
     while (acc >= STEP) {
       acc -= STEP;
       time += STEP;
-      water.step(STEP);
-      angler.update(STEP);
-      const [tx, ty] = angler.straightTip();
-      rope.length = 7;
-      rope.step(STEP, tx, ty, tx + 1, ty + 7, (x) => water.surfaceAt(x));
+      game.update(STEP, hour);
     }
 
-    const { hour } = clockHour();
-    const sky = skyAt(hour);
-    water.night = sky.night;
+    // Page text, touched only when it changes.
     const text = clockText(hour);
-    if (clock && text !== lastClock) clock.textContent = lastClock = text;
+    if (clock && text !== shown.clock) clock.textContent = shown.clock = text;
+    if (hint && game.hint !== shown.hint) hint.textContent = shown.hint = game.hint;
+    if (game.uiState !== shown.state) root.dataset.state = shown.state = game.uiState;
+    const depth = `${game.depthFt} ft`;
+    if (depthOut && depth !== shown.depth) depthOut.textContent = shown.depth = depth;
+    if (game.canSetDepth !== shown.depthOn) {
+      shown.depthOn = game.canSetDepth;
+      if (shallower) shallower.disabled = !shown.depthOn;
+      if (deeper) deeper.disabled = !shown.depthOn;
+    }
+    root.dataset.tension = game.tension.toFixed(2);
 
-    // Camera: keep the dock in view for now.
-    const target = vw >= WORLD_W ? (WORLD_W - vw) / 2 : Math.max(0, Math.min(WORLD_W - vw, 30 - vw * 0.12));
-    camX = target;
+    // Camera follows the float or the fish, keeping the dock in view when it can.
+    const target = cameraTarget();
+    if (!camReady) {
+      camX = target;
+      camReady = true;
+    }
+    camX += (target - camX) * Math.min(1, dt * (game.state === 'flight' ? 3.5 : 2));
     const cx = Math.floor(camX);
     const cy = camY;
     sprites.ox = glow.ox = cx;
@@ -131,25 +261,17 @@ export function startFishing(root: HTMLElement): void {
     sprites.clear();
     glow.clear();
 
-    const state = { time, wind: water.wind, night: sky.night };
-    drawBack(sprites, state);
-    drawBed(sprites, state);
-    drawDock(sprites, glow, state);
-    const end = rope.length;
-    const [tx, ty] = angler.draw(sprites, rope.x[rope.x.length - 1], rope.y[rope.y.length - 1], 0);
-    void tx;
-    void ty;
-    void end;
-    rope.draw(sprites, LINE);
-    const bx = rope.x[rope.x.length - 1];
-    const by = rope.y[rope.y.length - 1];
-    sprites.rect(bx - 1, by - 1, 3, 2, FLOAT_RED);
-    sprites.rect(bx - 1, by + 1, 3, 1, FLOAT_WHITE);
-    water.draw(sprites, glow);
+    const scene = { time, wind: game.water.wind, night: sky.night };
+    drawBack(sprites, scene);
+    drawBed(sprites, scene);
+    game.drawFish(sprites);
+    drawDock(sprites, glow, scene);
+    game.drawRig(sprites, glow, sky.night);
+    game.water.draw(sprites, glow);
 
     for (let i = 0; i <= vw; i++) {
       const wx = cx + i;
-      cols[i * 2] = water.surfaceAt(wx);
+      cols[i * 2] = game.water.surfaceAt(wx);
       cols[i * 2 + 1] = bedAt(Math.max(0, Math.min(WORLD_W, wx)));
     }
 
