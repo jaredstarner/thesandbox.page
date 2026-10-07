@@ -39,6 +39,7 @@ import Bare from '../../layouts/Bare.astro';
 
     <section class="card" data-card hidden aria-live="polite">
       <canvas class="card-fish" data-card-fish width="32" height="12"></canvas>
+      <p class="card-flag" data-card-flag></p>
       <h2 data-card-name></h2>
       <p class="card-size" data-card-size></p>
       <p class="card-metric" data-card-metric></p>
@@ -307,6 +308,18 @@ import Bare from '../../layouts/Bare.astro';
     width: 12rem;
     height: auto;
     image-rendering: pixelated;
+  }
+
+  .fishing .card-flag {
+    margin: 0;
+    color: var(--red);
+    font: 700 0.875rem/1 var(--font);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .fishing .card-flag:empty {
+    display: none;
   }
 
   .fishing .card h2 {

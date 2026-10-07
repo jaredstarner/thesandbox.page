@@ -1,13 +1,13 @@
 // The fishing hole: wires the lake, the angler, and the page's controls together.
 
 import { moonPhase, moonProgress, partOfDay, skyAt, sunProgress } from './_daylight';
-import type { Fish } from './_fish';
 import { Game } from './_game';
 import { Renderer } from './_gl';
-import { Layer, type Sprite } from './_pixels';
-import { drawBack, drawBed, drawDock } from './_scenery';
+import { loadLog, paintSprite, record, renderLog, sizeText, spriteOf } from './_log';
+import { Layer } from './_pixels';
+import { drawBack, drawBed, drawDock, drawFireflies } from './_scenery';
 import { Sound } from './_sound';
-import { BOOT_ID, bootSprite, fishSprite } from './_species';
+import { BOOT_ID } from './_species';
 import { WORLD_W, bedAt } from './_world';
 
 const STEP = 1 / 60;
@@ -30,35 +30,6 @@ function clockText(hour: number): string {
   return `${h12}:${String(m).padStart(2, '0')} ${h < 12 ? 'am' : 'pm'} · ${partOfDay(hour)}`;
 }
 
-/** Inches and pounds-and-ounces, then centimeters and kilograms. */
-export function sizeText(cm: number, kg: number): [string, string] {
-  const inches = (cm / 2.54).toFixed(1);
-  let lb = Math.floor(kg * 2.20462);
-  let oz = Math.round((kg * 2.20462 - lb) * 16);
-  if (oz === 16) {
-    lb += 1;
-    oz = 0;
-  }
-  const weight = lb === 0 ? `${oz} oz` : `${lb} lb ${oz} oz`;
-  return [`${inches} in · ${weight}`, `${cm.toFixed(1)} cm · ${kg.toFixed(2)} kg`];
-}
-
-/** Paint a sprite into a small canvas, one canvas pixel per sprite pixel. */
-export function paintSprite(canvas: HTMLCanvasElement, s: Sprite): void {
-  canvas.width = s.w + 2;
-  canvas.height = s.h + 2;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  const img = ctx.createImageData(s.w, s.h);
-  new Uint32Array(img.data.buffer).set(s.px);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.putImageData(img, 1, 1);
-}
-
-export function spriteOf(f: Fish, silhouette = false): Sprite {
-  return f.sp.id === BOOT_ID ? bootSprite(silhouette) : fishSprite(f.sp, f.px, 0, silhouette);
-}
-
 export function startFishing(root: HTMLElement): void {
   const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel);
   const canvas = $<HTMLCanvasElement>('[data-view]');
@@ -70,12 +41,16 @@ export function startFishing(root: HTMLElement): void {
   const deeper = $<HTMLButtonElement>('[data-deeper]');
   const card = $('[data-card]');
   const cardFish = $<HTMLCanvasElement>('[data-card-fish]');
+  const cardFlag = $('[data-card-flag]');
   const cardName = $('[data-card-name]');
   const cardSize = $('[data-card-size]');
   const cardMetric = $('[data-card-metric]');
   const cardNote = $('[data-card-note]');
   const releaseButton = $<HTMLButtonElement>('[data-release]');
   const soundButton = $<HTMLButtonElement>('[data-sound]');
+  const total = $('[data-total]');
+  const logList = $('[data-log]');
+  const logPanel = $('#fh-log');
   if (!canvas) return;
 
   const fail = (message: string) => {
@@ -167,8 +142,12 @@ export function startFishing(root: HTMLElement): void {
       if (popoverOpen()) return;
       event.preventDefault();
       setDepth(game.depthFt + (event.key === 'ArrowDown' ? 1 : -1));
-    } else if ((event.key === 'm' || event.key === 'M') && !event.ctrlKey && !event.metaKey && !event.altKey) {
+    } else if (event.ctrlKey || event.metaKey || event.altKey) {
+      return;
+    } else if (event.key === 'm' || event.key === 'M') {
       toggleSound();
+    } else if ((event.key === 'l' || event.key === 'L') && logPanel) {
+      logPanel.togglePopover();
     }
   });
   window.addEventListener('keyup', (event) => {
@@ -216,10 +195,20 @@ export function startFishing(root: HTMLElement): void {
     });
   }
 
-  // ---- the catch card ---------------------------------------------------------
+  // ---- the catch card and the log ----------------------------------------------
+  const log = loadLog();
+  const showLog = () => {
+    if (total) total.textContent = String(log.total);
+    if (logList) renderLog(logList, log);
+  };
+  showLog();
+
   game.on((e) => {
     if (e.type === 'land' && card) {
       const f = e.fish;
+      const news = record(log, f);
+      showLog();
+      if (cardFlag) cardFlag.textContent = news === 'first' ? 'First one!' : news === 'best' ? 'New best!' : '';
       if (cardFish) paintSprite(cardFish, spriteOf(f));
       if (cardName) cardName.textContent = f.sp.name;
       const [imperial, metric] = sizeText(f.cm, f.kg);
@@ -287,6 +276,7 @@ export function startFishing(root: HTMLElement): void {
     drawDock(sprites, glow, scene);
     game.drawRig(sprites, glow, sky.night);
     game.water.draw(sprites, glow);
+    drawFireflies(glow, scene);
 
     for (let i = 0; i <= vw; i++) {
       const wx = cx + i;

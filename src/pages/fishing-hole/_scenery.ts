@@ -189,3 +189,17 @@ export function drawDock(layer: Layer, glow: Layer, s: SceneryState): void {
     glow.add(lx + 1, ly + 3, 0xff9c40, k * 0.6);
   }
 }
+
+/** After dusk, fireflies drift and blink over both shores. */
+export function drawFireflies(glow: Layer, s: SceneryState): void {
+  if (s.night < 0.35) return;
+  for (let i = 0; i < 10; i++) {
+    const near = i < 6;
+    const bx = near ? 4 + i * 10 : 432 + (i - 6) * 12;
+    const by = near ? -14 - (i % 3) * 5 : -12 - (i % 2) * 6;
+    const x = bx + Math.sin(s.time * 0.3 * (1 + i * 0.13) + i) * 7;
+    const y = by + Math.sin(s.time * 0.45 + i * 2.1) * 4;
+    const b = Math.sin(s.time * (0.9 + i * 0.17) + i * 5.3);
+    if (b > 0.55) glow.add(x, y, 0xd6ff6a, ((b - 0.55) / 0.45) * s.night);
+  }
+}

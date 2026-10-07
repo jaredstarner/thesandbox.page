@@ -120,7 +120,9 @@ void main() {
         col = lit ? vec3(0.96, 0.94, 0.84) : mix(col, vec3(0.2, 0.24, 0.38), 0.6);
       } else {
         float full = 1.0 - abs(uMoon.z - 0.5) * 2.0;
-        col = mix(col, vec3(0.8, 0.85, 1.0), dq(clamp(1.0 - (len - r) / 16.0, 0.0, 1.0) * 0.18 * full, 4.0, b));
+        // Stepped rings, the way a pixel artist draws moonlight.
+        float ring = floor(clamp(1.0 - (len - r) / 12.0, 0.0, 1.0) * 3.0) / 3.0;
+        col = mix(col, vec3(0.75, 0.82, 1.0), ring * 0.16 * (0.4 + 0.6 * full));
       }
     }
 
