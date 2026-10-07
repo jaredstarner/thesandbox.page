@@ -284,6 +284,13 @@ import { SHAPES } from './_shapes';
     opacity: 0;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .wordbrush .hint,
+    .wordbrush .ring {
+      transition: none;
+    }
+  }
+
   .wordbrush .vh {
     position: absolute;
     width: 1px;
