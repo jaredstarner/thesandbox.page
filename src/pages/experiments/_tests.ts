@@ -70,6 +70,10 @@ const ALIASES: Record<string, string> = {
   'server-sent-events': 'eventsource',
   'doc-pip': 'document-picture-in-picture',
   'document-pip': 'document-picture-in-picture',
+  'intl.segmenter': 'intl-segmenter',
+  segmenter: 'intl-segmenter',
+  pointerevents: 'pointer-events',
+  pointer: 'pointer-events',
 };
 
 /** Lowercase, drop "()" and a leading ":", hyphenate spaces, then map aliases. */
@@ -363,7 +367,24 @@ export const TECHNIQUES: Record<string, Technique> = {
         'document.visibilityState missing',
       ),
   },
+  'intl-segmenter': {
+    label: 'Intl.Segmenter',
+    webFeature: 'intl-segmenter',
+    test: () =>
+      present(
+        typeof Intl !== 'undefined' && typeof Intl.Segmenter === 'function',
+        'Intl.Segmenter present',
+        'Intl.Segmenter missing',
+      ),
+  },
+  'pointer-events': {
+    label: 'Pointer events',
+    webFeature: 'pointer-events',
+    test: () => present(typeof PointerEvent === 'function', 'PointerEvent present', 'PointerEvent missing'),
+  },
   // Technique notes: no browser dependency, so no test and no light.
+  typography: { label: 'Typography' },
+  pretext: { label: 'Pretext' },
   favicon: { label: 'Favicon' },
   css: { label: 'CSS' },
   'split-flap': { label: 'Split-flap' },

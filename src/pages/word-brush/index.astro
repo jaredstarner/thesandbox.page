@@ -1,0 +1,194 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Word brush"
+  description="A blank sheet where the brush lays down prose instead of paint: every stroke makes room, and a whole passage reflows through your drawing as you make it."
+>
+  <Font cssVariable="--font-wordbrush" slot="head" />
+
+  <main class="wordbrush" data-wordbrush>
+    <canvas
+      class="sheet"
+      data-sheet
+      aria-label="A blank sheet of paper. Drawing on it lays down lines of a passage of prose, which flow through whatever shape is drawn."
+    ></canvas>
+    <div class="ring" data-ring aria-hidden="true"></div>
+
+    <header class="masthead">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Word brush</h1>
+      <p class="dek">Paint, and the prose finds room.</p>
+    </header>
+
+    <p class="tally" data-tally aria-live="polite"></p>
+    <p class="hint" data-hint>Draw anywhere on the sheet</p>
+
+    <noscript>
+      <p class="hint">The brush sets its type with JavaScript. Turn scripts on to draw.</p>
+      <style is:inline>
+        .wordbrush .stick,
+        .wordbrush [data-hint] {
+          display: none;
+        }
+      </style>
+    </noscript>
+  </main>
+</Bare>
+
+<script>
+  import { startWordBrush } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-wordbrush]');
+  if (root) startWordBrush(root);
+</script>
+
+<style is:global>
+  body:has(.wordbrush) {
+    margin: 0;
+    background: #f2ecdf;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .wordbrush {
+    --paper: #f2ecdf;
+    --paper-deep: #e8e0cf;
+    --ink: #241b15;
+    --ink-soft: rgb(36 27 21 / 0.62);
+    --rule: rgb(36 27 21 / 0.2);
+    --red: #a3402a;
+    --face: var(--font-wordbrush, 'EB Garamond', Georgia, serif);
+
+    position: fixed;
+    inset: 0;
+    overflow: clip;
+    color: var(--ink);
+    font-family: var(--face);
+    font-size: 17px;
+    line-height: 1.35;
+    background:
+      radial-gradient(120% 90% at 50% 40%, transparent 55%, rgb(120 96 60 / 0.12)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .28 0 0 0 0 .2 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E"),
+      var(--paper);
+  }
+
+  .wordbrush .sheet {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: none;
+  }
+
+  .wordbrush .ring {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 1px solid rgb(36 27 21 / 0.45);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .wordbrush .ring[data-erase] {
+    border-style: dashed;
+    border-color: var(--red);
+  }
+
+  .wordbrush .masthead {
+    position: absolute;
+    top: 18px;
+    left: 22px;
+    pointer-events: none;
+  }
+
+  .wordbrush .masthead > * {
+    pointer-events: auto;
+  }
+
+  .wordbrush .home {
+    color: var(--ink-soft);
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+
+  .wordbrush .home:hover,
+  .wordbrush .home:focus-visible {
+    color: var(--red);
+  }
+
+  .wordbrush h1 {
+    margin: 2px 0 0;
+    font-size: 40px;
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .wordbrush .dek {
+    margin: 4px 0 0;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .wordbrush .tally {
+    position: absolute;
+    top: 20px;
+    right: 22px;
+    margin: 0;
+    color: var(--ink-soft);
+    font-variant-caps: all-small-caps;
+    font-variant-numeric: oldstyle-nums;
+    letter-spacing: 0.06em;
+    text-align: right;
+    pointer-events: none;
+  }
+
+  .wordbrush .hint {
+    position: absolute;
+    top: 46%;
+    left: 50%;
+    margin: 0;
+    translate: -50% -50%;
+    color: var(--ink-soft);
+    font-size: 22px;
+    font-style: italic;
+    white-space: nowrap;
+    pointer-events: none;
+    transition: opacity 0.6s;
+  }
+
+  .wordbrush .hint[data-gone] {
+    opacity: 0;
+  }
+
+  @media (max-width: 640px) {
+    .wordbrush h1 {
+      font-size: 32px;
+    }
+
+    .wordbrush .dek {
+      display: none;
+    }
+
+    .wordbrush .tally {
+      top: auto;
+      bottom: 132px;
+      right: 16px;
+    }
+
+    .wordbrush .hint {
+      font-size: 19px;
+    }
+  }
+</style>

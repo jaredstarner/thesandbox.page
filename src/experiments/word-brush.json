@@ -1,0 +1,8 @@
+{
+  "title": "Word brush",
+  "summary": "A blank sheet where the brush lays down prose instead of paint: every stroke makes room, and a whole passage reflows through your drawing as you make it, like a calligram that sets itself.",
+  "date": "2026-10-07",
+  "tags": ["canvas", "intl-segmenter", "pretext", "typography", "pointer-events", "popover"],
+  "requires": ["canvas", "intl-segmenter"],
+  "plot": 8
+}
