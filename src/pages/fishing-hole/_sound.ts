@@ -33,11 +33,12 @@ export class Sound {
   private cricketTimer = 1;
   private loonTimer = 20;
 
-  /** Start, or resume, from inside a user gesture. */
+  /** Start, or resume, from inside a user gesture. Safe to call on every one. */
   unlock(): void {
     if (!this.enabled) return;
     if (!this.ctx) this.build();
-    if (this.ctx && this.ctx.state === 'suspended') void this.ctx.resume();
+    const ctx = this.ctx;
+    if (ctx && ctx.state !== 'running' && ctx.state !== 'closed') ctx.resume().catch(() => {});
   }
 
   setEnabled(on: boolean): void {

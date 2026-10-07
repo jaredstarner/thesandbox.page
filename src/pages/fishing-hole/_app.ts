@@ -121,9 +121,10 @@ export function startFishing(root: HTMLElement): void {
 
   canvas.addEventListener('pointerdown', (event) => {
     if (event.button !== 0 || popoverOpen()) return;
-    event.preventDefault();
+    // No preventDefault: cancelling the press can keep it from counting as the
+    // gesture that lets audio start. touch-action and user-select already stop
+    // scrolling and selection.
     canvas.setPointerCapture(event.pointerId);
-    sound.unlock();
     game.pressDown();
   });
   const up = () => game.pressUp();
@@ -137,7 +138,6 @@ export function startFishing(root: HTMLElement): void {
     if (event.key === ' ' || event.key === 'Enter') {
       if (isControl(event.target) || popoverOpen()) return;
       event.preventDefault();
-      sound.unlock();
       if (!event.repeat) game.pressDown();
     } else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
       if (popoverOpen()) return;
@@ -186,12 +186,16 @@ export function startFishing(root: HTMLElement): void {
   };
   showSound();
   soundButton?.addEventListener('click', toggleSound);
+  // Audio may only start inside a user gesture, and browsers differ on which
+  // events count, so try on every first touch of any kind, anywhere on the page.
+  for (const type of ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown']) {
+    document.addEventListener(type, () => sound.unlock(), { capture: true, passive: true });
+  }
   document.addEventListener('visibilitychange', () => sound.setHidden(document.hidden));
 
   // A mouse click leaves focus on a button, where Space would press it again.
   for (const b of root.querySelectorAll('button')) {
     b.addEventListener('click', (event) => {
-      if (b !== soundButton) sound.unlock();
       if (event.detail > 0) b.blur();
     });
   }
