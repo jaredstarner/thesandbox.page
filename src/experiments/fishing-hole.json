@@ -1,0 +1,8 @@
+{
+  "title": "Fishing hole",
+  "summary": "A pixel lake cut open from the side: cast from the dock, watch fish come to the bait, strike when the float goes under, and play the line until one is landed.",
+  "date": "2026-10-07",
+  "tags": ["webgl2", "web-audio", "physics", "pixel-art", "game", "verlet"],
+  "requires": ["webgl2"],
+  "plot": 7
+}

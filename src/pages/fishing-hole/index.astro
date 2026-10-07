@@ -1,0 +1,522 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Fishing hole"
+  description="A pixel lake cut open from the side: cast from the dock, watch fish come to the bait, strike when the float goes under, and land one."
+>
+  <Font cssVariable="--font-fishing" slot="head" />
+
+  <main class="fishing" data-fishing data-state="ready">
+    <canvas
+      class="view"
+      data-view
+      aria-label="A lake seen side on, cut open below the surface. An angler stands at the end of a wooden dock, and fish swim in the water below."
+    ></canvas>
+
+    <header class="top">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Fishing hole</h1>
+      <p class="clock" data-clock></p>
+    </header>
+
+    <nav class="tools" aria-label="Tackle">
+      <button type="button" popovertarget="fh-log" data-log-button>Log <span data-total>0</span></button>
+      <button type="button" data-sound aria-pressed="true">Sound</button>
+      <button type="button" popovertarget="fh-help" aria-label="How to fish">?</button>
+    </nav>
+
+    <div class="depth" data-depth-panel>
+      <span class="depth-label">Float</span>
+      <button type="button" data-shallower aria-label="Set the bait shallower">&#9650;</button>
+      <output data-depth>3 ft</output>
+      <button type="button" data-deeper aria-label="Set the bait deeper">&#9660;</button>
+    </div>
+
+    <p class="hint" data-hint aria-live="polite">Hold to cast</p>
+
+    <section class="card" data-card hidden aria-live="polite">
+      <canvas class="card-fish" data-card-fish width="32" height="12"></canvas>
+      <p class="card-flag" data-card-flag></p>
+      <h2 data-card-name></h2>
+      <p class="card-size" data-card-size></p>
+      <p class="card-metric" data-card-metric></p>
+      <p class="card-note" data-card-note></p>
+      <button type="button" data-release>Release</button>
+    </section>
+
+    <section class="panel" id="fh-log" popover aria-labelledby="fh-log-title">
+      <button type="button" class="close" popovertarget="fh-log" popovertargetaction="hide" aria-label="Close the log">&times;</button>
+      <h2 id="fh-log-title">Catch log</h2>
+      <ol class="log" data-log></ol>
+      <p class="hint-small">Kept in this browser only.</p>
+    </section>
+
+    <section class="panel" id="fh-help" popover aria-labelledby="fh-help-title">
+      <button type="button" class="close" popovertarget="fh-help" popovertargetaction="hide" aria-label="Close">&times;</button>
+      <h2 id="fh-help-title">How to fish</h2>
+      <dl class="keys">
+        <div><dt>Hold, release</dt><dd>Cast. Let go at the top of the swing to throw far.</dd></div>
+        <div><dt>Tap</dt><dd>Twitch the bait. Fish nearby take notice.</dd></div>
+        <div><dt>Float goes under</dt><dd>Strike: tap right away. A float that only bobs is a nibble; strike then and the fish bolts.</dd></div>
+        <div><dt>Hold</dt><dd>Reel. When the line runs hot, let go and let the fish run, or it snaps.</dd></div>
+        <div><dt>&#9650; &#9660;</dt><dd>Set how deep the bait hangs below the float. Arrow keys or the wheel work too.</dd></div>
+      </dl>
+      <p>
+        Space or Enter works for every tap and hold. Each fish keeps its own hours, and the sky follows your clock, so a lake at
+        night isn't the lake at noon.
+      </p>
+      <h3>About this lake</h3>
+      <p>
+        Everything here is drawn and voiced in code for this page: no image or sound files. The lettering is Pixelify Sans by
+        Stefie Justprince, under the SIL Open Font License, served from this site. <a href="/">Back to thesandbox.page</a>
+      </p>
+    </section>
+
+    <p class="unsupported" data-unsupported hidden></p>
+    <noscript>
+      <p class="unsupported">The lake runs on JavaScript and WebGL 2. Turn scripts on to fish it.</p>
+      <style is:inline>
+        .fishing .tools,
+        .fishing .depth,
+        .fishing .hint {
+          display: none;
+        }
+      </style>
+    </noscript>
+  </main>
+</Bare>
+
+<script>
+  import { startFishing } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-fishing]');
+  if (root) startFishing(root);
+</script>
+
+<style is:global>
+  /* Global on purpose: the log's rows are built by script. Every rule is keyed
+     under .fishing, and its variables live there. */
+
+  body:has(.fishing) {
+    margin: 0;
+    background: #101826;
+    overflow: hidden;
+  }
+
+  .fishing {
+    --ink: #10141f;
+    --cream: #f6efdc;
+    --gold: #ffcf5a;
+    --red: #e8574b;
+    --panel: rgb(16 20 31 / 0.86);
+    --pixel: max(2px, 0.18rem);
+    --font: var(--font-fishing), ui-monospace, monospace;
+
+    position: fixed;
+    inset: 0;
+    overflow: clip;
+    color: var(--cream);
+    font: 400 1rem/1.35 var(--font);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .fishing,
+  .fishing * {
+    box-sizing: border-box;
+    /* The face's fi and fl ligatures draw as broken glyphs. Important,
+       because every font shorthand below would reset it. */
+    font-variant-ligatures: none !important;
+  }
+
+  .fishing .view {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: pointer;
+  }
+
+  .fishing[data-state='card'] .view {
+    cursor: default;
+  }
+
+  /* Pixel panels: a hard border with stepped corners. */
+  .fishing .top,
+  .fishing .tools button,
+  .fishing .depth,
+  .fishing .hint,
+  .fishing .card,
+  .fishing .panel {
+    text-shadow: var(--pixel) var(--pixel) 0 rgb(0 0 0 / 0.55);
+  }
+
+  .fishing .top {
+    text-shadow:
+      var(--pixel) var(--pixel) 0 rgb(0 0 0 / 0.6),
+      0 0 0.7rem rgb(10 14 24 / 0.55);
+    position: absolute;
+    top: 0.9rem;
+    left: 1rem;
+    pointer-events: none;
+  }
+
+  .fishing .top > * {
+    pointer-events: auto;
+  }
+
+  .fishing .home {
+    color: var(--cream);
+    opacity: 0.8;
+    font-size: 0.8125rem;
+    text-decoration: none;
+  }
+
+  .fishing .home:hover,
+  .fishing .home:focus-visible {
+    opacity: 1;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .fishing h1 {
+    margin: 0.1rem 0 0;
+    font: 700 clamp(1.5rem, 3.2vw, 2.4rem) / 1 var(--font);
+    letter-spacing: 0.02em;
+  }
+
+  .fishing .clock {
+    margin: 0.3rem 0 0;
+    font-size: 0.875rem;
+    opacity: 0.85;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fishing button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .fishing .tools {
+    position: absolute;
+    top: 0.9rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .fishing .tools button,
+  .fishing .depth button,
+  .fishing .card button {
+    min-height: 2.25rem;
+    min-width: 2.25rem;
+    padding: 0.2rem 0.7rem;
+    border: 0;
+    background: var(--panel);
+    box-shadow:
+      inset 0 0 0 var(--pixel) var(--cream),
+      inset 0 calc(var(--pixel) * -2) 0 var(--pixel) rgb(0 0 0 / 0.35);
+    clip-path: polygon(
+      var(--pixel) 0,
+      calc(100% - var(--pixel)) 0,
+      calc(100% - var(--pixel)) var(--pixel),
+      100% var(--pixel),
+      100% calc(100% - var(--pixel)),
+      calc(100% - var(--pixel)) calc(100% - var(--pixel)),
+      calc(100% - var(--pixel)) 100%,
+      var(--pixel) 100%,
+      var(--pixel) calc(100% - var(--pixel)),
+      0 calc(100% - var(--pixel)),
+      0 var(--pixel),
+      var(--pixel) var(--pixel)
+    );
+  }
+
+  .fishing button:hover {
+    background: rgb(40 48 70 / 0.92);
+  }
+
+  .fishing button:focus-visible {
+    outline: none;
+    background: rgb(60 70 100 / 0.95);
+    color: var(--gold);
+  }
+
+  .fishing .tools [data-sound][aria-pressed='false'] {
+    text-decoration: line-through;
+    opacity: 0.75;
+  }
+
+  .fishing [data-total] {
+    color: var(--gold);
+  }
+
+  .fishing .depth {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .fishing .depth output {
+    min-width: 3.4em;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fishing .depth button {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .fishing .hint {
+    position: absolute;
+    left: 50%;
+    bottom: 1.1rem;
+    translate: -50% 0;
+    margin: 0;
+    max-width: min(32rem, calc(100vw - 2rem));
+    font-size: clamp(1rem, 1.8vw, 1.25rem);
+    text-align: center;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .fishing[data-state='bite'] .hint,
+  .fishing[data-state='snapped'] .hint {
+    color: var(--gold);
+  }
+
+  .fishing .card {
+    position: absolute;
+    top: 16%;
+    left: 50%;
+    translate: -50% 0;
+    display: grid;
+    justify-items: center;
+    gap: 0.35rem;
+    width: min(20rem, calc(100vw - 2rem));
+    padding: 1.1rem 1.2rem 1.2rem;
+    background: var(--panel);
+    box-shadow: inset 0 0 0 var(--pixel) var(--cream);
+    text-align: center;
+  }
+
+  .fishing .card[hidden] {
+    display: none;
+  }
+
+  .fishing .card-fish {
+    width: 12rem;
+    height: auto;
+    image-rendering: pixelated;
+  }
+
+  .fishing .card-flag {
+    margin: 0;
+    color: var(--red);
+    font: 700 0.875rem/1 var(--font);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .fishing .card-flag:empty {
+    display: none;
+  }
+
+  .fishing .card h2 {
+    margin: 0.2rem 0 0;
+    font: 700 1.5rem/1.1 var(--font);
+    color: var(--gold);
+  }
+
+  .fishing .card-size {
+    margin: 0;
+    font-size: 1.125rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fishing .card-metric {
+    margin: -0.2rem 0 0;
+    font-size: 0.8125rem;
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fishing .card-note {
+    margin: 0;
+    min-height: 1.35em;
+    font-size: 0.875rem;
+    opacity: 0.85;
+  }
+
+  .fishing .card-note:empty {
+    display: none;
+  }
+
+  .fishing .card button {
+    margin-top: 0.4rem;
+  }
+
+  .fishing .panel {
+    width: min(26rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 4rem);
+    overflow: auto;
+    margin: auto;
+    padding: 1.1rem 1.3rem 1.2rem;
+    border: 0;
+    color: var(--cream);
+    background: var(--panel);
+    box-shadow: inset 0 0 0 var(--pixel) var(--cream);
+    font: 400 1rem/1.4 var(--font);
+  }
+
+  .fishing .panel::backdrop {
+    background: rgb(8 10 16 / 0.35);
+  }
+
+  .fishing .panel h2 {
+    margin: 0 0 0.7rem;
+    font: 700 1.4rem/1.1 var(--font);
+    color: var(--gold);
+  }
+
+  .fishing .panel h3 {
+    margin: 1rem 0 0.3rem;
+    font: 700 1.05rem/1.2 var(--font);
+  }
+
+  .fishing .panel p {
+    margin: 0.5rem 0 0;
+    font-size: 0.9375rem;
+  }
+
+  .fishing .panel a {
+    color: var(--gold);
+  }
+
+  .fishing .close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.6rem;
+    border: 0;
+    background: none;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .fishing .keys {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+  }
+
+  .fishing .keys div {
+    display: grid;
+    grid-template-columns: 8.5rem 1fr;
+    gap: 0.6rem;
+  }
+
+  .fishing .keys dt {
+    color: var(--gold);
+  }
+
+  .fishing .keys dd {
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+
+  .fishing .log {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .fishing .log li {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .fishing .log canvas {
+    width: 4.5rem;
+    height: auto;
+    image-rendering: pixelated;
+  }
+
+  .fishing .log .unknown {
+    opacity: 0.8;
+  }
+
+  .fishing .log .count {
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fishing .log .best {
+    display: block;
+    font-size: 0.8125rem;
+    opacity: 0.8;
+  }
+
+  .fishing .hint-small {
+    font-size: 0.8125rem;
+    opacity: 0.7;
+  }
+
+  .fishing .unsupported {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: min(26rem, calc(100vw - 2rem));
+    margin: 0;
+    text-align: center;
+    font-size: 1.125rem;
+  }
+
+  .fishing .unsupported[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 40rem) {
+    .fishing .top {
+      top: 0.6rem;
+      left: 0.75rem;
+    }
+
+    .fishing .tools {
+      top: 0.6rem;
+      right: 0.75rem;
+      gap: 0.35rem;
+    }
+
+    .fishing .depth {
+      left: 0.75rem;
+      bottom: 3.6rem;
+    }
+
+    .fishing .hint {
+      white-space: normal;
+      width: calc(100vw - 1.5rem);
+    }
+
+    .fishing .keys div {
+      grid-template-columns: 1fr;
+      gap: 0.1rem;
+    }
+  }
+</style>

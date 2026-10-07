@@ -102,5 +102,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    {
+      // The pixel lettering on /fishing-hole/.
+      provider: fontProviders.fontsource(),
+      name: 'Pixelify Sans',
+      cssVariable: '--font-fishing',
+      weights: ['400 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });
