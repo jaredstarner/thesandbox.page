@@ -18,6 +18,7 @@ interface Sprite {
   /** Seconds to wait before inking in. */
   wait: number;
   rubric: boolean;
+  sx: number;
   tone: number;
 }
 
@@ -51,7 +52,7 @@ export class Ink {
       seen.add(p.id);
       let s = this.sprites.get(p.id);
       if (!s) {
-        s = { text: p.text, x: p.x, y: p.y + drop, tx: p.x, ty: p.y, a: 0, ta: 1, wait: 0, rubric: p.rubric, tone: tone(p.id) };
+        s = { text: p.text, x: p.x, y: p.y + drop, tx: p.x, ty: p.y, a: 0, ta: 1, wait: 0, rubric: p.rubric, sx: p.sx, tone: tone(p.id) };
         s.wait = Math.min(fresh++ * this.pour, 0.9);
         this.sprites.set(p.id, s);
         continue;
@@ -68,6 +69,7 @@ export class Ink {
         s.text = p.text;
         s.rubric = p.rubric;
       }
+      s.sx = p.sx;
       s.tx = p.x;
       s.ty = p.y;
       s.ta = 1;
@@ -114,8 +116,17 @@ export class Ink {
         if (a < 0.004) continue;
         ctx.globalAlpha = a * s.tone;
         ctx.fillStyle = s.rubric ? red : ink;
-        if (settled) ctx.fillText(s.text, s.tx, s.ty);
-        else ctx.fillText(s.text, s.x, s.y);
+        const x = settled ? s.tx : s.x;
+        const y = settled ? s.ty : s.y;
+        if (s.sx === 1) {
+          ctx.fillText(s.text, x, y);
+        } else {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.scale(s.sx, 1);
+          ctx.fillText(s.text, 0, 0);
+          ctx.restore();
+        }
       }
     };
     if (!settled) pass(this.ghosts);

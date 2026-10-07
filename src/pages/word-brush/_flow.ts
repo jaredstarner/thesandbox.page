@@ -15,6 +15,8 @@ export interface Piece {
   y: number;
   /** Set in red: pilcrows and the mark between passes. */
   rubric: boolean;
+  /** Horizontal scale, below 1 for a word squeezed into a span a little too narrow. */
+  sx: number;
 }
 
 export interface Placement {
@@ -27,8 +29,14 @@ export interface Placement {
 const GAP_KINDS = new Set(['space', 'preserved-space', 'tab', 'zero-width-break', 'soft-hyphen', 'hard-break']);
 const RUBRICS = new Set(['¶', SEPARATOR.trim()]);
 
-const graphemes = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
-const split = (s: string) => Array.from(graphemes.segment(s), (g) => g.segment);
+/** A word may be squeezed to this fraction of its width before it is hyphenated instead. */
+const SQUEEZE = 0.78;
+
+let graphemes: Intl.Segmenter | null = null;
+const split = (s: string) => {
+  graphemes ??= new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+  return Array.from(graphemes.segment(s), (g) => g.segment);
+};
 
 export class Typesetter {
   private prepared: PreparedTextWithSegments | null = null;
@@ -102,8 +110,34 @@ export class Typesetter {
       const y = order[s] * lh + baseline;
       const x0 = order[s + 1];
       const room = order[s + 2] - x0;
-      const line = layoutNextLine(prepared, cursor, room);
+      let line = layoutNextLine(prepared, cursor, room);
       if (!line) break;
+
+      // Pretext breaks a word only when it is too wide for the span on its
+      // own. Squeeze it in if it is only a little too wide; otherwise break it
+      // with a hyphen.
+      let hyphen = false;
+      if (line.end.graphemeIndex > 0) {
+        const i = line.start.segmentIndex;
+        if (i === line.end.segmentIndex) {
+          const from = line.start.graphemeIndex;
+          const text = from > 0 ? split(segments[i]).slice(from).join('') : segments[i];
+          const w = from > 0 ? this.width(text) : widths[i];
+          const next = kinds[i + 1];
+          if ((next === undefined || GAP_KINDS.has(next)) && w * SQUEEZE <= room) {
+            out.push({ id: i * 1024 + Math.min(from, 1023), text, x: x0, y, rubric: false, sx: room / w });
+            if (from === 0) words++;
+            lastChar = this.starts[i];
+            cursor = { segmentIndex: i + 1, graphemeIndex: 0 };
+            continue;
+          }
+        }
+        const shorter = layoutNextLine(prepared, cursor, room - this.width('-'));
+        if (shorter && shorter.end.graphemeIndex > 0) {
+          line = shorter;
+          hyphen = true;
+        }
+      }
       cursor = line.end;
 
       // Walk the line's segments into words and gaps.
@@ -142,6 +176,11 @@ export class Typesetter {
         lastChar = this.starts[i];
       }
       if (lineWords.length === 0) continue;
+      if (hyphen) {
+        const tail = lineWords[lineWords.length - 1];
+        tail.text += '-';
+        tail.w += this.width('-');
+      }
 
       // Justify to the span: spread the slack over the gaps, up to a limit,
       // and center whatever is left.
@@ -160,7 +199,7 @@ export class Typesetter {
       let x = x0 + (slack - extra * gaps) / 2;
       for (const w of lineWords) {
         if (w.gapBefore) x += space + extra;
-        out.push({ id: w.id, text: w.text, x, y, rubric: RUBRICS.has(w.text) });
+        out.push({ id: w.id, text: w.text, x, y, rubric: RUBRICS.has(w.text), sx: 1 });
         x += w.w;
       }
     }
@@ -212,10 +251,28 @@ export function readingOrder(rows: number[][], byShape: boolean): number[] {
       }
     }
   }
+  // Regions that start within a few rows of each other read left to right,
+  // like columns; otherwise the one that starts higher goes first. A region's
+  // root is its first span, so its row and x0 are where the region starts.
   const order = Array.from({ length: n }, (_, i) => i);
   const root = order.map(find);
-  order.sort((a, b) => root[a] - root[b] || a - b);
+  const roots = [...new Set(root)].sort((a, b) => a - b);
+  const rank = new Map<number, number>();
+  for (let g = 0; g < roots.length; ) {
+    const top = flat[roots[g] * 3];
+    let end = g;
+    while (end < roots.length && flat[roots[end] * 3] - top <= TIE_ROWS) end++;
+    roots
+      .slice(g, end)
+      .sort((a, b) => flat[a * 3 + 1] - flat[b * 3 + 1])
+      .forEach((r) => rank.set(r, rank.size));
+    g = end;
+  }
+  order.sort((a, b) => rank.get(root[a])! - rank.get(root[b])! || a - b);
   const out: number[] = [];
   for (const i of order) out.push(flat[i * 3], flat[i * 3 + 1], flat[i * 3 + 2]);
   return out;
 }
+
+/** Regions starting this many rows apart or closer count as side by side. */
+const TIE_ROWS = 3;
