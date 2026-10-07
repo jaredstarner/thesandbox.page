@@ -1,6 +1,6 @@
 // Word brush: wires the sheet, the brush, and the tools together.
 
-import { Mask, type LineStroke, type Mode, type Stroke } from './_mask';
+import { CELL, Mask, type LineStroke, type Mode, type Stroke } from './_mask';
 import { readingOrder, Typesetter, type Placement } from './_flow';
 import { Ink } from './_ink';
 import { SHAPES } from './_shapes';
@@ -323,8 +323,9 @@ export function startWordBrush(root: HTMLElement): void {
         p.drawn[i] = Math.max(p.drawn[i], upto, 1);
       } else {
         const [y0, y1] = p.bands[i];
-        const from = p.drawn[i] || y0 - 1;
-        const to = y0 + (y1 - y0) * k + 1;
+        // Bands land on whole mask cells, so no seam is painted twice.
+        const from = p.drawn[i] || Math.floor((y0 - 1) / CELL) * CELL;
+        const to = Math.ceil((y0 + (y1 - y0) * k + 1) / CELL) * CELL;
         if (to > from) mask.fill(s.mode, s.rings, [from, to]);
         p.drawn[i] = to;
       }

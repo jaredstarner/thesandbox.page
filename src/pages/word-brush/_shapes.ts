@@ -99,14 +99,14 @@ export const SHAPES: Shape[] = [
     label: 'Rain',
     build(w, h, type) {
       const { s, cy } = stage(w, h);
-      const width = Math.max(type * 3.2, s * 0.07);
-      const count = Math.max(4, Math.min(9, Math.floor((w * 0.86) / (width * 2.1))));
+      const width = Math.max(type * 5.5, s * 0.11);
+      const count = Math.max(3, Math.min(8, Math.floor((w * 0.86) / (width * 1.9))));
       const span = w * 0.8;
       const out: Stroke[] = [];
       for (let i = 0; i < count; i++) {
         const x = w / 2 - span / 2 + (span * (i + 0.5)) / count;
-        const len = s * (0.62 + 0.3 * Math.abs(Math.sin(i * 2.4 + 1)));
-        const y0 = cy - s * 0.46 + (i % 3) * s * 0.03;
+        const len = (s - width) * (0.62 + 0.3 * Math.abs(Math.sin(i * 2.4 + 1)));
+        const y0 = cy - s / 2 + width / 2 + (i % 3) * s * 0.03;
         const pts: number[] = [];
         for (let j = 0; j <= 30; j++) {
           const t = j / 30;
