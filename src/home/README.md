@@ -5,7 +5,7 @@ The home page: a survey map of the site. Every experiment claims a plot of land,
 | File | Role |
 | :--- | :--- |
 | `Survey.astro` | Markup and styles. Every plot is a real link in an ordered list; without script the list is the page |
-| `survey.ts` | Camera and input: drag, wheel, pinch, keyboard, fly-to, deep links (`/#<slug>`), the next stake and its estimated countdown to about 09:00 ET |
+| `survey.ts` | Camera and input: drag, wheel, pinch, keyboard, fly-to, deep links (`/#<slug>`), the next stake and its estimated countdown to when the next run's page is usually live (`SURVEY_AT`, set from the `sandbox-daily` routine) |
 | `terrain.ts` | The land: one WebGL2 fragment shader draws contours, water, woodland, and section lines from seeded noise |
 | `plots.ts` | Where a plot sits, from its number alone, and where the office sits. Shared by the build and the browser |
 
