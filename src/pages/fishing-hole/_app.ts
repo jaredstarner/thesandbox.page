@@ -6,6 +6,7 @@ import { Game } from './_game';
 import { Renderer } from './_gl';
 import { Layer, type Sprite } from './_pixels';
 import { drawBack, drawBed, drawDock } from './_scenery';
+import { Sound } from './_sound';
 import { BOOT_ID, bootSprite, fishSprite } from './_species';
 import { WORLD_W, bedAt } from './_world';
 
@@ -74,6 +75,7 @@ export function startFishing(root: HTMLElement): void {
   const cardMetric = $('[data-card-metric]');
   const cardNote = $('[data-card-note]');
   const releaseButton = $<HTMLButtonElement>('[data-release]');
+  const soundButton = $<HTMLButtonElement>('[data-sound]');
   if (!canvas) return;
 
   const fail = (message: string) => {
@@ -99,6 +101,8 @@ export function startFishing(root: HTMLElement): void {
   }
 
   const game = new Game();
+  const sound = new Sound();
+  game.on((e) => sound.play(e));
   const sprites = new Layer();
   const glow = new Layer();
   let cols = new Float32Array(0);
@@ -143,6 +147,7 @@ export function startFishing(root: HTMLElement): void {
     if (event.button !== 0 || popoverOpen()) return;
     event.preventDefault();
     canvas.setPointerCapture(event.pointerId);
+    sound.unlock();
     game.pressDown();
   });
   const up = () => game.pressUp();
@@ -156,11 +161,14 @@ export function startFishing(root: HTMLElement): void {
     if (event.key === ' ' || event.key === 'Enter') {
       if (isControl(event.target) || popoverOpen()) return;
       event.preventDefault();
+      sound.unlock();
       if (!event.repeat) game.pressDown();
     } else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
       if (popoverOpen()) return;
       event.preventDefault();
       setDepth(game.depthFt + (event.key === 'ArrowDown' ? 1 : -1));
+    } else if ((event.key === 'm' || event.key === 'M') && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      toggleSound();
     }
   });
   window.addEventListener('keyup', (event) => {
@@ -191,9 +199,19 @@ export function startFishing(root: HTMLElement): void {
     game.pressDown();
     game.pressUp();
   });
+  const showSound = () => soundButton?.setAttribute('aria-pressed', String(sound.enabled));
+  const toggleSound = () => {
+    sound.setEnabled(!sound.enabled);
+    showSound();
+  };
+  showSound();
+  soundButton?.addEventListener('click', toggleSound);
+  document.addEventListener('visibilitychange', () => sound.setHidden(document.hidden));
+
   // A mouse click leaves focus on a button, where Space would press it again.
   for (const b of root.querySelectorAll('button')) {
     b.addEventListener('click', (event) => {
+      if (b !== soundButton) sound.unlock();
       if (event.detail > 0) b.blur();
     });
   }
@@ -232,6 +250,7 @@ export function startFishing(root: HTMLElement): void {
       time += STEP;
       game.update(STEP, hour);
     }
+    sound.update(dt, { night: sky.night, reeling: game.reeling, dragging: game.dragging, flying: game.state === 'flight' });
 
     // Page text, touched only when it changes.
     const text = clockText(hour);
