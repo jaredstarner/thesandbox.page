@@ -427,7 +427,7 @@ export function startAdHell(root: HTMLElement): void {
 
   q('[data-rp-calm]')?.addEventListener('click', () => {
     q<HTMLDialogElement>('[data-report]')?.close();
-    if (!blocked) box.click();
+    if (!blocked) setBlocked(true);
     scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
   });
   q('[data-rp-again]')?.addEventListener('click', () => location.reload());
