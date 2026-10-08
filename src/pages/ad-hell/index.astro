@@ -1,6 +1,10 @@
 ---
 import { Font } from 'astro:assets';
 import Bare from '../../layouts/Bare.astro';
+import Art from './_Art.astro';
+import { GROUPS, VIOLATIONS, type Group } from './_tally';
+
+const groups = Object.keys(GROUPS) as Group[];
 ---
 
 <Bare
@@ -12,7 +16,41 @@ import Bare from '../../layouts/Bare.astro';
   <Font cssVariable="--font-adhell-hand" slot="head" />
 
   <main class="adhell" data-adhell>
+    <header class="hud" data-hud>
+      <a class="hud-home" href="/" title="Back to thesandbox.page"><span aria-hidden="true">←</span><span class="opt"> thesandbox.page</span></a>
+      <p class="hud-name">Ad hell</p>
+      <p class="hud-goal" data-hud-goal>Read the recipe to the end.</p>
+      <ul class="hud-stats" aria-label="Your reading so far">
+        <li><span class="k">Time</span> <b data-stat="time">0:00</b></li>
+        <li class="opt"><span class="k">Ad clicks</span> <b data-stat="clicks">0</b></li>
+        <li class="opt"><span class="k">Ad density</span> <b data-stat="density">-</b></li>
+        <li class="opt"><span class="k" data-stat-label="cls">CLS</span> <b data-stat="cls">-</b></li>
+      </ul>
+      <button class="hud-btn hud-viol" type="button" popovertarget="ah-checklist" title="Violations seen so far">
+        <b data-stat="seen">0</b>/{VIOLATIONS.length}<span class="opt"> violations</span>
+      </button>
+      <button class="hud-btn hud-sound" type="button" data-sound aria-pressed="true" title="Sound">
+        <span aria-hidden="true">♪</span><span class="vh">Sound</span>
+      </button>
+      <label class="hud-block" title="Hide every ad on the page">
+        <input type="checkbox" data-block />
+        <span class="sw" aria-hidden="true"></span>
+        <span>Block ads</span>
+      </label>
+    </header>
+
     <div class="site" data-site>
+      <div class="ad leader" data-violation="density-30">
+        <p class="ad-label">Advertisement</p>
+        <button class="leader-in" type="button" data-cta="breadcoin">
+          <span class="coin" aria-hidden="true">B</span>
+          <span class="leader-name">BREADCOIN</span>
+          <span class="leader-tick">▲ 412% this week</span>
+          <span class="leader-line">The currency backed by actual bread.</span>
+          <span class="cta">Buy now</span>
+        </button>
+      </div>
+
       <header class="masthead">
         <p class="logo"><span>The</span> Toastmonger</p>
         <p class="motto">recipes, stories &amp; crumbs</p>
@@ -35,6 +73,12 @@ import Bare from '../../layouts/Bare.astro';
             </p>
           </header>
 
+          <div class="ad disguise" data-violation="disguised-ads">
+            <button class="fake-btn go" type="button" data-cta="recipejumper">▼ JUMP TO RECIPE</button>
+            <button class="fake-btn dl" type="button" data-cta="filewizard">⬇ DOWNLOAD RECIPE (PDF)</button>
+            <span class="ad-tag">Ad</span>
+          </div>
+
           <p>
             Some mornings ask for very little. A window, a kettle working itself up to a boil, and a slice of bread on its way
             to becoming something better. This is a recipe for that slice.
@@ -45,6 +89,24 @@ import Bare from '../../layouts/Bare.astro';
             scroll.
           </p>
 
+          <div class="ad video-slot" data-video-slot>
+            <p class="ad-label">Advertisement</p>
+            <div class="vid" data-video>
+              <canvas class="vid-canvas" data-video-canvas width="640" height="360" aria-label="A video advertisement"></canvas>
+              <p class="vid-poster" aria-hidden="true">GRANITE</p>
+              <div class="vid-ui">
+                <span class="vid-count" data-video-count>Ad 1 of 3</span>
+                <button class="vid-btn vid-cta" type="button" data-cta="granite" data-video-cta>Learn more ›</button>
+                <button class="vid-btn vid-mute" type="button" data-video-mute aria-pressed="false" title="Mute this ad">
+                  <span aria-hidden="true">🔊</span><span class="vh">Mute</span>
+                </button>
+                <button class="vid-btn vid-skip" type="button" data-video-skip disabled>Skip ad in 5</button>
+                <button class="vid-x" type="button" data-video-close aria-label="Close video">×</button>
+                <span class="vid-bar"><i data-video-bar></i></span>
+              </div>
+            </div>
+          </div>
+
           <h2>My toast story</h2>
           <p>
             My grandmother's toaster browned exactly one side of anything you put in it. Nobody remembers it working any other
@@ -52,16 +114,41 @@ import Bare from '../../layouts/Bare.astro';
             first side came up the color of an old church pew she'd flip the slice and send it down again. It took twice as
             long as toast should. It was the best toast I have ever eaten.
           </p>
+
+          <aside class="ad box loafly" data-violation="fake-close visual-interference" data-large>
+            <p class="ad-label">Advertisement</p>
+            <div class="box-in" data-cta="loafly">
+              <Art name="loaf" uid="box" class="box-art" />
+              <p class="loafly-name">LOAFLY</p>
+              <p class="loafly-line">Fresh bread every six hours. Whether you like it or not.</p>
+              <span class="cta">Start free trial</span>
+              <span class="fakex" data-fakex aria-hidden="true">×</span>
+            </div>
+            <p class="ad-foot"><button class="realx" type="button" data-close-ad>close ad</button></p>
+          </aside>
+
           <p>
             I used to think the secret was the toaster. Then I thought it was the bread, a dense brown loaf from a bakery that
             has since become a phone shop. It took me years to understand that the secret was the waiting: she gave each side
             its full attention, and she buttered it the moment it came up, while it was still hot enough to drink the butter
             in.
           </p>
+          <div class="ad lazy" data-lazy="quiz"></div>
           <p>
             When she gave me the toaster, it lasted one more winter. I've owned four since. None of them burn on one side only,
             and I still flip my bread out of habit, which my partner finds either charming or deranged depending on the hour.
           </p>
+
+          <aside class="ad bagel" data-violation="density-30">
+            <p class="ad-label">Advertisement</p>
+            <div class="bagel-field">
+              <p class="bagel-title">BONK THE BAGEL!</p>
+              <p class="bagel-sub">Win a FREE* toaster</p>
+              <button class="bagel-target" type="button" data-bagel aria-label="Bonk the bagel">
+                <Art name="bagel" />
+              </button>
+            </div>
+          </aside>
 
           <h2>Why this recipe works</h2>
           <p>
@@ -69,10 +156,33 @@ import Bare from '../../layouts/Bare.astro';
             minute starts to steam itself soft from underneath. Butter that goes on cold tears the surface and pools in the
             middle. Get the timing right and the rest takes care of itself.
           </p>
+
+          <aside class="ad box spoon" data-violation="flashing" data-large>
+            <p class="ad-label">Advertisement</p>
+            <div class="spoon-in" data-cta="spoon">
+              <p class="spoon-top">!!! ONE WEIRD SPOON !!!</p>
+              <Art name="spoon" class="spoon-art" />
+              <p class="spoon-bottom">Chefs are <b>FURIOUS</b></p>
+            </div>
+          </aside>
+
           <p>
             It's also forgiving. Too pale, and you send it back down. Too dark, and you scrape it over the sink the way
             everyone's parents did, and nobody has to know.
           </p>
+          <div class="ad lazy" data-lazy="plumber"></div>
+
+          <div class="ad scrollover" data-scrollover>
+            <div class="scrollover-panel" data-violation="scrollover">
+              <p class="ad-label">Advertisement</p>
+              <p class="so-ask">You look tired.</p>
+              <Art name="mattress" uid="so" class="so-art" />
+              <p class="so-brand">SNOOZLE</p>
+              <p class="so-line">The 400-night trial. Sleep on it. Then sleep on it 399 more times.</p>
+              <button class="so-cta" type="button" data-cta="snoozle">Find my firmness</button>
+              <p class="so-hint">Scroll to keep reading ↓</p>
+            </div>
+          </div>
 
           <h2>A word about bread</h2>
           <p>
@@ -81,10 +191,22 @@ import Bare from '../../layouts/Bare.astro';
             better than fresh, because some of its moisture has already left, so this is the best possible use for the end of
             a loaf.
           </p>
+
+          <aside class="ad native" data-violation="disguised-ads">
+            <div class="native-in" data-cta="clickwell">
+              <h2 class="native-h">7 Breads Nutritionists Won't Stop Talking About</h2>
+              <p class="native-p">
+                Number four is just a photo of a baguette, and it changed how we think about lunch. <span class="native-more">Keep reading ›</span>
+              </p>
+              <p class="native-tag">Sponsored · Clickwell</p>
+            </div>
+          </aside>
+
           <p>
             Slice it about as thick as your little finger. Thinner slices dry out before they color. Thicker ones stay doughy
             in the middle, which some people love and I won't argue with.
           </p>
+          <div class="ad lazy" data-lazy="horoscope"></div>
 
           <h2>A word about butter</h2>
           <p>
@@ -92,6 +214,42 @@ import Bare from '../../layouts/Bare.astro';
             butter, shave thin curls of it with a vegetable peeler and lay them on the hot toast; they'll melt in seconds.
           </p>
           <p>Spread it to the very edges. The crust deserves butter too.</p>
+
+          <aside class="ad chumbox" data-violation="chumbox">
+            <p class="chum-head"><span>Around the Web</span><span class="chum-by">Promoted by Clickwell</span></p>
+            <div class="chum-grid">
+              <button class="chum" type="button" data-cta="clickwell">
+                <Art name="chum-crouton" />
+                <span class="chum-t">Doctors Can't Explain Why This Crouton Is So Crunchy</span>
+                <span class="chum-s">BreadDaily</span>
+              </button>
+              <button class="chum" type="button" data-cta="clickwell">
+                <Art name="chum-attic" />
+                <span class="chum-t">Toasters From Your Childhood Could Be Worth a Fortune. Check Your Attic</span>
+                <span class="chum-s">HomeyHacks</span>
+              </button>
+              <button class="chum" type="button" data-cta="clickwell">
+                <Art name="chum-jam" />
+                <span class="chum-t">She Put the Jam on First. Her Family Hasn't Spoken Since</span>
+                <span class="chum-s">KitchenFeud</span>
+              </button>
+              <button class="chum" type="button" data-cta="clickwell">
+                <Art name="chum-mistake" />
+                <span class="chum-t">The One Bread Mistake Almost Everyone Makes Every Morning</span>
+                <span class="chum-s">CrumbFacts</span>
+              </button>
+              <button class="chum" type="button" data-cta="clickwell">
+                <Art name="chum-cat" />
+                <span class="chum-t">Cats Are Doing Something Strange With Bread, and Nobody Knows Why</span>
+                <span class="chum-s">PawPost</span>
+              </button>
+              <button class="chum" type="button" data-cta="clickwell">
+                <Art name="chum-town" />
+                <span class="chum-t">Locals Are Furious About This Town's New Butter Rule</span>
+                <span class="chum-s">TheDailyKnead</span>
+              </button>
+            </div>
+          </aside>
 
           <h2>Frequently asked questions</h2>
           <dl class="faq">
@@ -107,6 +265,18 @@ import Bare from '../../layouts/Bare.astro';
             <dd>Tea, coffee, or a glass of cold milk, ideally at a window.</dd>
           </dl>
 
+          <aside class="ad box granite" data-violation="fake-close visual-interference" data-large>
+            <p class="ad-label">Advertisement</p>
+            <div class="box-in" data-cta="granite">
+              <Art name="can" uid="box" class="box-art" />
+              <p class="granite-name">GRANITE</p>
+              <p class="granite-line">Smell like a countertop.</p>
+              <span class="cta">Get the spray</span>
+              <span class="fakex" data-fakex aria-hidden="true">×</span>
+            </div>
+            <p class="ad-foot"><button class="realx" type="button" data-close-ad>close ad</button></p>
+          </aside>
+
           <section class="card" id="recipe" aria-labelledby="recipe-title">
             <p class="card-kicker">Recipe</p>
             <h2 id="recipe-title">Buttered toast</h2>
@@ -117,6 +287,7 @@ import Bare from '../../layouts/Bare.astro';
               <li>1 tablespoon salted butter, softened</li>
               <li>A pinch of flaky salt (optional)</li>
             </ul>
+            <div class="ad lazy" data-lazy="card"></div>
             <h3>Method</h3>
             <ol>
               <li>Toast the bread until it's deep golden on both sides. If your toaster browns only one side, flip it and go again.</li>
@@ -126,12 +297,103 @@ import Bare from '../../layouts/Bare.astro';
             <p class="card-end" data-end>That's it. That's the recipe.</p>
             <p class="signoff">xo, Wren</p>
           </section>
+
+          <section class="comments" aria-labelledby="comments-title">
+            <h2 id="comments-title">Comments (3)</h2>
+            <ol>
+              <li>
+                <p class="who">Marla K. <span aria-label="One star out of five">★☆☆☆☆</span></p>
+                <p>I used a bagel instead of bread and margarine instead of butter, and I skipped the toasting. It was not toast.</p>
+              </li>
+              <li>
+                <p class="who">toastlover88 <span aria-label="Five stars out of five">★★★★★</span></p>
+                <p>Made this for the whole family. Took about forty minutes, mostly closing things. Worth it.</p>
+              </li>
+              <li>
+                <p class="who">Dale <span aria-label="Five stars out of five">★★★★★</span></p>
+                <p>Haven't made it yet but I'm sure it's great.</p>
+              </li>
+            </ol>
+          </section>
+
+          <div class="ad fake-next" data-violation="disguised-ads">
+            <button class="fake-next-btn" type="button" data-cta="clickwell">Next page ›</button>
+            <span class="ad-tag">Ad</span>
+          </div>
         </article>
+
+        <aside class="rail" aria-label="Advertisements">
+          <div class="ad box sofa" data-violation="retargeting" data-large>
+            <p class="ad-label">Advertisement</p>
+            <div class="box-in" data-cta="slouchmore">
+              <Art name="sofa" class="box-art" />
+              <p class="sofa-line">Still thinking about the <b>Slouchmore</b>?</p>
+              <p class="sofa-sub">It's still thinking about you.</p>
+              <span class="cta">Take me back</span>
+            </div>
+          </div>
+          <div class="rail-stick">
+            <div class="ad half" data-violation="fake-urgency fake-scarcity" data-large>
+              <p class="ad-label">Advertisement</p>
+              <div class="half-in" data-cta="crumbtronic">
+                <p class="half-badge">70% OFF · TODAY ONLY</p>
+                <Art name="toaster" uid="rail" class="half-art" />
+                <p class="half-name">CRUMBTRONIC 3000</p>
+                <p class="half-line">The toaster that texts you when it's done.</p>
+                <p class="half-price"><s>$499</s> <b>$149</b></p>
+                <p class="half-timer">Deal ends in <b data-urgency>04:59</b></p>
+                <p class="half-stock">Only <b data-stock>3</b> left in stock!</p>
+                <p class="half-watch"><b data-watchers>17</b> people are looking at this right now</p>
+                <span class="cta">Shop now</span>
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
 
       <footer class="site-foot">
         <p>The Toastmonger is invented, and so is every brand on this page. <a href="/">Back to thesandbox.page</a></p>
       </footer>
+    </div>
+
+    <div class="ad sticky" data-sticky data-violation="sticky-large">
+      <button class="sticky-x" type="button" data-sticky-close aria-label="Close">×</button>
+      <div class="sticky-in" data-cta="sokkit">
+        <Art name="socks" class="sticky-art" />
+        <div class="sticky-copy">
+          <p class="sticky-name">SOKKIT</p>
+          <p class="sticky-line">Smart socks. Know where the other one is. Always.</p>
+        </div>
+        <span class="cta">Pair now</span>
+      </div>
+    </div>
+
+    <div class="checklist" id="ah-checklist" popover>
+      <div class="cl-head">
+        <h2>Violations seen</h2>
+        <button class="cl-x" type="button" popovertarget="ah-checklist" popovertargetaction="hide" aria-label="Close">×</button>
+      </div>
+      <p class="cl-note">
+        Every brand and ad here is invented. Nothing is sold, tracked, or sent anywhere: the page makes no requests beyond
+        its own files and sets no cookies.
+      </p>
+      {
+        groups.map((group) => (
+          <section class="cl-group">
+            <h3>{GROUPS[group].title}</h3>
+            <p class="cl-src">{GROUPS[group].note}</p>
+            <ol>
+              {VIOLATIONS.filter((v) => v.group === group).map((v) => (
+                <li data-check={v.id}>
+                  <span class="cl-label">{v.label}</span>
+                  {v.lists && <span class="cl-lists">{v.lists}</span>}
+                  <span class="cl-where">{v.where}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ))
+      }
     </div>
   </main>
 </Bare>
@@ -281,7 +543,7 @@ import Bare from '../../layouts/Bare.astro';
     font-size: 1.65rem;
   }
 
-  .adhell .post p {
+  .adhell .post > p {
     margin: 0 0 1.1em;
   }
 
@@ -358,3 +620,1251 @@ import Bare from '../../layouts/Bare.astro';
     color: inherit;
   }
 </style>
+
+<style is:global>
+  .adhell .vh {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .adhell [hidden] {
+    display: none !important;
+  }
+
+  /* The ad blocker: one :has() selector, so it works with no script at all. */
+  .adhell:has(.hud-block input:checked) .ad,
+  .adhell[data-blocked] .ad {
+    display: none !important;
+  }
+
+  /* ---------- The bar ---------- */
+
+  .adhell .hud {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: var(--hud-h);
+    padding: 0 12px;
+    background: #0d0d0e;
+    color: #f2efe8;
+    font: 500 13px/1 ui-monospace, 'Cascadia Mono', Consolas, Menlo, monospace;
+    box-shadow: 0 1px 0 #000, 0 6px 18px -8px rgb(0 0 0 / 0.6);
+  }
+
+  .adhell .hud a {
+    color: #9b968c;
+    text-decoration: none;
+  }
+
+  .adhell .hud a:hover {
+    color: #fff;
+  }
+
+  .adhell .hud-name {
+    margin: 0;
+    padding: 4px 7px;
+    background: #ff3b1f;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .adhell .hud-goal {
+    margin: 0;
+    color: #c9c4b9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+
+  .adhell .hud-stats {
+    display: flex;
+    gap: 14px;
+    margin: 0 0 0 auto;
+    padding: 0;
+    list-style: none;
+    white-space: nowrap;
+  }
+
+  .adhell .hud-stats .k {
+    color: #8a857b;
+  }
+
+  .adhell .hud-stats b {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .adhell .hud-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid #3a3936;
+    border-radius: 14px;
+    background: #1b1b1c;
+    color: inherit;
+    font: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .adhell .hud-btn:hover {
+    border-color: #77736b;
+  }
+
+  .adhell .hud-viol b {
+    color: #ffb000;
+  }
+
+  .adhell .hud-sound[aria-pressed='false'] {
+    color: #6c685f;
+    text-decoration: line-through;
+  }
+
+  .adhell .hud-block {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .adhell .hud-block input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  .adhell .hud-block .sw {
+    position: relative;
+    width: 38px;
+    height: 22px;
+    border-radius: 11px;
+    background: #3a3936;
+    transition: background-color 0.2s;
+  }
+
+  .adhell .hud-block .sw::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #f2efe8;
+    transition: translate 0.2s;
+  }
+
+  .adhell .hud-block input:checked + .sw {
+    background: #2fbf71;
+  }
+
+  .adhell .hud-block input:checked + .sw::after {
+    translate: 16px 0;
+  }
+
+  .adhell .hud-block input:focus-visible + .sw {
+    outline: 2px solid #ffb000;
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 1100px) {
+    .adhell .hud-goal {
+      display: none;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .adhell .hud {
+      gap: 10px;
+      padding: 0 8px;
+    }
+
+    .adhell .hud .opt {
+      display: none;
+    }
+
+    .adhell .hud-name {
+      font-size: 11px;
+    }
+  }
+
+  /* ---------- The checklist ---------- */
+
+  .adhell .checklist {
+    width: min(560px, 100vw - 24px);
+    max-height: min(80vh, 760px);
+    margin: calc(var(--hud-h) + 8px) 12px auto auto;
+    padding: 0 20px 20px;
+    overflow: auto;
+    border: 1px solid #3a3936;
+    border-radius: 10px;
+    background: #121212;
+    color: #e9e5dc;
+    font: 13px/1.45 ui-monospace, 'Cascadia Mono', Consolas, Menlo, monospace;
+    box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.7);
+  }
+
+  .adhell .checklist::backdrop {
+    background: rgb(0 0 0 / 0.25);
+  }
+
+  .adhell .cl-head {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0 10px;
+    background: #121212;
+  }
+
+  .adhell .checklist h2 {
+    margin: 0;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .adhell .cl-x {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #3a3936;
+    border-radius: 50%;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .adhell .cl-note,
+  .adhell .cl-src {
+    margin: 0 0 10px;
+    color: #9b968c;
+  }
+
+  .adhell .cl-group h3 {
+    margin: 18px 0 4px;
+    color: #ffb000;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .adhell .checklist ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .adhell .checklist li {
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+    gap: 0 8px;
+    padding: 7px 0;
+    border-top: 1px solid #262524;
+  }
+
+  .adhell .checklist li::before {
+    content: '';
+    grid-row: span 2;
+    width: 14px;
+    height: 14px;
+    margin-top: 2px;
+    border: 1.5px solid #55524c;
+    border-radius: 3px;
+  }
+
+  .adhell .checklist li[data-seen]::before {
+    content: '✓';
+    border-color: #ff3b1f;
+    background: #ff3b1f;
+    color: #fff;
+    font-size: 11px;
+    line-height: 12px;
+    text-align: center;
+  }
+
+  .adhell .cl-label {
+    color: #f2efe8;
+  }
+
+  .adhell .checklist li:not([data-seen]) .cl-label {
+    color: #9b968c;
+  }
+
+  .adhell .cl-lists {
+    color: #6c685f;
+    font-size: 11px;
+  }
+
+  .adhell .cl-where {
+    grid-column: 2 / -1;
+    color: #77736b;
+    font-size: 12px;
+  }
+
+  /* ---------- Ads: the shared bits ---------- */
+
+  .adhell .ad {
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.25;
+  }
+
+  .adhell .ad button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .adhell .ad-label {
+    margin: 0 0 4px;
+    color: #a59d93;
+    font: 10px/1.2 Arial, Helvetica, sans-serif;
+    letter-spacing: 0.12em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .adhell .ad-tag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1px 4px;
+    background: #f1c40f;
+    color: #000;
+    font: 700 9px/1.2 Arial, Helvetica, sans-serif;
+    border-radius: 0 0 0 3px;
+  }
+
+  .adhell .cta {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .adhell .ad-foot {
+    margin: 3px 0 0;
+    text-align: right;
+  }
+
+  /* The real way out, and it is barely there. */
+  .adhell .realx {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #d7cfc4 !important;
+    font-size: 10px !important;
+  }
+
+  .adhell .fakex {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.55);
+    color: #fff;
+    font: 700 15px/1 Arial, sans-serif;
+  }
+
+  .adhell .box {
+    width: 300px;
+    max-width: 100%;
+    margin: 2em auto;
+  }
+
+  .adhell .box-in {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 250px;
+    padding: 18px 16px;
+    text-align: center;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .adhell .box-in p {
+    margin: 0;
+  }
+
+  .adhell .box-art {
+    width: 120px;
+    height: auto;
+  }
+
+  /* ---------- Each ad's own bad taste ---------- */
+
+  .adhell .leader {
+    width: min(728px, 100% - 32px);
+    margin: 10px auto 0;
+  }
+
+  .adhell .leader .leader-in {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 90px;
+    padding: 10px 18px;
+    border: 0;
+    background: linear-gradient(90deg, #0b3d2e, #0e6b4a 60%, #0b3d2e);
+    color: #fff;
+    text-align: left;
+  }
+
+  .adhell .coin {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff3b0, #e8b923 55%, #9c7408);
+    color: #6b4f00;
+    font: 900 28px/1 Georgia, serif;
+    box-shadow: 0 0 0 3px #f6d55c;
+  }
+
+  .adhell .leader-name {
+    font: 900 26px/1 Impact, 'Arial Black', sans-serif;
+    letter-spacing: 0.02em;
+  }
+
+  .adhell .leader-tick {
+    color: #5dff9d;
+    font: 700 15px/1 'Courier New', monospace;
+  }
+
+  .adhell .leader-line {
+    flex: 1;
+    font-size: 13px;
+    color: #c7f5dd;
+  }
+
+  .adhell .leader .cta {
+    background: #ffd400;
+    color: #062b1f;
+  }
+
+  @media (max-width: 640px) {
+    .adhell .leader-line {
+      display: none;
+    }
+
+    .adhell .leader-name {
+      font-size: 20px;
+    }
+  }
+
+  .adhell .disguise {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 6px 0 26px;
+    padding-top: 10px;
+  }
+
+  .adhell .fake-btn {
+    flex: 1 1 240px;
+    padding: 16px 18px;
+    border: 0;
+    border-radius: 6px;
+    color: #fff !important;
+    font: 800 17px/1 Arial, Helvetica, sans-serif !important;
+    letter-spacing: 0.03em;
+    box-shadow: 0 4px 0 rgb(0 0 0 / 0.25);
+  }
+
+  .adhell .fake-btn.go {
+    background: #1fa83f;
+  }
+
+  .adhell .fake-btn.dl {
+    background: #1769e0;
+  }
+
+  /* The video ad. */
+  .adhell .video-slot {
+    margin: 2em 0;
+  }
+
+  .adhell .vid {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #111;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+
+  .adhell .vid-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .adhell .vid-poster {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    background: radial-gradient(circle at 50% 40%, #4d5258, #15171a 70%);
+    color: #d9d4ca;
+    font: 900 clamp(32px, 9vw, 72px)/1 Impact, 'Arial Black', sans-serif;
+    letter-spacing: 0.06em;
+  }
+
+  .adhell .vid[data-live] .vid-poster {
+    display: none;
+  }
+
+  .adhell .vid-ui {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .adhell .vid-ui > * {
+    pointer-events: auto;
+  }
+
+  .adhell .vid-count {
+    position: absolute;
+    left: 10px;
+    bottom: 14px;
+    padding: 3px 7px;
+    border-radius: 2px;
+    background: rgb(0 0 0 / 0.6);
+    color: #ffd400;
+    font: 700 12px/1.2 Arial, sans-serif;
+  }
+
+  .adhell .vid-btn {
+    position: absolute;
+    border: 1px solid rgb(255 255 255 / 0.5);
+    background: rgb(0 0 0 / 0.65);
+    color: #fff !important;
+    font: 600 13px/1 Arial, sans-serif !important;
+  }
+
+  .adhell .vid-cta {
+    left: 10px;
+    top: 10px;
+    padding: 8px 12px;
+    border-radius: 2px;
+    background: #ffd400;
+    border-color: #ffd400;
+    color: #111 !important;
+  }
+
+  .adhell .vid-mute {
+    right: 10px;
+    top: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 15px !important;
+  }
+
+  .adhell .vid-mute[aria-pressed='true'] {
+    opacity: 0.6;
+  }
+
+  .adhell .vid-skip {
+    right: 0;
+    bottom: 20px;
+    padding: 10px 16px;
+    border-right: 0;
+  }
+
+  .adhell .vid-skip:disabled {
+    cursor: default;
+    color: #bbb !important;
+  }
+
+  .adhell .vid-x {
+    display: none;
+  }
+
+  .adhell .vid-bar {
+    position: absolute;
+    inset: auto 0 0;
+    height: 4px;
+    background: rgb(255 255 255 / 0.25);
+  }
+
+  .adhell .vid-bar i {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: #ffd400;
+  }
+
+  /* LOAFLY in a box. */
+  .adhell .loafly .box-in {
+    background: linear-gradient(160deg, #fff4dc, #ffd9a0);
+    border: 3px solid #e07b20;
+    color: #5b2a00;
+  }
+
+  .adhell .loafly-name {
+    font: 900 34px/1 'Arial Black', Impact, sans-serif;
+    letter-spacing: 0.04em;
+    color: #c4520c;
+  }
+
+  .adhell .loafly-line {
+    font: italic 15px/1.3 Georgia, serif;
+  }
+
+  .adhell .loafly .cta {
+    background: #c4520c;
+    color: #fff;
+  }
+
+  /* The bagel game: a banner that begs to be clicked. */
+  .adhell .bagel {
+    margin: 2em 0;
+  }
+
+  .adhell .bagel-field {
+    position: relative;
+    container-type: inline-size;
+    height: 110px;
+    padding: 10px 14px;
+    overflow: hidden;
+    background: repeating-linear-gradient(45deg, #1f3cff 0 14px, #2a48ff 14px 28px);
+    border: 4px solid #ffe600;
+    color: #fff;
+    text-align: center;
+  }
+
+  .adhell .bagel-title {
+    margin: 0;
+    font: 900 28px/1 Impact, 'Arial Black', sans-serif;
+    color: #ffe600;
+    text-shadow: 3px 3px 0 #e3121b;
+    letter-spacing: 0.03em;
+  }
+
+  .adhell .bagel-sub {
+    margin: 4px 0 0;
+    font: 700 14px/1 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', cursive;
+  }
+
+  .adhell .bagel-target {
+    position: absolute;
+    left: 6px;
+    bottom: 4px;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border: 0;
+    background: none;
+    animation: ah-bagel 2.6s ease-in-out infinite alternate;
+  }
+
+  .adhell .bagel-target svg {
+    width: 100%;
+    height: 100%;
+    animation: ah-spin 1.3s linear infinite;
+  }
+
+  @keyframes ah-bagel {
+    0% {
+      translate: 0 0;
+    }
+
+    25% {
+      translate: 25cqw -34px;
+    }
+
+    50% {
+      translate: 48cqw 0;
+    }
+
+    75% {
+      translate: 70cqw -30px;
+    }
+
+    100% {
+      translate: calc(100cqw - 64px) 0;
+    }
+  }
+
+  @keyframes ah-spin {
+    to {
+      rotate: 1turn;
+    }
+  }
+
+  /* The spoon flashes, but under three times a second (WCAG 2.3.1). */
+  .adhell .spoon-in {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 250px;
+    padding: 14px;
+    background: #ffe600;
+    color: #000;
+    text-align: center;
+    cursor: pointer;
+    animation: ah-flash 1.2s steps(1) infinite;
+  }
+
+  .adhell .spoon-top {
+    margin: 0;
+    font: 900 22px/1 Impact, 'Arial Black', sans-serif;
+  }
+
+  .adhell .spoon-art {
+    width: 110px;
+    height: 110px;
+  }
+
+  .adhell .spoon-bottom {
+    margin: 0;
+    font: 700 24px/1 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', cursive;
+    text-transform: uppercase;
+  }
+
+  .adhell .spoon-bottom b {
+    color: #e3121b;
+  }
+
+  @keyframes ah-flash {
+    0% {
+      background: #ffe600;
+      color: #000;
+    }
+
+    50% {
+      background: #ff1fa6;
+      color: #fff;
+    }
+  }
+
+  /* The scrollover: a zero-height slot whose panel sweeps over the text as you scroll past. */
+  .adhell .scrollover {
+    position: relative;
+    height: 0;
+    view-timeline: --ah-sweep block;
+  }
+
+  .adhell .scrollover-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: calc(var(--hud-h) + 20px) 20px 20px;
+    background: linear-gradient(180deg, #e9e3ff, #ffd9c7);
+    color: #2c2366;
+    text-align: center;
+    translate: 0 110vh;
+    will-change: translate;
+  }
+
+  .adhell .scrollover-panel p {
+    margin: 0;
+  }
+
+  .adhell .so-ask {
+    font: italic 400 clamp(28px, 6vw, 56px)/1.1 Georgia, serif;
+  }
+
+  .adhell .so-art {
+    width: min(70vw, 380px);
+    height: auto;
+  }
+
+  .adhell .so-brand {
+    font: 900 clamp(40px, 10vw, 96px)/1 'Arial Black', Impact, sans-serif;
+    letter-spacing: 0.12em;
+    color: #5b4bd1;
+  }
+
+  .adhell .so-line {
+    max-width: 30ch;
+    font-size: 18px;
+  }
+
+  .adhell .so-cta {
+    padding: 14px 26px;
+    border: 0;
+    border-radius: 999px;
+    background: #5b4bd1;
+    color: #fff !important;
+    font: 700 16px/1 Arial, sans-serif !important;
+  }
+
+  .adhell .so-hint {
+    margin-top: 12px !important;
+    color: #6c63a8;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /*
+   * The timeline goes through a custom property so the minifier can't fold it
+   * into the animation shorthand, where not every browser accepts it.
+   */
+  @supports (animation-timeline: view()) {
+    .adhell .scrollover-panel {
+      --ah-tl: --ah-sweep;
+
+      animation-name: ah-sweep;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: var(--ah-tl);
+      animation-range: cover;
+    }
+  }
+
+  @keyframes ah-sweep {
+    from {
+      translate: 0 100vh;
+    }
+
+    to {
+      translate: 0 -100vh;
+    }
+  }
+
+  /* A native ad, set in the article's own type. */
+  .adhell .native {
+    margin: 0 0 1.1em;
+  }
+
+  .adhell .native-in {
+    cursor: pointer;
+    font-family: var(--font-adhell-body);
+    line-height: 1.7;
+  }
+
+  .adhell .post .native-h {
+    margin: 1.4em 0 0.3em;
+    font-size: 1.35rem;
+  }
+
+  .adhell .post .native-p {
+    margin: 0;
+  }
+
+  .adhell .native-more {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .adhell .post .native-tag {
+    margin: 2px 0 0;
+    color: #b9b0a5;
+    font: 10px/1.2 Arial, sans-serif;
+  }
+
+  /* The chumbox. */
+  .adhell .chumbox {
+    margin: 2.4em 0;
+    padding-top: 10px;
+    border-top: 3px solid #222;
+  }
+
+  .adhell .chum-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 0 0 10px;
+    font: 900 15px/1 Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .adhell .chum-by {
+    color: #999;
+    font: 400 10px/1 Arial, sans-serif;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .adhell .chum-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 16px 12px;
+  }
+
+  .adhell .chum {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+  }
+
+  .adhell .chum svg {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    height: auto;
+  }
+
+  .adhell .chum-t {
+    font: 700 15px/1.25 Arial, Helvetica, sans-serif;
+    color: #111;
+  }
+
+  .adhell .chum:hover .chum-t {
+    text-decoration: underline;
+  }
+
+  .adhell .chum-s {
+    color: #999;
+    font-size: 11px;
+  }
+
+  /* GRANITE in a box. */
+  .adhell .granite .box-in {
+    background: radial-gradient(circle at 50% 30%, #6a7077, #1a1c1f 75%);
+    color: #e9e4da;
+  }
+
+  .adhell .granite .box-art {
+    width: 50px;
+  }
+
+  .adhell .granite-name {
+    font: 900 40px/1 Impact, 'Arial Black', sans-serif;
+    letter-spacing: 0.14em;
+  }
+
+  .adhell .granite-line {
+    font: italic 16px/1.3 Georgia, serif;
+  }
+
+  .adhell .granite .cta {
+    background: #e9e4da;
+    color: #1a1c1f;
+  }
+
+  /* Lazy ads: nothing until you have scrolled past, then something. */
+  .adhell .lazy {
+    height: 0;
+  }
+
+  .adhell .lazy[data-loaded] {
+    height: auto;
+    margin: 1.6em auto;
+  }
+
+  /* The rail. */
+  .adhell .rail {
+    display: none;
+    padding-top: 40px;
+  }
+
+  .adhell .rail .box {
+    margin-top: 0;
+  }
+
+  .adhell .rail-stick {
+    position: sticky;
+    top: calc(var(--hud-h) + 16px);
+  }
+
+  .adhell .sofa .box-in {
+    background: #fdf6ec;
+    border: 1px solid #d8c9b2;
+    color: #34433c;
+  }
+
+  .adhell .sofa .box-art {
+    width: 150px;
+  }
+
+  .adhell .sofa-line {
+    font: 18px/1.25 Georgia, serif;
+  }
+
+  .adhell .sofa-sub {
+    font: italic 14px/1.3 Georgia, serif;
+    color: #7a6e64;
+  }
+
+  .adhell .sofa .cta {
+    background: #4f7a6a;
+    color: #fff;
+  }
+
+  .adhell .half-in {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-height: 600px;
+    padding: 16px;
+    background: linear-gradient(180deg, #ff2d2d, #b30000);
+    color: #fff;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .adhell .half-in p {
+    margin: 0;
+  }
+
+  .adhell .half-badge {
+    padding: 6px 10px;
+    background: #ffe600;
+    color: #b30000;
+    font: 900 15px/1 Impact, 'Arial Black', sans-serif;
+    letter-spacing: 0.04em;
+    rotate: -4deg;
+  }
+
+  .adhell .half-art {
+    width: 190px;
+    height: auto;
+    margin: 6px 0;
+    filter: drop-shadow(0 10px 10px rgb(0 0 0 / 0.35));
+  }
+
+  .adhell .half-name {
+    font: 900 28px/1 'Arial Black', Impact, sans-serif;
+  }
+
+  .adhell .half-line {
+    font-size: 14px;
+  }
+
+  .adhell .half-price s {
+    opacity: 0.7;
+    font-size: 18px;
+  }
+
+  .adhell .half-price b {
+    font: 900 44px/1 Impact, 'Arial Black', sans-serif;
+    color: #ffe600;
+  }
+
+  .adhell .half-timer,
+  .adhell .half-stock,
+  .adhell .half-watch {
+    font-size: 14px;
+  }
+
+  .adhell .half-timer b {
+    font: 700 20px/1 'Courier New', monospace;
+    color: #ffe600;
+  }
+
+  .adhell .half-in .cta {
+    margin-top: auto;
+    background: #ffe600;
+    color: #b30000;
+    font-size: 18px;
+  }
+
+  @media (min-width: 1060px) {
+    .adhell .layout {
+      grid-template-columns: minmax(0, 680px) 300px;
+    }
+
+    .adhell .rail {
+      display: block;
+    }
+  }
+
+  .adhell:has(.hud-block input:checked) .layout,
+  .adhell[data-blocked] .layout {
+    grid-template-columns: minmax(0, 680px);
+  }
+
+  /* The sticky banner: a third of the screen. */
+  .adhell .sticky {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 50;
+    height: max(34vh, 200px);
+    background: linear-gradient(90deg, #ff7a00, #ff2e63);
+    color: #fff;
+    box-shadow: 0 -8px 30px rgb(0 0 0 / 0.3);
+    transition: height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), translate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .adhell .sticky[data-compact] {
+    height: 72px;
+  }
+
+  .adhell .sticky[data-down] {
+    translate: 0 110%;
+  }
+
+  .adhell .sticky-in {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 4vw, 40px);
+    height: 100%;
+    padding: 12px 48px 12px 16px;
+    cursor: pointer;
+  }
+
+  .adhell .sticky-art {
+    height: 80%;
+    max-height: 180px;
+    width: auto;
+  }
+
+  .adhell .sticky-copy p {
+    margin: 0;
+  }
+
+  .adhell .sticky-name {
+    font: 900 clamp(30px, 6vw, 64px)/1 'Arial Black', Impact, sans-serif;
+    letter-spacing: 0.04em;
+  }
+
+  .adhell .sticky-line {
+    font-size: clamp(14px, 2vw, 20px);
+  }
+
+  .adhell .sticky .cta {
+    background: #fff;
+    color: #ff2e63;
+    font-size: 18px;
+  }
+
+  .adhell .sticky[data-compact] .sticky-name {
+    font-size: 24px;
+  }
+
+  .adhell .sticky[data-compact] .sticky-line {
+    font-size: 13px;
+  }
+
+  .adhell .sticky[data-compact] .sticky-art {
+    height: 56px;
+  }
+
+  .adhell .sticky-x {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 1;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.35);
+    color: #fff !important;
+    font: 700 18px/1 Arial, sans-serif !important;
+  }
+
+  @media (max-width: 640px) {
+    .adhell .sticky .cta,
+    .adhell .sticky[data-compact] .sticky-line {
+      display: none;
+    }
+  }
+
+  /* The site keeps room at the bottom so the sticky banner covers ads, not the end of the recipe. */
+  .adhell .site {
+    padding-bottom: 72px;
+  }
+
+  .adhell .fake-next {
+    position: relative;
+    margin: 2em 0 0;
+    text-align: center;
+  }
+
+  .adhell .fake-next-btn {
+    padding: 14px 40px;
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    font: 700 16px/1 var(--font-adhell-body) !important;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .adhell .comments {
+    margin-top: 3em;
+  }
+
+  .adhell .comments ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .adhell .comments li {
+    padding: 14px 0;
+    border-top: 1px solid var(--rule);
+    font-size: 0.95rem;
+  }
+
+  .adhell .comments .who {
+    margin: 0 0 4px;
+    font-weight: 700;
+  }
+
+  .adhell .comments .who span {
+    margin-left: 6px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  .adhell .comments li p:last-child {
+    margin: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .adhell .spoon-in,
+    .adhell .bagel-target,
+    .adhell .bagel-target svg {
+      animation: none;
+    }
+
+    .adhell .sticky {
+      transition: none;
+    }
+  }
+</style>
+
