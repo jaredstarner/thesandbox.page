@@ -1,0 +1,252 @@
+---
+// Product shots and thumbnails for the invented ads, drawn here so every one is original.
+// `uid` keeps gradient ids unique when a piece appears more than once.
+
+interface Props {
+  name: string;
+  uid?: string;
+  class?: string;
+}
+
+const { name, uid = name, class: className } = Astro.props;
+const id = (part: string) => `ah-${uid}-${part}`;
+const url = (part: string) => `url(#${id(part)})`;
+
+// The clickbait house style: a red ring and a red arrow pointing at not much.
+const ring = (cx: number, cy: number, rx: number, ry: number) =>
+  `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="#e3121b" stroke-width="4"/>`;
+const arrow = (x1: number, y1: number, x2: number, y2: number) => {
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  const h = 12;
+  const p1 = [x2 - h * Math.cos(a - 0.5), y2 - h * Math.sin(a - 0.5)];
+  const p2 = [x2 - h * Math.cos(a + 0.5), y2 - h * Math.sin(a + 0.5)];
+  const f = (n: number) => n.toFixed(1);
+  return (
+    `<line x1="${x1}" y1="${y1}" x2="${f(x2 - 6 * Math.cos(a))}" y2="${f(y2 - 6 * Math.sin(a))}" stroke="#e3121b" stroke-width="5" stroke-linecap="round"/>` +
+    `<path d="M${x2} ${y2}L${f(p1[0])} ${f(p1[1])}L${f(p2[0])} ${f(p2[1])}Z" fill="#e3121b"/>`
+  );
+};
+
+const art: Record<string, { box: string; body: string }> = {
+  toaster: {
+    box: '0 0 120 96',
+    body: `
+      <defs><linearGradient id="${id('chrome')}" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset=".42" stop-color="#b9c2ca"/>
+        <stop offset=".58" stop-color="#7c8791"/><stop offset="1" stop-color="#e3e8ec"/>
+      </linearGradient></defs>
+      <path d="M33 34V16q0-8 10-8t10 8v18z" fill="#e8a457" stroke="#94561c" stroke-width="2"/>
+      <path d="M67 34V18q0-8 10-8t10 8v16z" fill="#d98f3f" stroke="#94561c" stroke-width="2"/>
+      <rect x="12" y="30" width="96" height="56" rx="17" fill="${url('chrome')}" stroke="#4f5961" stroke-width="2"/>
+      <rect x="30" y="28" width="26" height="6" rx="3" fill="#24292e"/>
+      <rect x="64" y="28" width="26" height="6" rx="3" fill="#24292e"/>
+      <rect x="106" y="46" width="10" height="7" rx="2" fill="#24292e"/>
+      <rect x="38" y="56" width="44" height="15" rx="3" fill="#0c1a11"/>
+      <text x="60" y="67" font-size="9" font-family="monospace" font-weight="700" fill="#45ff86" text-anchor="middle">READY</text>
+      <rect x="22" y="85" width="12" height="5" rx="2" fill="#24292e"/>
+      <rect x="86" y="85" width="12" height="5" rx="2" fill="#24292e"/>
+      <path d="M98 14q8-8 16 0M101 18q5-4.5 10 0" fill="none" stroke="#2b7bff" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="106" cy="21.5" r="2.4" fill="#2b7bff"/>`,
+  },
+  loaf: {
+    box: '0 0 120 80',
+    body: `
+      <defs><linearGradient id="${id('crust')}" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="#e9a65c"/><stop offset="1" stop-color="#a5581d"/>
+      </linearGradient></defs>
+      <ellipse cx="60" cy="72" rx="52" ry="6" fill="#000" opacity=".15"/>
+      <path d="M10 60q-4-34 30-44q20-6 40 0q34 10 30 44q0 10-12 10H22q-12 0-12-10z" fill="${url('crust')}" stroke="#7a3c10" stroke-width="2"/>
+      <path d="M34 26q8 10 4 24M56 20q8 12 4 28M80 24q8 10 4 24" fill="none" stroke="#f6d39b" stroke-width="4" stroke-linecap="round"/>`,
+  },
+  sofa: {
+    box: '0 0 140 80',
+    body: `
+      <rect x="22" y="14" width="96" height="36" rx="10" fill="#4f7a6a"/>
+      <rect x="8" y="34" width="124" height="30" rx="10" fill="#5f8f7c"/>
+      <rect x="4" y="28" width="22" height="38" rx="9" fill="#4f7a6a"/>
+      <rect x="114" y="28" width="22" height="38" rx="9" fill="#4f7a6a"/>
+      <rect x="28" y="36" width="40" height="16" rx="6" fill="#6fa18d"/>
+      <rect x="72" y="36" width="40" height="16" rx="6" fill="#6fa18d"/>
+      <rect x="16" y="64" width="6" height="10" rx="2" fill="#3b2a1d"/>
+      <rect x="118" y="64" width="6" height="10" rx="2" fill="#3b2a1d"/>`,
+  },
+  spoon: {
+    box: '0 0 120 120',
+    body: `
+      <defs><linearGradient id="${id('steel')}" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#9aa6b1"/><stop offset="1" stop-color="#e6ebef"/>
+      </linearGradient></defs>
+      <ellipse cx="44" cy="40" rx="24" ry="32" transform="rotate(-35 44 40)" fill="${url('steel')}" stroke="#56616b" stroke-width="2"/>
+      <path d="M60 62q10 8 14 22q4 14 22 26" fill="none" stroke="#56616b" stroke-width="11" stroke-linecap="round"/>
+      <path d="M60 62q10 8 14 22q4 14 22 26" fill="none" stroke="${url('steel')}" stroke-width="7" stroke-linecap="round"/>
+      <path d="M30 26q6-8 16-6" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`,
+  },
+  bagel: {
+    box: '0 0 80 80',
+    body: `
+      <circle cx="40" cy="40" r="34" fill="#d48a3c" stroke="#8a4a14" stroke-width="3"/>
+      <circle cx="40" cy="40" r="11" fill="#f6e3a6" stroke="#8a4a14" stroke-width="3"/>
+      <path d="M18 30q6-10 16-12M52 18q10 4 13 12M60 52q-4 10-14 13" fill="none" stroke="#f3c27a" stroke-width="4" stroke-linecap="round"/>
+      <g fill="#fff8e1"><circle cx="24" cy="46" r="1.6"/><circle cx="30" cy="58" r="1.6"/><circle cx="56" cy="30" r="1.6"/><circle cx="58" cy="42" r="1.6"/><circle cx="44" cy="62" r="1.6"/><circle cx="34" cy="22" r="1.6"/></g>`,
+  },
+  socks: {
+    box: '0 0 120 90',
+    body: `
+      <path d="M30 6h26v44q0 6 4 10l14 14q8 10-2 14q-8 4-16-4L36 64q-6-6-6-16z" fill="#ff5a36" stroke="#8c1f0b" stroke-width="2"/>
+      <rect x="30" y="6" width="26" height="10" fill="#ffd23f"/>
+      <path d="M64 10h26v44q0 6 4 10l10 10q8 10-2 14q-8 4-16-4L70 68q-6-6-6-16z" fill="#2e86ff" stroke="#0b3f8c" stroke-width="2"/>
+      <rect x="64" y="10" width="26" height="10" fill="#ffd23f"/>
+      <path d="M92 6q10-8 20 0M96 11q6-5 12 0" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"/>`,
+  },
+  can: {
+    box: '0 0 60 120',
+    body: `
+      <defs><linearGradient id="${id('can')}" x1="0" x2="1">
+        <stop offset="0" stop-color="#1b1d20"/><stop offset=".35" stop-color="#5b6168"/><stop offset=".5" stop-color="#9aa1a8"/><stop offset="1" stop-color="#15171a"/>
+      </linearGradient></defs>
+      <rect x="22" y="2" width="16" height="12" rx="3" fill="#2a2d31"/>
+      <rect x="10" y="12" width="40" height="104" rx="10" fill="${url('can')}"/>
+      <rect x="10" y="48" width="40" height="30" fill="#c9c2b6"/>
+      <text x="30" y="68" font-size="9" font-family="Impact, 'Arial Black', sans-serif" text-anchor="middle" fill="#1b1d20">GRANITE</text>`,
+  },
+  mattress: {
+    box: '0 0 140 70',
+    body: `
+      <rect x="6" y="18" width="128" height="38" rx="14" fill="#fff" stroke="#9b8cd9" stroke-width="3"/>
+      <path d="M30 22v30M54 22v30M78 22v30M102 22v30" stroke="#d9d2f5" stroke-width="2"/>
+      <path d="M8 40h124" stroke="#d9d2f5" stroke-width="2"/>
+      <text x="112" y="14" font-size="14" font-family="Georgia, serif" fill="#7b6cc4">z</text>
+      <text x="122" y="8" font-size="10" font-family="Georgia, serif" fill="#7b6cc4">z</text>`,
+  },
+  'chum-crouton': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#cdb48c"/>
+      <rect x="44" y="18" width="70" height="64" rx="10" fill="#e3a957" stroke="#8f5419" stroke-width="3" transform="rotate(-8 79 50)"/>
+      <g fill="#a8661f"><circle cx="64" cy="40" r="3"/><circle cx="88" cy="34" r="2.5"/><circle cx="76" cy="58" r="3"/><circle cx="96" cy="60" r="2.5"/></g>
+      ${ring(88, 36, 18, 14)}${arrow(140, 86, 106, 50)}`,
+  },
+  'chum-attic': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#5a3b23"/>
+      <path d="M0 30h160M0 62h160" stroke="#3f2816" stroke-width="3"/>
+      <rect x="46" y="44" width="62" height="40" rx="10" fill="#b8b29e" stroke="#4d4636" stroke-width="2"/>
+      <rect x="58" y="40" width="16" height="5" rx="2" fill="#2b2a24"/><rect x="82" y="40" width="16" height="5" rx="2" fill="#2b2a24"/>
+      <text x="124" y="34" font-size="22" font-family="Impact, sans-serif" fill="#ffe14a">$$$</text>
+      ${ring(77, 64, 40, 28)}`,
+  },
+  'chum-jam': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#f4b6c2"/>
+      <rect x="58" y="22" width="44" height="12" rx="3" fill="#d9d9d9" stroke="#8a8a8a" stroke-width="2"/>
+      <rect x="54" y="32" width="52" height="58" rx="10" fill="#b0122c" stroke="#5e0716" stroke-width="2"/>
+      <rect x="62" y="50" width="36" height="20" rx="3" fill="#fff6e8"/>
+      <text x="80" y="64" font-size="10" font-family="Georgia, serif" font-style="italic" text-anchor="middle" fill="#5e0716">jam</text>
+      ${ring(80, 28, 30, 12)}${arrow(18, 14, 46, 26)}`,
+  },
+  'chum-mistake': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#efe6d4"/>
+      <path d="M18 80V34q0-16 28-16t28 16v46z" fill="#f3e2b8" stroke="#b39561" stroke-width="2"/>
+      <path d="M86 80V34q0-16 28-16t28 16v46z" fill="#3a2414" stroke="#160c05" stroke-width="2"/>
+      <path d="M96 30l36 40M132 30L96 70" stroke="#e3121b" stroke-width="7" stroke-linecap="round"/>
+      ${ring(46, 50, 30, 36)}`,
+  },
+  'chum-cat': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#8fb3c9"/>
+      <path d="M92 86q-6-30 18-32q22 0 20 32z" fill="#e2a65a" stroke="#94561c" stroke-width="2"/>
+      <circle cx="54" cy="56" r="22" fill="#333"/>
+      <path d="M36 44l2-22 12 14zM72 44l-2-22-12 14z" fill="#333"/>
+      <rect x="34" y="70" width="40" height="22" rx="10" fill="#333"/>
+      <circle cx="46" cy="54" r="3.5" fill="#ffe14a"/><circle cx="62" cy="54" r="3.5" fill="#ffe14a"/>
+      ${arrow(150, 16, 124, 46)}`,
+  },
+  'chum-town': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#9ccf8a"/>
+      <rect y="70" width="160" height="30" fill="#7b7b7b"/>
+      <rect x="77" y="40" width="6" height="40" fill="#555"/>
+      <rect x="40" y="12" width="80" height="34" rx="4" fill="#ffe14a" stroke="#222" stroke-width="3"/>
+      <text x="80" y="34" font-size="13" font-family="Impact, 'Arial Black', sans-serif" text-anchor="middle" fill="#222">BUTTER ZONE</text>
+      ${ring(80, 29, 48, 24)}`,
+  },
+  'chum-kettle': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#d6e6e1"/>
+      <path d="M50 90q-6-44 30-46q36 2 30 46z" fill="#3c6e71" stroke="#1e3a3c" stroke-width="2"/>
+      <path d="M108 60q22-6 20-26" fill="none" stroke="#1e3a3c" stroke-width="6" stroke-linecap="round"/>
+      <rect x="66" y="36" width="28" height="8" rx="4" fill="#1e3a3c"/>
+      <path d="M126 28q-6-8 0-16M136 30q-6-8 0-16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+      ${ring(128, 30, 18, 16)}`,
+  },
+  'chum-knife': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#f3e9d2"/>
+      <rect x="18" y="56" width="70" height="22" rx="4" fill="#ffe08a" stroke="#c9a23c" stroke-width="2"/>
+      <path d="M40 30h80q16 0 16 9t-16 9H40z" fill="#c9ced3" stroke="#6b737b" stroke-width="2"/>
+      <rect x="10" y="32" width="34" height="14" rx="7" fill="#6b4a2b"/>
+      ${arrow(150, 88, 128, 52)}`,
+  },
+  'chum-days': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#fbe3d6"/>
+      <path d="M14 84V40q0-14 24-14t24 14v44z" fill="#f1d9a6" stroke="#b39561" stroke-width="2"/>
+      <path d="M98 84V40q0-14 24-14t24 14v44z" fill="#c27a2c" stroke="#7a4310" stroke-width="2"/>
+      <text x="38" y="18" font-size="12" font-family="Arial, sans-serif" font-weight="700" text-anchor="middle" fill="#333">DAY 1</text>
+      <text x="122" y="18" font-size="12" font-family="Arial, sans-serif" font-weight="700" text-anchor="middle" fill="#333">DAY 30</text>
+      ${arrow(66, 56, 92, 56)}`,
+  },
+  'chum-map': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#a8d5e8"/>
+      <path d="M20 70q10-40 50-36q30 2 40-20q30 6 36 40q-10 34-60 30q-40 0-66-14z" fill="#b9dc8f" stroke="#6f9a49" stroke-width="2"/>
+      <path d="M96 30q-14 0-14 14q0 12 14 26q14-14 14-26q0-14-14-14z" fill="#e3121b"/>
+      <circle cx="96" cy="44" r="5" fill="#fff"/>
+      ${ring(96, 48, 24, 28)}`,
+  },
+  'chum-ranking': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#fff6dd"/>
+      <rect x="20" y="58" width="22" height="30" fill="#e2a65a"/>
+      <rect x="50" y="40" width="22" height="48" fill="#c98a3c"/>
+      <rect x="80" y="24" width="22" height="64" fill="#a8661f"/>
+      <rect x="110" y="70" width="22" height="18" fill="#f1d9a6"/>
+      <text x="91" y="18" font-size="14" font-family="Impact, sans-serif" text-anchor="middle" fill="#e3121b">#1?!</text>
+      ${ring(121, 76, 18, 16)}`,
+  },
+  'chum-crumbs': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#3b3f46"/>
+      <ellipse cx="80" cy="56" rx="62" ry="30" fill="#f4f1ea"/>
+      <g fill="#c98a3c"><circle cx="58" cy="50" r="2.6"/><circle cx="70" cy="62" r="2"/><circle cx="84" cy="48" r="3"/><circle cx="96" cy="64" r="2.2"/><circle cx="104" cy="52" r="1.8"/><circle cx="76" cy="54" r="1.6"/><circle cx="64" cy="70" r="2.4"/><circle cx="110" cy="60" r="2.6"/></g>
+      ${ring(84, 50, 14, 12)}${arrow(144, 14, 102, 42)}`,
+  },
+  sun: {
+    box: '0 0 120 120',
+    body: `
+      <circle cx="60" cy="60" r="30" fill="#ffd23f"/>
+      <g stroke="#ffd23f" stroke-width="7" stroke-linecap="round">
+        <path d="M60 8v14M60 98v14M8 60h14M98 60h14M23 23l10 10M87 87l10 10M23 97l10-10M87 33l10-10"/>
+      </g>
+      <path d="M44 66q16 14 32 0" fill="none" stroke="#a5560c" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="49" cy="54" r="4" fill="#a5560c"/><circle cx="71" cy="54" r="4" fill="#a5560c"/>`,
+  },
+};
+
+const piece = art[name];
+if (!piece) throw new Error(`No art named ${name}`);
+---
+
+<svg class={className} viewBox={piece.box} aria-hidden="true" focusable="false" set:html={piece.body} />
