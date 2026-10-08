@@ -33,10 +33,11 @@ const groups = Object.keys(GROUPS) as Group[];
         <span aria-hidden="true">♪</span><span class="vh">Sound</span>
       </button>
       <label class="hud-block" title="Hide every ad on the page">
-        <input type="checkbox" data-block />
+        <input type="checkbox" data-block autocomplete="off" />
         <span class="sw" aria-hidden="true"></span>
         <span>Block ads</span>
       </label>
+      <p class="hud-flash" data-hud-flash aria-live="polite"></p>
     </header>
 
     <div class="site" data-site>
@@ -91,18 +92,21 @@ const groups = Object.keys(GROUPS) as Group[];
 
           <div class="ad video-slot" data-video-slot>
             <p class="ad-label">Advertisement</p>
-            <div class="vid" data-video>
-              <canvas class="vid-canvas" data-video-canvas width="640" height="360" aria-label="A video advertisement"></canvas>
-              <p class="vid-poster" aria-hidden="true">GRANITE</p>
-              <div class="vid-ui">
-                <span class="vid-count" data-video-count>Ad 1 of 3</span>
-                <button class="vid-btn vid-cta" type="button" data-cta="granite" data-video-cta>Learn more ›</button>
-                <button class="vid-btn vid-mute" type="button" data-video-mute aria-pressed="false" title="Mute this ad">
-                  <span aria-hidden="true">🔊</span><span class="vh">Mute</span>
-                </button>
-                <button class="vid-btn vid-skip" type="button" data-video-skip disabled>Skip ad in 5</button>
-                <button class="vid-x" type="button" data-video-close aria-label="Close video">×</button>
-                <span class="vid-bar"><i data-video-bar></i></span>
+            <div class="vid-frame">
+              <p class="vid-gone" aria-hidden="true">This ad is following you ↘</p>
+              <div class="vid" data-video>
+                <canvas class="vid-canvas" data-video-canvas width="640" height="360" aria-label="A video advertisement"></canvas>
+                <p class="vid-poster" aria-hidden="true">GRANITE</p>
+                <div class="vid-ui">
+                  <span class="vid-count" data-video-count>Ad 1 of 3</span>
+                  <button class="vid-btn vid-cta" type="button" data-cta="granite" data-video-cta>Learn more ›</button>
+                  <button class="vid-btn vid-mute" type="button" data-video-mute aria-pressed="false" title="Mute this ad">
+                    <span aria-hidden="true">🔊</span><span class="vh">Mute</span>
+                  </button>
+                  <button class="vid-btn vid-skip" type="button" data-video-skip disabled>Skip ad in 5</button>
+                  <button class="vid-x" type="button" data-video-close aria-label="Close video">×</button>
+                  <span class="vid-bar"><i data-video-bar></i></span>
+                </div>
               </div>
             </div>
           </div>
@@ -368,6 +372,136 @@ const groups = Object.keys(GROUPS) as Group[];
       </div>
     </div>
 
+    <div class="ad proof" data-proof></div>
+
+    <div class="ad pushask" data-pushask hidden>
+      <p class="push-text" data-push-text></p>
+      <p class="push-buttons" data-push-buttons>
+        <button type="button" class="push-later" data-push="later">Maybe later</button>
+        <button type="button" class="push-allow" data-push="allow">Allow</button>
+      </p>
+    </div>
+
+    <div class="ad chat" data-chat hidden>
+      <div class="chat-panel" data-chat-panel hidden>
+        <p class="chat-head">
+          <span class="chat-face" aria-hidden="true">🍞</span>
+          <span><b>Crumb</b><small>The Toastmonger assistant · online</small></span>
+          <button type="button" class="chat-x" data-chat-x aria-label="Minimize chat">–</button>
+        </p>
+        <ol class="chat-log" data-chat-log aria-live="polite"></ol>
+        <div class="chat-quick" data-chat-quick></div>
+      </div>
+      <button type="button" class="chat-teaser" data-chat-teaser hidden>Hi! 👋 Need help with your toast?</button>
+      <button type="button" class="chat-bubble" data-chat-open aria-label="Open chat">
+        <span aria-hidden="true">💬</span>
+        <span class="chat-badge" data-chat-badge hidden>1</span>
+      </button>
+    </div>
+
+    <div class="ad popups" data-popups></div>
+
+    <div class="ad newsletter" data-newsletter hidden>
+      <div class="nl-panel" role="dialog" aria-modal="true" aria-labelledby="ah-nl-title">
+        <button type="button" class="nl-x" data-nl-x aria-label="Close">×</button>
+        <p class="nl-kicker" data-nl-kicker>WAIT! Don't go yet</p>
+        <h2 class="nl-title" id="ah-nl-title" data-nl-title>Get <i>101 Toasts</i>, our free e-book</h2>
+        <p class="nl-line">Join two million home cooks who get a toast in their inbox every morning.</p>
+        <form class="nl-form" data-nl-form>
+          <input type="email" name="ah-nothing" placeholder="Your email address" autocomplete="off" aria-label="Email address (never sent anywhere)" />
+          <button type="submit">Send me toast</button>
+        </form>
+        <p class="nl-thanks" data-nl-thanks hidden>You're in! (Nothing was sent anywhere. This page has no server.)</p>
+        <label class="nl-check"><input type="checkbox" checked /> Yes, also send me offers from our 1,482 partners</label>
+        <label class="nl-check"><input type="checkbox" /> Uncheck this box if you would prefer not to stop receiving no further updates</label>
+        <button type="button" class="nl-no" data-nl-no>No thanks, I like my toast pale and sad.</button>
+      </div>
+    </div>
+
+    <div class="ad cookies" data-cookies hidden>
+      <div class="cookie-panel" role="dialog" aria-modal="true" aria-labelledby="ah-cookie-title">
+        <section data-cookie-step="main">
+          <h2 id="ah-cookie-title">We value your privacy 🍪</h2>
+          <p>
+            We and our <b>1,482 partners</b> store and read things on your device to pick ads, measure ads, build a profile of
+            you, sell you a toaster, and remember that you were here.
+          </p>
+          <p class="cookie-actions">
+            <button type="button" class="c-accept" data-cookie="accept">Accept all</button>
+            <button type="button" class="c-faint" data-cookie="manage">Manage options</button>
+          </p>
+        </section>
+        <section data-cookie-step="purposes" hidden>
+          <h2>Manage your choices</h2>
+          <p class="cookie-sub">We've switched these on for you, to save you the trouble.</p>
+          <ul class="cookie-list">
+            <li><span>Store and read things on your device</span><button type="button" class="switch" role="switch" aria-checked="true" data-cookie-toggle aria-label="Store and read things on your device"></button></li>
+            <li><span>Pick ads using a little data</span><button type="button" class="switch" role="switch" aria-checked="true" data-cookie-toggle aria-label="Pick ads using a little data"></button></li>
+            <li><span>Build a profile of you for ads</span><button type="button" class="switch" role="switch" aria-checked="true" data-cookie-toggle aria-label="Build a profile of you for ads"></button></li>
+            <li><span>Pick ads using that profile</span><button type="button" class="switch" role="switch" aria-checked="true" data-cookie-toggle aria-label="Pick ads using that profile"></button></li>
+            <li><span>Measure how well the ads work</span><button type="button" class="switch" role="switch" aria-checked="true" data-cookie-toggle aria-label="Measure how well the ads work"></button></li>
+            <li><span>Sell you a toaster</span><button type="button" class="switch" role="switch" aria-checked="true" data-cookie-toggle aria-label="Sell you a toaster"></button></li>
+          </ul>
+          <p class="cookie-actions">
+            <button type="button" class="c-accept" data-cookie="accept">Accept all</button>
+            <button type="button" class="c-faint" data-cookie="legit">Legitimate interest ›</button>
+          </p>
+        </section>
+        <section data-cookie-step="legit" hidden>
+          <h2>Legitimate interest</h2>
+          <p class="cookie-sub">Some partners don't ask. They have a legitimate interest in you. You may object to each one.</p>
+          <ul class="cookie-list">
+            <li><span>Understand audiences through statistics</span><button type="button" class="c-object" data-cookie-object aria-pressed="false">Object</button></li>
+            <li><span>Develop and improve the toaster</span><button type="button" class="c-object" data-cookie-object aria-pressed="false">Object</button></li>
+            <li><span>Remember that you were here</span><button type="button" class="c-object" data-cookie-object aria-pressed="false">Object</button></li>
+            <li><span>Guess what you'll want for breakfast</span><button type="button" class="c-object" data-cookie-object aria-pressed="false">Object</button></li>
+          </ul>
+          <p class="cookie-actions">
+            <button type="button" class="c-accept" data-cookie="accept">Accept all</button>
+            <button type="button" class="c-faint" data-cookie="confirm">Confirm my choices</button>
+          </p>
+        </section>
+        <section data-cookie-step="sure" hidden>
+          <h2>Are you sure?</h2>
+          <p>Rejecting cookies means you'll see just as many ads. They'll just be about things you don't like.</p>
+          <p class="cookie-actions">
+            <button type="button" class="c-accept" data-cookie="accept">Keep relevant ads</button>
+            <button type="button" class="c-faint" data-cookie="reject">Yes, show me irrelevant ads</button>
+          </p>
+        </section>
+        <p class="cookie-note">This page sets no cookies. It asks anyway.</p>
+      </div>
+    </div>
+
+    <div class="ad prestitial" data-prestitial hidden>
+      <p class="inter-top">
+        <span>Advertisement</span>
+        <span data-pre-wait>The Toastmonger will continue in <b data-pre-count>7</b></span>
+        <button type="button" class="inter-skip" data-pre-skip hidden>Continue to The Toastmonger ›</button>
+      </p>
+      <div class="inter-in loafly-pre">
+        <Art name="loaf" uid="pre" class="inter-art" />
+        <p class="inter-brand">LOAFLY</p>
+        <p class="inter-head">Bread, but make it a subscription.</p>
+        <p class="inter-sub">Fresh loaves delivered every six hours. Pause anytime.*</p>
+        <button type="button" class="inter-cta" data-cta="loafly">Start my free trial</button>
+        <p class="inter-fine">*Pausing requires a notarized letter.</p>
+      </div>
+    </div>
+
+    <div class="ad postitial" data-postitial hidden>
+      <p class="inter-top">
+        <span>Advertisement</span>
+        <span>Taking you to the recipe in <b data-post-count>5</b></span>
+      </p>
+      <div class="inter-in crumb-post">
+        <Art name="toaster" uid="post" class="inter-art" />
+        <p class="inter-brand">CRUMBTRONIC 3000</p>
+        <p class="inter-head">Before you make toast, make sure it's smart toast.</p>
+        <button type="button" class="inter-cta" data-cta="crumbtronic">Shop now</button>
+      </div>
+    </div>
+
     <div class="checklist" id="ah-checklist" popover>
       <div class="cl-head">
         <h2>Violations seen</h2>
@@ -395,8 +529,27 @@ const groups = Object.keys(GROUPS) as Group[];
         ))
       }
     </div>
+
+    <dialog class="report" data-report aria-labelledby="ah-report-title">
+      <p class="rp-kicker">You made it to the end.</p>
+      <h2 id="ah-report-title">Reading report</h2>
+      <dl class="rp-stats" data-rp-stats></dl>
+      <p class="rp-note" data-rp-note></p>
+      <p class="rp-actions">
+        <button type="button" class="rp-calm" data-rp-calm>Read it calmly</button>
+        <button type="button" data-rp-again>Go again</button>
+        <a href="/">thesandbox.page</a>
+      </p>
+    </dialog>
   </main>
 </Bare>
+
+<script>
+  import { startAdHell } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-adhell]');
+  if (root) startAdHell(root);
+</script>
 
 <style is:global>
   html:has(.adhell) {
@@ -1592,9 +1745,13 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   /* The rail. */
+  /* Beside the article on wide screens; under it on narrow ones, where the deal waits at the bottom. */
   .adhell .rail {
-    display: none;
-    padding-top: 40px;
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 24px;
+    padding: 0 0 40px;
   }
 
   .adhell .rail .box {
@@ -1707,12 +1864,18 @@ const groups = Object.keys(GROUPS) as Group[];
 
     .adhell .rail {
       display: block;
+      padding-top: 40px;
     }
   }
 
   .adhell:has(.hud-block input:checked) .layout,
   .adhell[data-blocked] .layout {
     grid-template-columns: minmax(0, 680px);
+  }
+
+  .adhell:has(.hud-block input:checked) .rail,
+  .adhell[data-blocked] .rail {
+    display: none;
   }
 
   /* The sticky banner: a third of the screen. */
@@ -1864,6 +2027,1114 @@ const groups = Object.keys(GROUPS) as Group[];
 
     .adhell .sticky {
       transition: none;
+    }
+  }
+
+  /* ---------- Script-driven pieces ---------- */
+
+  html:has(.adhell[data-lock]) {
+    overflow: hidden;
+  }
+
+  .adhell .hud-flash {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 12px;
+    margin: 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #ff3b1f;
+    color: #fff;
+    font: 600 12px/1.2 ui-monospace, 'Cascadia Mono', Consolas, Menlo, monospace;
+    opacity: 0;
+    translate: 0 -6px;
+    pointer-events: none;
+    transition: opacity 0.25s, translate 0.25s;
+  }
+
+  .adhell .hud-flash.show {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  /* The video follows you once you scroll past it. */
+  .adhell .vid-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #ece5da;
+  }
+
+  .adhell .vid-gone {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    color: #a59d93;
+    font: italic 15px/1 Georgia, serif;
+  }
+
+  .adhell .vid-frame .vid {
+    position: absolute;
+    inset: 0;
+  }
+
+  .adhell .vid-frame .vid.is-pip {
+    position: fixed;
+    inset: auto 16px 88px auto;
+    z-index: 55;
+    width: min(360px, 62vw);
+    height: auto;
+    aspect-ratio: 16 / 9;
+    box-shadow: 0 16px 40px -10px rgb(0 0 0 / 0.6);
+    outline: 3px solid #ffd400;
+  }
+
+  .adhell .vid.is-pip .vid-x {
+    position: absolute;
+    top: -12px;
+    left: -12px;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #111;
+    color: #fff !important;
+    font: 700 16px/1 Arial, sans-serif !important;
+  }
+
+  .adhell .vid.is-pip .vid-skip,
+  .adhell .vid.is-pip .vid-count {
+    font-size: 11px !important;
+  }
+
+  .adhell .vid.is-pip .vid-cta {
+    padding: 5px 8px;
+    font-size: 11px !important;
+  }
+
+  /* Late ads. */
+  .adhell .lz {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 240px;
+    justify-content: center;
+    padding: 20px;
+    border: 0;
+    text-align: center;
+  }
+
+  .adhell .lz-big {
+    font: 900 26px/1.1 'Arial Black', Impact, sans-serif;
+  }
+
+  .adhell .lz-quiz {
+    background: radial-gradient(circle at 30% 20%, #fff59a, #ff8a00);
+    color: #3a1d00 !important;
+  }
+
+  .adhell .lz-quiz .cta {
+    background: #3a1d00;
+    color: #fff59a;
+  }
+
+  .adhell .lz-plumb {
+    background: #0b5bd3;
+    color: #fff !important;
+  }
+
+  .adhell .lz-plumb .cta {
+    background: #ffd400;
+    color: #0b2a6b;
+  }
+
+  .adhell .lz-stars {
+    background: radial-gradient(circle at 70% 30%, #4b2a8c, #120a2a 70%);
+    color: #f1e6ff !important;
+  }
+
+  .adhell .lz-stars .cta {
+    background: #f1e6ff;
+    color: #120a2a;
+  }
+
+  .adhell .lz-card {
+    min-height: 180px;
+    background: linear-gradient(180deg, #ff2d2d, #b30000);
+    color: #fff !important;
+  }
+
+  .adhell .lz-card .lz-big {
+    font-size: 20px;
+  }
+
+  .adhell .lz-card .cta {
+    background: #ffe600;
+    color: #b30000;
+  }
+
+  /* Strangers buying things. */
+  .adhell .proof {
+    position: fixed;
+    left: 16px;
+    bottom: 88px;
+    z-index: 60;
+    width: min(330px, 100vw - 32px);
+  }
+
+  .adhell .proof-card {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: #fff;
+    color: #222;
+    font-size: 13px;
+    line-height: 1.35;
+    box-shadow: 0 10px 30px -8px rgb(0 0 0 / 0.35);
+    animation: ah-in 0.35s ease-out both;
+  }
+
+  .adhell .proof-card.out {
+    opacity: 0;
+    translate: 0 10px;
+    transition: opacity 0.5s, translate 0.5s;
+  }
+
+  .adhell .proof-card small {
+    display: block;
+    margin-top: 3px;
+    color: #888;
+    font-size: 11px;
+  }
+
+  .adhell .proof-dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    margin-top: 4px;
+    border-radius: 50%;
+    background: #2fbf71;
+    box-shadow: 0 0 0 4px rgb(47 191 113 / 0.25);
+  }
+
+  @keyframes ah-in {
+    from {
+      opacity: 0;
+      translate: 0 14px;
+    }
+  }
+
+  /* The notification pre-ask. */
+  .adhell .pushask {
+    position: fixed;
+    top: calc(var(--hud-h) + 10px);
+    left: 50%;
+    z-index: 65;
+    width: min(420px, 100vw - 24px);
+    padding: 16px 18px 12px;
+    translate: -50% 0;
+    border-radius: 10px;
+    background: #fff;
+    color: #222;
+    font-size: 14px;
+    line-height: 1.4;
+    box-shadow: 0 18px 40px -12px rgb(0 0 0 / 0.45);
+    animation: ah-drop 0.35s ease-out both;
+  }
+
+  .adhell .pushask p {
+    margin: 0;
+  }
+
+  .adhell .push-text::before {
+    content: '🔔 ';
+  }
+
+  .adhell .push-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 12px !important;
+  }
+
+  .adhell .push-buttons button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 0;
+  }
+
+  .adhell .push-later {
+    background: none;
+    color: #999 !important;
+  }
+
+  .adhell .push-allow {
+    background: #1769e0;
+    color: #fff !important;
+    font-weight: 700 !important;
+  }
+
+  @keyframes ah-drop {
+    from {
+      opacity: 0;
+      translate: -50% -16px;
+    }
+  }
+
+  /* The chat bubble. */
+  .adhell .chat {
+    position: fixed;
+    right: 16px;
+    bottom: 88px;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  .adhell:has(.vid.is-pip) .chat {
+    bottom: calc(88px + min(360px, 62vw) * 9 / 16 + 16px);
+  }
+
+  .adhell .chat-bubble {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    border: 0;
+    border-radius: 50%;
+    background: #1769e0;
+    font-size: 26px !important;
+    box-shadow: 0 10px 24px -6px rgb(23 105 224 / 0.6);
+  }
+
+  .adhell .chat-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 11px;
+    background: #e3121b;
+    color: #fff;
+    font: 700 12px/22px Arial, sans-serif;
+  }
+
+  .adhell .chat-teaser {
+    max-width: 240px;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 14px 14px 4px 14px;
+    background: #fff;
+    color: #222 !important;
+    font-size: 14px !important;
+    text-align: left;
+    box-shadow: 0 10px 24px -8px rgb(0 0 0 / 0.35);
+    animation: ah-in 0.3s ease-out both;
+  }
+
+  .adhell .chat-panel {
+    display: flex;
+    flex-direction: column;
+    width: min(320px, 100vw - 32px);
+    height: min(420px, 60vh);
+    border-radius: 12px;
+    background: #fff;
+    color: #222;
+    overflow: hidden;
+    box-shadow: 0 18px 50px -12px rgb(0 0 0 / 0.5);
+  }
+
+  .adhell .chat-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 12px 14px;
+    background: #1769e0;
+    color: #fff;
+    font-size: 14px;
+  }
+
+  .adhell .chat-head small {
+    display: block;
+    opacity: 0.8;
+    font-size: 11px;
+  }
+
+  .adhell .chat-face {
+    font-size: 22px;
+  }
+
+  .adhell .chat-x {
+    margin-left: auto;
+    border: 0;
+    background: none;
+    color: #fff !important;
+    font-size: 20px !important;
+  }
+
+  .adhell .chat-log {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 12px;
+    overflow: auto;
+    list-style: none;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .adhell .chat-log li {
+    max-width: 85%;
+    padding: 8px 11px;
+    border-radius: 12px;
+  }
+
+  .adhell .chat-log .bot {
+    align-self: flex-start;
+    background: #eef1f6;
+  }
+
+  .adhell .chat-log .me {
+    align-self: flex-end;
+    background: #1769e0;
+    color: #fff;
+  }
+
+  .adhell .chat-log .typing {
+    color: #888;
+    font-style: italic;
+  }
+
+  .adhell .chat-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 12px 12px;
+    border-top: 1px solid #eee;
+  }
+
+  .adhell .chat-quick button {
+    padding: 6px 10px;
+    border: 1px solid #1769e0;
+    border-radius: 14px;
+    background: #fff;
+    color: #1769e0 !important;
+    font-size: 12px !important;
+  }
+
+  /* Fake windows. */
+  .adhell .popups {
+    position: fixed;
+    inset: 0;
+    z-index: 97;
+    pointer-events: none;
+  }
+
+  .adhell .win {
+    --win: #333;
+
+    position: fixed;
+    width: min(380px, 100vw - 24px);
+    pointer-events: auto;
+    border: 2px solid var(--win);
+    border-radius: 6px;
+    background: #fff;
+    color: #222;
+    box-shadow: 0 20px 50px -10px rgb(0 0 0 / 0.55);
+    animation: ah-pop 0.22s cubic-bezier(0.3, 1.6, 0.6, 1) both;
+  }
+
+  .adhell .win-small {
+    width: min(280px, 100vw - 24px);
+  }
+
+  .adhell .win-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 6px 6px 12px;
+    background: var(--win);
+    color: #fff;
+    cursor: move;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .adhell .win-title {
+    flex: 1;
+    font: 700 13px/1.2 Arial, sans-serif;
+    letter-spacing: 0.04em;
+  }
+
+  .adhell .win-x {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: rgb(255 255 255 / 0.2);
+    color: #fff !important;
+    font: 700 15px/1 Arial, sans-serif !important;
+  }
+
+  .adhell .win-body {
+    padding: 16px 18px 6px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .adhell .win-body p {
+    margin: 0 0 10px;
+  }
+
+  .adhell .win-fine {
+    margin: 0;
+    padding: 6px 18px 10px;
+    color: #aaa;
+    font-size: 10px;
+  }
+
+  .adhell .l-big {
+    font: 900 20px/1.15 'Arial Black', Impact, sans-serif;
+  }
+
+  .adhell .l-kicker {
+    color: #888;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .adhell .l-small {
+    color: #888;
+    font-size: 11px;
+  }
+
+  .adhell .l-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0 10px;
+  }
+
+  .adhell .l-row .l-small {
+    flex: 1;
+  }
+
+  .adhell .l-col {
+    display: grid;
+    gap: 6px;
+    margin: 4px 0 10px;
+  }
+
+  .adhell .l-btn,
+  .adhell .l-ghost {
+    padding: 9px 14px;
+    border-radius: 4px;
+    font-weight: 700 !important;
+  }
+
+  .adhell .l-btn {
+    border: 0;
+    background: var(--win);
+    color: #fff !important;
+  }
+
+  .adhell .l-huge {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 16px;
+    font-size: 18px !important;
+  }
+
+  .adhell .l-ghost {
+    border: 1px solid #ccc;
+    background: #fff;
+  }
+
+  .adhell .l-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #aaa !important;
+    font-size: 10px !important;
+    text-decoration: underline;
+  }
+
+  .adhell .l-cart {
+    width: 100%;
+    margin: 0 0 8px;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .adhell .l-cart td {
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .adhell .l-cart td:last-child {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .adhell .l-total td {
+    font-weight: 700;
+    border-bottom: 0;
+  }
+
+  .adhell .l-tag {
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: #fff1b8;
+    color: #7a5b00;
+    font-size: 10px;
+  }
+
+  .adhell .l-streak {
+    font-weight: 700;
+    color: #e3121b;
+  }
+
+  .adhell .l-progress {
+    height: 12px;
+    margin: 6px 0 8px;
+    border-radius: 6px;
+    background: #eee;
+    overflow: hidden;
+  }
+
+  .adhell .l-progress i {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: var(--win);
+    transition: width 0.2s;
+  }
+
+  .adhell .l-slide {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 9;
+    margin: 0 0 10px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, hsl(var(--hue) 70% 70%), hsl(calc(var(--hue) + 60) 70% 45%));
+    color: #fff;
+    font: 900 64px/1 Impact, 'Arial Black', sans-serif;
+    text-shadow: 0 4px 0 rgb(0 0 0 / 0.25);
+  }
+
+  .adhell .l-gift {
+    display: grid;
+    gap: 6px;
+    margin: 0 0 10px;
+    padding: 18px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #7a3cff, #ff3cac);
+    color: #fff;
+    font: 700 12px/1 Arial, sans-serif;
+    letter-spacing: 0.2em;
+  }
+
+  .adhell .l-gift b {
+    font: 900 40px/1 'Arial Black', Impact, sans-serif;
+    letter-spacing: 0;
+  }
+
+  @keyframes ah-pop {
+    from {
+      opacity: 0;
+      scale: 0.85;
+    }
+  }
+
+  /* The newsletter. */
+  .adhell .newsletter,
+  .adhell .cookies {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    place-items: center;
+    padding: calc(var(--hud-h) + 12px) 12px 12px;
+    background: rgb(20 12 6 / 0.55);
+    animation: ah-fade 0.25s ease-out both;
+  }
+
+  @keyframes ah-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .adhell .nl-panel {
+    position: relative;
+    width: min(460px, 100%);
+    padding: 34px 30px 22px;
+    border-radius: 14px;
+    background: #fff6e6;
+    color: #3a2410;
+    text-align: center;
+    box-shadow: 0 30px 70px -20px rgb(0 0 0 / 0.6);
+    animation: ah-pop 0.3s cubic-bezier(0.3, 1.5, 0.6, 1) both;
+  }
+
+  .adhell .nl-x {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #d4c3ad !important;
+    font-size: 18px !important;
+  }
+
+  .adhell .nl-kicker {
+    margin: 0;
+    color: #e3121b;
+    font: 900 14px/1 Arial, sans-serif;
+    letter-spacing: 0.14em;
+  }
+
+  .adhell .nl-title {
+    margin: 10px 0 8px;
+    font: 700 30px/1.1 var(--font-adhell-display);
+  }
+
+  .adhell .nl-line {
+    margin: 0 0 16px;
+    font-size: 15px;
+  }
+
+  .adhell .nl-form {
+    display: flex;
+    gap: 8px;
+  }
+
+  .adhell .nl-form input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px;
+    border: 2px solid #e2c9a6;
+    border-radius: 6px;
+    font: 15px Arial, sans-serif;
+  }
+
+  .adhell .nl-form button {
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 6px;
+    background: #e3121b;
+    color: #fff !important;
+    font-weight: 700 !important;
+  }
+
+  .adhell .nl-thanks {
+    margin: 0;
+    padding: 12px;
+    border-radius: 6px;
+    background: #e5f8ec;
+    color: #146c3a;
+    font-weight: 700;
+  }
+
+  .adhell .nl-check {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-top: 10px;
+    color: #8a7259;
+    font-size: 11px;
+    text-align: left;
+  }
+
+  .adhell .nl-no {
+    margin-top: 16px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #b39b80 !important;
+    font-size: 12px !important;
+    text-decoration: underline;
+  }
+
+  /* The cookie wall. */
+  .adhell .cookies {
+    place-items: end center;
+  }
+
+  .adhell .cookie-panel {
+    width: min(720px, 100%);
+    max-height: 100%;
+    overflow: auto;
+    padding: 24px 26px 16px;
+    border-radius: 14px;
+    background: #fff;
+    color: #222;
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: 0 -10px 60px -10px rgb(0 0 0 / 0.5);
+    animation: ah-rise 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  @keyframes ah-rise {
+    from {
+      translate: 0 40px;
+      opacity: 0;
+    }
+  }
+
+  .adhell .cookie-panel h2 {
+    margin: 0 0 8px;
+    font: 700 20px/1.2 Arial, sans-serif;
+  }
+
+  .adhell .cookie-panel p {
+    margin: 0 0 12px;
+  }
+
+  .adhell .cookie-sub {
+    color: #666;
+  }
+
+  .adhell .cookie-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px !important;
+  }
+
+  .adhell .c-accept {
+    flex: 1 1 240px;
+    padding: 14px;
+    border: 0;
+    border-radius: 8px;
+    background: #2fbf71;
+    color: #fff !important;
+    font: 700 16px/1 Arial, sans-serif !important;
+  }
+
+  .adhell .c-faint {
+    padding: 6px;
+    border: 0;
+    background: none;
+    color: #b5b5b5 !important;
+    font-size: 12px !important;
+  }
+
+  .adhell .cookie-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .adhell .cookie-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 0;
+    border-top: 1px solid #eee;
+  }
+
+  .adhell .switch {
+    flex: none;
+    position: relative;
+    width: 42px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: #ccc;
+  }
+
+  .adhell .switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: translate 0.15s;
+  }
+
+  .adhell .switch[aria-checked='true'] {
+    background: #2fbf71;
+  }
+
+  .adhell .switch[aria-checked='true']::after {
+    translate: 18px 0;
+  }
+
+  .adhell .c-object {
+    flex: none;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    color: #999 !important;
+    font-size: 12px !important;
+  }
+
+  .adhell .c-object[aria-pressed='true'] {
+    border-color: #2fbf71;
+    color: #2fbf71 !important;
+  }
+
+  .adhell .cookie-note {
+    margin: 10px 0 0 !important;
+    color: #bbb;
+    font-size: 11px;
+  }
+
+  /* The prestitial and the postitial. */
+  .adhell .prestitial,
+  .adhell .postitial {
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--hud-h);
+    animation: ah-fade 0.2s ease-out both;
+  }
+
+  .adhell .inter-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0;
+    padding: 10px 16px;
+    background: #fff;
+    color: #888;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+
+  .adhell .inter-top b {
+    color: #222;
+  }
+
+  .adhell .inter-skip {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f6f6f6;
+    color: #333 !important;
+    font-size: 13px !important;
+  }
+
+  .adhell .inter-in {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .adhell .inter-in p {
+    margin: 0;
+  }
+
+  .adhell .inter-art {
+    width: min(260px, 60vw);
+    height: auto;
+  }
+
+  .adhell .inter-brand {
+    font: 900 clamp(44px, 10vw, 110px)/1 'Arial Black', Impact, sans-serif;
+    letter-spacing: 0.04em;
+  }
+
+  .adhell .inter-head {
+    font: italic clamp(20px, 3.4vw, 32px)/1.2 Georgia, serif;
+  }
+
+  .adhell .inter-sub {
+    font-size: 17px;
+  }
+
+  .adhell .inter-cta {
+    margin-top: 10px;
+    padding: 18px 34px;
+    border: 0;
+    border-radius: 999px;
+    font: 900 20px/1 Arial, sans-serif !important;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .adhell .inter-fine {
+    color: inherit;
+    opacity: 0.7;
+    font-size: 11px;
+  }
+
+  .adhell .loafly-pre {
+    background: radial-gradient(circle at 50% 30%, #fff4dc, #ffc977 70%, #e98d2b);
+    color: #5b2a00;
+  }
+
+  .adhell .loafly-pre .inter-brand {
+    color: #c4520c;
+  }
+
+  .adhell .loafly-pre .inter-cta {
+    background: #c4520c;
+    color: #fff !important;
+  }
+
+  .adhell .crumb-post {
+    background: linear-gradient(180deg, #ff2d2d, #8f0000);
+    color: #fff;
+  }
+
+  .adhell .crumb-post .inter-brand {
+    font-size: clamp(34px, 7vw, 76px);
+  }
+
+  .adhell .crumb-post .inter-cta {
+    background: #ffe600;
+    color: #b30000 !important;
+  }
+
+  /* The reading report: the page's own voice, not an ad. */
+  .adhell .report {
+    width: min(520px, 100vw - 24px);
+    padding: 26px 26px 20px;
+    border: 1px solid #3a3936;
+    border-radius: 12px;
+    background: #121212;
+    color: #e9e5dc;
+    font: 13px/1.45 ui-monospace, 'Cascadia Mono', Consolas, Menlo, monospace;
+  }
+
+  .adhell .report::backdrop {
+    background: rgb(251 247 240 / 0.7);
+    backdrop-filter: blur(3px);
+  }
+
+  .adhell .rp-kicker {
+    margin: 0;
+    color: #2fbf71;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .adhell .report h2 {
+    margin: 4px 0 16px;
+    font-size: 22px;
+  }
+
+  .adhell .rp-stats {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    margin: 0;
+  }
+
+  .adhell .rp-stats dt {
+    color: #8a857b;
+  }
+
+  .adhell .rp-stats dd {
+    margin: 0;
+    color: #f2efe8;
+  }
+
+  .adhell .rp-note {
+    margin: 16px 0 0;
+    color: #ffb000;
+  }
+
+  .adhell .rp-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0 0;
+  }
+
+  .adhell .rp-actions button {
+    padding: 9px 14px;
+    border: 1px solid #3a3936;
+    border-radius: 16px;
+    background: #1b1b1c;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .adhell .rp-actions .rp-calm {
+    border-color: #2fbf71;
+    background: #2fbf71;
+    color: #08240f;
+    font-weight: 700;
+  }
+
+  .adhell .rp-actions a {
+    margin-left: auto;
+    color: #9b968c;
+  }
+
+  @media (max-width: 560px) {
+    .adhell .rp-stats {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .adhell .rp-stats dd {
+      margin-bottom: 8px;
+    }
+  }
+
+  /* The blocker's sweep: the article glides to the middle as the ads go. */
+  .adhell .post {
+    view-transition-name: ah-post;
+  }
+
+  ::view-transition-group(ah-post) {
+    animation-duration: 0.5s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .adhell .win,
+    .adhell .nl-panel,
+    .adhell .cookie-panel,
+    .adhell .proof-card,
+    .adhell .pushask,
+    .adhell .chat-teaser,
+    .adhell .newsletter,
+    .adhell .cookies,
+    .adhell .prestitial,
+    .adhell .postitial {
+      animation: none;
     }
   }
 </style>
