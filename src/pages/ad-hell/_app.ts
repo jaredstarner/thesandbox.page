@@ -23,6 +23,7 @@ export function startAdHell(root: HTMLElement): void {
   let blockedEver = blocked;
   let finished = false;
   let started = false;
+  let jumped = false;
   const t0 = performance.now();
   let lastTick = t0;
   let adMs = 0;
@@ -144,12 +145,20 @@ export function startAdHell(root: HTMLElement): void {
       if (hud.goal && !finished) hud.goal.textContent = `Ad blocker on: ${showing} ads gone.`;
       blockedEver = true;
       closeAllWindows();
+      hud.flash?.classList.remove('show');
     } else if (hud.goal && !finished) {
       hud.goal.textContent = goalText;
     }
+    // Scroll anchoring is off on purpose, so keep the reader's place by hand: the first bit of
+    // article text on screen stays where it is while the ads around it come and go.
+    const anchor = [...root.querySelectorAll<HTMLElement>('.post > p, .post > h2, .post > .faq, .post > .card')].find(
+      (el) => el.getBoundingClientRect().bottom > 60,
+    );
+    const before = anchor?.getBoundingClientRect().top ?? 0;
     box!.checked = on;
     blocked = on;
     root.toggleAttribute('data-blocked', on);
+    if (anchor) scrollBy(0, anchor.getBoundingClientRect().top - before);
     for (const fn of blockListeners) fn(on);
     syncModal();
     video.tick();
@@ -197,7 +206,9 @@ export function startAdHell(root: HTMLElement): void {
       return;
     }
     const jump = t.closest('[data-jump]');
-    if (jump && started && !blocked) {
+    if (jump && started) {
+      jumped = true;
+      if (blocked) return;
       e.preventDefault();
       postitial(hell, () => q('#recipe')?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' }));
     }
@@ -355,7 +366,7 @@ export function startAdHell(root: HTMLElement): void {
     if (!dialog || !list) return;
     const calm = Math.max(1, Math.round(words() / CALM_WPM));
     const rows: [string, string][] = [
-      ['Time to read it', clock(finishMs)],
+      [jumped ? 'Time to the recipe' : 'Time to read it', clock(finishMs)],
       ['The same text, calmly', `about ${calm} min at ${CALM_WPM} words a minute`],
       ['Clicks on ads', String(stats.adClicks)],
       ['Close buttons that were ads', String(stats.fakeCloses)],
@@ -399,7 +410,9 @@ export function startAdHell(root: HTMLElement): void {
     if (note) {
       note.textContent = blockedEver
         ? 'You used the ad blocker, which is how most people read the web.'
-        : best != null && finishMs < best
+        : jumped
+          ? "You skipped the story and jumped to the recipe. Everyone does. Wren understands."
+          : best != null && finishMs < best
           ? `A new best: your last best was ${clock(best)}.`
           : best != null
             ? `Your best is ${clock(best)}.`
