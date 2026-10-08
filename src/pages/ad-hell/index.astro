@@ -1,0 +1,360 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Ad hell"
+  description="A modest toast recipe buried under every ad format the industry agreed to retire. Read it to the end, or flip the ad blocker."
+>
+  <Font cssVariable="--font-adhell-display" slot="head" />
+  <Font cssVariable="--font-adhell-body" slot="head" />
+  <Font cssVariable="--font-adhell-hand" slot="head" />
+
+  <main class="adhell" data-adhell>
+    <div class="site" data-site>
+      <header class="masthead">
+        <p class="logo"><span>The</span> Toastmonger</p>
+        <p class="motto">recipes, stories &amp; crumbs</p>
+        <nav class="sitenav" aria-label="The Toastmonger">
+          <span>Recipes</span>
+          <span>Stories</span>
+          <span>Shop</span>
+          <span>About</span>
+        </nav>
+      </header>
+
+      <div class="layout">
+        <article class="post" data-post>
+          <header class="post-head">
+            <p class="kicker">Breakfast · Five ingredients or fewer</p>
+            <h1>The Best Buttered Toast You'll Ever Make</h1>
+            <p class="dek">A family recipe, a few thoughts on mornings, and, eventually, toast.</p>
+            <p class="byline">
+              By Wren Halloway · <a class="jump" href="#recipe" data-jump>Jump to recipe</a>
+            </p>
+          </header>
+
+          <p>
+            Some mornings ask for very little. A window, a kettle working itself up to a boil, and a slice of bread on its way
+            to becoming something better. This is a recipe for that slice.
+          </p>
+          <p>
+            I know what you're thinking: toast doesn't need a recipe. You're right. But it does deserve one, the way a good
+            chair deserves to be sat in properly. So pull one up. The recipe is at the bottom, and I promise it's worth the
+            scroll.
+          </p>
+
+          <h2>My toast story</h2>
+          <p>
+            My grandmother's toaster browned exactly one side of anything you put in it. Nobody remembers it working any other
+            way. She'd stand beside it with a butter knife in one hand and the other hovering over the lever, and when the
+            first side came up the color of an old church pew she'd flip the slice and send it down again. It took twice as
+            long as toast should. It was the best toast I have ever eaten.
+          </p>
+          <p>
+            I used to think the secret was the toaster. Then I thought it was the bread, a dense brown loaf from a bakery that
+            has since become a phone shop. It took me years to understand that the secret was the waiting: she gave each side
+            its full attention, and she buttered it the moment it came up, while it was still hot enough to drink the butter
+            in.
+          </p>
+          <p>
+            When she gave me the toaster, it lasted one more winter. I've owned four since. None of them burn on one side only,
+            and I still flip my bread out of habit, which my partner finds either charming or deranged depending on the hour.
+          </p>
+
+          <h2>Why this recipe works</h2>
+          <p>
+            Heat, then fat, then salt, in that order and without a pause between them. Toast that sits on a plate for even a
+            minute starts to steam itself soft from underneath. Butter that goes on cold tears the surface and pools in the
+            middle. Get the timing right and the rest takes care of itself.
+          </p>
+          <p>
+            It's also forgiving. Too pale, and you send it back down. Too dark, and you scrape it over the sink the way
+            everyone's parents did, and nobody has to know.
+          </p>
+
+          <h2>A word about bread</h2>
+          <p>
+            Use bread you'd happily eat untoasted. A sourdough with an open crumb gives you crisp edges and soft valleys for the
+            butter to settle in. A plain sandwich loaf gives you even, golden toast from corner to corner. Day-old bread toasts
+            better than fresh, because some of its moisture has already left, so this is the best possible use for the end of
+            a loaf.
+          </p>
+          <p>
+            Slice it about as thick as your little finger. Thinner slices dry out before they color. Thicker ones stay doughy
+            in the middle, which some people love and I won't argue with.
+          </p>
+
+          <h2>A word about butter</h2>
+          <p>
+            Salted, and soft. Leave it out on the counter overnight, or at least while the kettle boils. If you only have cold
+            butter, shave thin curls of it with a vegetable peeler and lay them on the hot toast; they'll melt in seconds.
+          </p>
+          <p>Spread it to the very edges. The crust deserves butter too.</p>
+
+          <h2>Frequently asked questions</h2>
+          <dl class="faq">
+            <dt>Can I make this ahead?</dt>
+            <dd>No. Toast is a present-tense food.</dd>
+            <dt>Can I freeze it?</dt>
+            <dd>You can freeze the bread, and toast it straight from frozen. Give it an extra minute.</dd>
+            <dt>Is this recipe gluten-free?</dt>
+            <dd>Only if your bread is.</dd>
+            <dt>Can I use a microwave?</dt>
+            <dd>I can't stop you. I would rather you didn't.</dd>
+            <dt>What should I drink with it?</dt>
+            <dd>Tea, coffee, or a glass of cold milk, ideally at a window.</dd>
+          </dl>
+
+          <section class="card" id="recipe" aria-labelledby="recipe-title">
+            <p class="card-kicker">Recipe</p>
+            <h2 id="recipe-title">Buttered toast</h2>
+            <p class="card-meta"><span>Prep 1 min</span><span>Cook 3 min</span><span>Serves 1</span></p>
+            <h3>Ingredients</h3>
+            <ul>
+              <li>1 slice of good bread, about as thick as your little finger</li>
+              <li>1 tablespoon salted butter, softened</li>
+              <li>A pinch of flaky salt (optional)</li>
+            </ul>
+            <h3>Method</h3>
+            <ol>
+              <li>Toast the bread until it's deep golden on both sides. If your toaster browns only one side, flip it and go again.</li>
+              <li>Butter it the moment it comes out, all the way to the edges.</li>
+              <li>Add a pinch of salt if you like. Eat it right away, standing up in the kitchen if you must.</li>
+            </ol>
+            <p class="card-end" data-end>That's it. That's the recipe.</p>
+            <p class="signoff">xo, Wren</p>
+          </section>
+        </article>
+      </div>
+
+      <footer class="site-foot">
+        <p>The Toastmonger is invented, and so is every brand on this page. <a href="/">Back to thesandbox.page</a></p>
+      </footer>
+    </div>
+  </main>
+</Bare>
+
+<style is:global>
+  html:has(.adhell) {
+    /* Without scroll anchoring, an ad that loads above the reader shoves the text down, as it does on the worst sites. */
+    overflow-anchor: none;
+    scroll-padding-top: 64px;
+  }
+
+  body:has(.adhell) {
+    margin: 0;
+    background: #fbf7f0;
+  }
+
+  .adhell {
+    --cream: #fbf7f0;
+    --paper: #fffdf8;
+    --ink: #2a2420;
+    --muted: #7a6e64;
+    --accent: #b5502a;
+    --rule: #e6dccd;
+    --hud-h: 44px;
+
+    display: block;
+    color: var(--ink);
+    font-family: var(--font-adhell-body);
+    font-size: 19px;
+    line-height: 1.7;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .adhell *,
+  .adhell *::before,
+  .adhell *::after {
+    box-sizing: border-box;
+  }
+
+  .adhell .site {
+    overflow-x: clip;
+    padding-top: var(--hud-h);
+  }
+
+  .adhell .masthead {
+    text-align: center;
+    padding: 28px 16px 0;
+  }
+
+  .adhell .logo {
+    margin: 0;
+    font-family: var(--font-adhell-display);
+    font-style: italic;
+    font-weight: 700;
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+
+  .adhell .logo span {
+    font-size: 0.55em;
+    font-weight: 400;
+    vertical-align: 0.35em;
+  }
+
+  .adhell .motto {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  .adhell .sitenav {
+    display: flex;
+    justify-content: center;
+    gap: clamp(16px, 4vw, 40px);
+    margin: 18px auto 0;
+    padding: 12px 0;
+    max-width: 1028px;
+    border-block: 1px solid var(--rule);
+    font-size: 0.8rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .adhell .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 680px);
+    justify-content: center;
+    gap: 48px;
+    padding: 0 16px;
+  }
+
+  .adhell .post {
+    min-width: 0;
+    padding-bottom: 48px;
+  }
+
+  .adhell .post-head {
+    padding: 40px 0 8px;
+  }
+
+  .adhell .kicker,
+  .adhell .card-kicker {
+    margin: 0 0 10px;
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .adhell h1,
+  .adhell .post h2,
+  .adhell .card h3 {
+    font-family: var(--font-adhell-display);
+    font-weight: 700;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  .adhell h1 {
+    margin: 0;
+    font-size: clamp(2rem, 6vw, 3rem);
+  }
+
+  .adhell .dek {
+    margin: 14px 0 0;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 1.1rem;
+  }
+
+  .adhell .byline {
+    margin: 18px 0 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .adhell .byline a {
+    color: var(--muted);
+  }
+
+  .adhell .post h2 {
+    margin: 2.2em 0 0.4em;
+    font-size: 1.65rem;
+  }
+
+  .adhell .post p {
+    margin: 0 0 1.1em;
+  }
+
+  .adhell .faq dt {
+    margin-top: 1em;
+    font-weight: 700;
+  }
+
+  .adhell .faq dd {
+    margin: 0.2em 0 0;
+  }
+
+  .adhell .card {
+    margin: 3em 0 0;
+    padding: 28px clamp(18px, 4vw, 36px) 30px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-top: 6px solid var(--accent);
+    border-radius: 4px;
+    box-shadow: 0 14px 40px -24px rgb(60 30 10 / 0.35);
+  }
+
+  .adhell .card h2 {
+    margin: 0;
+    font-size: 2rem;
+  }
+
+  .adhell .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .adhell .card h3 {
+    margin: 1.4em 0 0.3em;
+    font-size: 1.2rem;
+  }
+
+  .adhell .card ul,
+  .adhell .card ol {
+    margin: 0;
+    padding-left: 1.3em;
+  }
+
+  .adhell .card li + li {
+    margin-top: 0.4em;
+  }
+
+  .adhell .card-end {
+    margin: 1.4em 0 0;
+    font-style: italic;
+  }
+
+  .adhell .signoff {
+    margin: 0.4em 0 0;
+    font-family: var(--font-adhell-hand);
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--accent);
+  }
+
+  .adhell .site-foot {
+    padding: 28px 16px 40px;
+    border-top: 1px solid var(--rule);
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .adhell .site-foot a {
+    color: inherit;
+  }
+</style>

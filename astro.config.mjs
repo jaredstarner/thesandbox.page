@@ -122,5 +122,33 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Garamond', 'Georgia', 'serif'],
     },
+    // The recipe blog buried under /ad-hell/: its headings, body, and sign-off.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Playfair Display',
+      cssVariable: '--font-adhell-display',
+      weights: ['400 900'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Lora',
+      cssVariable: '--font-adhell-body',
+      weights: ['400 700'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Caveat',
+      cssVariable: '--font-adhell-hand',
+      weights: ['400 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['cursive'],
+    },
   ],
 });
