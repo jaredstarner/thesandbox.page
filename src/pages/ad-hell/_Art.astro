@@ -176,6 +176,73 @@ const art: Record<string, { box: string; body: string }> = {
       <text x="80" y="34" font-size="13" font-family="Impact, 'Arial Black', sans-serif" text-anchor="middle" fill="#222">BUTTER ZONE</text>
       ${ring(80, 29, 48, 24)}`,
   },
+  'chum-kettle': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#d6e6e1"/>
+      <path d="M50 90q-6-44 30-46q36 2 30 46z" fill="#3c6e71" stroke="#1e3a3c" stroke-width="2"/>
+      <path d="M108 60q22-6 20-26" fill="none" stroke="#1e3a3c" stroke-width="6" stroke-linecap="round"/>
+      <rect x="66" y="36" width="28" height="8" rx="4" fill="#1e3a3c"/>
+      <path d="M126 28q-6-8 0-16M136 30q-6-8 0-16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+      ${ring(128, 30, 18, 16)}`,
+  },
+  'chum-knife': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#f3e9d2"/>
+      <rect x="18" y="56" width="70" height="22" rx="4" fill="#ffe08a" stroke="#c9a23c" stroke-width="2"/>
+      <path d="M40 30h80q16 0 16 9t-16 9H40z" fill="#c9ced3" stroke="#6b737b" stroke-width="2"/>
+      <rect x="10" y="32" width="34" height="14" rx="7" fill="#6b4a2b"/>
+      ${arrow(150, 88, 128, 52)}`,
+  },
+  'chum-days': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#fbe3d6"/>
+      <path d="M14 84V40q0-14 24-14t24 14v44z" fill="#f1d9a6" stroke="#b39561" stroke-width="2"/>
+      <path d="M98 84V40q0-14 24-14t24 14v44z" fill="#c27a2c" stroke="#7a4310" stroke-width="2"/>
+      <text x="38" y="18" font-size="12" font-family="Arial, sans-serif" font-weight="700" text-anchor="middle" fill="#333">DAY 1</text>
+      <text x="122" y="18" font-size="12" font-family="Arial, sans-serif" font-weight="700" text-anchor="middle" fill="#333">DAY 30</text>
+      ${arrow(66, 56, 92, 56)}`,
+  },
+  'chum-map': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#a8d5e8"/>
+      <path d="M20 70q10-40 50-36q30 2 40-20q30 6 36 40q-10 34-60 30q-40 0-66-14z" fill="#b9dc8f" stroke="#6f9a49" stroke-width="2"/>
+      <path d="M96 30q-14 0-14 14q0 12 14 26q14-14 14-26q0-14-14-14z" fill="#e3121b"/>
+      <circle cx="96" cy="44" r="5" fill="#fff"/>
+      ${ring(96, 48, 24, 28)}`,
+  },
+  'chum-ranking': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#fff6dd"/>
+      <rect x="20" y="58" width="22" height="30" fill="#e2a65a"/>
+      <rect x="50" y="40" width="22" height="48" fill="#c98a3c"/>
+      <rect x="80" y="24" width="22" height="64" fill="#a8661f"/>
+      <rect x="110" y="70" width="22" height="18" fill="#f1d9a6"/>
+      <text x="91" y="18" font-size="14" font-family="Impact, sans-serif" text-anchor="middle" fill="#e3121b">#1?!</text>
+      ${ring(121, 76, 18, 16)}`,
+  },
+  'chum-crumbs': {
+    box: '0 0 160 100',
+    body: `
+      <rect width="160" height="100" fill="#3b3f46"/>
+      <ellipse cx="80" cy="56" rx="62" ry="30" fill="#f4f1ea"/>
+      <g fill="#c98a3c"><circle cx="58" cy="50" r="2.6"/><circle cx="70" cy="62" r="2"/><circle cx="84" cy="48" r="3"/><circle cx="96" cy="64" r="2.2"/><circle cx="104" cy="52" r="1.8"/><circle cx="76" cy="54" r="1.6"/><circle cx="64" cy="70" r="2.4"/><circle cx="110" cy="60" r="2.6"/></g>
+      ${ring(84, 50, 14, 12)}${arrow(144, 14, 102, 42)}`,
+  },
+  sun: {
+    box: '0 0 120 120',
+    body: `
+      <circle cx="60" cy="60" r="30" fill="#ffd23f"/>
+      <g stroke="#ffd23f" stroke-width="7" stroke-linecap="round">
+        <path d="M60 8v14M60 98v14M8 60h14M98 60h14M23 23l10 10M87 87l10 10M23 97l10-10M87 33l10-10"/>
+      </g>
+      <path d="M44 66q16 14 32 0" fill="none" stroke="#a5560c" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="49" cy="54" r="4" fill="#a5560c"/><circle cx="71" cy="54" r="4" fill="#a5560c"/>`,
+  },
 };
 
 const piece = art[name];

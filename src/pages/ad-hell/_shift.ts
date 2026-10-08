@@ -4,6 +4,15 @@
 import { rand, type Hell } from './_hell';
 
 const LAZY: Record<string, string> = {
+  local:
+    `<p class="ad-label">Advertisement</p><button type="button" class="lz lz-local" data-cta="clickwell">` +
+    `<span class="lz-big">Bakeries near you are furious about this one trick</span><span>Number three closed a bakery. Allegedly.</span><span class="cta">See the trick</span></button>`,
+  games:
+    `<p class="ad-label">Advertisement</p><button type="button" class="lz lz-games" data-cta="clickwell">` +
+    `<span class="lz-big">99% of players can't pass level 2</span><span>Level 2 is the cookie banner.</span><span class="cta">Play free</span></button>`,
+  mortgage:
+    `<p class="ad-label">Advertisement</p><button type="button" class="lz lz-rates" data-cta="clickwell">` +
+    `<span class="lz-big">Rates are toast. Refinance before lunch.</span><span>See how much you could save on things you don't own.</span><span class="cta">Check my rate</span></button>`,
   quiz:
     `<p class="ad-label">Advertisement</p><button type="button" class="lz lz-quiz" data-cta="quiz">` +
     `<span class="lz-big">Which toast are you?</span><span>Take the 30-question quiz. Question one is about clouds.</span><span class="cta">Start the quiz</span></button>`,

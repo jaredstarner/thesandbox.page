@@ -309,6 +309,16 @@ const LANDINGS: Record<string, () => Landing> = {
       if (action === 'pair') setBody(win, `<p class="l-big">Pairing…</p><p>Left sock: found.<br />Right sock: searching.</p>`);
     },
   }),
+  brunchland: () => ({
+    title: 'BRUNCHLAND Resorts',
+    color: '#c45a00',
+    body:
+      `<p class="l-big">It's always 11 a.m. here.</p><p>Bottomless coffee, endless toast, and a view of a waiter who has seen you.</p>` +
+      `<button type="button" class="l-btn" data-l="book">Book a table</button>`,
+    act(action, win) {
+      if (action === 'book') setBody(win, `<p class="l-big">Fully booked until 2031.</p><p>Join the waitlist. The waitlist is also full.</p>`);
+    },
+  }),
   quiz: () => ({
     title: 'Which toast are you?',
     color: '#ff8a00',

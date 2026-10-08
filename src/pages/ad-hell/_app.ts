@@ -160,8 +160,11 @@ export function startAdHell(root: HTMLElement): void {
     // Undo the click's own toggle and redo it inside a view transition, so the ads leave together.
     e.preventDefault();
     const apply = () => setBlocked(next);
-    if (document.startViewTransition && !reducedMotion) document.startViewTransition(apply);
-    else setTimeout(apply);
+    if (document.startViewTransition && !reducedMotion) {
+      root.setAttribute('data-vt', '');
+      const vt = document.startViewTransition(apply);
+      vt.finished.finally(() => root.removeAttribute('data-vt'));
+    } else setTimeout(apply);
   });
   if (blocked) setBlocked(true);
 
@@ -206,6 +209,30 @@ export function startAdHell(root: HTMLElement): void {
     if (!started || blocked || finished || modals.size > 0 || adMs < 6000) return;
     newsletter(hell, true);
   });
+
+  // ---------- The scrollover, where CSS can't drive it ----------
+
+  // The same sweep the CSS view timeline draws: the panel rises at twice the scroll speed,
+  // from just below the screen to just above it, while its zero-height slot crosses the viewport.
+  const sweep = q('[data-scrollover]');
+  const panel = sweep?.querySelector<HTMLElement>('.scrollover-panel');
+  if (sweep && panel && !CSS.supports('animation-timeline: view()')) {
+    let queued = false;
+    const place = () => {
+      queued = false;
+      const v = innerHeight;
+      const y = Math.min(v, Math.max(-v, 2 * sweep.getBoundingClientRect().top - v));
+      panel.style.translate = `0 ${y}px`;
+    };
+    const queue = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(place);
+    };
+    addEventListener('scroll', queue, { passive: true });
+    addEventListener('resize', queue);
+    place();
+  }
 
   // ---------- The fake deal in the rail ----------
 
