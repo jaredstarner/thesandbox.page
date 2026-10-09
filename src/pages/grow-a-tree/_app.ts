@@ -106,6 +106,7 @@ export function startArbor(root: HTMLElement): void {
   function buildLadder(): void {
     ui.ladder.textContent = '';
     ui.ticks.textContent = '';
+    let lastLabel = -1;
     sp.stages.forEach((st, i) => {
       const li = document.createElement('li');
       const b = document.createElement('button');
@@ -123,8 +124,11 @@ export function startArbor(root: HTMLElement): void {
       ui.ladder.append(li);
       if (i >= 3) {
         const t = document.createElement('span');
-        t.style.left = `${ageToU(st.age) * 100}%`;
-        t.dataset.label = st.age >= 1 ? `${st.age}y` : '';
+        const u = ageToU(st.age);
+        t.style.left = `${u * 100}%`;
+        // Labels that would collide are left off.
+        t.dataset.label = st.age >= 1 && u - lastLabel > 0.075 ? `${st.age}y` : '';
+        if (t.dataset.label) lastLabel = u;
         ui.ticks.append(t);
       }
     });
@@ -376,11 +380,33 @@ export function startArbor(root: HTMLElement): void {
   const wind: Wind = { gust: 0, dirX: 1, dirZ: 0 };
   const off = new THREE.Vector3();
 
+  // The part of the screen the panels leave free, measured on resize.
+  const band = { top: 0, bottom: 1, height: 1, width: 1 };
+  const panels = {
+    env: $<HTMLElement>(root, '.env'),
+    caption: $<HTMLElement>(root, '.caption'),
+    time: $<HTMLElement>(root, '.time'),
+  };
+  function measureBand(): void {
+    const r = root.getBoundingClientRect();
+    const phone = r.width < 640;
+    band.width = r.width;
+    band.height = r.height;
+    band.top = phone ? panels.env.getBoundingClientRect().bottom - r.top + 4 : 0;
+    band.bottom = (phone ? panels.caption : panels.time).getBoundingClientRect().top - r.top - 4;
+    if (band.bottom - band.top < r.height * 0.3) {
+      band.top = 0;
+      band.bottom = r.height;
+    }
+    const shift = r.height / 2 - (band.top + band.bottom) / 2;
+    scene.camera.setViewOffset(r.width, r.height, 0, shift, r.width, r.height);
+  }
+
   function frameCamera(dt: number): void {
     const h = Math.max(pose.height, 0);
     const depth = scene.plugDepth;
     const seedFrame = sp.id === 'oak' ? 0.07 : 0.035;
-    const tall = Math.max(h * 1.08 + depth * 0.7, seedFrame);
+    const tall = Math.max(h * 1.08 + depth * 0.5, seedFrame) * (band.height / Math.max(1, band.bottom - band.top));
     const wide = Math.max(scene.plugR * 2.1, pose.crownR * 2.2, seedFrame);
     const fov = (scene.camera.fov * Math.PI) / 180;
     const t = Math.tan(fov / 2);
@@ -388,7 +414,7 @@ export function startArbor(root: HTMLElement): void {
     const fit = Math.max(tall / (2 * t), wide / (2 * t * aspect)) * 1.32;
     const k = 1 - Math.exp(-dt * 2.5);
     autoDist += (fit - autoDist) * k;
-    const ty = (h * 1.02 - depth * 0.7) / 2;
+    const ty = (h * 1.02 - depth * 0.5) / 2;
     camTarget.y += (ty - camTarget.y) * k;
     off.copy(scene.camera.position).sub(scene.controls.target);
     scene.controls.target.copy(camTarget);
@@ -406,6 +432,7 @@ export function startArbor(root: HTMLElement): void {
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
     scene.resize(w, h);
+    measureBand();
   }
   new ResizeObserver(resize).observe(canvas);
   resize();

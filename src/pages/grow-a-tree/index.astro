@@ -67,7 +67,7 @@ import Bare from '../../layouts/Bare.astro';
             d="M3.5 2.5 H6.5 V13.5 H3.5 Z M9.5 2.5 H12.5 V13.5 H9.5 Z"></path></svg
         >
       </button>
-      <button type="button" class="step" data-step>Grow to the next stage</button>
+      <button type="button" class="step" data-step><span class="full">Grow to the next stage</span><span class="short">Next stage</span></button>
       <div class="scrub">
         <input type="range" min="0" max="1000" value="0" step="1" data-scrub aria-label="Age of the tree" />
         <div class="ticks" data-ticks aria-hidden="true"></div>
@@ -477,6 +477,10 @@ import Bare from '../../layouts/Bare.astro';
   .step:hover,
   .picker .plant:hover {
     background: rgb(79 107 58 / 0.12);
+  }
+
+  .step .short {
+    display: none;
   }
 
   .step:disabled {
@@ -984,6 +988,14 @@ import Bare from '../../layouts/Bare.astro';
       font-size: 13px;
     }
 
+    .step .full {
+      display: none;
+    }
+
+    .step .short {
+      display: inline;
+    }
+
     .age {
       min-width: 0;
       font-size: 15px;
@@ -994,7 +1006,7 @@ import Bare from '../../layouts/Bare.astro';
     }
 
     .env {
-      top: 70px;
+      top: 92px;
       right: 12px;
       left: 12px;
       max-width: none;
