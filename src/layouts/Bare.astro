@@ -8,9 +8,11 @@ interface Props {
   description?: string;
   /** Set false to leave out the site's icons, for a page that links its own in the head slot. */
   icon?: boolean;
+  /** Keep the page out of search: a robots noindex, and no canonical URL or og:url. */
+  noindex?: boolean;
 }
 
-const { title, description = 'A testing ground for web experiments.', icon = true } = Astro.props;
+const { title, description = 'A testing ground for web experiments.', icon = true, noindex = false } = Astro.props;
 const fullTitle = title ? `${title} · thesandbox.page` : 'thesandbox.page';
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -24,11 +26,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="generator" content={Astro.generator} />
     {icon && <link rel="icon" type="image/png" sizes="32x32" href="/favicon-hdr.png" />}
     {icon && <link rel="apple-touch-icon" href="/apple-touch-icon.png" />}
-    <link rel="canonical" href={canonical} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {!noindex && <meta property="og:url" content={canonical} />}
     <title>{fullTitle}</title>
     <slot name="head" />
   </head>
