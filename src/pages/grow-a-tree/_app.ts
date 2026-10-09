@@ -444,6 +444,8 @@ export function startArbor(root: HTMLElement): void {
   // A shared link can open on an age.
   const startAge = Number(params.get('age'));
   if (startAge > 0) age = Math.min(sp.maxAge, startAge);
+  // Otherwise it starts growing at once, unless the visitor asks for less motion.
+  else if (!matchMedia('(prefers-reduced-motion: reduce)').matches) setPlaying(true);
   root.dataset.state = 'ready';
   // A read-only handle for render checks.
   if (params.has('debug')) Object.assign(window, { arbor: { pose, sound, get grower() { return grower; } } });
