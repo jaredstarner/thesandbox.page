@@ -68,9 +68,8 @@ const stampStyle = (accession: string) => {
 const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:${leafRaked};--tex-watermark:${watermark};`;
 ---
 
-<Bare title="Accession register" description="The register of every object in thesandbox.page, surveyed in your browser.">
+<Bare title="Accession register" description="The register of every object in thesandbox.page, surveyed in your browser." noindex>
   <Fragment slot="head">
-    <meta name="robots" content="noindex" />
     <Font cssVariable="--font-register-form" preload />
     <Font cssVariable="--font-register-data" preload />
     <Font cssVariable="--font-register-entry" preload />
