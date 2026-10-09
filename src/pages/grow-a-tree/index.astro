@@ -862,6 +862,10 @@ import Bare from '../../layouts/Bare.astro';
     color: var(--moss-deep);
   }
 
+  .arbor:has(.inspect:not([hidden])) .ladder {
+    visibility: hidden;
+  }
+
   .arbor[data-state='loading'] .time,
   .arbor[data-state='loading'] .env,
   .arbor[data-state='loading'] .caption {

@@ -644,7 +644,7 @@ export class Scene {
 
     // The plug grows to hold the roots and frame the crown.
     const want = Math.max(sp.id === 'oak' ? 0.045 : 0.03, pose.rootR * 1.15, pose.crownR * 0.75, pose.height * 0.22);
-    const wantD = Math.max(0.05, pose.rootDepth * 1.18, want * 0.35);
+    const wantD = Math.max(0.03, pose.rootDepth * 1.18, want * 0.4);
     this.plugR = want;
     this.plugDepth = wantD;
     for (const m of [this.soilBack, this.soilFront, this.soilBottom]) m.scale.set(want, wantD, want);

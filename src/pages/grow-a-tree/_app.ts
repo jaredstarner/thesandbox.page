@@ -6,6 +6,7 @@ import { computePose, makePose } from './_pose';
 import { SPECIES, type Species, type SpeciesId } from './_species';
 import { Scene } from './_scene';
 import { windAt, type Wind } from './_wind';
+import { describe, drawRings, hitPosition, pick, type Hit, type SwayState } from './_inspect';
 
 const SCRUB_K = 7.5;
 
@@ -42,6 +43,14 @@ export function startArbor(root: HTMLElement): void {
     breeze: $<HTMLInputElement>(root, '[data-breeze]'),
     hint: $<HTMLElement>(root, '[data-hint]'),
     status: $<HTMLElement>(root, '[data-status]'),
+    inspect: $<HTMLElement>(root, '[data-inspect]'),
+    inspectKicker: $<HTMLElement>(root, '[data-inspect-kicker]'),
+    inspectTitle: $<HTMLElement>(root, '[data-inspect-title]'),
+    inspectText: $<HTMLElement>(root, '[data-inspect-text]'),
+    inspectClose: $<HTMLButtonElement>(root, '[data-inspect-close]'),
+    rings: $<HTMLCanvasElement>(root, '[data-rings]'),
+    ringsNote: $<HTMLElement>(root, '[data-rings-note]'),
+    marker: $<HTMLElement>(root, '[data-marker]'),
   };
 
   const params = new URLSearchParams(location.search);
@@ -143,6 +152,7 @@ export function startArbor(root: HTMLElement): void {
     ui.latin.textContent = sp.latin;
     ui.common.textContent = sp.common;
     for (const b of ui.species) b.setAttribute('aria-pressed', String(b.dataset.species === id));
+    closeInspect();
     buildLadder();
     const url = new URL(location.href);
     url.searchParams.set('tree', id);
@@ -223,6 +233,72 @@ export function startArbor(root: HTMLElement): void {
     ui.step.disabled = false;
   }
 
+  // Inspecting: a tap (not a drag) names the part under it.
+  let hit: Hit | null = null;
+  let hitAge = -1;
+  const sway: SwayState = { time: 0, freq: 1, breeze: 0, height: 1, wind: { gust: 0, dirX: 1, dirZ: 0 } };
+  let down: { x: number; y: number; t: number } | null = null;
+  canvas.addEventListener('pointerdown', (e) => {
+    down = { x: e.clientX, y: e.clientY, t: performance.now() };
+  });
+  canvas.addEventListener('pointerup', (e) => {
+    if (!down) return;
+    const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+    const quick = performance.now() - down.t < 600;
+    down = null;
+    if (moved > 6 || !quick) return;
+    const rect = canvas.getBoundingClientRect();
+    const seedAt = age < sp.seedHold ? scene.seedPosition(sp) : null;
+    const found = pick(e.clientX - rect.left, e.clientY - rect.top, scene.camera, rect.width, rect.height, pose, sway, seedAt, scene.plugR);
+    if (found) openInspect(found);
+    else closeInspect();
+  });
+  ui.inspectClose.addEventListener('click', closeInspect);
+
+  function openInspect(h: Hit): void {
+    hit = h;
+    hitAge = -1;
+    ui.inspect.hidden = false;
+    ui.marker.hidden = false;
+    ui.hint.dataset.gone = '';
+    refreshInspect();
+  }
+
+  function closeInspect(): void {
+    hit = null;
+    ui.inspect.hidden = true;
+    ui.marker.hidden = true;
+  }
+
+  function refreshInspect(): void {
+    if (!hit || Math.abs(hitAge - poseAge) < 0.25) return;
+    hitAge = poseAge;
+    if (hit.kind !== 'seed' && (!pose.shown[hit.node] || (hit.kind === 'leaf' && pose.leafNode[hit.leaf] !== hit.node))) {
+      closeInspect();
+      return;
+    }
+    const d = describe(hit, grower.plant, pose, sp, poseAge);
+    ui.inspectKicker.textContent = d.kicker;
+    ui.inspectTitle.textContent = d.title;
+    ui.inspectText.textContent = d.text;
+    ui.rings.hidden = !d.rings;
+    ui.ringsNote.hidden = !d.rings;
+    if (d.rings) {
+      drawRings(ui.rings, sp, seed, d.rings);
+      const cm = d.rings.radius * 200;
+      const across = cm < 100 ? `${Math.max(1, Math.round(cm))} cm` : `${(cm / 100).toFixed(1)} m`;
+      ui.ringsNote.textContent = `${d.rings.years} ring${d.rings.years === 1 ? '' : 's'}, about ${across} across${d.rings.hollow > 0.05 ? ', hollow at the heart' : ''}`;
+    }
+  }
+
+  function placeMarker(): void {
+    if (!hit) return;
+    const p = hitPosition(hit, pose, sway, scene.seedPosition(sp));
+    const v = new THREE.Vector3(p[0], p[1], p[2]).project(scene.camera);
+    const rect = canvas.getBoundingClientRect();
+    ui.marker.style.transform = `translate(${(v.x * 0.5 + 0.5) * rect.width}px, ${(-v.y * 0.5 + 0.5) * rect.height}px)`;
+  }
+
   function frame(dt: number): void {
     if (!grower.done) grower.run(8);
 
@@ -249,7 +325,8 @@ export function startArbor(root: HTMLElement): void {
       poseAge = shownAge;
       if (!scrubbing) ui.scrub.value = String(Math.round(ageToU(shownAge) * 1000));
       const h = pose.height;
-      ui.age.textContent = `${formatAge(shownAge)} · ${h < 1 ? `${Math.round(h * 100)} cm` : `${h.toFixed(h < 10 ? 1 : 0)} m`}`;
+      const tall = h < 0.005 ? '' : h < 1 ? ` · ${Math.round(h * 100)} cm` : ` · ${h.toFixed(h < 10 ? 1 : 0)} m`;
+      ui.age.textContent = `${formatAge(shownAge)}${tall}`;
       updateStage();
     }
 
@@ -265,8 +342,15 @@ export function startArbor(root: HTMLElement): void {
     const now = performance.now() / 1000;
     windAt(now, breeze, wind);
     scene.setWind({ time: now, freq: scene.freq, gust: wind.gust, breeze, dirX: wind.dirX, dirZ: wind.dirZ });
+    sway.time = now;
+    sway.freq = scene.freq;
+    sway.breeze = breeze;
+    sway.height = Math.max(0.02, pose.height);
+    sway.wind = wind;
 
     frameCamera(dt);
+    refreshInspect();
+    placeMarker();
     scene.render();
   }
 
