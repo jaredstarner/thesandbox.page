@@ -124,7 +124,7 @@ void main() {
     col = mix(vec3(0.38, 0.42, 0.2), col, smoothstep(uTipR * 0.9, uTipR * 2.6, vR));
     // Dead wood weathers to silver.
     float g = fbm(bp * vec2(6.0, 2.0));
-    col = mix(col, vec3(0.6, 0.58, 0.54) * (0.75 + 0.35 * g), vInfo.x);
+    col = mix(col, vec3(0.46, 0.43, 0.39) * (0.75 + 0.35 * g), vInfo.x);
   }
   float inner = 1.0 - clamp(length(vWorld - uCrownC) / max(uCrownR, 0.01), 0.0, 1.0);
   float ao = mix(1.0, 0.55, inner * smoothstep(0.0, 0.4, vWorld.y)) ;
@@ -152,7 +152,8 @@ void main() {
   float kind = aB.z;
   float size = aA.w;
   float s = uSeason;
-  if (kind < 0.5 && uDeciduous > 0.5) {
+  bool leafy = kind < 0.5 || kind > 2.5;
+  if (leafy && uDeciduous > 0.5) {
     float bud = smoothstep(0.02 + rnd * 0.06, 0.13 + rnd * 0.06, s);
     float drop = 1.0 - smoothstep(0.79 + rnd * 0.07, 0.83 + rnd * 0.07, s);
     size *= bud * drop;
@@ -161,24 +162,24 @@ void main() {
     gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
     return;
   }
-  float needle = (kind < 0.5 && uLeafCell > 1.5) || kind > 1.5 ? 1.0 : 0.0;
+  float needle = (leafy && uLeafCell > 1.5) || (kind > 1.5 && kind < 2.5) ? 1.0 : 0.0;
   vec3 up = normalize(aA.xyz);
   vec3 ref = abs(up.y) < 0.95 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
   vec3 side = normalize(cross(up, ref));
   vec3 nrm = cross(side, up);
   float flutter = sin(uTime * (7.0 + rnd * 6.0) + rnd * 40.0) * (0.08 + 0.55 * uBreeze) * (0.35 + uGust);
-  float spin = aB.w * (kind > 0.5 ? 0.0 : 1.0) + flutter * (1.0 - needle * 0.7);
+  float spin = aB.w * (leafy ? 1.0 : 0.0) + flutter * (1.0 - needle * 0.7);
   vec3 s2 = side * cos(spin) + nrm * sin(spin);
   vec3 n2 = cross(s2, up);
-  float w = needle > 0.5 ? (kind > 1.5 ? 0.25 : 0.5) : 1.0;
-  float along = needle > 0.5 && kind < 0.5 ? position.y - 0.5 : position.y;
+  float w = needle > 0.5 ? (leafy ? 0.5 : 0.25) : 1.0;
+  float along = needle > 0.5 && leafy ? position.y - 0.5 : position.y;
   vec3 world = aPos + sway(aPos, aB.x) + (s2 * (position.x - 0.5) * w + up * along) * size;
   vUv = position.xy;
   vN = n2;
   vWorld = world;
   vRand = rnd;
-  vCell = kind > 1.5 ? 2.0 : (kind > 0.5 ? 3.0 : uLeafCell);
-  vKind = kind;
+  vCell = kind > 2.5 ? 4.0 + uLeafCell : kind > 1.5 ? 2.0 : (kind > 0.5 ? 3.0 : uLeafCell);
+  vKind = leafy ? 0.0 : kind;
   gl_Position = projectionMatrix * viewMatrix * vec4(world, 1.0);
 }
 `;
@@ -200,7 +201,7 @@ varying float vRand;
 varying float vCell;
 varying float vKind;
 void main() {
-  vec4 tex = texture2D(uAtlas, vec2((vCell + vUv.x) * 0.25, vUv.y));
+  vec4 tex = texture2D(uAtlas, vec2((vCell + vUv.x) / 6.0, vUv.y));
   if (tex.a < 0.45) discard;
   float s = uSeason;
   vec3 col;
@@ -261,8 +262,8 @@ void main() {
   col = mix(col, clay, smoothstep(0.5, 0.85, d + wav));
   float grain = vnoise(q * 9.0);
   col *= 0.82 + 0.3 * grain;
-  float stone = smoothstep(0.86, 0.9, vnoise(q * 2.2 + 11.0));
-  col = mix(col, vec3(0.62, 0.6, 0.55), stone * 0.7);
+  float stone = smoothstep(0.9, 0.94, vnoise(q * 5.0 + 11.0));
+  col = mix(col, vec3(0.5, 0.46, 0.4), stone * 0.45);
   vec3 n = normalize(vNormal);
   col *= light(n, 0.9) * uShade;
   gl_FragColor = vec4(col, uAlpha);
@@ -500,7 +501,7 @@ export class Scene {
     const frontMat = new THREE.ShaderMaterial({
       vertexShader: SOIL_VERT,
       fragmentShader: SOIL_FRAG,
-      uniforms: soilUniforms(0.66, 1),
+      uniforms: soilUniforms(0.5, 1.1),
       side: THREE.FrontSide,
       transparent: true,
       depthWrite: false,
@@ -642,7 +643,7 @@ export class Scene {
     this.leafGeo.instanceCount = Math.min(lc, LEAF_CAP);
 
     // The plug grows to hold the roots and frame the crown.
-    const want = Math.max(0.07, pose.rootR * 1.15, pose.crownR * 0.75, pose.height * 0.22);
+    const want = Math.max(sp.id === 'oak' ? 0.045 : 0.03, pose.rootR * 1.15, pose.crownR * 0.75, pose.height * 0.22);
     const wantD = Math.max(0.05, pose.rootDepth * 1.18, want * 0.35);
     this.plugR = want;
     this.plugDepth = wantD;

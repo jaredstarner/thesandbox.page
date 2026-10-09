@@ -282,7 +282,7 @@ export function startArbor(root: HTMLElement): void {
     const fov = (scene.camera.fov * Math.PI) / 180;
     const t = Math.tan(fov / 2);
     const aspect = scene.camera.aspect;
-    const fit = Math.max(tall / (2 * t), wide / (2 * t * aspect)) * 1.18;
+    const fit = Math.max(tall / (2 * t), wide / (2 * t * aspect)) * 1.32;
     const k = 1 - Math.exp(-dt * 2.5);
     autoDist += (fit - autoDist) * k;
     const ty = (h * 1.02 - depth * 0.7) / 2;
@@ -313,6 +313,8 @@ export function startArbor(root: HTMLElement): void {
   const startAge = Number(params.get('age'));
   if (startAge > 0) age = Math.min(sp.maxAge, startAge);
   root.dataset.state = 'ready';
+  // A read-only handle for render checks.
+  if (params.has('debug')) Object.assign(window, { arbor: { pose, get grower() { return grower; } } });
 
   let last = performance.now();
   const loop = (t: number): void => {

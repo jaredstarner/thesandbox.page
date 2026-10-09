@@ -74,6 +74,19 @@ export function makePose(cap: number): Pose {
 const acc = new Float32Array(70000);
 const pipe = new Float32Array(70000);
 
+/** Twig thickness by the plant's height when the twig grew: a seedling's shoots are fine. */
+const tipCache = new WeakMap<Plant, { n: number; tip: Float32Array }>();
+function tipScales(plant: Plant, sp: Species): Float32Array {
+  let c = tipCache.get(plant);
+  if (!c) {
+    c = { n: 0, tip: new Float32Array(plant.x.length) };
+    tipCache.set(plant, c);
+  }
+  for (let i = c.n; i < plant.n; i++) c.tip[i] = Math.min(1, 0.22 + heightAt(sp, plant.birth[i]) / 4);
+  c.n = plant.n;
+  return c.tip;
+}
+
 /** How long a new shoot takes to reach full length, by when it was born. */
 const growTime = (birth: number): number => Math.max(0.02, Math.min(0.6, 0.03 + birth * 0.05));
 
@@ -102,10 +115,11 @@ export function computePose(pose: Pose, plant: Plant, sp: Species, age: number):
 
   // Pipe model, tips first: a branch carries the r^n of everything above it.
   let rootCollar = 0;
+  const tipScale = tipScales(plant, sp);
   for (let i = n - 1; i >= 1; i--) {
     if (!shown[i]) continue;
     const g = Math.min(1, (age - birth[i]) / growTime(birth[i]));
-    const tip = (kind[i] ? tipR * 0.8 : tipR) * (0.35 + 0.65 * g);
+    const tip = (kind[i] ? tipR * 0.8 : tipR) * tipScale[i] * (0.35 + 0.65 * g);
     const s = acc[i] > 0 ? acc[i] : Math.pow(tip, N);
     pipe[i] = Math.pow(s, 1 / N);
     const p = parent[i];
@@ -121,8 +135,9 @@ export function computePose(pose: Pose, plant: Plant, sp: Species, age: number):
     if (!shown[i]) continue;
     const r0 = i === 0 ? pipe[0] : pipe[i];
     const years = Math.max(0, age - birth[i]);
-    const stout = Math.min(1, r0 / 0.04);
-    let r = r0 + sp.ring * (kind[i] ? 0.55 : 1) * years * stout * stout;
+    const stout = Math.min(1, r0 / 0.06);
+    const share = kind[i] ? 0.5 : plant.axis[i] ? 1 : 0.45;
+    let r = r0 + sp.ring * share * years * stout * stout;
     if (kind[i] === 0 && y[i] < 1.5) {
       const reach = Math.max(0.02, r * 2.2);
       r *= 1 + sp.flare * Math.exp(-Math.max(0, y[i]) / reach);
@@ -204,8 +219,10 @@ export function computePose(pose: Pose, plant: Plant, sp: Species, age: number):
   let lc = 0;
   const { leafPos, leafA, leafB, leafNode } = pose;
   const leafyR = tipR * sp.leafyR;
-  const per = sp.leavesPerNode;
   const needle = sp.leaf === 'needle';
+  const young = !needle && h < 2.2;
+  const per = young ? 1 : sp.leavesPerNode;
+  const leafMin = young ? sp.leafMin * 0.8 : Math.max(sp.leafMin, h * (needle ? 0.016 : 0.011));
   for (let i = 1; i < n && lc < LEAF_CAP - per; i++) {
     if (!shown[i] || kind[i] || age >= dead[i]) continue;
     if (pipe[i] > leafyR) continue;
@@ -217,7 +234,7 @@ export function computePose(pose: Pose, plant: Plant, sp: Species, age: number):
     const dz = ez[i] - ez[p];
     const len = Math.hypot(dx, dy, dz) || 1e-4;
     const grown = Math.min(1, since / 0.35);
-    const size = Math.min(sp.leafMax, Math.max(sp.leafMin, len * sp.leafScale)) * grown;
+    const size = (young ? Math.min(sp.leafMin * 2.2, Math.max(leafMin, len * 1.4)) : Math.min(sp.leafMax, Math.max(leafMin, len * sp.leafScale))) * grown;
     for (let s = 0; s < per; s++) {
       const hsh = hash1(i * 13 + s * 7 + 1);
       const h2 = hash1(i * 31 + s * 11 + 5);
@@ -237,7 +254,7 @@ export function computePose(pose: Pose, plant: Plant, sp: Species, age: number):
         // Leaves angle outward from the shoot and toward the light.
         const ang = h2 * Math.PI * 2;
         let ox = Math.cos(ang) * 0.9 + (dx / len) * 0.6;
-        let oy = 0.55 + h3 * 0.5 + (dy / len) * 0.4;
+        let oy = (sp.liftHigher < -0.3 ? -0.5 : 0.55) + h3 * 0.5 + (dy / len) * 0.4;
         let oz = Math.sin(ang) * 0.9 + (dz / len) * 0.6;
         const ol = Math.hypot(ox, oy, oz) || 1;
         ox /= ol;
@@ -250,7 +267,7 @@ export function computePose(pose: Pose, plant: Plant, sp: Species, age: number):
       leafA[q + 3] = size * (needle ? 1 : 0.8 + 0.4 * h3);
       leafB[q] = flex[i] * (0.6 + 0.4 * t) + flex[p] * (0.4 - 0.4 * t);
       leafB[q + 1] = hsh;
-      leafB[q + 2] = 0;
+      leafB[q + 2] = young ? 3 : 0;
       leafB[q + 3] = h2 * Math.PI * 2;
       leafNode[lc] = i;
       lc++;

@@ -202,7 +202,7 @@ function insideEnvelope(e: Envelope, x: number, y: number, z: number): boolean {
 
 /** Segment length by plant height: fine for a seedling, coarse for a mature crown. */
 const segment = (h: number, root: boolean): number =>
-  Math.min(root ? 0.55 : 0.42, Math.max(root ? 0.009 : 0.006, h * (root ? 0.04 : 0.028)));
+  Math.min(root ? 0.55 : 0.42, Math.max(root ? 0.008 : 0.006, (root ? 0.06 : 0.045) * Math.pow(Math.max(h, 0.01), 0.75)));
 
 interface System {
   kind: 0 | 1;
@@ -345,9 +345,9 @@ export class Grower {
     const rng = this.rng;
     const prev = sys.lastEnv;
     const gained = Math.max(0, envelopeVolume(env) - (prev && !fresh ? envelopeVolume(prev) : 0));
-    const spacing = d * (sys.kind === 1 ? 2.9 : 2.3);
+    const spacing = d * (sys.kind === 1 ? 2.6 : fresh ? 3.4 : 2.3);
     sys.carry += gained / (spacing * spacing * spacing);
-    if (fresh) sys.carry = Math.min(sys.carry, 40);
+    if (fresh) sys.carry = Math.min(sys.carry, 12);
     let want = Math.min(4000, Math.floor(sys.carry));
     sys.carry -= want;
     let tries = 0;
@@ -704,7 +704,7 @@ export class Grower {
         if (s > sp.keepCrown) {
           const jit = l >= 0 ? limbJitter[l] : 1;
           const f = Math.min(1, ((1 - s) / (1 - sp.keepCrown)) * jit);
-          const d = sp.oldAge + f * span * 0.92;
+          const d = sp.oldAge + Math.pow(f, 1.3) * span * 0.8;
           if (d < dead) {
             dead = d;
             const thin = p.order[i] >= 2 || p.children[i] === 0;

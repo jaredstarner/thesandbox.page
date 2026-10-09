@@ -1,5 +1,6 @@
-// Leaf shapes, drawn once into a four-cell texture: an oak spray, a birch
-// spray, a spruce shoot of needles, and a round seed leaf. Each cell has its
+// Leaf shapes, drawn once into a six-cell texture: an oak spray, a birch
+// spray, a spruce shoot of needles, a round seed leaf, and single oak and
+// birch leaves for young plants. Each cell has its
 // stalk at the bottom centre; colour comes from the shader, so the cells hold
 // light and shade only.
 
@@ -138,9 +139,26 @@ function seedLeaf(ctx: CanvasRenderingContext2D, cx: number): void {
   ctx.restore();
 }
 
+function single(ctx: CanvasRenderingContext2D, cx: number, rng: Rng, kind: 'oak' | 'birch'): void {
+  ctx.save();
+  ctx.translate(cx + CELL / 2, CELL - 4);
+  ctx.strokeStyle = 'rgba(110,100,90,1)';
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, -CELL * (kind === 'oak' ? 0.06 : 0.22));
+  ctx.stroke();
+  ctx.translate(0, -CELL * (kind === 'oak' ? 0.05 : 0.2));
+  if (kind === 'oak') oakLeaf(ctx, CELL * 0.92, rng);
+  else birchLeaf(ctx, CELL * 0.76);
+  ctx.restore();
+}
+
+export const ATLAS_CELLS = 6;
+
 export function drawLeafAtlas(): HTMLCanvasElement {
   const c = document.createElement('canvas');
-  c.width = CELL * 4;
+  c.width = CELL * ATLAS_CELLS;
   c.height = CELL;
   const ctx = c.getContext('2d') as CanvasRenderingContext2D;
   const rng = makeRng(7);
@@ -149,5 +167,7 @@ export function drawLeafAtlas(): HTMLCanvasElement {
   spray(ctx, CELL, rng, 'birch');
   needles(ctx, CELL * 2, rng);
   seedLeaf(ctx, CELL * 3);
+  single(ctx, CELL * 4, rng, 'oak');
+  single(ctx, CELL * 5, rng, 'birch');
   return c;
 }
