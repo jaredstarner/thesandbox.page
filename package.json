@@ -17,10 +17,12 @@
   },
   "dependencies": {
     "@chenglou/pretext": "0.0.9",
-    "astro": "^7.3.5"
+    "astro": "^7.3.5",
+    "three": "0.186.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@types/three": "0.186.0",
     "semantic-release": "^25.0.9",
     "typescript": "^6.0.3",
     "web-features": "^3.40.1"

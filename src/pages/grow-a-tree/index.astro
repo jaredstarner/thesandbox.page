@@ -1,0 +1,1044 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Grow a tree"
+  description="Plant a spruce, an oak, or a birch and grow it from seed to ancient tree in 3D, branch by branch, while it sways in a breeze you set."
+>
+  <Font cssVariable="--font-tree" slot="head" />
+
+  <main class="arbor" data-arbor data-state="loading">
+    <canvas
+      class="view"
+      data-view
+      aria-label="A tree growing on a round plug of soil, seen in 3D. Its roots show through the soil. Drag to turn it, scroll or pinch to zoom, and tap a part to name it."
+    ></canvas>
+    <div class="marker" data-marker hidden aria-hidden="true"></div>
+
+    <header class="head">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Grow a tree</h1>
+      <p class="species-name"><em data-latin>Quercus robur</em><span data-common>English oak</span></p>
+    </header>
+
+    <nav class="picker" aria-label="Species">
+      <button type="button" data-species="spruce" aria-pressed="false">
+        <svg viewBox="0 0 24 32" aria-hidden="true"
+          ><path d="M12 2 L17 11 L14.5 11 L19 19 L15.5 19 L21 27 L3 27 L8.5 19 L5 19 L9.5 11 L7 11 Z"></path><rect
+            x="11"
+            y="27"
+            width="2"
+            height="4"></rect></svg
+        >
+        <span>Spruce</span>
+      </button>
+      <button type="button" data-species="oak" aria-pressed="true">
+        <svg viewBox="0 0 24 32" aria-hidden="true"
+          ><path
+            d="M12 3 C6 3 2 7 2.5 12 C1 15 2.5 19.5 6.5 20 C8 22 10.5 21.5 11 20.5 L10.5 30 L13.5 30 L13 20.5 C14 21.5 16.5 22 17.5 20 C21.5 19.5 23 15 21.5 12 C22 7 18 3 12 3 Z"
+          ></path></svg
+        >
+        <span>Oak</span>
+      </button>
+      <button type="button" data-species="birch" aria-pressed="false">
+        <svg viewBox="0 0 24 32" aria-hidden="true"
+          ><path
+            d="M12 1.5 C8 4 6.5 9 6.5 14 C6.5 19 8.5 22.5 11.2 23.5 L11 31 L13 31 L12.8 23.5 C15.5 22.5 17.5 19 17.5 14 C17.5 9 16 4 12 1.5 Z"
+          ></path></svg
+        >
+        <span>Birch</span>
+      </button>
+      <button type="button" class="plant" data-plant>Plant a new seed</button>
+    </nav>
+
+    <ol class="ladder" data-ladder aria-label="Life stages"></ol>
+
+    <section class="caption" aria-live="polite">
+      <h2 data-stage-name>Seed</h2>
+      <p data-stage-text></p>
+    </section>
+
+    <div class="time" role="group" aria-label="Growth">
+      <button type="button" class="play" data-play aria-pressed="false" aria-label="Grow continuously">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path class="i-play" d="M4 2.5 L13 8 L4 13.5 Z"></path><path
+            class="i-pause"
+            d="M3.5 2.5 H6.5 V13.5 H3.5 Z M9.5 2.5 H12.5 V13.5 H9.5 Z"></path></svg
+        >
+      </button>
+      <button type="button" class="step" data-step><span class="full">Grow to the next stage</span><span class="short">Next stage</span></button>
+      <div class="scrub">
+        <input type="range" min="0" max="1000" value="0" step="1" data-scrub aria-label="Age of the tree" />
+        <div class="ticks" data-ticks aria-hidden="true"></div>
+      </div>
+      <output class="age" data-age>Year 0</output>
+      <label class="speed">
+        <span>Pace</span>
+        <select data-speed>
+          <option value="0.4">Slow</option>
+          <option value="1" selected>Steady</option>
+          <option value="3">Brisk</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="env" role="group" aria-label="Weather and sound">
+      <fieldset class="season">
+        <legend>Season</legend>
+        <label><input type="radio" name="arbor-season" value="0.15" /><span>Spring</span></label>
+        <label><input type="radio" name="arbor-season" value="0.4" checked /><span>Summer</span></label>
+        <label><input type="radio" name="arbor-season" value="0.7" /><span>Autumn</span></label>
+        <label><input type="radio" name="arbor-season" value="0.95" /><span>Winter</span></label>
+      </fieldset>
+      <label class="breeze">
+        <span>Breeze</span>
+        <input type="range" min="0" max="100" value="40" data-breeze />
+      </label>
+      <button type="button" class="sound" data-sound aria-pressed="false">Sound</button>
+      <button type="button" class="notes-btn" popovertarget="arbor-notes">Notes</button>
+    </div>
+
+    <aside class="inspect" data-inspect hidden aria-live="polite">
+      <button type="button" class="close" data-inspect-close aria-label="Close">&times;</button>
+      <p class="inspect-kicker" data-inspect-kicker></p>
+      <h3 data-inspect-title></h3>
+      <p data-inspect-text></p>
+      <canvas class="rings" data-rings width="240" height="240" hidden></canvas>
+      <p class="rings-note" data-rings-note hidden></p>
+    </aside>
+
+    <p class="hint" data-hint>Drag to turn &middot; scroll or pinch to zoom &middot; tap a part to name it</p>
+    <p class="status" data-status aria-live="polite"></p>
+
+    <section class="notes" id="arbor-notes" popover aria-labelledby="arbor-notes-title">
+      <button type="button" class="close" popovertarget="arbor-notes" popovertargetaction="hide" aria-label="Close"
+        >&times;</button
+      >
+      <h2 id="arbor-notes-title">Field notes</h2>
+      <p>
+        Every tree here is grown, not drawn. The oak and the birch use <em>space colonization</em>: the crown is filled
+        with points that stand for open space and light, every bud grows toward the points near it, and a point is used
+        up once a shoot reaches it. Buds that find no space stop, so branches compete, and the shape of the crown comes
+        out of that competition. The crown's room widens with age, which is why a young oak grows one leader and an older
+        one spreads into a dome.
+      </p>
+      <p>
+        The spruce follows a rule instead: one leader that puts out a whorl of branches every year, and side shoots that
+        grow flat along each branch. That strong central control is what keeps conifers conical.
+      </p>
+      <p>
+        Branch thickness follows the pipe model: a branch is as thick as the branches it carries, plus a ring of wood for
+        every year it has lived. Lower branches lose their light and are shed as the crown rises, and old trees die back
+        from the top and the tips, leaving dead wood standing above a smaller living crown.
+      </p>
+      <p>
+        The breeze is one number shared by the picture and the sound: it bends thin wood more than thick, and turns up
+        the wind and the rustle of the leaves together.
+      </p>
+      <h3>Sources</h3>
+      <ul>
+        <li>
+          Runions, Lane, and Prusinkiewicz, <a href="https://www.algorithmicbotany.org/papers/colonization.egwnp2007.html"
+            >Modeling trees with a space colonization algorithm</a
+          > (2007)
+        </li>
+        <li>
+          Woodland Trust, <a href="https://www.woodlandtrust.org.uk/blog/2019/06/tree-lifecycle/">The life cycle of a tree</a
+          >: stages, the sapling threshold, and the oak's ages
+        </li>
+        <li><a href="https://en.wikipedia.org/wiki/Decurrent">Excurrent and decurrent crowns</a>, Wikipedia</li>
+      </ul>
+      <p class="small">
+        Ages for the oak follow the Woodland Trust's figures. Ages for the spruce and the birch are approximate, and every
+        tree is scaled for the screen rather than measured. Built with three.js; every model, texture, and sound is made on
+        the page.
+      </p>
+    </section>
+
+    <div class="fallback" data-fallback hidden>
+      <h2>This tree needs WebGL 2</h2>
+      <p>Your browser didn't offer a WebGL 2 context, so there's nothing to grow it in.</p>
+      <a href="/">Back to thesandbox.page</a>
+    </div>
+  </main>
+</Bare>
+
+<script>
+  import { startArbor } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-arbor]');
+  if (root) startArbor(root);
+</script>
+
+<style is:global>
+  body:has(.arbor) {
+    margin: 0;
+    overflow: hidden;
+    background: #e6ebe1;
+  }
+</style>
+
+<style>
+  .arbor {
+    --ink: #1e2a21;
+    --ink-soft: #4b5a4c;
+    --paper: rgb(247 244 234 / 0.82);
+    --paper-solid: #f6f2e6;
+    --line: rgb(30 42 33 / 0.18);
+    --moss: #4f6b3a;
+    --moss-deep: #34492a;
+    --amber: #b5772c;
+    position: fixed;
+    inset: 0;
+    overflow: clip;
+    color: var(--ink);
+    font: 400 15px/1.45 var(--font-tree);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .view {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .view:active {
+    cursor: grabbing;
+  }
+
+  button,
+  select,
+  input {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  .head {
+    position: absolute;
+    top: 18px;
+    left: 22px;
+    pointer-events: none;
+  }
+
+  .head a,
+  .head * {
+    pointer-events: auto;
+  }
+
+  .home {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+
+  .home:hover {
+    text-decoration: underline;
+  }
+
+  h1 {
+    margin: 2px 0 0;
+    font-weight: 300;
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+
+  .species-name {
+    margin: 4px 0 0;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    font-size: 17px;
+  }
+
+  .species-name em {
+    font-weight: 400;
+  }
+
+  .species-name span {
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  .picker {
+    position: absolute;
+    top: 128px;
+    left: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 150px;
+  }
+
+  .picker button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px 6px 8px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--paper);
+    backdrop-filter: blur(6px);
+    text-align: left;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .picker button:hover {
+    border-color: rgb(30 42 33 / 0.4);
+  }
+
+  .picker svg {
+    width: 18px;
+    height: 24px;
+    fill: var(--ink-soft);
+  }
+
+  .picker button[aria-pressed='true'] {
+    background: var(--moss-deep);
+    border-color: var(--moss-deep);
+    color: #f4f1e4;
+  }
+
+  .picker button[aria-pressed='true'] svg {
+    fill: #cfe0b4;
+  }
+
+  .picker .plant {
+    margin-top: 6px;
+    justify-content: center;
+    font-style: italic;
+    font-size: 14px;
+  }
+
+  .ladder {
+    position: absolute;
+    top: 50%;
+    right: 22px;
+    transform: translateY(-50%);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    counter-reset: stage;
+  }
+
+  .ladder :global(button) {
+    display: grid;
+    grid-template-columns: 18px auto;
+    grid-template-rows: auto auto;
+    column-gap: 8px;
+    width: 100%;
+    padding: 5px 12px 5px 6px;
+    border: 0;
+    border-left: 1px solid var(--line);
+    background: transparent;
+    text-align: left;
+    color: var(--ink-soft);
+    transition: color 0.25s;
+  }
+
+  .ladder :global(button)::before {
+    content: '';
+    grid-row: 1 / span 2;
+    align-self: center;
+    justify-self: center;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    background: transparent;
+    transition: background 0.25s, transform 0.25s;
+  }
+
+  .ladder :global(.stage-name) {
+    font-size: 15px;
+  }
+
+  .ladder :global(.stage-age) {
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    opacity: 0.8;
+  }
+
+  .ladder :global(button[data-reached='true']) {
+    color: var(--ink);
+  }
+
+  .ladder :global(button[data-reached='true'])::before {
+    background: var(--moss);
+    border-color: var(--moss);
+  }
+
+  .ladder :global(button[aria-current='step']) {
+    color: var(--ink);
+    border-left-color: var(--moss-deep);
+    border-left-width: 2px;
+    padding-left: 5px;
+  }
+
+  .ladder :global(button[aria-current='step'])::before {
+    transform: scale(1.6);
+    background: var(--amber);
+    border-color: var(--amber);
+  }
+
+  .ladder :global(button[aria-current='step'] .stage-name) {
+    font-weight: 600;
+  }
+
+  .caption {
+    position: absolute;
+    left: 22px;
+    bottom: 96px;
+    width: min(380px, calc(100% - 44px));
+    padding: 12px 16px 14px;
+    background: var(--paper);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+  }
+
+  .caption h2 {
+    margin: 0 0 4px;
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  .caption p {
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+  }
+
+  .time {
+    position: absolute;
+    left: 22px;
+    right: 22px;
+    bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--paper);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+  }
+
+  .play {
+    flex: none;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: var(--moss-deep);
+  }
+
+  .play svg {
+    width: 16px;
+    height: 16px;
+    fill: #f4f1e4;
+  }
+
+  .play .i-pause,
+  .play[aria-pressed='true'] .i-play {
+    display: none;
+  }
+
+  .play[aria-pressed='true'] .i-pause {
+    display: inline;
+  }
+
+  .step {
+    flex: none;
+    padding: 7px 12px;
+    border: 1px solid var(--moss-deep);
+    border-radius: 3px;
+    background: transparent;
+    font-style: italic;
+  }
+
+  .step:hover,
+  .picker .plant:hover {
+    background: rgb(79 107 58 / 0.12);
+  }
+
+  .step .short {
+    display: none;
+  }
+
+  .step:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .scrub {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    display: flex;
+    align-items: center;
+  }
+
+  .scrub input {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    margin: 0;
+    background: transparent;
+    appearance: none;
+    height: 38px;
+  }
+
+  .scrub input::-webkit-slider-runnable-track {
+    height: 2px;
+    background: rgb(30 42 33 / 0.3);
+  }
+
+  .scrub input::-moz-range-track {
+    height: 2px;
+    background: rgb(30 42 33 / 0.3);
+  }
+
+  .scrub input::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: var(--amber);
+    border: 2px solid var(--paper-solid);
+    box-shadow: 0 0 0 1px var(--amber);
+  }
+
+  .scrub input::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--amber);
+    border: 2px solid var(--paper-solid);
+    box-shadow: 0 0 0 1px var(--amber);
+  }
+
+  .ticks {
+    position: absolute;
+    inset: 0 7px;
+    pointer-events: none;
+  }
+
+  .ticks :global(span) {
+    position: absolute;
+    top: 50%;
+    width: 1px;
+    height: 10px;
+    margin-top: -5px;
+    background: rgb(30 42 33 / 0.45);
+  }
+
+  .ticks :global(span)::after {
+    content: attr(data-label);
+    position: absolute;
+    top: 13px;
+    left: 0;
+    transform: translateX(-50%);
+    font-size: 10.5px;
+    white-space: nowrap;
+    color: var(--ink-soft);
+  }
+
+  .age {
+    flex: none;
+    min-width: 92px;
+    text-align: right;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .speed {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .speed select {
+    padding: 4px 6px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: transparent;
+  }
+
+  .env {
+    position: absolute;
+    right: 22px;
+    bottom: 96px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--paper);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-size: 13.5px;
+  }
+
+  .season {
+    display: flex;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .season legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .season label {
+    position: relative;
+  }
+
+  .season input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .season span {
+    display: block;
+    padding: 4px 9px;
+    border: 1px solid var(--line);
+    margin-left: -1px;
+  }
+
+  .season label:first-of-type span {
+    border-radius: 3px 0 0 3px;
+  }
+
+  .season label:last-of-type span {
+    border-radius: 0 3px 3px 0;
+  }
+
+  .season input:checked + span {
+    background: var(--moss-deep);
+    border-color: var(--moss-deep);
+    color: #f4f1e4;
+  }
+
+  .season input:focus-visible + span {
+    outline: 2px solid var(--amber);
+    outline-offset: 1px;
+  }
+
+  .breeze {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink-soft);
+  }
+
+  .breeze input {
+    width: 90px;
+    accent-color: var(--moss-deep);
+  }
+
+  .sound,
+  .notes-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: transparent;
+  }
+
+  .sound[aria-pressed='true'] {
+    background: var(--moss-deep);
+    border-color: var(--moss-deep);
+    color: #f4f1e4;
+  }
+
+  .inspect {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    width: 260px;
+    padding: 12px 16px 14px;
+    background: var(--paper-solid);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    box-shadow: 0 8px 30px rgb(30 42 33 / 0.12);
+  }
+
+  .inspect[hidden] {
+    display: none;
+  }
+
+  .inspect-kicker {
+    margin: 0;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--amber);
+  }
+
+  .inspect h3 {
+    margin: 2px 0 4px;
+    font-weight: 600;
+    font-size: 19px;
+  }
+
+  .inspect p {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .rings {
+    display: block;
+    width: 200px;
+    height: 200px;
+    margin: 10px auto 0;
+  }
+
+  .rings[hidden],
+  .rings-note[hidden] {
+    display: none;
+  }
+
+  .rings-note {
+    margin-top: 4px !important;
+    font-size: 12.5px !important;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  .close {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border: 0;
+    background: transparent;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--ink-soft);
+  }
+
+  .marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border: 2px solid var(--amber);
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: 0 0 0 3px rgb(246 242 230 / 0.6);
+  }
+
+  .marker[hidden] {
+    display: none;
+  }
+
+  .hint {
+    position: absolute;
+    left: 50%;
+    top: 22px;
+    transform: translateX(-50%);
+    margin: 0;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ink-soft);
+    pointer-events: none;
+    transition: opacity 1s;
+    white-space: nowrap;
+  }
+
+  .hint[data-gone] {
+    opacity: 0;
+  }
+
+  .status {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    font-style: italic;
+    color: var(--ink-soft);
+    pointer-events: none;
+  }
+
+  .notes {
+    width: min(540px, calc(100% - 32px));
+    max-height: calc(100% - 64px);
+    overflow: auto;
+    padding: 20px 26px 22px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--paper-solid);
+    color: var(--ink);
+    font: 400 15px/1.55 var(--font-tree);
+    box-shadow: 0 20px 60px rgb(30 42 33 / 0.25);
+  }
+
+  .notes::backdrop {
+    background: rgb(30 42 33 / 0.25);
+  }
+
+  .notes h2 {
+    margin: 0 0 8px;
+    font-weight: 300;
+    font-size: 28px;
+  }
+
+  .notes h3 {
+    margin: 18px 0 4px;
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .notes p {
+    margin: 0 0 10px;
+  }
+
+  .notes ul {
+    margin: 0 0 10px;
+    padding-left: 18px;
+  }
+
+  .notes a {
+    color: var(--moss-deep);
+  }
+
+  .notes .small {
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    padding: 24px;
+    background: #e6ebe1;
+  }
+
+  .fallback[hidden] {
+    display: none;
+  }
+
+  .fallback h2 {
+    font-weight: 300;
+    font-size: 30px;
+    margin: 0 0 8px;
+  }
+
+  .fallback a {
+    color: var(--moss-deep);
+  }
+
+  .arbor:has(.inspect:not([hidden])) .ladder {
+    visibility: hidden;
+  }
+
+  .arbor[data-state='loading'] .time,
+  .arbor[data-state='loading'] .env,
+  .arbor[data-state='loading'] .caption {
+    visibility: hidden;
+  }
+
+  @media (max-width: 900px) {
+    .env {
+      bottom: auto;
+      top: 96px;
+      right: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: 260px;
+      gap: 8px;
+    }
+
+    .ladder {
+      top: auto;
+      transform: none;
+      bottom: 236px;
+    }
+
+    .hint {
+      display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .arbor {
+      font-size: 14px;
+    }
+
+    .head {
+      top: 10px;
+      left: 12px;
+    }
+
+    h1 {
+      font-size: 26px;
+    }
+
+    .species-name {
+      font-size: 14px;
+    }
+
+    .picker {
+      top: auto;
+      bottom: 150px;
+      left: 12px;
+      right: 12px;
+      width: auto;
+      flex-direction: row;
+      gap: 4px;
+    }
+
+    .picker button {
+      flex: 1;
+      justify-content: center;
+      padding: 4px 6px;
+      gap: 4px;
+      font-size: 13px;
+    }
+
+    .picker svg {
+      width: 12px;
+      height: 16px;
+    }
+
+    .picker .plant {
+      margin-top: 0;
+      font-size: 12px;
+      flex: 1.3;
+    }
+
+    .ladder {
+      display: none;
+    }
+
+    .caption {
+      left: 12px;
+      right: 12px;
+      width: auto;
+      bottom: 188px;
+      padding: 8px 12px 10px;
+    }
+
+    .caption h2 {
+      font-size: 15px;
+      margin: 0 0 2px;
+    }
+
+    .caption p {
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .time {
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+      padding: 8px 10px 4px;
+    }
+
+    .scrub {
+      order: 5;
+      flex-basis: 100%;
+      height: 42px;
+    }
+
+    .step {
+      flex: 1;
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+
+    .step .full {
+      display: none;
+    }
+
+    .step .short {
+      display: inline;
+    }
+
+    .age {
+      min-width: 0;
+      font-size: 15px;
+    }
+
+    .speed span {
+      display: none;
+    }
+
+    .env {
+      top: 92px;
+      right: 12px;
+      left: 12px;
+      max-width: none;
+      justify-content: space-between;
+      padding: 6px 8px;
+      font-size: 12.5px;
+    }
+
+    .season span {
+      padding: 3px 6px;
+    }
+
+    .breeze span {
+      display: none;
+    }
+
+    .breeze input {
+      width: 64px;
+    }
+
+    .inspect {
+      top: auto;
+      bottom: 188px;
+      left: 12px;
+      right: 12px;
+      width: auto;
+      z-index: 2;
+    }
+
+    .rings {
+      width: 140px;
+      height: 140px;
+    }
+  }
+</style>

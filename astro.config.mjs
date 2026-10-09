@@ -150,5 +150,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['cursive'],
     },
+    {
+      // The field-guide labels on /grow-a-tree/.
+      provider: fontProviders.fontsource(),
+      name: 'Spectral',
+      cssVariable: '--font-tree',
+      weights: [300, 400, 600],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
   ],
 });
