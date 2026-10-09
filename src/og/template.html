@@ -1,0 +1,52 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!-- The social image: render at 1200x630 to public/og.png. See README.md. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,400;0,800;1,400&family=Overpass+Mono:wght@500&display=block" rel="stylesheet">
+<style>
+  html,body{margin:0;width:1200px;height:630px;overflow:hidden}
+  body{background:#f3eee0;position:relative;font-family:Overpass,sans-serif;color:#2b2a26}
+  svg{position:absolute;inset:0}
+  .grid{position:absolute;inset:0;background-image:linear-gradient(90deg,rgb(200 71 59/.28) 1px,transparent 1px),linear-gradient(rgb(200 71 59/.28) 1px,transparent 1px);background-size:150px 150px;background-position:-1px 90px}
+  .plot{position:absolute;left:120px;top:165px;width:960px;height:300px;border:2px dashed #c8473b;background:rgb(243 238 224/.9)}
+  .plot i{position:absolute;width:12px;height:12px;background:#c8473b}
+  .plot i:nth-child(1){left:-7px;top:-7px}.plot i:nth-child(2){right:-7px;top:-7px}.plot i:nth-child(3){left:-7px;bottom:-7px}.plot i:nth-child(4){right:-7px;bottom:-7px}
+  .flag{position:absolute;left:1073px;top:96px}
+  .inner{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:14px;text-align:center}
+  .tag{font-family:'Overpass Mono',monospace;font-size:22px;letter-spacing:.14em;color:#c8473b}
+  h1{margin:0;font-weight:800;font-size:92px;letter-spacing:.03em;line-height:1}
+  p{margin:0;font-style:italic;font-size:30px;color:#5d584c}
+</style></head><body>
+<svg id="c" width="1200" height="630"></svg>
+<div class="grid"></div>
+<div class="plot"><i></i><i></i><i></i><i></i>
+  <div class="inner"><div class="tag">PLOT STAKED · SURVEYED DAILY</div><h1>THESANDBOX.PAGE</h1><p>A survey of web experiments</p></div>
+</div>
+<svg class="flag" width="60" height="80" viewBox="0 0 60 80"><line x1="8" y1="4" x2="8" y2="76" stroke="#2b2a26" stroke-width="4"/><path d="M10 6 L52 18 L10 30 Z" fill="#3f7fa6"/></svg>
+<script>
+// Seeded wobbly contour rings around a few summits, drawn into <svg id="c">.
+function contours(svg, { stroke, index, width = 1.2, summits }) {
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const ns = 'http://www.w3.org/2000/svg';
+  for (const [cx, cy, max, step] of summits) {
+    const ph = [rnd() * 6.28, rnd() * 6.28, rnd() * 6.28];
+    let n = 0;
+    for (let r = 18; r < max; r += step, n++) {
+      const pts = [];
+      for (let i = 0; i <= 96; i++) {
+        const a = (i / 96) * Math.PI * 2;
+        const k = 1 + 0.18 * Math.sin(2 * a + ph[0] + r / 260) + 0.09 * Math.sin(3 * a + ph[1] - r / 180) + 0.05 * Math.sin(5 * a + ph[2]);
+        pts.push(`${(cx + Math.cos(a) * r * k * 1.35).toFixed(1)},${(cy + Math.sin(a) * r * k).toFixed(1)}`);
+      }
+      const p = document.createElementNS(ns, 'path');
+      p.setAttribute('d', 'M' + pts.join('L') + 'Z');
+      p.setAttribute('fill', 'none');
+      p.setAttribute('stroke', n % 5 === 4 ? index : stroke);
+      p.setAttribute('stroke-width', n % 5 === 4 ? width * 2 : width);
+      svg.appendChild(p);
+    }
+  }
+}
+</script>
+<script>contours(document.getElementById('c'),{stroke:'rgb(168 112 58/.55)',index:'rgb(168 112 58/.8)',summits:[[140,90,520,22],[1080,560,560,24],[620,700,260,22]]});</script>
+</body></html>

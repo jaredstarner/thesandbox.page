@@ -15,6 +15,9 @@ interface Props {
 const { title, description = 'A testing ground for web experiments.', icon = true, noindex = false } = Astro.props;
 const fullTitle = title ? `${title} · thesandbox.page` : 'thesandbox.page';
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// The site's one social image; see src/og/README.md.
+const ogImage = new URL('/og.png', Astro.site);
+const ogImageAlt = 'THESANDBOX.PAGE, a survey of web experiments, lettered inside a staked survey plot on a contour map.';
 ---
 
 <!doctype html>
@@ -28,9 +31,19 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     {icon && <link rel="apple-touch-icon" href="/apple-touch-icon.png" />}
     {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="thesandbox.page" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     {!noindex && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
     <title>{fullTitle}</title>
     <slot name="head" />
   </head>
