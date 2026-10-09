@@ -6,6 +6,7 @@ import { computePose, makePose } from './_pose';
 import { SPECIES, type Species, type SpeciesId } from './_species';
 import { Scene } from './_scene';
 import { windAt, type Wind } from './_wind';
+import { Sound } from './_sound';
 import { describe, drawRings, hitPosition, pick, type Hit, type SwayState } from './_inspect';
 
 const SCRUB_K = 7.5;
@@ -51,6 +52,7 @@ export function startArbor(root: HTMLElement): void {
     rings: $<HTMLCanvasElement>(root, '[data-rings]'),
     ringsNote: $<HTMLElement>(root, '[data-rings-note]'),
     marker: $<HTMLElement>(root, '[data-marker]'),
+    sound: $<HTMLButtonElement>(root, '[data-sound]'),
   };
 
   const params = new URLSearchParams(location.search);
@@ -211,6 +213,14 @@ export function startArbor(root: HTMLElement): void {
   for (const r of ui.seasons) r.addEventListener('change', () => (seasonTarget = Number(r.value)));
   ui.breeze.addEventListener('input', () => (breeze = Number(ui.breeze.value) / 100));
 
+  const sound = new Sound();
+  ui.sound.addEventListener('click', () => {
+    const on = !sound.on;
+    ui.sound.setAttribute('aria-pressed', String(on));
+    void sound.setOn(on);
+  });
+  document.addEventListener('visibilitychange', () => sound.setVisible(document.visibilityState === 'visible'));
+
   /** The model must be ahead of what is shown; deaths are known once it finishes. */
   function maxShown(): number {
     if (grower.done) return sp.maxAge;
@@ -347,6 +357,15 @@ export function startArbor(root: HTMLElement): void {
     sway.breeze = breeze;
     sway.height = Math.max(0.02, pose.height);
     sway.wind = wind;
+    sound.update({
+      gust: wind.gust,
+      breeze,
+      leaves: pose.leafAmount,
+      needles: sp.leaf === 'needle',
+      season,
+      deciduous: sp.deciduous,
+      height: pose.height,
+    });
 
     frameCamera(dt);
     refreshInspect();
@@ -398,7 +417,7 @@ export function startArbor(root: HTMLElement): void {
   if (startAge > 0) age = Math.min(sp.maxAge, startAge);
   root.dataset.state = 'ready';
   // A read-only handle for render checks.
-  if (params.has('debug')) Object.assign(window, { arbor: { pose, get grower() { return grower; } } });
+  if (params.has('debug')) Object.assign(window, { arbor: { pose, sound, get grower() { return grower; } } });
 
   let last = performance.now();
   const loop = (t: number): void => {
