@@ -87,8 +87,6 @@ export function startArbor(root: HTMLElement): void {
   });
   scene.controls.addEventListener('end', () => {
     userActive = false;
-    const d = scene.camera.position.distanceTo(scene.controls.target);
-    zoom = Math.min(4, Math.max(0.12, d / autoDist));
   });
   {
     const az = 0.55;
@@ -425,7 +423,11 @@ export function startArbor(root: HTMLElement): void {
     scene.camera.updateProjectionMatrix();
     scene.controls.minDistance = autoDist * 0.12;
     scene.controls.maxDistance = autoDist * 4;
+    // Wheel and pinch zoom move the camera inside update(); keep what they chose.
+    const before = off.length();
     scene.controls.update();
+    const after = scene.camera.position.distanceTo(scene.controls.target);
+    if (Math.abs(after - before) > before * 1e-4) zoom = Math.min(4, Math.max(0.12, after / autoDist));
   }
 
   function resize(): void {
