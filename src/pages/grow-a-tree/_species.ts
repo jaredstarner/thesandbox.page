@@ -68,6 +68,12 @@ export interface Species {
   leafMax: number;
   /** A node carries leaves while its radius is under this many tip radii. */
   leafyR: number;
+  /** Fruit (cones, acorns, catkins): chance per leafy twig, length in metres, and the part of the year it shows. */
+  fruitRate: number;
+  fruitSize: number;
+  fruitSeason: [number, number];
+  /** Fruit only grows above this share of the height (cones near the top of a spruce). */
+  fruitAbove: number;
   /** Seed leaves above ground (0 for hypogeal germination). */
   cotyledons: number;
   /** Years the seed stays visible. */
@@ -123,6 +129,10 @@ export const SPECIES: Record<SpeciesId, Species> = {
     taprootUntil: 12,
     deciduous: true,
     leaf: 'oak',
+    fruitRate: 0.035,
+    fruitSize: 0.13,
+    fruitSeason: [0.45, 0.84],
+    fruitAbove: 0.2,
     leavesPerNode: 2,
     leafScale: 1.15,
     leafMin: 0.035,
@@ -207,6 +217,10 @@ export const SPECIES: Record<SpeciesId, Species> = {
     taprootUntil: 3,
     deciduous: true,
     leaf: 'birch',
+    fruitRate: 0.06,
+    fruitSize: 0.08,
+    fruitSeason: [0.06, 0.8],
+    fruitAbove: 0.3,
     leavesPerNode: 3,
     leafScale: 0.9,
     leafMin: 0.022,
@@ -291,6 +305,10 @@ export const SPECIES: Record<SpeciesId, Species> = {
     taprootUntil: 2,
     deciduous: false,
     leaf: 'needle',
+    fruitRate: 0.09,
+    fruitSize: 0.24,
+    fruitSeason: [0, 1.01],
+    fruitAbove: 0.6,
     leavesPerNode: 2,
     leafScale: 1.5,
     leafMin: 0.03,

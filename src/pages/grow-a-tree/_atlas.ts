@@ -154,7 +154,79 @@ function single(ctx: CanvasRenderingContext2D, cx: number, rng: Rng, kind: 'oak'
   ctx.restore();
 }
 
-export const ATLAS_CELLS = 6;
+/** Fruit hangs from the bottom of its cell and is drawn in its own colours. */
+function fruit(ctx: CanvasRenderingContext2D, cx: number, rng: Rng, kind: 'acorn' | 'catkin' | 'cone'): void {
+  ctx.save();
+  ctx.translate(cx + CELL / 2, CELL - 2);
+  ctx.lineCap = 'round';
+  if (kind === 'acorn') {
+    // Pedunculate: two acorns on a long stalk.
+    ctx.strokeStyle = '#6b5636';
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -CELL * 0.42);
+    ctx.stroke();
+    for (const [dx, a] of [
+      [-34, -0.35],
+      [34, 0.35],
+    ] as const) {
+      ctx.save();
+      ctx.translate(dx * 0.4, -CELL * 0.42);
+      ctx.rotate(a);
+      ctx.fillStyle = '#93853f';
+      ctx.beginPath();
+      ctx.ellipse(0, -CELL * 0.2, CELL * 0.085, CELL * 0.16, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#6a5434';
+      ctx.beginPath();
+      ctx.ellipse(0, -CELL * 0.07, CELL * 0.1, CELL * 0.075, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  } else if (kind === 'catkin') {
+    ctx.strokeStyle = '#6e5a3c';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -CELL * 0.12);
+    ctx.stroke();
+    ctx.fillStyle = '#8f7f45';
+    ctx.beginPath();
+    ctx.ellipse(0, -CELL * 0.52, CELL * 0.075, CELL * 0.42, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(70,55,30,0.55)';
+    for (let i = 0; i < 40; i++) {
+      ctx.beginPath();
+      ctx.arc((rng() - 0.5) * CELL * 0.11, -CELL * (0.14 + 0.75 * rng()), 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else {
+    ctx.strokeStyle = '#5a3f28';
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -CELL * 0.08);
+    ctx.stroke();
+    ctx.fillStyle = '#7d5434';
+    ctx.beginPath();
+    ctx.moveTo(0, -CELL * 0.06);
+    ctx.bezierCurveTo(CELL * 0.17, -CELL * 0.18, CELL * 0.16, -CELL * 0.8, 0, -CELL * 0.97);
+    ctx.bezierCurveTo(-CELL * 0.16, -CELL * 0.8, -CELL * 0.17, -CELL * 0.18, 0, -CELL * 0.06);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(60,38,22,0.8)';
+    ctx.lineWidth = 3;
+    for (let y = 0.14; y < 0.92; y += 0.07) {
+      const w = Math.sin(Math.PI * Math.min(1, (y - 0.04) / 0.92)) * CELL * 0.12;
+      ctx.beginPath();
+      ctx.arc(0, -CELL * y, w, 0.15 * Math.PI, 0.85 * Math.PI);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+export const ATLAS_CELLS = 9;
 
 export function drawLeafAtlas(): HTMLCanvasElement {
   const c = document.createElement('canvas');
@@ -169,5 +241,8 @@ export function drawLeafAtlas(): HTMLCanvasElement {
   seedLeaf(ctx, CELL * 3);
   single(ctx, CELL * 4, rng, 'oak');
   single(ctx, CELL * 5, rng, 'birch');
+  fruit(ctx, CELL * 6, rng, 'acorn');
+  fruit(ctx, CELL * 7, rng, 'catkin');
+  fruit(ctx, CELL * 8, rng, 'cone');
   return c;
 }

@@ -141,6 +141,7 @@ attribute vec4 aB;
 uniform float uSeason;
 uniform float uDeciduous;
 uniform float uLeafCell;
+uniform vec2 uFruitWin;
 varying vec2 vUv;
 varying vec3 vN;
 varying vec3 vWorld;
@@ -152,7 +153,11 @@ void main() {
   float kind = aB.z;
   float size = aA.w;
   float s = uSeason;
-  bool leafy = kind < 0.5 || kind > 2.5;
+  bool leafy = kind < 0.5 || (kind > 2.5 && kind < 3.5);
+  bool fruit = kind > 3.5;
+  if (fruit) {
+    size *= step(uFruitWin.x, s) * (1.0 - step(uFruitWin.y, s));
+  }
   if (leafy && uDeciduous > 0.5) {
     float bud = smoothstep(0.02 + rnd * 0.06, 0.13 + rnd * 0.06, s);
     float drop = 1.0 - smoothstep(0.79 + rnd * 0.07, 0.83 + rnd * 0.07, s);
@@ -168,18 +173,18 @@ void main() {
   vec3 side = normalize(cross(up, ref));
   vec3 nrm = cross(side, up);
   float flutter = sin(uTime * (7.0 + rnd * 6.0) + rnd * 40.0) * (0.08 + 0.55 * uBreeze) * (0.35 + uGust);
-  float spin = aB.w * (leafy ? 1.0 : 0.0) + flutter * (1.0 - needle * 0.7);
+  float spin = aB.w * (leafy || fruit ? 1.0 : 0.0) + flutter * (fruit ? 0.3 : 1.0 - needle * 0.7);
   vec3 s2 = side * cos(spin) + nrm * sin(spin);
   vec3 n2 = cross(s2, up);
-  float w = needle > 0.5 ? (leafy ? 0.5 : 0.25) : 1.0;
+  float w = fruit ? 0.6 : needle > 0.5 ? (leafy ? 0.5 : 0.25) : 1.0;
   float along = needle > 0.5 && leafy ? position.y - 0.5 : position.y;
   vec3 world = aPos + sway(aPos, aB.x) + (s2 * (position.x - 0.5) * w + up * along) * size;
   vUv = position.xy;
   vN = n2;
   vWorld = world;
   vRand = rnd;
-  vCell = kind > 2.5 ? 4.0 + uLeafCell : kind > 1.5 ? 2.0 : (kind > 0.5 ? 3.0 : uLeafCell);
-  vKind = leafy ? 0.0 : kind;
+  vCell = fruit ? 6.0 + uLeafCell : kind > 2.5 ? 4.0 + uLeafCell : kind > 1.5 ? 2.0 : (kind > 0.5 ? 3.0 : uLeafCell);
+  vKind = leafy ? 0.0 : fruit ? 4.0 : kind;
   gl_Position = projectionMatrix * viewMatrix * vec4(world, 1.0);
 }
 `;
@@ -201,11 +206,13 @@ varying float vRand;
 varying float vCell;
 varying float vKind;
 void main() {
-  vec4 tex = texture2D(uAtlas, vec2((vCell + vUv.x) / 6.0, vUv.y));
+  vec4 tex = texture2D(uAtlas, vec2((vCell + vUv.x) / 9.0, vUv.y));
   if (tex.a < 0.45) discard;
   float s = uSeason;
   vec3 col;
-  if (vKind > 0.5) {
+  if (vKind > 3.5) {
+    col = pow(tex.rgb, vec3(2.2)) * 1.6;
+  } else if (vKind > 0.5) {
     col = vec3(0.45, 0.62, 0.25);
   } else if (uDeciduous > 0.5) {
     col = mix(uSpring, uSummer, smoothstep(0.12, 0.34, s));
@@ -215,7 +222,7 @@ void main() {
     col *= mix(1.0, 0.82, smoothstep(0.8, 0.95, s));
   }
   col *= 0.8 + 0.35 * vRand;
-  col *= tex.rgb;
+  if (vKind < 3.5) col *= tex.rgb;
   vec3 n = normalize(gl_FrontFacing ? vN : -vN);
   vec3 out1 = normalize(vWorld - uCrownC + vec3(0.0, 0.001, 0.0));
   vec3 nn = normalize(mix(n, out1, 0.6));
@@ -473,6 +480,7 @@ export class Scene {
         uAtlas: { value: atlas },
         uDeciduous: { value: 1 },
         uLeafCell: { value: 0 },
+        uFruitWin: { value: new THREE.Vector2(0, 1) },
         uSpring: { value: new THREE.Color() },
         uSummer: { value: new THREE.Color() },
         uAutumn: { value: new THREE.Color() },
@@ -602,6 +610,7 @@ export class Scene {
     const l = this.leafMat.uniforms;
     l.uDeciduous.value = sp.deciduous ? 1 : 0;
     l.uLeafCell.value = sp.leaf === 'oak' ? 0 : sp.leaf === 'birch' ? 1 : 2;
+    (l.uFruitWin.value as THREE.Vector2).set(sp.fruitSeason[0], sp.fruitSeason[1]);
     (l.uSpring.value as THREE.Color).copy(srgb(sp.leafColors[0]));
     (l.uSummer.value as THREE.Color).copy(srgb(sp.leafColors[1]));
     (l.uAutumn.value as THREE.Color).copy(srgb(sp.leafColors[2]));

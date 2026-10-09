@@ -169,6 +169,24 @@ export function describe(hit: Hit, plant: Plant, pose: Pose, sp: Species, age: n
   }
   if (hit.kind === 'leaf') {
     const kind = pose.leafB[hit.leaf * 4 + 2];
+    if (kind === 4) {
+      const fruit =
+        sp.id === 'oak'
+          ? {
+              title: 'Acorns',
+              text: 'Two or three to a long stalk, which is why this species is also called the pedunculate oak. They ripen and drop in autumn.',
+            }
+          : sp.id === 'birch'
+            ? {
+                title: 'Catkin',
+                text: 'Male catkins hang out in spring and shed pollen to the wind; the female ones ripen into seed catkins that break up and scatter in late summer and autumn.',
+              }
+            : {
+                title: 'Cone',
+                text: 'Norway spruce cones are long and hang down from the upper branches. They open to let the winged seeds fall, then drop whole.',
+              };
+      return { kicker: `${common}, ${where(pose.ey[hit.node])}`, ...fruit };
+    }
     if (kind === 1 || kind === 2) {
       return {
         kicker: `${common}, seed leaf`,

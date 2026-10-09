@@ -274,6 +274,36 @@ export function computePose(pose: Pose, plant: Plant, sp: Species, age: number):
     }
   }
 
+  // Fruit, once the tree is mature: cones, acorns, or catkins hanging from twigs.
+  const mature = sp.stages[5].age;
+  if (age >= mature) {
+    const ramp = Math.min(1, (age - mature) / (mature * 0.5));
+    const size = Math.max(sp.fruitSize, h * sp.fruitSize * 0.085);
+    for (let i = 1; i < n && lc < LEAF_CAP; i++) {
+      if (!shown[i] || kind[i] || age >= dead[i] || pipe[i] > leafyR) continue;
+      if (ey[i] < h * sp.fruitAbove || birth[i] < mature * 0.6) continue;
+      if (hash1(i * 97 + 3) > sp.fruitRate * ramp) continue;
+      const k = lc * 3;
+      leafPos[k] = ex[i];
+      leafPos[k + 1] = ey[i];
+      leafPos[k + 2] = ez[i];
+      const q = lc * 4;
+      const jx = (hash1(i * 5) - 0.5) * 0.5;
+      const jz = (hash1(i * 7) - 0.5) * 0.5;
+      const l = Math.hypot(jx, 1, jz);
+      leafA[q] = jx / l;
+      leafA[q + 1] = -1 / l;
+      leafA[q + 2] = jz / l;
+      leafA[q + 3] = size * (0.85 + 0.3 * hash1(i * 11));
+      leafB[q] = flex[i];
+      leafB[q + 1] = hash1(i * 13);
+      leafB[q + 2] = 4;
+      leafB[q + 3] = hash1(i * 17) * Math.PI * 2;
+      leafNode[lc] = i;
+      lc++;
+    }
+  }
+
   // Seed leaves, for a season after the shoot breaks the soil.
   if (sp.cotyledons > 0 && plant.cotyledons.length && age > sp.emerge && age < sp.emerge + 0.9) {
     const c = plant.cotyledons[0];
