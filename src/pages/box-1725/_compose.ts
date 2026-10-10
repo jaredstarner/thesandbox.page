@@ -60,7 +60,7 @@ const TOPICS: [Topic, RegExp][] = [
   ['whoAreYou', /\b(who|what) (are|r) (you|u)\b|\bare you (alive|real|ok|okay|haunted|a ghost)\b/i],
   ['inside', /\b(inside|interior|in there|what'?s in)\b/i],
   ['file', /\b(file|inspector|department|okafor|clearance|redact\w*|case)\b/i],
-  ['greet', /\b(hello|hi|hey|dear|greetings|howdy|good (morning|evening|afternoon))\b/i],
+  ['greet', /\b(hello|hi|hey|greetings|howdy|good (morning|evening|afternoon))\b/i],
   ['thanks', /\b(thank|thanks|thank you|grateful)\b/i],
   ['sorry', /\b(sorry|apologi[sz]e|forgive)\b/i],
   ['lonely', /\b(love|lonely|alone|friend|miss you|miss|companion|hug|care)\b/i],
