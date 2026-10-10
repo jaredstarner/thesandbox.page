@@ -13,7 +13,7 @@ import { STAMPS } from './_stamps';
   <Font cssVariable="--font-box-hand" slot="head" />
   <Font cssVariable="--font-box-headline" slot="head" />
 
-  <div class="box1725" data-box1725 data-clearance="0" data-sky="dusk" data-door="shut" data-flag="down">
+  <div class="box1725" data-box1725 data-clearance="0" data-sky="dusk" data-door-pos="shut" data-flag-pos="down">
     <section class="roadside" aria-label="The mailbox">
       <Roadside />
       <div class="tag" aria-live="polite">
@@ -326,6 +326,10 @@ import { STAMPS } from './_stamps';
     font: 16px/1.6 var(--type);
   }
 
+  .box1725 [hidden] {
+    display: none !important;
+  }
+
   .box1725 .sr {
     position: absolute;
     width: 1px;
@@ -496,11 +500,11 @@ import { STAMPS } from './_stamps';
     cursor: pointer;
     outline: none;
   }
-  .box1725[data-door='ajar'] .door {
+  .box1725[data-door-pos='ajar'] .door {
     --door-s: 0.55;
     transition: transform 3.2s cubic-bezier(0.3, 0, 0.2, 1);
   }
-  .box1725[data-door='open'] .door {
+  .box1725[data-door-pos='open'] .door {
     --door-s: -0.34;
     transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.1);
   }
@@ -516,7 +520,7 @@ import { STAMPS } from './_stamps';
     transition: opacity 1.2s;
     transform: translate(var(--gx, 0px), var(--gy, 0px));
   }
-  .box1725[data-door='ajar'] .glint {
+  .box1725[data-door-pos='ajar'] .glint {
     opacity: 0.85;
     transition-delay: 2.4s;
   }
@@ -529,7 +533,7 @@ import { STAMPS } from './_stamps';
     cursor: pointer;
     outline: none;
   }
-  .box1725[data-flag='up'] .flag {
+  .box1725[data-flag-pos='up'] .flag {
     --flag-r: -84deg;
   }
   .box1725 .flag-arm {

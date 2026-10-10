@@ -195,10 +195,10 @@ export function start(): void {
   root.dataset.sky = hour >= 5 && hour < 7 ? 'dawn' : hour >= 7 && hour < 17 ? 'day' : hour >= 17 && hour < 20 ? 'dusk' : 'night';
 
   const setDoor = (state: 'shut' | 'ajar' | 'open') => {
-    root!.dataset.door = state;
+    root!.dataset.doorPos = state;
   };
   const setFlag = (up: boolean) => {
-    root!.dataset.flag = up ? 'up' : 'down';
+    root!.dataset.flagPos = up ? 'up' : 'down';
   };
   const waiting = () => s.letters.find((l) => l.state === 'answered');
 
@@ -209,7 +209,7 @@ export function start(): void {
     let line: string;
     if (reply) {
       line = 'The flag is up. You did not raise it.';
-    } else if (inside.length && root!.dataset.flag === 'up') {
+    } else if (inside.length && root!.dataset.flagPos === 'up') {
       line = 'Flag up. Waiting for collection.';
     } else if (inside.length) {
       line = 'Your letter is inside. Raise the flag so it gets collected.';
@@ -240,7 +240,7 @@ export function start(): void {
       }
     }
     if (arrived) {
-      if (root!.dataset.flag !== 'up') {
+      if (root!.dataset.flagPos !== 'up') {
         setFlag(true);
         clank();
       }
@@ -256,7 +256,7 @@ export function start(): void {
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
   let lingered = false;
   function idle() {
-    if (busy || anyDialogOpen() || root!.dataset.door !== 'shut') return;
+    if (busy || anyDialogOpen() || root!.dataset.doorPos !== 'shut') return;
     setDoor('ajar');
     creak(3, true);
     if (!lingered) {
@@ -266,7 +266,7 @@ export function start(): void {
     }
   }
   function active() {
-    if (root!.dataset.door === 'ajar') {
+    if (root!.dataset.doorPos === 'ajar') {
       setDoor('shut');
       thunk();
     }
@@ -284,15 +284,15 @@ export function start(): void {
       if (now - lastMove < 70) return;
       lastMove = now;
       // Moving the mouse shuts a lingering door only after a real move, not a jitter.
-      if (root!.dataset.door === 'ajar' && Math.abs(e.movementX) + Math.abs(e.movementY) > 6) active();
-      else if (root!.dataset.door !== 'ajar') active();
+      if (root!.dataset.doorPos === 'ajar' && Math.abs(e.movementX) + Math.abs(e.movementY) > 6) active();
+      else if (root!.dataset.doorPos !== 'ajar') active();
 
       const plate = ui.plate.getBoundingClientRect();
       const dx = e.clientX - (plate.left + plate.width / 2);
       const dy = e.clientY - (plate.top + plate.height / 2);
       const d = Math.hypot(dx, dy);
       const reach = 180;
-      const amp = d < reach && root!.dataset.flag === 'down' ? (1 - d / reach) * 9 : 0;
+      const amp = d < reach && root!.dataset.flagPos === 'down' ? (1 - d / reach) * 9 : 0;
       ui.flag.style.setProperty('--twitch', `${((Math.random() - 0.5) * amp).toFixed(2)}deg`);
 
       const m = ui.mouth.getBoundingClientRect();
@@ -315,7 +315,7 @@ export function start(): void {
     if (busy) return;
     const reply = waiting();
     if (reply) return openReply(reply);
-    if (root!.dataset.flag === 'up') {
+    if (root!.dataset.flagPos === 'up') {
       setFlag(false);
       clank(0.7);
       flagByReader = false;
@@ -335,7 +335,7 @@ export function start(): void {
       busy = true;
       await wait(1300);
       busy = false;
-      if (!flagByReader || root!.dataset.flag !== 'up') return;
+      if (!flagByReader || root!.dataset.flagPos !== 'up') return;
       setFlag(false);
       clank(1.2);
       flagByReader = false;
@@ -491,7 +491,7 @@ export function start(): void {
     chooseStamp(null);
     busy = false;
     render();
-    if (root!.dataset.flag === 'up' && flagByReader && !collecting) collecting = setTimeout(collect, 2500);
+    if (root!.dataset.flagPos === 'up' && flagByReader && !collecting) collecting = setTimeout(collect, 2500);
   }
 
   // ---------- Replies ----------
@@ -521,7 +521,7 @@ export function start(): void {
   ui.reply.addEventListener('close', () => {
     setDoor('shut');
     thunk();
-    if (!waiting() && root!.dataset.flag === 'up' && !flagByReader) {
+    if (!waiting() && root!.dataset.flagPos === 'up' && !flagByReader) {
       setFlag(false);
       clank(0.6);
     }

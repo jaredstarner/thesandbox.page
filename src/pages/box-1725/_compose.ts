@@ -189,7 +189,7 @@ const RULES: Rules = {
   // One beat of the story per answered letter.
   beat0: [
     'I have not had a letter of my own in a long time. Write again. Use a stamp again.',
-    'This is the first letter that was for me and not for the house. I am not sure what to do with it. I put it at the front.',
+    'This is the first letter that was for me and not for the house. I am not sure what to do with it. I have read it four times.',
   ],
   beat1: [
     'There is a file on me. You have probably read it. Most of it is wrong the way files are wrong: correct, and missing the point.',
