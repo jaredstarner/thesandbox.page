@@ -1,0 +1,1348 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import Roadside from './_Roadside.astro';
+import { STAMPS } from './_stamps';
+---
+
+<Bare
+  title="Box 1725"
+  description="The case file on a roadside mailbox that enforces postal law personally. Post it a stamped letter and it writes back, in words cut from the mail it has kept."
+>
+  <Font cssVariable="--font-box-type" slot="head" />
+  <Font cssVariable="--font-box-hand" slot="head" />
+  <Font cssVariable="--font-box-headline" slot="head" />
+
+  <div class="box1725" data-box1725 data-clearance="0" data-sky="dusk" data-door-pos="shut" data-flag-pos="down">
+    <section class="roadside" aria-label="The mailbox">
+      <Roadside />
+      <div class="tag" aria-live="polite">
+        <p class="tag-line" data-status>Flag down. Nothing waiting.</p>
+        <div class="tag-actions">
+          <button type="button" data-write disabled>Write a letter</button>
+          <button type="button" data-ledger disabled>Correspondence <span data-ledger-count></span></button>
+          <button type="button" class="quiet" data-sound aria-pressed="true" disabled>Sound</button>
+        </div>
+        <noscript><p class="tag-line">Writing to the item needs JavaScript. The file can still be read.</p></noscript>
+      </div>
+    </section>
+
+    <article class="folder" aria-labelledby="box1725-title">
+      <a class="home" href="/">thesandbox.page</a>
+      <div class="folder-tab">Item 1725</div>
+
+      <div class="sheet first">
+        <div class="clip" aria-hidden="true"></div>
+        <div class="ring" aria-hidden="true"></div>
+        <p class="agency">Department of Irregular Mail &middot; Field Office 9</p>
+        <h1 id="box1725-title">Case file: Box 1725</h1>
+        <span class="stamp red stamp-irregular" aria-hidden="true">Irregular</span>
+
+        <dl class="header-grid">
+          <dt>Item</dt><dd>Curbside mailbox, Traditional pattern</dd>
+          <dt>Location</dt><dd>Rural Route 9, mile <span class="tape" data-below="1" data-key="mile">14.6</span>, east shoulder</dd>
+          <dt>Status</dt><dd>In place. <span class="ver" data-levels="0 1 2">Under observation.</span><span class="ver" data-levels="3">Observing.</span></dd>
+          <dt>Disposition</dt><dd>Do not remove. <span class="tape" data-below="2" data-key="removal">Removal has been attempted three times.</span></dd>
+          <dt>File opened</dt><dd>14 MAR 1988</dd>
+          <dt>Last reviewed</dt><dd data-reviewed>on file</dd>
+          <dt>Reviewed by</dt><dd><span class="ver" data-levels="0 1 2">Inspector <span class="tape" data-below="2" data-key="inspector">M. Okafor</span></span><span class="ver hand" data-levels="3">1725</span></dd>
+        </dl>
+
+        <fieldset class="clearance" data-clearance-switch>
+          <legend>Reader clearance</legend>
+          <label><input type="radio" name="box1725-clearance" value="0" checked /> <span>0</span> Public</label>
+          <label><input type="radio" name="box1725-clearance" value="1" /> <span>1</span> Carrier</label>
+          <label><input type="radio" name="box1725-clearance" value="2" /> <span>2</span> Inspector</label>
+          <label class="locked" data-addressee
+            ><input type="radio" name="box1725-clearance" value="3" disabled /> <span>3</span> Addressee <small data-addressee-note>granted by the item</small></label
+          >
+        </fieldset>
+        <p class="aside">Redaction tape lifts if you pick at it. Lifting it is recorded.</p>
+      </div>
+
+      <section class="sheet" aria-labelledby="box1725-handling">
+        <h2 id="box1725-handling"><span>1.</span> Handling</h2>
+        <div class="note" data-note="ALSO. DO NOT LIE ABOUT THE FLAG."></div>
+        <ol class="rules">
+          <li>
+            Approach only with outgoing mail. Visitors who stand at the item without posting anything report that the door
+            opens on its own after about twenty seconds. <span class="tape" data-below="1" data-key="inside"
+              >Do not look inside. It is not dark in there the way a box is dark.</span
+            >
+          </li>
+          <li>
+            Every item posted must carry sufficient postage. Unstamped matter (circulars, menus, flyers, notes for the
+            neighbors) is returned, <span class="tape" data-below="1" data-key="speed">at speed</span>.
+          </li>
+          <li>
+            Do not raise the flag unless there is outgoing mail inside. The item treats a raised flag over an empty box as a
+            lie, and lowers it.
+          </li>
+          <li>
+            Do not replace the item. <span class="tape" data-below="2" data-key="replacements"
+              >Replacement boxes installed in 1994, 2003, and 2011 were each recovered from inside Item 1725 within a week,
+              intact, and holding mail.</span
+            >
+          </li>
+          <li>Do not strike the item. See Incident 1725-06.</li>
+        </ol>
+      </section>
+
+      <section class="sheet" aria-labelledby="box1725-description">
+        <h2 id="box1725-description"><span>2.</span> Description</h2>
+        <div class="note" data-note="CORRECT. AND MISSING THE POINT."></div>
+        <p>
+          Item 1725 is a curbside mailbox of the Traditional pattern: a steel tunnel with an arched top, a door hinged at
+          the bottom, and a red signal flag on its side, mounted on a cedar post. The pattern was drawn by a Post Office
+          engineer in 1915 and left unpatented, so anyone could make it; the arched top sheds rain and snow. The item
+          appears to apply the same principle to people. The name HOLLIS is stenciled on the side under two coats of
+          paint.
+        </p>
+        <p>
+          <span class="ver" data-levels="0">The item is ordinary in every measurable respect.</span><span
+            class="ver"
+            data-levels="1">The item is ordinary in every measurable respect. Carriers on Route 9 do not agree.</span
+          ><span class="ver" data-levels="2 3"
+            >The item is ordinary in every respect but one: its inside is larger than its outside. Measured with water in
+            2004, the interior held 2.3 times the exterior volume. The measurement was not repeated. The water was not
+            returned.</span
+          >
+        </p>
+        <h3>Behavior</h3>
+        <ul class="behavior">
+          <li>
+            It accepts only mail on which postage has been paid. That is the law (18 U.S.C. &sect; 1725); the item appears
+            to regard enforcing it as its own responsibility.
+          </li>
+          <li>It raises its own flag when it has something for you.</li>
+          <li>
+            It writes back. Replies are assembled from words cut out of the mail it has kept: catalogs, circulars, seed
+            packets, utility bills. No cutting instrument has been found. <span
+              class="tape"
+              data-below="2"
+              data-key="unposted">Some words in recovered replies were cut from letters that had not yet been posted.</span
+            >
+          </li>
+        </ul>
+      </section>
+
+      <section class="sheet" aria-labelledby="box1725-incidents">
+        <h2 id="box1725-incidents"><span>3.</span> Incident log</h2>
+        <div class="note" data-note="I RETURNED IT. THEY PAID."></div>
+        <ol class="incidents" data-incidents>
+          <li>
+            <b>1725-01</b> <time>11 AUG 1988</time> Carrier reports the flag raised over an empty box on 31 consecutive days
+            and stops lowering it. On day 32 it lowers itself.
+          </li>
+          <li>
+            <b>1725-03</b> <time>02 FEB 1991</time> A pizza menu left in the item without postage is found the next morning
+            under the wiper of the delivery car, fourteen miles away, <span class="tape" data-below="1" data-key="menu"
+              >folded into a small and accurate envelope</span
+            >.
+          </li>
+          <li>
+            <b>1725-06</b> <time>19 JUL 1998</time> Item struck with a baseball bat from a moving car. The bat is returned to
+            the car's registered owner by mail, postage due. <span class="tape" data-below="2" data-key="bat"
+              >The postage due was paid.</span
+            >
+          </li>
+          <li>
+            <b>1725-09</b> <time>06 APR 2004</time> Interior measured with water. See Description.
+          </li>
+          <li>
+            <b>1725-11</b> <time>03 MAY 2011</time> Third replacement box recovered from inside the item, <span
+              class="tape"
+              data-below="2"
+              data-key="third">with a seed catalog in it addressed to the item</span
+            >.
+          </li>
+          <li>
+            <b>1725-14</b> <time>2019</time> Route 9 carrier requests reassignment. The request reads, in full: <q
+              >It knows my truck.</q
+            > <span class="tape" data-below="1" data-key="truck"
+              >The carrier still drives Route 9 at 10:40 each weekday. The item raises its flag at 10:38.</span
+            >
+          </li>
+          <li>
+            <b>1725-17</b> <time><span class="tape" data-below="3" data-key="date">16 SEP 2026</span></time> Item begins
+            replying to letters addressed to it directly. <span class="ver" data-levels="0 1">Correspondents are not
+            identified.</span><span class="ver" data-levels="2 3">Every known correspondent is a reader of this file.</span>
+          </li>
+        </ol>
+      </section>
+
+      <section class="sheet" aria-labelledby="box1725-exhibits">
+        <h2 id="box1725-exhibits"><span>4.</span> Recovered correspondence</h2>
+        <div class="exhibits">
+          <figure class="exhibit envelope-exhibit">
+            <div class="old-envelope">
+              <span class="old-stamp" aria-hidden="true">22&cent;</span>
+              <span class="hand">Occupant<br />Rural Route 9, Box 1725<br />2041</span>
+            </div>
+            <figcaption>
+              <b>Exhibit A.</b> Envelope found in the item, stamped 1988, addressed to whoever lives here in 2041. Sealed. Left
+              unopened <span class="tape" data-below="1" data-key="unopened">at the item's insistence</span>.
+            </figcaption>
+          </figure>
+          <figure class="exhibit">
+            <div class="collage small" data-collage-static="1986" data-text="YOUR SON WILL NOT WRITE. I WILL. EVERY WEEK. POSTAGE PAID."
+            >
+              <p class="collage-fallback">YOUR SON WILL NOT WRITE. I WILL. EVERY WEEK. POSTAGE PAID.</p>
+            </div>
+            <figcaption>
+              <b>Exhibit B.</b> Reply in cut-out words, found among the effects of <span
+                class="tape"
+                data-below="2"
+                data-key="hollis">Mrs. A. Hollis, the item's first owner, d. 1987</span
+              >. The words were cut from a hardware circular.
+            </figcaption>
+          </figure>
+          <figure class="exhibit">
+            <div class="returned-slip">
+              <p class="typed">To the item: this office requests your cooperation with an interior survey.</p>
+              <span class="stamp red" aria-hidden="true">Returned &middot; Postage due</span>
+            </div>
+            <figcaption>
+              <b>Exhibit C.</b> Memo from this office to the item, posted without a stamp. <span
+                class="ver"
+                data-levels="0 1 2">It was returned within the hour.</span><span class="ver" data-levels="3"
+                >It was returned within the hour. So was the next one, with a stamp, because it was a request and not a
+                letter.</span
+              >
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="sheet last" aria-labelledby="box1725-note">
+        <h2 id="box1725-note"><span>5.</span> Reviewer's note</h2>
+        <div class="note" data-note="WRITE BACK."></div>
+        <p class="ver block" data-levels="0 1">
+          Readers of this file may write to the item. It is not recommended. <span
+            class="tape"
+            data-below="2"
+            data-key="recommended">It is not discouraged either.</span
+          >
+        </p>
+        <p class="ver block" data-levels="2">
+          The item does not want to be studied. It wants mail: not catalogs, letters, with postage, that expect an answer.
+          It answers every one. It is easier to be near when someone has been writing to it.
+        </p>
+        <p class="ver block hand-note" data-levels="3">
+          You have clearance now, so this part is for you. The inspector stopped writing in August. Somebody has to. Use a
+          stamp.
+        </p>
+      </section>
+
+      <footer class="colophon">
+        <p>
+          Fiction. The Department of Irregular Mail, Route 9, the Hollis family, and Box 1725 are invented. The postal law
+          is real, and so is the 1915 mailbox design.
+        </p>
+        <p>
+          Letters you write stay in this browser and nowhere else; no letter leaves the page. Replies come from a
+          hand-written grammar, not an AI. Type set in Special Elite, Reenie Beanie, and Abril Fatface (open licenses, via
+          Fontsource).
+        </p>
+      </footer>
+    </article>
+
+    <dialog class="desk" data-desk aria-labelledby="box1725-desk-title">
+      <form method="dialog" class="paper letter" data-letter-form>
+        <h2 id="box1725-desk-title" class="sr">Write a letter</h2>
+        <button type="button" class="stamp-slot" data-stamp-slot aria-label="Stamp: none. Pick one below.">
+          <span>Place stamp here</span>
+        </button>
+        <label class="line to">To <input name="to" value="Box 1725, R.R. 9" maxlength="80" autocomplete="off" /></label>
+        <label class="body"
+          ><span class="sr">Letter</span><textarea
+            name="body"
+            rows="9"
+            maxlength="2400"
+            placeholder="Write to it. It reads everything twice."
+            required></textarea></label
+        >
+        <label class="line from">From <input name="from" maxlength="40" autocomplete="off" placeholder="your name" /></label>
+        <fieldset class="stamps">
+          <legend>Stamps, one per letter</legend>
+          {
+            STAMPS.map((s) => (
+              <button type="button" class="stamp-pick" data-stamp={s.id} aria-pressed="false" aria-label={s.label}>
+                <Fragment set:html={s.svg} />
+              </button>
+            ))
+          }
+        </fieldset>
+        <div class="desk-actions">
+          <button value="cancel" formnovalidate class="quiet">Put it away</button>
+          <button value="post" data-post>Post it</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="reply" data-reply aria-labelledby="box1725-reply-title">
+      <h2 id="box1725-reply-title" class="sr" data-reply-title>A reply</h2>
+      <div class="reply-paper">
+        <div class="collage" data-reply-collage></div>
+        <span class="stamp red returned-stamp" data-returned-stamp hidden aria-hidden="true">Return to sender &middot; postage due</span>
+      </div>
+      <p class="reply-meta" data-reply-meta></p>
+      <form method="dialog"><button>Fold it away</button></form>
+    </dialog>
+
+    <dialog class="ledger" data-ledger-dialog aria-labelledby="box1725-ledger-title">
+      <h2 id="box1725-ledger-title">Correspondence</h2>
+      <p class="aside">Kept in this browser only.</p>
+      <ol class="ledger-list" data-ledger-list></ol>
+      <form method="dialog" class="ledger-actions"><button>Close</button></form>
+    </dialog>
+
+    <div class="flight" data-flight aria-hidden="true"></div>
+  </div>
+</Bare>
+
+<style is:global>
+  body:has(.box1725) {
+    margin: 0;
+    background: #2a2118;
+  }
+
+  .box1725 {
+    --ink: #2a2520;
+    --paper: #f3ecdc;
+    --paper-shade: #e6dcc3;
+    --kraft: #c29b5e;
+    --kraft-dark: #8f6c39;
+    --red: #b3261e;
+    --tape: #141210;
+    --type: var(--font-box-type), 'Courier New', monospace;
+    --hand: var(--font-box-hand), cursive;
+    --headline: var(--font-box-headline), Georgia, serif;
+
+    display: grid;
+    grid-template-columns: minmax(320px, 44vw) 1fr;
+    min-height: 100dvh;
+    color: var(--ink);
+    font: 16px/1.6 var(--type);
+  }
+
+  .box1725 [hidden] {
+    display: none !important;
+  }
+
+  .box1725 .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .box1725 button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  /* ---------- The roadside ---------- */
+
+  .box1725 .roadside {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    overflow: clip;
+    background: #0d1220;
+  }
+
+  .box1725 .scene {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .box1725 {
+    --sky-0: #1b2340;
+    --sky-1: #b5604a;
+    --sky-2: #f0a35e;
+    --sun: #ffd9a0;
+    --sun-o: 0.9;
+    --stars-o: 0;
+    --field: #3a3324;
+    --trees: #1e1a16;
+    --road: #5c5550;
+    --shoulder: #7d7466;
+    --poles: #1d1915;
+    --grass: #2e2a1c;
+    --line: #d9c27a;
+  }
+  .box1725[data-sky='night'] {
+    --sky-0: #03050c;
+    --sky-1: #0e1630;
+    --sky-2: #1d2747;
+    --sun: #e6ecf5;
+    --sun-o: 0.85;
+    --stars-o: 1;
+    --field: #0f1218;
+    --trees: #05070a;
+    --road: #1e2126;
+    --shoulder: #2a2c2f;
+    --poles: #07080b;
+    --grass: #0c0e10;
+    --line: #6e6748;
+  }
+  .box1725[data-sky='dawn'] {
+    --sky-0: #3a4a78;
+    --sky-1: #d99aa0;
+    --sky-2: #f6cf9a;
+    --sun: #fff1d0;
+    --sun-o: 0.8;
+    --field: #4b4a36;
+    --trees: #2a2a24;
+  }
+  .box1725[data-sky='day'] {
+    --sky-0: #4f86c6;
+    --sky-1: #a9cbe6;
+    --sky-2: #dde9ef;
+    --sun: #fffbe8;
+    --sun-o: 0;
+    --field: #7d8a4a;
+    --trees: #39452b;
+    --road: #8c8681;
+    --shoulder: #a69c8a;
+    --poles: #3b3128;
+    --grass: #5c6a32;
+    --line: #f0e3a0;
+  }
+
+  .box1725 .sky-0 {
+    stop-color: var(--sky-0);
+  }
+  .box1725 .sky-1 {
+    stop-color: var(--sky-1);
+  }
+  .box1725 .sky-2 {
+    stop-color: var(--sky-2);
+  }
+  .box1725 .stars {
+    fill: #fff;
+    opacity: var(--stars-o);
+  }
+  .box1725 .sun {
+    fill: var(--sun);
+    opacity: var(--sun-o);
+  }
+  .box1725 .field {
+    fill: var(--field);
+  }
+  .box1725 .treeline {
+    fill: var(--trees);
+  }
+  .box1725 .road {
+    fill: var(--road);
+  }
+  .box1725 .shoulder {
+    fill: var(--shoulder);
+  }
+  .box1725 .centerline {
+    stroke: var(--line);
+    stroke-width: 2;
+    stroke-dasharray: 14 18;
+    opacity: 0.7;
+  }
+  .box1725 .poles {
+    fill: var(--poles);
+  }
+  .box1725 .wires {
+    fill: none;
+    stroke: var(--poles);
+    stroke-width: 0.6;
+  }
+  .box1725 .grass {
+    fill: none;
+    stroke: var(--grass);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+  }
+  .box1725 .grain {
+    stroke: #2c1d13;
+    stroke-width: 0.8;
+    opacity: 0.5;
+  }
+  .box1725 .board {
+    fill: #3d2b1e;
+  }
+  .box1725 .seam {
+    stroke: #0b0d10;
+    stroke-width: 0.8;
+    opacity: 0.6;
+  }
+  .box1725 .stencil {
+    font: 700 13px/1 'Courier New', monospace;
+    fill: #626a73;
+    opacity: 0.45;
+    letter-spacing: 3px;
+  }
+  .box1725 .latch {
+    fill: #6f7780;
+  }
+  .box1725 .door-rim {
+    fill: none;
+    stroke: #555c64;
+    stroke-width: 1;
+  }
+
+  .box1725 .door {
+    transform-box: view-box;
+    transform-origin: 182px 318px;
+    transform: scaleY(var(--door-s, 1));
+    transition: transform 0.35s cubic-bezier(0.5, 0, 0.75, 0);
+    cursor: pointer;
+    outline: none;
+  }
+  .box1725[data-door-pos='ajar'] .door {
+    --door-s: 0.55;
+    transition: transform 3.2s cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  .box1725[data-door-pos='open'] .door {
+    --door-s: -0.34;
+    transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  }
+  .box1725 .door:focus-visible .door-rim,
+  .box1725 .flag:focus-visible .flag-plate {
+    stroke: #ffe08a;
+    stroke-width: 2;
+  }
+
+  .box1725 .glint {
+    fill: #e8f3c4;
+    opacity: 0;
+    transition: opacity 1.2s;
+    transform: translate(var(--gx, 0px), var(--gy, 0px));
+  }
+  .box1725[data-door-pos='ajar'] .glint {
+    opacity: 0.85;
+    transition-delay: 2.4s;
+  }
+
+  .box1725 .flag {
+    transform-box: view-box;
+    transform-origin: 232px 298px;
+    transform: rotate(calc(var(--flag-r, 0deg) + var(--twitch, 0deg)));
+    transition: transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+    cursor: pointer;
+    outline: none;
+  }
+  .box1725[data-flag-pos='up'] .flag {
+    --flag-r: -84deg;
+  }
+  .box1725 .flag-arm {
+    fill: #9b1d17;
+  }
+  .box1725 .flag-plate {
+    fill: #d42a20;
+  }
+  .box1725 .flag-pivot {
+    fill: #262a30;
+  }
+  .box1725[data-waiting] .flag-plate {
+    animation: box1725-beckon 1.6s ease-in-out infinite;
+  }
+  @keyframes box1725-beckon {
+    50% {
+      fill: #ff5a3c;
+    }
+  }
+
+  .box1725 .tag {
+    position: absolute;
+    left: 50%;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    translate: -50% 0;
+    width: min(92%, 420px);
+    padding: 12px 14px 12px;
+    background: #efe2c2;
+    color: var(--ink);
+    border-radius: 3px 3px 3px 3px;
+    box-shadow:
+      0 1px 0 #fff8 inset,
+      0 8px 24px #0008;
+    rotate: -1deg;
+  }
+  .box1725 .tag::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    margin-top: -5px;
+    border-radius: 50%;
+    background: #2a2118;
+    box-shadow: 0 0 0 3px #d2c09a;
+  }
+  .box1725 .tag-line {
+    margin: 0 0 8px 34px;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+  .box1725 .tag-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: 34px;
+  }
+  .box1725 .tag-actions button,
+  .box1725 dialog form button,
+  .box1725 .desk-actions button {
+    padding: 6px 12px;
+    font-family: var(--type);
+    background: var(--ink);
+    color: var(--paper);
+    border: 0;
+    border-radius: 2px;
+    font-size: 14px;
+  }
+  .box1725 button.quiet {
+    background: transparent;
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1.5px var(--ink);
+  }
+  .box1725 .tag-actions button[disabled] {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .box1725 [data-sound][aria-pressed='false'] {
+    text-decoration: line-through;
+  }
+
+  /* ---------- The folder ---------- */
+
+  .box1725 .folder {
+    position: relative;
+    padding: 56px clamp(16px, 5vw, 72px) 64px;
+    background:
+      radial-gradient(120% 60% at 30% 0%, #d8b77a 0%, transparent 60%),
+      repeating-linear-gradient(93deg, #0000 0 3px, #0000000a 3px 4px),
+      var(--kraft);
+    box-shadow: inset 12px 0 24px #0005;
+  }
+  .box1725 .home {
+    position: absolute;
+    top: 16px;
+    right: clamp(16px, 5vw, 72px);
+    color: #3b2a12;
+    font-size: 13px;
+  }
+  .box1725 .folder-tab {
+    display: inline-block;
+    padding: 6px 22px 10px;
+    margin-left: 24px;
+    background: var(--kraft-dark);
+    color: #f4e6c8;
+    border-radius: 8px 8px 0 0;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .box1725 .sheet {
+    position: relative;
+    max-width: 680px;
+    margin: 0 0 28px;
+    padding: clamp(20px, 4vw, 40px);
+    background:
+      linear-gradient(#0000 0 0) padding-box,
+      linear-gradient(180deg, #faf5ea, var(--paper) 30%, #efe6d2);
+    box-shadow:
+      0 1px 2px #0003,
+      0 10px 30px -10px #0006;
+    rotate: 0.25deg;
+  }
+  .box1725 .sheet:nth-of-type(even) {
+    rotate: -0.35deg;
+  }
+  .box1725 .sheet.first {
+    margin-top: 0;
+    rotate: -0.2deg;
+  }
+  .box1725 .clip {
+    position: absolute;
+    top: -14px;
+    left: 12px;
+    width: 18px;
+    height: 54px;
+    border: 3px solid #9aa0a6;
+    border-radius: 9px;
+    box-shadow: 1px 1px 0 #0003;
+  }
+  .box1725 .ring {
+    position: absolute;
+    right: 8%;
+    bottom: 14%;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #0000 58%, #7a4a1a22 60%, #7a4a1a33 63%, #0000 66%);
+    pointer-events: none;
+  }
+  .box1725 .agency {
+    margin: 0;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .box1725 h1 {
+    margin: 6px 0 18px;
+    font: 400 clamp(28px, 4vw, 40px) / 1.1 var(--type);
+  }
+  .box1725 h2 {
+    margin: 0 0 14px;
+    font: 400 22px/1.2 var(--type);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .box1725 h2 span {
+    color: var(--red);
+  }
+  .box1725 h3 {
+    margin: 18px 0 6px;
+    font: 400 16px/1.2 var(--type);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .box1725 .stamp {
+    display: inline-block;
+    padding: 4px 10px;
+    border: 3px double currentColor;
+    font: 400 18px/1 var(--type);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    mix-blend-mode: multiply;
+    opacity: 0.82;
+    mask: radial-gradient(circle at 30% 40%, #000 0 40%, #000b 60%, #0008 100%);
+  }
+  .box1725 .stamp.red {
+    color: var(--red);
+  }
+  .box1725 .stamp-irregular {
+    position: absolute;
+    top: 30px;
+    right: 28px;
+    rotate: 9deg;
+    font-size: 22px;
+  }
+  .box1725 .header-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 2px 18px;
+    margin: 0 0 18px;
+    font-size: 15px;
+  }
+  .box1725 .header-grid dt {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6b5f50;
+  }
+  .box1725 .header-grid dd {
+    margin: 0;
+  }
+  .box1725 .aside {
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: #6b5f50;
+  }
+  .box1725 .rules,
+  .box1725 .behavior {
+    padding-left: 1.4em;
+  }
+  .box1725 .rules li,
+  .box1725 .behavior li {
+    margin-bottom: 0.6em;
+  }
+
+  /* The clearance switch: four tabs on a rotary card. */
+  .box1725 .clearance {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 10px 0 0;
+    border: 0;
+    border-top: 1px dashed #b3a487;
+  }
+  .box1725 .clearance legend {
+    float: left;
+    width: 100%;
+    margin-bottom: 6px;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6b5f50;
+  }
+  .box1725 .clearance label {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1.5px solid var(--ink);
+    border-radius: 2px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .box1725 .clearance label span {
+    font-weight: 700;
+  }
+  .box1725 .clearance input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: inherit;
+  }
+  .box1725 .clearance label:has(input:checked) {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .box1725 .clearance label:has(input:focus-visible) {
+    outline: 2px solid var(--red);
+    outline-offset: 2px;
+  }
+  .box1725 .clearance label.locked {
+    border-style: dashed;
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .box1725 .clearance small {
+    font-size: 11px;
+    color: inherit;
+    opacity: 0.8;
+  }
+
+  /* Redaction tape and the versions each clearance can see. */
+  .box1725 .tape {
+    transition:
+      background-color 0.4s,
+      color 0.4s;
+    border-radius: 1px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .box1725[data-clearance='0'] .tape:is([data-below='1'], [data-below='2'], [data-below='3']):not([data-peeled]),
+  .box1725[data-clearance='1'] .tape:is([data-below='2'], [data-below='3']):not([data-peeled]),
+  .box1725[data-clearance='2'] .tape[data-below='3']:not([data-peeled]) {
+    background: var(--tape);
+    color: transparent;
+    cursor: pointer;
+    user-select: none;
+    box-shadow:
+      0 0 0 1px var(--tape),
+      inset 0 1px 0 #fff2;
+  }
+  .box1725 .tape[data-peeled] {
+    background: #f6e27a77;
+    box-shadow: inset 0 -1px 0 #0002;
+  }
+  .box1725 .tape[data-lifting] {
+    animation: box1725-lift 0.5s ease-out;
+  }
+  @keyframes box1725-lift {
+    from {
+      background: var(--tape);
+      color: transparent;
+      clip-path: inset(0 0 0 0);
+    }
+    to {
+      background: #f6e27a77;
+    }
+  }
+
+  .box1725 .ver {
+    display: none;
+  }
+  .box1725[data-clearance='0'] .ver[data-levels~='0'],
+  .box1725[data-clearance='1'] .ver[data-levels~='1'],
+  .box1725[data-clearance='2'] .ver[data-levels~='2'],
+  .box1725[data-clearance='3'] .ver[data-levels~='3'] {
+    display: inline;
+  }
+  .box1725[data-clearance='0'] .ver.block[data-levels~='0'],
+  .box1725[data-clearance='1'] .ver.block[data-levels~='1'],
+  .box1725[data-clearance='2'] .ver.block[data-levels~='2'],
+  .box1725[data-clearance='3'] .ver.block[data-levels~='3'] {
+    display: block;
+  }
+  .box1725 .hand,
+  .box1725 .hand-note {
+    font: 400 1.5em/1.2 var(--hand);
+  }
+  .box1725 .header-grid .hand {
+    font-size: 1.9em;
+    line-height: 0.8;
+    color: #23336b;
+  }
+  .box1725 .hand-note {
+    color: #23336b;
+    font-size: 1.7em;
+  }
+
+  /* The item's own notes, pasted into the margins at clearance 3. */
+  .box1725 .note {
+    display: none;
+  }
+  .box1725[data-clearance='3'] .note {
+    display: block;
+    float: right;
+    max-width: 46%;
+    margin: -8px -6px 10px 14px;
+    rotate: 3deg;
+    animation: box1725-paste 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  }
+  @keyframes box1725-paste {
+    from {
+      scale: 1.4;
+      opacity: 0;
+    }
+  }
+
+  .box1725 .incidents {
+    list-style: none;
+    padding: 0;
+  }
+  .box1725 .incidents li {
+    margin-bottom: 0.8em;
+  }
+  .box1725 .incidents b {
+    font-weight: 400;
+    color: var(--red);
+    margin-right: 0.4em;
+  }
+  .box1725 .incidents time {
+    display: inline-block;
+    min-width: 7.2em;
+    color: #6b5f50;
+  }
+  .box1725 .incidents li[data-visitor] {
+    padding-left: 10px;
+    border-left: 3px solid var(--red);
+    animation: box1725-type 0.6s steps(12) both;
+  }
+  @keyframes box1725-type {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+  }
+
+  .box1725 .exhibits {
+    display: grid;
+    gap: 24px;
+  }
+  .box1725 .exhibit {
+    margin: 0;
+  }
+  .box1725 .exhibit figcaption {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+  .box1725 .old-envelope {
+    position: relative;
+    max-width: 360px;
+    aspect-ratio: 2.2;
+    padding: 28px 24px;
+    box-sizing: border-box;
+    background: linear-gradient(160deg, #f1e5c4, #dccaa0);
+    box-shadow: 0 6px 16px -6px #0007;
+    rotate: -2deg;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+  }
+  .box1725 .old-envelope .hand {
+    font-size: 1.45em;
+    color: #1f2f5c;
+  }
+  .box1725 .old-stamp {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 34px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    background: #4c6b8a;
+    color: #fff;
+    font-size: 12px;
+    outline: 2px dotted #f1e5c4;
+    outline-offset: -3px;
+  }
+  .box1725 .returned-slip {
+    position: relative;
+    max-width: 360px;
+    padding: 18px 20px 46px;
+    background: #fbf8f1;
+    box-shadow: 0 6px 16px -6px #0007;
+    rotate: 1.5deg;
+  }
+  .box1725 .returned-slip .typed {
+    margin: 0;
+    font-size: 14px;
+  }
+  .box1725 .returned-slip .stamp {
+    position: absolute;
+    right: 12px;
+    bottom: 10px;
+    rotate: -8deg;
+    font-size: 14px;
+  }
+
+  .box1725 .colophon {
+    max-width: 680px;
+    font-size: 13px;
+    color: #3b2a12;
+  }
+
+  /* ---------- Cut-out lettering ---------- */
+
+  .box1725 .collage {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 2px;
+    line-height: 1;
+  }
+  .box1725 .collage.small {
+    max-width: 380px;
+    padding: 18px;
+    background: #fffaf0;
+    box-shadow: 0 6px 16px -6px #0007;
+    rotate: -1deg;
+  }
+  .box1725 .collage-fallback {
+    margin: 0;
+    font: 400 20px/1.3 var(--headline);
+  }
+  .box1725 .collage .gap {
+    flex-basis: 100%;
+    height: 10px;
+  }
+  .box1725 .scrap {
+    display: inline-block;
+    filter: drop-shadow(1px 1.5px 0.5px #0005);
+    rotate: var(--r);
+    translate: 0 var(--y);
+  }
+  .box1725 .scrap > span {
+    display: inline-block;
+    padding: 0.18em 0.28em 0.12em;
+    clip-path: var(--clip);
+    white-space: pre;
+  }
+  .box1725 .note .collage {
+    justify-content: flex-end;
+  }
+
+  /* ---------- Dialogs ---------- */
+
+  .box1725 dialog {
+    max-width: min(640px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    overflow: auto;
+  }
+  .box1725 dialog::backdrop {
+    background: #120d08b3;
+    backdrop-filter: blur(2px);
+  }
+  .box1725 dialog[open] {
+    animation: box1725-open 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  }
+  @keyframes box1725-open {
+    from {
+      translate: 0 30px;
+      opacity: 0;
+    }
+  }
+
+  .box1725 .paper {
+    position: relative;
+    margin: 0;
+    padding: 28px 28px 22px;
+    background: repeating-linear-gradient(#0000 0 31px, #8fb0d455 31px 32px), #fdfbf4;
+    background-position: 0 14px;
+    box-shadow: 0 20px 50px #0009;
+  }
+  .box1725 .letter {
+    display: grid;
+    gap: 8px;
+    width: min(560px, calc(100vw - 32px));
+    box-sizing: border-box;
+    font: 400 22px/32px var(--hand);
+  }
+  .box1725 .letter .line {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    font: 400 14px/32px var(--type);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .box1725 .letter .to {
+    padding-right: 90px;
+  }
+  .box1725 .letter input,
+  .box1725 .letter textarea {
+    flex: 1;
+    min-width: 0;
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
+    color: #1f2f5c;
+    font: 400 24px/32px var(--hand);
+    resize: vertical;
+  }
+  .box1725 .letter .body {
+    margin-top: 32px;
+  }
+  .box1725 .letter textarea {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 224px;
+  }
+  .box1725 .letter input:focus-visible,
+  .box1725 .letter textarea:focus-visible {
+    outline: 2px dashed #8fb0d4;
+  }
+  .box1725 .stamp-slot {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    width: 64px;
+    height: 76px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 1.5px dashed #a99a7c;
+    background: transparent;
+    font: 400 10px/1.2 var(--type);
+    text-transform: uppercase;
+    color: #8a7c62;
+  }
+  .box1725 .stamp-slot svg {
+    width: 60px;
+    height: 72px;
+    rotate: 3deg;
+  }
+  .box1725 .stamps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 6px 0 0;
+    padding: 10px 0 0;
+    border: 0;
+    border-top: 1px dashed #c8bba0;
+  }
+  .box1725 .stamps legend {
+    float: left;
+    width: 100%;
+    font: 400 12px/1.4 var(--type);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #6b5f50;
+  }
+  .box1725 .stamp-pick {
+    padding: 0;
+    border: 0;
+    background: none;
+    transition:
+      translate 0.15s,
+      opacity 0.15s;
+  }
+  .box1725 .stamp-pick svg {
+    display: block;
+    width: 50px;
+    height: 60px;
+  }
+  .box1725 .stamp-pick:hover {
+    translate: 0 -3px;
+  }
+  .box1725 .stamp-pick[aria-pressed='true'] {
+    opacity: 0.25;
+  }
+  .box1725 .desk-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .box1725 .reply-paper {
+    position: relative;
+    width: min(600px, calc(100vw - 32px));
+    box-sizing: border-box;
+    padding: 30px 26px 34px;
+    background:
+      radial-gradient(80% 60% at 70% 20%, #fff 0%, #0000 70%),
+      linear-gradient(170deg, #f6efe0, #e8dcc2);
+    box-shadow: 0 20px 50px #0009;
+  }
+  .box1725 .reply .collage {
+    gap: 6px 3px;
+  }
+  .box1725 .returned-stamp {
+    position: absolute;
+    right: 18px;
+    bottom: 14px;
+    rotate: -9deg;
+    font-size: 16px;
+  }
+  .box1725 .reply-meta {
+    margin: 10px 4px;
+    color: #f0e2c4;
+    font-size: 13px;
+  }
+  .box1725 .reply form,
+  .box1725 .ledger-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .box1725 .reply form button {
+    background: #f0e2c4;
+    color: var(--ink);
+  }
+
+  .box1725 .ledger {
+    width: min(560px, calc(100vw - 32px));
+    padding: 24px;
+    box-sizing: border-box;
+    background: var(--paper);
+    box-shadow: 0 20px 50px #0009;
+  }
+  .box1725 .ledger h2 {
+    margin-bottom: 0;
+  }
+  .box1725 .ledger-list {
+    margin: 14px 0;
+    padding: 0;
+    list-style: none;
+  }
+  .box1725 .ledger-list li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2px 12px;
+    padding: 10px 0;
+    border-top: 1px dashed #b3a487;
+    font-size: 14px;
+  }
+  .box1725 .ledger-list .excerpt {
+    grid-column: 1 / -1;
+    font: 400 20px/1.1 var(--hand);
+    color: #1f2f5c;
+  }
+  .box1725 .ledger-list button {
+    padding: 2px 8px;
+    border: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 13px;
+  }
+
+  /* An envelope in flight between the desk and the door. */
+  .box1725 .flight {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 120px;
+    height: 56px;
+    pointer-events: none;
+    background: linear-gradient(160deg, #fbf5e6, #e7dbbd);
+    box-shadow: 0 6px 14px #0007;
+    opacity: 0;
+    z-index: 10;
+  }
+  .box1725 .flight::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom right, #0000 49%, #0002 50%, #0000 51%),
+      linear-gradient(to bottom left, #0000 49%, #0002 50%, #0000 51%);
+    background-size: 100% 60%;
+    background-repeat: no-repeat;
+  }
+  .box1725 .flight[data-stamped]::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 14px;
+    height: 17px;
+    background: var(--red);
+  }
+
+  /* ---------- Phones and narrow windows ---------- */
+
+  @media (max-width: 820px) {
+    .box1725 {
+      grid-template-columns: 1fr;
+    }
+    .box1725 .roadside {
+      position: relative;
+      height: min(78svh, 680px);
+    }
+    .box1725 .folder {
+      padding-top: 40px;
+      box-shadow: inset 0 12px 24px #0005;
+    }
+    .box1725 .home {
+      top: 10px;
+    }
+    .box1725 .stamp-irregular {
+      position: static;
+      margin: 10px 0 4px;
+      rotate: -4deg;
+      font-size: 16px;
+    }
+    .box1725 .header-grid {
+      grid-template-columns: 1fr;
+    }
+    .box1725 .header-grid dd {
+      margin-bottom: 6px;
+    }
+    .box1725[data-clearance='3'] .note {
+      float: none;
+      max-width: none;
+      margin: 0 0 12px;
+    }
+    .box1725 .letter {
+      font-size: 20px;
+      padding: 22px 16px 16px;
+    }
+    .box1725 .stamp-slot {
+      right: 12px;
+      width: 52px;
+      height: 62px;
+    }
+    .box1725 .stamp-slot svg {
+      width: 48px;
+      height: 58px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .box1725 *,
+    .box1725 dialog[open] {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0s !important;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+  start();
+</script>

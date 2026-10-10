@@ -1,0 +1,165 @@
+---
+// The roadside scene: a Traditional tunnel mailbox on a cedar post, a gravel
+// road running to the horizon, and a line of telephone poles. Drawn at build
+// time from a fixed seed, so the markup never changes between builds.
+
+function rng(seed: number) {
+  return () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const r = rng(1725);
+const HORIZON = 360;
+const f = (n: number) => Math.round(n * 10) / 10;
+
+// A ragged tree line along the horizon, right of where the road vanishes.
+let trees = `M96 ${HORIZON}`;
+for (let x = 96; x < 404; ) {
+  const w = 6 + r() * 16;
+  const h = 4 + r() * (x > 250 ? 20 : 12);
+  trees += ` Q${f(x + w / 2)} ${f(HORIZON - h * 1.6)} ${f(x + w)} ${f(HORIZON - r() * 2)}`;
+  x += w;
+}
+trees += ` L404 ${HORIZON + 4} L96 ${HORIZON + 4} Z`;
+
+// Telephone poles on the far side of the road, shrinking toward the vanishing point.
+const poles = [0.06, 0.42, 0.64, 0.78, 0.87, 0.925].map((t) => {
+  const x = -18 + (86 - -18) * t;
+  const base = 556 + (HORIZON + 1 - 556) * t;
+  const h = 300 * (1 - t) ** 1.05 + 4;
+  return { x: f(x), base: f(base), top: f(base - h), w: f(Math.max(0.6, 7 * (1 - t))), arm: f(Math.max(1.5, 26 * (1 - t))) };
+});
+const wires = poles.slice(0, -1).map((p, i) => {
+  const q = poles[i + 1];
+  const sag = (p.base - p.top) * 0.08;
+  return [0.12, 0.88].map(
+    (side) => {
+      const ax = p.x - p.arm / 2 + p.arm * side;
+      const bx = q.x - q.arm / 2 + q.arm * side;
+      const ay = p.top + 3 * (p.w / 7);
+      const by = q.top + 3 * (q.w / 7);
+      return `M${f(ax)} ${f(ay)} Q${f((ax + bx) / 2)} ${f((ay + by) / 2 + sag)} ${f(bx)} ${f(by)}`;
+    },
+  );
+}).flat();
+
+// A few stars, only drawn at night.
+const stars = Array.from({ length: 34 }, () => ({ x: f(r() * 400), y: f(r() * 250), s: f(0.4 + r() * 0.9) }));
+
+// Grass tufts along the shoulder.
+let grass = '';
+for (let i = 0; i < 70; i++) {
+  const x = 150 + r() * 260;
+  const y = 470 + r() * 95;
+  const h = 6 + r() * 16;
+  const lean = (r() - 0.5) * 8;
+  grass += `M${f(x)} ${f(y)} q${f(lean / 2)} ${f(-h / 2)} ${f(lean)} ${f(-h)} `;
+}
+---
+
+<svg
+  class="scene"
+  viewBox="0 0 400 560"
+  preserveAspectRatio="xMidYMax slice"
+  role="img"
+  aria-labelledby="box1725-scene-title"
+  data-scene
+>
+  <title id="box1725-scene-title">A black tunnel mailbox on a cedar post at the edge of a gravel road, with HOLLIS stenciled on its side and its red flag down.</title>
+  <defs>
+    <linearGradient id="box1725-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" class="sky-0"></stop>
+      <stop offset="0.55" class="sky-1"></stop>
+      <stop offset="0.66" class="sky-2"></stop>
+    </linearGradient>
+    <linearGradient id="box1725-metal" x1="0" y1="236" x2="0" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5c636c"></stop>
+      <stop offset="0.12" stop-color="#8b939c"></stop>
+      <stop offset="0.3" stop-color="#3a4047"></stop>
+      <stop offset="1" stop-color="#16191d"></stop>
+    </linearGradient>
+    <linearGradient id="box1725-door" x1="0" y1="250" x2="0" y2="318" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4b525a"></stop>
+      <stop offset="0.5" stop-color="#2a2f35"></stop>
+      <stop offset="1" stop-color="#1b1e22"></stop>
+    </linearGradient>
+    <radialGradient id="box1725-inside" cx="182" cy="300" r="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#000"></stop>
+      <stop offset="0.7" stop-color="#05070a"></stop>
+      <stop offset="1" stop-color="#1a1d22"></stop>
+    </radialGradient>
+    <linearGradient id="box1725-cedar" x1="244" y1="0" x2="272" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4a3122"></stop>
+      <stop offset="0.35" stop-color="#7a5539"></stop>
+      <stop offset="1" stop-color="#3b271b"></stop>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="560" fill="url(#box1725-sky)"></rect>
+  <g class="stars">
+    {stars.map((s) => <circle cx={s.x} cy={s.y} r={s.s}></circle>)}
+  </g>
+  <circle class="sun" cx="318" cy="332" r="16"></circle>
+
+  <path class="field" d={`M0 ${HORIZON} L400 ${HORIZON - 4} L400 560 L0 560 Z`}></path>
+  <path class="treeline" d={trees}></path>
+
+  <path class="road" d={`M-40 560 L196 560 L95 ${HORIZON} L89 ${HORIZON} Z`}></path>
+  <path class="shoulder" d={`M196 560 L232 560 L97 ${HORIZON} L95 ${HORIZON} Z`}></path>
+  <path class="centerline" d={`M78 560 L92 ${HORIZON}`}></path>
+
+  <g class="poles">
+    {
+      poles.map((p) => (
+        <g>
+          <rect x={f(p.x - p.w / 2)} y={p.top} width={p.w} height={f(p.base - p.top)}></rect>
+          <rect x={f(p.x - p.arm / 2)} y={f(p.top + 2 * (p.w / 7))} width={p.arm} height={f(Math.max(0.5, p.w / 3))}></rect>
+        </g>
+      ))
+    }
+  </g>
+  <path class="wires" d={wires.join(' ')}></path>
+
+  <path class="grass" d={grass}></path>
+
+  <!-- The post and the board the box sits on. -->
+  <rect class="post" x="244" y="312" width="28" height="260" fill="url(#box1725-cedar)"></rect>
+  <path class="grain" d="M251 330 V560 M258 322 V548 M265 340 V560"></path>
+  <path class="board" d="M156 324 L364 306 L364 314 L156 332 Z"></path>
+
+  <!-- The box: body, the dark mouth behind the door, the door, then the flag. -->
+  <path class="body" d="M182 252 L332 236 A32 32 0 0 1 364 268 V302 L214 318 V284 A32 32 0 0 0 182 252 Z" fill="url(#box1725-metal)"></path>
+  <path class="seam" d="M214 284 L364 268 M214 300 L364 285"></path>
+  <text class="stencil" x="250" y="306" transform="skewY(-6)" textLength="78">HOLLIS</text>
+
+  <g class="mouth" data-mouth>
+    <path d="M150 318 V284 A32 32 0 0 1 214 284 V318 Z" fill="url(#box1725-inside)"></path>
+    <g class="glint" data-glint>
+      <ellipse cx="174" cy="270" rx="2" ry="1.3"></ellipse>
+      <ellipse cx="188" cy="270" rx="2" ry="1.3"></ellipse>
+    </g>
+  </g>
+
+  <g
+    class="door"
+    data-door
+    tabindex="0"
+    role="button"
+    aria-label="The mailbox door. Open it to post a letter, or to take what is waiting."
+  >
+    <path class="door-face" d="M150 318 V284 A32 32 0 0 1 214 284 V318 Z" fill="url(#box1725-door)"></path>
+    <path class="door-rim" d="M153 316 V285 A29 29 0 0 1 211 285 V316"></path>
+    <rect class="latch" x="177" y="246" width="10" height="10" rx="1.5"></rect>
+  </g>
+
+  <g class="flag" data-flag tabindex="0" role="button" aria-label="The red flag. Raise it when there is mail inside to collect.">
+    <rect class="flag-hit" x="222" y="270" width="104" height="36" fill="transparent"></rect>
+    <path class="flag-arm" d="M228 297 L298 290 L298 294 L228 301 Z"></path>
+    <path class="flag-plate" d="M290 280 L318 277 L318 292 L290 295 Z"></path>
+    <circle class="flag-pivot" cx="232" cy="298" r="4"></circle>
+  </g>
+</svg>
