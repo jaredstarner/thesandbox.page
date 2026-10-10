@@ -4,7 +4,7 @@
 // the story so far, and a sign-off. Words in {braces} were cut from the
 // reader's own letter and are pasted back in their handwriting.
 
-import { expand, hash, pick, rng, type Rand, type Rules } from './_grammar';
+import { expand, hash, pick, rng, type Rules } from './_grammar';
 
 export interface LetterIn {
   to: string;
