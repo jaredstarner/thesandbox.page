@@ -1,9 +1,0 @@
-{
-  "title": "Grow a tree",
-  "summary": "Plant a spruce, an oak, or a birch and grow it from seed to ancient tree in 3D, branch by branch, as buds compete for light and space, while it sways and rustles in a breeze you set.",
-  "date": "2026-10-09",
-  "tags": ["webgl2", "three-js", "space-colonization", "web-audio", "popover", "pointer-events"],
-  "requires": ["webgl2"],
-  "issue": 34,
-  "plot": 10
-}
