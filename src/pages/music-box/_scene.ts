@@ -663,13 +663,17 @@ export function drawBench(
     const ring = v.rings[r];
     if (ring) {
       const age = v.now - ring.start;
-      if (age >= 0 && age < 0.25) {
-        const k = 1 - age / 0.25;
-        const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, rowH * 1.1);
-        glow.addColorStop(0, `rgba(255, 220, 140, ${0.8 * k})`);
-        glow.addColorStop(1, 'rgba(255, 200, 120, 0)');
+      if (age >= 0 && age < 0.4) {
+        const k = (1 - age / 0.4) ** 1.5;
+        const R = rowH * 1.4;
+        const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+        glow.addColorStop(0, `rgba(255, 236, 170, ${k})`);
+        glow.addColorStop(0.35, `rgba(255, 200, 110, ${0.55 * k})`);
+        glow.addColorStop(1, 'rgba(255, 180, 90, 0)');
+        ctx.globalCompositeOperation = 'lighter';
         ctx.fillStyle = glow;
-        ctx.fillRect(-rowH * 1.1, -rowH * 1.1, rowH * 2.2, rowH * 2.2);
+        ctx.fillRect(-R, -R, R * 2, R * 2);
+        ctx.globalCompositeOperation = 'source-over';
       }
     }
     ctx.restore();
