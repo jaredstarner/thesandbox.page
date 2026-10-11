@@ -213,6 +213,19 @@ import { TUNES } from './_tunes';
     animation: musicbox-cue 2.4s ease-in-out infinite;
   }
 
+  .musicbox .cue[hidden] {
+    display: none;
+  }
+
+  .musicbox .cue.right {
+    flex-direction: row-reverse;
+    transform: translate(0, -100%);
+  }
+
+  .musicbox .cue.right svg {
+    scale: -1 1;
+  }
+
   .musicbox .cue svg {
     width: 38px;
     height: 38px;

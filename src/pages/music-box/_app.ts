@@ -71,7 +71,7 @@ export function startMusicBox(root: HTMLElement): void {
   let strip: Strip = blankStrip();
   let title = '';
   let s = -LEAD;
-  let crankAngle = -Math.PI / 2;
+  let crankAngle = 0.75;
   let tempo = 84;
   let auto = false;
   let held = false;
@@ -141,12 +141,11 @@ export function startMusicBox(root: HTMLElement): void {
   const placeCue = () => {
     if (!cue || !L) return;
     const { x, y, r } = L.crank;
-    cue.style.left = `${x - r * 0.75}px`;
-    cue.style.top = `${y - r * 0.55}px`;
-    if (L.phone) {
-      cue.style.left = `${x + r + 104}px`;
-      cue.style.top = `${y - r * 0.2}px`;
-    }
+    // Beside the knob's circle, on whichever side has room.
+    const right = L.phone;
+    cue.classList.toggle('right', right);
+    cue.style.left = `${right ? x + r + 18 : x - r - 14}px`;
+    cue.style.top = `${y - r * 0.15}px`;
   };
 
   // --- Playing ---

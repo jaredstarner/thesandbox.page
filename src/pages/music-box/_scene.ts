@@ -34,7 +34,7 @@ const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
 export function layout(w: number, h: number, dpr: number, font: string): Layout {
   const phone = w < 700;
-  const rowH = phone ? clamp((h * 0.4) / 32, 8.5, 12) : clamp((h * 0.52) / 32, 10, 15.5);
+  const rowH = phone ? clamp((h * 0.48) / 32, 8.5, 13) : clamp((h * 0.52) / 32, 10, 15.5);
   const margin = rowH * 1.3;
   const stripH = ROWS * rowH + margin * 2;
   const colW = rowH * 1.3;
@@ -46,7 +46,7 @@ export function layout(w: number, h: number, dpr: number, font: string): Layout 
   const heel = rowH * 2.3;
   const combLeft = tipX - longest - heel;
   const frameLeft = combLeft - rowH * 0.9;
-  const frameRight = play + rowH * 1.5;
+  const frameRight = play + rowH * 1.9;
   const frameTop = stripTop - rowH * 1.1;
   const frameBottom = stripTop + stripH + rowH * 1.1;
   const r = phone ? 50 : clamp(rowH * 3.4, 40, 54);
@@ -250,6 +250,16 @@ export function paintMovement(L: Layout): HTMLCanvasElement {
   ctx.beginPath();
   ctx.roundRect(fx + 0.5, fy + 0.5, fw - 1, fh - 1, rowH * 0.5);
   ctx.stroke();
+  // An engraved border, cut a little in from the edge.
+  const inset = rowH * 0.32;
+  ctx.strokeStyle = 'rgba(70, 45, 12, 0.55)';
+  ctx.beginPath();
+  ctx.roundRect(fx + inset, fy + inset, fw - inset * 2, fh - inset * 2, rowH * 0.3);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(255, 236, 190, 0.35)';
+  ctx.beginPath();
+  ctx.roundRect(fx + inset + 1, fy + inset + 1, fw - inset * 2, fh - inset * 2, rowH * 0.3);
+  ctx.stroke();
 
   // A window over the drum, where the paper shows as it rolls past the star wheels.
   const wx0 = L.tipX - 1;
@@ -308,7 +318,7 @@ export function paintMovement(L: Layout): HTMLCanvasElement {
   ctx.restore();
 
   // Slots between teeth, each as deep as the longer of its neighbours.
-  const slot = Math.max(1.1, rowH * 0.16);
+  const slot = Math.max(1, rowH * 0.11);
   for (let b = 0; b <= ROWS; b++) {
     const y = L.gridTop + b * rowH;
     const depth = Math.max(b > 0 ? toothLength(L, b - 1) : 0, b < ROWS ? toothLength(L, b) : 0);
@@ -324,11 +334,22 @@ export function paintMovement(L: Layout): HTMLCanvasElement {
     ctx.fillStyle = '#1d1712';
     ctx.fill();
   }
-  // Tooth tips, slightly rounded and darker where the star wheels wear them.
+  // Each tooth is a slightly rounded bar: a specular line along it, shade along its lower edge,
+  // and a dull worn patch at the tip where the star wheels strike.
   for (let r = 0; r < ROWS; r++) {
     const y = rowY(L, r);
-    ctx.fillStyle = 'rgba(40, 40, 40, 0.35)';
-    ctx.fillRect(L.tipX - rowH * 0.25, y - rowH * 0.32, rowH * 0.25, rowH * 0.64);
+    const x0 = L.tipX - toothLength(L, r);
+    const len = L.tipX - x0;
+    const shine = ctx.createLinearGradient(x0, 0, L.tipX, 0);
+    shine.addColorStop(0, 'rgba(255, 255, 255, 0)');
+    shine.addColorStop(0.5, 'rgba(255, 255, 255, 0.55)');
+    shine.addColorStop(1, 'rgba(255, 255, 255, 0.2)');
+    ctx.fillStyle = shine;
+    ctx.fillRect(x0, y - rowH * 0.2, len, Math.max(0.8, rowH * 0.09));
+    ctx.fillStyle = 'rgba(30, 34, 38, 0.16)';
+    ctx.fillRect(x0, y + rowH * 0.12, len, rowH * 0.3);
+    ctx.fillStyle = 'rgba(60, 55, 50, 0.3)';
+    ctx.fillRect(L.tipX - rowH * 0.32, y - rowH * 0.36, rowH * 0.32, rowH * 0.72);
   }
 
   // Engraved pitch at the root of each tooth.
@@ -471,7 +492,7 @@ export function drawBench(
         ctx.lineWidth = bar ? 1.1 : 0.8;
       } else {
         ctx.setLineDash([1.5, 2.5]);
-        ctx.strokeStyle = INK + '0.3)';
+        ctx.strokeStyle = INK + '0.2)';
         ctx.lineWidth = 0.8;
       }
       ctx.beginPath();
@@ -532,14 +553,19 @@ export function drawBench(
     }
 
     // Holes, and tape over the ones taken back.
-    const hr = Math.min(rowH, colW) * 0.34;
+    const hr = Math.min(rowH, colW) * 0.36;
     for (let c = Math.max(0, cFirst); c <= Math.min(strip.length - 1, cLast); c++) {
       const x = colX(L, c, s);
       for (let r = 0; r < ROWS; r++) {
         const state = strip.cells[c * ROWS + r];
         if (!state) continue;
         const y = rowY(L, r);
-        ctx.fillStyle = '#21150d';
+        // Through the hole: the dark of whatever lies below, deepest under the near edge.
+        const deep = ctx.createRadialGradient(x + hr * 0.35, y + hr * 0.35, 0, x, y, hr);
+        deep.addColorStop(0, '#4a2f1c');
+        deep.addColorStop(0.7, '#2a1a0f');
+        deep.addColorStop(1, '#150c06');
+        ctx.fillStyle = deep;
         ctx.beginPath();
         ctx.arc(x, y, hr, 0, Math.PI * 2);
         ctx.fill();
@@ -558,15 +584,25 @@ export function drawBench(
           ctx.save();
           ctx.translate(x, y);
           ctx.rotate(tilt);
-          const tw = colW * 1.05;
-          const th = rowH * 1.25;
-          ctx.fillStyle = 'rgba(232, 220, 175, 0.86)';
-          ctx.fillRect(-tw / 2, -th / 2, tw, th);
-          ctx.strokeStyle = 'rgba(160, 140, 90, 0.45)';
-          ctx.lineWidth = 0.7;
-          ctx.strokeRect(-tw / 2, -th / 2, tw, th);
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
-          ctx.fillRect(-tw / 2, -th / 2, tw, th * 0.3);
+          // A strip of yellowed tape laid across the row, its ends torn.
+          const tw = colW * 1.5;
+          const th = rowH * 1.05;
+          ctx.save();
+          ctx.shadowColor = 'rgba(80, 50, 20, 0.35)';
+          ctx.shadowBlur = 2;
+          ctx.shadowOffsetY = 0.5;
+          ctx.fillStyle = 'rgba(226, 196, 120, 0.82)';
+          ctx.beginPath();
+          ctx.moveTo(-tw / 2, -th / 2);
+          ctx.lineTo(tw / 2, -th / 2);
+          for (let k = 1; k <= 4; k++) ctx.lineTo(tw / 2 + (k % 2 ? 1.6 : 0), -th / 2 + (th * k) / 4);
+          ctx.lineTo(-tw / 2, th / 2);
+          for (let k = 3; k >= 0; k--) ctx.lineTo(-tw / 2 - (k % 2 ? 1.6 : 0), -th / 2 + (th * k) / 4);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+          ctx.fillStyle = 'rgba(255, 250, 225, 0.35)';
+          ctx.fillRect(-tw / 2, -th / 2, tw, th * 0.28);
           ctx.restore();
         }
       }
@@ -607,14 +643,34 @@ export function drawBench(
     ctx.save();
     ctx.translate(cx, cy);
     // Seen from above, a wheel standing on edge: a thin brass blade whose points pass by.
-    ctx.fillStyle = '#7b5b26';
-    ctx.fillRect(-wr, -rowH * 0.12, wr * 2, rowH * 0.24);
+    const blade = ctx.createLinearGradient(0, -rowH * 0.16, 0, rowH * 0.16);
+    blade.addColorStop(0, '#f1d48e');
+    blade.addColorStop(0.5, '#a57d36');
+    blade.addColorStop(1, '#5d4217');
+    ctx.fillStyle = blade;
+    ctx.beginPath();
+    ctx.roundRect(-wr, -rowH * 0.15, wr * 2, rowH * 0.3, rowH * 0.15);
+    ctx.fill();
     for (let k = 0; k < 6; k++) {
       const a = spin + (k * Math.PI) / 3;
+      const up = Math.sin(a);
+      if (up < 0) continue;
       const px = Math.cos(a) * wr;
-      if (Math.sin(a) < 0) continue;
-      ctx.fillStyle = `rgba(245, 214, 140, ${0.35 + 0.65 * Math.sin(a)})`;
-      ctx.fillRect(px - 0.9, -rowH * 0.17, 1.8, rowH * 0.34);
+      ctx.fillStyle = `rgba(255, 236, 180, ${0.25 + 0.75 * up})`;
+      ctx.fillRect(px - 1, -rowH * 0.2, 2, rowH * 0.4);
+    }
+    // A brief glint where a point comes up through a hole and picks.
+    const ring = v.rings[r];
+    if (ring) {
+      const age = v.now - ring.start;
+      if (age >= 0 && age < 0.25) {
+        const k = 1 - age / 0.25;
+        const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, rowH * 1.1);
+        glow.addColorStop(0, `rgba(255, 220, 140, ${0.8 * k})`);
+        glow.addColorStop(1, 'rgba(255, 200, 120, 0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(-rowH * 1.1, -rowH * 1.1, rowH * 2.2, rowH * 2.2);
+      }
     }
     ctx.restore();
   }
@@ -683,28 +739,30 @@ function drawCrank(ctx: CanvasRenderingContext2D, L: Layout, v: View) {
   const a = v.crankAngle;
   const kx = x + Math.cos(a) * r;
   const ky = y + Math.sin(a) * r;
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = '#8c6a2c';
-  ctx.lineWidth = 11;
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(kx, ky);
-  ctx.stroke();
+  // A flat brass arm, broad at the hub and narrowing to the knob.
+  const nx = -Math.sin(a);
+  const ny = Math.cos(a);
+  const arm = () => {
+    ctx.beginPath();
+    ctx.moveTo(x + nx * 9, y + ny * 9);
+    ctx.lineTo(kx + nx * 5.5, ky + ny * 5.5);
+    ctx.arc(kx, ky, 5.5, a + Math.PI / 2, a - Math.PI / 2, true);
+    ctx.lineTo(x - nx * 9, y - ny * 9);
+    ctx.arc(x, y, 9, a - Math.PI / 2, a + Math.PI / 2, true);
+    ctx.closePath();
+  };
+  ctx.fillStyle = '#8c6a2c';
+  arm();
+  ctx.fill();
   ctx.restore();
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = '#d9b46a';
-  ctx.lineWidth = 8;
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(kx, ky);
-  ctx.stroke();
-  ctx.strokeStyle = 'rgba(255, 240, 200, 0.6)';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(x - Math.sin(a) * 2, y + Math.cos(a) * -2);
-  ctx.lineTo(kx - Math.sin(a) * 2, ky + Math.cos(a) * -2);
-  ctx.stroke();
-  ctx.lineCap = 'butt';
+  const armShine = ctx.createLinearGradient(x + nx * 9, y + ny * 9, x - nx * 9, y - ny * 9);
+  armShine.addColorStop(0, '#7a5a22');
+  armShine.addColorStop(0.35, '#f2d690');
+  armShine.addColorStop(0.6, '#c49b50');
+  armShine.addColorStop(1, '#6b4d1c');
+  ctx.fillStyle = armShine;
+  arm();
+  ctx.fill();
 
   // Hub.
   const hub = ctx.createRadialGradient(x - 4, y - 4, 1, x, y, 13);
@@ -715,6 +773,9 @@ function drawCrank(ctx: CanvasRenderingContext2D, L: Layout, v: View) {
   ctx.beginPath();
   ctx.arc(x, y, 12, 0, Math.PI * 2);
   ctx.fill();
+  ctx.strokeStyle = 'rgba(60, 40, 10, 0.6)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
   screw(ctx, x, y, 4.5, a);
 
   // Turned walnut knob.
