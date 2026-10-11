@@ -150,43 +150,5 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['cursive'],
     },
-    {
-      // The field-guide labels on /grow-a-tree/.
-      provider: fontProviders.fontsource(),
-      name: 'Spectral',
-      cssVariable: '--font-tree',
-      weights: [300, 400, 600],
-      styles: ['normal', 'italic'],
-      subsets: ['latin'],
-      fallbacks: ['Georgia', 'serif'],
-    },
-    // The case file on /box-1725/: its typewriter, the reader's hand, and a headline face for the cut-out replies.
-    {
-      provider: fontProviders.fontsource(),
-      name: 'Special Elite',
-      cssVariable: '--font-box-type',
-      weights: [400],
-      styles: ['normal'],
-      subsets: ['latin'],
-      fallbacks: ['Courier New', 'monospace'],
-    },
-    {
-      provider: fontProviders.fontsource(),
-      name: 'Reenie Beanie',
-      cssVariable: '--font-box-hand',
-      weights: [400],
-      styles: ['normal'],
-      subsets: ['latin'],
-      fallbacks: ['cursive'],
-    },
-    {
-      provider: fontProviders.fontsource(),
-      name: 'Abril Fatface',
-      cssVariable: '--font-box-headline',
-      weights: [400],
-      styles: ['normal'],
-      subsets: ['latin'],
-      fallbacks: ['Georgia', 'serif'],
-    },
   ],
 });
