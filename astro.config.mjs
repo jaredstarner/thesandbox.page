@@ -150,5 +150,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['cursive'],
     },
+    {
+      // The engraved and printed lettering on /music-box/.
+      provider: fontProviders.fontsource(),
+      name: 'Cormorant Garamond',
+      cssVariable: '--font-musicbox',
+      weights: ['300 700'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Garamond', 'Georgia', 'serif'],
+    },
   ],
 });

@@ -1,0 +1,485 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { TUNES } from './_tunes';
+---
+
+<Bare
+  title="Music box"
+  description="A thirty-note paper-strip music box: punch holes in the strip, turn the crank, and hear each steel tooth ring."
+>
+  <Font cssVariable="--font-musicbox" slot="head" />
+
+  <main class="musicbox" data-musicbox>
+    <canvas
+      class="bench"
+      data-bench
+      aria-label="A paper-strip music box on a walnut table. The paper strip runs through a steel comb; click the strip to punch holes and drag the crank to play."
+    ></canvas>
+
+    <header class="label">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Music box</h1>
+      <p class="dek" data-tune-title>Thirty notes, one strip of paper</p>
+    </header>
+
+    <p class="cue" data-cue hidden>
+      <span>Turn the crank</span>
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 10 C 14 4, 30 6, 33 20 M 33 20 l -6 -3 M 33 20 l 3 -6" /></svg>
+    </p>
+
+    <p class="note" data-note aria-live="polite"></p>
+
+    <nav class="drawer" aria-label="Music box controls">
+      <button type="button" popovertarget="mb-tunes" title="Load a punched tune">Tunes</button>
+      <span class="rule" aria-hidden="true"></span>
+      <button type="button" class="turn" data-auto aria-pressed="false" title="Turn the crank steadily (hold Space to turn it yourself)">
+        <span class="lamp" aria-hidden="true"></span>Turn for me
+      </button>
+      <label class="tempo" title="How fast the crank turns">
+        <span class="vh">Tempo</span>
+        <input type="range" min="48" max="160" step="1" value="84" data-tempo />
+        <output data-tempo-out>84</output>
+      </label>
+      <button type="button" data-rewind title="Pull the strip back to its start">Rewind</button>
+      <span class="rule" aria-hidden="true"></span>
+      <button type="button" data-extend title="Glue another length of paper to the end">Add paper</button>
+      <button type="button" data-blank title="Feed in a fresh, unpunched strip">New strip</button>
+      <button type="button" data-share title="Copy a link that carries this strip">Share</button>
+      <span class="rule" aria-hidden="true"></span>
+      <button type="button" data-table aria-pressed="true" title="A box pressed to wood is louder and fuller">On the table</button>
+      <button type="button" class="about" popovertarget="mb-notes" aria-label="About the music box">?</button>
+    </nav>
+
+    <div class="pop" id="mb-tunes" popover>
+      <h2>Punched strips</h2>
+      <ul>
+        {
+          TUNES.map((tune) => (
+            <li>
+              <button type="button" data-tune={tune.id} popovertarget="mb-tunes" popovertargetaction="hide">
+                <span class="name">{tune.title}</span>
+                <span class="by">{tune.by}</span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="pop notes" id="mb-notes" popover>
+      <h2>How the comb sings</h2>
+      <p>
+        Each tooth of the steel comb is a little cantilever, clamped at the heel and free at the tip. Its pitch falls with
+        the square of its length, so the bass teeth reach furthest back into the comb.
+      </p>
+      <p>
+        A tooth's overtones are not harmonics. Its second way of bending rings about 6.3 times higher than the first, and
+        its third about 17.5 times. That out-of-tune shimmer above the note, dying away much faster than the note itself,
+        is the sound of a music box.
+      </p>
+      <p>
+        Every hole in the strip lets a star wheel rise and flick its tooth. Punch the same note twice in quick succession
+        and the second pick catches the tooth still swinging: listen for the buzz.
+      </p>
+      <p>
+        Hold a music box in the air and it is thin and quiet. Set it on a table and the wood becomes its soundboard.
+      </p>
+      <p>
+        This comb runs from C3 to B5: chromatic in the upper two octaves except for the D-sharps, and a plain scale with a
+        B-flat in the lowest.
+      </p>
+      <h3>At the bench</h3>
+      <ul>
+        <li>Click the paper to punch a hole. A hole cannot be unpunched; click it again to tape it over</li>
+        <li>Drag the crank clockwise, or hold Space. It will not turn backwards</li>
+        <li>Drag the strip, scroll, or use the arrow keys to slide it along</li>
+        <li>Share copies a link that carries the whole strip</li>
+      </ul>
+      <h3>The strips</h3>
+      <p>Arranged for this comb from Johannes Brahms (1868), Erik Satie (1888), and an English tune of the 1580s.</p>
+    </div>
+
+    <noscript>
+      <p class="note">The music box is drawn and played with JavaScript. Turn scripts on to punch a strip.</p>
+      <style is:inline>
+        .musicbox .drawer,
+        .musicbox .bench {
+          display: none;
+        }
+      </style>
+    </noscript>
+  </main>
+</Bare>
+
+<script>
+  import { startMusicBox } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-musicbox]');
+  if (root) startMusicBox(root);
+</script>
+
+<style is:global>
+  body:has(.musicbox) {
+    margin: 0;
+    background: #1d140f;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .musicbox {
+    --wood: #1d140f;
+    --cream: #f1e6cc;
+    --cream-soft: rgb(241 230 204 / 0.68);
+    --brass: #c9a35b;
+    --brass-deep: #8a6a2e;
+    --ink: #2a1b12;
+    --face: var(--font-musicbox, 'Cormorant Garamond', Garamond, Georgia, serif);
+
+    position: fixed;
+    inset: 0;
+    overflow: clip;
+    color: var(--cream);
+    font-family: var(--face);
+    font-size: 17px;
+    line-height: 1.35;
+    background: var(--wood);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .musicbox .bench {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .musicbox .label {
+    position: absolute;
+    left: clamp(16px, 3vw, 40px);
+    top: clamp(14px, 3vh, 34px);
+    pointer-events: none;
+  }
+
+  .musicbox .label a {
+    pointer-events: auto;
+  }
+
+  .musicbox .home {
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cream-soft);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .musicbox .home:hover,
+  .musicbox .home:focus-visible {
+    color: var(--brass);
+  }
+
+  .musicbox h1 {
+    margin: 0.1em 0 0;
+    font-size: clamp(34px, 4.4vw, 58px);
+    font-weight: 500;
+    font-style: italic;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: #f4e9cf;
+  }
+
+  .musicbox .dek {
+    margin: 0.35em 0 0;
+    font-size: clamp(15px, 1.4vw, 19px);
+    color: var(--cream-soft);
+  }
+
+  .musicbox .cue {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    font-style: italic;
+    font-size: 19px;
+    color: var(--cream);
+    pointer-events: none;
+    transform: translate(-100%, -100%);
+    animation: musicbox-cue 2.4s ease-in-out infinite;
+  }
+
+  .musicbox .cue[hidden] {
+    display: none;
+  }
+
+  .musicbox .cue.right {
+    flex-direction: row-reverse;
+    transform: translate(0, -100%);
+  }
+
+  .musicbox .cue.right svg {
+    scale: -1 1;
+  }
+
+  .musicbox .cue svg {
+    width: 38px;
+    height: 38px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  @keyframes musicbox-cue {
+    50% {
+      translate: 4px 3px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .musicbox .cue {
+      animation: none;
+    }
+  }
+
+  .musicbox .note {
+    position: absolute;
+    left: 50%;
+    top: clamp(16px, 3.4vh, 38px);
+    translate: -50% 0;
+    margin: 0;
+    padding: 0.3em 0.9em;
+    font-size: 16px;
+    font-style: italic;
+    color: var(--cream);
+    background: rgb(20 13 9 / 0.72);
+    border: 1px solid rgb(201 163 91 / 0.35);
+    border-radius: 999px;
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .musicbox .note.on {
+    opacity: 1;
+  }
+
+  .musicbox .drawer {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(10px, 2.2vh, 24px);
+    translate: -50% 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px;
+    max-width: calc(100vw - 20px);
+    box-sizing: border-box;
+    background: linear-gradient(#2b1e16, #21170f);
+    border: 1px solid rgb(201 163 91 / 0.3);
+    border-radius: 12px;
+    box-shadow:
+      0 1px 0 rgb(255 230 180 / 0.08) inset,
+      0 10px 30px rgb(0 0 0 / 0.45);
+  }
+
+  .musicbox .drawer button,
+  .musicbox .pop button {
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--cream);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 0.32em 0.7em;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .musicbox .drawer button:hover,
+  .musicbox .drawer button:focus-visible {
+    background: rgb(241 230 204 / 0.08);
+    border-color: rgb(201 163 91 / 0.35);
+    outline: none;
+  }
+
+  .musicbox .drawer button[aria-pressed='true'] {
+    color: #f7d998;
+  }
+
+  .musicbox .turn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+  }
+
+  .musicbox .lamp {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4c3a2a;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.4);
+  }
+
+  .musicbox .turn[aria-pressed='true'] .lamp {
+    background: #ffc867;
+    box-shadow: 0 0 8px #ffb840;
+  }
+
+  .musicbox .rule {
+    width: 1px;
+    align-self: stretch;
+    margin: 4px 3px;
+    background: rgb(201 163 91 / 0.25);
+  }
+
+  .musicbox .tempo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 4px;
+  }
+
+  .musicbox .tempo input {
+    width: 92px;
+    accent-color: var(--brass);
+  }
+
+  .musicbox .tempo output {
+    min-width: 2.2em;
+    font-variant-numeric: tabular-nums;
+    font-size: 15px;
+    color: var(--cream-soft);
+  }
+
+  .musicbox .about {
+    width: 2em;
+    padding-inline: 0 !important;
+    font-style: italic;
+  }
+
+  .musicbox .vh {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .musicbox .pop {
+    margin: auto;
+    max-width: min(460px, calc(100vw - 32px));
+    max-height: calc(100dvh - 40px);
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 22px 26px 24px;
+    color: var(--ink);
+    font-family: var(--face);
+    font-size: 17px;
+    line-height: 1.42;
+    background: #f1e6cc;
+    border: 0;
+    border-radius: 3px;
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.55);
+  }
+
+  .musicbox .pop::backdrop {
+    background: rgb(12 8 5 / 0.45);
+  }
+
+  .musicbox .pop h2 {
+    margin: 0 0 0.5em;
+    font-size: 27px;
+    font-weight: 500;
+    font-style: italic;
+    line-height: 1.1;
+  }
+
+  .musicbox .pop h3 {
+    margin: 1.1em 0 0.3em;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #8c3f2b;
+  }
+
+  .musicbox .pop p {
+    margin: 0 0 0.7em;
+  }
+
+  .musicbox .pop ul {
+    margin: 0;
+    padding-left: 1.1em;
+  }
+
+  .musicbox .pop li {
+    margin: 0.2em 0;
+  }
+
+  .musicbox #mb-tunes ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .musicbox #mb-tunes button {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    padding: 0.55em 0.75em;
+    color: var(--ink);
+    text-align: left;
+    border-radius: 3px;
+    border-bottom: 1px dashed rgb(140 63 43 / 0.35);
+  }
+
+  .musicbox #mb-tunes button:hover,
+  .musicbox #mb-tunes button:focus-visible {
+    background: rgb(140 63 43 / 0.08);
+    outline: none;
+  }
+
+  .musicbox #mb-tunes .name {
+    font-size: 21px;
+    font-weight: 600;
+    font-style: italic;
+  }
+
+  .musicbox #mb-tunes .by {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgb(42 27 18 / 0.7);
+  }
+
+  @media (max-width: 760px) {
+    .musicbox .drawer {
+      flex-wrap: wrap;
+      justify-content: center;
+      width: calc(100vw - 20px);
+      gap: 2px;
+    }
+
+    .musicbox .drawer .rule {
+      display: none;
+    }
+
+    .musicbox .drawer button {
+      font-size: 15px;
+      padding: 0.3em 0.55em;
+    }
+
+    .musicbox .tempo input {
+      width: 76px;
+    }
+  }
+</style>

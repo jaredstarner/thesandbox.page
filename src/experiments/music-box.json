@@ -1,0 +1,8 @@
+{
+  "title": "Music box",
+  "summary": "A thirty-note paper-strip music box on a walnut table: punch holes in the strip, turn the crank, and every hole plucks a steel tooth that rings with its own inharmonic overtones.",
+  "date": "2026-10-11",
+  "tags": ["canvas", "web-audio", "pointer-events", "popover", "modal-synthesis", "physics"],
+  "requires": ["canvas", "web-audio"],
+  "plot": 10
+}
