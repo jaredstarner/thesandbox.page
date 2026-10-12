@@ -160,5 +160,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Garamond', 'Georgia', 'serif'],
     },
+    // The bindery lettering on /marbling/: Fell's English roman and its small capitals.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'IM Fell English',
+      cssVariable: '--font-marbling',
+      weights: [400],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Garamond', 'Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'IM Fell English SC',
+      cssVariable: '--font-marbling-sc',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Garamond', 'Georgia', 'serif'],
+    },
   ],
 });

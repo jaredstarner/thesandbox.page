@@ -1,0 +1,8 @@
+{
+  "title": "Marbling",
+  "summary": "A marbler's trough of size: float drops of pigment, draw a stylus, rake, or comb through them, and lay a sheet of paper down to pull a print of every vein.",
+  "date": "2026-10-12",
+  "tags": ["canvas", "pointer-events", "popover", "svg", "physics"],
+  "requires": ["canvas"],
+  "plot": 11
+}

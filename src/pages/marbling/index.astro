@@ -1,0 +1,838 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { PIGMENTS } from './_pigments';
+import { RECIPES } from './_recipes';
+---
+
+<Bare
+  title="Marbling"
+  description="A marbler's trough: float drops of colour on size, draw a stylus, rake, or comb through them, and pull a print."
+>
+  <Font cssVariable="--font-marbling" slot="head" />
+  <Font cssVariable="--font-marbling-sc" slot="head" />
+
+  <main class="marbling" data-marbling>
+    <header class="mast">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Marbling</h1>
+      <p class="dek">Float colour on size, draw it into veins, and pull a print</p>
+    </header>
+
+    <section class="line" aria-label="Prints drying on the line">
+      <svg class="string" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 6 Q 500 30 1000 6" />
+      </svg>
+      <ol class="prints" data-prints></ol>
+      <p class="empty" data-empty>Pulled prints hang here to dry</p>
+    </section>
+
+    <div class="stage" data-stage>
+      <canvas
+        class="tray"
+        data-tray
+        aria-label="A zinc marbling trough filled with size. Drop colour onto it and drag tools through the colour."
+      ></canvas>
+    </div>
+
+    <p class="caption" data-caption aria-live="polite"></p>
+
+    <aside class="bench" aria-label="Colours and tools">
+      <fieldset class="pots">
+        <legend>Colour</legend>
+        <div class="potgrid">
+          {
+            PIGMENTS.map((p, i) => (
+              <label class="pot" title={p.name} style={`--c: ${p.hex}`}>
+                <input type="radio" name="mb-pot" value={p.id} checked={i === 1} />
+                <span class="well" aria-hidden="true" />
+                <span class="vh">{p.name}</span>
+              </label>
+            ))
+          }
+          <label class="pot gall" title="Gall water: a clear drop that pushes colour aside">
+            <input type="radio" name="mb-pot" value="gall" />
+            <span class="well" aria-hidden="true"></span>
+            <span class="vh">Gall water</span>
+          </label>
+        </div>
+        <p class="potname" data-potname>Indigo</p>
+      </fieldset>
+
+      <fieldset class="tools">
+        <legend>Tool</legend>
+        <div class="toolrow">
+          <label class="tool" title="Drop (1): hold to let the drop spread">
+            <input type="radio" name="mb-tool" value="drop" checked />
+            <svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 4 C 10 11, 7 14.5, 7 18 a 7 7 0 0 0 14 0 C 21 14.5, 18 11, 14 4 Z" /><path class="fine" d="M10.5 18.5 a 3.5 3.5 0 0 0 3 3.2" /></svg>
+            <span>Drop</span>
+          </label>
+          <label class="tool" title="Sprinkle (2): flick a brush to scatter small drops">
+            <input type="radio" name="mb-tool" value="sprinkle" />
+            <svg viewBox="0 0 28 28" aria-hidden="true"><path d="M5 23 L 13 15" /><path d="M13 15 L 19 7 M13 15 L 21 10 M13 15 L 17 6 M13 15 L 22 13" /><circle class="dot" cx="22" cy="4.5" r="1.1" /><circle class="dot" cx="25" cy="9" r="0.9" /><circle class="dot" cx="24.5" cy="16" r="1" /></svg>
+            <span>Sprinkle</span>
+          </label>
+          <label class="tool" title="Stylus (3): a single pin drawn through the colour">
+            <input type="radio" name="mb-tool" value="stylus" />
+            <svg viewBox="0 0 28 28" aria-hidden="true"><path d="M5 23 L 9 19" /><path class="handle" d="M9 19 L 15 13" /><path class="fine" d="M15 13 L 23 5" /></svg>
+            <span>Stylus</span>
+          </label>
+          <label class="tool" title="Rake (4): wide-set pins across the whole trough">
+            <input type="radio" name="mb-tool" value="rake" />
+            <svg viewBox="0 0 28 28" aria-hidden="true"><path class="handle" d="M3 8 H 25" /><path class="fine" d="M5 8 V 22 M11 8 V 22 M17 8 V 22 M23 8 V 22" /></svg>
+            <span>Rake</span>
+          </label>
+          <label class="tool" title="Comb (5): fine teeth across the whole trough">
+            <input type="radio" name="mb-tool" value="comb" />
+            <svg viewBox="0 0 28 28" aria-hidden="true"><path class="handle" d="M3 9 H 25" /><path class="fine" d="M4.5 9 V 18 M7.5 9 V 18 M10.5 9 V 18 M13.5 9 V 18 M16.5 9 V 18 M19.5 9 V 18 M22.5 9 V 18" /></svg>
+            <span>Comb</span>
+          </label>
+        </div>
+        <label class="straight">
+          <input type="checkbox" data-straight checked />
+          <span>Run rake and comb along the trough's sides</span>
+        </label>
+      </fieldset>
+
+      <div class="acts">
+        <button type="button" popovertarget="mb-patterns">Patterns</button>
+        <button type="button" data-undo disabled title="Undo (Z)">Undo</button>
+        <button type="button" data-skim title="Skim the size clean">Skim</button>
+      </div>
+
+      <button type="button" class="lay" data-lay title="Lay a sheet of paper on the size (P)">Lay paper</button>
+      <button type="button" class="about" popovertarget="mb-notes">About the trough</button>
+    </aside>
+
+    <div class="pop" id="mb-patterns" popover>
+      <h2>Patterns</h2>
+      <p class="hint">Watch one made from a fresh ground, then work into it yourself.</p>
+      <ul>
+        {
+          RECIPES.map((r) => (
+            <li>
+              <button type="button" data-recipe={r.id} popovertarget="mb-patterns" popovertargetaction="hide">
+                <span class="name">{r.name}</span>
+                <span class="by">{r.line}</span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="pop notes" id="mb-notes" popover>
+      <h2>On the trough</h2>
+      <p>
+        Marbled paper is printed from colour floating on size, water thickened with seaweed. Each drop spreads into a thin
+        film and shoulders every film already there out of its way, so the first colours thrown end up squeezed into veins
+        between the last.
+      </p>
+      <p>
+        Nothing on this trough is painted pixel by pixel. Every film is an outline, and every drop and stroke is an exact
+        transformation of the surface, after Aubrey Jaffer's mathematical marbling. A drop moves each point straight out
+        from its centre just far enough to make room for its own area. A tine slides each point along its path, less the
+        further the point lies from it. Outlines are cut finer as they stretch, so the veins stay sharp at any size, and a
+        print can be saved as vectors.
+      </p>
+      <p>
+        Paper laid face down on the size comes up as the trough's mirror image, so your print reads the other way round.
+      </p>
+      <p class="keys">Keys: 1 to 5 choose a tool, Z undoes, P lays paper, Esc stops a pattern.</p>
+    </div>
+
+    <dialog class="viewer" data-viewer aria-label="A pulled print">
+      <div class="sheet" data-sheet></div>
+      <div class="viewbar">
+        <p class="viewtitle" data-viewtitle></p>
+        <button type="button" data-png>Save as PNG</button>
+        <button type="button" data-svg>Save as SVG</button>
+        <button type="button" data-close>Back to the trough</button>
+      </div>
+    </dialog>
+  </main>
+</Bare>
+
+<script>
+  import { startMarbling } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-marbling]');
+  if (root) startMarbling(root);
+</script>
+
+<style is:global>
+  body:has(.marbling) {
+    margin: 0;
+    background: #ebe3d1;
+  }
+
+  .marbling {
+    --ink: #2b2520;
+    --soft: #6f6253;
+    --rule: #c3b496;
+    --paper: #f1eadb;
+    --ox: #7c2b20;
+    --fell: var(--font-marbling), Garamond, Georgia, serif;
+    --sc: var(--font-marbling-sc), Garamond, Georgia, serif;
+    box-sizing: border-box;
+    min-height: 100dvh;
+    height: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 248px;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'mast mast'
+      'line line'
+      'stage bench'
+      'caption bench';
+    column-gap: 28px;
+    padding: 18px 28px 14px;
+    color: var(--ink);
+    font-family: var(--fell);
+    font-size: 17px;
+    /* Laid paper: close wire lines and wide-set chain lines. */
+    background:
+      repeating-linear-gradient(90deg, transparent 0 118px, rgb(120 96 60 / 0.06) 118px 120px, transparent 120px 148px),
+      repeating-linear-gradient(0deg, transparent 0 2px, rgb(120 96 60 / 0.035) 2px 3px),
+      #ebe3d1;
+  }
+
+  .marbling *,
+  .marbling *::before,
+  .marbling *::after {
+    box-sizing: border-box;
+  }
+
+  .marbling .vh {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .marbling [hidden] {
+    display: none !important;
+  }
+
+  .marbling .mast {
+    grid-area: mast;
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .marbling .home {
+    order: 3;
+    margin-left: auto;
+    font-family: var(--sc);
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    color: var(--soft);
+    text-decoration: none;
+  }
+
+  .marbling .home:hover,
+  .marbling .home:focus-visible {
+    color: var(--ox);
+  }
+
+  .marbling h1 {
+    margin: 0;
+    font-family: var(--fell);
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 1;
+    letter-spacing: -0.005em;
+  }
+
+  .marbling .dek {
+    margin: 0;
+    font-style: italic;
+    color: var(--soft);
+    font-size: 18px;
+  }
+
+  /* The drying line. */
+  .marbling .line {
+    grid-area: line;
+    position: relative;
+    height: 132px;
+    margin: 8px 0 12px;
+  }
+
+  .marbling .string {
+    position: absolute;
+    inset: 4px 0 auto;
+    width: 100%;
+    height: 40px;
+    overflow: visible;
+  }
+
+  .marbling .string path {
+    fill: none;
+    stroke: #8b7a60;
+    stroke-width: 1.4;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .marbling .empty {
+    position: absolute;
+    top: 46px;
+    left: 0;
+    right: 0;
+    margin: 0;
+    text-align: center;
+    font-style: italic;
+    color: var(--soft);
+    opacity: 0.8;
+  }
+
+  .marbling .prints {
+    position: relative;
+    display: flex;
+    gap: 22px;
+    margin: 0;
+    padding: 0 8px;
+    list-style: none;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .marbling .prints li {
+    position: relative;
+    flex: none;
+    padding-top: 10px;
+    transform-origin: 50% 0;
+    rotate: var(--tilt, 0deg);
+    translate: 0 var(--sag, 0px);
+  }
+
+  .marbling .prints li[data-landing] {
+    visibility: hidden;
+  }
+
+  .marbling .prints button {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+
+  .marbling .prints canvas {
+    display: block;
+    height: 104px;
+    width: auto;
+    box-shadow:
+      0 1px 1px rgb(60 40 20 / 0.18),
+      0 8px 14px -6px rgb(60 40 20 / 0.35);
+  }
+
+  .marbling .prints button:focus-visible canvas {
+    outline: 2px solid var(--ox);
+    outline-offset: 3px;
+  }
+
+  /* A wooden clothes peg. */
+  .marbling .peg {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 9px;
+    height: 26px;
+    margin-left: -4.5px;
+    border-radius: 2px 2px 3px 3px;
+    background: linear-gradient(90deg, #b48d5c, #d9b98a 45%, #a47d4e);
+    box-shadow:
+      0 1px 2px rgb(60 40 20 / 0.35),
+      inset 0 -6px 0 -4px rgb(0 0 0 / 0.12);
+    z-index: 1;
+  }
+
+  .marbling .peg::after {
+    content: '';
+    position: absolute;
+    left: -1.5px;
+    right: -1.5px;
+    top: 9px;
+    height: 3px;
+    border-radius: 1px;
+    background: #7b7f82;
+  }
+
+  /* The trough. */
+  .marbling .stage {
+    grid-area: stage;
+    position: relative;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .marbling .tray {
+    display: block;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .marbling[data-busy] .tray {
+    cursor: progress;
+  }
+
+  .marbling .caption {
+    grid-area: caption;
+    margin: 10px 0 0;
+    min-height: 1.4em;
+    text-align: center;
+    font-style: italic;
+    color: var(--soft);
+  }
+
+  /* The bench of colours and tools. */
+  .marbling .bench {
+    grid-area: bench;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding-top: 4px;
+    min-height: 0;
+  }
+
+  .marbling[data-busy='print'] .bench {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .marbling fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .marbling legend {
+    padding: 0;
+    margin-bottom: 8px;
+    font-family: var(--sc);
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    color: var(--soft);
+    width: 100%;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .marbling .potgrid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+
+  .marbling .pot {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    cursor: pointer;
+  }
+
+  .marbling .pot input,
+  .marbling .tool input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  /* A glazed pot seen from above, wet colour inside. */
+  .marbling .well {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 36% 32%, rgb(255 255 255 / 0.5) 0 7%, transparent 18%),
+      radial-gradient(circle at 50% 55%, var(--c) 0 56%, color-mix(in srgb, var(--c) 70%, black) 66%, transparent 68%),
+      radial-gradient(circle, #e9e2d3 0 70%, #b9ab92 74%, #f4efe4 82%, #a99a80 100%);
+    box-shadow: 0 2px 3px rgb(60 40 20 / 0.28);
+    transition: transform 140ms ease;
+  }
+
+  .marbling .gall .well {
+    --c: #cfd3cc;
+    background:
+      radial-gradient(circle at 36% 32%, rgb(255 255 255 / 0.7) 0 7%, transparent 18%),
+      radial-gradient(circle at 50% 55%, #d6dcd6 0 50%, #b5bdb7 66%, transparent 68%),
+      radial-gradient(circle, #e9e2d3 0 70%, #b9ab92 74%, #f4efe4 82%, #a99a80 100%);
+  }
+
+  .marbling .pot:has(input:checked) .well {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 0 2px var(--paper),
+      0 0 0 3.5px var(--ink),
+      0 3px 5px rgb(60 40 20 / 0.3);
+  }
+
+  .marbling .pot:has(input:focus-visible) .well {
+    outline: 2px solid var(--ox);
+    outline-offset: 4px;
+  }
+
+  .marbling .potname {
+    margin: 8px 0 0;
+    font-style: italic;
+    color: var(--soft);
+  }
+
+  .marbling .toolrow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+  }
+
+  .marbling .tool {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    padding: 6px 0 4px;
+    border-radius: 4px;
+    color: var(--soft);
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .marbling .tool svg {
+    width: 30px;
+    height: 30px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .marbling .tool .fine {
+    stroke-width: 1.1;
+  }
+
+  .marbling .tool .handle {
+    stroke-width: 2.6;
+  }
+
+  .marbling .tool .dot {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .marbling .tool:has(input:checked) {
+    color: var(--ink);
+    background: rgb(255 255 255 / 0.45);
+    box-shadow: inset 0 0 0 1px var(--rule);
+  }
+
+  .marbling .tool:has(input:focus-visible) {
+    outline: 2px solid var(--ox);
+    outline-offset: 1px;
+  }
+
+  .marbling .straight {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    margin-top: 10px;
+    font-size: 15px;
+    color: var(--soft);
+    cursor: pointer;
+  }
+
+  .marbling .straight input {
+    accent-color: var(--ox);
+    translate: 0 2px;
+  }
+
+  .marbling button {
+    font: inherit;
+    color: inherit;
+  }
+
+  .marbling .acts {
+    display: flex;
+    gap: 6px;
+  }
+
+  .marbling .acts button,
+  .marbling .viewbar button {
+    flex: 1;
+    padding: 7px 4px 6px;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: rgb(255 255 255 / 0.35);
+    cursor: pointer;
+  }
+
+  .marbling .acts button:hover:not(:disabled),
+  .marbling .viewbar button:hover {
+    background: rgb(255 255 255 / 0.7);
+  }
+
+  .marbling .acts button:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .marbling .lay {
+    padding: 12px 10px 11px;
+    border: 0;
+    border-radius: 3px;
+    background: var(--ox);
+    color: #f6efe2;
+    font-family: var(--sc);
+    font-size: 19px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.2) inset,
+      0 3px 8px -3px rgb(60 20 10 / 0.6);
+  }
+
+  .marbling .lay:hover {
+    background: #8e3326;
+  }
+
+  .marbling button:focus-visible {
+    outline: 2px solid var(--ox);
+    outline-offset: 2px;
+  }
+
+  .marbling .lay:focus-visible {
+    outline-color: var(--ink);
+  }
+
+  .marbling .about {
+    align-self: flex-start;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-style: italic;
+    color: var(--soft);
+    text-decoration: underline;
+    text-decoration-color: var(--rule);
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  /* Pattern list and notes. */
+  .marbling .pop {
+    margin: auto;
+    width: min(460px, calc(100vw - 32px));
+    max-height: min(640px, calc(100dvh - 48px));
+    overflow: auto;
+    padding: 22px 26px 18px;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--fell);
+    font-size: 17px;
+    line-height: 1.45;
+    box-shadow: 0 24px 60px -20px rgb(40 25 10 / 0.55);
+  }
+
+  .marbling .pop::backdrop,
+  .marbling .viewer::backdrop {
+    background: rgb(40 30 20 / 0.35);
+  }
+
+  .marbling .pop h2 {
+    margin: 0 0 6px;
+    font-family: var(--sc);
+    font-weight: 400;
+    font-size: 24px;
+    letter-spacing: 0.04em;
+  }
+
+  .marbling .pop .hint {
+    margin: 0 0 12px;
+    font-style: italic;
+    color: var(--soft);
+  }
+
+  .marbling .pop ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .marbling .pop li + li {
+    border-top: 1px solid rgb(195 180 150 / 0.6);
+  }
+
+  .marbling .pop li button {
+    display: grid;
+    width: 100%;
+    gap: 1px;
+    padding: 9px 4px;
+    border: 0;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .marbling .pop li button:hover {
+    background: rgb(255 255 255 / 0.5);
+  }
+
+  .marbling .pop .name {
+    font-size: 19px;
+  }
+
+  .marbling .pop .by {
+    font-style: italic;
+    color: var(--soft);
+    font-size: 15.5px;
+  }
+
+  .marbling .notes p {
+    margin: 0 0 10px;
+  }
+
+  .marbling .notes .keys {
+    font-style: italic;
+    color: var(--soft);
+  }
+
+  /* The print viewer. */
+  .marbling .viewer {
+    max-width: calc(100vw - 32px);
+    max-height: calc(100dvh - 32px);
+    padding: 18px;
+    border: 0;
+    background: #ddd3bf;
+    box-shadow: 0 30px 80px -20px rgb(30 20 10 / 0.6);
+  }
+
+  .marbling .viewer .sheet canvas {
+    display: block;
+    max-width: min(1100px, calc(100vw - 68px));
+    max-height: calc(100dvh - 140px);
+    width: auto;
+    height: auto;
+    box-shadow: 0 2px 6px rgb(60 40 20 / 0.3);
+  }
+
+  .marbling .viewbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    font-family: var(--fell);
+    color: var(--ink);
+  }
+
+  .marbling .viewtitle {
+    flex: 1 1 100%;
+    margin: 0 0 2px;
+    font-style: italic;
+    color: var(--soft);
+  }
+
+  .marbling .viewbar button {
+    flex: 0 1 auto;
+    padding: 7px 14px 6px;
+  }
+
+  /* A sheet in flight from the trough to the line. */
+  .marbling .flight {
+    position: fixed;
+    z-index: 30;
+    perspective: 1400px;
+    pointer-events: none;
+  }
+
+  .marbling .flight .card {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+  }
+
+  .marbling .flight canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    box-shadow: 0 18px 30px -12px rgb(40 25 10 / 0.5);
+  }
+
+  .marbling .flight canvas.front {
+    transform: rotateY(180deg);
+  }
+
+  @media (max-width: 760px) {
+    .marbling {
+      height: auto;
+      min-height: 100dvh;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto auto auto auto;
+      grid-template-areas:
+        'mast'
+        'stage'
+        'caption'
+        'bench'
+        'line';
+      padding: 12px 16px 24px;
+      font-size: 16px;
+    }
+
+    .marbling .mast {
+      gap: 4px 12px;
+      margin-bottom: 10px;
+    }
+
+    .marbling h1 {
+      font-size: 30px;
+    }
+
+    .marbling .dek {
+      order: 4;
+      flex-basis: 100%;
+      font-size: 16px;
+    }
+
+    .marbling .caption {
+      margin-top: 6px;
+      font-size: 15px;
+    }
+
+    .marbling .bench {
+      gap: 14px;
+      padding-top: 6px;
+    }
+
+    .marbling .potgrid {
+      grid-template-columns: repeat(9, 1fr);
+      gap: 5px;
+    }
+
+    .marbling .potname {
+      margin-top: 4px;
+      font-size: 15px;
+    }
+
+    .marbling .line {
+      margin-top: 18px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marbling .well {
+      transition: none;
+    }
+  }
+</style>
