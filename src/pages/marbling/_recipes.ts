@@ -54,7 +54,8 @@ function ground(rng: () => number, w: number, h: number, throws: Throw[], captio
   // A ground is sized to the trough: more drops for a bigger tray.
   const k = (w * h) / (1200 * 800);
   for (const t of throws) {
-    const n = Math.round(t.count * k);
+    // The walls hold nothing back here, so a ground throws enough to keep the trough covered as colour spreads past them.
+    const n = Math.round(t.count * k * 1.8);
     for (let i = 0; i < n; i++) {
       steps.push({
         kind: 'drop',
@@ -103,7 +104,7 @@ function nonpareil(rng: () => number, h: number): Step[] {
 function serpentine(w: number, h: number, spacing: number, amp: number, wave: number, caption: string): Step[] {
   const path: number[] = [];
   const y0 = h / 2;
-  for (let x = -OVER; x <= w + OVER; x += 5) path.push(x, y0 + amp * Math.sin((x / wave) * Math.PI * 2));
+  for (let x = -OVER; x <= w + OVER; x += 16) path.push(x, y0 + amp * Math.sin((x / wave) * Math.PI * 2));
   const t: Tines = { spacing, nx: 0, ny: 1, z: 30, half: 5 };
   return [
     { kind: 'caption', text: caption },
@@ -113,10 +114,10 @@ function serpentine(w: number, h: number, spacing: number, amp: number, wave: nu
 
 const classicGround = (rng: () => number, w: number, h: number) =>
   ground(rng, w, h, [
-    { color: c('indigo'), count: 46, r: [26, 40] },
-    { color: c('venetian'), count: 46, r: [26, 40] },
-    { color: c('ochre'), count: 46, r: [26, 40] },
-    { color: c('black'), count: 30, r: [18, 30] },
+    { color: c('black'), count: 40, r: [24, 36] },
+    { color: c('indigo'), count: 62, r: [38, 56] },
+    { color: c('venetian'), count: 54, r: [38, 56] },
+    { color: c('ochre'), count: 44, r: [36, 52] },
   ]);
 
 export const RECIPES: Recipe[] = [
@@ -130,10 +131,10 @@ export const RECIPES: Recipe[] = [
         w,
         h,
         [
-          { color: c('black'), count: 34, r: [22, 34] },
-          { color: c('venetian'), count: 40, r: [28, 44] },
-          { color: c('indigo'), count: 40, r: [28, 44] },
-          { color: c('ochre'), count: 44, r: [34, 52] },
+          { color: c('black'), count: 40, r: [24, 36] },
+          { color: c('venetian'), count: 46, r: [38, 56] },
+          { color: c('indigo'), count: 46, r: [38, 56] },
+          { color: c('ochre'), count: 40, r: [44, 66] },
         ],
         'Stone: each colour thrown over the last',
       ),
@@ -191,8 +192,8 @@ export const RECIPES: Recipe[] = [
       const rMax = s * 0.36;
       const ox = rng() * s;
       const oy = rng() * s;
-      for (let i = 0; i <= 140; i++) {
-        const t = i / 140;
+      for (let i = 0; i <= 48; i++) {
+        const t = i / 48;
         const a = t * turns * Math.PI * 2;
         const r = rMax * t;
         path.push(ox + Math.cos(a) * r, oy + Math.sin(a) * r);
@@ -246,23 +247,25 @@ export const RECIPES: Recipe[] = [
     build: (rng, w, h) => {
       const steps: Step[] = [{ kind: 'caption', text: 'Suminagashi: ink, then clear water, touched to the same spot' }];
       const centres = [
-        [w * (0.3 + rng() * 0.1), h * (0.35 + rng() * 0.1)],
-        [w * (0.62 + rng() * 0.1), h * (0.58 + rng() * 0.12)],
+        [w * (0.26 + rng() * 0.1), h * (0.3 + rng() * 0.12)],
+        [w * (0.66 + rng() * 0.1), h * (0.62 + rng() * 0.12)],
+        [w * (0.55 + rng() * 0.1), h * (0.18 + rng() * 0.08)],
       ];
-      for (let i = 0; i < 26; i++) {
-        for (const [x, y] of centres) {
-          const ink = i % 5 === 3 ? c('indigo') : c('black');
-          steps.push({ kind: 'drop', x, y, r: 8 + rng() * 3, color: ink });
-          steps.push({ kind: 'drop', x, y, r: 11 + rng() * 4, color: GALL });
-        }
+      for (let i = 0; i < 18; i++) {
+        centres.forEach(([x, y], k) => {
+          if (k === 2 && i > 10) return;
+          const ink = i % 4 === 2 ? c('indigo') : c('black');
+          steps.push({ kind: 'drop', x, y, r: 21 + rng() * 7, color: ink });
+          steps.push({ kind: 'drop', x, y, r: 19 + rng() * 7, color: GALL });
+        });
       }
       steps.push({ kind: 'caption', text: 'Suminagashi: a breath across the water' });
-      const soft: Tines = { spacing: 0, nx: 0, ny: 1, z: 60, half: 40 };
+      const soft: Tines = { spacing: 0, nx: 0, ny: 1, z: 55, half: 110 };
       for (let k = 0; k < 3; k++) {
         const path: number[] = [];
         const y0 = h * (0.2 + 0.3 * k + rng() * 0.1);
         const ph = rng() * 6;
-        for (let x = -OVER; x <= w + OVER; x += 8) path.push(x, y0 + 60 * Math.sin(x / 210 + ph));
+        for (let x = -OVER; x <= w + OVER; x += 24) path.push(x, y0 + 90 * Math.sin(x / 240 + ph));
         steps.push({ kind: 'stroke', tines: soft, path, ms: 1800 });
       }
       return steps;

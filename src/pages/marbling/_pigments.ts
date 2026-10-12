@@ -37,5 +37,5 @@ export function rimOf(hex: string): string {
   const g = (n >> 8) & 255;
   const b = n & 255;
   const k = 0.62;
-  return `rgba(${Math.round(r * k)}, ${Math.round(g * k)}, ${Math.round(b * k)}, 0.55)`;
+  return `rgba(${Math.round(r * k)}, ${Math.round(g * k)}, ${Math.round(b * k)}, 0.42)`;
 }

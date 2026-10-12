@@ -111,7 +111,7 @@ export function drawTrough(cw: number, ch: number, rim: number, dpr: number): HT
   sp.height = sh;
   const sg = sp.getContext('2d');
   if (sg) {
-    const cell = 26 * dpr;
+    const cell = 15 * dpr;
     const gx = Math.ceil(sw / cell) + 2;
     const gy = Math.ceil(sh / cell) + 2;
     let seed = 7;
@@ -154,7 +154,7 @@ export function drawTrough(cw: number, ch: number, rim: number, dpr: number): HT
         }
         // A facet is brighter along its crystal's grain.
         const grain = Math.sin((x * Math.cos(ang[bk]) + y * Math.sin(ang[bk])) * 0.9) * 0.5 + 0.5;
-        const v = 148 + val[bk] * 46 + grain * 6;
+        const v = 156 + val[bk] * 24 + grain * 5;
         const o = (y * sw + x) * 4;
         img.data[o] = v;
         img.data[o + 1] = v + 4;
@@ -165,15 +165,10 @@ export function drawTrough(cw: number, ch: number, rim: number, dpr: number): HT
     sg.putImageData(img, 0, 0);
   }
 
-  g.save();
-  // Shadow of the trough on the bench.
-  g.shadowColor = 'rgba(40, 30, 20, 0.35)';
-  g.shadowBlur = 24 * dpr;
-  g.shadowOffsetY = 10 * dpr;
+  // The trough's shadow on the bench is the canvas's own CSS box shadow.
   rounded(g, 0, 0, cw, ch, outerR);
   g.fillStyle = '#9ba1a4';
   g.fill();
-  g.restore();
 
   g.save();
   rounded(g, 0, 0, cw, ch, outerR);

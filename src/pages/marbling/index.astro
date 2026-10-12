@@ -24,7 +24,13 @@ import { RECIPES } from './_recipes';
         <path d="M0 6 Q 500 30 1000 6" />
       </svg>
       <ol class="prints" data-prints></ol>
-      <p class="empty" data-empty>Pulled prints hang here to dry</p>
+      <p class="empty" data-empty>
+        <span class="peg" aria-hidden="true" style="--at: 12%; --y: 5px"></span>
+        <span class="peg" aria-hidden="true" style="--at: 31%; --y: 10px"></span>
+        <span class="peg" aria-hidden="true" style="--at: 69%; --y: 10px"></span>
+        <span class="peg" aria-hidden="true" style="--at: 88%; --y: 5px"></span>
+        <span class="say">Pulled prints hang here to dry</span>
+      </p>
     </section>
 
     <div class="stage" data-stage>
@@ -280,14 +286,24 @@ import { RECIPES } from './_recipes';
 
   .marbling .empty {
     position: absolute;
-    top: 46px;
-    left: 0;
-    right: 0;
+    inset: 0;
     margin: 0;
     text-align: center;
     font-style: italic;
     color: var(--soft);
-    opacity: 0.8;
+  }
+
+  .marbling .empty .say {
+    position: absolute;
+    top: 52px;
+    left: 0;
+    right: 0;
+    opacity: 0.85;
+  }
+
+  .marbling .empty .peg {
+    left: var(--at);
+    top: var(--y);
   }
 
   .marbling .prints {
@@ -374,6 +390,10 @@ import { RECIPES } from './_recipes';
 
   .marbling .tray {
     display: block;
+    border-radius: 16px;
+    box-shadow:
+      0 2px 3px rgb(40 30 20 / 0.25),
+      0 14px 30px -10px rgb(40 30 20 / 0.45);
     touch-action: none;
     cursor: crosshair;
   }
