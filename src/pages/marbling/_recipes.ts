@@ -171,12 +171,12 @@ export const RECIPES: Recipe[] = [
   {
     id: 'peacock',
     name: 'Peacock',
-    line: 'A tight wave through nonpareil, until each tooth draws an eye',
+    line: 'A tight wave drawn through nonpareil, curling every stripe into feathers',
     build: (rng, w, h) => [
       ...classicGround(rng, w, h),
       ...gelgit(rng, w, h),
       ...nonpareil(rng, h),
-      ...serpentine(w, h, 48, 24, 96, 'Peacock: a close comb waved through, one eye per tooth'),
+      ...serpentine(w, h, 48, 24, 96, 'Peacock: a close comb waved through the nonpareil'),
     ],
   },
   {
