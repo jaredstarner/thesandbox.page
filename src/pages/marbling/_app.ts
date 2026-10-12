@@ -3,7 +3,7 @@
 import { Trough, type Blot, type Tines } from './_engine';
 import { GALL, PAPER_HEX, PIGMENTS, pigmentIndex } from './_pigments';
 import { COMB, RAKE, RECIPES, STYLUS, across, recipeById, seeded, type Step } from './_recipes';
-import { drawSheen, drawTrough, noiseTile, paintBlots, paperTexture, printSvg, renderPrint, type Frame } from './_render';
+import { drawSheen, drawTrough, noiseTile, paintBlots, paperTexture, printSvg, renderPrint, shrink, type Frame } from './_render';
 
 type Tool = 'drop' | 'sprinkle' | 'stylus' | 'rake' | 'comb';
 
@@ -651,11 +651,8 @@ export function startMarbling(root: HTMLElement): void {
     btn.type = 'button';
     btn.setAttribute('aria-label', `Print ${n}: ${name}`);
     const thumbH = 104;
-    const thumb = document.createElement('canvas');
     const tw = Math.round(thumbH * ((W - INSET * 2) / (H - INSET * 2)));
-    thumb.width = Math.round(tw * 2);
-    thumb.height = Math.round(thumbH * 2);
-    thumb.getContext('2d')?.drawImage(full, 0, 0, thumb.width, thumb.height);
+    const thumb = shrink(full, tw * 2, thumbH * 2);
     btn.append(thumb);
     const peg = document.createElement('span');
     peg.className = 'peg';
@@ -706,11 +703,8 @@ export function startMarbling(root: HTMLElement): void {
         bg.fillStyle = 'rgba(241, 234, 219, 0.25)';
         bg.fillRect(0, 0, back.width, back.height);
       }
-      const front = document.createElement('canvas');
+      const front = shrink(full, back.width, back.height);
       front.className = 'front';
-      front.width = back.width;
-      front.height = back.height;
-      front.getContext('2d')?.drawImage(full, 0, 0, front.width, front.height);
       card.append(back, front);
       flight.append(card);
       root.append(flight);
@@ -743,7 +737,7 @@ export function startMarbling(root: HTMLElement): void {
     printing = null;
     ghost = { t0: now };
     delete root.dataset.busy;
-    say(`Print ${n} is on the line. The size keeps a faint ghost of it`, 4200);
+    say(`Print ${n} is on the line${onScreen ? '' : ' below'}. The size keeps a faint ghost of it`, 4200);
     dirty = true;
   };
 

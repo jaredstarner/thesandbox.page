@@ -340,3 +340,27 @@ export function printSvg(blots: Blot[], tw: number, th: number, inset: number): 
   parts.push('</g></svg>');
   return parts.join('');
 }
+
+/** Scale a canvas down by halves, so fine veins average out instead of aliasing. */
+export function shrink(src: HTMLCanvasElement, w: number, h: number): HTMLCanvasElement {
+  let cur = src;
+  while (cur.width / 2 >= w && cur.height / 2 >= h) {
+    const next = document.createElement('canvas');
+    next.width = Math.round(cur.width / 2);
+    next.height = Math.round(cur.height / 2);
+    const g = next.getContext('2d');
+    if (!g) break;
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(cur, 0, 0, next.width, next.height);
+    cur = next;
+  }
+  const out = document.createElement('canvas');
+  out.width = w;
+  out.height = h;
+  const g = out.getContext('2d');
+  if (g) {
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(cur, 0, 0, w, h);
+  }
+  return out;
+}
