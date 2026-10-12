@@ -115,26 +115,33 @@ export function tineMap(t: Tines, ax: number, ay: number, bx: number, by: number
     return Math.exp(-perp * k) * frac;
   };
 
-  // With the bar square to the stroke, every tine sees a point at the same
-  // distance along, so points outside the moving band are skipped outright.
-  const square = s === 0 || (s2 === 0 && Math.abs(t.nx * mx + t.ny * my) < 1e-3);
+  // Every tine of a bar sits on the same line across the stroke, so nothing
+  // further than `pad` from the stroke, measured square to the bar, can move.
+  // A lone stylus is bounded along its stroke as well.
+  const pad = ramp / 2 + reach;
+  const ux = s === 0 ? mx : -t.ny;
+  const uy = s === 0 ? my : t.nx;
+  const e = (bx - ax) * ux + (by - ay) * uy;
+  const lo = Math.min(0, e) - pad;
+  const hi = Math.max(0, e) + pad;
+  const banded = s2 === 0;
 
-  const touches: Touches | undefined = square
+  const touches: Touches | undefined = banded
     ? (x0, y0, x1, y1) => {
-        const [lo, hi] = project(x0, y0, x1, y1, ax, ay, mx, my);
-        if (hi < -ramp / 2 || lo > len + ramp / 2) return false;
+        const [plo, phi] = project(x0, y0, x1, y1, ax, ay, ux, uy);
+        if (phi < lo || plo > hi) return false;
         if (s > 0) return true;
-        const [plo, phi] = project(x0, y0, x1, y1, ax, ay, my, -mx);
-        return phi >= -reach && plo <= reach;
+        const [qlo, qhi] = project(x0, y0, x1, y1, ax, ay, my, -mx);
+        return qhi >= -reach && qlo <= reach;
       }
     : undefined;
 
   const map: PlaneMap = (x, y, out) => {
     const rx = x - ax;
     const ry = y - ay;
-    if (square) {
-      const along = rx * mx + ry * my;
-      if (along > len + ramp / 2 || along < -ramp / 2) {
+    if (banded) {
+      const u = rx * ux + ry * uy;
+      if (u < lo || u > hi) {
         out[0] = x;
         out[1] = y;
         return;
@@ -183,6 +190,8 @@ export class Trough {
   /** Longest edge kept before it is split, and shortest before it is merged. */
   maxLen = 3;
   minLen = 1.1;
+  /** How far a vertex may sit off its neighbours' line and still be dropped. */
+  flat = 0.08;
   /** How far past the walls paint is still tracked closely. */
   margin = 48;
   private buf = new Float64Array(1 << 16);
@@ -335,13 +344,26 @@ export class Trough {
     let maxX = lx;
     let minY = ly;
     let maxY = ly;
+    const tol = this.flat;
+    const reach2 = this.maxLen * this.maxLen * 2.25;
     for (let i = 1; i < total; i++) {
       const x = src[i * 2];
       const y = src[i * 2 + 1];
       const dx = x - lx;
       const dy = y - ly;
+      const d2 = dx * dx + dy * dy;
       const inside = x > -m && x < this.w + m && y > -m && y < this.h + m;
-      if (dx * dx + dy * dy < (inside ? min2 : coarse2)) continue;
+      if (d2 < (inside ? min2 : coarse2)) continue;
+      if (inside && i < total - 1) {
+        // A vertex that lies on the line between its neighbours adds nothing.
+        const nx = src[i * 2 + 2] - lx;
+        const ny = src[i * 2 + 3] - ly;
+        const n2 = nx * nx + ny * ny;
+        if (n2 <= reach2 && n2 > 0) {
+          const cross = dx * ny - dy * nx;
+          if (cross * cross <= tol * tol * n2) continue;
+        }
+      }
       src[w++] = x;
       src[w++] = y;
       lx = x;

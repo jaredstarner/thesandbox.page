@@ -466,8 +466,11 @@ export function startMarbling(root: HTMLElement): void {
           r.total = 0;
           for (let i = 2; i < p.length; i += 2) r.total += Math.hypot(p[i] - p[i - 2], p[i + 1] - p[i - 1]);
         }
-        const want = Math.min(1, (now - r.t0) / step.ms) * r.total;
-        while (r.done < want - 1e-6 && r.seg < p.length) {
+        // The stroke moves at its own pace, but never takes more than a frame's worth of work at once,
+        // so a slow frame can't snowball into a slower one.
+        const want = Math.min(r.total, r.done + (r.total / step.ms) * Math.min(dt, 1 / 30) * 1000);
+        const deadline = performance.now() + 14;
+        while (r.done < want - 1e-6 && r.seg < p.length && performance.now() < deadline) {
           const tx = p[r.seg];
           const ty = p[r.seg + 1];
           const d = Math.hypot(tx - r.lx, ty - r.ly);
@@ -488,7 +491,7 @@ export function startMarbling(root: HTMLElement): void {
           }
         }
         dirty = true;
-        if (r.seg >= p.length) {
+        if (r.seg >= p.length || r.done >= r.total - 1e-6) {
           r.i++;
           r.lx = NaN;
           r.t0 = now;
@@ -615,7 +618,8 @@ export function startMarbling(root: HTMLElement): void {
     for (let i = 0; i < p.length; i += 2) {
       const x = p[i];
       const y = p[i + 1];
-      if (Math.hypot(x - g.lx, y - g.ly) < 0.5) continue;
+      // Points closer than this are folded into the next one: each step costs a pass over every outline.
+      if (Math.hypot(x - g.lx, y - g.ly) < (i < p.length - 2 ? 5 : 0.5)) continue;
       trough.stroke(g.tines, g.lx, g.ly, x, y);
       g.lx = x;
       g.ly = y;
@@ -936,6 +940,11 @@ export function startMarbling(root: HTMLElement): void {
       layPaper,
       startRecipe,
       setTool,
+      timeDraw: () => {
+        const a = performance.now();
+        draw(performance.now());
+        return performance.now() - a;
+      },
     };
   }
   requestAnimationFrame(tick);
