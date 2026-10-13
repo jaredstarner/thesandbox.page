@@ -2,7 +2,7 @@
 // onto a grid of whole seconds, gaps stay NaN, and a high-pass filter strips
 // the tides and drift so what's left is ground shaking.
 
-import type { Record } from './_mseed';
+import type { Chunk } from './_mseed';
 
 export class Trace {
   /** Epoch ms of sample 0; always a whole second. */
@@ -40,7 +40,7 @@ export class Trace {
   }
 
   /** Adds records in time order; returns the index of the first new sample, or -1. */
-  add(records: Record[]): number {
+  add(records: Chunk[]): number {
     let first = -1;
     const sorted = records.filter((r) => r.rate === 1).sort((a, b) => a.start - b.start);
     for (const r of sorted) {

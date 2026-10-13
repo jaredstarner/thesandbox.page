@@ -2,7 +2,7 @@
 // Steim-2 compressed integer data, which is what FDSN dataselect services
 // return for broadband channels.
 
-export interface Record {
+export interface Chunk {
   /** Start time of the first sample, epoch milliseconds. */
   start: number;
   /** Samples per second. */
@@ -69,9 +69,9 @@ function steim(view: DataView, offset: number, length: number, count: number, le
   return out;
 }
 
-export function parse(buffer: ArrayBuffer): Record[] {
+export function parse(buffer: ArrayBuffer): Chunk[] {
   const view = new DataView(buffer);
-  const records: Record[] = [];
+  const records: Chunk[] = [];
   let offset = 0;
   while (offset + 64 <= buffer.byteLength) {
     const count = view.getUint16(offset + 30);
