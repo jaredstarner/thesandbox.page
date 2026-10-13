@@ -148,15 +148,18 @@ function start(root: HTMLElement): void {
   function updateScale(): void {
     // What one line's spacing means in ground speed at this magnification.
     const perLine = drum.lay.rowH / drum.lay.gain / station.scale;
-    scaleOut.textContent = `One line apart = ${speed(perLine)}`;
+    // Until the station answers there's no noise level, so no honest scale.
+    scaleOut.textContent = trace?.end ? `One line apart = ${speed(perLine)}` : '';
     gainOut.textContent = `×${GAINS[gainStep] < 1 ? `1/${1 / GAINS[gainStep]}` : GAINS[gainStep]}`;
   }
 
   function speed(ms: number): string {
+    // Two significant figures, never in exponent form.
+    const fig = (v: number) => Number(v.toPrecision(2)).toLocaleString();
     const um = ms * 1e6;
-    if (um >= 1000) return `${(um / 1000).toPrecision(2)} mm/s`;
-    if (um >= 1) return `${um.toPrecision(2)} µm/s`;
-    return `${(um * 1000).toPrecision(2)} nm/s`;
+    if (um >= 1000) return `${fig(um / 1000)} mm/s`;
+    if (um >= 1) return `${fig(um)} µm/s`;
+    return `${fig(um * 1000)} nm/s`;
   }
 
   // ---- Loading ------------------------------------------------------------
@@ -313,14 +316,17 @@ function start(root: HTMLElement): void {
         const pos = drum.pos(t);
         if (pos.row < 0 || pos.row >= drum.lay.rows) return;
         const w = i === 0 ? 50 : 14;
+        // Near the right edge the label hangs left of its tick, clear of the margin.
+        const leftward = pos.x + w > drum.width - drum.right + 6;
+        const [a0, b0] = leftward ? [pos.x - w, pos.x + 2] : [pos.x - 2, pos.x + w];
         const spans = taken.get(pos.row) ?? [];
-        const clash = spans.some(([a, b]) => pos.x < b && pos.x + w > a);
+        const clash = spans.some(([a, b]) => a0 < b && b0 > a);
         if (!clash) {
-          spans.push([pos.x - 2, pos.x + w]);
+          spans.push([a0, b0]);
           taken.set(pos.row, spans);
         }
         const el = document.createElement(i === 0 ? 'button' : 'span');
-        el.className = 'flag';
+        el.className = leftward ? 'flag lt' : 'flag';
         if (selected) el.classList.add(m.q.id === selected ? 'on' : 'dim');
         el.dataset.quake = m.q.id;
         el.style.left = `${pos.x}px`;
@@ -496,7 +502,7 @@ function start(root: HTMLElement): void {
     if (id) choose(id, true);
   });
 
-  paper.addEventListener('pointermove', (e) => {
+  const readout = (e: PointerEvent) => {
     if (!trace) return;
     const r = paper.getBoundingClientRect();
     const x = e.clientX - r.left;
@@ -518,7 +524,10 @@ function start(root: HTMLElement): void {
     const lines = [`${utc(at.time)} UTC`, `${localFmt.format(at.time)} your time`, `${st.format(at.time)} at ${station.code}`];
     if (!Number.isNaN(v)) lines.push(`${speed(Math.abs(v) / station.scale)} ${v >= 0 ? 'up' : 'down'}`);
     cursorText.textContent = lines.join('\n');
-  });
+  };
+  paper.addEventListener('pointermove', readout);
+  // A tap shows the readout on touch screens, where there's no hover.
+  paper.addEventListener('pointerdown', readout);
   paper.addEventListener('pointerleave', () => {
     cursor.hidden = true;
   });

@@ -342,6 +342,11 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
     opacity: 0.8;
   }
 
+  .seismo .flag.lt .ph {
+    left: auto;
+    right: 3px;
+  }
+
   .seismo .flag .ph.quiet {
     visibility: hidden;
   }
@@ -467,7 +472,11 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
   .seismo .blank {
     position: absolute;
     inset: 40% 10% auto;
-    margin: 0;
+    margin: 0 auto;
+    max-width: 30em;
+    padding: 14px 18px;
+    background: var(--paper);
+    box-shadow: 0 0 0 1px rgb(64 112 96 / 0.25);
     text-align: center;
     font: 400 14px/1.5 var(--f);
     color: #59523f;
