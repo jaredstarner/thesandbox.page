@@ -4,8 +4,7 @@
 // same grid from LAND_STEP with landDots() in _dial.ts.
 
 import topo from 'world-atlas/land-110m.json';
-
-export const LAND_STEP = 1.5;
+import { LAND_STEP } from './_landstep';
 
 type Ring = [number, number][];
 
