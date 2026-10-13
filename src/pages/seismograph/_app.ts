@@ -127,8 +127,8 @@ function start(root: HTMLElement): void {
   }
 
   function gainPx(rowH: number): number {
-    // Typical background noise fills about a fifth of a line at ×1.
-    return ((rowH * 0.1) / noise) * GAINS[gainStep];
+    // Typical background noise fills about a tenth of a line at ×1, so quakes stand out.
+    return ((rowH * 0.055) / noise) * GAINS[gainStep];
   }
 
   function relayout(): void {
@@ -138,7 +138,8 @@ function start(root: HTMLElement): void {
     const rowH = rowHeight(rows);
     drum.layout(paper.clientWidth, { t0: trace.t0, rowSec, rows, rowH, gain: gainPx(rowH) });
     drum.draw(trace, 0, drawn);
-    heading.textContent = `Vertical ground velocity, one line per ${rowSec >= 3600 ? 'hour' : `${rowSec / 60} minutes`}, ${utc(trace.t0, false)} UTC onward`;
+    const since = new Date(trace.t0).toLocaleDateString(undefined, { day: 'numeric', month: 'short', timeZone: 'UTC' });
+    heading.textContent = `Vertical ground velocity, one line per ${rowSec >= 3600 ? 'hour' : `${rowSec / 60} minutes`}, from ${utc(trace.t0, false)} UTC on ${since}`;
     updateScale();
     placeFlags();
     placePen();
@@ -288,8 +289,11 @@ function start(root: HTMLElement): void {
       when.className = 'when';
       const first = m.phases[0];
       const km = Math.round(m.dist * 111.19).toLocaleString();
-      when.textContent = `${utc(m.q.time, false)} UTC · ${Math.round(m.dist)}° (${km} km) away · ${first.name === 'R1' ? 'surface waves' : first.name} ${utc(m.q.time + first.t * 1000, false)}`;
-      b.append(mag, what, when);
+      when.textContent = `${utc(m.q.time, false)} UTC · ${Math.round(m.dist)}° away, ${km} km`;
+      const due = document.createElement('span');
+      due.className = 'when';
+      due.textContent = `${first.name === 'R1' ? 'Surface waves' : `First ${first.name} wave`} due ${utc(m.q.time + first.t * 1000, false)} UTC`;
+      b.append(mag, what, when, due);
       li.append(b);
       quakeList.append(li);
     }
@@ -299,11 +303,22 @@ function start(root: HTMLElement): void {
     marks.querySelectorAll('.flag').forEach((f) => f.remove());
     if (!trace) return;
     const frag = document.createDocumentFragment();
-    for (const m of marked) {
+    // Labels claim room on their line, biggest quakes and first arrivals first;
+    // a label that would land on another keeps its tick and drops its text.
+    const taken = new Map<number, [number, number][]>();
+    const order = [...marked].sort((a, b) => b.q.mag - a.q.mag);
+    for (const m of order) {
       m.phases.forEach((p, i) => {
         const t = m.q.time + p.t * 1000;
         const pos = drum.pos(t);
         if (pos.row < 0 || pos.row >= drum.lay.rows) return;
+        const w = i === 0 ? 50 : 14;
+        const spans = taken.get(pos.row) ?? [];
+        const clash = spans.some(([a, b]) => pos.x < b && pos.x + w > a);
+        if (!clash) {
+          spans.push([pos.x - 2, pos.x + w]);
+          taken.set(pos.row, spans);
+        }
         const el = document.createElement(i === 0 ? 'button' : 'span');
         el.className = 'flag';
         if (selected) el.classList.add(m.q.id === selected ? 'on' : 'dim');
@@ -325,6 +340,7 @@ function start(root: HTMLElement): void {
         } else {
           tag.textContent = name;
         }
+        if (clash) tag.classList.add('quiet');
         el.append(tag);
         frag.append(el);
       });
@@ -358,6 +374,7 @@ function start(root: HTMLElement): void {
     const p = drum.sampleAt(trace, i);
     pen.style.transform = `translate(${p.x}px, ${p.y}px)`;
     pen.classList.toggle('flip', p.x > drum.width - 260);
+    pen.classList.toggle('above', p.y > drum.height - drum.lay.rowH * 2.5);
     const t = trace.t0 + (i + 1) * 1000;
     const behind = Math.max(0, Math.round((Date.now() - t) / 60_000));
     penTag.textContent = opening ? 'Inking the last day' : `${utc(t)} UTC · ${behind} min behind the ground`;

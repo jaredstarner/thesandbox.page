@@ -179,8 +179,8 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Garamond', 'Georgia', 'serif'],
     },
-    // The instrument lettering on /seismograph/: a face drawn for cockpit displays, and its mono.
     {
+      // The instrument lettering on /seismograph/: a face drawn for cockpit displays.
       provider: fontProviders.fontsource(),
       name: 'B612',
       cssVariable: '--font-seismo',
@@ -188,15 +188,6 @@ export default defineConfig({
       styles: ['normal'],
       subsets: ['latin'],
       fallbacks: ['Arial', 'sans-serif'],
-    },
-    {
-      provider: fontProviders.fontsource(),
-      name: 'B612 Mono',
-      cssVariable: '--font-seismo-mono',
-      weights: [400, 700],
-      styles: ['normal'],
-      subsets: ['latin'],
-      fallbacks: ['ui-monospace', 'monospace'],
     },
   ],
 });

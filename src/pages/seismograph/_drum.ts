@@ -46,8 +46,8 @@ export class Drum {
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.width = width;
     const narrow = width < 520;
-    this.left = narrow ? 36 : 48;
-    this.right = narrow ? 36 : 48;
+    this.left = narrow ? 44 : 56;
+    this.right = narrow ? 38 : 50;
     this.top = Math.round(lay.rowH * 1.4);
     this.height = Math.round(this.top * 2 + lay.rows * lay.rowH);
     this.canvas.width = Math.round(width * this.dpr);
@@ -89,7 +89,8 @@ export class Drum {
     for (let m = 0; m <= mins; m += major) {
       const x = this.left + (m / mins) * this.plotW;
       ctx.textBaseline = 'bottom';
-      ctx.fillText(String(m), x, y0 - 3);
+      // The top-left corner belongs to the date.
+      if (m > 0) ctx.fillText(String(m), x, y0 - 3);
       ctx.textBaseline = 'top';
       ctx.fillText(String(m), x, y1 + 3);
     }
@@ -108,14 +109,19 @@ export class Drum {
       const l = document.createElement('span');
       l.className = 'margin l';
       if (day !== lastDay && r > 0) {
+        // A new day takes the line's label; its time is the hour the date turned.
         l.classList.add('day');
         l.textContent = day;
-        // Keep the date and the time together on a tall enough row; otherwise the date wins.
-        if (lay.rowH >= 22) l.textContent = `${day} ${local.format(t)}`;
       } else {
         l.textContent = local.format(t);
       }
-      if (r === 0) l.textContent = `${day} ${local.format(t)}`;
+      if (r === 0) {
+        const d = document.createElement('span');
+        d.className = 'margin l day';
+        d.textContent = day;
+        d.style.top = `${y - lay.rowH - 4}px`;
+        frag.append(d);
+      }
       lastDay = day;
       l.style.top = `${y}px`;
       const rt = document.createElement('span');

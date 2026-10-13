@@ -10,7 +10,6 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
   description="A drum recorder wired to a real seismometer: pick a vault anywhere from Albuquerque to Antarctica and watch the last day of ground motion, and the earthquakes that crossed the planet to reach it."
 >
   <Font cssVariable="--font-seismo" slot="head" />
-  <Font cssVariable="--font-seismo-mono" slot="head" />
 
   <main class="seismo" data-seismo data-land={landBitmap()}>
     <header class="plate">
@@ -65,11 +64,13 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
             }
           </select>
         </label>
-        <fieldset class="field seg">
+        <fieldset class="field rows">
           <legend>Each line</legend>
-          <label><input type="radio" name="sg-row" value="15" /><span>15 min</span></label>
-          <label><input type="radio" name="sg-row" value="30" checked /><span>30 min</span></label>
-          <label><input type="radio" name="sg-row" value="60" /><span>1 hour</span></label>
+          <div class="seg">
+            <label><input type="radio" name="sg-row" value="15" /><span>15 min</span></label>
+            <label><input type="radio" name="sg-row" value="30" checked /><span>30 min</span></label>
+            <label><input type="radio" name="sg-row" value="60" /><span>1 hour</span></label>
+          </div>
         </fieldset>
         <div class="field gain">
           <span id="sg-gain-label">Magnify</span>
@@ -126,7 +127,7 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
     --green: #1d7a46;
     --amber: #e8a33a;
     --f: var(--font-seismo);
-    --m: var(--font-seismo-mono);
+    --m: var(--font-seismo);
     --rail: 360px;
     --row: 15px;
 
@@ -151,6 +152,12 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
   .seismo *::before,
   .seismo *::after {
     box-sizing: border-box;
+  }
+
+  .seismo,
+  .seismo * {
+    /* Every font shorthand resets this, so it has to win outright. */
+    font-variant-numeric: tabular-nums !important;
   }
 
   .seismo [hidden] {
@@ -335,6 +342,14 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
     opacity: 0.8;
   }
 
+  .seismo .flag .ph.quiet {
+    visibility: hidden;
+  }
+
+  .seismo .flag.on .ph.quiet {
+    visibility: visible;
+  }
+
   .seismo .flag.dim {
     opacity: 0.35;
   }
@@ -407,6 +422,11 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
   .seismo .pen.flip .tag {
     left: auto;
     right: 12px;
+  }
+
+  .seismo .pen.above .tag {
+    top: auto;
+    bottom: 9px;
   }
 
   .seismo .cursor {
@@ -499,7 +519,8 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
   .seismo .controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px 14px;
+    grid-auto-flow: row dense;
+    gap: 14px 14px;
     padding: 14px;
     background: linear-gradient(180deg, var(--case-hi), #1d1a16);
     border: 1px solid var(--rim);
@@ -552,15 +573,12 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
     color: var(--enamel);
   }
 
-  .seismo .seg {
-    grid-column: 1 / -1;
-    display: flex;
-    gap: 0;
+  .seismo .rows {
+    grid-column: 2 / 3;
   }
 
-  .seismo .seg legend {
-    float: left;
-    width: 100%;
+  .seismo .seg {
+    display: flex;
   }
 
   .seismo .seg label {
@@ -578,7 +596,8 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
 
   .seismo .seg span {
     display: block;
-    padding: 7px 4px;
+    padding: 8px 2px;
+    white-space: nowrap;
     text-align: center;
     font: 400 12px/1.2 var(--m);
     color: var(--enamel-dim);
@@ -647,8 +666,7 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
   }
 
   .seismo .listen {
-    grid-column: 2 / 3;
-    align-self: end;
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -737,7 +755,7 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
   }
 
   .seismo .quakes .mag {
-    grid-row: span 2;
+    grid-row: span 3;
     align-self: center;
     font: 700 17px/1 var(--m);
     color: var(--amber);
