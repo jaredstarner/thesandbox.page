@@ -1,0 +1,811 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { landBitmap } from './_land';
+import { STATIONS, DEFAULT_STATION } from './_stations';
+---
+
+<Bare
+  title="Seismograph"
+  description="A drum recorder wired to a real seismometer: pick a vault anywhere from Albuquerque to Antarctica and watch the last day of ground motion, and the earthquakes that crossed the planet to reach it."
+>
+  <Font cssVariable="--font-seismo" slot="head" />
+  <Font cssVariable="--font-seismo-mono" slot="head" />
+
+  <main class="seismo" data-seismo data-land={landBitmap()}>
+    <header class="plate">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Seismograph</h1>
+      <p class="sta" data-sta-line>
+        <span class="code" data-sta-code>IU {DEFAULT_STATION} 00 LHZ</span>
+        <span class="where" data-sta-where></span>
+      </p>
+      <p class="lamp" data-lamp data-state="wait"><span class="led" aria-hidden="true"></span><span data-lamp-text>Calling the station</span></p>
+    </header>
+
+    <section class="sheet" aria-label="The last day of ground motion, one line at a time">
+      <div class="heading">
+        <p data-heading>Vertical ground velocity, one line per 30 minutes</p>
+        <p class="scale" data-scale></p>
+      </div>
+      <div class="paper" data-paper>
+        <canvas class="ink" data-ink aria-hidden="true"></canvas>
+        <div class="marks" data-marks></div>
+        <div class="pen" data-pen hidden><span class="nib"></span><span class="tag" data-pen-tag></span></div>
+        <div class="cursor" data-cursor hidden><span data-cursor-text></span></div>
+        <div class="playhead" data-playhead hidden></div>
+        <p class="blank" data-blank hidden></p>
+      </div>
+      <div class="legend">
+        <p><span class="lt">Left margin</span> your local time</p>
+        <p><span class="lt">Right margin</span> UTC</p>
+        <p>Read it like a page: each line runs on from the end of the one above</p>
+      </div>
+    </section>
+
+    <aside class="rail" aria-label="Station, controls, and quakes on this record">
+      <figure class="dial">
+        <canvas data-dial aria-label="The world as seen from the station: distance from the centre is distance over the Earth's surface"></canvas>
+        <figcaption>
+          The world drawn around the station. Rings are distance over the surface, every 30°; between 103° and 140° the
+          core casts a shadow that direct P waves can't reach.
+        </figcaption>
+      </figure>
+
+      <div class="controls">
+        <label class="field">
+          <span>Station</span>
+          <select data-station>
+            {
+              STATIONS.map((s) => (
+                <option value={s.code} selected={s.code === DEFAULT_STATION}>
+                  {s.code}, {s.place}, {s.region}
+                </option>
+              ))
+            }
+          </select>
+        </label>
+        <fieldset class="field seg">
+          <legend>Each line</legend>
+          <label><input type="radio" name="sg-row" value="15" /><span>15 min</span></label>
+          <label><input type="radio" name="sg-row" value="30" checked /><span>30 min</span></label>
+          <label><input type="radio" name="sg-row" value="60" /><span>1 hour</span></label>
+        </fieldset>
+        <div class="field gain">
+          <span id="sg-gain-label">Magnify</span>
+          <div class="knob" role="group" aria-labelledby="sg-gain-label">
+            <button type="button" data-gain="-1" aria-label="Less">-</button>
+            <output data-gain-out>×1</output>
+            <button type="button" data-gain="1" aria-label="More">+</button>
+          </div>
+        </div>
+        <button type="button" class="listen" data-listen disabled>
+          <span class="glyph" aria-hidden="true"></span><span data-listen-text>Listen to the day</span>
+        </button>
+        <p class="hint" data-listen-hint>A day of ground motion sped up 6,000 times, so the slow sway becomes sound.</p>
+      </div>
+
+      <section class="quakes">
+        <h2>Quakes on this record</h2>
+        <p class="note" data-quakes-note>Looking up the last day's earthquakes</p>
+        <ol data-quakes></ol>
+      </section>
+
+      <footer class="credit">
+        <p>
+          Ground motion from the Global Seismographic Network via EarthScope's FDSN services; earthquakes from the USGS
+          feed; coastline dots from Natural Earth.
+        </p>
+      </footer>
+    </aside>
+  </main>
+</Bare>
+
+<script>
+  import './_app';
+</script>
+
+<style is:global>
+  body:has(.seismo) {
+    margin: 0;
+    background: #171512;
+  }
+
+  .seismo {
+    --case: #171512;
+    --case-hi: #24211c;
+    --rim: #3a352c;
+    --enamel: #d9d2bf;
+    --enamel-dim: #9c9481;
+    --paper: #f1ecdd;
+    --paper-edge: #e3dcc8;
+    --grid: rgb(64 112 96 / 0.22);
+    --ink: #1a1a1a;
+    --red: #b3261e;
+    --blue: #1e4fa3;
+    --green: #1d7a46;
+    --amber: #e8a33a;
+    --f: var(--font-seismo);
+    --m: var(--font-seismo-mono);
+    --rail: 360px;
+    --row: 15px;
+
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--rail);
+    grid-template-areas:
+      'plate plate'
+      'sheet rail';
+    gap: 18px 28px;
+    padding: 18px 28px 40px;
+    color: var(--enamel);
+    font: 400 14px/1.45 var(--f);
+    background:
+      radial-gradient(1200px 600px at 30% -10%, rgb(255 240 210 / 0.06), transparent 70%),
+      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.012) 0 1px, transparent 1px 3px),
+      var(--case);
+  }
+
+  .seismo *,
+  .seismo *::before,
+  .seismo *::after {
+    box-sizing: border-box;
+  }
+
+  .seismo [hidden] {
+    display: none !important;
+  }
+
+  /* The nameplate */
+  .seismo .plate {
+    grid-area: plate;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      'home home home'
+      'title sta lamp';
+    align-items: end;
+    gap: 6px 22px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--rim);
+  }
+
+  .seismo .home {
+    grid-area: home;
+    justify-self: start;
+    color: var(--enamel-dim);
+    font: 400 12px/1 var(--m);
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+
+  .seismo .home:hover,
+  .seismo .home:focus-visible {
+    color: var(--enamel);
+  }
+
+  .seismo h1 {
+    grid-area: title;
+    margin: 0;
+    font: 700 30px/1 var(--f);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--enamel);
+  }
+
+  .seismo .sta {
+    grid-area: sta;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 16px;
+    align-items: baseline;
+    color: var(--enamel-dim);
+  }
+
+  .seismo .sta .code {
+    font: 700 14px/1.2 var(--m);
+    color: var(--amber);
+    letter-spacing: 0.08em;
+  }
+
+  .seismo .lamp {
+    grid-area: lamp;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: 400 12px/1.2 var(--m);
+    color: var(--enamel-dim);
+    white-space: nowrap;
+  }
+
+  .seismo .led {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #5d574b;
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.5);
+  }
+
+  .seismo .lamp[data-state='live'] .led {
+    background: #7fd36b;
+    box-shadow:
+      0 0 8px rgb(127 211 107 / 0.7),
+      inset 0 -1px 1px rgb(0 0 0 / 0.3);
+  }
+
+  .seismo .lamp[data-state='wait'] .led {
+    background: var(--amber);
+    box-shadow: 0 0 8px rgb(232 163 58 / 0.6);
+  }
+
+  .seismo .lamp[data-state='down'] .led {
+    background: #d4493b;
+    box-shadow: 0 0 8px rgb(212 73 59 / 0.6);
+  }
+
+  /* The record */
+  .seismo .sheet {
+    grid-area: sheet;
+    min-width: 0;
+  }
+
+  .seismo .heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: baseline;
+    margin-bottom: 8px;
+    font: 400 12px/1.3 var(--m);
+    color: var(--enamel-dim);
+  }
+
+  .seismo .heading p {
+    margin: 0;
+  }
+
+  .seismo .paper {
+    position: relative;
+    background:
+      radial-gradient(140% 90% at 50% 0%, rgb(255 255 255 / 0.35), transparent 60%),
+      linear-gradient(90deg, var(--paper-edge), var(--paper) 3%, var(--paper) 97%, var(--paper-edge)),
+      var(--paper);
+    border-radius: 2px;
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.4) inset,
+      0 18px 40px -12px rgb(0 0 0 / 0.7),
+      0 2px 6px rgb(0 0 0 / 0.5);
+    min-height: 240px;
+    overflow: clip;
+    touch-action: pan-y;
+  }
+
+  .seismo .ink {
+    display: block;
+    width: 100%;
+  }
+
+  .seismo .marks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .seismo .flag {
+    position: absolute;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font: 700 9px/1 var(--m);
+    color: #7a2b18;
+  }
+
+  .seismo .flag::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 1px;
+    height: var(--h, 18px);
+    background: currentColor;
+    opacity: 0.55;
+  }
+
+  .seismo .flag .ph {
+    position: absolute;
+    left: 3px;
+    top: -1px;
+    padding: 1px 2px;
+    background: rgb(241 236 221 / 0.85);
+    white-space: nowrap;
+  }
+
+  .seismo .flag .ph b {
+    font-weight: 700;
+  }
+
+  .seismo .flag .ph i {
+    font-style: normal;
+    font-weight: 400;
+    opacity: 0.8;
+  }
+
+  .seismo .flag.dim {
+    opacity: 0.35;
+  }
+
+  .seismo .flag.on {
+    color: var(--red);
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .seismo .flag.on::before {
+    opacity: 1;
+  }
+
+  .seismo .margin {
+    position: absolute;
+    font: 400 9.5px/1 var(--m);
+    color: rgb(40 50 44 / 0.62);
+    transform: translateY(-50%);
+    white-space: nowrap;
+  }
+
+  .seismo .margin.l {
+    left: 6px;
+  }
+
+  .seismo .margin.r {
+    right: 6px;
+    text-align: right;
+  }
+
+  .seismo .margin.day {
+    font-weight: 700;
+    color: rgb(40 50 44 / 0.85);
+  }
+
+  .seismo .pen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .seismo .pen .nib {
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ff8f73, var(--red) 55%, #6b120c);
+    box-shadow:
+      0 0 0 3px rgb(179 38 30 / 0.18),
+      0 0 14px rgb(179 38 30 / 0.55);
+  }
+
+  .seismo .pen .tag {
+    position: absolute;
+    left: 12px;
+    top: 9px;
+    padding: 3px 6px 3px;
+    font: 400 10px/1.25 var(--m);
+    color: var(--paper);
+    background: rgb(26 23 19 / 0.88);
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .seismo .pen.flip .tag {
+    left: auto;
+    right: 12px;
+  }
+
+  .seismo .cursor {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgb(30 79 163 / 0.45);
+    pointer-events: none;
+  }
+
+  .seismo .cursor span {
+    position: absolute;
+    top: var(--y, 0);
+    left: 8px;
+    padding: 3px 6px;
+    font: 400 10px/1.3 var(--m);
+    color: var(--paper);
+    background: rgb(23 21 18 / 0.9);
+    border-radius: 2px;
+    white-space: pre;
+  }
+
+  .seismo .cursor.flip span {
+    left: auto;
+    right: 8px;
+  }
+
+  .seismo .playhead {
+    position: absolute;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--amber);
+    box-shadow: 0 0 10px rgb(232 163 58 / 0.9);
+    pointer-events: none;
+  }
+
+  .seismo .blank {
+    position: absolute;
+    inset: 40% 10% auto;
+    margin: 0;
+    text-align: center;
+    font: 400 14px/1.5 var(--f);
+    color: #59523f;
+  }
+
+  .seismo .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 22px;
+    margin-top: 10px;
+    font: 400 11px/1.4 var(--m);
+    color: var(--enamel-dim);
+  }
+
+  .seismo .legend p {
+    margin: 0;
+  }
+
+  .seismo .legend .lt {
+    color: var(--enamel);
+    margin-right: 4px;
+  }
+
+  /* The rail */
+  .seismo .rail {
+    grid-area: rail;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+  }
+
+  .seismo .dial {
+    margin: 0;
+  }
+
+  .seismo .dial canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+  }
+
+  .seismo .dial figcaption {
+    margin-top: 6px;
+    font: 400 11px/1.45 var(--f);
+    color: var(--enamel-dim);
+  }
+
+  .seismo .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 14px;
+    padding: 14px;
+    background: linear-gradient(180deg, var(--case-hi), #1d1a16);
+    border: 1px solid var(--rim);
+    border-radius: 4px;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset;
+  }
+
+  .seismo .field {
+    display: grid;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .seismo .field > span,
+  .seismo .field legend {
+    padding: 0;
+    font: 700 10px/1 var(--f);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--enamel-dim);
+  }
+
+  .seismo .field legend {
+    margin-bottom: 5px;
+  }
+
+  .seismo label.field {
+    grid-column: 1 / -1;
+  }
+
+  .seismo select {
+    width: 100%;
+    padding: 8px 30px 8px 10px;
+    font: 400 13px/1.2 var(--f);
+    color: var(--enamel);
+    background:
+      linear-gradient(45deg, transparent 50%, var(--enamel-dim) 50%) right 15px center / 5px 5px no-repeat,
+      linear-gradient(-45deg, transparent 50%, var(--enamel-dim) 50%) right 10px center / 5px 5px no-repeat,
+      #12100d;
+    border: 1px solid var(--rim);
+    border-radius: 3px;
+    appearance: none;
+  }
+
+  .seismo select option {
+    background: #12100d;
+    color: var(--enamel);
+  }
+
+  .seismo .seg {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 0;
+  }
+
+  .seismo .seg legend {
+    float: left;
+    width: 100%;
+  }
+
+  .seismo .seg label {
+    flex: 1;
+    position: relative;
+  }
+
+  .seismo .seg input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .seismo .seg span {
+    display: block;
+    padding: 7px 4px;
+    text-align: center;
+    font: 400 12px/1.2 var(--m);
+    color: var(--enamel-dim);
+    background: #12100d;
+    border: 1px solid var(--rim);
+    margin-left: -1px;
+  }
+
+  .seismo .seg label:first-of-type span {
+    border-radius: 3px 0 0 3px;
+    margin-left: 0;
+  }
+
+  .seismo .seg label:last-of-type span {
+    border-radius: 0 3px 3px 0;
+  }
+
+  .seismo .seg input:checked + span {
+    color: #1b160d;
+    background: var(--amber);
+    border-color: var(--amber);
+  }
+
+  .seismo .seg input:focus-visible + span,
+  .seismo .knob button:focus-visible,
+  .seismo .listen:focus-visible,
+  .seismo select:focus-visible,
+  .seismo .quakes button:focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+
+  .seismo .gain {
+    grid-column: 1 / 2;
+  }
+
+  .seismo .knob {
+    display: grid;
+    grid-template-columns: 34px 1fr 34px;
+    align-items: stretch;
+    border: 1px solid var(--rim);
+    border-radius: 3px;
+    background: #12100d;
+  }
+
+  .seismo .knob button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--enamel);
+    font: 700 16px/1 var(--m);
+    cursor: pointer;
+  }
+
+  .seismo .knob button:hover {
+    color: var(--amber);
+  }
+
+  .seismo .knob output {
+    display: grid;
+    place-items: center;
+    padding: 7px 0;
+    font: 400 13px/1.2 var(--m);
+    color: var(--amber);
+    border-inline: 1px solid var(--rim);
+  }
+
+  .seismo .listen {
+    grid-column: 2 / 3;
+    align-self: end;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 7px 10px;
+    font: 700 12px/1.1 var(--f);
+    letter-spacing: 0.04em;
+    color: #1b160d;
+    background: var(--enamel);
+    border: 0;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .seismo .listen:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .seismo .listen .glyph {
+    width: 0;
+    height: 0;
+    border-left: 8px solid currentColor;
+    border-block: 5px solid transparent;
+  }
+
+  .seismo .listen[aria-pressed='true'] .glyph {
+    width: 8px;
+    height: 10px;
+    border: 0;
+    border-inline: 3px solid currentColor;
+  }
+
+  .seismo .hint {
+    grid-column: 1 / -1;
+    margin: 0;
+    font: 400 11px/1.4 var(--f);
+    color: var(--enamel-dim);
+  }
+
+  .seismo .quakes h2 {
+    margin: 0 0 8px;
+    font: 700 11px/1 var(--f);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--enamel-dim);
+  }
+
+  .seismo .quakes .note {
+    margin: 0 0 8px;
+    font: 400 12px/1.4 var(--f);
+    color: var(--enamel-dim);
+  }
+
+  .seismo .quakes ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  .seismo .quakes button {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 2px 10px;
+    width: 100%;
+    padding: 8px 10px;
+    text-align: left;
+    color: var(--enamel);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .seismo .quakes button:hover {
+    background: var(--case-hi);
+  }
+
+  .seismo .quakes button[aria-pressed='true'] {
+    background: var(--case-hi);
+    border-color: var(--rim);
+  }
+
+  .seismo .quakes .mag {
+    grid-row: span 2;
+    align-self: center;
+    font: 700 17px/1 var(--m);
+    color: var(--amber);
+  }
+
+  .seismo .quakes .mag.big {
+    color: #ff7a5c;
+  }
+
+  .seismo .quakes .what {
+    font: 400 13px/1.3 var(--f);
+  }
+
+  .seismo .quakes .when {
+    font: 400 11px/1.3 var(--m);
+    color: var(--enamel-dim);
+  }
+
+  .seismo .credit p {
+    margin: 0;
+    font: 400 11px/1.5 var(--f);
+    color: #7b7464;
+  }
+
+  @media (max-width: 900px) {
+    .seismo {
+      --rail: 1fr;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'plate'
+        'sheet'
+        'rail';
+      padding: 14px 16px 32px;
+      gap: 14px;
+    }
+
+    .seismo .plate {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        'home lamp'
+        'title title'
+        'sta sta';
+      align-items: center;
+      gap: 8px 12px;
+    }
+
+    .seismo h1 {
+      font-size: 24px;
+    }
+
+    .seismo .heading {
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .seismo .rail {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .seismo .controls {
+      order: -1;
+    }
+
+    .seismo .dial {
+      max-width: 420px;
+      width: 100%;
+      justify-self: center;
+    }
+  }
+</style>

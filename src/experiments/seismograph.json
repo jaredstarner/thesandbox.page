@@ -1,0 +1,8 @@
+{
+  "title": "Seismograph",
+  "summary": "A drum recorder wired to a real seismometer: pick a vault anywhere from Albuquerque to Antarctica, watch the pen write the last day of ground motion, see where each earthquake's waves should land, and hear the whole day sped up six thousand times.",
+  "date": "2026-10-13",
+  "tags": ["canvas", "live-data", "web-audio", "miniseed", "seismology", "pointer-events"],
+  "requires": ["canvas"],
+  "plot": 12
+}
