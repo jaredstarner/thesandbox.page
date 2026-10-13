@@ -193,6 +193,8 @@ function start(root: HTMLElement): void {
       blank.textContent = `${s.place} isn't answering right now. Try another station, or come back in a while.`;
       blank.hidden = false;
       return;
+    } finally {
+      if (load === ctl) load = null;
     }
     if (!trace.end) {
       setLamp('down', 'No recent data');
@@ -217,7 +219,12 @@ function start(root: HTMLElement): void {
   }
 
   async function poll(): Promise<void> {
-    if (!trace || !trace.end || document.hidden) return;
+    if (!trace || document.hidden) return;
+    if (!trace.end) {
+      // The station didn't answer the first call; ask again from the start.
+      if (!load) void loadStation(station);
+      return;
+    }
     const s = station;
     const tr = trace;
     try {
