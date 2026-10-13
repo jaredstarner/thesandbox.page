@@ -179,5 +179,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Garamond', 'Georgia', 'serif'],
     },
+    {
+      // The instrument lettering on /seismograph/: a face drawn for cockpit displays.
+      provider: fontProviders.fontsource(),
+      name: 'B612',
+      cssVariable: '--font-seismo',
+      weights: [400, 700],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Arial', 'sans-serif'],
+    },
   ],
 });

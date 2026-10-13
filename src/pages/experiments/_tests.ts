@@ -394,6 +394,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   javascript: { label: 'JavaScript' },
   physics: { label: 'Physics' },
   autocorrelation: { label: 'Autocorrelation' },
+  miniseed: { label: 'miniSEED' },
+  seismology: { label: 'Seismology' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
