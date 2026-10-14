@@ -226,4 +226,4 @@ function distances(at: (x: number, y: number) => Cell, from: Cell) {
   return dist;
 }
 
-export const plan = build(1725);
+export const plan = build(2147);
