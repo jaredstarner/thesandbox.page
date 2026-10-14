@@ -40,8 +40,21 @@ function wall(x: number, y: number, d: Dir) {
   }
 }
 
+/** The far stair, drawn on the chart only once you have climbed it: treads outside the edge it opens from. */
+function exitMark() {
+  const { cell, dir } = plan.exit;
+  const x0 = cell.x * CELL;
+  const y0 = cell.y * CELL;
+  const span = SIZE * CELL;
+  const treads =
+    dir === 's'
+      ? [0, 3, 6].map((k, i) => `M${x0 + 4 + i} ${span + 1.5 + k}h${12 - i * 2}`)
+      : [0, 3, 6].map((k, i) => `M${span + 1.5 + k} ${y0 + 4 + i}v${12 - i * 2}`);
+  return `<path class="stair" d="${treads.join('')}"/>`;
+}
+
 /** The chart as SVG. `base` is the path from the page to the undercroft's folder, such as "../". */
-export function chart(base: string) {
+export function chart(base: string, { exit = false } = {}) {
   const links: string[] = [];
   for (const c of plan.cells) {
     for (const d of DIRS) {
@@ -63,12 +76,13 @@ export function chart(base: string) {
   const rows = Array.from({ length: SIZE }, (_, i) => `<text x="-5" y="${i * CELL + half + 3}" text-anchor="end">${i + 1}</text>`).join('');
   const start = plan.start;
   return (
-    `<svg class="chart" viewBox="-18 -16 ${span + 24} ${span + 22}" role="img" aria-label="Your chart of the undercroft, inked from the places you have stood">` +
+    `<svg class="chart" viewBox="-18 -16 ${span + 28} ${span + 28}" role="img" aria-label="Your chart of the undercroft, inked from the places you have stood">` +
     `<path class="grid" d="${ticks.join('')}"/>` +
     `<g class="cells">${links.join('')}</g>` +
     `<rect class="edge" width="${span}" height="${span}"/>` +
     // The stair you came down by is the one mark the chart starts with.
     `<path class="stair" d="M${start.x * CELL + 4} 1.5h12M${start.x * CELL + 5} -1.5h10M${start.x * CELL + 6} -4.5h8"/>` +
+    (exit ? exitMark() : '') +
     `<g class="labels">${cols}${rows}</g>` +
     `<path class="here" d="M0 -6.5l4.6 9.5-4.6-2.6-4.6 2.6z" data-here/>` +
     `</svg>`

@@ -28,7 +28,7 @@ const exit = plan.exit;
         You came up the stair at {exit.cell.id.toUpperCase()} into open air. Below is the chart of the undercroft as you walked it:
         every cell you stood in, inked on each side you faced.
       </p>
-      <div class="sheet" inert><Fragment set:html={chart('../')} /></div>
+      <div class="sheet" inert><Fragment set:html={chart('../', { exit: true })} /></div>
       <p class="legend">
         The chart is drawn from your browser's own history, link by link. Clear the history for this site and the undercroft
         forgets you were ever down there.
