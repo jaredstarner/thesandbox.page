@@ -1,0 +1,8 @@
+{
+  "title": "The undercroft",
+  "summary": "A stone labyrinth drawn as 576 engraved plates, one static page for every place you can stand and way you can face: walk it by following links, step back with the back button, and climb toward the daylight while your own browser history inks in the chart.",
+  "date": "2026-10-14",
+  "tags": ["html", "svg", "visited", "cross-document-view-transitions", "speculation-rules", "static-generation"],
+  "requires": [],
+  "plot": 13
+}

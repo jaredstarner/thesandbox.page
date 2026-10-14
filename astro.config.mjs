@@ -189,5 +189,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Arial', 'sans-serif'],
     },
+    // The plate captions on /undercroft/, set in a Victorian book face, and the letters cut into its walls.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Old Standard TT',
+      cssVariable: '--font-undercroft',
+      weights: [400],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Cinzel',
+      cssVariable: '--font-undercroft-carved',
+      weights: ['400 900'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Trajan Pro', 'Georgia', 'serif'],
+    },
   ],
 });
