@@ -283,7 +283,7 @@ body:has(.undercroft) {
 }
 
 .undercroft .chart .labels {
-  font-size: 7px;
+  font-size: 8.5px;
   fill: var(--ink-soft);
   text-anchor: middle;
 }

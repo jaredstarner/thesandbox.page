@@ -21,6 +21,8 @@ const MAX_DEPTH = 9;
 
 const PAPER = [236, 226, 203] as const;
 const INK = [30, 23, 17] as const;
+/** Sky at the top of the far stair: brighter than the paper, the one thing on the plate that is. */
+const DAYLIGHT = '#fffbf0';
 
 type V3 = [number, number, number]; // x right, y up, z forward, in cell widths; z is from the cell centre
 type V2 = [number, number];
@@ -68,29 +70,81 @@ function clipSeg(a: V3, b: V3): [V3, V3] | null {
   return ia ? [a, m] : [m, b];
 }
 
+/** Tenths of a plate unit, so relative steps add up exactly. */
+const tenth = (n: number) => Math.round(n * 10);
+
+/** A number in tenths, written short: "-.5" for -0.5, "12" for 12.0. */
+function num(t: number) {
+  const s = (t / 10).toString();
+  return s.replace(/^(-?)0\./, '$1.');
+}
+
+/** Joins numbers, letting a minus sign stand in for the separator. */
+function nums(...t: number[]) {
+  return t.map((v, i) => (i && v >= 0 ? ' ' : '') + num(v)).join('');
+}
+
 function polyPath(pts: V3[]) {
   const c = clipPoly(pts);
   if (c.length < 3) return '';
-  return c.map((p, i) => (i ? 'L' : 'M') + project(p).map(fmt).join(' ')).join('') + 'Z';
+  let d = '';
+  let px = 0;
+  let py = 0;
+  c.forEach((p, i) => {
+    const [x, y] = project(p).map(tenth) as [number, number];
+    d += (i ? 'l' : 'M') + (i ? nums(x - px, y - py) : nums(x, y));
+    px = x;
+    py = y;
+  });
+  return d + 'z';
 }
 
-/** Several segments as one path, with H and V shortcuts for level and plumb lines. */
+/** Clips a plate-space segment to a margin round the plate (Liang-Barsky); null when it misses. */
+function clipToPlate(ax: number, ay: number, bx: number, by: number): [number, number, number, number] | null {
+  const m = 12;
+  let t0 = 0;
+  let t1 = 1;
+  const dx = bx - ax;
+  const dy = by - ay;
+  for (const [p, q] of [
+    [-dx, ax + m],
+    [dx, VW + m - ax],
+    [-dy, ay + m],
+    [dy, VH + m - ay],
+  ] as const) {
+    if (p === 0) {
+      if (q < 0) return null;
+      continue;
+    }
+    const r = q / p;
+    if (p < 0) t0 = Math.max(t0, r);
+    else t1 = Math.min(t1, r);
+    if (t0 > t1) return null;
+  }
+  return [ax + dx * t0, ay + dy * t0, ax + dx * t1, ay + dy * t1];
+}
+
+/** Several segments as one path in relative steps, with h and v for level and plumb lines. */
 function segPath(segs: [V3, V3][]) {
   let d = '';
+  let px = 0;
+  let py = 0;
   for (const [a0, b0] of segs) {
     const s = clipSeg(a0, b0);
     if (!s) continue;
-    const [ax, ay] = project(s[0]);
-    const [bx, by] = project(s[1]);
-    if (!isFinite(ax + ay + bx + by)) continue;
-    // Off the plate entirely.
-    if ((ax < -40 && bx < -40) || (ax > VW + 40 && bx > VW + 40) || (ay < -40 && by < -40) || (ay > VH + 40 && by > VH + 40)) {
-      continue;
-    }
-    d += `M${fmt(ax)} ${fmt(ay)}`;
-    if (Math.abs(ay - by) < 0.05) d += `H${fmt(bx)}`;
-    else if (Math.abs(ax - bx) < 0.05) d += `V${fmt(by)}`;
-    else d += `L${fmt(bx)} ${fmt(by)}`;
+    const [ax0, ay0] = project(s[0]);
+    const [bx0, by0] = project(s[1]);
+    if (!isFinite(ax0 + ay0 + bx0 + by0)) continue;
+    const clipped = clipToPlate(ax0, ay0, bx0, by0);
+    if (!clipped) continue;
+    const [ax, ay, bx, by] = clipped.map(tenth) as [number, number, number, number];
+    if (ax === bx && ay === by) continue;
+    d += d ? `m${nums(ax - px, ay - py)}` : `M${nums(ax, ay)}`;
+    if (ay === by) d += `h${num(bx - ax)}`;
+    else if (ax === bx) d += `v${num(by - ay)}`;
+    else d += `l${nums(bx - ax, by - ay)}`;
+    px = bx;
+    py = by;
   }
   return d;
 }
@@ -129,7 +183,7 @@ function sideFace(d: number, l: number, side: 'left' | 'right', seed: number): F
   return { at, length: 1, near: Math.max(NEAR, zc([0, 0, z0])), front: false, seed };
 }
 
-const lantern = (z: number) => 1 / (1 + (z / 1.6) ** 3);
+const lantern = (z: number) => 1 / (1 + (z / 1.8) ** 3);
 const weight = (z: number) => Math.max(0.35, Math.min(1.7, 1.25 / z));
 
 interface Out {
@@ -149,7 +203,7 @@ function surfaceTone(cell: Cell, z: number, bias: number) {
 }
 
 /** Hatch spacing on the plate, in plate units, as an engraver keeps it. */
-const RULE = 7.5;
+const RULE = 6;
 /** Past this depth the lines would be too many for too little; the wash carries the tone. */
 const HATCH_DEPTH = 3.4;
 
@@ -163,12 +217,12 @@ const spacingAt = (z: number) => (RULE * z) / F;
  */
 function hatch(out: Out, sets: [V3, V3][][], t: number, z: number) {
   if (z > HATCH_DEPTH || t < 0.03) return;
-  lineSet(out, sets[0]!, RULE * Math.min(0.6, Math.max(0.06, t * 0.72)), tone(0.97));
-  if (t > 0.48 && sets[1]) lineSet(out, sets[1], RULE * Math.min(0.46, (t - 0.42) * 0.9), tone(0.97));
+  lineSet(out, sets[0]!, RULE * Math.min(0.48, Math.max(0.07, t * 0.56)), tone(0.97));
+  if (t > 0.5 && sets[1]) lineSet(out, sets[1], RULE * Math.min(0.36, (t - 0.45) * 0.75), tone(0.97));
 }
 
 /** A surface's wash: the share of the tone the hatching doesn't carry. */
-const wash = (t: number, z: number) => tone(z > HATCH_DEPTH ? t : t * 0.4);
+const wash = (t: number, z: number) => tone(z > HATCH_DEPTH ? t : t * 0.55);
 
 /**
  * Parallel lines across a w x h rectangle in its own (a, b) coordinates, at
@@ -246,6 +300,68 @@ function masonry(out: Out, f: Face, w: number, t: number, z: number) {
   lineSet(out, joints, w * 1.15, tone(1));
 }
 
+/** Where vault arches spring, and how high their crowns reach, in face coordinates. */
+const SPRING = 0.9;
+const CROWN = 1.15;
+
+/** The intrados of a vault arch from u = 0 to 1: a flattened half ellipse. */
+function archCurve(steps = 16): V2[] {
+  const pts: V2[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const a = Math.PI - (Math.PI * i) / steps;
+    pts.push([0.5 + Math.cos(a) * 0.5, SPRING + Math.sin(a) * (CROWN - SPRING)]);
+  }
+  return pts;
+}
+
+/**
+ * A vault arch on a cell boundary. Open: the spandrel of masonry between the
+ * arch and the ceiling, with its voussoirs. Closed: the same arch, cut as a
+ * line on the wall where the vault meets it.
+ */
+function vault(out: Out, f: Face, t: number, w: number, z: number, open: boolean) {
+  const curve = archCurve();
+  if (open) {
+    const spandrel = facePoly(f, [[0, H], [1, H], [1, 0.0], [0.94, 0.0], ...curve.slice().reverse().map(([u, v]): V2 => [0.06 + u * 0.88, v]), [0.06, 0], [0, 0]]);
+    out.parts.push(`<path d="${polyPath(spandrel)}" fill="${wash(t, z)}"/>`);
+    // Piers and spandrel, ruled like the walls: level lines stopped at the opening.
+    const ruling: [V3, V3][] = [];
+    const sp = spacingAt(z);
+    if (z <= HATCH_DEPTH && t > 0.03) {
+      for (let v = sp / 2; v < H; v += sp) {
+        const gap = v < SPRING ? [0.06, 0.94] : v < CROWN ? spandrelGap(v) : null;
+        if (gap) ruling.push([f.at(0, v), f.at(gap[0], v)], [f.at(gap[1], v), f.at(1, v)]);
+        else ruling.push([f.at(0, v), f.at(1, v)]);
+      }
+      lineSet(out, ruling, RULE * Math.min(0.48, Math.max(0.07, t * 0.56)), tone(0.97));
+    }
+  }
+  const ring: [V3, V3][] = [];
+  const inner = curve.map(([u, v]): V2 => [0.06 + u * 0.88, v]);
+  for (let i = 0; i < inner.length - 1; i++) ring.push([f.at(...inner[i]!), f.at(...inner[i + 1]!)]);
+  if (open) {
+    // Voussoirs: joints radiating from the arch's centre to the ceiling line.
+    for (let i = 2; i < inner.length - 2; i += 2) {
+      const [u, v] = inner[i]!;
+      const du = u - 0.5;
+      const dv = v - SPRING + 0.25;
+      const k = 0.075 / Math.hypot(du, dv);
+      ring.push([f.at(u, v), f.at(u + du * k, Math.min(H, v + dv * k))]);
+    }
+    ring.push([f.at(0.06, 0), f.at(0.06, SPRING)], [f.at(0.94, 0), f.at(0.94, SPRING)]);
+    ring.push([f.at(0, SPRING), f.at(0.06, SPRING)], [f.at(0.94, SPRING), f.at(1, SPRING)]);
+  }
+  lineSet(out, ring, w * (open ? 1.2 : 0.9), tone(1));
+}
+
+/** Where a level line at height v between springing and crown leaves the spandrel for the arch's opening. */
+function spandrelGap(v: number): [number, number] | null {
+  const s = (v - SPRING) / (CROWN - SPRING);
+  if (s <= 0) return null;
+  const x = Math.sqrt(Math.max(0, 0.25 - (s / 2) ** 2));
+  return [0.06 + (0.5 - x) * 0.88, 0.06 + (0.5 + x) * 0.88];
+}
+
 function facePoly(f: Face, pts: V2[]): V3[] {
   return pts.map(([u, v]) => f.at(u, v));
 }
@@ -271,10 +387,19 @@ function drawFeature(out: Out, f: Face, feature: Feature, t: number, w: number) 
     const r = (u1 - u0) / 2;
     const vu = (u0 + u1) / 2;
     // The stairwell: dark sides, and at the top, the sky or the dim landing you came down from.
-    out.parts.push(`<path d="${polyPath(facePoly(f, opening))}" fill="${tone(day ? 0.62 : 0.92)}"/>`);
+    out.parts.push(`<path d="${polyPath(facePoly(f, opening))}" fill="${tone(day ? 0.5 : 0.8)}"/>`);
+    // The stairwell's walls, ruled plumb up to the arch.
+    const well: [V3, V3][] = [];
+    const sp = spacingAt(Math.max(0.6, f.near));
+    for (let u = u0 + sp / 2; u < u1; u += sp) {
+      const dx = (u - vu) / r;
+      const v1 = spring + Math.sqrt(Math.max(0, 1 - dx * dx)) * r;
+      well.push([f.at(u, 0), f.at(u, v1)]);
+    }
+    lineSet(out, well, RULE * (day ? 0.3 : 0.45), tone(1));
     const top = spring + r * 0.62;
     const sky = arch(vu - r * 0.42, vu + r * 0.42, top - 0.2, top - 0.06, 10);
-    out.parts.push(`<path d="${polyPath(facePoly(f, sky))}" fill="${tone(day ? 0 : 0.6)}"/>`);
+    out.parts.push(`<path d="${polyPath(facePoly(f, sky))}" fill="${day ? DAYLIGHT : tone(0.6)}"/>`);
     // Steps climbing away: each band is a riser, lit more the nearer it is to the top.
     const n = 9;
     // Scaled so the last riser meets the landing at the top of the flight.
@@ -527,8 +652,6 @@ export function engrave(cell: Cell, facing: Dir): Plate {
     ]);
     if (ceil) out.parts.push(`<path d="${ceil}" fill="${wash(ceilT, zFlat)}"/>`);
     hatchFlat(out, l, d, H, ceilT, zFlat, seed + 11, 'across');
-    lineSet(out, [[[l - 0.5, H, d + 0.5], [l + 0.5, H, d + 0.5]]], fw * 1.2, tone(1));
-
     const walls: { side: 'front' | 'left' | 'right'; face: Face; dir: Dir; z: number }[] = [];
     if (h.walls.has('front')) walls.push({ side: 'front', face: frontFace(d, l, seed + 1), dir: facing, z: d + 0.5 + BACKSET });
     if (h.walls.has('left')) walls.push({ side: 'left', face: sideFace(d, l, 'left', seed + 2), dir: LEFT[facing], z: zMid + 0.2 });
@@ -544,6 +667,36 @@ export function engrave(cell: Cell, facing: Dir): Plate {
       masonry(out, f, w, t, z);
       const feature = c.faces[wall.dir];
       if (feature) drawFeature(out, f, feature, t, w);
+      else vault(out, f, t, w, z, false);
+    }
+
+    // Open boundaries carry a vault arch: across the passage ahead, and along it at open sides.
+    // The arch overhead at the sides of the cell you stand in is mostly behind you; its
+    // underside would show only as stray slivers at the plate's top corners.
+    const arches: { face: Face; z: number; soffit: ((u: number, v: number) => V3) | null }[] = [];
+    if (c.open[facing]) {
+      const z = d + 0.5;
+      arches.push({ face: frontFace(d, l, seed + 4), z: z + BACKSET, soffit: (u, v) => [l - 0.5 + u, v, z + 0.08] });
+    }
+    if (l <= 0 && c.open[LEFT[facing]]) {
+      const x = l - 0.5;
+      arches.push({ face: sideFace(d, l, 'left', seed + 5), z: zMid + 0.2, soffit: d ? (u, v) => [x - 0.08, v, d - 0.5 + u] : null });
+    }
+    if (l >= 0 && c.open[RIGHT[facing]]) {
+      const x = l + 0.5;
+      arches.push({ face: sideFace(d, l, 'right', seed + 6), z: zMid + 0.2, soffit: d ? (u, v) => [x + 0.08, v, d + 0.5 - u] : null });
+    }
+    for (const a of arches) {
+      const z = Math.max(0.25, a.z);
+      const t = Math.max(0, surfaceTone(c, z, 0) - 0.04);
+      if (a.soffit) {
+        // The underside of the arch, a sliver of shadow between its near and far faces.
+        const curve = archCurve().map(([u, v]): V2 => [0.06 + u * 0.88, v]);
+        const soffit = [...curve.map(([u, v]) => a.face.at(u, v)), ...curve.reverse().map(([u, v]) => a.soffit!(u, v))];
+        const sp = polyPath(soffit);
+        if (sp) out.parts.push(`<path d="${sp}" fill="${tone(Math.min(1, t + 0.32))}"/>`);
+      }
+      vault(out, a.face, t, weight(z), z, true);
     }
   }
 
