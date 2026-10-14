@@ -91,7 +91,7 @@ body:has(.undercroft) {
 
 .undercroft.crawl {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
   grid-template-rows: auto 1fr;
   column-gap: 28px;
   padding-bottom: 24px;
