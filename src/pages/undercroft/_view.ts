@@ -216,7 +216,8 @@ const spacingAt = (z: number) => (RULE * z) / F;
  * was ruled for.
  */
 function hatch(out: Out, sets: [V3, V3][][], t: number, z: number) {
-  if (z > HATCH_DEPTH || t < 0.03) return;
+  // Even the lightest stone gets a fine rule; only the paper itself is left bare.
+  if (z > HATCH_DEPTH) return;
   lineSet(out, sets[0]!, RULE * Math.min(0.48, Math.max(0.07, t * 0.56)), tone(0.97));
   if (t > 0.5 && sets[1]) lineSet(out, sets[1], RULE * Math.min(0.36, (t - 0.45) * 0.75), tone(0.97));
 }
@@ -678,15 +679,15 @@ export function engrave(cell: Cell, facing: Dir): Plate {
     const arches: { face: Face; z: number; soffit: ((u: number, v: number) => V3) | null }[] = [];
     if (c.open[facing]) {
       const z = d + 0.5;
-      arches.push({ face: frontFace(d, l, seed + 4), z: z + BACKSET, soffit: (u, v) => [l - 0.5 + u, v, z + 0.08] });
+      arches.push({ face: frontFace(d, l, seed + 4), z: z + BACKSET, soffit: (u, v) => [l - 0.5 + u, v, z + 0.05] });
     }
     if (l <= 0 && c.open[LEFT[facing]]) {
       const x = l - 0.5;
-      arches.push({ face: sideFace(d, l, 'left', seed + 5), z: zMid + 0.2, soffit: d ? (u, v) => [x - 0.08, v, d - 0.5 + u] : null });
+      arches.push({ face: sideFace(d, l, 'left', seed + 5), z: zMid + 0.2, soffit: d ? (u, v) => [x - 0.05, v, d - 0.5 + u] : null });
     }
     if (l >= 0 && c.open[RIGHT[facing]]) {
       const x = l + 0.5;
-      arches.push({ face: sideFace(d, l, 'right', seed + 6), z: zMid + 0.2, soffit: d ? (u, v) => [x + 0.08, v, d + 0.5 - u] : null });
+      arches.push({ face: sideFace(d, l, 'right', seed + 6), z: zMid + 0.2, soffit: d ? (u, v) => [x + 0.05, v, d + 0.5 - u] : null });
     }
     for (const a of arches) {
       const z = Math.max(0.25, a.z);
@@ -696,7 +697,7 @@ export function engrave(cell: Cell, facing: Dir): Plate {
         const curve = archCurve().map(([u, v]): V2 => [0.06 + u * 0.88, v]);
         const soffit = [...curve.map(([u, v]) => a.face.at(u, v)), ...curve.reverse().map(([u, v]) => a.soffit!(u, v))];
         const sp = polyPath(soffit);
-        if (sp) out.parts.push(`<path d="${sp}" fill="${tone(Math.min(1, t + 0.32))}"/>`);
+        if (sp) out.parts.push(`<path d="${sp}" fill="${tone(Math.min(1, t + 0.55))}" stroke="${tone(1)}" stroke-width="${fmt(weight(z) * 0.9)}" stroke-linejoin="round"/>`);
       }
       vault(out, a.face, t, weight(z), z, true);
     }
