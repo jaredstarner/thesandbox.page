@@ -1,0 +1,191 @@
+---
+// The head of the stair: a title plate, and the way down.
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import Defs from './_Defs.astro';
+import { plan } from './_maze';
+import { engrave } from './_view';
+import { chart } from './_chart';
+import './_undercroft.css';
+
+const first = engrave(plan.start, 's');
+const down = `${plan.start.id}/#s`;
+---
+
+<Bare
+  title="The undercroft"
+  description="A stone labyrinth drawn as 576 engraved plates, one page for every place you can stand and way you can face. Walk it by following links; your browser history draws the chart."
+>
+  <Fragment slot="head">
+    <Font cssVariable="--font-undercroft" preload />
+    <Font cssVariable="--font-undercroft-carved" preload />
+    <script is:inline type="speculationrules" set:html={JSON.stringify({ prerender: [{ urls: [down.split('#')[0]], eagerness: 'moderate' }] })} />
+  </Fragment>
+
+  <main class="undercroft title">
+    <Defs />
+    <header class="masthead">
+      <a class="home" href="/">thesandbox.page</a>
+    </header>
+
+    <article class="frontispiece">
+      <h1>
+        <span class="the">The</span>
+        Undercroft
+      </h1>
+      <p class="sub">A survey in five hundred and seventy-six plates</p>
+
+      <figure class="plate">
+        <div class="frame"><Fragment set:html={first.svg} /></div>
+        <figcaption><span class="no">Frontispiece.</span> <span class="where">The foot of the stair, looking south.</span></figcaption>
+      </figure>
+
+      <div class="intro">
+        <p>
+          A stair goes down from here into a labyrinth of cut stone, twelve cells by twelve. Every place you can stand there,
+          and every way you can face, is a plate of its own. Walk it with the keys under each plate, the arrow keys, or a tap on
+          the plate itself. The back button steps you back the way you came.
+        </p>
+        <p>Somewhere at the far side, steps climb to daylight.</p>
+        <a class="descend" href={down}>Go down the stair</a>
+      </div>
+
+      <aside class="survey">
+        <div class="sheet" inert><Fragment set:html={chart('')} /></div>
+        <p class="legend">Your chart so far. It inks in as you walk, and remembers what your browser remembers.</p>
+      </aside>
+    </article>
+  </main>
+</Bare>
+
+<style is:global>
+  .undercroft.title .masthead {
+    justify-content: flex-start;
+  }
+
+  .undercroft .frontispiece {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+    column-gap: 40px;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 18px 24px 48px;
+  }
+
+  .undercroft .frontispiece h1 {
+    grid-column: 1 / -1;
+    margin: 6px 0 0;
+    font-family: var(--carved);
+    font-weight: 700;
+    font-size: clamp(40px, 7vw, 88px);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .undercroft .frontispiece h1 .the {
+    display: block;
+    margin-bottom: 0.25em;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.3em;
+    letter-spacing: 0.08em;
+    text-transform: none;
+  }
+
+  .undercroft .frontispiece .sub {
+    grid-column: 1 / -1;
+    margin: 14px 0 26px;
+    text-align: center;
+    font-style: italic;
+    font-size: 18px;
+  }
+
+  .undercroft .frontispiece .sub::before,
+  .undercroft .frontispiece .sub::after {
+    content: '';
+    display: inline-block;
+    width: 48px;
+    height: 1px;
+    margin: 0 14px;
+    vertical-align: middle;
+    background: var(--ink);
+  }
+
+  .undercroft .frontispiece .plate {
+    grid-column: 1;
+    grid-row: 3 / span 2;
+    width: 100%;
+    max-width: none;
+  }
+
+  .undercroft .frontispiece .intro {
+    grid-column: 2;
+    grid-row: 3;
+    font-size: 17px;
+  }
+
+  .undercroft .frontispiece .intro p {
+    margin: 0 0 14px;
+    text-wrap: pretty;
+  }
+
+  .undercroft .frontispiece .descend {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 12px 20px;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+    box-shadow: inset 0 0 0 3px var(--ink), inset 0 0 0 4px rgb(236 226 203 / 0.5);
+    font-family: var(--carved);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .undercroft .frontispiece .descend:hover {
+    background: #3a2e22;
+  }
+
+  .undercroft .frontispiece .descend:focus-visible {
+    outline: 2px solid var(--sanguine);
+    outline-offset: 3px;
+  }
+
+  .undercroft .frontispiece .survey {
+    grid-column: 2;
+    grid-row: 4;
+    padding: 24px 0 0;
+  }
+
+  @media (max-width: 760px) {
+    .undercroft .frontispiece {
+      display: block;
+      padding: 12px 16px 40px;
+    }
+
+    .undercroft .frontispiece h1 .the {
+      font-size: 0.42em;
+    }
+
+    .undercroft .frontispiece .sub {
+      margin: 10px 0 20px;
+      font-size: 16px;
+      text-wrap: balance;
+    }
+
+    .undercroft .frontispiece .sub::before,
+    .undercroft .frontispiece .sub::after {
+      display: none;
+    }
+
+    .undercroft .frontispiece .intro {
+      margin-top: 22px;
+    }
+  }
+</style>

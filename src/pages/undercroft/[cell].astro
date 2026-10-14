@@ -1,0 +1,141 @@
+---
+// One page per cell of the undercroft. Each holds the four plates you can see
+// from there, one per way you can face; the URL fragment (#n, #e, #s, #w)
+// picks which one shows, so turning is a same-page link and stepping is a
+// link to the next cell's page.
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import Defs from './_Defs.astro';
+import Reveal from './_Reveal.astro';
+import { BACK, DIRS, DIR_NAME, LEFT, RIGHT, STEP, plan, type Cell, type Dir } from './_maze';
+import { engrave } from './_view';
+import { chart, CELL } from './_chart';
+import { describe, plateNumber, where } from './_caption';
+import './_undercroft.css';
+
+export function getStaticPaths() {
+  return plan.cells.map((cell) => ({ params: { cell: cell.id }, props: { id: cell.id } }));
+}
+
+const { id } = Astro.props as { id: string };
+const cell = plan.cells.find((c) => c.id === id)!;
+
+const neighbour = (c: Cell, d: Dir) => (c.open[d] ? plan.at(c.x + STEP[d][0], c.y + STEP[d][1]) : null);
+
+const views = DIRS.map((facing) => {
+  const plate = engrave(cell, facing);
+  const feature = cell.faces[facing];
+  const next = neighbour(cell, facing);
+  const behind = neighbour(cell, BACK[facing]);
+  let forward: { href: string; label: string } | null = null;
+  if (next) forward = { href: `../${next.id}/#${facing}`, label: 'Step forward' };
+  else if (feature?.kind === 'daylight') forward = { href: '../daylight/', label: 'Climb to daylight' };
+  else if (feature?.kind === 'stair-up') forward = { href: '../', label: 'Climb the stair' };
+  return {
+    facing,
+    plate,
+    number: plateNumber(cell, facing),
+    where: where(cell, facing),
+    text: describe(cell, facing, plate.ahead, plate.aheadFeature),
+    forward,
+    back: behind ? { href: `../${behind.id}/#${facing}`, label: 'Step back' } : null,
+    left: LEFT[facing],
+    right: RIGHT[facing],
+  };
+});
+
+const title = `The undercroft, ${cell.id.toUpperCase()}`;
+const here = `--hx: ${cell.x * CELL + CELL / 2}px; --hy: ${cell.y * CELL + CELL / 2}px`;
+const speculation = JSON.stringify({
+  prefetch: [{ where: { selector_matches: '.go' }, eagerness: 'immediate' }],
+  prerender: [{ where: { selector_matches: '.go' }, eagerness: 'moderate' }],
+});
+---
+
+<Bare title={title} description="One cell of the undercroft, a labyrinth drawn as engraved plates." noindex>
+  <Fragment slot="head">
+    <Font cssVariable="--font-undercroft" preload />
+    <Font cssVariable="--font-undercroft-carved" preload />
+    <Reveal />
+    <script is:inline type="speculationrules" set:html={speculation} />
+  </Fragment>
+
+  <main class="undercroft crawl" data-cell={cell.id} style={here}>
+    {DIRS.map((d) => <i id={d} class="mark" />)}
+    <Defs />
+    <header class="masthead">
+      <a class="home" href="/">thesandbox.page</a>
+      <a class="name" href="../">The Undercroft</a>
+    </header>
+
+    <div class="views">
+      {
+        views.map((v) => (
+          <section class="view" data-dir={v.facing} aria-label={v.where}>
+            <figure class="plate">
+              <div class="frame">
+                <Fragment set:html={v.plate.svg} />
+                <div class="taps" aria-hidden="true">
+                  <a class="tap left" href={`#${v.left}`} tabindex="-1" data-turn="left" />
+                  {v.forward ? <a class="tap ahead go" href={v.forward.href} tabindex="-1" /> : <span class="tap ahead" />}
+                  <a class="tap right" href={`#${v.right}`} tabindex="-1" data-turn="right" />
+                </div>
+              </div>
+              <figcaption>
+                <span class="no">Plate {v.number}.</span> <span class="where">{v.where}.</span> {v.text}
+              </figcaption>
+            </figure>
+            <nav class="pad" aria-label="Walk">
+              <a class="key turn" href={`#${v.left}`} data-turn="left" data-key="left" aria-label={`Turn left, to face ${DIR_NAME[v.left]}`}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H15a5 5 0 0 1 0 10H8M9 7l3.5-3.5M9 7l3.5 3.5" /></svg>
+                <span>Left</span>
+              </a>
+              {
+                v.forward ? (
+                  <a class="key go" href={v.forward.href} data-key="ahead">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V5M12 5l-5 5M12 5l5 5" /></svg>
+                    <span>{v.forward.label}</span>
+                  </a>
+                ) : (
+                  <span class="key off" aria-disabled="true">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14" /></svg>
+                    <span>Wall</span>
+                  </span>
+                )
+              }
+              {
+                v.back ? (
+                  <a class="key go" href={v.back.href} data-key="back">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M12 19l-5-5M12 19l5-5" /></svg>
+                    <span>Back</span>
+                  </a>
+                ) : (
+                  <span class="key off" aria-disabled="true">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14" /></svg>
+                    <span>Wall</span>
+                  </span>
+                )
+              }
+              <a class="key turn" href={`#${v.right}`} data-turn="right" data-key="right" aria-label={`Turn right, to face ${DIR_NAME[v.right]}`}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7H9a5 5 0 0 0 0 10h7M15 7l-3.5-3.5M15 7l-3.5 3.5" /></svg>
+                <span>Right</span>
+              </a>
+            </nav>
+          </section>
+        ))
+      }
+    </div>
+
+    <aside class="survey">
+      <div class="sheet" inert>
+        <Fragment set:html={chart('../')} />
+      </div>
+      <p class="legend">Your chart. A cell inks in on each side you have faced there.</p>
+    </aside>
+  </main>
+</Bare>
+
+<script>
+  import { walk } from './_walk';
+  walk();
+</script>

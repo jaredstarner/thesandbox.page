@@ -1,0 +1,22 @@
+---
+// Names each cross-page step for the view transition: forward when the new
+// cell lies ahead of the way you now face, back when it lies behind. Must run
+// before first render, so it is a classic script in the head.
+---
+
+<script is:inline>
+  addEventListener('pagereveal', (event) => {
+    const activation = window.navigation && navigation.activation;
+    if (!event.viewTransition || !activation || !activation.from) return;
+    const cell = (url) => /\/undercroft\/([a-l])(\d+)\/$/.exec(new URL(url).pathname);
+    const from = cell(activation.from.url);
+    const to = cell(activation.entry.url);
+    if (!from || !to) return;
+    const step = { n: [0, -1], e: [1, 0], s: [0, 1], w: [-1, 0] }[new URL(activation.entry.url).hash.slice(1) || 'n'];
+    if (!step) return;
+    const dx = to[1].charCodeAt(0) - from[1].charCodeAt(0);
+    const dy = Number(to[2]) - Number(from[2]);
+    if (dx === step[0] && dy === step[1]) event.viewTransition.types.add('forward');
+    else if (dx === -step[0] && dy === -step[1]) event.viewTransition.types.add('back');
+  });
+</script>

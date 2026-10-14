@@ -1,0 +1,18 @@
+---
+// Gradients the plates share. Kept in one SVG that is always rendered, since a
+// gradient inside a hidden plate can't be painted from another.
+---
+
+<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <radialGradient id="uc-candle">
+      <stop offset="0" stop-color="#fff3d0" stop-opacity="0.75"></stop>
+      <stop offset="0.35" stop-color="#f4dfae" stop-opacity="0.3"></stop>
+      <stop offset="1" stop-color="#f4dfae" stop-opacity="0"></stop>
+    </radialGradient>
+    <radialGradient id="uc-lamp" cx="0.5" cy="0.46" r="0.72">
+      <stop offset="0.5" stop-color="#1e1711" stop-opacity="0"></stop>
+      <stop offset="1" stop-color="#1e1711" stop-opacity="0.6"></stop>
+    </radialGradient>
+  </defs>
+</svg>

@@ -1,0 +1,108 @@
+---
+// The top of the far stair: out in the air, with the whole chart.
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { plan } from './_maze';
+import { chart } from './_chart';
+import './_undercroft.css';
+
+const exit = plan.exit;
+---
+
+<Bare title="The undercroft: daylight" description="The far stair of the undercroft, and the chart of the way you walked." noindex>
+  <Fragment slot="head">
+    <Font cssVariable="--font-undercroft" preload />
+    <Font cssVariable="--font-undercroft-carved" preload />
+  </Fragment>
+
+  <main class="undercroft daylight">
+    <header class="masthead">
+      <a class="home" href="/">thesandbox.page</a>
+      <a class="name" href="../">The Undercroft</a>
+    </header>
+
+    <article class="out">
+      <p class="kicker">Plate the last</p>
+      <h1>Daylight</h1>
+      <p class="lede">
+        You came up the stair at {exit.cell.id.toUpperCase()} into open air. Below is the chart of the undercroft as you walked it:
+        every cell you stood in, inked on each side you faced.
+      </p>
+      <div class="sheet" inert><Fragment set:html={chart('../', { exit: true })} /></div>
+      <p class="legend">
+        The chart is drawn from your browser's own history, link by link. Clear the history for this site and the undercroft
+        forgets you were ever down there.
+      </p>
+      <p class="again">
+        <a href={`../${plan.start.id}/#s`}>Go down again</a>
+        <a href="/">Back to thesandbox.page</a>
+      </p>
+    </article>
+  </main>
+</Bare>
+
+<style is:global>
+  .undercroft.daylight {
+    background:
+      radial-gradient(90% 60% at 50% 0%, rgb(255 251 240 / 0.9), transparent 70%),
+      var(--sheet);
+  }
+
+  .undercroft .out {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 20px 56px;
+    text-align: center;
+  }
+
+  .undercroft .out .kicker {
+    margin: 0;
+    font-style: italic;
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+  }
+
+  .undercroft .out h1 {
+    margin: 4px 0 18px;
+    font-family: var(--carved);
+    font-weight: 700;
+    font-size: clamp(44px, 9vw, 80px);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .undercroft .out .lede {
+    margin: 0 auto 26px;
+    max-width: 34em;
+    text-wrap: pretty;
+  }
+
+  .undercroft .out .sheet {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .undercroft .out .legend {
+    max-width: 30em;
+    margin: 14px auto 0;
+    text-wrap: pretty;
+  }
+
+  .undercroft .out .again {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin-top: 30px;
+  }
+
+  .undercroft .out .again a {
+    font-family: var(--carved);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-underline-offset: 4px;
+  }
+</style>
