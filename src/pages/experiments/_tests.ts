@@ -257,6 +257,22 @@ export const TECHNIQUES: Record<string, Technique> = {
         'document.startViewTransition() missing',
       ),
   },
+  'cross-document-view-transitions': {
+    label: 'Cross-document view transitions',
+    webFeature: 'cross-document-view-transitions',
+    test: () =>
+      present('onpagereveal' in window, 'the pagereveal event is supported', 'no pagereveal event'),
+  },
+  'speculation-rules': {
+    label: 'Speculation rules',
+    webFeature: 'speculation-rules',
+    test: () =>
+      present(
+        typeof HTMLScriptElement.supports === 'function' && HTMLScriptElement.supports('speculationrules'),
+        'script type="speculationrules" is supported',
+        'speculation rules unsupported',
+      ),
+  },
   'anchor-positioning': {
     label: 'Anchor positioning',
     webFeature: 'anchor-positioning',
@@ -396,6 +412,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   autocorrelation: { label: 'Autocorrelation' },
   miniseed: { label: 'miniSEED' },
   seismology: { label: 'Seismology' },
+  visited: { label: ':visited' },
+  'static-generation': { label: 'Static generation' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
