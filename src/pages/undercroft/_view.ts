@@ -650,8 +650,10 @@ export function engrave(cell: Cell, facing: Dir): Plate {
       [l + 0.5, H, d + 0.5],
       [l - 0.5, H, d + 0.5],
     ]);
-    if (ceil) out.parts.push(`<path d="${ceil}" fill="${wash(ceilT, zFlat)}"/>`);
-    hatchFlat(out, l, d, H, ceilT, zFlat, seed + 11, 'across');
+    // A ceiling this deep in shadow prints as solid tone; ruling it only shows the paper between the lines.
+    const ruledCeiling = ceilT < 0.72;
+    if (ceil) out.parts.push(`<path d="${ceil}" fill="${ruledCeiling ? wash(ceilT, zFlat) : tone(ceilT)}"/>`);
+    if (ruledCeiling) hatchFlat(out, l, d, H, ceilT, zFlat, seed + 11, 'across');
     const walls: { side: 'front' | 'left' | 'right'; face: Face; dir: Dir; z: number }[] = [];
     if (h.walls.has('front')) walls.push({ side: 'front', face: frontFace(d, l, seed + 1), dir: facing, z: d + 0.5 + BACKSET });
     if (h.walls.has('left')) walls.push({ side: 'left', face: sideFace(d, l, 'left', seed + 2), dir: LEFT[facing], z: zMid + 0.2 });
