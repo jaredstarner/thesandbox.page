@@ -2,7 +2,7 @@
 // the gallery.
 
 import { A, G, CONCEAL, DOUBLE, FLASH, HOLD, NEW_BG, NORMAL, SEPARATE, CONTIG, Page, fit, wrap } from './_page';
-import { band, bigText, counter, fastext, para, type Labels } from './_layout';
+import { band, bigText, counter, fastext, para } from './_layout';
 import type { Service } from './_service';
 import { store } from './_feeds';
 
@@ -107,7 +107,7 @@ interface Question {
 }
 
 const QUESTIONS: Question[] = [
-  { q: 'What do red and green light make when they are mixed?', options: ['Brown', 'Yellow', 'Cyan', 'White'], answer: 1 },
+  { q: 'How many colours can a teletext page show, black included?', options: ['Six', 'Eight', 'Sixteen', '256'], answer: 1 },
   { q: 'Which is the capital of Australia?', options: ['Sydney', 'Melbourne', 'Perth', 'Canberra'], answer: 3 },
   { q: 'What is the chemical symbol for tungsten?', options: ['W', 'Tu', 'Tn', 'Ts'], answer: 0 },
   { q: 'How many columns of text fit across a teletext page?', options: ['32', '64', '40', '80'], answer: 2 },
@@ -144,7 +144,7 @@ function question(i: number): Page {
     p.put(r, 1, G[FAST[k]], 0x7f, 0x7f, A.white, o);
     r += 2;
   });
-  fastext(p, ['A', 'B', 'C', 'D'].map((x, k) => `${x}  ${q.options[k]}`) as Labels);
+  fastext(p, q.options);
   return p;
 }
 
@@ -170,47 +170,30 @@ function wrongPage(): Page {
 function winPage(): Page {
   const p = new Page();
   band(p, { ...QUIZ_BAND, title: 'Full marks' });
-  // A rosette: rings of colour round a centre, with two tails.
-  const cx = 18;
-  const cy = 18;
-  const colour = (x: number, y: number): number => {
-    const dx = (x - cx) / 1.16;
-    const dy = y - cy;
-    const d = Math.hypot(dx, dy);
-    if (d < 5) return 3;
-    if (d < 9) return 1;
-    if (d < 13) return 4;
-    if (d < 15.5) return 3;
-    if (y > cy + 8 && y < cy + 30 && Math.abs(dx + (y - cy) * 0.25) < 3) return 1;
-    if (y > cy + 8 && y < cy + 30 && Math.abs(dx - (y - cy) * 0.25) < 3) return 4;
-    return 0;
-  };
-  // Each row runs through colours left to right; held graphics fill the
-  // cells spent on changing colour.
-  for (let r = 0; r < 14; r++) {
-    let col = 0;
-    let current = -1;
-    p.put(5 + r, col++, HOLD);
-    for (let c = 0; c < 18; c++) {
-      const cells: number[] = [];
-      for (let k = 0; k < 6; k++) cells.push(colour(c * 2 + (k % 2), r * 3 + Math.floor(k / 2)));
-      const counts = [0, 0, 0, 0, 0];
-      for (const v of cells) if (v) counts[v]++;
-      let best = 0;
-      for (let v = 1; v < 5; v++) if (counts[v] > (counts[best] ?? 0)) best = v;
-      if (!best) {
-        p.put(5 + r, col++, 0x20);
-        continue;
-      }
-      if (best !== current) {
-        p.put(5 + r, col++, [0, G.red, 0, G.yellow, G.blue][best]);
-        current = best;
-        if (col > 19) break;
-      }
-      const lit = cells.map((v) => v === best);
-      p.put(5 + r, col++, 0x20 | (lit[0] ? 1 : 0) | (lit[1] ? 2 : 0) | (lit[2] ? 4 : 0) | (lit[3] ? 8 : 0) | (lit[4] ? 16 : 0) | (lit[5] ? 64 : 0));
+  // A cup in one colour: bowl, handles, stem, and a stepped base.
+  const cx = 17;
+  const lit = (x: number, y: number): boolean => {
+    const dx = (x + 0.5 - cx) / 1.16;
+    const yy = y + 0.5;
+    // Bowl: a half ellipse under a flat rim.
+    if (yy >= 2 && yy < 4 && Math.abs(dx) < 9.2) return true;
+    if (yy >= 4 && yy < 20) {
+      const t = (yy - 4) / 16;
+      if (Math.abs(dx) < 8.4 * Math.sqrt(1 - t * t)) return true;
     }
-  }
+    // Handles: thick ears either side of the bowl.
+    for (const side of [-1, 1]) {
+      const hx = side * dx - 9;
+      const d = Math.hypot(hx, (yy - 8) * 0.55);
+      if (hx > 0 && d > 2 && d < 3.9) return true;
+    }
+    if (yy >= 20 && yy < 28 && Math.abs(dx) < 1.8 + Math.max(0, 21 - yy) * 1.2) return true;
+    if (yy >= 28 && yy < 31 && Math.abs(dx) < 6) return true;
+    if (yy >= 31 && yy < 35 && Math.abs(dx) < 8.5) return true;
+    return false;
+  };
+  for (let r = 0; r < 13; r++) p.put(5 + r, 0, G.yellow);
+  p.mosaic(5, 1, 18, 13, (x, y) => lit(x, y));
   p.put(7, 22, A.yellow, FLASH, DOUBLE, 'WINNER');
   p.put(11, 22, A.white, 'Eight out of');
   p.put(12, 22, A.white, 'eight.');
@@ -259,6 +242,16 @@ function sunsetPage(): Page {
   for (let i = 0; i < sky.length; i++) {
     const r = 1 + i;
     const bg = sky[i];
+    const next = sky[i + 1];
+    // Where one band meets the next, dither the next colour in, unless the
+    // sun is in the way.
+    const sunRow = (i + 1) * 3 > sunCy - sunR;
+    if (next && next !== bg && !sunRow) {
+      p.put(r, 0, G[bg], NEW_BG, G[next]);
+      p.put(r, 3, SEPARATE);
+      p.mosaic(r, 4, 36, 1, (x, y) => (y === 2 ? true : y === 1 ? (x + i) % 2 === 0 : (x + i) % 4 === 0));
+      continue;
+    }
     const fg = bg === 'yellow' ? 'red' : 'yellow';
     p.put(r, 0, G[bg], NEW_BG, G[fg]);
     p.mosaic(r, 3, 37, 1, (x, y) => {
@@ -267,22 +260,24 @@ function sunsetPage(): Page {
       const dx = (gx - sunCx) / 1.16;
       const dy = gy - sunCy;
       if (dx * dx + dy * dy > sunR * sunR) return false;
-      // Stripes widen toward the horizon.
-      const band = Math.floor(gy / 3);
-      return !(band >= 6 && y === 2 - (band % 2));
+      // Slots cut across the lower half, widening toward the horizon.
+      const below = gy - (sunCy - sunR * 0.55);
+      return !(below > 0 && y === 2 - (Math.floor(gy / 3) % 2) && below > 2 - i * 0.1);
     });
   }
+  // The sea: the sun's path in broken dashes that narrow and thin with
+  // distance, and white glints that flash.
   for (let r = horizon; r <= 22; r++) {
     const depth = r - horizon;
     p.put(r, 0, G.blue, NEW_BG, G.yellow);
     p.mosaic(r, 3, 37, 1, (x, y) => {
       const gx = x + 6;
-      const half = Math.max(1, 8 - depth * 0.6 + ((r * 7 + x) % 3));
-      return Math.abs(gx - sunCx) < half && (y + r) % 2 === 0;
+      const half = 15 - depth * 1.2 + (depth % 2) * 2;
+      if (y === 1 || Math.abs(gx - sunCx) > half) return false;
+      return (gx * 5 + r * 3 + y * 7) % 9 > 1;
     });
-    // Glints.
-    const g = (r * 13) % 31;
-    if (depth > 1 && g + 6 < 37) p.put(r, 3 + g, G.white, FLASH, 0x23, 0x30, G.yellow, 0x09);
+    const g = (r * 13 + 5) % 33;
+    if (depth > 0 && (g < 10 || g > 26)) p.put(r, 3 + g, G.white, FLASH, 0x23 | 0x40, G.yellow, 0x09);
   }
   p.put(23, 0, A.yellow, 'Sunset', A.white, 'in block graphics');
   counter(p, 0, 1);
@@ -293,13 +288,13 @@ function sunsetPage(): Page {
 function testCard(): Page {
   const p = new Page();
   const bars: (keyof typeof G)[] = ['white', 'yellow', 'cyan', 'green', 'magenta', 'red', 'blue'];
+  const widths = [6, 6, 6, 5, 5, 5, 6];
   for (let r = 1; r <= 9; r++) {
     let col = 0;
-    for (const b of bars) {
+    bars.forEach((b, i) => {
       p.put(r, col, G[b], NEW_BG);
-      col += 5;
-    }
-    p.put(r, col, 0x1c);
+      col += widths[i];
+    });
   }
   // The time, big, in block letters.
   const now = new Date();
@@ -308,8 +303,7 @@ function testCard(): Page {
   const cols = Math.ceil(big.w / 2);
   for (let r = 11; r <= 15; r++) p.put(r, 0, G.white);
   p.mosaic(11, 1 + Math.floor((39 - cols) / 2), cols, 5, (x, y) => big.lit(x, y - 1));
-  p.put(17, 0, G.white, SEPARATE, Array(39).fill(0x2c | 0x40 | 0x03), CONTIG);
-  p.put(19, 0, A.yellow, NORMAL, fit('TELEPAGE', 19), A.white, fit(`${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]}`, 19, 'right'));
+  p.put(19, 0, A.yellow, fit('TELEPAGE', 19), A.white, fit(`${DAYS[now.getDay()].slice(0, 3)} ${now.getDate()} ${MONTHS[now.getMonth()].slice(0, 3)}`, 19, 'right'));
   p.put(21, 0, A.cyan, 'Every colour a teletext set can show.');
   counter(p, 0, 1);
   fastext(p, ['Sunset', '', '', 'Index']);

@@ -60,13 +60,18 @@ export function paginate<T>(items: T[], per: number): T[][] {
   return out.length ? out : [[]];
 }
 
+const FLAT_A = ['.###.', '#...#', '#...#', '#####', '#...#', '#...#', '#...#', '.....', '.....'].map((r) =>
+  Array.from(r, (ch) => ch === '#'),
+);
+
 /**
  * Letters made from block graphics: each dot of the text font becomes one
  * sixel wide and `tall` sixels high. Returns the lit test for `Page.mosaic`.
  */
 export function bigText(text: string, tall = 2, gap = 1): { w: number; lit: (x: number, y: number) => boolean } {
   const codes = encode(text);
-  const mats = codes.map((c) => dotMatrix(c));
+  // Drawn this large, the pointed A reads as an accent; give it a flat top.
+  const mats = codes.map((c) => (c === 0x41 ? FLAT_A : dotMatrix(c)));
   const pitch = 5 + gap;
   const w = codes.length * pitch - gap;
   return {

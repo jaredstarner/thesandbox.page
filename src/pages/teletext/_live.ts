@@ -53,7 +53,7 @@ function story(b: Band, lead: { text: string; colour: Colour }[], labels: Labels
 
 // News: the stories on Wikipedia's main page "In the news".
 const NEWS: Band = { title: 'News', bg: 'red', fg: 'white', rule: 'red', tag: 'Headlines' };
-const NEWS_LABELS: Labels = ['Headlines', 'Next story', 'Weather', 'Index'];
+const NEWS_LABELS: Labels = ['Headlines', 'Next', 'Weather', 'Index'];
 const MAX_STORIES = 8;
 
 function headlines(): Page[] {
@@ -140,7 +140,7 @@ function onThisDay(): Page[] {
   flush();
   pages.forEach((pg, i) => {
     counter(pg, i, pages.length);
-    fastext(pg, ['News', 'Featured', 'Did you know', 'Index']);
+    fastext(pg, ['News', 'Featured', 'Facts', 'Index']);
   });
   return pages;
 }
@@ -148,12 +148,12 @@ function onThisDay(): Page[] {
 const FEATURED: Band = { title: 'Featured article', bg: 'green', fg: 'blue', rule: 'green' };
 
 function featured(): Page[] {
-  if (!store.tfa) return waiting(FEATURED, store.wiki, ['News', 'Did you know', '', 'Index']);
+  if (!store.tfa) return waiting(FEATURED, store.wiki, ['News', 'Facts', '', 'Index']);
   const t = store.tfa;
   const lead: { text: string; colour: Colour }[] = [{ text: t.title, colour: 'yellow' }];
   if (t.description) lead.push({ text: t.description, colour: 'cyan' });
   lead.push({ text: t.extract, colour: 'white' });
-  return story(FEATURED, lead, ['News', 'Did you know', 'On this day', 'Index']);
+  return story(FEATURED, lead, ['News', 'Facts', 'History', 'Index']);
 }
 
 const DYK: Band = { title: 'Did you know', bg: 'magenta', fg: 'white', rule: 'magenta' };
@@ -249,7 +249,7 @@ function charts(): Page[] {
     const lo = Math.min(...series);
     const hi = Math.max(...series);
     const span = hi - lo || hi * 0.01;
-    const W = 34 * 2;
+    const W = 32 * 2;
     const H = 12 * 3;
     // A filled area chart: each dot column rises to the day's rate.
     const height = (x: number) => {
@@ -261,11 +261,13 @@ function charts(): Page[] {
     };
     p.put(5, 0, A.yellow, `$1 in ${NAMES[c].toLowerCase()}`, A.white, fit(rate(series[series.length - 1]), 38 - 7 - NAMES[c].length - 1, 'right'));
     for (let r = 0; r < 12; r++) {
-      p.put(7 + r, 0, A.white, r === 0 ? fit(rate(hi), 3) : r === 11 ? fit(rate(lo), 3) : '   ', G.cyan);
-      p.mosaic(7 + r, 5, 34, 1, (x, y) => H - (r * 3 + y) <= height(x));
+      const label = r === 0 ? rate(hi) : r === 11 ? rate(lo) : '';
+      p.put(7 + r, 0, A.white, fit(label, 6), G.cyan);
+      p.mosaic(7 + r, 8, 32, 1, (x, y) => H - (r * 3 + y) <= height(x));
     }
     p.put(19, 0, A.white, fit(day(store.rates[0].date), 19), fit(day(store.rates[store.rates.length - 1].date), 19, 'right'));
-    p.put(21, 0, A.cyan, `High ${rate(hi)}  Low ${rate(lo)}`);
+    const change = ((series[series.length - 1] - series[0]) / series[0]) * 100;
+    p.put(21, 0, A.cyan, 'Over three months', A[change >= 0 ? 'green' : 'red'], `${change >= 0 ? '+' : '-'}${Math.abs(change).toFixed(1)}%`);
     counter(p, i, CHARTED.length);
     fastext(p, ['Rates', 'Weather', 'News', 'Index']);
     return p;
@@ -382,19 +384,20 @@ function moonPage(): Page[] {
   const p = new Page();
   band(p, { ...ALMANAC, tag: 'Tonight' });
   const m = moon();
-  // The disc: lit dots in white; cells wholly in shadow in blue, for earthshine.
+  // The disc: lit dots in white; cells wholly in shadow in blue, for
+  // earthshine. A colour change takes the place of a cell, which held
+  // graphics fill with the cell before it.
   const rows = 15;
-  const cols = 18;
-  const ry = (rows * 3) / 2 - 1;
+  const cols = 19;
+  const ry = 20.5;
   const rx = ry / 1.16;
-  const cx = cols;
+  const cx = 19;
   const cy = (rows * 3) / 2;
   for (let r = 0; r < rows; r++) {
     const row = 5 + r;
     let colour = 0;
-    let col = 0;
-    p.put(row, col++, HOLD);
-    for (let c = 0; c < cols && col < 20; c++) {
+    p.put(row, 0, HOLD);
+    for (let c = 1; c < cols; c++) {
       const disc: boolean[] = [];
       const lit: boolean[] = [];
       for (let k = 0; k < 6; k++) {
@@ -410,11 +413,12 @@ function moonPage(): Page[] {
       const anyDisc = disc.some(Boolean);
       const want = anyLit ? 7 : anyDisc ? 4 : colour;
       if (want !== colour) {
-        p.put(row, col++, want === 7 ? G.white : G.blue);
+        p.put(row, c, want === 7 ? G.white : G.blue);
         colour = want;
+        continue;
       }
       const cells = anyLit ? lit : disc;
-      p.put(row, col++, 0x20 | (cells[0] ? 1 : 0) | (cells[1] ? 2 : 0) | (cells[2] ? 4 : 0) | (cells[3] ? 8 : 0) | (cells[4] ? 16 : 0) | (cells[5] ? 64 : 0));
+      p.put(row, c, 0x20 | (cells[0] ? 1 : 0) | (cells[1] ? 2 : 0) | (cells[2] ? 4 : 0) | (cells[3] ? 8 : 0) | (cells[4] ? 16 : 0) | (cells[5] ? 64 : 0));
     }
   }
   const x = 21;
