@@ -14,7 +14,7 @@ const DIRECTORY: [string, number][][] = [
   [
     ['News', 101],
     ['On this day', 120],
-    ['Featured article', 130],
+    ['Featured', 130],
     ['Did you know', 140],
     ['Money', 200],
     ['Currency charts', 201],
@@ -39,7 +39,7 @@ function indexPage(): Page {
   const cols = Math.ceil(logo.w / 2);
   const left = 3 + Math.floor((37 - cols) / 2);
   p.mosaic(1, left, cols, 6, (x, y) => logo.lit(x, y - 2));
-  p.put(7, 0, G.red, Array(39).fill(0x2c | 0x40 | 0x03));
+  p.put(7, 0, G.red, Array(39).fill(0x23));
   const now = new Date();
   const date = `${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]}`;
   p.put(8, 0, A.cyan, fit(date, 24), A.white, fit('Pages 100-899', 14, 'right'));

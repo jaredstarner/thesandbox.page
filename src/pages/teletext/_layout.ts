@@ -16,14 +16,14 @@ export interface Band {
   tag?: string;
 }
 
-/** Rows 1 to 3: the band and its rule. */
+/** Rows 1 to 3: the band, then a dotted rule that ends in the tag, if any. */
 export function band(p: Page, b: Band): void {
   p.put(1, 0, G[b.bg], NEW_BG, A[b.fg], DOUBLE, b.title.toUpperCase());
-  if (b.tag) {
-    const tag = b.tag.toUpperCase();
-    p.put(1, 39 - tag.length - 1, A[b.fg === 'white' ? 'yellow' : 'white'], tag);
-  }
-  p.put(3, 0, G[b.rule ?? b.bg], SEPARATE, Array(39).fill(0x23));
+  const tag = b.tag ? b.tag.toUpperCase() : '';
+  const ruleEnd = tag ? 39 - tag.length - 2 : 39;
+  p.put(3, 0, G[b.rule ?? b.bg], SEPARATE, Array(ruleEnd).fill(0x23));
+  const ink = b.rule ?? b.bg;
+  if (tag) p.put(3, 39 - tag.length - 1, A[ink === 'blue' ? 'cyan' : ink], tag);
 }
 
 export type Links = [number, number, number, number];

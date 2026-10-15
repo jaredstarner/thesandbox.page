@@ -71,12 +71,15 @@ function headlines(): Page[] {
       r = 5;
     }
     p.put(r, 0, A.yellow, String(b.n), A.white, b.lines[0]);
-    for (let k = 1; k < need; k++) p.put(r + k, 4, A.white, b.lines[k]);
+    for (let k = 1; k < need; k++) {
+      const more = k === need - 1 && b.lines.length > need;
+      p.put(r + k, 4, A.white, more ? `${b.lines[k].slice(0, 31)}...` : b.lines[k]);
+    }
     r += need + 1;
   }
   pages.forEach((pg, i) => {
     counter(pg, i, pages.length);
-    fastext(pg, ['Top story', 'On this day', 'Weather', 'Index']);
+    fastext(pg, ['Top story', 'History', 'Weather', 'Index']);
   });
   return pages;
 }
@@ -316,11 +319,10 @@ function weatherMap(mask: string): Page[] {
     while (c < cols) {
       const label = labels.get(r * 100 + c);
       if (label) {
-        p.put(row, 4 + c, A[label.colour], label.text, G.green, mode === 2 ? SEPARATE : CONTIG);
-        // The label takes its colour cell, the digits, and two cells to get
-        // back to graphics; the last of those shows the held block.
-        mode = mode === 2 ? 2 : 1;
-        c += label.text.length + 3;
+        // A colour cell (showing the held block), the digits, and a cell to
+        // get back to graphics. Separation survives the switch to text.
+        p.put(row, 4 + c, A[label.colour], label.text, G.green);
+        c += label.text.length + 2;
         continue;
       }
       const cells: number[] = [];
@@ -416,8 +418,10 @@ function moonPage(): Page[] {
     }
   }
   const x = 21;
-  p.put(6, x, A.yellow, DOUBLE, m.name.split(' ')[0]);
-  if (m.name.includes(' ')) p.put(8, x, A.yellow, DOUBLE, m.name.split(' ').slice(1).join(' '));
+  // Normal height: a double-height row would take the next row's half of the
+  // disc with it.
+  p.put(7, x, A.yellow, m.name.split(' ')[0]);
+  if (m.name.includes(' ')) p.put(8, x, A.yellow, m.name.split(' ').slice(1).join(' '));
   p.put(11, x, A.white, fit(`${Math.round(m.lit * 100)}% lit`, 17));
   p.put(12, x, A.white, fit(`${m.age.toFixed(1)} days old`, 17));
   p.put(14, x, A.cyan, 'Next full moon');
