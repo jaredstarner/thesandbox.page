@@ -1,7 +1,7 @@
 // Pages that need no feed: the index, the help page, the quiz, riddles, and
 // the gallery.
 
-import { A, G, CONCEAL, DOUBLE, FLASH, HOLD, NEW_BG, NORMAL, SEPARATE, CONTIG, Page, fit, wrap } from './_page';
+import { A, G, CONCEAL, DOUBLE, FLASH, NEW_BG, SEPARATE, Page, fit, wrap } from './_page';
 import { band, bigText, counter, fastext, para } from './_layout';
 import type { Service } from './_service';
 import { store } from './_feeds';

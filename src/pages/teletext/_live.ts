@@ -1,7 +1,7 @@
 // Pages set from the feeds: news, the day in history, the featured article,
 // money, weather, the Moon and Sun, and earthquakes.
 
-import { A, G, DOUBLE, FLASH, HOLD, NEW_BG, SEPARATE, CONTIG, Page, fit, wrap, type Colour } from './_page';
+import { A, G, FLASH, HOLD, NEW_BG, SEPARATE, CONTIG, Page, fit, wrap, type Colour } from './_page';
 import { band, counter, fastext, notice, paginate, type Band, type Labels } from './_layout';
 import { CURRENCIES, US_CITIES, WORLD_CITIES, sky, store, type Status } from './_feeds';
 import { MAP } from './_mapgrid';
@@ -57,7 +57,7 @@ const NEWS_LABELS: Labels = ['Headlines', 'Next', 'Weather', 'Index'];
 const MAX_STORIES = 8;
 
 function headlines(): Page[] {
-  if (!store.news.length) return waiting(NEWS, store.wiki, NEWS_LABELS);
+  if (!store.news.length) return waiting(NEWS, store.wiki, ['Top story', 'History', 'Weather', 'Index']);
   const blocks = store.news.slice(0, MAX_STORIES).map((s, i) => ({ n: 102 + i, lines: wrap(s.headline, 34) }));
   const pages: Page[] = [];
   let p: Page | null = null;
