@@ -169,6 +169,8 @@ export function start(root: HTMLElement, service: Service): void {
     root.dataset.hold = String(hold);
     root.dataset.reveal = String(reveal);
     root.dataset.size = String(size);
+    root.querySelector('[data-key="hold"]')?.setAttribute('aria-pressed', String(hold));
+    root.querySelector('[data-key="reveal"]')?.setAttribute('aria-pressed', String(reveal));
   }
 
   // Remote.
