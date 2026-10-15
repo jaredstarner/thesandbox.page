@@ -414,6 +414,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   seismology: { label: 'Seismology' },
   visited: { label: ':visited' },
   'static-generation': { label: 'Static generation' },
+  teletext: { label: 'Teletext' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

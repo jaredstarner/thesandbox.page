@@ -1,0 +1,404 @@
+---
+import Bare from '../../layouts/Bare.astro';
+import { mapMask } from './_map';
+
+const DIGITS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const FAST = [
+  { key: 'red', label: 'Red' },
+  { key: 'green', label: 'Green' },
+  { key: 'yellow', label: 'Yellow' },
+  { key: 'cyan', label: 'Cyan' },
+];
+---
+
+<Bare
+  title="Teletext"
+  description="A working teletext service: key a page number, wait for it to come round, and read today's news, weather, markets, and earthquakes in forty columns of block graphics."
+>
+  <main class="teletext" data-teletext data-map={mapMask()} data-size="0" data-hold="false" data-reveal="false">
+    <a class="home" href="/">thesandbox.page</a>
+
+    <div class="set">
+      <div class="bezel">
+        <div class="tube">
+          <canvas class="screen" data-screen aria-hidden="true"></canvas>
+          <div class="glass" aria-hidden="true"></div>
+        </div>
+        <p class="badge" aria-hidden="true"><span class="lamp"></span>Telepage</p>
+      </div>
+
+      <div class="remote" role="group" aria-label="Remote control">
+        <div class="pad">
+          {DIGITS.map((d) => <button type="button" class="key num" data-key={d} aria-label={`Digit ${d}`}>{d}</button>)}
+          <button type="button" class="key fn" data-key="index" title="Index (I)">Index</button>
+          <button type="button" class="key num" data-key="0" aria-label="Digit 0">0</button>
+          <button type="button" class="key fn" data-key="reveal" title="Reveal (? or V)" aria-pressed="false">Reveal</button>
+        </div>
+        <div class="fast">
+          {
+            FAST.map((f) => (
+              <button type="button" class={`key fx ${f.key}`} data-key={f.key} aria-label={`${f.label} key`} title={`${f.label} (${f.key[0].toUpperCase()})`} />
+            ))
+          }
+        </div>
+        <div class="nav">
+          <button type="button" class="key arrow" data-key="prev" aria-label="Previous page" title="Previous page (Left)">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg>
+          </button>
+          <button type="button" class="key arrow" data-key="up" aria-label="Next part" title="Next part (Up)">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 10l5-5 5 5" /></svg>
+          </button>
+          <button type="button" class="key arrow" data-key="down" aria-label="Previous part" title="Previous part (Down)">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+          </button>
+          <button type="button" class="key arrow" data-key="next" aria-label="Next page" title="Next page (Right)">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" /></svg>
+          </button>
+        </div>
+        <div class="mode">
+          <button type="button" class="key fn" data-key="hold" title="Hold (H)" aria-pressed="false">Hold</button>
+          <button type="button" class="key fn" data-key="size" title="Size (S)">Size</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="mirror" aria-live="polite" data-mirror></p>
+
+    <noscript>
+      <p class="nojs">The set is warming up, but it needs JavaScript to tune in.</p>
+    </noscript>
+  </main>
+</Bare>
+
+<script>
+  import { start } from './_app';
+  import { Service } from './_service';
+  import { addStatic } from './_static';
+  import { addLive } from './_live';
+  import { onFeed, startFeeds } from './_feeds';
+
+  const root = document.querySelector<HTMLElement>('[data-teletext]');
+  if (root) {
+    const service = new Service();
+    addStatic(service);
+    addLive(service, root.dataset.map ?? '');
+    onFeed(() => service.updated());
+    start(root, service);
+    startFeeds();
+  }
+</script>
+
+<style is:global>
+  body:has(.teletext) {
+    margin: 0;
+    background: #0c0c0e;
+  }
+
+  .teletext {
+    --room: #0c0c0e;
+    --plastic-hi: #2a2a2e;
+    --plastic: #19191c;
+    --plastic-lo: #101012;
+    --label: #d9d6cf;
+    --label-dim: #8f8c86;
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 100svh;
+    box-sizing: border-box;
+    padding: 56px 24px 32px;
+    color: var(--label);
+    font: 500 14px/1.4 system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background:
+      radial-gradient(ellipse 70% 55% at 45% 45%, rgba(70, 90, 160, 0.09), transparent 70%),
+      var(--room);
+  }
+
+  .teletext .home {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: var(--label-dim);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+
+  .teletext .home:hover {
+    color: var(--label);
+  }
+
+  .teletext .set {
+    display: flex;
+    align-items: center;
+    gap: clamp(20px, 3vw, 44px);
+    width: 100%;
+    max-width: 1280px;
+    justify-content: center;
+  }
+
+  /* The cabinet: a slim dark frame with a moulded edge. */
+  .teletext .bezel {
+    position: relative;
+    flex: 0 1 auto;
+    width: min(100%, calc((100svh - 150px) * 4 / 3 + 40px));
+    box-sizing: border-box;
+    padding: clamp(10px, 1.6vw, 20px) clamp(10px, 1.6vw, 20px) clamp(28px, 3vw, 38px);
+    border-radius: clamp(14px, 2vw, 26px);
+    background: linear-gradient(170deg, var(--plastic-hi), var(--plastic) 30%, var(--plastic-lo));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.07),
+      inset 0 -2px 6px rgba(0, 0, 0, 0.5),
+      0 40px 80px -30px rgba(0, 0, 0, 0.9),
+      0 0 0 1px #050506;
+  }
+
+  .teletext .tube {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 4.5% / 6%;
+    background: #000;
+    box-shadow:
+      0 0 0 2px #050506,
+      0 0 0 4px #222226;
+  }
+
+  .teletext .screen {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Curved glass: darker toward the corners, with a soft reflection. */
+  .teletext .glass {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background:
+      radial-gradient(ellipse 120% 90% at 30% 12%, rgba(255, 255, 255, 0.07), transparent 42%),
+      radial-gradient(ellipse 75% 75% at 50% 50%, transparent 62%, rgba(0, 0, 0, 0.55) 100%);
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.85);
+  }
+
+  .teletext .badge {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: clamp(6px, 0.9vw, 11px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    color: #6f6c67;
+    font-size: clamp(9px, 0.9vw, 11px);
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+
+  .teletext .lamp {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #ff4a2a;
+    box-shadow: 0 0 6px 1px rgba(255, 74, 42, 0.7);
+  }
+
+  /* The remote. */
+  .teletext .remote {
+    flex: none;
+    display: grid;
+    gap: 16px;
+    width: 156px;
+    box-sizing: border-box;
+    padding: 22px 16px 26px;
+    border-radius: 30px 30px 40px 40px;
+    background: linear-gradient(160deg, #26262a, #18181b 45%, #121214);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -3px 8px rgba(0, 0, 0, 0.5),
+      0 30px 50px -20px rgba(0, 0, 0, 0.9),
+      0 0 0 1px #060607;
+  }
+
+  .teletext .pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 9px;
+  }
+
+  .teletext .fast,
+  .teletext .nav,
+  .teletext .mode {
+    display: grid;
+    gap: 8px;
+  }
+
+  .teletext .fast {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .teletext .nav {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .teletext .mode {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .teletext .key {
+    appearance: none;
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 11px;
+    color: var(--label);
+    font: inherit;
+    cursor: pointer;
+    background: linear-gradient(180deg, #3a3a3f, #2a2a2e 55%, #232326);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 2px 0 #0a0a0b,
+      0 3px 6px rgba(0, 0, 0, 0.5);
+    transition:
+      transform 60ms,
+      box-shadow 60ms,
+      filter 60ms;
+  }
+
+  .teletext .key:hover {
+    filter: brightness(1.12);
+  }
+
+  .teletext .key:active,
+  .teletext .key.is-down {
+    transform: translateY(2px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 0 0 #0a0a0b,
+      0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .teletext .key:focus-visible {
+    outline: 2px solid #8fb4ff;
+    outline-offset: 2px;
+  }
+
+  .teletext .num {
+    height: 34px;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    justify-self: center;
+    width: 34px;
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .teletext .fn {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--label-dim);
+  }
+
+  .teletext .pad .fn {
+    height: 34px;
+    border-radius: 12px;
+    font-size: 8.5px;
+  }
+
+  .teletext[data-hold='true'] .key[data-key='hold'],
+  .teletext[data-reveal='true'] .key[data-key='reveal'] {
+    color: #ffd84a;
+    text-shadow: 0 0 6px rgba(255, 216, 74, 0.6);
+  }
+
+  .teletext .fx {
+    height: 18px;
+    border-radius: 6px;
+  }
+
+  .teletext .fx.red {
+    background: linear-gradient(180deg, #ef5446, #c4271c);
+  }
+  .teletext .fx.green {
+    background: linear-gradient(180deg, #4fd06a, #1f9a3e);
+  }
+  .teletext .fx.yellow {
+    background: linear-gradient(180deg, #f6dd4e, #d0ad1c);
+  }
+  .teletext .fx.cyan {
+    background: linear-gradient(180deg, #52d4e6, #1e9fb3);
+  }
+
+  .teletext .arrow {
+    height: 26px;
+    border-radius: 9px;
+  }
+
+  .teletext .arrow svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: var(--label-dim);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .teletext .mirror {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .teletext .nojs {
+    margin-top: 20px;
+    color: var(--label-dim);
+  }
+
+  @media (max-width: 860px) {
+    .teletext {
+      align-content: start;
+      padding: 52px 16px 28px;
+    }
+
+    .teletext .set {
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .teletext .bezel {
+      width: 100%;
+    }
+
+    .teletext .remote {
+      width: 100%;
+      max-width: 420px;
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+      gap: 14px 18px;
+      padding: 18px;
+      border-radius: 26px;
+    }
+
+    .teletext .pad {
+      grid-row: span 3;
+    }
+
+    .teletext .fast {
+      align-self: start;
+    }
+  }
+</style>

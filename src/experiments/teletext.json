@@ -1,0 +1,8 @@
+{
+  "title": "Teletext",
+  "summary": "A working teletext service on a glass tube: key a three-digit number and wait for the page to come round, then read today's news, weather, markets, and earthquakes in forty columns of block graphics, or play a quiz that sends you back to the start.",
+  "date": "2026-10-15",
+  "tags": ["canvas", "live-data", "teletext", "pixel-art", "pointer-events"],
+  "requires": ["canvas"],
+  "plot": 14
+}
