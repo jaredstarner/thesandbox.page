@@ -66,7 +66,7 @@ function indexPage(): Page {
 }
 
 function helpPages(): Page[] {
-  const b = { title: 'How to use', bg: 'cyan', fg: 'blue', rule: 'cyan' } as const;
+  const b = { title: 'How to use', bg: 'white', fg: 'blue', rule: 'cyan' } as const;
   const one = new Page();
   band(one, b);
   let r = 5;
@@ -216,7 +216,7 @@ function riddlePages(): Page[] {
   const groups = [RIDDLES.slice(0, 3), RIDDLES.slice(3)];
   return groups.map((g, gi) => {
     const p = new Page();
-    band(p, { title: 'Riddles', bg: 'green', fg: 'blue', rule: 'green' });
+    band(p, { title: 'Riddles', bg: 'yellow', fg: 'blue', rule: 'yellow' });
     let r = 5;
     for (const [q, a] of g) {
       r = para(p, r, q, 'yellow');

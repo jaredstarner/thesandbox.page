@@ -145,7 +145,7 @@ function onThisDay(): Page[] {
   return pages;
 }
 
-const FEATURED: Band = { title: 'Featured article', bg: 'green', fg: 'blue', rule: 'green' };
+const FEATURED: Band = { title: 'Featured article', bg: 'white', fg: 'blue', rule: 'white' };
 
 function featured(): Page[] {
   if (!store.tfa) return waiting(FEATURED, store.wiki, ['News', 'Facts', '', 'Index']);
@@ -183,7 +183,7 @@ function didYouKnow(): Page[] {
 }
 
 // Money: what a dollar buys, from the European Central Bank's reference rates.
-const MONEY: Band = { title: 'Money', bg: 'cyan', fg: 'blue', rule: 'yellow', tag: 'Currencies' };
+const MONEY: Band = { title: 'Money', bg: 'blue', fg: 'cyan', rule: 'yellow', tag: 'Currencies' };
 const NAMES: Record<string, string> = {
   EUR: 'Euro',
   GBP: 'Pound sterling',
@@ -357,7 +357,7 @@ function cityTable(cities: typeof US_CITIES, title: string, fahrenheitFirst: boo
   if (store.weather !== 'ok') return waiting(b, store.weather, labels);
   const p = new Page();
   band(p, b);
-  p.put(5, 0, A.green, fit('', 15), fit(fahrenheitFirst ? 'F' : 'C', 4, 'right'), fit(fahrenheitFirst ? 'C' : 'F', 4, 'right'), fit('Hi/Lo', 7, 'right'), '  ', 'Sky');
+  p.put(5, 0, A.green, fit('', 12), fit(fahrenheitFirst ? 'F' : 'C', 4, 'right'), fit(fahrenheitFirst ? 'C' : 'F', 5, 'right'), fit('Hi/Lo', 7, 'right'), ' ', 'Sky');
   let r = 6;
   for (const c of cities) {
     const w = store.conditions[c.name];
@@ -365,7 +365,7 @@ function cityTable(cities: typeof US_CITIES, title: string, fahrenheitFirst: boo
     const f = Math.round(toF(w.temp));
     const cc = Math.round(w.temp);
     const hl = fahrenheitFirst ? `${Math.round(toF(w.hi))}/${Math.round(toF(w.lo))}` : `${Math.round(w.hi)}/${Math.round(w.lo)}`;
-    p.put(r, 0, A.white, fit(c.name, 15), A[tempColour(f)], fit(String(fahrenheitFirst ? f : cc), 3, 'right'), A.white, fit(String(fahrenheitFirst ? cc : f), 3, 'right'), fit(hl, 7, 'right'), A.cyan, ' ', fit(sky(w.code, w.isDay), 12));
+    p.put(r, 0, A.white, fit(c.short ?? c.name, 12), A[tempColour(f)], fit(String(fahrenheitFirst ? f : cc), 3, 'right'), A.white, fit(String(fahrenheitFirst ? cc : f), 4, 'right'), fit(hl, 7, 'right'), A.cyan, fit(sky(w.code, w.isDay), 10));
     r++;
   }
   p.put(21, 0, A.white, 'Now, and today\'s high and low.');
@@ -472,11 +472,14 @@ function quakes(): Page[] {
       const t = clock(new Date(q.time));
       const big = q.mag >= 6.5;
       const colour: Colour = big ? 'red' : q.mag >= 5.5 ? 'yellow' : 'white';
-      const place = q.place.replace(/^(\d+) km /, '$1km ');
+      // "43 km SSE of Otorohanga, New Zealand": drop the bearing, then the
+      // town, until it fits.
+      let place = q.place.replace(/^\d+\s*km\s+[NSEW]{1,3}\s+of\s+/, '');
+      if (place.length > 27 && place.includes(', ')) place = place.slice(place.lastIndexOf(', ') + 2);
       p.put(r, 0, A.cyan, t, A[colour], big ? FLASH : 0x20, q.mag.toFixed(1), A.white, big ? 0x09 : 0x20, fit(place, 27));
       r++;
     }
-    p.put(22, 0, A.white, 'Magnitude 4.5 and up, worldwide. Your time.');
+    p.put(22, 0, A.white, 'Magnitude 4.5 and up. Times are yours.');
     counter(p, i, groups.length);
     fastext(p, labels);
     return p;

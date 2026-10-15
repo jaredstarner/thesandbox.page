@@ -57,6 +57,8 @@ export const store: Store = {
 
 export interface City {
   name: string;
+  /** A shorter name for narrow tables. */
+  short?: string;
   lat: number;
   lon: number;
   tz: string;
@@ -64,10 +66,10 @@ export interface City {
 
 export const US_CITIES: City[] = [
   { name: 'Seattle', lat: 47.61, lon: -122.33, tz: 'America/Los_Angeles' },
-  { name: 'San Francisco', lat: 37.77, lon: -122.42, tz: 'America/Los_Angeles' },
+  { name: 'San Francisco', short: 'San Fran', lat: 37.77, lon: -122.42, tz: 'America/Los_Angeles' },
   { name: 'Los Angeles', lat: 34.05, lon: -118.24, tz: 'America/Los_Angeles' },
   { name: 'Phoenix', lat: 33.45, lon: -112.07, tz: 'America/Phoenix' },
-  { name: 'Salt Lake City', lat: 40.76, lon: -111.89, tz: 'America/Denver' },
+  { name: 'Salt Lake City', short: 'Salt Lake', lat: 40.76, lon: -111.89, tz: 'America/Denver' },
   { name: 'Denver', lat: 39.74, lon: -104.99, tz: 'America/Denver' },
   { name: 'Minneapolis', lat: 44.98, lon: -93.27, tz: 'America/Chicago' },
   { name: 'Dallas', lat: 32.78, lon: -96.8, tz: 'America/Chicago' },
@@ -91,7 +93,7 @@ export const WORLD_CITIES: City[] = [
   { name: 'Honolulu', lat: 21.31, lon: -157.86, tz: 'Pacific/Honolulu' },
   { name: 'Anchorage', lat: 61.22, lon: -149.9, tz: 'America/Anchorage' },
   { name: 'Mexico City', lat: 19.43, lon: -99.13, tz: 'America/Mexico_City' },
-  { name: 'Rio de Janeiro', lat: -22.91, lon: -43.17, tz: 'America/Sao_Paulo' },
+  { name: 'Rio de Janeiro', short: 'Rio', lat: -22.91, lon: -43.17, tz: 'America/Sao_Paulo' },
 ];
 
 export const CURRENCIES = ['EUR', 'GBP', 'JPY', 'CAD', 'MXN', 'CHF', 'AUD', 'CNY', 'INR', 'KRW', 'BRL', 'SEK'];
@@ -258,18 +260,18 @@ export function startFeeds(): void {
   every(loadQuakes, 5);
 }
 
-/** Words for a WMO weather code, as a forecaster would put them. */
+/** Words for a WMO weather code, as a forecaster would put them, in ten letters or fewer. */
 export function sky(code: number, isDay: boolean): string {
   if (code === 0) return isDay ? 'Sunny' : 'Clear';
-  if (code === 1) return isDay ? 'Mainly sunny' : 'Mainly clear';
-  if (code === 2) return 'Partly cloudy';
+  if (code === 1) return isDay ? 'Bright' : 'Fair';
+  if (code === 2) return 'Some cloud';
   if (code === 3) return 'Cloudy';
   if (code === 45 || code === 48) return 'Fog';
   if (code >= 51 && code <= 57) return 'Drizzle';
   if (code >= 61 && code <= 67) return code >= 65 ? 'Heavy rain' : 'Rain';
   if (code >= 71 && code <= 77) return 'Snow';
   if (code >= 80 && code <= 82) return 'Showers';
-  if (code === 85 || code === 86) return 'Snow showers';
+  if (code === 85 || code === 86) return 'Flurries';
   if (code >= 95) return 'Thunder';
   return 'Unsettled';
 }
