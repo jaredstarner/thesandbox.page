@@ -17,13 +17,13 @@
   },
   "dependencies": {
     "@chenglou/pretext": "0.0.9",
-    "astro": "^7.3.6"
+    "astro": "^7.3.8"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "semantic-release": "^25.0.9",
     "typescript": "^6.0.3",
-    "web-features": "^3.40.1",
+    "web-features": "^3.42.0",
     "world-atlas": "2.0.2"
   }
 }
