@@ -371,7 +371,7 @@ export class Lock {
       ev.push({ type: 'open' });
     }
     const caughtNow = this.pins.some((p) => p.state === 'caught');
-    const target = this.setCount * 1.6 + (caughtNow ? 7 * (1 - feel.counter) : 0) + t * 1.2;
+    const target = this.setCount * 3 + (caughtNow ? 9 * (1 - feel.counter) : 0) + t * 2;
     this.turn += (target - this.turn) * Math.min(1, dt * 18);
     return ev;
   }
