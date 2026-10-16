@@ -27,6 +27,8 @@ export interface Layout {
   oy: number;
   wide: boolean;
   face: { x: number; y: number; r: number };
+  /** The blind lock's door, centred in the room the section would take. */
+  door: { x: number; y: number; r: number };
 }
 
 /** Room the page's own controls take up, in CSS pixels, so the lock sits clear of them. */
@@ -61,7 +63,12 @@ export function layout(w: number, h: number, dpr: number, lock: Lock, inset: Ins
   const face = wide
     ? { x: ox + x1 * s + faceRoom / 2 + 8, y: oy - (SHEAR - 2) * s, r: Math.min(faceRoom * 0.42, 96) }
     : { x: w - 16 - 40, y: inset.top + 50, r: 40 };
-  return { w, h, dpr, s, ox, oy, wide, face };
+  const regionTop = inset.top + (wide ? 8 : 4);
+  const regionH = h - inset.bottom - regionTop - 16;
+  const regionW = w - inset.left - inset.right - 32;
+  const dr = Math.max(60, Math.min(regionH / 3.05, regionW / 2.95, 230));
+  const door = { x: inset.left + (w - inset.left - inset.right) / 2, y: regionTop + 1.3 * dr, r: dr };
+  return { w, h, dpr, s, ox, oy, wide, face, door };
 }
 
 export const toWorld = (L: Layout, x: number, y: number) => ({ x: (x - L.ox) / L.s, y: (L.oy - y) / L.s });
@@ -263,7 +270,20 @@ function sectionFill(
   g.stroke(path);
 }
 
-function voidRect(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, clear: boolean, px: number) {
+/**
+ * A cut in the section: what shows through it is the far half of the bore, a concave brass
+ * wall lit across its middle, or for the keyway the flat far wall of the slot.
+ */
+function voidRect(
+  g: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  clear: boolean,
+  px: number,
+  slot = false,
+) {
   if (clear) {
     g.fillStyle = 'rgb(10 20 24 / 0.38)';
     g.fillRect(x, y, w, h);
@@ -272,13 +292,28 @@ function voidRect(g: CanvasRenderingContext2D, x: number, y: number, w: number, 
     g.strokeRect(x, y, w, h);
     return;
   }
-  const grad = g.createLinearGradient(x, 0, x + w, 0);
-  grad.addColorStop(0, '#060504');
-  grad.addColorStop(0.2, VOID);
-  grad.addColorStop(0.8, '#1d1a15');
-  grad.addColorStop(1, '#0a0908');
+  const grad = slot ? g.createLinearGradient(0, y + h, 0, y) : g.createLinearGradient(x, 0, x + w, 0);
+  if (slot) {
+    grad.addColorStop(0, '#2c2010');
+    grad.addColorStop(0.5, '#3d2d14');
+    grad.addColorStop(1, '#17110a');
+  } else {
+    grad.addColorStop(0, '#120c05');
+    grad.addColorStop(0.3, '#3b2b13');
+    grad.addColorStop(0.62, '#5c4520');
+    grad.addColorStop(1, '#160f06');
+  }
   g.fillStyle = grad;
   g.fillRect(x, y, w, h);
+  // The bore's cut edges, catching the lamp.
+  g.strokeStyle = 'rgb(255 226 160 / 0.22)';
+  g.lineWidth = px;
+  g.beginPath();
+  g.moveTo(x, y);
+  g.lineTo(x, y + h);
+  g.moveTo(x + w, y);
+  g.lineTo(x + w, y + h);
+  g.stroke();
 }
 
 function cylinderGradient(g: CanvasRenderingContext2D, x: number, w: number, tone: typeof STEEL): CanvasGradient {
@@ -533,10 +568,7 @@ export function drawScene(g: CanvasRenderingContext2D, L: Layout, lock: Lock, be
 
   if (hidden) {
     // No window: the lock as a picker meets it, face on, filling the section's place.
-    const cx = L.ox + (len / 2) * L.s;
-    const cy = L.oy - (SHEAR - 3) * L.s;
-    const r = Math.min(L.s * 14, L.w * 0.36, 230);
-    drawFace(g, L, lock, cx, cy, r, true);
+    drawFace(g, L, lock, L.door.x, L.door.y, L.door.r, true);
     return;
   }
 
@@ -569,11 +601,11 @@ export function drawScene(g: CanvasRenderingContext2D, L: Layout, lock: Lock, be
   g.scale(1, squash);
   const plug = plugPath(lock, 1);
   sectionFill(g, plug, PLUG, [-2.2, -R, len - 0.4, R], -1, px / Math.max(0.2, squash), clear);
-  voidRect(g, -2.2, KW_BOT, len - 1.2, KW_TOP - KW_BOT, clear, px);
+  voidRect(g, -2.2, KW_BOT, len - 1.2, KW_TOP - KW_BOT, clear, px, true);
   // The keyway's wards, seen edge-on as two ribs.
-  g.strokeStyle = clear ? 'rgb(214 240 250 / 0.22)' : 'rgb(120 96 50 / 0.5)';
+  g.strokeStyle = 'rgb(140 110 56 / 0.55)';
   g.lineWidth = px;
-  for (const y of [KW_BOT + 2.1, KW_TOP - 1.5]) {
+  for (const y of clear ? [] : [KW_BOT + 2.1, KW_TOP - 1.5]) {
     g.beginPath();
     g.moveTo(-2.2, y);
     g.lineTo(len - 3.4, y);
@@ -696,19 +728,25 @@ function drawFace(g: CanvasRenderingContext2D, L: Layout, lock: Lock, cx: number
     g.shadowBlur = 40;
     g.shadowOffsetY = 14;
     const plateW = r * 2.9;
-    const plateH = r * 3.3;
+    const plateH = r * 3.0;
     const paint = g.createLinearGradient(0, -plateH / 2, 0, plateH / 2);
     paint.addColorStop(0, '#2e4a43');
     paint.addColorStop(1, '#1d302b');
     g.fillStyle = paint;
     g.beginPath();
-    g.roundRect(-plateW / 2, -plateH * 0.42, plateW, plateH, 6);
+    g.roundRect(-plateW / 2, -r * 1.3, plateW, plateH, 6);
     g.fill();
     g.restore();
-    g.strokeStyle = 'rgb(255 255 255 / 0.05)';
-    g.lineWidth = 2;
+    // A raised field moulding, as on a panelled door.
+    g.strokeStyle = 'rgb(0 0 0 / 0.35)';
+    g.lineWidth = 3;
     g.beginPath();
-    g.roundRect(-r * 1.3, -plateH * 0.42 + r * 0.16, r * 2.6, plateH - r * 0.32, 4);
+    g.roundRect(-r * 1.3, -r * 1.16, r * 2.6, plateH - r * 0.28, 4);
+    g.stroke();
+    g.strokeStyle = 'rgb(255 255 255 / 0.07)';
+    g.lineWidth = 1.5;
+    g.beginPath();
+    g.roundRect(-r * 1.3 + 2, -r * 1.16 + 2, r * 2.6 - 4, plateH - r * 0.28 - 4, 3);
     g.stroke();
   }
 
@@ -830,6 +868,21 @@ function drawFace(g: CanvasRenderingContext2D, L: Layout, lock: Lock, cx: number
     g.stroke();
     g.strokeStyle = '#c3c9ce';
     g.lineWidth = Math.max(5, r * 0.035);
+    g.stroke();
+    // The handle's grip tape, on the outer half.
+    const gx0 = ex * 0.52;
+    const gy0 = sy + (ey - sy) * 0.52 - bend * r * 0.04;
+    g.strokeStyle = '#0d0f11';
+    g.lineWidth = Math.max(12, r * 0.09);
+    g.beginPath();
+    g.moveTo(gx0, gy0);
+    g.lineTo(ex, ey);
+    g.stroke();
+    g.strokeStyle = 'rgb(255 255 255 / 0.08)';
+    g.lineWidth = Math.max(3, r * 0.02);
+    g.beginPath();
+    g.moveTo(gx0, gy0 - r * 0.02);
+    g.lineTo(ex, ey - r * 0.02);
     g.stroke();
     g.lineCap = 'butt';
   }
