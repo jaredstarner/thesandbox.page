@@ -236,8 +236,8 @@ export class LockSound {
     const ctx = this.ctx;
     if (!ctx || !this.rubGain || !this.zingGain || !this.rubFilter) return;
     const v = Math.min(1, speed / 12);
-    const rub = contact === 'binding' ? v * (0.1 + tension * 0.3) : contact === 'loose' ? v * 0.04 : 0;
-    const zing = contact === 'spring' ? v * 0.07 : contact === 'binding' ? v * 0.03 : 0;
+    const rub = contact === 'binding' ? v * (0.16 + tension * 0.4) : contact === 'loose' ? v * 0.04 : 0;
+    const zing = contact === 'spring' ? v * 0.24 : contact === 'binding' ? v * 0.06 : 0;
     const now = ctx.currentTime;
     this.rubGain.gain.setTargetAtTime(this.muted ? 0 : rub, now, 0.015);
     this.zingGain.gain.setTargetAtTime(this.muted ? 0 : zing, now, 0.02);
