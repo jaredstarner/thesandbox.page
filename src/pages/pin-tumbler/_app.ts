@@ -84,7 +84,7 @@ export function startPinTumbler(root: HTMLElement): void {
   const insets = (): Insets => {
     const wide = window.innerWidth >= 820;
     if (wide) return { top: 104, right: 150, bottom: 96, left: 24 };
-    return { top: 118, right: 0, bottom: 176, left: 0 };
+    return { top: 132, right: 0, bottom: 176, left: 0 };
   };
 
   const resize = () => {
@@ -362,6 +362,7 @@ export function startPinTumbler(root: HTMLElement): void {
         const s = LOCKS.find((l) => l.id === id);
         if (s) select(s, seed);
       },
+      sound,
       labels(on: boolean) {
         labels = on;
       },

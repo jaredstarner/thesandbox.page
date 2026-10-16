@@ -67,7 +67,11 @@ export function layout(w: number, h: number, dpr: number, lock: Lock, inset: Ins
   const regionH = h - inset.bottom - regionTop - 16;
   const regionW = w - inset.left - inset.right - 32;
   const dr = Math.max(60, Math.min(regionH / 3.05, regionW / 2.95, 230));
-  const door = { x: inset.left + (w - inset.left - inset.right) / 2, y: regionTop + 1.3 * dr, r: dr };
+  const door = {
+    x: inset.left + (w - inset.left - inset.right) / 2,
+    y: regionTop + Math.max(0, (regionH - 3.0 * dr) / 2) + 1.3 * dr,
+    r: dr,
+  };
   return { w, h, dpr, s, ox, oy, wide, face, door };
 }
 
