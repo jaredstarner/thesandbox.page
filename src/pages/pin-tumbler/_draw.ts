@@ -531,6 +531,15 @@ export function drawScene(g: CanvasRenderingContext2D, L: Layout, lock: Lock, be
   const len = lock.length;
   const hidden = spec.blind && !o.xray;
 
+  if (hidden) {
+    // No window: the lock as a picker meets it, face on, filling the section's place.
+    const cx = L.ox + (len / 2) * L.s;
+    const cy = L.oy - (SHEAR - 3) * L.s;
+    const r = Math.min(L.s * 14, L.w * 0.36, 230);
+    drawFace(g, L, lock, cx, cy, r, true);
+    return;
+  }
+
   // A soft cast shadow under the lock body.
   g.save();
   g.shadowColor = 'rgb(0 0 0 / 0.55)';
@@ -541,13 +550,6 @@ export function drawScene(g: CanvasRenderingContext2D, L: Layout, lock: Lock, be
   g.restore();
 
   drawWrench(g, px, lock.tension);
-
-  if (hidden) {
-    drawExterior(g, lock, px);
-    drawPick(g, lock, px, lock.feel.bend, false);
-    drawFace(g, L, lock, o);
-    return;
-  }
 
   // Housing, hatched one way; plug, hatched the other, as a section drawing would.
   const housing = housingPath(lock);
@@ -622,72 +624,98 @@ export function drawScene(g: CanvasRenderingContext2D, L: Layout, lock: Lock, be
     g.restore();
   }
 
-  drawFace(g, L, lock, o);
+  drawFace(g, L, lock, L.face.x, L.face.y, L.face.r, false);
   if (o.labels) drawLabels(g, L, lock, o);
 }
 
 function drawCam(g: CanvasRenderingContext2D, lock: Lock, px: number, open: number) {
+  // A retaining collar at the back of the plug, then the tailpiece: a flat blade that
+  // turns with the plug and throws the bolt. Seen edge-on, it narrows as it turns.
   const x = lock.length - 0.4;
-  g.fillStyle = '#5a5f64';
-  g.fillRect(x, -1.2, 2.6, 2.4);
+  const collar = g.createLinearGradient(0, 1.6, 0, -1.6);
+  collar.addColorStop(0, STEEL.lit);
+  collar.addColorStop(0.45, STEEL.mid);
+  collar.addColorStop(1, STEEL.deep);
+  g.fillStyle = collar;
   g.strokeStyle = STEEL.edge;
   g.lineWidth = px;
-  g.strokeRect(x, -1.2, 2.6, 2.4);
-  // The tailpiece: a flat blade that turns with the plug and throws the bolt.
-  const w = 2.4 * Math.abs(Math.cos(open * Math.PI * 0.5)) + 0.5;
-  g.fillStyle = '#868c92';
-  g.fillRect(x + 2.6, -w / 2, 1.6, w);
-  g.strokeRect(x + 2.6, -w / 2, 1.6, w);
+  g.beginPath();
+  g.roundRect(x, -1.6, 1.3, 3.2, 0.3);
+  g.fill();
+  g.stroke();
+  const w = 3.0 * Math.abs(Math.cos(open * Math.PI * 0.5)) + 0.45;
+  const blade = g.createLinearGradient(0, w / 2, 0, -w / 2);
+  blade.addColorStop(0, '#c9ced3');
+  blade.addColorStop(0.5, '#8a9096');
+  blade.addColorStop(1, '#5c6268');
+  g.fillStyle = blade;
+  g.beginPath();
+  g.roundRect(x + 1.3, -w / 2, 3.4, w, 0.2);
+  g.fill();
+  g.stroke();
 }
 
-function drawExterior(g: CanvasRenderingContext2D, lock: Lock, px: number) {
-  const housing = housingPath(lock);
-  const grad = g.createLinearGradient(0, BIBLE_TOP, 0, HOUSING_BOT);
-  grad.addColorStop(0, '#8a6527');
-  grad.addColorStop(0.18, '#e3c27a');
-  grad.addColorStop(0.32, '#c49543');
-  grad.addColorStop(0.7, '#9b7230');
-  grad.addColorStop(1, '#4e3812');
-  g.fillStyle = grad;
-  g.fill(housing);
-  g.strokeStyle = BRASS.edge;
-  g.lineWidth = px * 1.4;
-  g.stroke(housing);
-  // Turned rings and the bible's cap screws, so it reads as a solid cylinder.
-  g.strokeStyle = 'rgb(60 40 10 / 0.35)';
-  for (const x of [1.2, lock.length - 1.2]) {
+/** The collar's graduations: a tick for every two degrees either side of top dead centre. */
+function graduations(g: CanvasRenderingContext2D, r: number, big: boolean) {
+  g.strokeStyle = 'rgb(48 32 8 / 0.75)';
+  for (let d = -40; d <= 40; d += 2) {
+    const a = (d * Math.PI) / 180 - Math.PI / 2;
+    const long = d % 10 === 0;
+    const r0 = r * (long ? 0.8 : 0.85);
+    const r1 = r * 0.91;
+    g.lineWidth = long ? (big ? 1.6 : 1.2) : big ? 1 : 0.7;
     g.beginPath();
-    g.moveTo(x, HOUSING_BOT + 0.2);
-    g.lineTo(x, R + 2.2);
+    g.moveTo(Math.cos(a) * r0, Math.sin(a) * r0);
+    g.lineTo(Math.cos(a) * r1, Math.sin(a) * r1);
     g.stroke();
   }
-  for (const p of lock.pins) {
-    g.fillStyle = 'rgb(70 48 14 / 0.4)';
-    g.beginPath();
-    g.arc(p.x, CHAMBER_TOP - 1.4, 0.5, 0, Math.PI * 2);
-    g.fill();
+  if (!big) return;
+  g.fillStyle = 'rgb(48 32 8 / 0.85)';
+  g.font = `600 ${Math.round(r * 0.07)}px ${FACE}`;
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  for (const d of [-30, -20, -10, 10, 20, 30]) {
+    const a = (d * Math.PI) / 180 - Math.PI / 2;
+    g.fillText(String(Math.abs(d)), Math.cos(a) * r * 0.73, Math.sin(a) * r * 0.73);
   }
-  const collar = collarPath();
-  g.fillStyle = grad;
-  g.fill(collar);
-  g.stroke(collar);
-  drawCam(g, lock, px, Math.min(1, lock.turn / 90));
 }
 
-// ---------------------------------------------------------------------------
-// The face of the lock: what a picker sees, and where tension shows
-
-function drawFace(g: CanvasRenderingContext2D, L: Layout, lock: Lock, o: DrawOpts) {
-  const { x, y } = L.face;
-  const r = L.face.r * (lock.spec.blind && !o.xray && L.wide ? 1.25 : 1);
+/**
+ * The face of the lock: the collar, the plug and its keyway, the wrench, and, in the
+ * big view, the pick seen end-on from the door.
+ */
+function drawFace(g: CanvasRenderingContext2D, L: Layout, lock: Lock, cx: number, cy: number, r: number, big: boolean) {
   g.save();
   g.setTransform(L.dpr, 0, 0, L.dpr, 0, 0);
-  g.translate(x, y);
+  g.translate(cx, cy);
 
-  // Shadow and the housing's collar.
+  if (big) {
+    // The door: a painted panel with the cylinder's collar set into it.
+    g.save();
+    g.shadowColor = 'rgb(0 0 0 / 0.5)';
+    g.shadowBlur = 40;
+    g.shadowOffsetY = 14;
+    const plateW = r * 2.9;
+    const plateH = r * 3.3;
+    const paint = g.createLinearGradient(0, -plateH / 2, 0, plateH / 2);
+    paint.addColorStop(0, '#2e4a43');
+    paint.addColorStop(1, '#1d302b');
+    g.fillStyle = paint;
+    g.beginPath();
+    g.roundRect(-plateW / 2, -plateH * 0.42, plateW, plateH, 6);
+    g.fill();
+    g.restore();
+    g.strokeStyle = 'rgb(255 255 255 / 0.05)';
+    g.lineWidth = 2;
+    g.beginPath();
+    g.roundRect(-r * 1.3, -plateH * 0.42 + r * 0.16, r * 2.6, plateH - r * 0.32, 4);
+    g.stroke();
+  }
+
+  // Shadow and the collar.
   g.shadowColor = 'rgb(0 0 0 / 0.6)';
-  g.shadowBlur = 18;
-  g.shadowOffsetY = 6;
+  g.shadowBlur = big ? 30 : 18;
+  g.shadowOffsetY = big ? 10 : 6;
   const collar = g.createRadialGradient(-r * 0.3, -r * 0.4, r * 0.1, 0, 0, r);
   collar.addColorStop(0, '#f0d38e');
   collar.addColorStop(0.55, '#c39548');
@@ -702,29 +730,23 @@ function drawFace(g: CanvasRenderingContext2D, L: Layout, lock: Lock, o: DrawOpt
   g.beginPath();
   g.arc(0, 0, r * 0.97, 0, Math.PI * 2);
   g.stroke();
-  // Brushed rings on the collar.
-  g.strokeStyle = 'rgb(255 236 190 / 0.08)';
-  for (let k = 0.7; k < 0.96; k += 0.035) {
+  // Turned rings on the collar.
+  g.strokeStyle = 'rgb(255 236 190 / 0.07)';
+  for (let k = 0.66; k < 0.96; k += 0.03) {
     g.beginPath();
     g.arc(0, 0, r * k, 0, Math.PI * 2);
     g.stroke();
   }
+  graduations(g, r, big);
 
   const pr = r * 0.6;
-  // A tick at top dead centre on the housing, for judging the turn against.
-  g.strokeStyle = '#3b2a0c';
-  g.lineWidth = 2;
-  g.beginPath();
-  g.moveTo(0, -r * 0.94);
-  g.lineTo(0, -pr - 3);
-  g.stroke();
-
+  const gap = Math.max(1.5, r * 0.012);
   const turn = (lock.turn * Math.PI) / 180;
   g.rotate(turn);
   // The plug: a gap ring around it, then its own face.
   g.fillStyle = '#2a1e0a';
   g.beginPath();
-  g.arc(0, 0, pr + 1.5, 0, Math.PI * 2);
+  g.arc(0, 0, pr + gap, 0, Math.PI * 2);
   g.fill();
   const plug = g.createRadialGradient(-pr * 0.35, -pr * 0.45, pr * 0.1, 0, 0, pr);
   plug.addColorStop(0, '#f6dc9c');
@@ -734,16 +756,21 @@ function drawFace(g: CanvasRenderingContext2D, L: Layout, lock: Lock, o: DrawOpt
   g.beginPath();
   g.arc(0, 0, pr, 0, Math.PI * 2);
   g.fill();
-  // The plug's index mark, which leaves the housing's tick as it turns.
+  // The plug's index line, read against the collar's graduations.
+  g.strokeStyle = '#ef6a3a';
+  g.lineWidth = big ? 2.5 : 2;
+  g.beginPath();
+  g.moveTo(0, -pr - gap);
+  g.lineTo(0, -r * 0.92);
+  g.stroke();
   g.strokeStyle = '#3b2a0c';
-  g.lineWidth = 2;
   g.beginPath();
   g.moveTo(0, -pr + 2);
-  g.lineTo(0, -pr * 0.66);
+  g.lineTo(0, -pr * 0.7);
   g.stroke();
 
   // A paracentric keyway: a zig-zag slot.
-  const k = pr / 6.35;
+  const k = pr / R;
   const kw = [
     [-0.7, 3.0],
     [0.7, 3.0],
@@ -772,26 +799,92 @@ function drawFace(g: CanvasRenderingContext2D, L: Layout, lock: Lock, o: DrawOpt
   g.stroke();
 
   // The wrench, in the bottom of the keyway and out past the collar; it turns with the plug.
-  g.fillStyle = '#596067';
+  const wr = g.createLinearGradient(-0.6 * k, 0, 0.6 * k, 0);
+  wr.addColorStop(0, '#3c4247');
+  wr.addColorStop(0.45, '#9aa2a9');
+  wr.addColorStop(1, '#3c4247');
+  g.fillStyle = wr;
   g.strokeStyle = '#15181b';
+  g.lineWidth = 1;
   g.beginPath();
-  g.rect(-0.55 * k, 3.6 * k, 1.1 * k, r * 1.05 - 3.6 * k);
+  g.rect(-0.6 * k, 3.65 * k, 1.2 * k, r * 1.12 - 3.65 * k);
   g.fill();
   g.stroke();
-  g.fillStyle = '#7d858c';
-  g.fillRect(-0.55 * k, 3.6 * k, 1.1 * k, 0.6 * k);
-  g.rotate(-turn);
 
-  // Tension, as an arc of pressure on the wrench's handle.
-  if (lock.tension > 0.01 && !lock.opened) {
-    g.strokeStyle = `rgb(239 106 58 / ${0.35 + lock.tension * 0.6})`;
-    g.lineWidth = 2 + lock.tension * 3;
+  if (big && !lock.opened) {
+    // The pick, end-on: its shaft sits in the keyway above the wrench, and the handle
+    // swings down as the tip lifts. It bows when the tip meets a pin that won't give.
+    const sy = Math.min(3.2 * k, Math.max(-2.6 * k, -(lock.py - HOOK - 0.2) * k));
+    const lift = Math.max(0, lock.py + 1.4);
+    const ang = 0.5 + lift * 0.06;
+    const len = r * 1.75;
+    const bend = Math.min(1, lock.feel.bend * 1.5);
+    const ex = -Math.cos(ang) * len;
+    const ey = sy + Math.sin(ang) * len;
     g.lineCap = 'round';
-    const a0 = Math.PI / 2 + turn + 0.12;
+    g.strokeStyle = '#15181b';
+    g.lineWidth = Math.max(5, r * 0.035) + 2;
     g.beginPath();
-    g.arc(0, 0, r * 1.14, a0, a0 + 0.2 + lock.tension * 0.7);
+    g.moveTo(0, sy);
+    g.quadraticCurveTo(ex * 0.5, (sy + ey) / 2 - bend * r * 0.08, ex, ey);
+    g.stroke();
+    g.strokeStyle = '#c3c9ce';
+    g.lineWidth = Math.max(5, r * 0.035);
     g.stroke();
     g.lineCap = 'butt';
+  }
+  g.rotate(-turn);
+
+  // Tension, as an arc of pressure beside the wrench's handle.
+  if (lock.tension > 0.01 && !lock.opened) {
+    g.strokeStyle = `rgb(239 106 58 / ${0.35 + lock.tension * 0.6})`;
+    g.lineWidth = (big ? 3 : 2) + lock.tension * (big ? 5 : 3);
+    g.lineCap = 'round';
+    const a0 = Math.PI / 2 + turn + 0.1;
+    g.beginPath();
+    g.arc(0, 0, r * 1.1, a0, a0 + 0.18 + lock.tension * 0.6);
+    g.stroke();
+    g.lineCap = 'butt';
+  }
+
+  if (big) {
+    // How deep the pick is: a gauge with a notch for each chamber, under the collar.
+    const gy = r * 1.42;
+    const gw = r * 1.7;
+    const n = lock.spec.pins;
+    const toX = (x: number) => -gw / 2 + (x / lock.length) * gw;
+    g.strokeStyle = 'rgb(235 228 211 / 0.35)';
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(-gw / 2, gy);
+    g.lineTo(gw / 2, gy);
+    g.stroke();
+    for (let i = 0; i < n; i++) {
+      const x = toX(FIRST + i * PITCH);
+      g.beginPath();
+      g.moveTo(x, gy - 5);
+      g.lineTo(x, gy + 5);
+      g.stroke();
+    }
+    const mx = toX(Math.max(0, lock.px));
+    g.fillStyle = '#ef6a3a';
+    g.beginPath();
+    g.moveTo(mx, gy - 2);
+    g.lineTo(mx - 6, gy - 11);
+    g.lineTo(mx + 6, gy - 11);
+    g.closePath();
+    g.fill();
+    g.fillStyle = 'rgb(235 228 211 / 0.6)';
+    g.font = `600 13px ${FACE}`;
+    g.textAlign = 'center';
+    g.textBaseline = 'top';
+    g.fillText('PICK DEPTH', 0, gy + 10);
+  } else {
+    g.fillStyle = 'rgb(235 228 211 / 0.55)';
+    g.font = `600 ${L.wide ? 12 : 10}px ${FACE}`;
+    g.textAlign = 'center';
+    g.textBaseline = 'top';
+    g.fillText('FACE', 0, r + (L.wide ? 14 : 6));
   }
   g.restore();
 }
