@@ -1,0 +1,8 @@
+{
+  "title": "Pin tumbler",
+  "summary": "A pin-tumbler lock cut open down the middle: set the tension, find the pin that binds, lift it until it clicks at the shear line, and work through spools, serrations, and finally a lock you can only hear.",
+  "date": "2026-10-16",
+  "tags": ["canvas", "web-audio", "pointer-events", "physics", "game"],
+  "requires": ["canvas"],
+  "plot": 15
+}

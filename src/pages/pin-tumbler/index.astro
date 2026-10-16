@@ -1,0 +1,745 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { LOCKS } from './_lock';
+---
+
+<Bare
+  title="Pin tumbler"
+  description="A pin-tumbler lock cut open down the middle: set the tension, find the binding pin, and lift it until it clicks at the shear line."
+>
+  <Font cssVariable="--font-pintumbler" slot="head" />
+
+  <main class="pintumbler" data-pintumbler data-lock="practice">
+    <canvas
+      class="bench"
+      data-bench
+      aria-label="A pin-tumbler lock drawn in section on a cutting mat, with a hook pick in the keyway and a tension wrench below it. Drag up beneath a pin to lift it."
+    ></canvas>
+
+    <header class="plate">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Pin tumbler</h1>
+      <p class="dek" data-dek>Practice lock: three standard pins in clear plastic</p>
+    </header>
+
+    <nav class="locks" aria-label="Locks">
+      <ol>
+        {
+          LOCKS.map((lock, i) => (
+            <li>
+              <button type="button" data-lock={lock.id} aria-current={i === 0 ? 'true' : 'false'} title={lock.blurb}>
+                <span class="hole" aria-hidden="true" />
+                <span class="no">{String(i + 1).padStart(2, '0')}</span>
+                <span class="name">{lock.name}</span>
+                <span class="best" data-best />
+              </button>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <section class="wrench" aria-label="Tension wrench">
+      <label for="pt-tension">Tension</label>
+      <div class="slot">
+        <span class="mark heavy" aria-hidden="true">Too heavy</span>
+        <input id="pt-tension" type="range" min="0" max="100" step="1" value="0" data-tension />
+        <span class="mark light" aria-hidden="true">None</span>
+      </div>
+    </section>
+
+    <footer class="readout">
+      <p class="msg" data-msg aria-live="polite"></p>
+      <div class="dials">
+        <span class="timer" data-timer>0:00.0</span>
+        <span class="count" data-count>0 of 3 set</span>
+      </div>
+    </footer>
+
+    <nav class="tools" aria-label="Bench">
+      <button type="button" data-repin title="New key pin lengths and a new binding order">Re-pin</button>
+      <button type="button" data-labels aria-pressed="true" title="Name the parts">Labels</button>
+      <button type="button" data-peek aria-pressed="false" hidden title="Show the section. The time won’t count">Look inside</button>
+      <button type="button" data-sound aria-pressed="true" title="Sound">Sound</button>
+      <button type="button" class="about" popovertarget="pt-notes" aria-label="How it works">?</button>
+    </nav>
+
+    <div class="card" data-card hidden>
+      <p class="kicker">Open</p>
+      <p class="time" data-card-time>0:00.0</p>
+      <p class="best" data-card-best></p>
+      <div class="actions">
+        <button type="button" data-again>Re-pin and go again</button>
+        <button type="button" class="primary" data-next>Next lock</button>
+      </div>
+    </div>
+
+    <div class="notes" id="pt-notes" popover>
+      <h2>How a lock gives itself away</h2>
+      <p>
+        A pin-tumbler lock is a brass plug that wants to turn inside a housing. Stacks of pins cross the gap between them:
+        a key pin below, a driver above, a spring on top. The right key lifts every stack until the split between its two
+        pins sits exactly on that gap, the shear line, and the plug turns.
+      </p>
+      <p>
+        No lock is drilled perfectly. Turn the plug a little with a tension wrench and the chamber that is furthest off
+        true pinches its pin first. Only that pin binds; the rest stay springy. Lift the binding pin until its driver
+        clears the shear line and the plug jumps a fraction of a degree. That jump is the click, and it traps the driver
+        on the plug’s edge. Then another pin binds.
+      </p>
+      <p>
+        Push a set key pin on up past the shear line and it wedges there: overset. Let go of the wrench and everything
+        drops. Too much tension and nothing moves at all.
+      </p>
+      <h3>Security pins</h3>
+      <p>
+        A spool driver has a narrow waist. When the waist reaches the shear line, the plug swings further than a set pin
+        could turn it: a false set. Lift that spool through and its lip pushes the plug back against your wrench, so you
+        have to ease off just enough to let it pass. A serrated driver has grooves that catch the plug’s edge one after
+        another, each one a click that isn’t the set.
+      </p>
+      <h3>At the bench</h3>
+      <ul>
+        <li>Set the tension with the wrench control, the scroll wheel, the bracket keys, or the digits 0 to 9</li>
+        <li>Press below a pin and push up to lift it; slide across to move the pick between pins</li>
+        <li>Or use the arrow keys: left and right step between pins, up and down lift and lower, Shift for finer steps</li>
+        <li>Your best time on each lock is kept in this browser</li>
+      </ul>
+      <p class="aside">Pick only locks you own, or have been asked to open.</p>
+    </div>
+
+    <noscript>
+      <p class="nojs">The lock is drawn and picked with JavaScript. Turn scripts on to pick it.</p>
+    </noscript>
+  </main>
+</Bare>
+
+<script>
+  import { startPinTumbler } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-pintumbler]');
+  if (root) startPinTumbler(root);
+</script>
+
+<style is:global>
+  body:has(.pintumbler) {
+    margin: 0;
+    background: #141b19;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .pintumbler {
+    --face: var(--font-pintumbler, 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif);
+    --cream: #ebe4d3;
+    --cream-soft: rgb(235 228 211 / 0.66);
+    --cream-faint: rgb(235 228 211 / 0.14);
+    --ink: #ef6a3a;
+    --panel: rgb(14 19 18 / 0.78);
+    --tension: 0;
+
+    position: fixed;
+    inset: 0;
+    color: var(--cream);
+    font-family: var(--face);
+    font-size: 16px;
+    line-height: 1.35;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .pintumbler .bench {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .pintumbler button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .pintumbler :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  /* The maker's plate, top left. */
+  .pintumbler .plate {
+    position: absolute;
+    top: 20px;
+    left: 28px;
+    pointer-events: none;
+  }
+
+  .pintumbler .plate > * {
+    pointer-events: auto;
+  }
+
+  .pintumbler .home {
+    color: var(--cream-soft);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .pintumbler .home:hover {
+    color: var(--cream);
+  }
+
+  .pintumbler h1 {
+    margin: 2px 0 0;
+    font-size: 46px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .pintumbler .dek {
+    margin: 6px 0 0;
+    color: var(--cream-soft);
+    font-size: 17px;
+  }
+
+  /* Key tags, one per lock. */
+  .pintumbler .locks {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+  }
+
+  .pintumbler .locks ol {
+    display: flex;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pintumbler .locks button {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 6px;
+    align-items: baseline;
+    min-width: 104px;
+    padding: 7px 12px 7px 26px;
+    border: 1px solid rgb(235 228 211 / 0.16);
+    border-radius: 4px 14px 14px 4px;
+    background: rgb(30 37 35 / 0.86);
+    text-align: left;
+    transition: background-color 120ms, border-color 120ms;
+  }
+
+  .pintumbler .locks button:hover {
+    border-color: rgb(235 228 211 / 0.36);
+  }
+
+  .pintumbler .locks .hole {
+    position: absolute;
+    top: 50%;
+    left: 9px;
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+    border-radius: 50%;
+    background: #0c100f;
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.7), 0 0 0 1.5px rgb(201 163 91 / 0.65);
+  }
+
+  .pintumbler .locks .no {
+    color: var(--cream-soft);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  .pintumbler .locks .name {
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .pintumbler .locks .best {
+    grid-column: 2;
+    min-height: 1.2em;
+    color: #9fd0b6;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+
+  .pintumbler .locks .best:empty::before {
+    content: 'Unopened';
+    color: rgb(235 228 211 / 0.36);
+  }
+
+  .pintumbler .locks [aria-current='true'] {
+    border-color: var(--ink);
+    background: rgb(70 36 22 / 0.92);
+  }
+
+  .pintumbler .locks [aria-current='true'] .hole {
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.7), 0 0 0 1.5px var(--ink);
+  }
+
+  /* The wrench control: a slot with a steel handle in it. */
+  .pintumbler .wrench {
+    position: absolute;
+    top: 50%;
+    right: 36px;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    transform: translateY(-46%);
+  }
+
+  .pintumbler .wrench label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .pintumbler .slot {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+  }
+
+  .pintumbler .mark {
+    color: var(--cream-soft);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .pintumbler .mark.heavy {
+    color: rgb(239 106 58 / 0.85);
+  }
+
+  .pintumbler .wrench input {
+    --fill: calc(var(--tension) * 100%);
+
+    width: 44px;
+    height: min(46vh, 380px);
+    margin: 0;
+    writing-mode: vertical-lr;
+    direction: rtl;
+    appearance: none;
+    background: transparent;
+    cursor: ns-resize;
+  }
+
+  .pintumbler .wrench input::-webkit-slider-runnable-track {
+    width: 12px;
+    border-radius: 6px;
+    background:
+      linear-gradient(to top, transparent 82%, rgb(239 106 58 / 0.35) 82%) no-repeat,
+      linear-gradient(to top, rgb(239 106 58 / 0.9) var(--fill), transparent var(--fill)) no-repeat,
+      #070a09;
+    box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.9), 0 0 0 1px rgb(235 228 211 / 0.14);
+  }
+
+  .pintumbler .wrench input::-moz-range-track {
+    width: 12px;
+    border-radius: 6px;
+    background:
+      linear-gradient(to top, transparent 82%, rgb(239 106 58 / 0.35) 82%) no-repeat,
+      linear-gradient(to top, rgb(239 106 58 / 0.9) var(--fill), transparent var(--fill)) no-repeat,
+      #070a09;
+    box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.9), 0 0 0 1px rgb(235 228 211 / 0.14);
+  }
+
+  .pintumbler .wrench input::-webkit-slider-thumb {
+    width: 40px;
+    height: 18px;
+    margin-left: -14px;
+    border: 1px solid #1a1d20;
+    border-radius: 3px;
+    appearance: none;
+    background:
+      repeating-linear-gradient(to right, transparent 0 4px, rgb(0 0 0 / 0.22) 4px 5px),
+      linear-gradient(#e4e8eb, #8d949a 55%, #5b6167);
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.6);
+  }
+
+  .pintumbler .wrench input::-moz-range-thumb {
+    width: 40px;
+    height: 18px;
+    border: 1px solid #1a1d20;
+    border-radius: 3px;
+    background:
+      repeating-linear-gradient(to right, transparent 0 4px, rgb(0 0 0 / 0.22) 4px 5px),
+      linear-gradient(#e4e8eb, #8d949a 55%, #5b6167);
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.6);
+  }
+
+  .pintumbler.heavy .wrench label {
+    color: var(--ink);
+  }
+
+  /* Time, count, and a line of advice, bottom left. */
+  .pintumbler .readout {
+    position: absolute;
+    bottom: 22px;
+    left: 28px;
+    max-width: min(560px, 52vw);
+    pointer-events: none;
+  }
+
+  .pintumbler .msg {
+    min-height: 2.7em;
+    margin: 0 0 8px;
+    color: var(--cream);
+    font-size: 17px;
+    text-wrap: pretty;
+  }
+
+  .pintumbler .dials {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  .pintumbler .timer {
+    font-size: 34px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .pintumbler .count {
+    color: var(--cream-soft);
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .pintumbler .tools {
+    position: absolute;
+    right: 24px;
+    bottom: 24px;
+    display: flex;
+    gap: 6px;
+  }
+
+  .pintumbler .tools button,
+  .pintumbler .card button {
+    padding: 7px 14px;
+    border: 1px solid rgb(235 228 211 / 0.2);
+    border-radius: 3px;
+    background: rgb(22 28 27 / 0.86);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  .pintumbler .tools button:hover,
+  .pintumbler .card button:hover {
+    border-color: rgb(235 228 211 / 0.45);
+  }
+
+  .pintumbler .tools [aria-pressed='false'] {
+    color: var(--cream-soft);
+  }
+
+  .pintumbler .tools [aria-pressed='true'] {
+    border-color: rgb(159 208 182 / 0.55);
+  }
+
+  .pintumbler .tools .about {
+    width: 36px;
+    padding: 7px 0;
+    font-weight: 700;
+  }
+
+  /* The opened card. */
+  .pintumbler .card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 280px;
+    padding: 22px 28px 24px;
+    border: 1px solid rgb(235 228 211 / 0.18);
+    border-top: 3px solid var(--ink);
+    border-radius: 4px;
+    background: rgb(14 19 18 / 0.94);
+    box-shadow: 0 20px 60px rgb(0 0 0 / 0.6);
+    text-align: center;
+    transform: translate(-50%, -50%);
+    animation: pt-card 260ms ease-out;
+  }
+
+  .pintumbler .card[hidden] {
+    display: none;
+  }
+
+  @keyframes pt-card {
+    from {
+      transform: translate(-50%, -44%);
+      filter: opacity(0);
+    }
+  }
+
+  .pintumbler .card p {
+    margin: 0;
+  }
+
+  .pintumbler .card .kicker {
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  .pintumbler .card .time {
+    font-size: 64px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.05;
+  }
+
+  .pintumbler .card .best {
+    color: var(--cream-soft);
+  }
+
+  .pintumbler .card .actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .pintumbler .card .primary {
+    border-color: var(--ink);
+    background: rgb(239 106 58 / 0.18);
+  }
+
+  .pintumbler .notes {
+    max-width: min(560px, calc(100vw - 32px));
+    max-height: min(80vh, 720px);
+    padding: 22px 26px 24px;
+    border: 1px solid rgb(235 228 211 / 0.18);
+    border-radius: 4px;
+    background: #121816;
+    color: var(--cream);
+    font-family: var(--face);
+    font-size: 17px;
+    line-height: 1.42;
+    box-shadow: 0 24px 80px rgb(0 0 0 / 0.7);
+  }
+
+  .pintumbler .notes::backdrop {
+    background: rgb(0 0 0 / 0.45);
+  }
+
+  .pintumbler .notes h2 {
+    margin: 0 0 10px;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .pintumbler .notes h3 {
+    margin: 18px 0 6px;
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .pintumbler .notes p {
+    margin: 0 0 10px;
+  }
+
+  .pintumbler .notes ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  .pintumbler .notes li {
+    margin-bottom: 4px;
+  }
+
+  .pintumbler .notes .aside {
+    margin-top: 14px;
+    color: var(--cream-soft);
+    font-style: italic;
+  }
+
+  .pintumbler .nojs {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    max-width: 320px;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  /* Phones: the plate and tags across the top, the wrench across the bottom. */
+  @media (width < 820px) {
+    .pintumbler .plate {
+      top: 12px;
+      left: 16px;
+      right: 16px;
+    }
+
+    .pintumbler h1 {
+      font-size: 30px;
+    }
+
+    .pintumbler .dek {
+      margin-top: 2px;
+      font-size: 15px;
+    }
+
+    .pintumbler .locks {
+      top: 92px;
+      right: 0;
+      left: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .pintumbler .locks ol {
+      gap: 6px;
+      padding: 0 16px;
+      width: max-content;
+    }
+
+    .pintumbler .locks button {
+      min-width: 0;
+      padding: 4px 10px 4px 22px;
+      grid-template-columns: auto auto;
+    }
+
+    .pintumbler .locks .hole {
+      left: 7px;
+    }
+
+    .pintumbler .locks .best {
+      display: none;
+    }
+
+    .pintumbler .readout {
+      right: 16px;
+      bottom: 104px;
+      left: 16px;
+      max-width: none;
+    }
+
+    .pintumbler .msg {
+      min-height: 0;
+      font-size: 15px;
+    }
+
+    .pintumbler .timer {
+      font-size: 26px;
+    }
+
+    .pintumbler .count {
+      font-size: 13px;
+    }
+
+    .pintumbler .wrench {
+      top: auto;
+      right: 16px;
+      bottom: 58px;
+      left: 16px;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      justify-items: stretch;
+      transform: none;
+    }
+
+    .pintumbler .slot {
+      display: block;
+    }
+
+    .pintumbler .mark {
+      display: none;
+    }
+
+    .pintumbler .wrench input {
+      width: 100%;
+      height: 36px;
+      writing-mode: horizontal-tb;
+      direction: ltr;
+      cursor: ew-resize;
+    }
+
+    .pintumbler .wrench input::-webkit-slider-runnable-track {
+      width: auto;
+      height: 12px;
+      background:
+        linear-gradient(to right, transparent 82%, rgb(239 106 58 / 0.35) 82%) no-repeat,
+        linear-gradient(to right, rgb(239 106 58 / 0.9) var(--fill), transparent var(--fill)) no-repeat,
+        #070a09;
+    }
+
+    .pintumbler .wrench input::-moz-range-track {
+      width: auto;
+      height: 12px;
+      background:
+        linear-gradient(to right, transparent 82%, rgb(239 106 58 / 0.35) 82%) no-repeat,
+        linear-gradient(to right, rgb(239 106 58 / 0.9) var(--fill), transparent var(--fill)) no-repeat,
+        #070a09;
+    }
+
+    .pintumbler .wrench input::-webkit-slider-thumb {
+      width: 18px;
+      height: 36px;
+      margin-top: -12px;
+      margin-left: 0;
+      background:
+        repeating-linear-gradient(transparent 0 4px, rgb(0 0 0 / 0.22) 4px 5px),
+        linear-gradient(to right, #e4e8eb, #8d949a 55%, #5b6167);
+    }
+
+    .pintumbler .wrench input::-moz-range-thumb {
+      width: 18px;
+      height: 36px;
+      background:
+        repeating-linear-gradient(transparent 0 4px, rgb(0 0 0 / 0.22) 4px 5px),
+        linear-gradient(to right, #e4e8eb, #8d949a 55%, #5b6167);
+    }
+
+    .pintumbler .tools {
+      right: 16px;
+      bottom: 14px;
+      left: 16px;
+      justify-content: flex-end;
+    }
+
+    .pintumbler .tools button {
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+
+    .pintumbler .tools .about {
+      width: 32px;
+    }
+
+    .pintumbler .card {
+      min-width: 0;
+      width: calc(100vw - 48px);
+      padding: 18px 16px 20px;
+    }
+
+    .pintumbler .card .time {
+      font-size: 52px;
+    }
+  }
+</style>
