@@ -1,0 +1,43 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Pin tumbler"
+  description="A pin-tumbler lock cut open down the middle: set the tension, find the binding pin, and lift it until it clicks at the shear line."
+>
+  <Font cssVariable="--font-pintumbler" slot="head" />
+
+  <main class="pintumbler" data-pintumbler>
+    <canvas class="bench" data-bench aria-label="A pin-tumbler lock drawn in section."></canvas>
+    <header class="plate">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Pin tumbler</h1>
+    </header>
+  </main>
+</Bare>
+
+<style is:global>
+  body:has(.pintumbler) {
+    margin: 0;
+    background: #0f1113;
+    overflow: hidden;
+  }
+
+  .pintumbler {
+    --face: var(--font-pintumbler, 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif);
+
+    position: fixed;
+    inset: 0;
+    color: #e8e2d4;
+    font-family: var(--face);
+  }
+
+  .pintumbler .bench {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+</style>

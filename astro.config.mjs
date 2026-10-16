@@ -208,5 +208,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Trajan Pro', 'Georgia', 'serif'],
     },
+    {
+      // The callouts and dial lettering on /pin-tumbler/: a condensed face from the DIN and grotesk tradition.
+      provider: fontProviders.fontsource(),
+      name: 'Barlow Condensed',
+      cssVariable: '--font-pintumbler',
+      weights: [400, 500, 600, 700],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Arial Narrow', 'Arial', 'sans-serif'],
+    },
   ],
 });
