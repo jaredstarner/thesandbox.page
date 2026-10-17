@@ -404,13 +404,12 @@ export const TECHNIQUES: Record<string, Technique> = {
   'css-3d-transforms': {
     label: '3D transforms',
     webFeature: 'transforms3d',
-    test: () =>
-      supports('transform: matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)', 'transform: matrix3d()'),
+    test: () => supports('transform: matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)', 'transform: matrix3d()'),
   },
   'clip-path': {
     label: 'clip-path: path()',
     webFeature: 'clip-path',
-    test: () => supports("clip-path: path(evenodd, 'M0 0L1 0L1 1Z')", "clip-path: path(evenodd, ...)"),
+    test: () => supports("clip-path: path(evenodd, 'M0 0L1 0L1 1Z')", 'clip-path: path(evenodd, ...)'),
   },
   // Technique notes: no browser dependency, so no test and no light.
   'paper-engineering': { label: 'Paper engineering' },

@@ -285,11 +285,7 @@ function buildPiece(world: HTMLElement, p: Piece, spread: number): Placed {
 const rgb = (base: RGB, light: RGB) =>
   `rgb(${base.map((b, i) => Math.round(255 * Math.pow(Math.min(1, b * light[i]), 0.85))).join(' ')})`;
 
-const lightAt = (i: number): RGB => [
-  AMBIENT[0] + i * LAMP[0],
-  AMBIENT[1] + i * LAMP[1],
-  AMBIENT[2] + i * LAMP[2],
-];
+const lightAt = (i: number): RGB => [AMBIENT[0] + i * LAMP[0], AMBIENT[1] + i * LAMP[1], AMBIENT[2] + i * LAMP[2]];
 
 const RINGS = [0, 0.25, 0.5, 0.8, 1.2, 1.7, 2.4, 3.4, 5];
 
@@ -395,18 +391,33 @@ export function mount(root: HTMLElement) {
 
   // The board edges of each half of the book block.
   const edgeFront = [0, 1].map(() =>
-    addFace(world, { w: W, h: 10, frontBase: EDGE, glow: 0, casts: false, receives: false, frontTex: 'var(--pp-edge)' }),
+    addFace(world, {
+      w: W,
+      h: 10,
+      frontBase: EDGE,
+      glow: 0,
+      casts: false,
+      receives: false,
+      frontTex: 'var(--pp-edge)',
+    }),
   );
   const edgeSide = [0, 1].map(() =>
-    addFace(world, { w: H, h: 10, frontBase: EDGE, glow: 0, casts: false, receives: false, frontTex: 'var(--pp-edge)' }),
+    addFace(world, {
+      w: H,
+      h: 10,
+      frontBase: EDGE,
+      glow: 0,
+      casts: false,
+      receives: false,
+      frontTex: 'var(--pp-edge)',
+    }),
   );
 
   // Leaves: the cover, then a board per spread; the back board never turns.
   const art = (inner: string) => pencil(W, H, inner);
   const leaves: Face[] = [];
   for (let i = 0; i < LEAVES; i++) {
-    const front =
-      i === 0 ? coverLabel : art(SPREADS[i - 1].right + glueMarks(SPREADS[i - 1].pieces, 'r'));
+    const front = i === 0 ? coverLabel : art(SPREADS[i - 1].right + glueMarks(SPREADS[i - 1].pieces, 'r'));
     const back = art(SPREADS[i].left + glueMarks(SPREADS[i].pieces, 'l'));
     leaves.push(
       addFace(world, {
@@ -576,7 +587,9 @@ export function mount(root: HTMLElement) {
     // World rings for casters.
     const live = faces.filter((f) => f.visible);
     for (const f of live) {
-      f.world = f.casts ? f.rings.map((r) => r.map(([x, y]) => add(f.frame.o, add(mul(f.frame.ex, x), mul(f.frame.ey, y))))) : undefined;
+      f.world = f.casts
+        ? f.rings.map((r) => r.map(([x, y]) => add(f.frame.o, add(mul(f.frame.ex, x), mul(f.frame.ey, y)))))
+        : undefined;
     }
     const casters = live.filter((f) => f.casts);
 
@@ -692,7 +705,18 @@ export function mount(root: HTMLElement) {
         dir = target > t ? 1 : -1;
       }
     }
-    drag = { kind, id: e.pointerId, x: e.clientX, wx, reach, leaf, t0: t, moved: 0, dir, hist: [[performance.now(), t]] };
+    drag = {
+      kind,
+      id: e.pointerId,
+      x: e.clientX,
+      wx,
+      reach,
+      leaf,
+      t0: t,
+      moved: 0,
+      dir,
+      hist: [[performance.now(), t]],
+    };
     try {
       stage.setPointerCapture(e.pointerId);
     } catch {}
