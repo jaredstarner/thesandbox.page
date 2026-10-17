@@ -1343,7 +1343,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
 
   .r-body {
     display: grid;
-    grid-template-columns: 13ch minmax(0, 1fr);
+    grid-template-columns: 12ch minmax(0, 1fr);
     margin: 0;
     font-family: var(--f-data);
     font-size: 12px;
@@ -1393,7 +1393,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    column-gap: 7px;
+    column-gap: 6px;
     margin-left: -14px;
     color: var(--ink);
   }
@@ -1417,7 +1417,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
   .r-role {
     font-family: var(--f-form);
     font-size: 10.5px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--ink-graphite);
   }
@@ -1435,9 +1435,11 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
     cursor: help;
   }
 
+  /* The form face, narrower than the data face, so "Not Baseline" holds the line. */
   .r-base {
     min-width: 4ch;
-    font-size: 10.5px;
+    font-family: var(--f-form);
+    font-size: 11px;
     text-align: right;
     color: var(--ink-graphite);
   }
