@@ -302,7 +302,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
                             >
                               <span class="light" aria-hidden="true" />
                               <span class="t-label">{t.label}</span>
-                              {t.baseline && <span class="t-base">{t.baseline.short.replace('Baseline ', '')}</span>}
+                              {t.baseline && <span class="t-base">{t.baseline.year ?? t.baseline.short}</span>}
                             </li>
                           ))}
                         </ul>
