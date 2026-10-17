@@ -37,7 +37,7 @@ type NavigatorExtras = Navigator & {
 
 const nav = navigator as NavigatorExtras;
 
-const safe = <T,>(probe: () => T): T | null => {
+const safe = <T>(probe: () => T): T | null => {
   try {
     return probe();
   } catch {
@@ -127,7 +127,10 @@ function scheme(): string | null {
   if (!color && !contrast) return null;
   const parts = [
     color && `${color === 'dark' ? 'Dark' : 'Light'} scheme`,
-    contrast && { more: 'more contrast', less: 'less contrast', custom: 'custom contrast', 'no-preference': 'standard contrast' }[contrast],
+    contrast &&
+      { more: 'more contrast', less: 'less contrast', custom: 'custom contrast', 'no-preference': 'standard contrast' }[
+        contrast
+      ],
     forced && 'forced colors',
   ].filter(Boolean) as string[];
   const text = parts.join(' · ');

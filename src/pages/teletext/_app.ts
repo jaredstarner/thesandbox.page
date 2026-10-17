@@ -57,13 +57,28 @@ export function start(root: HTMLElement, service: Service): void {
   function header(): Page {
     const p = new Page();
     const now = new Date();
-    const typed = entry ? entry.padEnd(3, '-') : target !== null ? String(target) : String(shown || '').padStart(3, ' ');
+    const typed = entry
+      ? entry.padEnd(3, '-')
+      : target !== null
+        ? String(target)
+        : String(shown || '').padStart(3, ' ');
     const list = cycle();
     const rolling = target !== null ? list[roll % list.length] : shown;
     const date = `${DAYS[now.getDay()]} ${String(now.getDate()).padStart(2, '0')} ${MONTHS[now.getMonth()]}`;
     const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}/${String(now.getSeconds()).padStart(2, '0')}`;
     p.put(0, 0, ' ', target !== null || entry ? A.green : A.white, `P${typed}`);
-    p.put(0, 7, A.cyan, hold ? fit('  HOLD', 8) : 'TELEPAGE', A.white, String(rolling).padStart(3, ' '), ' ', date, A.yellow, time);
+    p.put(
+      0,
+      7,
+      A.cyan,
+      hold ? fit('  HOLD', 8) : 'TELEPAGE',
+      A.white,
+      String(rolling).padStart(3, ' '),
+      ' ',
+      date,
+      A.yellow,
+      time,
+    );
     return p;
   }
 
@@ -201,7 +216,7 @@ export function start(root: HTMLElement, service: Service): void {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const t = e.target as HTMLElement | null;
     if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
-    const key = /^[0-9]$/.test(e.key) ? e.key : KEYS[e.key] ?? KEYS[e.key.toLowerCase()];
+    const key = /^[0-9]$/.test(e.key) ? e.key : (KEYS[e.key] ?? KEYS[e.key.toLowerCase()]);
     if (!key) return;
     e.preventDefault();
     press(key);
@@ -230,7 +245,8 @@ export function start(root: HTMLElement, service: Service): void {
     const cell = cellAt(e);
     if (!cell || cell.row < 1) return null;
     const body = pages[sub];
-    if (cell.row === 24 && service.links(shown, sub).some(Boolean)) return { fastext: Math.min(3, Math.floor(cell.col / 10)) };
+    if (cell.row === 24 && service.links(shown, sub).some(Boolean))
+      return { fastext: Math.min(3, Math.floor(cell.col / 10)) };
     const text = Array.from({ length: COLS }, (_, c) => {
       const b = body.get(cell.row, c);
       return b >= 0x30 && b <= 0x39 ? String.fromCharCode(b) : ' ';

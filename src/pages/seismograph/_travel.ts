@@ -10,9 +10,14 @@ export function geo(aLat: number, aLon: number, bLat: number, bLon: number): { d
   const p1 = aLat * RAD;
   const p2 = bLat * RAD;
   const dl = (bLon - aLon) * RAD;
-  const c = Math.acos(Math.min(1, Math.max(-1, Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(dl))));
-  const az = Math.atan2(Math.sin(dl) * Math.cos(p2), Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl));
-  return { dist: c / RAD, az: ((az / RAD) % 360 + 360) % 360 };
+  const c = Math.acos(
+    Math.min(1, Math.max(-1, Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(dl))),
+  );
+  const az = Math.atan2(
+    Math.sin(dl) * Math.cos(p2),
+    Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl),
+  );
+  return { dist: c / RAD, az: (((az / RAD) % 360) + 360) % 360 };
 }
 
 // Seconds after origin, every 10 degrees from 0.

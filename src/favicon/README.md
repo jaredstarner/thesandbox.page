@@ -2,13 +2,13 @@
 
 The site's mark is the Tray: an open box with one orange grain, on a dark tile.
 
-| File | What it is |
-| :--- | :--- |
-| `tray.svg` | The mark as a vector; the reference for its shape |
-| `generate.mjs` | Writes the raster icons to `public/`. No dependencies: `node src/favicon/generate.mjs`, then commit the output |
-| `public/favicon-hdr.png` | The tab icon: 32 px, 16-bit, HDR |
-| `public/favicon.ico` | 16, 32, and 48 px SDR copies, for clients that fetch `/favicon.ico` by convention |
-| `public/apple-touch-icon.png` | 180 px, SDR, for iOS home screens |
+| File                          | What it is                                                                                                     |
+| :---------------------------- | :------------------------------------------------------------------------------------------------------------- |
+| `tray.svg`                    | The mark as a vector; the reference for its shape                                                              |
+| `generate.mjs`                | Writes the raster icons to `public/`. No dependencies: `node src/favicon/generate.mjs`, then commit the output |
+| `public/favicon-hdr.png`      | The tab icon: 32 px, 16-bit, HDR                                                                               |
+| `public/favicon.ico`          | 16, 32, and 48 px SDR copies, for clients that fetch `/favicon.ico` by convention                              |
+| `public/apple-touch-icon.png` | 180 px, SDR, for iOS home screens                                                                              |
 
 ## HDR
 

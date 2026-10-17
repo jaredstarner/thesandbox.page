@@ -15,7 +15,12 @@ const verse = (lines: string) =>
   lines
     .trim()
     .split(/\n\s*\n/)
-    .map((stanza) => stanza.trim().split(/\s*\n\s*/).join(' '))
+    .map((stanza) =>
+      stanza
+        .trim()
+        .split(/\s*\n\s*/)
+        .join(' '),
+    )
     .join(' ¶ ');
 
 export const PASSAGES: Passage[] = [

@@ -26,7 +26,11 @@ export function describe(cell: Cell, facing: Dir, ahead: number | null, feature:
   else {
     const paces = ahead === 1 ? 'one pace' : `${NUMBERS[ahead] ?? ahead} paces`;
     parts.push(
-      feature ? `${capital(ON_WALL[feature.kind])}, ${paces} ahead.` : ahead === 1 ? 'A wall one pace ahead.' : `The passage runs ${paces} to a wall.`,
+      feature
+        ? `${capital(ON_WALL[feature.kind])}, ${paces} ahead.`
+        : ahead === 1
+          ? 'A wall one pace ahead.'
+          : `The passage runs ${paces} to a wall.`,
     );
   }
   const left = cell.open[LEFT[facing]];

@@ -442,7 +442,8 @@ export function initVideo(hell: Hell): Video {
   };
 
   const sound = () => {
-    const want = (visible || pip) && !muted && !hell.blocked && !hell.finished && hell.started && !document.hidden && !stopped;
+    const want =
+      (visible || pip) && !muted && !hell.blocked && !hell.finished && hell.started && !document.hidden && !stopped;
     if (want && audioReady()) {
       if (!playing || playingSpot !== spot) {
         playing?.stop();

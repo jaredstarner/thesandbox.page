@@ -2,12 +2,12 @@
 
 The home page: a survey map of the site. Every experiment claims a plot of land, and the next plot is staked out ahead of the next run. The register at `/experiments/` is the survey office, on a plot of its own out to the north-west, marked by a theodolite on its tripod. The page opens on the stake and draws the land outward from it.
 
-| File | Role |
-| :--- | :--- |
-| `Survey.astro` | Markup and styles. Every plot is a real link in an ordered list; without script the list is the page |
-| `survey.ts` | Camera and input: drag, wheel, pinch, keyboard, fly-to, deep links (`/#<slug>`), the next stake and its estimated countdown to when the next run's page is usually live (`SURVEY_AT`, set from the `sandbox-daily` routine) |
-| `terrain.ts` | The land: one WebGL2 fragment shader draws contours, water, woodland, and section lines from seeded noise |
-| `plots.ts` | Where a plot sits, from its number alone, and where the office sits. Shared by the build and the browser |
+| File           | Role                                                                                                                                                                                                                        |
+| :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Survey.astro` | Markup and styles. Every plot is a real link in an ordered list; without script the list is the page                                                                                                                        |
+| `survey.ts`    | Camera and input: drag, wheel, pinch, keyboard, fly-to, deep links (`/#<slug>`), the next stake and its estimated countdown to when the next run's page is usually live (`SURVEY_AT`, set from the `sandbox-daily` routine) |
+| `terrain.ts`   | The land: one WebGL2 fragment shader draws contours, water, woodland, and section lines from seeded noise                                                                                                                   |
+| `plots.ts`     | Where a plot sits, from its number alone, and where the office sits. Shared by the build and the browser                                                                                                                    |
 
 ## Plots
 

@@ -3,7 +3,12 @@
 // last line stopped. Each line is then justified to its span, and every word
 // gets an id that stays the same wherever it lands, so it can glide there.
 
-import { layoutNextLine, prepareWithSegments, type LayoutCursor, type PreparedTextWithSegments } from '@chenglou/pretext';
+import {
+  layoutNextLine,
+  prepareWithSegments,
+  type LayoutCursor,
+  type PreparedTextWithSegments,
+} from '@chenglou/pretext';
 import { SEPARATOR } from './_texts';
 
 /** One word, or the part of a word that fit, placed on the sheet. */
@@ -258,7 +263,7 @@ export function readingOrder(rows: number[][], byShape: boolean): number[] {
   const root = order.map(find);
   const roots = [...new Set(root)].sort((a, b) => a - b);
   const rank = new Map<number, number>();
-  for (let g = 0; g < roots.length; ) {
+  for (let g = 0; g < roots.length;) {
     const top = flat[roots[g] * 3];
     let end = g;
     while (end < roots.length && flat[roots[end] * 3] - top <= TIE_ROWS) end++;

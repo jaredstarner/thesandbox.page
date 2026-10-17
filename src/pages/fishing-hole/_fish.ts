@@ -236,7 +236,8 @@ export class Fish {
     this.vx += ((dx / d) * want - this.vx) * k;
     this.vy += ((dy / d) * want * 0.7 - this.vy) * k;
     this.move(dt, pond.water);
-    if (this.state === 'curious' || this.state === 'nibble' || this.state === 'bite') this.facing = this.side === 1 ? -1 : 1;
+    if (this.state === 'curious' || this.state === 'nibble' || this.state === 'bite')
+      this.facing = this.side === 1 ? -1 : 1;
     else if (Math.abs(this.vx) > 0.6) this.facing = this.vx > 0 ? 1 : -1;
 
     // At night the plankton show where fish swim.

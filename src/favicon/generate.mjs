@@ -49,7 +49,11 @@ function srgbTo2020([r, g, b]) {
 
 /** PQ inverse EOTF (SMPTE ST 2084): nits to a 0..1 signal. */
 function pq(nits) {
-  const m1 = 0.1593017578125, m2 = 78.84375, c1 = 0.8359375, c2 = 18.8515625, c3 = 18.6875;
+  const m1 = 0.1593017578125,
+    m2 = 78.84375,
+    c1 = 0.8359375,
+    c2 = 18.8515625,
+    c3 = 18.6875;
   const y = Math.max(0, nits) / 10000;
   const p = y ** m1;
   return ((c1 + c2 * p) / (1 + c3 * p)) ** m2;
@@ -79,7 +83,8 @@ function render(size, { ink, grain, tile, inset = 0 }) {
   const unit = (32 + inset * 2) / size;
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
-      let t = 0, g = 0;
+      let t = 0,
+        g = 0;
       for (let i = 0; i < SAMPLES; i++) {
         for (let j = 0; j < SAMPLES; j++) {
           const x = (col + (j + 0.5) / SAMPLES) * unit - inset;
@@ -100,8 +105,7 @@ function srgbSamples({ px, ink, grain, tile }) {
   const data = [];
   for (const { tray, grain: gc } of px) {
     for (let c = 0; c < 3; c++) {
-      const v =
-        toLinear(tile.srgb[c]) * (1 - tray - gc) + toLinear(ink.srgb[c]) * tray + toLinear(grain.srgb[c]) * gc;
+      const v = toLinear(tile.srgb[c]) * (1 - tray - gc) + toLinear(ink.srgb[c]) * tray + toLinear(grain.srgb[c]) * gc;
       data.push(Math.round(toSrgb(clamp01(v)) * 255));
     }
   }

@@ -105,7 +105,9 @@ export class Water {
     if (edge <= 0) return 0;
     const w = 0.35 + this.wind * 0.75;
     return (
-      edge * w * (0.5 * Math.sin(x * 0.11 + t * 1.6) + 0.32 * Math.sin(x * 0.047 - t * 0.9) + 0.22 * Math.sin(x * 0.23 + t * 2.7))
+      edge *
+      w *
+      (0.5 * Math.sin(x * 0.11 + t * 1.6) + 0.32 * Math.sin(x * 0.047 - t * 0.9) + 0.22 * Math.sin(x * 0.23 + t * 2.7))
     );
   }
 

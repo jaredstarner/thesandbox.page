@@ -17,20 +17,38 @@ const groups = Object.keys(GROUPS) as Group[];
 
   <main class="adhell" data-adhell>
     <header class="hud" data-hud>
-      <a class="hud-home" href="/" title="Back to thesandbox.page"><span aria-hidden="true">←</span><span class="opt"> thesandbox.page</span></a>
+      <a class="hud-home" href="/" title="Back to thesandbox.page">
+        <span aria-hidden="true">←</span>
+        <span class="opt"> thesandbox.page</span>
+      </a>
       <p class="hud-name">Ad hell</p>
-      <p class="hud-goal" data-hud-goal>Read the recipe to the end.</p>
+      <p class="hud-goal" data-hud-goal>
+        Read the recipe to the end.
+      </p>
       <ul class="hud-stats" aria-label="Your reading so far">
-        <li><span class="k">Time</span> <b data-stat="time">0:00</b></li>
-        <li class="opt"><span class="k">Ad clicks</span> <b data-stat="clicks">0</b></li>
-        <li class="opt"><span class="k">Ad density</span> <b data-stat="density">-</b></li>
-        <li class="opt"><span class="k" data-stat-label="cls">CLS</span> <b data-stat="cls">-</b></li>
+        <li>
+          <span class="k">Time</span> <b data-stat="time">0:00</b>
+        </li>
+        <li class="opt">
+          <span class="k">Ad clicks</span> <b data-stat="clicks">0</b>
+        </li>
+        <li class="opt">
+          <span class="k">Ad density</span> <b data-stat="density">-</b>
+        </li>
+        <li class="opt">
+          <span class="k" data-stat-label="cls">
+            CLS
+          </span>{' '}
+          <b data-stat="cls">-</b>
+        </li>
       </ul>
       <button class="hud-btn hud-viol" type="button" popovertarget="ah-checklist" title="Violations seen so far">
-        <b data-stat="seen">0</b>/{VIOLATIONS.length}<span class="opt"> violations</span>
+        <b data-stat="seen">0</b>/{VIOLATIONS.length}
+        <span class="opt"> violations</span>
       </button>
       <button class="hud-btn hud-sound" type="button" data-sound aria-pressed="true" title="Sound">
-        <span aria-hidden="true">♪</span><span class="vh">Sound</span>
+        <span aria-hidden="true">♪</span>
+        <span class="vh">Sound</span>
       </button>
       <label class="hud-block" title="Hide every ad on the page">
         <input type="checkbox" data-block autocomplete="off" />
@@ -44,7 +62,9 @@ const groups = Object.keys(GROUPS) as Group[];
       <div class="ad leader" data-violation="density-30">
         <p class="ad-label">Advertisement</p>
         <button class="leader-in" type="button" data-cta="breadcoin">
-          <span class="coin" aria-hidden="true">B</span>
+          <span class="coin" aria-hidden="true">
+            B
+          </span>
           <span class="leader-name">BREADCOIN</span>
           <span class="leader-tick">▲ 412% this week</span>
           <span class="leader-line">The currency backed by actual bread.</span>
@@ -53,7 +73,9 @@ const groups = Object.keys(GROUPS) as Group[];
       </div>
 
       <header class="masthead">
-        <p class="logo"><span>The</span> Toastmonger</p>
+        <p class="logo">
+          <span>The</span> Toastmonger
+        </p>
         <p class="motto">recipes, stories &amp; crumbs</p>
         <nav class="sitenav" aria-label="The Toastmonger">
           <span>Recipes</span>
@@ -70,43 +92,77 @@ const groups = Object.keys(GROUPS) as Group[];
             <h1>The Best Buttered Toast You'll Ever Make</h1>
             <p class="dek">A family recipe, a few thoughts on mornings, and, eventually, toast.</p>
             <p class="byline">
-              By Wren Halloway · <a class="jump" href="#recipe" data-jump>Jump to recipe</a>
+              By Wren Halloway ·{' '}
+              <a class="jump" href="#recipe" data-jump>
+                Jump to recipe
+              </a>
             </p>
           </header>
 
           <div class="ad disguise" data-violation="disguised-ads">
-            <button class="fake-btn go" type="button" data-cta="recipejumper">▼ JUMP TO RECIPE</button>
-            <button class="fake-btn dl" type="button" data-cta="filewizard">⬇ DOWNLOAD RECIPE (PDF)</button>
+            <button class="fake-btn go" type="button" data-cta="recipejumper">
+              ▼ JUMP TO RECIPE
+            </button>
+            <button class="fake-btn dl" type="button" data-cta="filewizard">
+              ⬇ DOWNLOAD RECIPE (PDF)
+            </button>
             <span class="ad-tag">Ad</span>
           </div>
 
           <p>
-            Some mornings ask for very little. A window, a kettle working itself up to a boil, and a slice of bread on its way
-            to becoming something better. This is a recipe for that slice.
+            Some mornings ask for very little. A window, a kettle working itself up to a boil, and a slice of bread on
+            its way to becoming something better. This is a recipe for that slice.
           </p>
           <div class="ad lazy" data-lazy="local"></div>
           <p>
-            I know what you're thinking: toast doesn't need a recipe. You're right. But it does deserve one, the way a good
-            chair deserves to be sat in properly. So pull one up. The recipe is at the bottom, and I promise it's worth the
-            scroll.
+            I know what you're thinking: toast doesn't need a recipe. You're right. But it does deserve one, the way a
+            good chair deserves to be sat in properly. So pull one up. The recipe is at the bottom, and I promise it's
+            worth the scroll.
           </p>
 
           <div class="ad video-slot" data-video-slot>
             <p class="ad-label">Advertisement</p>
             <div class="vid-frame">
-              <p class="vid-gone" aria-hidden="true">This ad is following you ↘</p>
+              <p class="vid-gone" aria-hidden="true">
+                This ad is following you ↘
+              </p>
               <div class="vid" data-video>
-                <canvas class="vid-canvas" data-video-canvas width="640" height="360" aria-label="A video advertisement"></canvas>
-                <p class="vid-poster" aria-hidden="true">GRANITE</p>
+                <canvas
+                  class="vid-canvas"
+                  data-video-canvas
+                  width="640"
+                  height="360"
+                  aria-label="A video advertisement"
+                ></canvas>
+                <p class="vid-poster" aria-hidden="true">
+                  GRANITE
+                </p>
                 <div class="vid-ui">
-                  <span class="vid-count" data-video-count>Ad 1 of 3</span>
-                  <button class="vid-btn vid-cta" type="button" data-cta="granite" data-video-cta>Learn more ›</button>
-                  <button class="vid-btn vid-mute" type="button" data-video-mute aria-pressed="false" title="Mute this ad">
-                    <span aria-hidden="true">🔊</span><span class="vh">Mute</span>
+                  <span class="vid-count" data-video-count>
+                    Ad 1 of 3
+                  </span>
+                  <button class="vid-btn vid-cta" type="button" data-cta="granite" data-video-cta>
+                    Learn more ›
                   </button>
-                  <button class="vid-btn vid-skip" type="button" data-video-skip disabled>Skip ad in 5</button>
-                  <button class="vid-x" type="button" data-video-close aria-label="Close video">×</button>
-                  <span class="vid-bar"><i data-video-bar></i></span>
+                  <button
+                    class="vid-btn vid-mute"
+                    type="button"
+                    data-video-mute
+                    aria-pressed="false"
+                    title="Mute this ad"
+                  >
+                    <span aria-hidden="true">🔊</span>
+                    <span class="vh">Mute</span>
+                  </button>
+                  <button class="vid-btn vid-skip" type="button" data-video-skip disabled>
+                    Skip ad in 5
+                  </button>
+                  <button class="vid-x" type="button" data-video-close aria-label="Close video">
+                    ×
+                  </button>
+                  <span class="vid-bar">
+                    <i data-video-bar></i>
+                  </span>
                 </div>
               </div>
             </div>
@@ -114,10 +170,10 @@ const groups = Object.keys(GROUPS) as Group[];
 
           <h2>My toast story</h2>
           <p>
-            My grandmother's toaster browned exactly one side of anything you put in it. Nobody remembers it working any other
-            way. She'd stand beside it with a butter knife in one hand and the other hovering over the lever, and when the
-            first side came up the color of an old church pew she'd flip the slice and send it down again. It took twice as
-            long as toast should. It was the best toast I have ever eaten.
+            My grandmother's toaster browned exactly one side of anything you put in it. Nobody remembers it working any
+            other way. She'd stand beside it with a butter knife in one hand and the other hovering over the lever, and
+            when the first side came up the color of an old church pew she'd flip the slice and send it down again. It
+            took twice as long as toast should. It was the best toast I have ever eaten.
           </p>
 
           <aside class="ad box loafly" data-violation="fake-close visual-interference" data-large>
@@ -127,21 +183,28 @@ const groups = Object.keys(GROUPS) as Group[];
               <p class="loafly-name">LOAFLY</p>
               <p class="loafly-line">Fresh bread every six hours. Whether you like it or not.</p>
               <span class="cta">Start free trial</span>
-              <span class="fakex" data-fakex aria-hidden="true">×</span>
+              <span class="fakex" data-fakex aria-hidden="true">
+                ×
+              </span>
             </div>
-            <p class="ad-foot"><button class="realx" type="button" data-close-ad>close ad</button></p>
+            <p class="ad-foot">
+              <button class="realx" type="button" data-close-ad>
+                close ad
+              </button>
+            </p>
           </aside>
 
           <p>
-            I used to think the secret was the toaster. Then I thought it was the bread, a dense brown loaf from a bakery that
-            has since become a phone shop. It took me years to understand that the secret was the waiting: she gave each side
-            its full attention, and she buttered it the moment it came up, while it was still hot enough to drink the butter
-            in.
+            I used to think the secret was the toaster. Then I thought it was the bread, a dense brown loaf from a
+            bakery that has since become a phone shop. It took me years to understand that the secret was the waiting:
+            she gave each side its full attention, and she buttered it the moment it came up, while it was still hot
+            enough to drink the butter in.
           </p>
           <div class="ad lazy" data-lazy="quiz"></div>
           <p>
-            When she gave me the toaster, it lasted one more winter. I've owned four since. None of them burn on one side only,
-            and I still flip my bread out of habit, which my partner finds either charming or deranged depending on the hour.
+            When she gave me the toaster, it lasted one more winter. I've owned four since. None of them burn on one
+            side only, and I still flip my bread out of habit, which my partner finds either charming or deranged
+            depending on the hour.
           </p>
           <div class="ad lazy" data-lazy="games"></div>
 
@@ -158,9 +221,9 @@ const groups = Object.keys(GROUPS) as Group[];
 
           <h2>Why this recipe works</h2>
           <p>
-            Heat, then fat, then salt, in that order and without a pause between them. Toast that sits on a plate for even a
-            minute starts to steam itself soft from underneath. Butter that goes on cold tears the surface and pools in the
-            middle. Get the timing right and the rest takes care of itself.
+            Heat, then fat, then salt, in that order and without a pause between them. Toast that sits on a plate for
+            even a minute starts to steam itself soft from underneath. Butter that goes on cold tears the surface and
+            pools in the middle. Get the timing right and the rest takes care of itself.
           </p>
 
           <aside class="ad box spoon" data-violation="flashing" data-large>
@@ -168,7 +231,9 @@ const groups = Object.keys(GROUPS) as Group[];
             <div class="spoon-in" data-cta="spoon">
               <p class="spoon-top">!!! ONE WEIRD SPOON !!!</p>
               <Art name="spoon" class="spoon-art" />
-              <p class="spoon-bottom">Chefs are <b>FURIOUS</b></p>
+              <p class="spoon-bottom">
+                Chefs are <b>FURIOUS</b>
+              </p>
             </div>
           </aside>
 
@@ -185,39 +250,43 @@ const groups = Object.keys(GROUPS) as Group[];
               <Art name="mattress" uid="so" class="so-art" />
               <p class="so-brand">SNOOZLE</p>
               <p class="so-line">The 400-night trial. Sleep on it. Then sleep on it 399 more times.</p>
-              <button class="so-cta" type="button" data-cta="snoozle">Find my firmness</button>
+              <button class="so-cta" type="button" data-cta="snoozle">
+                Find my firmness
+              </button>
               <p class="so-hint">Scroll to keep reading ↓</p>
             </div>
           </div>
 
           <h2>A word about bread</h2>
           <p>
-            Use bread you'd happily eat untoasted. A sourdough with an open crumb gives you crisp edges and soft valleys for the
-            butter to settle in. A plain sandwich loaf gives you even, golden toast from corner to corner. Day-old bread toasts
-            better than fresh, because some of its moisture has already left, so this is the best possible use for the end of
-            a loaf.
+            Use bread you'd happily eat untoasted. A sourdough with an open crumb gives you crisp edges and soft valleys
+            for the butter to settle in. A plain sandwich loaf gives you even, golden toast from corner to corner.
+            Day-old bread toasts better than fresh, because some of its moisture has already left, so this is the best
+            possible use for the end of a loaf.
           </p>
 
           <aside class="ad native" data-violation="disguised-ads">
             <div class="native-in" data-cta="clickwell">
               <h2 class="native-h">7 Breads Nutritionists Won't Stop Talking About</h2>
               <p class="native-p">
-                Number four is just a photo of a baguette, and it changed how we think about lunch. <span class="native-more">Keep reading ›</span>
+                Number four is just a photo of a baguette, and it changed how we think about lunch.{' '}
+                <span class="native-more">Keep reading ›</span>
               </p>
               <p class="native-tag">Sponsored · Clickwell</p>
             </div>
           </aside>
 
           <p>
-            Slice it about as thick as your little finger. Thinner slices dry out before they color. Thicker ones stay doughy
-            in the middle, which some people love and I won't argue with.
+            Slice it about as thick as your little finger. Thinner slices dry out before they color. Thicker ones stay
+            doughy in the middle, which some people love and I won't argue with.
           </p>
           <div class="ad lazy" data-lazy="horoscope"></div>
 
           <h2>A word about butter</h2>
           <p>
-            Salted, and soft. Leave it out on the counter overnight, or at least while the kettle boils. If you only have cold
-            butter, shave thin curls of it with a vegetable peeler and lay them on the hot toast; they'll melt in seconds.
+            Salted, and soft. Leave it out on the counter overnight, or at least while the kettle boils. If you only
+            have cold butter, shave thin curls of it with a vegetable peeler and lay them on the hot toast; they'll melt
+            in seconds.
           </p>
 
           <aside class="ad billboard" data-violation="density-30" data-large>
@@ -235,7 +304,10 @@ const groups = Object.keys(GROUPS) as Group[];
           <p>Spread it to the very edges. The crust deserves butter too.</p>
 
           <aside class="ad chumbox" data-violation="chumbox">
-            <p class="chum-head"><span>Around the Web</span><span class="chum-by">Promoted by Clickwell</span></p>
+            <p class="chum-head">
+              <span>Around the Web</span>
+              <span class="chum-by">Promoted by Clickwell</span>
+            </p>
             <div class="chum-grid">
               <button class="chum" type="button" data-cta="clickwell">
                 <Art name="chum-crouton" />
@@ -271,7 +343,10 @@ const groups = Object.keys(GROUPS) as Group[];
           </aside>
 
           <aside class="ad chumbox chumbox-2" data-violation="chumbox">
-            <p class="chum-head"><span>You May Like</span><span class="chum-by">Sponsored Links by Linkwise</span></p>
+            <p class="chum-head">
+              <span>You May Like</span>
+              <span class="chum-by">Sponsored Links by Linkwise</span>
+            </p>
             <div class="chum-grid">
               <button class="chum" type="button" data-cta="clickwell">
                 <Art name="chum-kettle" />
@@ -328,16 +403,26 @@ const groups = Object.keys(GROUPS) as Group[];
               <p class="granite-name">GRANITE</p>
               <p class="granite-line">Smell like a countertop.</p>
               <span class="cta">Get the spray</span>
-              <span class="fakex" data-fakex aria-hidden="true">×</span>
+              <span class="fakex" data-fakex aria-hidden="true">
+                ×
+              </span>
             </div>
-            <p class="ad-foot"><button class="realx" type="button" data-close-ad>close ad</button></p>
+            <p class="ad-foot">
+              <button class="realx" type="button" data-close-ad>
+                close ad
+              </button>
+            </p>
           </aside>
 
           <aside class="ad native-card" data-violation="disguised-ads">
             <div class="native-card-in" data-cta="crumbtronic">
               <p class="card-kicker">Recipe</p>
               <h2 class="native-card-h">Smart Toast with the CRUMBTRONIC 3000</h2>
-              <p class="card-meta"><span>Prep 1 min</span><span>Cook 3 min</span><span>Requires the app</span></p>
+              <p class="card-meta">
+                <span>Prep 1 min</span>
+                <span>Cook 3 min</span>
+                <span>Requires the app</span>
+              </p>
               <ol>
                 <li>Download the CRUMBTRONIC app and create an account.</li>
                 <li>Accept the terms, then the new terms.</li>
@@ -351,7 +436,11 @@ const groups = Object.keys(GROUPS) as Group[];
           <section class="card" id="recipe" aria-labelledby="recipe-title">
             <p class="card-kicker">Recipe</p>
             <h2 id="recipe-title">Buttered toast</h2>
-            <p class="card-meta"><span>Prep 1 min</span><span>Cook 3 min</span><span>Serves 1</span></p>
+            <p class="card-meta">
+              <span>Prep 1 min</span>
+              <span>Cook 3 min</span>
+              <span>Serves 1</span>
+            </p>
             <h3>Ingredients</h3>
             <ul>
               <li>1 slice of good bread, about as thick as your little finger</li>
@@ -361,11 +450,16 @@ const groups = Object.keys(GROUPS) as Group[];
             <div class="ad lazy" data-lazy="card"></div>
             <h3>Method</h3>
             <ol>
-              <li>Toast the bread until it's deep golden on both sides. If your toaster browns only one side, flip it and go again.</li>
+              <li>
+                Toast the bread until it's deep golden on both sides. If your toaster browns only one side, flip it and
+                go again.
+              </li>
               <li>Butter it the moment it comes out, all the way to the edges.</li>
               <li>Add a pinch of salt if you like. Eat it right away, standing up in the kitchen if you must.</li>
             </ol>
-            <p class="card-end" data-end>That's it. That's the recipe.</p>
+            <p class="card-end" data-end>
+              That's it. That's the recipe.
+            </p>
             <p class="signoff">xo, Wren</p>
           </section>
 
@@ -373,29 +467,45 @@ const groups = Object.keys(GROUPS) as Group[];
             <h2 id="comments-title">Comments (3)</h2>
             <ol>
               <li>
-                <p class="who">Marla K. <span aria-label="One star out of five">★☆☆☆☆</span></p>
-                <p>I used a bagel instead of bread and margarine instead of butter, and I skipped the toasting. It was not toast.</p>
+                <p class="who">
+                  Marla K. <span aria-label="One star out of five">★☆☆☆☆</span>
+                </p>
+                <p>
+                  I used a bagel instead of bread and margarine instead of butter, and I skipped the toasting. It was
+                  not toast.
+                </p>
               </li>
               <li class="ad spam" data-violation="disguised-ads">
                 <div class="spam-in" data-cta="breadcoin">
-                  <p class="who">Linda M. <span aria-label="Five stars out of five">★★★★★</span></p>
-                  <p>Great recipe! My neighbor makes $9,000 a month toasting from home. I didn't believe it either. Here's how ›</p>
+                  <p class="who">
+                    Linda M. <span aria-label="Five stars out of five">★★★★★</span>
+                  </p>
+                  <p>
+                    Great recipe! My neighbor makes $9,000 a month toasting from home. I didn't believe it either.
+                    Here's how ›
+                  </p>
                   <p class="native-tag">Sponsored</p>
                 </div>
               </li>
               <li>
-                <p class="who">toastlover88 <span aria-label="Five stars out of five">★★★★★</span></p>
+                <p class="who">
+                  toastlover88 <span aria-label="Five stars out of five">★★★★★</span>
+                </p>
                 <p>Made this for the whole family. Took about forty minutes, mostly closing things. Worth it.</p>
               </li>
               <li>
-                <p class="who">Dale <span aria-label="Five stars out of five">★★★★★</span></p>
+                <p class="who">
+                  Dale <span aria-label="Five stars out of five">★★★★★</span>
+                </p>
                 <p>Haven't made it yet but I'm sure it's great.</p>
               </li>
             </ol>
           </section>
 
           <div class="ad fake-next" data-violation="disguised-ads">
-            <button class="fake-next-btn" type="button" data-cta="clickwell">Next page ›</button>
+            <button class="fake-next-btn" type="button" data-cta="clickwell">
+              Next page ›
+            </button>
             <span class="ad-tag">Ad</span>
           </div>
         </article>
@@ -405,7 +515,9 @@ const groups = Object.keys(GROUPS) as Group[];
             <p class="ad-label">Advertisement</p>
             <div class="box-in" data-cta="slouchmore">
               <Art name="sofa" class="box-art" />
-              <p class="sofa-line">Still thinking about the <b>Slouchmore</b>?</p>
+              <p class="sofa-line">
+                Still thinking about the <b>Slouchmore</b>?
+              </p>
               <p class="sofa-sub">It's still thinking about you.</p>
               <span class="cta">Take me back</span>
             </div>
@@ -418,10 +530,18 @@ const groups = Object.keys(GROUPS) as Group[];
                 <Art name="toaster" uid="rail" class="half-art" />
                 <p class="half-name">CRUMBTRONIC 3000</p>
                 <p class="half-line">The toaster that texts you when it's done.</p>
-                <p class="half-price"><s>$499</s> <b>$149</b></p>
-                <p class="half-timer">Deal ends in <b data-urgency>04:59</b></p>
-                <p class="half-stock">Only <b data-stock>3</b> left in stock!</p>
-                <p class="half-watch"><b data-watchers>17</b> people are looking at this right now</p>
+                <p class="half-price">
+                  <s>$499</s> <b>$149</b>
+                </p>
+                <p class="half-timer">
+                  Deal ends in <b data-urgency>04:59</b>
+                </p>
+                <p class="half-stock">
+                  Only <b data-stock>3</b> left in stock!
+                </p>
+                <p class="half-watch">
+                  <b data-watchers>17</b> people are looking at this right now
+                </p>
                 <span class="cta">Shop now</span>
               </div>
             </div>
@@ -430,12 +550,16 @@ const groups = Object.keys(GROUPS) as Group[];
       </div>
 
       <footer class="site-foot">
-        <p>The Toastmonger is invented, and so is every brand on this page. <a href="/">Back to thesandbox.page</a></p>
+        <p>
+          The Toastmonger is invented, and so is every brand on this page. <a href="/">Back to thesandbox.page</a>
+        </p>
       </footer>
     </div>
 
     <div class="ad sticky" data-sticky data-violation="sticky-large">
-      <button class="sticky-x" type="button" data-sticky-close aria-label="Close">×</button>
+      <button class="sticky-x" type="button" data-sticky-close aria-label="Close">
+        ×
+      </button>
       <div class="sticky-in" data-cta="sokkit">
         <Art name="socks" class="sticky-art" />
         <div class="sticky-copy">
@@ -451,25 +575,40 @@ const groups = Object.keys(GROUPS) as Group[];
     <div class="ad pushask" data-pushask hidden>
       <p class="push-text" data-push-text></p>
       <p class="push-buttons" data-push-buttons>
-        <button type="button" class="push-later" data-push="later">Maybe later</button>
-        <button type="button" class="push-allow" data-push="allow">Allow</button>
+        <button type="button" class="push-later" data-push="later">
+          Maybe later
+        </button>
+        <button type="button" class="push-allow" data-push="allow">
+          Allow
+        </button>
       </p>
     </div>
 
     <div class="ad chat" data-chat hidden>
       <div class="chat-panel" data-chat-panel hidden>
         <p class="chat-head">
-          <span class="chat-face" aria-hidden="true">🍞</span>
-          <span><b>Crumb</b><small>The Toastmonger assistant · online</small></span>
-          <button type="button" class="chat-x" data-chat-x aria-label="Minimize chat">–</button>
+          <span class="chat-face" aria-hidden="true">
+            🍞
+          </span>
+          <span>
+            <b>Crumb</b>
+            <small>The Toastmonger assistant · online</small>
+          </span>
+          <button type="button" class="chat-x" data-chat-x aria-label="Minimize chat">
+            –
+          </button>
         </p>
         <ol class="chat-log" data-chat-log aria-live="polite"></ol>
         <div class="chat-quick" data-chat-quick></div>
       </div>
-      <button type="button" class="chat-teaser" data-chat-teaser hidden>Hi! 👋 Need help with your toast?</button>
+      <button type="button" class="chat-teaser" data-chat-teaser hidden>
+        Hi! 👋 Need help with your toast?
+      </button>
       <button type="button" class="chat-bubble" data-chat-open aria-label="Open chat">
         <span aria-hidden="true">💬</span>
-        <span class="chat-badge" data-chat-badge hidden>1</span>
+        <span class="chat-badge" data-chat-badge hidden>
+          1
+        </span>
       </button>
     </div>
 
@@ -477,18 +616,38 @@ const groups = Object.keys(GROUPS) as Group[];
 
     <div class="ad newsletter" data-newsletter hidden>
       <div class="nl-panel" role="dialog" aria-modal="true" aria-labelledby="ah-nl-title">
-        <button type="button" class="nl-x" data-nl-x aria-label="Close">×</button>
-        <p class="nl-kicker" data-nl-kicker>WAIT! Don't go yet</p>
-        <h2 class="nl-title" id="ah-nl-title" data-nl-title>Get <i>101 Toasts</i>, our free e-book</h2>
+        <button type="button" class="nl-x" data-nl-x aria-label="Close">
+          ×
+        </button>
+        <p class="nl-kicker" data-nl-kicker>
+          WAIT! Don't go yet
+        </p>
+        <h2 class="nl-title" id="ah-nl-title" data-nl-title>
+          Get <i>101 Toasts</i>, our free e-book
+        </h2>
         <p class="nl-line">Join two million home cooks who get a toast in their inbox every morning.</p>
         <form class="nl-form" data-nl-form>
-          <input type="email" name="ah-nothing" placeholder="Your email address" autocomplete="off" aria-label="Email address (never sent anywhere)" />
+          <input
+            type="email"
+            name="ah-nothing"
+            placeholder="Your email address"
+            autocomplete="off"
+            aria-label="Email address (never sent anywhere)"
+          />
           <button type="submit">Send me toast</button>
         </form>
-        <p class="nl-thanks" data-nl-thanks hidden>You're in! (Nothing was sent anywhere. This page has no server.)</p>
-        <label class="nl-check"><input type="checkbox" checked /> Yes, also send me offers from our 1,482 partners</label>
-        <label class="nl-check"><input type="checkbox" /> Uncheck this box if you would prefer not to stop receiving no further updates</label>
-        <button type="button" class="nl-no" data-nl-no>No thanks, I like my toast pale and sad.</button>
+        <p class="nl-thanks" data-nl-thanks hidden>
+          You're in! (Nothing was sent anywhere. This page has no server.)
+        </p>
+        <label class="nl-check">
+          <input type="checkbox" checked /> Yes, also send me offers from our 1,482 partners
+        </label>
+        <label class="nl-check">
+          <input type="checkbox" /> Uncheck this box if you would prefer not to stop receiving no further updates
+        </label>
+        <button type="button" class="nl-no" data-nl-no>
+          No thanks, I like my toast pale and sad.
+        </button>
       </div>
     </div>
 
@@ -497,50 +656,148 @@ const groups = Object.keys(GROUPS) as Group[];
         <section data-cookie-step="main">
           <h2 id="ah-cookie-title">We value your privacy 🍪</h2>
           <p>
-            We and our <b>1,482 partners</b> store and read things on your device to pick ads, measure ads, build a profile of
-            you, sell you a toaster, and remember that you were here.
+            We and our <b>1,482 partners</b> store and read things on your device to pick ads, measure ads, build a
+            profile of you, sell you a toaster, and remember that you were here.
           </p>
           <p class="cookie-actions">
-            <button type="button" class="c-accept" data-cookie="accept">Accept all</button>
-            <button type="button" class="c-faint" data-cookie="manage">Manage options</button>
+            <button type="button" class="c-accept" data-cookie="accept">
+              Accept all
+            </button>
+            <button type="button" class="c-faint" data-cookie="manage">
+              Manage options
+            </button>
           </p>
         </section>
         <section data-cookie-step="purposes" hidden>
           <h2>Manage your choices</h2>
           <p class="cookie-sub">We've switched these on for you, to save you the trouble.</p>
           <ul class="cookie-list">
-            <li><span>Store and read things on your device</span><button type="button" class="switch" role="switch" aria-checked="true" data-cookie-toggle aria-label="Store and read things on your device"></button></li>
-            <li><span>Pick ads using a little data</span><button type="button" class="switch" role="switch" aria-checked="true" data-cookie-toggle aria-label="Pick ads using a little data"></button></li>
-            <li><span>Build a profile of you for ads</span><button type="button" class="switch" role="switch" aria-checked="true" data-cookie-toggle aria-label="Build a profile of you for ads"></button></li>
-            <li><span>Pick ads using that profile</span><button type="button" class="switch" role="switch" aria-checked="true" data-cookie-toggle aria-label="Pick ads using that profile"></button></li>
-            <li><span>Measure how well the ads work</span><button type="button" class="switch" role="switch" aria-checked="true" data-cookie-toggle aria-label="Measure how well the ads work"></button></li>
-            <li><span>Sell you a toaster</span><button type="button" class="switch" role="switch" aria-checked="true" data-cookie-toggle aria-label="Sell you a toaster"></button></li>
+            <li>
+              <span>Store and read things on your device</span>
+              <button
+                type="button"
+                class="switch"
+                role="switch"
+                aria-checked="true"
+                data-cookie-toggle
+                aria-label="Store and read things on your device"
+              ></button>
+            </li>
+            <li>
+              <span>Pick ads using a little data</span>
+              <button
+                type="button"
+                class="switch"
+                role="switch"
+                aria-checked="true"
+                data-cookie-toggle
+                aria-label="Pick ads using a little data"
+              ></button>
+            </li>
+            <li>
+              <span>Build a profile of you for ads</span>
+              <button
+                type="button"
+                class="switch"
+                role="switch"
+                aria-checked="true"
+                data-cookie-toggle
+                aria-label="Build a profile of you for ads"
+              ></button>
+            </li>
+            <li>
+              <span>Pick ads using that profile</span>
+              <button
+                type="button"
+                class="switch"
+                role="switch"
+                aria-checked="true"
+                data-cookie-toggle
+                aria-label="Pick ads using that profile"
+              ></button>
+            </li>
+            <li>
+              <span>Measure how well the ads work</span>
+              <button
+                type="button"
+                class="switch"
+                role="switch"
+                aria-checked="true"
+                data-cookie-toggle
+                aria-label="Measure how well the ads work"
+              ></button>
+            </li>
+            <li>
+              <span>Sell you a toaster</span>
+              <button
+                type="button"
+                class="switch"
+                role="switch"
+                aria-checked="true"
+                data-cookie-toggle
+                aria-label="Sell you a toaster"
+              ></button>
+            </li>
           </ul>
           <p class="cookie-actions">
-            <button type="button" class="c-accept" data-cookie="accept">Accept all</button>
-            <button type="button" class="c-faint" data-cookie="legit">Legitimate interest ›</button>
+            <button type="button" class="c-accept" data-cookie="accept">
+              Accept all
+            </button>
+            <button type="button" class="c-faint" data-cookie="legit">
+              Legitimate interest ›
+            </button>
           </p>
         </section>
         <section data-cookie-step="legit" hidden>
           <h2>Legitimate interest</h2>
-          <p class="cookie-sub">Some partners don't ask. They have a legitimate interest in you. You may object to each one.</p>
+          <p class="cookie-sub">
+            Some partners don't ask. They have a legitimate interest in you. You may object to each one.
+          </p>
           <ul class="cookie-list">
-            <li><span>Understand audiences through statistics</span><button type="button" class="c-object" data-cookie-object aria-pressed="false">Object</button></li>
-            <li><span>Develop and improve the toaster</span><button type="button" class="c-object" data-cookie-object aria-pressed="false">Object</button></li>
-            <li><span>Remember that you were here</span><button type="button" class="c-object" data-cookie-object aria-pressed="false">Object</button></li>
-            <li><span>Guess what you'll want for breakfast</span><button type="button" class="c-object" data-cookie-object aria-pressed="false">Object</button></li>
+            <li>
+              <span>Understand audiences through statistics</span>
+              <button type="button" class="c-object" data-cookie-object aria-pressed="false">
+                Object
+              </button>
+            </li>
+            <li>
+              <span>Develop and improve the toaster</span>
+              <button type="button" class="c-object" data-cookie-object aria-pressed="false">
+                Object
+              </button>
+            </li>
+            <li>
+              <span>Remember that you were here</span>
+              <button type="button" class="c-object" data-cookie-object aria-pressed="false">
+                Object
+              </button>
+            </li>
+            <li>
+              <span>Guess what you'll want for breakfast</span>
+              <button type="button" class="c-object" data-cookie-object aria-pressed="false">
+                Object
+              </button>
+            </li>
           </ul>
           <p class="cookie-actions">
-            <button type="button" class="c-accept" data-cookie="accept">Accept all</button>
-            <button type="button" class="c-faint" data-cookie="confirm">Confirm my choices</button>
+            <button type="button" class="c-accept" data-cookie="accept">
+              Accept all
+            </button>
+            <button type="button" class="c-faint" data-cookie="confirm">
+              Confirm my choices
+            </button>
           </p>
         </section>
         <section data-cookie-step="sure" hidden>
           <h2>Are you sure?</h2>
           <p>Rejecting cookies means you'll see just as many ads. They'll just be about things you don't like.</p>
           <p class="cookie-actions">
-            <button type="button" class="c-accept" data-cookie="accept">Keep relevant ads</button>
-            <button type="button" class="c-faint" data-cookie="reject">Yes, show me irrelevant ads</button>
+            <button type="button" class="c-accept" data-cookie="accept">
+              Keep relevant ads
+            </button>
+            <button type="button" class="c-faint" data-cookie="reject">
+              Yes, show me irrelevant ads
+            </button>
           </p>
         </section>
         <p class="cookie-note">This page sets no cookies. It asks anyway.</p>
@@ -550,15 +807,21 @@ const groups = Object.keys(GROUPS) as Group[];
     <div class="ad prestitial" data-prestitial hidden>
       <p class="inter-top">
         <span>Advertisement</span>
-        <span data-pre-wait>The Toastmonger will continue in <b data-pre-count>7</b></span>
-        <button type="button" class="inter-skip" data-pre-skip hidden>Continue to The Toastmonger ›</button>
+        <span data-pre-wait>
+          The Toastmonger will continue in <b data-pre-count>7</b>
+        </span>
+        <button type="button" class="inter-skip" data-pre-skip hidden>
+          Continue to The Toastmonger ›
+        </button>
       </p>
       <div class="inter-in loafly-pre">
         <Art name="loaf" uid="pre" class="inter-art" />
         <p class="inter-brand">LOAFLY</p>
         <p class="inter-head">Bread, but make it a subscription.</p>
         <p class="inter-sub">Fresh loaves delivered every six hours. Pause anytime.*</p>
-        <button type="button" class="inter-cta" data-cta="loafly">Start my free trial</button>
+        <button type="button" class="inter-cta" data-cta="loafly">
+          Start my free trial
+        </button>
         <p class="inter-fine">*Pausing requires a notarized letter.</p>
       </div>
     </div>
@@ -566,42 +829,46 @@ const groups = Object.keys(GROUPS) as Group[];
     <div class="ad postitial" data-postitial hidden>
       <p class="inter-top">
         <span>Advertisement</span>
-        <span>Taking you to the recipe in <b data-post-count>5</b></span>
+        <span>
+          Taking you to the recipe in <b data-post-count>5</b>
+        </span>
       </p>
       <div class="inter-in crumb-post">
         <Art name="toaster" uid="post" class="inter-art" />
         <p class="inter-brand">CRUMBTRONIC 3000</p>
         <p class="inter-head">Before you make toast, make sure it's smart toast.</p>
-        <button type="button" class="inter-cta" data-cta="crumbtronic">Shop now</button>
+        <button type="button" class="inter-cta" data-cta="crumbtronic">
+          Shop now
+        </button>
       </div>
     </div>
 
     <div class="checklist" id="ah-checklist" popover>
       <div class="cl-head">
         <h2>Violations seen</h2>
-        <button class="cl-x" type="button" popovertarget="ah-checklist" popovertargetaction="hide" aria-label="Close">×</button>
+        <button class="cl-x" type="button" popovertarget="ah-checklist" popovertargetaction="hide" aria-label="Close">
+          ×
+        </button>
       </div>
       <p class="cl-note">
-        Every brand and ad here is invented. Nothing is sold, tracked, or sent anywhere: the page makes no requests beyond
-        its own files and sets no cookies.
+        Every brand and ad here is invented. Nothing is sold, tracked, or sent anywhere: the page makes no requests
+        beyond its own files and sets no cookies.
       </p>
-      {
-        groups.map((group) => (
-          <section class="cl-group">
-            <h3>{GROUPS[group].title}</h3>
-            <p class="cl-src">{GROUPS[group].note}</p>
-            <ol>
-              {VIOLATIONS.filter((v) => v.group === group).map((v) => (
-                <li data-check={v.id}>
-                  <span class="cl-label">{v.label}</span>
-                  {v.lists && <span class="cl-lists">{v.lists}</span>}
-                  <span class="cl-where">{v.where}</span>
-                </li>
-              ))}
-            </ol>
-          </section>
-        ))
-      }
+      {groups.map((group) => (
+        <section class="cl-group">
+          <h3>{GROUPS[group].title}</h3>
+          <p class="cl-src">{GROUPS[group].note}</p>
+          <ol>
+            {VIOLATIONS.filter((v) => v.group === group).map((v) => (
+              <li data-check={v.id}>
+                <span class="cl-label">{v.label}</span>
+                {v.lists && <span class="cl-lists">{v.lists}</span>}
+                <span class="cl-where">{v.where}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))}
     </div>
 
     <dialog class="report" data-report aria-labelledby="ah-report-title">
@@ -610,8 +877,12 @@ const groups = Object.keys(GROUPS) as Group[];
       <dl class="rp-stats" data-rp-stats></dl>
       <p class="rp-note" data-rp-note></p>
       <p class="rp-actions">
-        <button type="button" class="rp-calm" data-rp-calm>Read it calmly</button>
-        <button type="button" data-rp-again>Go again</button>
+        <button type="button" class="rp-calm" data-rp-calm>
+          Read it calmly
+        </button>
+        <button type="button" data-rp-again>
+          Go again
+        </button>
         <a href="/">thesandbox.page</a>
       </p>
     </dialog>
@@ -887,8 +1158,15 @@ const groups = Object.keys(GROUPS) as Group[];
     padding: 0 12px;
     background: #0d0d0e;
     color: #f2efe8;
-    font: 500 13px/1 ui-monospace, 'Cascadia Mono', Consolas, Menlo, monospace;
-    box-shadow: 0 1px 0 #000, 0 6px 18px -8px rgb(0 0 0 / 0.6);
+    font:
+      500 13px/1 ui-monospace,
+      'Cascadia Mono',
+      Consolas,
+      Menlo,
+      monospace;
+    box-shadow:
+      0 1px 0 #000,
+      0 6px 18px -8px rgb(0 0 0 / 0.6);
   }
 
   .adhell .hud a {
@@ -1049,7 +1327,12 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 10px;
     background: #121212;
     color: #e9e5dc;
-    font: 13px/1.45 ui-monospace, 'Cascadia Mono', Consolas, Menlo, monospace;
+    font:
+      13px/1.45 ui-monospace,
+      'Cascadia Mono',
+      Consolas,
+      Menlo,
+      monospace;
     box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.7);
   }
 
@@ -1169,7 +1452,10 @@ const groups = Object.keys(GROUPS) as Group[];
   .adhell .ad-label {
     margin: 0 0 4px;
     color: #a59d93;
-    font: 10px/1.2 Arial, Helvetica, sans-serif;
+    font:
+      10px/1.2 Arial,
+      Helvetica,
+      sans-serif;
     letter-spacing: 0.12em;
     text-align: center;
     text-transform: uppercase;
@@ -1182,7 +1468,10 @@ const groups = Object.keys(GROUPS) as Group[];
     padding: 1px 4px;
     background: #f1c40f;
     color: #000;
-    font: 700 9px/1.2 Arial, Helvetica, sans-serif;
+    font:
+      700 9px/1.2 Arial,
+      Helvetica,
+      sans-serif;
     border-radius: 0 0 0 3px;
   }
 
@@ -1220,7 +1509,9 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 50%;
     background: rgb(0 0 0 / 0.55);
     color: #fff;
-    font: 700 15px/1 Arial, sans-serif;
+    font:
+      700 15px/1 Arial,
+      sans-serif;
   }
 
   /* The IAB large rectangle, 336 by 280. */
@@ -1282,18 +1573,25 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, #fff3b0, #e8b923 55%, #9c7408);
     color: #6b4f00;
-    font: 900 28px/1 Georgia, serif;
+    font:
+      900 28px/1 Georgia,
+      serif;
     box-shadow: 0 0 0 3px #f6d55c;
   }
 
   .adhell .leader-name {
-    font: 900 26px/1 Impact, 'Arial Black', sans-serif;
+    font:
+      900 26px/1 Impact,
+      'Arial Black',
+      sans-serif;
     letter-spacing: 0.02em;
   }
 
   .adhell .leader-tick {
     color: #5dff9d;
-    font: 700 15px/1 'Courier New', monospace;
+    font:
+      700 15px/1 'Courier New',
+      monospace;
   }
 
   .adhell .leader-line {
@@ -1332,7 +1630,10 @@ const groups = Object.keys(GROUPS) as Group[];
     border: 0;
     border-radius: 6px;
     color: #fff !important;
-    font: 800 17px/1 Arial, Helvetica, sans-serif !important;
+    font:
+      800 17px/1 Arial,
+      Helvetica,
+      sans-serif !important;
     letter-spacing: 0.03em;
     box-shadow: 0 4px 0 rgb(0 0 0 / 0.25);
   }
@@ -1374,7 +1675,10 @@ const groups = Object.keys(GROUPS) as Group[];
     margin: 0;
     background: radial-gradient(circle at 50% 40%, #4d5258, #15171a 70%);
     color: #d9d4ca;
-    font: 900 clamp(32px, 9vw, 72px)/1 Impact, 'Arial Black', sans-serif;
+    font:
+      900 clamp(32px, 9vw, 72px)/1 Impact,
+      'Arial Black',
+      sans-serif;
     letter-spacing: 0.06em;
   }
 
@@ -1400,7 +1704,9 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 2px;
     background: rgb(0 0 0 / 0.6);
     color: #ffd400;
-    font: 700 12px/1.2 Arial, sans-serif;
+    font:
+      700 12px/1.2 Arial,
+      sans-serif;
   }
 
   .adhell .vid-btn {
@@ -1408,7 +1714,9 @@ const groups = Object.keys(GROUPS) as Group[];
     border: 1px solid rgb(255 255 255 / 0.5);
     background: rgb(0 0 0 / 0.65);
     color: #fff !important;
-    font: 600 13px/1 Arial, sans-serif !important;
+    font:
+      600 13px/1 Arial,
+      sans-serif !important;
   }
 
   .adhell .vid-cta {
@@ -1472,13 +1780,18 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .loafly-name {
-    font: 900 34px/1 'Arial Black', Impact, sans-serif;
+    font:
+      900 34px/1 'Arial Black',
+      Impact,
+      sans-serif;
     letter-spacing: 0.04em;
     color: #c4520c;
   }
 
   .adhell .loafly-line {
-    font: italic 15px/1.3 Georgia, serif;
+    font:
+      italic 15px/1.3 Georgia,
+      serif;
   }
 
   .adhell .loafly .cta {
@@ -1505,7 +1818,10 @@ const groups = Object.keys(GROUPS) as Group[];
 
   .adhell .bagel-title {
     margin: 0;
-    font: 900 28px/1 Impact, 'Arial Black', sans-serif;
+    font:
+      900 28px/1 Impact,
+      'Arial Black',
+      sans-serif;
     color: #ffe600;
     text-shadow: 3px 3px 0 #e3121b;
     letter-spacing: 0.03em;
@@ -1513,7 +1829,11 @@ const groups = Object.keys(GROUPS) as Group[];
 
   .adhell .bagel-sub {
     margin: 4px 0 0;
-    font: 700 14px/1 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', cursive;
+    font:
+      700 14px/1 'Comic Sans MS',
+      'Comic Sans',
+      'Chalkboard SE',
+      cursive;
   }
 
   .adhell .bagel-target {
@@ -1579,7 +1899,10 @@ const groups = Object.keys(GROUPS) as Group[];
 
   .adhell .spoon-top {
     margin: 0;
-    font: 900 22px/1 Impact, 'Arial Black', sans-serif;
+    font:
+      900 22px/1 Impact,
+      'Arial Black',
+      sans-serif;
   }
 
   .adhell .spoon-art {
@@ -1589,7 +1912,11 @@ const groups = Object.keys(GROUPS) as Group[];
 
   .adhell .spoon-bottom {
     margin: 0;
-    font: 700 24px/1 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', cursive;
+    font:
+      700 24px/1 'Comic Sans MS',
+      'Comic Sans',
+      'Chalkboard SE',
+      cursive;
     text-transform: uppercase;
   }
 
@@ -1638,7 +1965,9 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .so-ask {
-    font: italic 400 clamp(28px, 6vw, 56px)/1.1 Georgia, serif;
+    font:
+      italic 400 clamp(28px, 6vw, 56px)/1.1 Georgia,
+      serif;
   }
 
   .adhell .so-art {
@@ -1647,7 +1976,10 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .so-brand {
-    font: 900 clamp(40px, 10vw, 96px)/1 'Arial Black', Impact, sans-serif;
+    font:
+      900 clamp(40px, 10vw, 96px)/1 'Arial Black',
+      Impact,
+      sans-serif;
     letter-spacing: 0.12em;
     color: #5b4bd1;
   }
@@ -1663,7 +1995,9 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 999px;
     background: #5b4bd1;
     color: #fff !important;
-    font: 700 16px/1 Arial, sans-serif !important;
+    font:
+      700 16px/1 Arial,
+      sans-serif !important;
   }
 
   .adhell .so-hint {
@@ -1729,7 +2063,9 @@ const groups = Object.keys(GROUPS) as Group[];
   .adhell .post .native-tag {
     margin: 2px 0 0;
     color: #b9b0a5;
-    font: 10px/1.2 Arial, sans-serif;
+    font:
+      10px/1.2 Arial,
+      sans-serif;
   }
 
   /* A sponsored recipe card, dressed as the real one. */
@@ -1774,14 +2110,18 @@ const groups = Object.keys(GROUPS) as Group[];
     justify-content: space-between;
     align-items: baseline;
     margin: 0 0 10px;
-    font: 900 15px/1 Arial, sans-serif;
+    font:
+      900 15px/1 Arial,
+      sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   .adhell .chum-by {
     color: #999;
-    font: 400 10px/1 Arial, sans-serif;
+    font:
+      400 10px/1 Arial,
+      sans-serif;
     text-transform: none;
     letter-spacing: 0;
   }
@@ -1838,14 +2178,19 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .billboard-name {
-    font: 900 clamp(30px, 6vw, 46px)/1 'Arial Black', Impact, sans-serif;
+    font:
+      900 clamp(30px, 6vw, 46px)/1 'Arial Black',
+      Impact,
+      sans-serif;
     letter-spacing: 0.04em;
     color: #fff;
     text-shadow: 0 3px 0 #c45a00;
   }
 
   .adhell .billboard-line {
-    font: italic 18px/1.2 Georgia, serif;
+    font:
+      italic 18px/1.2 Georgia,
+      serif;
   }
 
   .adhell .billboard .cta {
@@ -1870,7 +2215,10 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .chum-t {
-    font: 700 15px/1.25 Arial, Helvetica, sans-serif;
+    font:
+      700 15px/1.25 Arial,
+      Helvetica,
+      sans-serif;
     color: #111;
   }
 
@@ -1894,12 +2242,17 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .granite-name {
-    font: 900 40px/1 Impact, 'Arial Black', sans-serif;
+    font:
+      900 40px/1 Impact,
+      'Arial Black',
+      sans-serif;
     letter-spacing: 0.14em;
   }
 
   .adhell .granite-line {
-    font: italic 16px/1.3 Georgia, serif;
+    font:
+      italic 16px/1.3 Georgia,
+      serif;
   }
 
   .adhell .granite .cta {
@@ -1947,11 +2300,15 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .sofa-line {
-    font: 18px/1.25 Georgia, serif;
+    font:
+      18px/1.25 Georgia,
+      serif;
   }
 
   .adhell .sofa-sub {
-    font: italic 14px/1.3 Georgia, serif;
+    font:
+      italic 14px/1.3 Georgia,
+      serif;
     color: #7a6e64;
   }
 
@@ -1982,7 +2339,10 @@ const groups = Object.keys(GROUPS) as Group[];
     padding: 6px 10px;
     background: #ffe600;
     color: #b30000;
-    font: 900 15px/1 Impact, 'Arial Black', sans-serif;
+    font:
+      900 15px/1 Impact,
+      'Arial Black',
+      sans-serif;
     letter-spacing: 0.04em;
     rotate: -4deg;
   }
@@ -1995,7 +2355,10 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .half-name {
-    font: 900 28px/1 'Arial Black', Impact, sans-serif;
+    font:
+      900 28px/1 'Arial Black',
+      Impact,
+      sans-serif;
   }
 
   .adhell .half-line {
@@ -2008,7 +2371,10 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .half-price b {
-    font: 900 44px/1 Impact, 'Arial Black', sans-serif;
+    font:
+      900 44px/1 Impact,
+      'Arial Black',
+      sans-serif;
     color: #ffe600;
   }
 
@@ -2019,7 +2385,9 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .half-timer b {
-    font: 700 20px/1 'Courier New', monospace;
+    font:
+      700 20px/1 'Courier New',
+      monospace;
     color: #ffe600;
   }
 
@@ -2060,7 +2428,9 @@ const groups = Object.keys(GROUPS) as Group[];
     background: linear-gradient(90deg, #ff7a00, #ff2e63);
     color: #fff;
     box-shadow: 0 -8px 30px rgb(0 0 0 / 0.3);
-    transition: height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), translate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition:
+      height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
+      translate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .adhell .sticky[data-compact] {
@@ -2092,7 +2462,10 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .sticky-name {
-    font: 900 clamp(30px, 6vw, 64px)/1 'Arial Black', Impact, sans-serif;
+    font:
+      900 clamp(30px, 6vw, 64px)/1 'Arial Black',
+      Impact,
+      sans-serif;
     letter-spacing: 0.04em;
   }
 
@@ -2130,7 +2503,9 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 50%;
     background: rgb(0 0 0 / 0.35);
     color: #fff !important;
-    font: 700 18px/1 Arial, sans-serif !important;
+    font:
+      700 18px/1 Arial,
+      sans-serif !important;
   }
 
   @media (max-width: 640px) {
@@ -2218,11 +2593,18 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 6px;
     background: #ff3b1f;
     color: #fff;
-    font: 600 12px/1.2 ui-monospace, 'Cascadia Mono', Consolas, Menlo, monospace;
+    font:
+      600 12px/1.2 ui-monospace,
+      'Cascadia Mono',
+      Consolas,
+      Menlo,
+      monospace;
     opacity: 0;
     translate: 0 -6px;
     pointer-events: none;
-    transition: opacity 0.25s, translate 0.25s;
+    transition:
+      opacity 0.25s,
+      translate 0.25s;
   }
 
   .adhell .hud-flash.show {
@@ -2244,7 +2626,9 @@ const groups = Object.keys(GROUPS) as Group[];
     place-items: center;
     margin: 0;
     color: #a59d93;
-    font: italic 15px/1 Georgia, serif;
+    font:
+      italic 15px/1 Georgia,
+      serif;
   }
 
   .adhell .vid-frame .vid {
@@ -2276,7 +2660,9 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 50%;
     background: #111;
     color: #fff !important;
-    font: 700 16px/1 Arial, sans-serif !important;
+    font:
+      700 16px/1 Arial,
+      sans-serif !important;
   }
 
   .adhell .vid.is-pip .vid-skip,
@@ -2304,7 +2690,10 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .lz-big {
-    font: 900 26px/1.1 'Arial Black', Impact, sans-serif;
+    font:
+      900 26px/1.1 'Arial Black',
+      Impact,
+      sans-serif;
   }
 
   .adhell .lz-quiz {
@@ -2414,7 +2803,9 @@ const groups = Object.keys(GROUPS) as Group[];
   .adhell .proof-card.out {
     opacity: 0;
     translate: 0 10px;
-    transition: opacity 0.5s, translate 0.5s;
+    transition:
+      opacity 0.5s,
+      translate 0.5s;
   }
 
   .adhell .proof-card small {
@@ -2537,7 +2928,9 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 11px;
     background: #e3121b;
     color: #fff;
-    font: 700 12px/22px Arial, sans-serif;
+    font:
+      700 12px/22px Arial,
+      sans-serif;
   }
 
   .adhell .chat-teaser {
@@ -2686,7 +3079,9 @@ const groups = Object.keys(GROUPS) as Group[];
 
   .adhell .win-title {
     flex: 1;
-    font: 700 13px/1.2 Arial, sans-serif;
+    font:
+      700 13px/1.2 Arial,
+      sans-serif;
     letter-spacing: 0.04em;
   }
 
@@ -2698,7 +3093,9 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 4px;
     background: rgb(255 255 255 / 0.2);
     color: #fff !important;
-    font: 700 15px/1 Arial, sans-serif !important;
+    font:
+      700 15px/1 Arial,
+      sans-serif !important;
   }
 
   .adhell .win-body {
@@ -2719,7 +3116,10 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .l-big {
-    font: 900 20px/1.15 'Arial Black', Impact, sans-serif;
+    font:
+      900 20px/1.15 'Arial Black',
+      Impact,
+      sans-serif;
   }
 
   .adhell .l-kicker {
@@ -2845,7 +3245,10 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 4px;
     background: linear-gradient(135deg, hsl(var(--hue) 70% 70%), hsl(calc(var(--hue) + 60) 70% 45%));
     color: #fff;
-    font: 900 64px/1 Impact, 'Arial Black', sans-serif;
+    font:
+      900 64px/1 Impact,
+      'Arial Black',
+      sans-serif;
     text-shadow: 0 4px 0 rgb(0 0 0 / 0.25);
   }
 
@@ -2857,12 +3260,17 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 10px;
     background: linear-gradient(135deg, #7a3cff, #ff3cac);
     color: #fff;
-    font: 700 12px/1 Arial, sans-serif;
+    font:
+      700 12px/1 Arial,
+      sans-serif;
     letter-spacing: 0.2em;
   }
 
   .adhell .l-gift b {
-    font: 900 40px/1 'Arial Black', Impact, sans-serif;
+    font:
+      900 40px/1 'Arial Black',
+      Impact,
+      sans-serif;
     letter-spacing: 0;
   }
 
@@ -2920,7 +3328,9 @@ const groups = Object.keys(GROUPS) as Group[];
   .adhell .nl-kicker {
     margin: 0;
     color: #e3121b;
-    font: 900 14px/1 Arial, sans-serif;
+    font:
+      900 14px/1 Arial,
+      sans-serif;
     letter-spacing: 0.14em;
   }
 
@@ -2945,7 +3355,9 @@ const groups = Object.keys(GROUPS) as Group[];
     padding: 12px;
     border: 2px solid #e2c9a6;
     border-radius: 6px;
-    font: 15px Arial, sans-serif;
+    font:
+      15px Arial,
+      sans-serif;
   }
 
   .adhell .nl-form button {
@@ -3014,7 +3426,9 @@ const groups = Object.keys(GROUPS) as Group[];
 
   .adhell .cookie-panel h2 {
     margin: 0 0 8px;
-    font: 700 20px/1.2 Arial, sans-serif;
+    font:
+      700 20px/1.2 Arial,
+      sans-serif;
   }
 
   .adhell .cookie-panel p {
@@ -3040,7 +3454,9 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 8px;
     background: #2fbf71;
     color: #fff !important;
-    font: 700 16px/1 Arial, sans-serif !important;
+    font:
+      700 16px/1 Arial,
+      sans-serif !important;
   }
 
   .adhell .c-faint {
@@ -3177,12 +3593,17 @@ const groups = Object.keys(GROUPS) as Group[];
   }
 
   .adhell .inter-brand {
-    font: 900 clamp(44px, 10vw, 110px)/1 'Arial Black', Impact, sans-serif;
+    font:
+      900 clamp(44px, 10vw, 110px)/1 'Arial Black',
+      Impact,
+      sans-serif;
     letter-spacing: 0.04em;
   }
 
   .adhell .inter-head {
-    font: italic clamp(20px, 3.4vw, 32px)/1.2 Georgia, serif;
+    font:
+      italic clamp(20px, 3.4vw, 32px)/1.2 Georgia,
+      serif;
   }
 
   .adhell .inter-sub {
@@ -3194,7 +3615,9 @@ const groups = Object.keys(GROUPS) as Group[];
     padding: 18px 34px;
     border: 0;
     border-radius: 999px;
-    font: 900 20px/1 Arial, sans-serif !important;
+    font:
+      900 20px/1 Arial,
+      sans-serif !important;
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
@@ -3241,7 +3664,12 @@ const groups = Object.keys(GROUPS) as Group[];
     border-radius: 12px;
     background: #121212;
     color: #e9e5dc;
-    font: 13px/1.45 ui-monospace, 'Cascadia Mono', Consolas, Menlo, monospace;
+    font:
+      13px/1.45 ui-monospace,
+      'Cascadia Mono',
+      Consolas,
+      Menlo,
+      monospace;
   }
 
   .adhell .report::backdrop {
@@ -3350,4 +3778,3 @@ const groups = Object.keys(GROUPS) as Group[];
     }
   }
 </style>
-

@@ -3,7 +3,8 @@
 
 /** MIDI notes of the comb, low to high: C3 to B5, as a 30-note paper-strip comb is tuned. */
 export const COMB = [
-  48, 50, 52, 53, 55, 57, 58, 59, 60, 61, 62, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81, 82, 83,
+  48, 50, 52, 53, 55, 57, 58, 59, 60, 61, 62, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81, 82,
+  83,
 ] as const;
 
 export const ROWS = COMB.length;
@@ -147,7 +148,11 @@ export const TUNES: Tune[] = [
           `r:24 | r:2 F#5:2 A5:2 | G5:2 F#5:2 C#5:2 | B4:2 C#5:2 D5:2 | A4:6 | F#4:6 | r:6 | r:6 | r:6 |
            r:2 F#5:2 A5:2 | G5:2 F#5:2 C#5:2 | B4:2 C#5:2 D5:2 | A4:6 | C#5:6 | F#5:6 | E5:6 | r:6 | r:6 | D5:6`,
         ),
-        comp('Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dend', 6, [2]),
+        comp(
+          'Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dmaj7 Gmaj7 Dend',
+          6,
+          [2],
+        ),
       ),
   },
   {

@@ -74,7 +74,12 @@ function start(root: HTMLElement): void {
   let selected: string | null = null;
 
   const utc = (t: number, secs = true) => new Date(t).toISOString().slice(11, secs ? 19 : 16);
-  const localFmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+  const localFmt = new Intl.DateTimeFormat(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  });
 
   function pickStation(): Station {
     const asked = new URLSearchParams(location.search).get('station')?.toUpperCase();
@@ -242,7 +247,10 @@ function start(root: HTMLElement): void {
   function refreshLamp(): void {
     if (!trace?.end) return;
     const age = Math.round((Date.now() - trace.endTime) / 60_000);
-    setLamp(age > 60 ? 'down' : 'live', age > 60 ? `Newest sample ${Math.round(age / 60)} h old` : `Live · newest sample ${age} min old`);
+    setLamp(
+      age > 60 ? 'down' : 'live',
+      age > 60 ? `Newest sample ${Math.round(age / 60)} h old` : `Live · newest sample ${age} min old`,
+    );
   }
 
   async function loadQuakes(): Promise<void> {
@@ -266,7 +274,8 @@ function start(root: HTMLElement): void {
       const { dist, az } = geo(station.lat, station.lon, q.lat, q.lon);
       const f = felt(dist, q.mag);
       const ph = phases(dist, q.mag).filter((p) => q.time + p.t * 1000 >= from && q.time + p.t * 1000 < to);
-      if (q.time > from - 4 * HOUR) forDial.push({ id: q.id, lat: q.lat, lon: q.lon, mag: q.mag, felt: f && ph.length > 0 });
+      if (q.time > from - 4 * HOUR)
+        forDial.push({ id: q.id, lat: q.lat, lon: q.lon, mag: q.mag, felt: f && ph.length > 0 });
       if (f && ph.length) marked.push({ q, dist, az, felt: f, phases: ph });
     }
     dial.setQuakes(forDial);
@@ -349,7 +358,10 @@ function start(root: HTMLElement): void {
           mag.textContent = ` M${m.q.mag.toFixed(1)}`;
           tag.append(b, mag);
           (el as HTMLButtonElement).type = 'button';
-          el.setAttribute('aria-label', `M${m.q.mag.toFixed(1)}, ${m.q.place}: expected ${name} arrival at ${utc(t)} UTC`);
+          el.setAttribute(
+            'aria-label',
+            `M${m.q.mag.toFixed(1)}, ${m.q.place}: expected ${name} arrival at ${utc(t)} UTC`,
+          );
         } else {
           tag.textContent = name;
         }
@@ -364,7 +376,9 @@ function start(root: HTMLElement): void {
   function choose(id: string | null, scroll: boolean): void {
     selected = selected === id ? null : id;
     dial.select(selected);
-    quakeList.querySelectorAll<HTMLButtonElement>('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.quake === selected)));
+    quakeList
+      .querySelectorAll<HTMLButtonElement>('button')
+      .forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.quake === selected)));
     marks.querySelectorAll<HTMLElement>('.flag').forEach((f) => {
       f.classList.toggle('on', !!selected && f.dataset.quake === selected);
       f.classList.toggle('dim', !!selected && f.dataset.quake !== selected);
@@ -527,8 +541,17 @@ function start(root: HTMLElement): void {
     cursor.classList.toggle('flip', x > drum.width - 190);
     const i = Math.round((at.time - trace.t0) / 1000);
     const v = i < trace.end ? trace.values[i] : NaN;
-    const st = new Intl.DateTimeFormat(undefined, { timeZone: station.zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-    const lines = [`${utc(at.time)} UTC`, `${localFmt.format(at.time)} your time`, `${st.format(at.time)} at ${station.code}`];
+    const st = new Intl.DateTimeFormat(undefined, {
+      timeZone: station.zone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    });
+    const lines = [
+      `${utc(at.time)} UTC`,
+      `${localFmt.format(at.time)} your time`,
+      `${st.format(at.time)} at ${station.code}`,
+    ];
     if (!Number.isNaN(v)) lines.push(`${speed(Math.abs(v) / station.scale)} ${v >= 0 ? 'up' : 'down'}`);
     cursorText.textContent = lines.join('\n');
   };

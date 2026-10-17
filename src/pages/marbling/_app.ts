@@ -3,7 +3,17 @@
 import { Trough, type Blot, type Tines } from './_engine';
 import { GALL, PAPER_HEX, PIGMENTS, pigmentIndex } from './_pigments';
 import { COMB, RAKE, RECIPES, STYLUS, across, recipeById, seeded, type Step } from './_recipes';
-import { drawSheen, drawTrough, noiseTile, paintBlots, paperTexture, printSvg, renderPrint, shrink, type Frame } from './_render';
+import {
+  drawSheen,
+  drawTrough,
+  noiseTile,
+  paintBlots,
+  paperTexture,
+  printSvg,
+  renderPrint,
+  shrink,
+  type Frame,
+} from './_render';
 
 type Tool = 'drop' | 'sprinkle' | 'stylus' | 'rake' | 'comb';
 
@@ -149,7 +159,12 @@ export function startMarbling(root: HTMLElement): void {
     frame = { scale: scaleCss * dpr, ox: rimCss * dpr, oy: rimCss * dpr };
     troughLayer = drawTrough(canvas.width, canvas.height, rimCss * dpr, dpr);
     sheenLayer = drawSheen(canvas.width, canvas.height, rimCss * dpr, dpr);
-    paperLayer = paperTexture(Math.round((W - INSET * 2) * frame.scale), Math.round((H - INSET * 2) * frame.scale), frame.scale, 5);
+    paperLayer = paperTexture(
+      Math.round((W - INSET * 2) * frame.scale),
+      Math.round((H - INSET * 2) * frame.scale),
+      frame.scale,
+      5,
+    );
     if (!grain) grain = ctx.createPattern(noiseTile(160, 11, 0.16), 'repeat');
     dirty = true;
   };
@@ -323,7 +338,13 @@ export function startMarbling(root: HTMLElement): void {
       ctx.setLineDash(tool === 'sprinkle' ? [3 * dpr * line, 4 * dpr * line] : []);
       ctx.strokeStyle = 'rgba(30, 30, 30, 0.35)';
       ctx.beginPath();
-      ctx.arc(gesture?.kind === 'drop' ? gesture.x : px, gesture?.kind === 'drop' ? gesture.y : py, r + 2, 0, Math.PI * 2);
+      ctx.arc(
+        gesture?.kind === 'drop' ? gesture.x : px,
+        gesture?.kind === 'drop' ? gesture.y : py,
+        r + 2,
+        0,
+        Math.PI * 2,
+      );
       ctx.stroke();
     } else {
       let t: Tines | null = null;
@@ -715,7 +736,11 @@ export function startMarbling(root: HTMLElement): void {
       const anim = flight.animate(
         [
           { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`, transformOrigin: '0 0' },
-          { transform: `translate(${dx * 0.55}px, ${dy * 0.55 - 60}px) scale(${sx * 0.7}, ${sy * 0.7})`, transformOrigin: '0 0', offset: 0.45 },
+          {
+            transform: `translate(${dx * 0.55}px, ${dy * 0.55 - 60}px) scale(${sx * 0.7}, ${sy * 0.7})`,
+            transformOrigin: '0 0',
+            offset: 0.45,
+          },
           { transform: 'translate(0, 0) scale(1, 1)', transformOrigin: '0 0' },
         ],
         { duration: 1100, easing: 'cubic-bezier(.45,.05,.3,1)' },
@@ -803,7 +828,11 @@ export function startMarbling(root: HTMLElement): void {
   });
   $<HTMLButtonElement>('[data-svg]')?.addEventListener('click', () => {
     const p = current();
-    if (p) download(new Blob([printSvg(p.blots, W, H, INSET)], { type: 'image/svg+xml' }), `marbling-${String(p.n).padStart(2, '0')}.svg`);
+    if (p)
+      download(
+        new Blob([printSvg(p.blots, W, H, INSET)], { type: 'image/svg+xml' }),
+        `marbling-${String(p.n).padStart(2, '0')}.svg`,
+      );
   });
   $<HTMLButtonElement>('[data-close]')?.addEventListener('click', () => viewer.close());
   viewer.addEventListener('click', (e) => {
@@ -820,9 +849,9 @@ export function startMarbling(root: HTMLElement): void {
     dirty = true;
   };
 
-  root.querySelectorAll<HTMLInputElement>('input[name="mb-tool"]').forEach((input) =>
-    input.addEventListener('change', () => setTool(input.value as Tool)),
-  );
+  root
+    .querySelectorAll<HTMLInputElement>('input[name="mb-tool"]')
+    .forEach((input) => input.addEventListener('change', () => setTool(input.value as Tool)));
   root.querySelectorAll<HTMLInputElement>('input[name="mb-pot"]').forEach((input) =>
     input.addEventListener('change', () => {
       color = pigmentIndex(input.value);

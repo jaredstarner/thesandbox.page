@@ -228,7 +228,12 @@ export function startMusicBox(root: HTMLElement): void {
     const p = point(e);
     sound.wake();
     if (nearCrank(p.x, p.y)) {
-      drag = { kind: 'crank', id: e.pointerId, angle: Math.atan2(p.y - L.crank.y, p.x - L.crank.x), t: performance.now() };
+      drag = {
+        kind: 'crank',
+        id: e.pointerId,
+        angle: Math.atan2(p.y - L.crank.y, p.x - L.crank.x),
+        t: performance.now(),
+      };
       rewind = null;
     } else if (onPaper(L, strip, s, p.x, p.y)) {
       drag = { kind: 'paper', id: e.pointerId, x0: p.x, y0: p.y, x: p.x, moved: false };
@@ -283,7 +288,13 @@ export function startMusicBox(root: HTMLElement): void {
       hover = next;
       dirty = true;
     }
-    canvas.style.cursor = nearCrank(p.x, p.y) ? 'grab' : next ? 'crosshair' : onPaper(L, strip, s, p.x, p.y) ? 'ew-resize' : '';
+    canvas.style.cursor = nearCrank(p.x, p.y)
+      ? 'grab'
+      : next
+        ? 'crosshair'
+        : onPaper(L, strip, s, p.x, p.y)
+          ? 'ew-resize'
+          : '';
   });
 
   const endDrag = (e: PointerEvent) => {

@@ -151,7 +151,8 @@ export function startPinTumbler(root: HTMLElement): void {
 
   const setTension = (v: number) => {
     tension = Math.max(0, Math.min(1, v));
-    if (tensionIn && Number(tensionIn.value) !== Math.round(tension * 100)) tensionIn.value = String(Math.round(tension * 100));
+    if (tensionIn && Number(tensionIn.value) !== Math.round(tension * 100))
+      tensionIn.value = String(Math.round(tension * 100));
     root.style.setProperty('--tension', String(tension));
     if (tension > 0 && started === null && !lock.opened) started = performance.now();
   };
@@ -161,23 +162,29 @@ export function startPinTumbler(root: HTMLElement): void {
       case 'set':
         sound.set();
         buzz(12);
-        if (spec.coach) say(`Click. Pin ${ev.pin + 1} is set, and the plug turned a hair. Find the next one that binds.`);
+        if (spec.coach)
+          say(`Click. Pin ${ev.pin + 1} is set, and the plug turned a hair. Find the next one that binds.`);
         break;
       case 'groove':
         sound.groove();
         buzz(5);
-        if (teaching() && !spec.coach) say('A small click, but the pin is still stiff: a serrated driver. Keep lifting.', 4);
+        if (teaching() && !spec.coach)
+          say('A small click, but the pin is still stiff: a serrated driver. Keep lifting.', 4);
         break;
       case 'caught':
         sound.caught();
         buzz(28);
         if (teaching())
-          say('False set: the plug swung further than a pin should turn it. A spool has caught. Lighten the wrench and lift the pin that pushes back.', 7);
+          say(
+            'False set: the plug swung further than a pin should turn it. A spool has caught. Lighten the wrench and lift the pin that pushes back.',
+            7,
+          );
         break;
       case 'overset':
         sound.overset();
         buzz([8, 30, 8]);
-        if (teaching()) say('Overset. That key pin went past the shear line and wedged. Let the wrench go to drop every pin.', 7);
+        if (teaching())
+          say('Overset. That key pin went past the shear line and wedged. Let the wrench go to drop every pin.', 7);
         break;
       case 'reset':
         sound.reset(ev.pins);

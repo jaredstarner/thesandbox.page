@@ -134,7 +134,8 @@ export class Dial {
     }
     ctx.fillStyle = 'rgba(217, 210, 191, 0.42)';
     const dot = Math.max(1.1, size / 300);
-    for (let i = 0; i < this.land.length; i += 2) ctx.fillRect(this.land[i] - dot / 2, this.land[i + 1] - dot / 2, dot, dot);
+    for (let i = 0; i < this.land.length; i += 2)
+      ctx.fillRect(this.land[i] - dot / 2, this.land[i + 1] - dot / 2, dot, dot);
 
     // Range rings and their labels.
     ctx.font = `400 9px ${this.font}`;
@@ -180,7 +181,12 @@ export class Dial {
     ctx.font = `700 10px ${this.font}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    for (const [l, a] of [['N', 0], ['E', 90], ['S', 180], ['W', 270]] as const) {
+    for (const [l, a] of [
+      ['N', 0],
+      ['E', 90],
+      ['S', 180],
+      ['W', 270],
+    ] as const) {
       ctx.fillText(l, c + Math.sin(a * RAD) * (R + 14), c - Math.cos(a * RAD) * (R + 14));
     }
 

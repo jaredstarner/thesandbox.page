@@ -16,7 +16,9 @@ const FAST = [
   description="A working teletext service: key a page number, wait for it to come round, and read today's news, weather, markets, and earthquakes in forty columns of block graphics."
 >
   <main class="teletext" data-teletext data-map={mapMask()} data-size="0" data-hold="false" data-reveal="false">
-    <a class="home" href="/">thesandbox.page</a>
+    <a class="home" href="/">
+      thesandbox.page
+    </a>
 
     <div class="set">
       <div class="bezel">
@@ -24,40 +26,80 @@ const FAST = [
           <canvas class="screen" data-screen aria-hidden="true"></canvas>
           <div class="glass" aria-hidden="true"></div>
         </div>
-        <p class="badge" aria-hidden="true"><span class="lamp"></span>Telepage</p>
+        <p class="badge" aria-hidden="true">
+          <span class="lamp"></span>Telepage
+        </p>
       </div>
 
       <div class="remote" role="group" aria-label="Remote control">
         <div class="pad">
-          {DIGITS.map((d) => <button type="button" class="key num" data-key={d} aria-label={`Digit ${d}`}>{d}</button>)}
-          <button type="button" class="key fn" data-key="index" title="Index (I)">Index</button>
-          <button type="button" class="key num" data-key="0" aria-label="Digit 0">0</button>
-          <button type="button" class="key fn" data-key="reveal" title="Reveal (? or V)" aria-pressed="false">Reveal</button>
+          {DIGITS.map((d) => (
+            <button type="button" class="key num" data-key={d} aria-label={`Digit ${d}`}>
+              {d}
+            </button>
+          ))}
+          <button type="button" class="key fn" data-key="index" title="Index (I)">
+            Index
+          </button>
+          <button type="button" class="key num" data-key="0" aria-label="Digit 0">
+            0
+          </button>
+          <button type="button" class="key fn" data-key="reveal" title="Reveal (? or V)" aria-pressed="false">
+            Reveal
+          </button>
         </div>
         <div class="fast">
-          {
-            FAST.map((f) => (
-              <button type="button" class={`key fx ${f.key}`} data-key={f.key} aria-label={`${f.label} key`} title={`${f.label} (${f.key[0].toUpperCase()})`} />
-            ))
-          }
+          {FAST.map((f) => (
+            <button
+              type="button"
+              class={`key fx ${f.key}`}
+              data-key={f.key}
+              aria-label={`${f.label} key`}
+              title={`${f.label} (${f.key[0].toUpperCase()})`}
+            />
+          ))}
         </div>
         <div class="nav">
-          <button type="button" class="key arrow" data-key="prev" aria-label="Previous page" title="Previous page (Left)">
-            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg>
+          <button
+            type="button"
+            class="key arrow"
+            data-key="prev"
+            aria-label="Previous page"
+            title="Previous page (Left)"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M10 3 5 8l5 5" />
+            </svg>
           </button>
           <button type="button" class="key arrow" data-key="up" aria-label="Next part" title="Next part (Up)">
-            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 10l5-5 5 5" /></svg>
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3 10l5-5 5 5" />
+            </svg>
           </button>
-          <button type="button" class="key arrow" data-key="down" aria-label="Previous part" title="Previous part (Down)">
-            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+          <button
+            type="button"
+            class="key arrow"
+            data-key="down"
+            aria-label="Previous part"
+            title="Previous part (Down)"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3 6l5 5 5-5" />
+            </svg>
           </button>
           <button type="button" class="key arrow" data-key="next" aria-label="Next page" title="Next page (Right)">
-            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" /></svg>
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M6 3l5 5-5 5" />
+            </svg>
           </button>
         </div>
         <div class="mode">
-          <button type="button" class="key fn" data-key="hold" title="Hold (H)" aria-pressed="false">Hold</button>
-          <button type="button" class="key fn" data-key="size" title="Size (S)">Size</button>
+          <button type="button" class="key fn" data-key="hold" title="Hold (H)" aria-pressed="false">
+            Hold
+          </button>
+          <button type="button" class="key fn" data-key="size" title="Size (S)">
+            Size
+          </button>
         </div>
       </div>
     </div>
@@ -108,10 +150,12 @@ const FAST = [
     box-sizing: border-box;
     padding: 56px 24px 32px;
     color: var(--label);
-    font: 500 14px/1.4 system-ui, -apple-system, 'Segoe UI', sans-serif;
-    background:
-      radial-gradient(ellipse 70% 55% at 45% 45%, rgba(70, 90, 160, 0.09), transparent 70%),
-      var(--room);
+    font:
+      500 14px/1.4 system-ui,
+      -apple-system,
+      'Segoe UI',
+      sans-serif;
+    background: radial-gradient(ellipse 70% 55% at 45% 45%, rgba(70, 90, 160, 0.09), transparent 70%), var(--room);
   }
 
   .teletext .home {

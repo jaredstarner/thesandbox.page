@@ -153,7 +153,11 @@ export function startSurvey(root: HTMLElement): void {
 
     if (reveal < 1e5) {
       if (!revealStart) revealStart = now;
-      const reach = Math.hypot(Math.abs(cam.x - stakeX) + viewW() / cam.zoom / 2, Math.abs(cam.y - stakeY) + viewH() / cam.zoom / 2) + 2;
+      const reach =
+        Math.hypot(
+          Math.abs(cam.x - stakeX) + viewW() / cam.zoom / 2,
+          Math.abs(cam.y - stakeY) + viewH() / cam.zoom / 2,
+        ) + 2;
       const t = clamp((now - revealStart) / 2200, 0, 1);
       reveal = t >= 1 ? 1e5 : ease(t) * reach;
       dirty = true;
@@ -164,7 +168,17 @@ export function startSurvey(root: HTMLElement): void {
       root.style.setProperty('--cx', cam.x.toFixed(4));
       root.style.setProperty('--cy', cam.y.toFixed(4));
       root.style.setProperty('--z', cam.zoom.toFixed(3));
-      terrain?.render({ x: cam.x, y: cam.y, zoom: cam.zoom, reveal, revealX: stakeX, revealY: stakeY, settled, officeX: OFFICE.x, officeY: OFFICE.y });
+      terrain?.render({
+        x: cam.x,
+        y: cam.y,
+        zoom: cam.zoom,
+        reveal,
+        revealX: stakeX,
+        revealY: stakeY,
+        settled,
+        officeX: OFFICE.x,
+        officeY: OFFICE.y,
+      });
       if (reveal !== revealedUpTo) {
         revealedUpTo = reveal;
         for (const p of plots) p.el.classList.toggle('sv-on', Math.hypot(p.x - stakeX, p.y - stakeY) <= reveal);
@@ -236,7 +250,11 @@ export function startSurvey(root: HTMLElement): void {
       const midBefore = { x: (pa.x + pb.x) / 2, y: (pa.y + pb.y) / 2 };
       const midAfter = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
       dragged += DRAG_SLOP;
-      set({ ...cam, x: cam.x - (midAfter.x - midBefore.x) / cam.zoom, y: cam.y - (midAfter.y - midBefore.y) / cam.zoom });
+      set({
+        ...cam,
+        x: cam.x - (midAfter.x - midBefore.x) / cam.zoom,
+        y: cam.y - (midAfter.y - midBefore.y) / cam.zoom,
+      });
       if (before > 0) zoomAt(midAfter.x, midAfter.y, after / before);
     }
     pointers.set(event.pointerId, point);
@@ -296,7 +314,8 @@ export function startSurvey(root: HTMLElement): void {
 
   window.addEventListener('keydown', (event) => {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
-    if (event.target instanceof HTMLElement && event.target.closest('input, textarea, select, [contenteditable]')) return;
+    if (event.target instanceof HTMLElement && event.target.closest('input, textarea, select, [contenteditable]'))
+      return;
     const pan = 120 / cam.zoom;
     const moves: Record<string, () => void> = {
       ArrowLeft: () => flyTo({ ...cam, x: cam.x - pan }, 220),
@@ -393,8 +412,7 @@ export function startSurvey(root: HTMLElement): void {
     const hash = decodeURIComponent(location.hash.slice(1));
     return plots.find((p) => p.el.id === hash);
   };
-  const plotView = (p: (typeof plots)[number]): Camera =>
-    settle({ x: p.x, y: p.y, zoom: ENTRY_ZOOM });
+  const plotView = (p: (typeof plots)[number]): Camera => settle({ x: p.x, y: p.y, zoom: ENTRY_ZOOM });
   window.addEventListener('hashchange', () => {
     const p = linkedPlot();
     if (p) flyTo(plotView(p));

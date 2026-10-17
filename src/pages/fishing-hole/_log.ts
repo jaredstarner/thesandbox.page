@@ -24,7 +24,8 @@ export function loadLog(): Log {
     if (raw && typeof raw.total === 'number' && raw.species && typeof raw.species === 'object') {
       const species: Record<string, Entry> = {};
       for (const [id, e] of Object.entries(raw.species)) {
-        if (e && typeof e.count === 'number' && typeof e.bestCm === 'number' && typeof e.bestKg === 'number') species[id] = e;
+        if (e && typeof e.count === 'number' && typeof e.bestCm === 'number' && typeof e.bestKg === 'number')
+          species[id] = e;
       }
       return { total: raw.total, species };
     }

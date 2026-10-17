@@ -39,7 +39,12 @@ export function classify(tags: string[], requires?: string[]): Classification {
     };
   }
   if (requires.length === 0) {
-    return { cls: 'stable', word: 'Stable', reason: 'It requires nothing in particular: every technique it uses is an enhancement.', handling };
+    return {
+      cls: 'stable',
+      word: 'Stable',
+      reason: 'It requires nothing in particular: every technique it uses is an enhancement.',
+      handling,
+    };
   }
 
   const required = requires.map((tag) => {

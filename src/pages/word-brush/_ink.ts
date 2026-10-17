@@ -52,7 +52,19 @@ export class Ink {
       seen.add(p.id);
       let s = this.sprites.get(p.id);
       if (!s) {
-        s = { text: p.text, x: p.x, y: p.y + drop, tx: p.x, ty: p.y, a: 0, ta: 1, wait: 0, rubric: p.rubric, sx: p.sx, tone: tone(p.id) };
+        s = {
+          text: p.text,
+          x: p.x,
+          y: p.y + drop,
+          tx: p.x,
+          ty: p.y,
+          a: 0,
+          ta: 1,
+          wait: 0,
+          rubric: p.rubric,
+          sx: p.sx,
+          tone: tone(p.id),
+        };
         s.wait = Math.min(fresh++ * this.pour, 0.9);
         this.sprites.set(p.id, s);
         continue;

@@ -20,7 +20,9 @@ type Transitioning = Document & {
 export function walk() {
   const root = document.querySelector<HTMLElement>('.undercroft.crawl');
   if (!root) return;
-  const active = () => root.querySelector<HTMLElement>(`.view[data-dir="${location.hash.slice(1) || 'n'}"]`) ?? root.querySelector<HTMLElement>('.view');
+  const active = () =>
+    root.querySelector<HTMLElement>(`.view[data-dir="${location.hash.slice(1) || 'n'}"]`) ??
+    root.querySelector<HTMLElement>('.view');
 
   root.addEventListener('click', (event) => {
     const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-turn]');

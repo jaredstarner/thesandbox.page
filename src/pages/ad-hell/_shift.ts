@@ -48,7 +48,9 @@ export function initShift(hell: Hell): { tick(): void; density(): number; clsSup
 
   // CLS, by the Web Vitals definition: the largest burst of unexpected shifts, in windows
   // that close after a second's quiet or five seconds in all. Chromium only.
-  const clsSupported = typeof PerformanceObserver !== 'undefined' && (PerformanceObserver.supportedEntryTypes ?? []).includes('layout-shift');
+  const clsSupported =
+    typeof PerformanceObserver !== 'undefined' &&
+    (PerformanceObserver.supportedEntryTypes ?? []).includes('layout-shift');
   if (clsSupported) {
     let windowValue = 0;
     let windowStart = 0;

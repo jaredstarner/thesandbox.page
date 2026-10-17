@@ -612,7 +612,8 @@ export function drawScene(g: CanvasRenderingContext2D, L: Layout, lock: Lock, be
     g.lineTo(len - 3.4, y);
     g.stroke();
   }
-  for (const p of lock.pins) voidRect(g, p.x - slip - PIN_D / 2, KW_TOP - 0.01, PIN_D, SHEAR - KW_TOP + 0.01, clear, px);
+  for (const p of lock.pins)
+    voidRect(g, p.x - slip - PIN_D / 2, KW_TOP - 0.01, PIN_D, SHEAR - KW_TOP + 0.01, clear, px);
   g.restore();
 
   // The cam at the back of the plug.
@@ -980,7 +981,14 @@ function drawLabels(g: CanvasRenderingContext2D, L: Layout, lock: Lock, o: DrawO
   if (L.wide) {
     callout('Spring', sx(first.x - 0.6), sy(CHAMBER_TOP - 1.6), leftX, sy(CHAMBER_TOP - 0.6), 'right');
     callout('Driver pin', sx(first.x - 0.9), sy(first.drvY + DRIVER * 0.5), leftX, sy(SHEAR + 3.4), 'right');
-    callout('Key pin', sx(first.x - lock.slip - 0.9), sy(first.keyY + first.key * 0.6), leftX, sy(SHEAR - 2.0), 'right');
+    callout(
+      'Key pin',
+      sx(first.x - lock.slip - 0.9),
+      sy(first.keyY + first.key * 0.6),
+      leftX,
+      sy(SHEAR - 2.0),
+      'right',
+    );
     callout('Plug', sx(0.4), sy(-R + 1.0), leftX, sy(-R + 0.4), 'right');
     callout('Tension wrench', sx(-3.4), sy(HOUSING_BOT - 3.6), leftX, sy(HOUSING_BOT - 3.6), 'right');
     callout('Shear line', sx(lock.length + 1.4), sy(SHEAR), sx(lock.length + 2.6), sy(SHEAR + 1.4), 'left');

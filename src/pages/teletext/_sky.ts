@@ -67,7 +67,12 @@ export interface Sun {
 
 /** Today's sunrise and sunset at a place (east longitude positive), for the date it is there. */
 export function sun(lat: number, lon: number, tz: string, now = Date.now()): Sun {
-  const [y, m, d] = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' })
+  const [y, m, d] = new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
     .format(new Date(now))
     .split('-')
     .map(Number);
@@ -88,5 +93,7 @@ export function sun(lat: number, lon: number, tz: string, now = Date.now()): Sun
 
 /** HH:MM in a time zone. */
 export function clock(d: Date, tz?: string): string {
-  return new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz }).format(d);
+  return new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz }).format(
+    d,
+  );
 }

@@ -69,7 +69,9 @@ export function dateKeys(entry: RegisterEntry): string[] {
  * object. A lot can only gain members on its own day, because metadata dates
  * are ship dates; once that UTC day ends, its numbers are frozen.
  */
-export function accessionNumbers(experiments: Experiment[]): Map<string, { accession: string; iso: string; lot: string }> {
+export function accessionNumbers(
+  experiments: Experiment[],
+): Map<string, { accession: string; iso: string; lot: string }> {
   const lots = new Map<string, Experiment[]>();
   for (const experiment of experiments) {
     const iso = experiment.date.toISOString().slice(0, 10);

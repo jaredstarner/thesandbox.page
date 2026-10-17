@@ -11,7 +11,12 @@ type Dir = 'up' | 'down' | 'left' | 'right';
 type Cell = { x: number; y: number };
 type Mode = 'demo' | 'play' | 'paused' | 'over';
 
-const STEP: Record<Dir, Cell> = { up: { x: 0, y: -1 }, down: { x: 0, y: 1 }, left: { x: -1, y: 0 }, right: { x: 1, y: 0 } };
+const STEP: Record<Dir, Cell> = {
+  up: { x: 0, y: -1 },
+  down: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 },
+};
 const OPPOSITE: Record<Dir, Dir> = { up: 'down', down: 'up', left: 'right', right: 'left' };
 const DIRS = Object.keys(STEP) as Dir[];
 
@@ -112,7 +117,14 @@ export function createSnake(lab: Lab): Program {
       // The score, as big as it fits.
       const text = String(score);
       const scale = textWidth(text, 2) <= 30 ? 2 : 1;
-      drawText(ctx, text, Math.round((32 - textWidth(text, scale)) / 2), Math.round((32 - 7 * scale) / 2), scale, COLORS.text);
+      drawText(
+        ctx,
+        text,
+        Math.round((32 - textWidth(text, scale)) / 2),
+        Math.round((32 - 7 * scale) / 2),
+        scale,
+        COLORS.text,
+      );
     } else {
       ctx.fillStyle = COLORS.food;
       ctx.fillRect(food.x * CELL, food.y * CELL, CELL, CELL);

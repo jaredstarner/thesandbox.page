@@ -39,7 +39,14 @@ export function paintBlots(ctx: CanvasRenderingContext2D, blots: Blot[], frame: 
   ctx.save();
   if (opts.print) {
     // Paper laid face down comes up as the trough's mirror image.
-    ctx.setTransform(-frame.scale, 0, 0, frame.scale, frame.ox + (opts.print.w - opts.print.inset) * frame.scale, frame.oy - opts.print.inset * frame.scale);
+    ctx.setTransform(
+      -frame.scale,
+      0,
+      0,
+      frame.scale,
+      frame.ox + (opts.print.w - opts.print.inset) * frame.scale,
+      frame.oy - opts.print.inset * frame.scale,
+    );
   } else {
     ctx.setTransform(frame.scale, 0, 0, frame.scale, frame.ox, frame.oy);
   }

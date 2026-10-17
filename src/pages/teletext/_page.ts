@@ -41,7 +41,8 @@ export class Page {
 
   /** Writes parts (codes, text, nested lists) from a column, clipped at 40. */
   put(row: number, col: number, ...parts: Part[]): number {
-    const flat = (p: Part): number[] => (typeof p === 'number' ? [p] : typeof p === 'string' ? encode(p) : p.flatMap(flat));
+    const flat = (p: Part): number[] =>
+      typeof p === 'number' ? [p] : typeof p === 'string' ? encode(p) : p.flatMap(flat);
     for (const b of parts.flatMap(flat)) {
       if (col >= COLS) break;
       if (col >= 0 && row >= 0 && row < ROWS) this.buf[row * COLS + col] = b;
