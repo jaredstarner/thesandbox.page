@@ -145,7 +145,8 @@ export function createClock(lab: Lab): Program {
     const B = 30;
     const lo = Math.log(100);
     const hi = Math.log(120000);
-    const y = (gap: number) => T + (H - T - B) * (1 - (Math.log(Math.min(Math.max(gap, 100), 120000)) - lo) / (hi - lo));
+    const y = (gap: number) =>
+      T + (H - T - B) * (1 - (Math.log(Math.min(Math.max(gap, 100), 120000)) - lo) / (hi - lo));
     const x = (at: number) => L + ((W - L - R) * at) / Math.max(away, 1);
     chart.replaceChildren();
     chart.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -163,7 +164,9 @@ export function createClock(lab: Lab): Program {
     }
     chart.append(el('line', { class: 'axis', x1: L, x2: W - R, y1: H - B, y2: H - B }));
     chart.append(el('text', { class: 'label', x: L, y: H - 10 }, 'You left'));
-    chart.append(el('text', { class: 'label', x: W - R, y: H - 10, 'text-anchor': 'end' }, `Back, ${duration(away)} later`));
+    chart.append(
+      el('text', { class: 'label', x: W - R, y: H - 10, 'text-anchor': 'end' }, `Back, ${duration(away)} later`),
+    );
     for (const p of points) {
       chart.append(el('circle', { class: p.hum ? 'dot hum' : 'dot', cx: x(p.at), cy: y(p.gap), r: 3.2 }));
     }

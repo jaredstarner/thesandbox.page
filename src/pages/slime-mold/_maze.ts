@@ -108,7 +108,11 @@ export function buildMaze(size: number, dishRadius: number, cells = 9, loops = 7
       { x: x0 + side - inset, y: y0 + side - inset },
     ],
     open: (x, y) =>
-      x > x0 + h && x < x0 + side - h && y > y0 + h && y < y0 + side - h && !walls[Math.floor(y) * size + Math.floor(x)],
+      x > x0 + h &&
+      x < x0 + side - h &&
+      y > y0 + h &&
+      y < y0 + side - h &&
+      !walls[Math.floor(y) * size + Math.floor(x)],
     bounds: { x0, y0, side },
     cells,
     pitch,

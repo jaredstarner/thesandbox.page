@@ -29,7 +29,9 @@ const programs = [
   <link rel="icon" type="image/svg+xml" href={startHref} slot="head" data-lab-icon />
 
   <div class="faviconlab" data-faviconlab>
-    <p class="lookup" aria-hidden="true"><span class="lookup-arrow">↑</span> The real one is up there</p>
+    <p class="lookup" aria-hidden="true">
+      <span class="lookup-arrow">↑</span> The real one is up there
+    </p>
 
     <section class="window" aria-label="This tab, enlarged">
       <div class="tabs" data-tabs>
@@ -37,58 +39,90 @@ const programs = [
           <div class="tab-icon">
             <canvas width="32" height="32" data-screen aria-label="This tab's icon, enlarged" role="img"></canvas>
             <img class="tab-img" alt="" data-screen-img hidden />
-            <div class="cover" data-cover hidden><span>No peeking.<br />Look up.</span></div>
+            <div class="cover" data-cover hidden>
+              <span>
+                No peeking.
+                <br />
+                Look up.
+              </span>
+            </div>
           </div>
-          <span class="tab-title" data-tab-title>Favicon lab</span>
-          <span class="tab-x" aria-hidden="true">×</span>
+          <span class="tab-title" data-tab-title>
+            Favicon lab
+          </span>
+          <span class="tab-x" aria-hidden="true">
+            ×
+          </span>
         </div>
-        <a class="tab-new" href="/favicon-lab/#strip" target="_blank" aria-label="Open the lab in a new tab">+</a>
+        <a class="tab-new" href="/favicon-lab/#strip" target="_blank" aria-label="Open the lab in a new tab">
+          +
+        </a>
       </div>
       <div class="toolbar" aria-hidden="true">
         <span class="nav-glyphs">‹ › ↻</span>
-        <span class="url">thesandbox.page/favicon-lab/<span data-url-hash></span></span>
+        <span class="url">
+          thesandbox.page/favicon-lab/<span data-url-hash></span>
+        </span>
       </div>
     </section>
 
     <main class="page">
       <noscript>
-        <p class="noscript">Every program here draws the tab icon from script, so with script off there is only the amber square.</p>
+        <p class="noscript">
+          Every program here draws the tab icon from script, so with script off there is only the amber square.
+        </p>
       </noscript>
 
       <nav class="programs" aria-label="Programs" data-programs>
-        {
-          programs.map((p) => (
-            <button type="button" data-program={p.id} aria-pressed="false">
-              <span class="program-name">{p.name}</span>
-              <span class="program-blurb">{p.blurb}</span>
-            </button>
-          ))
-        }
+        {programs.map((p) => (
+          <button type="button" data-program={p.id} aria-pressed="false">
+            <span class="program-name">{p.name}</span>
+            <span class="program-blurb">{p.blurb}</span>
+          </button>
+        ))}
       </nav>
 
       <section class="panel" data-panel="snake" hidden aria-labelledby="h-snake">
         <h1 id="h-snake">Snake, in your tab</h1>
         <p>
-          The game runs in this tab's icon, up in your browser's tab strip. Steer with the arrow keys or WASD, or the pad
-          below. The score is in the tab's title. Until you press a key, the snake plays itself.
+          The game runs in this tab's icon, up in your browser's tab strip. Steer with the arrow keys or WASD, or the
+          pad below. The score is in the tab's title. Until you press a key, the snake plays itself.
         </p>
         <div class="row">
-          <button type="button" class="btn" data-snake-play>New game</button>
-          <button type="button" class="btn" data-snake-cover aria-pressed="false">Cover the mirror</button>
+          <button type="button" class="btn" data-snake-play>
+            New game
+          </button>
+          <button type="button" class="btn" data-snake-cover aria-pressed="false">
+            Cover the mirror
+          </button>
           <dl class="readout">
-            <div><dt>Score</dt><dd data-snake-score>0</dd></div>
-            <div><dt>Best</dt><dd data-snake-best>0</dd></div>
+            <div>
+              <dt>Score</dt>
+              <dd data-snake-score>0</dd>
+            </div>
+            <div>
+              <dt>Best</dt>
+              <dd data-snake-best>0</dd>
+            </div>
           </dl>
         </div>
         <div class="pad" data-snake-pad>
-          <button type="button" class="btn" data-dir="up" aria-label="Up">▲</button>
-          <button type="button" class="btn" data-dir="left" aria-label="Left">◀</button>
-          <button type="button" class="btn" data-dir="right" aria-label="Right">▶</button>
-          <button type="button" class="btn" data-dir="down" aria-label="Down">▼</button>
+          <button type="button" class="btn" data-dir="up" aria-label="Up">
+            ▲
+          </button>
+          <button type="button" class="btn" data-dir="left" aria-label="Left">
+            ◀
+          </button>
+          <button type="button" class="btn" data-dir="right" aria-label="Right">
+            ▶
+          </button>
+          <button type="button" class="btn" data-dir="down" aria-label="Down">
+            ▼
+          </button>
         </div>
         <p class="note">
-          A tab icon is 16 pixels square, or 32 on a sharp screen, so the board is 16 cells across, two pixels each. Phones
-          often don't show tab icons at all; there, the mirror above is all you get.
+          A tab icon is 16 pixels square, or 32 on a sharp screen, so the board is 16 cells across, two pixels each.
+          Phones often don't show tab icons at all; there, the mirror above is all you get.
         </p>
       </section>
 
@@ -96,14 +130,22 @@ const programs = [
         <h1 id="h-clock">A clock that slows down when you leave</h1>
         <p>
           The icon is a clock with a sweeping second hand, redrawn by a timer four times a second. Switch to another tab
-          and watch this one's icon and title. Browsers save power by holding back timers in background tabs, so the hand
-          stops sweeping and starts to jump. Come back and this page shows what it managed while you were gone.
+          and watch this one's icon and title. Browsers save power by holding back timers in background tabs, so the
+          hand stops sweeping and starts to jump. Come back and this page shows what it managed while you were gone.
         </p>
         <div class="row">
-          <button type="button" class="btn" data-clock-hum aria-pressed="false">Hum</button>
+          <button type="button" class="btn" data-clock-hum aria-pressed="false">
+            Hum
+          </button>
           <dl class="readout">
-            <div><dt>Redraws, last second</dt><dd data-clock-rate>0</dd></div>
-            <div><dt>Away</dt><dd data-clock-away>Not yet</dd></div>
+            <div>
+              <dt>Redraws, last second</dt>
+              <dd data-clock-rate>0</dd>
+            </div>
+            <div>
+              <dt>Away</dt>
+              <dd data-clock-away>Not yet</dd>
+            </div>
           </dl>
         </div>
         <p class="note">
@@ -125,7 +167,9 @@ const programs = [
           <li>
             Hidden for five minutes, silent for 30 seconds, with a chain of five or more timers: at most once a minute.
           </li>
-          <li><code>requestAnimationFrame</code> doesn't run at all in a hidden tab.</li>
+          <li>
+            <code>requestAnimationFrame</code> doesn't run at all in a hidden tab.
+          </li>
         </ul>
         <p>Firefox and Safari have rules of their own. The chart shows what your browser actually did.</p>
       </section>
@@ -133,30 +177,37 @@ const programs = [
       <section class="panel" data-panel="paint" hidden aria-labelledby="h-paint">
         <h1 id="h-paint">Paint your own</h1>
         <p>
-          Draw on the big icon above, and your tab follows along. The picture is kept in this browser; <strong
-            >Save</strong
-          > downloads it as a 32 pixel PNG.
+          Draw on the big icon above, and your tab follows along. The picture is kept in this browser;{' '}
+          <strong>Save</strong> downloads it as a 32 pixel PNG.
         </p>
         <div class="row" role="group" aria-label="Tool">
-          <button type="button" class="btn" data-paint-tool="pen" aria-pressed="true">Pen</button>
-          <button type="button" class="btn" data-paint-tool="fill" aria-pressed="false">Fill</button>
-          <button type="button" class="btn" data-paint-tool="erase" aria-pressed="false">Eraser</button>
-          <button type="button" class="btn" data-paint-clear>Clear</button>
-          <button type="button" class="btn" data-paint-save>Save</button>
+          <button type="button" class="btn" data-paint-tool="pen" aria-pressed="true">
+            Pen
+          </button>
+          <button type="button" class="btn" data-paint-tool="fill" aria-pressed="false">
+            Fill
+          </button>
+          <button type="button" class="btn" data-paint-tool="erase" aria-pressed="false">
+            Eraser
+          </button>
+          <button type="button" class="btn" data-paint-clear>
+            Clear
+          </button>
+          <button type="button" class="btn" data-paint-save>
+            Save
+          </button>
         </div>
         <div class="palette" role="group" aria-label="Color">
-          {
-            PALETTE.map((color, i) => (
-              <button
-                type="button"
-                class="swatch"
-                style={`--swatch: ${color}`}
-                data-paint-color={color}
-                aria-pressed={i === 9 ? 'true' : 'false'}
-                aria-label={`Color ${color}`}
-              />
-            ))
-          }
+          {PALETTE.map((color, i) => (
+            <button
+              type="button"
+              class="swatch"
+              style={`--swatch: ${color}`}
+              data-paint-color={color}
+              aria-pressed={i === 9 ? 'true' : 'false'}
+              aria-label={`Color ${color}`}
+            />
+          ))}
         </div>
       </section>
 
@@ -164,34 +215,43 @@ const programs = [
         <h1 id="h-native">An icon that moves by itself</h1>
         <p>
           Every other program here redraws the icon from script, frame after frame. This one hands the browser a single
-          SVG file with an animation inside, and stops. If the icon in your tab spins, your browser animates icons on its
-          own: Firefox does. If it sits still, your browser draws the first frame and keeps it: Chromium does, and a
+          SVG file with an animation inside, and stops. If the icon in your tab spins, your browser animates icons on
+          its own: Firefox does. If it sits still, your browser draws the first frame and keeps it: Chromium does, and a
           request to change that was closed as not planned.
         </p>
         <div class="row" role="group" aria-label="Animation">
-          <button type="button" class="btn" data-native="css" aria-pressed="true">CSS animation</button>
-          <button type="button" class="btn" data-native="smil" aria-pressed="false">SMIL animation</button>
+          <button type="button" class="btn" data-native="css" aria-pressed="true">
+            CSS animation
+          </button>
+          <button type="button" class="btn" data-native="smil" aria-pressed="false">
+            SMIL animation
+          </button>
         </div>
-        <p class="note">The big copy above is the same file shown as an image in the page, where every browser animates it.</p>
+        <p class="note">
+          The big copy above is the same file shown as an image in the page, where every browser animates it.
+        </p>
       </section>
 
       <section class="panel" data-panel="gamut" hidden aria-labelledby="h-gamut">
         <h1 id="h-gamut">Wide color and HDR, in the tab</h1>
         <p>
-          Two test icons, written byte by byte by this page as PNG files that name their color space in a <code
-            >cICP</code
-          > chunk. Put one in the tab, then compare the tab with the copies here.
+          Two test icons, written byte by byte by this page as PNG files that name their color space in a{' '}
+          <code>cICP</code> chunk. Put one in the tab, then compare the tab with the copies here.
         </p>
         <div class="row" role="group" aria-label="Test icon">
-          <button type="button" class="btn" data-gamut="p3" aria-pressed="true">Wide color</button>
-          <button type="button" class="btn" data-gamut="hdr" aria-pressed="false">HDR</button>
+          <button type="button" class="btn" data-gamut="p3" aria-pressed="true">
+            Wide color
+          </button>
+          <button type="button" class="btn" data-gamut="hdr" aria-pressed="false">
+            HDR
+          </button>
         </div>
         <div class="specimens">
           <figure>
             <img alt="Wide color test icon" data-gamut-img="p3" width="32" height="32" />
             <figcaption>
-              Left, the reddest red in sRGB. Right, the reddest red in Display P3. On a wide-gamut screen, in a browser that
-              keeps the color, the right half is redder.
+              Left, the reddest red in sRGB. Right, the reddest red in Display P3. On a wide-gamut screen, in a browser
+              that keeps the color, the right half is redder.
             </figcaption>
           </figure>
           <figure>
@@ -204,8 +264,14 @@ const programs = [
           </figure>
         </div>
         <dl class="readout">
-          <div><dt>Screen gamut</dt><dd data-gamut-gamut>Unknown</dd></div>
-          <div><dt>Dynamic range</dt><dd data-gamut-range>Unknown</dd></div>
+          <div>
+            <dt>Screen gamut</dt>
+            <dd data-gamut-gamut>Unknown</dd>
+          </div>
+          <div>
+            <dt>Dynamic range</dt>
+            <dd data-gamut-range>Unknown</dd>
+          </div>
         </dl>
         <p class="note" data-gamut-note>
           If the copies here show the difference and the tab doesn't, your browser flattens its tab icons. If neither
@@ -216,21 +282,30 @@ const programs = [
       <section class="panel" data-panel="strip" hidden aria-labelledby="h-strip">
         <h1 id="h-strip">A sign across your tabs</h1>
         <p>
-          Open this page in a few more tabs, side by side, with the <strong>+</strong> above or the link below. Every tab
-          showing Strip joins the sign and holds one letter, and the message scrolls from tab to tab along your tab strip.
+          Open this page in a few more tabs, side by side, with the <strong>+</strong> above or the link below. Every
+          tab showing Strip joins the sign and holds one letter, and the message scrolls from tab to tab along your tab
+          strip.
         </p>
         <div class="row">
-          <a class="btn" href="/favicon-lab/#strip" target="_blank" data-strip-open>Open another tab</a>
+          <a class="btn" href="/favicon-lab/#strip" target="_blank" data-strip-open>
+            Open another tab
+          </a>
           <div class="row" role="group" aria-label="Sign">
-            <button type="button" class="btn" data-strip-mode="run" aria-pressed="true">Run the sign</button>
-            <button type="button" class="btn" data-strip-mode="number" aria-pressed="false">Number the tabs</button>
+            <button type="button" class="btn" data-strip-mode="run" aria-pressed="true">
+              Run the sign
+            </button>
+            <button type="button" class="btn" data-strip-mode="number" aria-pressed="false">
+              Number the tabs
+            </button>
           </div>
         </div>
         <label class="field">
           <span>Message</span>
           <input type="text" maxlength="60" spellcheck="false" autocomplete="off" data-strip-text />
         </label>
-        <p class="status" data-strip-status aria-live="polite">This is the only tab on the sign.</p>
+        <p class="status" data-strip-status aria-live="polite">
+          This is the only tab on the sign.
+        </p>
         <ol class="roster" data-strip-roster></ol>
         <p class="note">
           Tabs take their places in the order they joined, which is usually left to right. If yours are out of order,
@@ -244,8 +319,8 @@ const programs = [
       <p>
         A tab icon is a <code>&lt;link rel="icon"&gt;</code> in the page's head. Point it at a new picture and the
         browser repaints the tab. Every program here but Native and Gamut draws a 32 by 32 canvas, turns it into a PNG
-        data URL, and swaps the link, up to about ten times a second. The big icon at the top is that same canvas, scaled
-        up without smoothing.
+        data URL, and swaps the link, up to about ten times a second. The big icon at the top is that same canvas,
+        scaled up without smoothing.
       </p>
       <p>
         The tabs on the sign find each other over a <code>BroadcastChannel</code>. A hidden tab's timers are held back,
@@ -253,10 +328,9 @@ const programs = [
         own letter from the clock.
       </p>
       <p class="credits">
-        Labels set in <a href="https://fonts.google.com/specimen/Silkscreen">Silkscreen</a> by Jason Kottke, SIL Open Font
-        License, served from this site. The letters on the sign are a 5 by 7 font drawn for this page. <a href="/"
-          >Back to thesandbox.page</a
-        >
+        Labels set in <a href="https://fonts.google.com/specimen/Silkscreen">Silkscreen</a> by Jason Kottke, SIL Open
+        Font License, served from this site. The letters on the sign are a 5 by 7 font drawn for this page.{' '}
+        <a href="/">Back to thesandbox.page</a>
       </p>
     </footer>
   </div>
@@ -402,8 +476,8 @@ const programs = [
     flex: none;
     width: var(--size);
     height: var(--size);
-    background: repeating-conic-gradient(light-dark(#e6e8ec, #2a2c31) 0 25%, transparent 0 50%) 0 0 / calc(var(--size) / 8)
-      calc(var(--size) / 8);
+    background: repeating-conic-gradient(light-dark(#e6e8ec, #2a2c31) 0 25%, transparent 0 50%) 0 0 /
+      calc(var(--size) / 8) calc(var(--size) / 8);
   }
 
   .faviconlab .tab-icon canvas,
@@ -422,7 +496,8 @@ const programs = [
     pointer-events: none;
     background:
       linear-gradient(to right, light-dark(#0000000f, #ffffff0f) 1px, transparent 1px) 0 0 / calc(var(--size) / 32) 100%,
-      linear-gradient(to bottom, light-dark(#0000000f, #ffffff0f) 1px, transparent 1px) 0 0 / 100% calc(var(--size) / 32);
+      linear-gradient(to bottom, light-dark(#0000000f, #ffffff0f) 1px, transparent 1px) 0 0 / 100%
+        calc(var(--size) / 32);
   }
 
   .faviconlab .tab-icon.is-smooth img {
@@ -594,7 +669,9 @@ const programs = [
   }
 
   .faviconlab code {
-    font: 0.9em ui-monospace, monospace;
+    font:
+      0.9em ui-monospace,
+      monospace;
   }
 
   .faviconlab a {

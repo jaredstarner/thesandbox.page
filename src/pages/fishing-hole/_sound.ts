@@ -60,7 +60,8 @@ export class Sound {
   }
 
   private build(): void {
-    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const Ctx =
+      window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctx) return;
     const ctx = new Ctx();
     this.ctx = ctx;
@@ -121,7 +122,15 @@ export class Sound {
   }
 
   /** A burst of filtered noise with a quick decay. */
-  private burst(type: BiquadFilterType, freq: number, q: number, level: number, length: number, at = 0, echo = false): void {
+  private burst(
+    type: BiquadFilterType,
+    freq: number,
+    q: number,
+    level: number,
+    length: number,
+    at = 0,
+    echo = false,
+  ): void {
     const ctx = this.ctx!;
     const t = ctx.currentTime + at;
     const src = ctx.createBufferSource();
@@ -142,7 +151,15 @@ export class Sound {
   }
 
   /** A pitched blip that glides from f0 to f1. */
-  private tone(wave: OscillatorType, f0: number, f1: number, level: number, length: number, at = 0, echo = false): void {
+  private tone(
+    wave: OscillatorType,
+    f0: number,
+    f1: number,
+    level: number,
+    length: number,
+    at = 0,
+    echo = false,
+  ): void {
     const ctx = this.ctx!;
     const t = ctx.currentTime + at;
     const osc = ctx.createOscillator();

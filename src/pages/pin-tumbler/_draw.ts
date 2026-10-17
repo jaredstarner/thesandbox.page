@@ -83,7 +83,6 @@ export const toWorld = (L: Layout, x: number, y: number) => ({ x: (x - L.ox) / L
 const BRASS = { lit: '#d9b264', mid: '#b98d3e', deep: '#7c5a22', edge: '#4a3410' };
 const PLUG = { lit: '#e4c27a', mid: '#c79d4c', deep: '#86622a', edge: '#4f3912' };
 const STEEL = { lit: '#eef1f3', mid: '#a7adb3', deep: '#5d636a', edge: '#2c3035' };
-const VOID = '#141210';
 const SHEAR_INK = '#ef6a3a';
 
 // ---------------------------------------------------------------------------
@@ -385,15 +384,13 @@ function drawDriver(g: CanvasRenderingContext2D, x: number, pin: Pin, px: number
   } else if (pin.driver === 'serrated') {
     g.moveTo(l, t);
     g.lineTo(l + w, t);
-    let y = b + 1.05;
-    g.lineTo(l + w, y);
+    g.lineTo(l + w, b + 1.05);
     for (const s of [0.93, 0.62, 0.31]) {
       g.lineTo(l + w - 0.22, b + s - 0.08);
       g.lineTo(l + w, b + s - 0.16);
     }
     g.lineTo(l + w, b);
     g.lineTo(l, b);
-    y = b;
     for (const s of [0.31, 0.62, 0.93]) {
       g.lineTo(l, b + s - 0.16);
       g.lineTo(l + 0.22, b + s - 0.08);
@@ -615,7 +612,8 @@ export function drawScene(g: CanvasRenderingContext2D, L: Layout, lock: Lock, be
     g.lineTo(len - 3.4, y);
     g.stroke();
   }
-  for (const p of lock.pins) voidRect(g, p.x - slip - PIN_D / 2, KW_TOP - 0.01, PIN_D, SHEAR - KW_TOP + 0.01, clear, px);
+  for (const p of lock.pins)
+    voidRect(g, p.x - slip - PIN_D / 2, KW_TOP - 0.01, PIN_D, SHEAR - KW_TOP + 0.01, clear, px);
   g.restore();
 
   // The cam at the back of the plug.
@@ -983,7 +981,14 @@ function drawLabels(g: CanvasRenderingContext2D, L: Layout, lock: Lock, o: DrawO
   if (L.wide) {
     callout('Spring', sx(first.x - 0.6), sy(CHAMBER_TOP - 1.6), leftX, sy(CHAMBER_TOP - 0.6), 'right');
     callout('Driver pin', sx(first.x - 0.9), sy(first.drvY + DRIVER * 0.5), leftX, sy(SHEAR + 3.4), 'right');
-    callout('Key pin', sx(first.x - lock.slip - 0.9), sy(first.keyY + first.key * 0.6), leftX, sy(SHEAR - 2.0), 'right');
+    callout(
+      'Key pin',
+      sx(first.x - lock.slip - 0.9),
+      sy(first.keyY + first.key * 0.6),
+      leftX,
+      sy(SHEAR - 2.0),
+      'right',
+    );
     callout('Plug', sx(0.4), sy(-R + 1.0), leftX, sy(-R + 0.4), 'right');
     callout('Tension wrench', sx(-3.4), sy(HOUSING_BOT - 3.6), leftX, sy(HOUSING_BOT - 3.6), 'right');
     callout('Shear line', sx(lock.length + 1.4), sy(SHEAR), sx(lock.length + 2.6), sy(SHEAR + 1.4), 'left');

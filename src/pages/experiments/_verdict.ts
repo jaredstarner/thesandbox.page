@@ -73,7 +73,11 @@ export function assess(findings: Finding[], hasRequires: boolean, requiredWithou
   const failures = tested.filter(failed);
   if (failures.length === 0) return { verdict: 'functional', word: VERDICT_WORDS.functional, reason: '' };
   if (!hasRequires) {
-    return { verdict: 'uncertain', word: VERDICT_WORDS.uncertain, reason: `${why(failures)}; requirements not cataloged` };
+    return {
+      verdict: 'uncertain',
+      word: VERDICT_WORDS.uncertain,
+      reason: `${why(failures)}; requirements not cataloged`,
+    };
   }
   const requiredFailures = failures.filter((f) => f.required);
   if (requiredFailures.length > 0) {

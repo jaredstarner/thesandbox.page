@@ -8,7 +8,8 @@ export const DIGIT_DRUM = '0123456789';
 const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
 
 /** Splits text into what a reader sees as single characters, so accents and combined glyphs share a cell. */
-export const glyphs = (text: string): string[] => Array.from(segmenter.segment(text.normalize('NFC')), (s) => s.segment);
+export const glyphs = (text: string): string[] =>
+  Array.from(segmenter.segment(text.normalize('NFC')), (s) => s.segment);
 
 const random = (n: number) => Math.floor(Math.random() * n);
 

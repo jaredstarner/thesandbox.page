@@ -2,7 +2,16 @@
 
 import { initChat, initProof } from './_chatter';
 import { clock, type Hell, type Stats } from './_hell';
-import { cookieWall, initNewsletter, initPushAsk, initSticky, newsletter, postitial, prestitial, pushAsk } from './_interrupts';
+import {
+  cookieWall,
+  initNewsletter,
+  initPushAsk,
+  initSticky,
+  newsletter,
+  postitial,
+  prestitial,
+  pushAsk,
+} from './_interrupts';
 import { initShift } from './_shift';
 import { initAudio, setMuted, sfx } from './_sound';
 import { VIOLATIONS } from './_tally';
@@ -314,7 +323,11 @@ export function startAdHell(root: HTMLElement): void {
       if (video.pip && large.some((ad) => onScreen(ad))) hell.see('sticky-video-inline');
     }
     if (hud.cls) {
-      hud.cls.textContent = shift.clsSupported ? (stats.cls == null ? '0.00' : stats.cls.toFixed(2)) : String(stats.shoves);
+      hud.cls.textContent = shift.clsSupported
+        ? stats.cls == null
+          ? '0.00'
+          : stats.cls.toFixed(2)
+        : String(stats.shoves);
     }
   }, 250);
 
@@ -403,7 +416,8 @@ export function startAdHell(root: HTMLElement): void {
     try {
       const stored = Number(localStorage.getItem(BEST_KEY));
       if (stored > 0) best = stored;
-      if (!blockedEver && (best == null || finishMs < best)) localStorage.setItem(BEST_KEY, String(Math.round(finishMs)));
+      if (!blockedEver && (best == null || finishMs < best))
+        localStorage.setItem(BEST_KEY, String(Math.round(finishMs)));
     } catch {
       // Storage can be off; the report doesn't need it.
     }
@@ -411,12 +425,12 @@ export function startAdHell(root: HTMLElement): void {
       note.textContent = blockedEver
         ? 'You used the ad blocker, which is how most people read the web.'
         : jumped
-          ? "You skipped the story and jumped to the recipe. Everyone does. Wren understands."
+          ? 'You skipped the story and jumped to the recipe. Everyone does. Wren understands.'
           : best != null && finishMs < best
-          ? `A new best: your last best was ${clock(best)}.`
-          : best != null
-            ? `Your best is ${clock(best)}.`
-            : 'All the way through, with every ad on. Respect.';
+            ? `A new best: your last best was ${clock(best)}.`
+            : best != null
+              ? `Your best is ${clock(best)}.`
+              : 'All the way through, with every ad on. Respect.';
     }
     try {
       dialog.showModal();

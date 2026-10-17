@@ -20,15 +20,15 @@ An experiment that wants its own font adds it to `fonts` in `astro.config.mjs` a
 }
 ```
 
-| Field | Required | Notes |
-| :--- | :--- | :--- |
-| `title` | Yes | Shown on the home page and in the list |
-| `summary` | Yes | One sentence |
-| `date` | Yes | Date first shipped, `YYYY-MM-DD` |
-| `tags` | No | Techniques or APIs the experiment uses |
-| `requires` | No | The tags it cannot function without; every other tag is an enhancement. `/experiments/` tests them in the visitor's browser |
-| `issue` | No | Issue number, when there is one |
-| `plot` | Yes | Its plot on the home page's survey map: the highest plot in use plus one. Never change or reuse another experiment's plot (see `src/home/README.md`) |
+| Field      | Required | Notes                                                                                                                                                |
+| :--------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`    | Yes      | Shown on the home page and in the list                                                                                                               |
+| `summary`  | Yes      | One sentence                                                                                                                                         |
+| `date`     | Yes      | Date first shipped, `YYYY-MM-DD`                                                                                                                     |
+| `tags`     | No       | Techniques or APIs the experiment uses                                                                                                               |
+| `requires` | No       | The tags it cannot function without; every other tag is an enhancement. `/experiments/` tests them in the visitor's browser                          |
+| `issue`    | No       | Issue number, when there is one                                                                                                                      |
+| `plot`     | Yes      | Its plot on the home page's survey map: the highest plot in use plus one. Never change or reuse another experiment's plot (see `src/home/README.md`) |
 
 `/experiments/` surveys tags against its test table, `src/pages/experiments/_tests.ts`. Use its tag names where one fits (common aliases are accepted). If an experiment depends on a browser API the table lacks, add an entry for it: a presence test that never prompts. Without `requires`, the register can still say an object works in a browser, but not why it might not.
 

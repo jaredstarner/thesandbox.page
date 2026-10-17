@@ -43,7 +43,8 @@ export class LockSound {
       if (this.ctx.state === 'suspended') void this.ctx.resume();
       return;
     }
-    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const AC =
+      window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AC) return;
     const ctx = new AC();
     this.ctx = ctx;

@@ -201,7 +201,8 @@ export function startWordBrush(root: HTMLElement): void {
     last = now;
     if (playing) playStep(dt);
     const changed = mask.sync();
-    if (changed) rowsDirty = rowsDirty ? [Math.min(rowsDirty[0], changed[0]), Math.max(rowsDirty[1], changed[1])] : changed;
+    if (changed)
+      rowsDirty = rowsDirty ? [Math.min(rowsDirty[0], changed[0]), Math.max(rowsDirty[1], changed[1])] : changed;
     if (rowsDirty && ready) {
       updateRows(rowsDirty);
       rowsDirty = null;
@@ -395,9 +396,9 @@ export function startWordBrush(root: HTMLElement): void {
     if (radio) radio.checked = true;
     sizeRing();
   }
-  root.querySelectorAll<HTMLInputElement>('[data-tool]').forEach((r) =>
-    r.addEventListener('change', () => setMode(r.value as Mode)),
-  );
+  root
+    .querySelectorAll<HTMLInputElement>('[data-tool]')
+    .forEach((r) => r.addEventListener('change', () => setMode(r.value as Mode)));
 
   function setBrush(width: number): void {
     state.brush = Math.max(24, Math.min(260, width));

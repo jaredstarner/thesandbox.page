@@ -80,7 +80,7 @@ function decodeRow(page: Page, row: number): Cell[] {
     if (b < 0x20) {
       const showHeld = hold && graphics;
       cell = { code: showHeld ? held : 0x20, mosaic: showHeld, separated: heldSep, fg, bg, flash, conceal, double };
-    } else if (graphics && (b & 0x20)) {
+    } else if (graphics && b & 0x20) {
       held = b;
       heldSep = separated;
       cell = { code: b, mosaic: true, separated, fg, bg, flash, conceal, double };

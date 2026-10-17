@@ -13,13 +13,20 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
 
   <main class="seismo" data-seismo data-land={landBitmap()}>
     <header class="plate">
-      <a class="home" href="/">thesandbox.page</a>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
       <h1>Seismograph</h1>
       <p class="sta" data-sta-line>
-        <span class="code" data-sta-code>IU {DEFAULT_STATION} 00 LHZ</span>
+        <span class="code" data-sta-code>
+          IU {DEFAULT_STATION} 00 LHZ
+        </span>
         <span class="where" data-sta-where></span>
       </p>
-      <p class="lamp" data-lamp data-state="wait"><span class="led" aria-hidden="true"></span><span data-lamp-text>Calling the station</span></p>
+      <p class="lamp" data-lamp data-state="wait">
+        <span class="led" aria-hidden="true"></span>
+        <span data-lamp-text>Calling the station</span>
+      </p>
     </header>
 
     <section class="sheet" aria-label="The last day of ground motion, one line at a time">
@@ -30,21 +37,33 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
       <div class="paper" data-paper>
         <canvas class="ink" data-ink aria-hidden="true"></canvas>
         <div class="marks" data-marks></div>
-        <div class="pen" data-pen hidden><span class="nib"></span><span class="tag" data-pen-tag></span></div>
-        <div class="cursor" data-cursor hidden><span data-cursor-text></span></div>
+        <div class="pen" data-pen hidden>
+          <span class="nib"></span>
+          <span class="tag" data-pen-tag></span>
+        </div>
+        <div class="cursor" data-cursor hidden>
+          <span data-cursor-text></span>
+        </div>
         <div class="playhead" data-playhead hidden></div>
         <p class="blank" data-blank hidden></p>
       </div>
       <div class="legend">
-        <p><span class="lt">Left margin</span> your local time</p>
-        <p><span class="lt">Right margin</span> UTC</p>
+        <p>
+          <span class="lt">Left margin</span> your local time
+        </p>
+        <p>
+          <span class="lt">Right margin</span> UTC
+        </p>
         <p>Read it like a page: each line runs on from the end of the one above</p>
       </div>
     </section>
 
     <aside class="rail" aria-label="Station, controls, and quakes on this record">
       <figure class="dial">
-        <canvas data-dial aria-label="The world as seen from the station: distance from the centre is distance over the Earth's surface"></canvas>
+        <canvas
+          data-dial
+          aria-label="The world as seen from the station: distance from the centre is distance over the Earth's surface"
+        ></canvas>
         <figcaption>
           The world drawn around the station. Rings are distance over the surface, every 30°; between 103° and 140° the
           core casts a shadow that direct P waves can't reach.
@@ -55,40 +74,56 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
         <label class="field">
           <span>Station</span>
           <select data-station>
-            {
-              STATIONS.map((s) => (
-                <option value={s.code} selected={s.code === DEFAULT_STATION}>
-                  {s.code}, {s.place}, {s.region}
-                </option>
-              ))
-            }
+            {STATIONS.map((s) => (
+              <option value={s.code} selected={s.code === DEFAULT_STATION}>
+                {s.code}, {s.place}, {s.region}
+              </option>
+            ))}
           </select>
         </label>
         <fieldset class="field rows">
           <legend>Each line</legend>
           <div class="seg">
-            <label><input type="radio" name="sg-row" value="15" /><span>15 min</span></label>
-            <label><input type="radio" name="sg-row" value="30" checked /><span>30 min</span></label>
-            <label><input type="radio" name="sg-row" value="60" /><span>1 hour</span></label>
+            <label>
+              <input type="radio" name="sg-row" value="15" />
+              <span>15 min</span>
+            </label>
+            <label>
+              <input type="radio" name="sg-row" value="30" checked />
+              <span>30 min</span>
+            </label>
+            <label>
+              <input type="radio" name="sg-row" value="60" />
+              <span>1 hour</span>
+            </label>
           </div>
         </fieldset>
         <div class="field gain">
           <span id="sg-gain-label">Magnify</span>
           <div class="knob" role="group" aria-labelledby="sg-gain-label">
-            <button type="button" data-gain="-1" aria-label="Less">-</button>
+            <button type="button" data-gain="-1" aria-label="Less">
+              -
+            </button>
             <output data-gain-out>×1</output>
-            <button type="button" data-gain="1" aria-label="More">+</button>
+            <button type="button" data-gain="1" aria-label="More">
+              +
+            </button>
           </div>
         </div>
         <button type="button" class="listen" data-listen disabled>
-          <span class="glyph" aria-hidden="true"></span><span data-listen-text>Listen to the day</span>
+          <span class="glyph" aria-hidden="true"></span>
+          <span data-listen-text>Listen to the day</span>
         </button>
-        <p class="hint" data-listen-hint>A day of ground motion sped up 6,000 times, so the slow sway becomes sound.</p>
+        <p class="hint" data-listen-hint>
+          A day of ground motion sped up 6,000 times, so the slow sway becomes sound.
+        </p>
       </div>
 
       <section class="quakes">
         <h2>Quakes on this record</h2>
-        <p class="note" data-quakes-note>Looking up the last day's earthquakes</p>
+        <p class="note" data-quakes-note>
+          Looking up the last day's earthquakes
+        </p>
         <ol data-quakes></ol>
       </section>
 
@@ -144,8 +179,7 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
     font: 400 14px/1.45 var(--f);
     background:
       radial-gradient(1200px 600px at 30% -10%, rgb(255 240 210 / 0.06), transparent 70%),
-      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.012) 0 1px, transparent 1px 3px),
-      var(--case);
+      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.012) 0 1px, transparent 1px 3px), var(--case);
   }
 
   .seismo *,
@@ -277,8 +311,7 @@ import { STATIONS, DEFAULT_STATION } from './_stations';
     position: relative;
     background:
       radial-gradient(140% 90% at 50% 0%, rgb(255 255 255 / 0.35), transparent 60%),
-      linear-gradient(90deg, var(--paper-edge), var(--paper) 3%, var(--paper) 97%, var(--paper-edge)),
-      var(--paper);
+      linear-gradient(90deg, var(--paper-edge), var(--paper) 3%, var(--paper) 97%, var(--paper-edge)), var(--paper);
     border-radius: 2px;
     box-shadow:
       0 1px 0 rgb(255 255 255 / 0.4) inset,

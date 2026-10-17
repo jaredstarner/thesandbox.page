@@ -34,7 +34,12 @@ export function startPlate(root: HTMLElement): void {
   const style = getComputedStyle(root);
   const sandRgb = cssColor(style.getPropertyValue('--color-sand'));
   const waveRgb = cssColor(style.getPropertyValue('--color-accent'));
-  const palette = Uint32Array.from([0.72, 0.86, 1, 1.12], (k) => pack(sandRgb.map((c) => c * k), 255));
+  const palette = Uint32Array.from([0.72, 0.86, 1, 1.12], (k) =>
+    pack(
+      sandRgb.map((c) => c * k),
+      255,
+    ),
+  );
 
   let image = ctx.createImageData(1, 1);
   let pixels = new Uint32Array(image.data.buffer);

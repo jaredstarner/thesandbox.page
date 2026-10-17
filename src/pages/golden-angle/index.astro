@@ -19,7 +19,9 @@ const arms = [8, 13, 21, 34];
       <p class="hint">scroll to twist</p>
 
       <div class="head" aria-hidden="true">
-        {Array.from({ length: SEEDS }, () => <i />)}
+        {Array.from({ length: SEEDS }, () => (
+          <i />
+        ))}
       </div>
 
       <div class="readout">
@@ -29,14 +31,14 @@ const arms = [8, 13, 21, 34];
 
       <fieldset class="arms">
         <legend>Trace every</legend>
-        <label><input type="radio" name="arm" value="0" checked /> none</label>
-        {
-          arms.map((n) => (
-            <label>
-              <input type="radio" name="arm" value={n} data-arm={n} /> {n}th
-            </label>
-          ))
-        }
+        <label>
+          <input type="radio" name="arm" value="0" checked /> none
+        </label>
+        {arms.map((n) => (
+          <label>
+            <input type="radio" name="arm" value={n} data-arm={n} /> {n}th
+          </label>
+        ))}
       </fieldset>
 
       <p class="unsupported">
@@ -53,8 +55,8 @@ const arms = [8, 13, 21, 34];
       either way and the seeds fall into spokes.
     </p>
     <p>
-      This page has no JavaScript. The seed head is {SEEDS} empty <code>&lt;i&gt;</code> elements with no classes and
-      no inline styles. Each one works out its own place from <code>sibling-index()</code> and
+      This page has no JavaScript. The seed head is {SEEDS} empty <code>&lt;i&gt;</code> elements with no classes and no
+      inline styles. Each one works out its own place from <code>sibling-index()</code> and
       <code>sibling-count()</code>, which became Baseline in 2026:
     </p>
     <pre><code>{`i {

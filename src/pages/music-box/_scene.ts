@@ -165,7 +165,8 @@ export function paintPaper(): HTMLCanvasElement {
     const y = rand() * S;
     const len = 2 + rand() * 7;
     const a = rand() * Math.PI;
-    ctx.strokeStyle = rand() < 0.5 ? `rgba(120, 90, 50, ${0.04 + rand() * 0.06})` : `rgba(255, 252, 240, ${0.15 + rand() * 0.2})`;
+    ctx.strokeStyle =
+      rand() < 0.5 ? `rgba(120, 90, 50, ${0.04 + rand() * 0.06})` : `rgba(255, 252, 240, ${0.15 + rand() * 0.2})`;
     ctx.lineWidth = 0.6;
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -705,7 +706,14 @@ export function drawBench(
   drawCrank(ctx, L, v);
 
   // A last breath of lamp falloff over everything, so brass and paper sit in the same light.
-  const fall = ctx.createRadialGradient(L.w * 0.36, L.h * 0.32, L.h * 0.25, L.w * 0.36, L.h * 0.32, Math.hypot(L.w, L.h) * 0.75);
+  const fall = ctx.createRadialGradient(
+    L.w * 0.36,
+    L.h * 0.32,
+    L.h * 0.25,
+    L.w * 0.36,
+    L.h * 0.32,
+    Math.hypot(L.w, L.h) * 0.75,
+  );
   fall.addColorStop(0, 'rgba(0, 0, 0, 0)');
   fall.addColorStop(1, 'rgba(10, 5, 2, 0.4)');
   ctx.fillStyle = fall;

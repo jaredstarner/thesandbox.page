@@ -11,8 +11,12 @@ import BackHome from '../../theme/BackHome.astro';
 
   <div class="stage" data-plate>
     <div class="readout" aria-live="polite">
-      <p class="hz" data-hz>&nbsp;</p>
-      <p class="mode" data-mode>&nbsp;</p>
+      <p class="hz" data-hz>
+        &nbsp;
+      </p>
+      <p class="mode" data-mode>
+        &nbsp;
+      </p>
     </div>
 
     <div class="plate">
@@ -23,15 +27,27 @@ import BackHome from '../../theme/BackHome.astro';
 
     <div class="controls">
       <div class="tuner">
-        <button type="button" data-prev aria-label="Previous resonance">&lsaquo;</button>
+        <button type="button" data-prev aria-label="Previous resonance">
+          &lsaquo;
+        </button>
         <input type="range" min="0" max="1000" step="1" aria-label="Pitch" data-freq />
-        <button type="button" data-next aria-label="Next resonance">&rsaquo;</button>
+        <button type="button" data-next aria-label="Next resonance">
+          &rsaquo;
+        </button>
       </div>
       <div class="toggles">
-        <button type="button" data-sound aria-pressed="false">Sound off</button>
-        <button type="button" data-sing aria-pressed="false">Sing to it</button>
-        <button type="button" data-wave aria-pressed="false">Show the wave</button>
-        <button type="button" data-scatter>Scatter</button>
+        <button type="button" data-sound aria-pressed="false">
+          Sound off
+        </button>
+        <button type="button" data-sing aria-pressed="false">
+          Sing to it
+        </button>
+        <button type="button" data-wave aria-pressed="false">
+          Show the wave
+        </button>
+        <button type="button" data-scatter>
+          Scatter
+        </button>
       </div>
       <p class="status" data-status></p>
     </div>
@@ -41,14 +57,15 @@ import BackHome from '../../theme/BackHome.astro';
     <h1>Singing sand</h1>
     <p>
       In 1787 Ernst Chladni sprinkled sand on a metal plate, clamped it at the centre, and drew a violin bow along its
-      edge. The plate rang, and the sand ran off the parts that were shaking and piled up on the lines that weren't. Each
-      note left a different figure.
+      edge. The plate rang, and the sand ran off the parts that were shaking and piled up on the lines that weren't.
+      Each note left a different figure.
     </p>
     <p>
-      This plate is idealised. Each pattern is a pair of standing waves, <code>cos(nπx)·cos(mπy) ± cos(mπx)·cos(nπy)</code>,
-      and its pitch grows with <code>n² + m²</code>, as a real square plate's does. Only the modes that are still at the
-      centre are kept, since that's where the plate is bolted. Every mode answers the drive with a resonance peak, so
-      between peaks the plate barely moves, and the sand stops where it is.
+      This plate is idealised. Each pattern is a pair of standing waves,{' '}
+      <code>cos(nπx)·cos(mπy) ± cos(mπx)·cos(nπy)</code>, and its pitch grows with <code>n² + m²</code>, as a real
+      square plate's does. Only the modes that are still at the centre are kept, since that's where the plate is bolted.
+      Every mode answers the drive with a resonance peak, so between peaks the plate barely moves, and the sand stops
+      where it is.
     </p>
     <p>
       The sand follows two rules. Each grain gets a random kick in proportion to how hard its spot is shaking, and it

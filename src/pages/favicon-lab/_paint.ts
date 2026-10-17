@@ -174,7 +174,7 @@ export function createPaint(lab: Lab): Program {
       lab.present();
       // A drawing kept from before replaces the starter once it decodes.
       const run = ++loaded;
-      let saved: string | null = null;
+      let saved: string | null;
       try {
         saved = localStorage.getItem(STORE_KEY);
       } catch {

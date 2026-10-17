@@ -260,8 +260,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   'cross-document-view-transitions': {
     label: 'Cross-document view transitions',
     webFeature: 'cross-document-view-transitions',
-    test: () =>
-      present('onpagereveal' in window, 'the pagereveal event is supported', 'no pagereveal event'),
+    test: () => present('onpagereveal' in window, 'the pagereveal event is supported', 'no pagereveal event'),
   },
   'speculation-rules': {
     label: 'Speculation rules',
@@ -286,7 +285,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   popover: {
     label: 'Popover',
     webFeature: 'popover',
-    test: () => present('popover' in HTMLElement.prototype, 'the popover attribute is reflected', 'no popover attribute'),
+    test: () =>
+      present('popover' in HTMLElement.prototype, 'the popover attribute is reflected', 'no popover attribute'),
   },
   wasm: {
     label: 'WebAssembly',
@@ -309,12 +309,15 @@ export const TECHNIQUES: Record<string, Technique> = {
     webFeature: 'device-orientation-events',
     handling: 'Responds to how the device is held, and may ask for motion access.',
     test: () => {
-      if (typeof DeviceOrientationEvent !== 'function') return { state: 'absent', detail: 'DeviceOrientationEvent missing' };
+      if (typeof DeviceOrientationEvent !== 'function')
+        return { state: 'absent', detail: 'DeviceOrientationEvent missing' };
       const needsPermission =
         typeof (DeviceOrientationEvent as unknown as { requestPermission?: unknown }).requestPermission === 'function';
       return {
         state: 'detected',
-        detail: needsPermission ? 'present; requires permission, asked on a tap' : 'present; a sensor is not guaranteed',
+        detail: needsPermission
+          ? 'present; requires permission, asked on a tap'
+          : 'present; a sensor is not guaranteed',
       };
     },
   },

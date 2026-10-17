@@ -124,8 +124,26 @@ export function initChat(hell: Hell): { ping(): void } {
   return { ping };
 }
 
-const PEOPLE = ['Gary in Tulsa', 'Priya in Leeds', 'Tom in Duluth', 'Ana in Porto', 'Mo in Cork', 'Bea in Fresno', 'Kenji in Osaka', 'Lou in Hobart', 'Dee in Akron', 'Sven in Malmö'];
-const BUYS = ['a CRUMBTRONIC 3000', 'a LOAFLY free trial', 'SOKKIT smart socks (left only)', 'a SNOOZLE mattress', '100 BREADCOIN', 'the Slouchmore, again'];
+const PEOPLE = [
+  'Gary in Tulsa',
+  'Priya in Leeds',
+  'Tom in Duluth',
+  'Ana in Porto',
+  'Mo in Cork',
+  'Bea in Fresno',
+  'Kenji in Osaka',
+  'Lou in Hobart',
+  'Dee in Akron',
+  'Sven in Malmö',
+];
+const BUYS = [
+  'a CRUMBTRONIC 3000',
+  'a LOAFLY free trial',
+  'SOKKIT smart socks (left only)',
+  'a SNOOZLE mattress',
+  '100 BREADCOIN',
+  'the Slouchmore, again',
+];
 
 export function initProof(hell: Hell): { show(): void } {
   const layer = hell.root.querySelector<HTMLElement>('[data-proof]');

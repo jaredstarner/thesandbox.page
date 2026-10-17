@@ -747,7 +747,8 @@ export class Game implements Pond {
 
     const mx = this.angler.x - 4;
     const my = this.angler.top - 6;
-    if (this.state === 'charge') this.meter(layer, mx, my, this.power, this.power > 0.85 ? RED : this.power > 0.55 ? YELLOW : GREEN);
+    if (this.state === 'charge')
+      this.meter(layer, mx, my, this.power, this.power > 0.85 ? RED : this.power > 0.55 ? YELLOW : GREEN);
     if (this.state === 'hooked' && this.fight) {
       const t = this.fight.tension;
       const blink = this.fight.strain > 0.35 && Math.floor(this.time * 10) % 2 === 0;

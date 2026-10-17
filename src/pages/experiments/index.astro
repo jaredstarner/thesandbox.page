@@ -68,24 +68,42 @@ const stampStyle = (accession: string) => {
 const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:${leafRaked};--tex-watermark:${watermark};`;
 ---
 
-<Bare title="Accession register" description="The register of every object in thesandbox.page, surveyed in your browser." noindex>
+<Bare
+  title="Accession register"
+  description="The register of every object in thesandbox.page, surveyed in your browser."
+  noindex
+>
   <Fragment slot="head">
     <Font cssVariable="--font-register-form" preload />
     <Font cssVariable="--font-register-data" preload />
     <Font cssVariable="--font-register-entry" preload />
     <noscript>
       <style is:inline>
-        .cloth .row .cond-text { font-size: 0; }
-        .cloth .row .cond-text::after { content: 'Not surveyed (script disabled)'; font-size: 11px; }
-        .cloth .leaf .call-slip, .cloth .leaf .foot-actions { display: none; }
-        .cloth .row .light { visibility: hidden; }
+        .cloth .row .cond-text {
+          font-size: 0;
+        }
+        .cloth .row .cond-text::after {
+          content: 'Not surveyed (script disabled)';
+          font-size: 11px;
+        }
+        .cloth .leaf .call-slip,
+        .cloth .leaf .foot-actions {
+          display: none;
+        }
+        .cloth .row .light {
+          visibility: hidden;
+        }
       </style>
     </noscript>
   </Fragment>
 
   <div class="cloth" style={cssVars}>
-    <a class="skip" href="#folios">Skip to the register</a>
-    <p class="gilt" aria-hidden="true">Register of Objects · Vol. I · thesandbox.page</p>
+    <a class="skip" href="#folios">
+      Skip to the register
+    </a>
+    <p class="gilt" aria-hidden="true">
+      Register of Objects · Vol. I · thesandbox.page
+    </p>
 
     <main class="leaf">
       <header class="leaf-head">
@@ -93,26 +111,70 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
         <p class="folio-of">
           {folios.length <= 1 ? `Folio ${folios.length} of ${folios.length}` : `${folios.length} folios`}
         </p>
-        <p class="pencil">{total} {total === 1 ? 'object' : 'objects'} accessioned</p>
+        <p class="pencil">
+          {total} {total === 1 ? 'object' : 'objects'} accessioned
+        </p>
       </header>
 
       <section class="conditions" aria-labelledby="conditions-title">
         <h2 id="conditions-title">Survey Conditions</h2>
         <dl>
-          <div><dt>Browser (reported)</dt><dd data-env="browser">Not surveyed</dd></div>
-          <div><dt>Viewport</dt><dd data-env="viewport">Not surveyed</dd></div>
-          <div><dt>Color gamut</dt><dd data-env="gamut">Not surveyed</dd></div>
-          <div><dt>Dynamic range</dt><dd data-env="range">Not surveyed</dd></div>
-          <div><dt>Refresh rate</dt><dd data-env="refresh">Not surveyed</dd></div>
-          <div><dt>Pointer</dt><dd data-env="pointer">Not surveyed</dd></div>
-          <div><dt>Motion</dt><dd data-env="motion">Not surveyed</dd></div>
-          <div><dt>Contrast · scheme</dt><dd data-env="scheme">Not surveyed</dd></div>
-          <div><dt>Language · time zone</dt><dd data-env="locale">Not surveyed</dd></div>
-          <div><dt>Logical cores</dt><dd data-env="cores">Not surveyed</dd></div>
-          <div><dt>Device memory</dt><dd data-env="memory">Not surveyed</dd></div>
-          <div><dt>GPU</dt><dd data-env="gpu">Not surveyed</dd></div>
-          <div><dt>Microphone · camera</dt><dd data-env="permissions">Not surveyed</dd></div>
-          <div><dt>Network</dt><dd data-env="network">Not surveyed</dd></div>
+          <div>
+            <dt>Browser (reported)</dt>
+            <dd data-env="browser">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>Viewport</dt>
+            <dd data-env="viewport">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>Color gamut</dt>
+            <dd data-env="gamut">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>Dynamic range</dt>
+            <dd data-env="range">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>Refresh rate</dt>
+            <dd data-env="refresh">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>Pointer</dt>
+            <dd data-env="pointer">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>Motion</dt>
+            <dd data-env="motion">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>Contrast · scheme</dt>
+            <dd data-env="scheme">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>Language · time zone</dt>
+            <dd data-env="locale">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>Logical cores</dt>
+            <dd data-env="cores">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>Device memory</dt>
+            <dd data-env="memory">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>GPU</dt>
+            <dd data-env="gpu">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>Microphone · camera</dt>
+            <dd data-env="permissions">Not surveyed</dd>
+          </div>
+          <div>
+            <dt>Network</dt>
+            <dd data-env="network">Not surveyed</dd>
+          </div>
         </dl>
       </section>
 
@@ -125,152 +187,166 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
           <input type="checkbox" name="functional" disabled />
           <span>Only objects functional in this browser</span>
         </label>
-        <output class="call-tally" aria-hidden="true">{total} of {total} objects</output>
+        <output class="call-tally" aria-hidden="true">
+          {total} of {total} objects
+        </output>
       </form>
 
-      {
-        folios.length > 1 && (
-          <nav class="folio-index" aria-labelledby="folio-index-title">
-            <h2 id="folio-index-title">Index of folios</h2>
-            <ol>
-              {folios.map((folio) => (
-                <li>
-                  <a href={`#${folio.id}`}>{folio.label}</a>
-                  <span>
-                    Folio {folio.number} · {folio.entries.length} {folio.entries.length === 1 ? 'object' : 'objects'}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </nav>
-        )
-      }
+      {folios.length > 1 && (
+        <nav class="folio-index" aria-labelledby="folio-index-title">
+          <h2 id="folio-index-title">Index of folios</h2>
+          <ol>
+            {folios.map((folio) => (
+              <li>
+                <a href={`#${folio.id}`}>{folio.label}</a>
+                <span>
+                  Folio {folio.number} · {folio.entries.length} {folio.entries.length === 1 ? 'object' : 'objects'}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
 
       <div id="folios">
-        {
-          folios.map((folio) => {
-            const blanks = Math.max(0, FOLIO_MIN_LINES - folio.entries.length);
-            return (
-              <section class="folio" id={folio.id} aria-labelledby={`${folio.id}-title`}>
-                <h2 class="folio-head" id={`${folio.id}-title`}>
-                  {folio.label} <span>· Folio {folio.number}</span>
-                </h2>
-                <p class="folio-empty">{folio.label}: no matches</p>
-                <div class="sheet">
-                  <div class="col-heads" aria-hidden="true">
-                    <span>Line</span>
-                    <span>Accession No.</span>
-                    <span>Accessioned</span>
-                    <span>Object</span>
-                    <span>Medium</span>
-                    <span>Condition</span>
-                  </div>
-                  <ol class="rows">
-                    {folio.entries.map((entry) => {
-                      const techniques = medium(entry.tags, entry.requires);
-                      const objectClass = classify(entry.tags, entry.requires);
-                      return (
-                        <li
-                          class="row"
-                          id={entry.slug}
-                          data-acc={entry.accession}
-                          data-tags={entry.tags.join(' ')}
-                          data-requires={entry.requires?.join(' ')}
-                          data-class={objectClass.cls}
-                          data-search={searchText(entry, objectClass.word, techniques.map((t) => t.label))}
-                        >
-                          <span class="c-line">{entry.line}</span>
-                          <span class="c-acc">
-                            {entry.accession}
-                            <span class="acc-class">Class: {objectClass.word}</span>
-                          </span>
-                          <time class="c-date" datetime={entry.iso}>
-                            {formatEntryDate(entry.date)}
-                          </time>
-                          <div class="c-object">
-                            <a href={entry.href}>{entry.title}</a>
-                            <p>{entry.summary}</p>
-                            <details class="report">
-                              <summary>Condition report</summary>
-                              <dl class="r-body">
-                                <dt>Object class</dt>
-                                <dd>
-                                  <strong class="r-class">{objectClass.word}.</strong> {objectClass.reason}
-                                </dd>
-                                <dt>Handling</dt>
-                                <dd>{objectClass.handling.join(' ')}</dd>
-                                <dt>Evidence</dt>
-                                <dd>
-                                  <ul class="r-evidence">
-                                    {techniques.map((t) => (
-                                      <li data-key={t.key} data-testable={t.testable ? '' : undefined}>
-                                        <span class="r-line">
-                                          <span class="light" aria-hidden="true" />
-                                          <span class="r-tech">{t.label}</span>
-                                          <span class="r-role">
-                                            {t.required ? 'required' : t.testable ? 'enhancement' : 'technique note'}
-                                          </span>
-                                        </span>
-                                        <span class="r-state">{t.testable ? 'Not surveyed' : 'Nothing to test in a browser'}</span>
-                                        {t.baseline && <span class="r-base">{t.baseline.long}</span>}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </dd>
-                                <dt class="r-env-t" hidden>Environment</dt>
-                                <dd class="r-env" hidden>
-                                  <ul />
-                                </dd>
-                              </dl>
-                            </details>
-                          </div>
-                          <ul class="c-medium">
-                            {techniques.map((t) => (
-                              <li data-key={t.key} data-testable={t.testable ? '' : undefined} data-required={t.required ? '' : undefined}>
-                                <span class="light" aria-hidden="true" />
-                                <span class="t-label">{t.label}</span>
-                                {t.baseline && <span class="t-base">{t.baseline.short.replace('Baseline ', '')}</span>}
-                              </li>
-                            ))}
-                          </ul>
-                          <div class="c-condition">
-                            <div class="stamp" aria-hidden="true" style={stampStyle(entry.accession)}>
-                              <span class="s-band">Condition</span>
-                              <span class="s-verdict" />
-                              <span class="s-date" />
-                            </div>
-                            <p class="cond-text">Not surveyed</p>
-                            <p class="cond-memory" hidden />
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ol>
-                  <ol class="blanks" aria-hidden="true" start={folio.entries.length + 1}>
-                    {Array.from({ length: blanks }, (_, i) => (
-                      <li>
-                        <span class="c-line">{folio.entries.length + i + 1}</span>
-                      </li>
-                    ))}
-                  </ol>
-                  <span class="vr vr-1" aria-hidden="true" />
-                  <span class="vr vr-2" aria-hidden="true" />
-                  <span class="vr vr-3" aria-hidden="true" />
-                  <span class="vr vr-4" aria-hidden="true" />
-                  <span class="vr vr-5" aria-hidden="true" />
+        {folios.map((folio) => {
+          const blanks = Math.max(0, FOLIO_MIN_LINES - folio.entries.length);
+          return (
+            <section class="folio" id={folio.id} aria-labelledby={`${folio.id}-title`}>
+              <h2 class="folio-head" id={`${folio.id}-title`}>
+                {folio.label} <span>· Folio {folio.number}</span>
+              </h2>
+              <p class="folio-empty">{folio.label}: no matches</p>
+              <div class="sheet">
+                <div class="col-heads" aria-hidden="true">
+                  <span>Line</span>
+                  <span>Accession No.</span>
+                  <span>Accessioned</span>
+                  <span>Object</span>
+                  <span>Medium</span>
+                  <span>Condition</span>
                 </div>
-              </section>
-            );
-          })
-        }
+                <ol class="rows">
+                  {folio.entries.map((entry) => {
+                    const techniques = medium(entry.tags, entry.requires);
+                    const objectClass = classify(entry.tags, entry.requires);
+                    return (
+                      <li
+                        class="row"
+                        id={entry.slug}
+                        data-acc={entry.accession}
+                        data-tags={entry.tags.join(' ')}
+                        data-requires={entry.requires?.join(' ')}
+                        data-class={objectClass.cls}
+                        data-search={searchText(
+                          entry,
+                          objectClass.word,
+                          techniques.map((t) => t.label),
+                        )}
+                      >
+                        <span class="c-line">{entry.line}</span>
+                        <span class="c-acc">
+                          {entry.accession}
+                          <span class="acc-class">Class: {objectClass.word}</span>
+                        </span>
+                        <time class="c-date" datetime={entry.iso}>
+                          {formatEntryDate(entry.date)}
+                        </time>
+                        <div class="c-object">
+                          <a href={entry.href}>{entry.title}</a>
+                          <p>{entry.summary}</p>
+                          <details class="report">
+                            <summary>Condition report</summary>
+                            <dl class="r-body">
+                              <dt>Object class</dt>
+                              <dd>
+                                <strong class="r-class">{objectClass.word}.</strong> {objectClass.reason}
+                              </dd>
+                              <dt>Handling</dt>
+                              <dd>{objectClass.handling.join(' ')}</dd>
+                              <dt>Evidence</dt>
+                              <dd>
+                                <ul class="r-evidence">
+                                  {techniques.map((t) => (
+                                    <li data-key={t.key} data-testable={t.testable ? '' : undefined}>
+                                      <span class="r-line">
+                                        <span class="light" aria-hidden="true" />
+                                        <span class="r-tech">{t.label}</span>
+                                        <span class="r-role">
+                                          {t.required ? 'required' : t.testable ? 'enhancement' : 'technique note'}
+                                        </span>
+                                      </span>
+                                      <span class="r-state">
+                                        {t.testable ? 'Not surveyed' : 'Nothing to test in a browser'}
+                                      </span>
+                                      {t.baseline && <span class="r-base">{t.baseline.long}</span>}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </dd>
+                              <dt class="r-env-t" hidden>
+                                Environment
+                              </dt>
+                              <dd class="r-env" hidden>
+                                <ul />
+                              </dd>
+                            </dl>
+                          </details>
+                        </div>
+                        <ul class="c-medium">
+                          {techniques.map((t) => (
+                            <li
+                              data-key={t.key}
+                              data-testable={t.testable ? '' : undefined}
+                              data-required={t.required ? '' : undefined}
+                            >
+                              <span class="light" aria-hidden="true" />
+                              <span class="t-label">{t.label}</span>
+                              {t.baseline && <span class="t-base">{t.baseline.short.replace('Baseline ', '')}</span>}
+                            </li>
+                          ))}
+                        </ul>
+                        <div class="c-condition">
+                          <div class="stamp" aria-hidden="true" style={stampStyle(entry.accession)}>
+                            <span class="s-band">Condition</span>
+                            <span class="s-verdict" />
+                            <span class="s-date" />
+                          </div>
+                          <p class="cond-text">Not surveyed</p>
+                          <p class="cond-memory" hidden />
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+                <ol class="blanks" aria-hidden="true" start={folio.entries.length + 1}>
+                  {Array.from({ length: blanks }, (_, i) => (
+                    <li>
+                      <span class="c-line">{folio.entries.length + i + 1}</span>
+                    </li>
+                  ))}
+                </ol>
+                <span class="vr vr-1" aria-hidden="true" />
+                <span class="vr vr-2" aria-hidden="true" />
+                <span class="vr vr-3" aria-hidden="true" />
+                <span class="vr vr-4" aria-hidden="true" />
+                <span class="vr vr-5" aria-hidden="true" />
+              </div>
+            </section>
+          );
+        })}
       </div>
 
       <footer class="leaf-foot">
-        <p class="tally">{total} {total === 1 ? 'object' : 'objects'} in the register. Not yet surveyed.</p>
+        <p class="tally">
+          {total} {total === 1 ? 'object' : 'objects'} in the register. Not yet surveyed.
+        </p>
         {baselineLine && <p class="tally-baseline">{baselineLine}</p>}
         <p class="tally-memory" hidden />
         <p class="foot-actions">
-          <button type="button" class="resurvey" data-resurvey disabled>Re-survey</button>
+          <button type="button" class="resurvey" data-resurvey disabled>
+            Re-survey
+          </button>
         </p>
         <div class="foot-marks">
           <div class="perforation" aria-hidden="true"></div>
@@ -279,7 +355,14 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
               <path id="seal-ring" d="M 0 -45 A 45 45 0 1 1 0 45 A 45 45 0 1 1 0 -45" />
               <filter id="seal-emboss" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
                 <feGaussianBlur in="SourceAlpha" stdDeviation="1.4" result="height" />
-                <feDiffuseLighting class="seal-relief" in="height" surfaceScale="2.5" diffuseConstant="1" lighting-color="#fff" result="lit">
+                <feDiffuseLighting
+                  class="seal-relief"
+                  in="height"
+                  surfaceScale="2.5"
+                  diffuseConstant="1"
+                  lighting-color="#fff"
+                  result="lit"
+                >
                   <feDistantLight class="seal-light" azimuth="340" elevation="30" />
                 </feDiffuseLighting>
                 <!-- Pull the relief toward mid gray: a blind emboss reads as light and shadow, not ink. -->
@@ -291,19 +374,21 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
               </filter>
             </defs>
             <g filter="url(#seal-emboss)">
-            <g fill="none" stroke="#000" stroke-width="1.2">
-              <circle r="56" />
-              <circle r="52" stroke-width="0.6" />
-              <circle r="36" stroke-width="0.8" />
-            </g>
-            <text font-size="9.4" letter-spacing="1.6">
-              <textPath href="#seal-ring" startOffset="0">REGISTER OF OBJECTS · THESANDBOX.PAGE ·</textPath>
-            </text>
-            <g transform="scale(0.36)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
-              <path d={monogramPaths.t} stroke-width="7" />
-              <path d={monogramPaths.s} stroke-width="6" />
-              <path d={monogramPaths.p} stroke-width="6" />
-            </g>
+              <g fill="none" stroke="#000" stroke-width="1.2">
+                <circle r="56" />
+                <circle r="52" stroke-width="0.6" />
+                <circle r="36" stroke-width="0.8" />
+              </g>
+              <text font-size="9.4" letter-spacing="1.6">
+                <textPath href="#seal-ring" startOffset="0">
+                  REGISTER OF OBJECTS · THESANDBOX.PAGE ·
+                </textPath>
+              </text>
+              <g transform="scale(0.36)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+                <path d={monogramPaths.t} stroke-width="7" />
+                <path d={monogramPaths.s} stroke-width="6" />
+                <path d={monogramPaths.p} stroke-width="6" />
+              </g>
             </g>
           </svg>
         </div>
@@ -314,21 +399,33 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
         <p class="sr-only" aria-live="polite" data-announce></p>
       </footer>
     </main>
-    <button type="button" class="skip-survey" data-skip-survey hidden>Skip survey</button>
+    <button type="button" class="skip-survey" data-skip-survey hidden>
+      Skip survey
+    </button>
   </div>
 
   <svg class="ink-filters" width="0" height="0" aria-hidden="true" focusable="false">
-    {
-      [1, 2, 3, 4, 5, 6, 7, 8].map((seed) => (
-        <filter id={`ink-${seed}`} x="-8%" y="-12%" width="116%" height="124%" color-interpolation-filters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed={seed} result="warp" />
-          <feDisplacementMap in="SourceGraphic" in2="warp" scale="2.6" xChannelSelector="R" yChannelSelector="G" result="moved" />
-          <feTurbulence type="fractalNoise" baseFrequency="0.7 0.45" numOctaves="2" seed={seed + 20} result="grain" />
-          <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -5.5 0 0 0 4.1" result="skips" />
-          <feComposite in="moved" in2="skips" operator="in" />
-        </filter>
-      ))
-    }
+    {[1, 2, 3, 4, 5, 6, 7, 8].map((seed) => (
+      <filter id={`ink-${seed}`} x="-8%" y="-12%" width="116%" height="124%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed={seed} result="warp" />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="warp"
+          scale="2.6"
+          xChannelSelector="R"
+          yChannelSelector="G"
+          result="moved"
+        />
+        <feTurbulence type="fractalNoise" baseFrequency="0.7 0.45" numOctaves="2" seed={seed + 20} result="grain" />
+        <feColorMatrix
+          in="grain"
+          type="matrix"
+          values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -5.5 0 0 0 4.1"
+          result="skips"
+        />
+        <feComposite in="moved" in2="skips" operator="in" />
+      </filter>
+    ))}
   </svg>
 </Bare>
 
@@ -424,10 +521,11 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
     font-family: var(--f-entry);
     padding: 0 56px 56px;
     background:
-      radial-gradient(120% 80% at 50% 0%, rgb(255 255 255 / 0.05), transparent 60%),
-      var(--tex-cloth),
-      var(--cloth);
-    background-size: auto, 240px 240px, auto;
+      radial-gradient(120% 80% at 50% 0%, rgb(255 255 255 / 0.05), transparent 60%), var(--tex-cloth), var(--cloth);
+    background-size:
+      auto,
+      240px 240px,
+      auto;
   }
 
   .skip {
@@ -456,7 +554,14 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
     letter-spacing: 0.34em;
     text-transform: uppercase;
     color: transparent;
-    background: linear-gradient(var(--gilt-angle, 105deg), #9c7a2c 0%, var(--gilt) 30%, var(--gilt-hi) 48%, var(--gilt) 62%, #8e6e26 100%);
+    background: linear-gradient(
+      var(--gilt-angle, 105deg),
+      #9c7a2c 0%,
+      var(--gilt) 30%,
+      var(--gilt-hi) 48%,
+      var(--gilt) 62%,
+      #8e6e26 100%
+    );
     background-clip: text;
     -webkit-background-clip: text;
     filter: drop-shadow(0 -1px 0 rgb(0 0 0 / 0.45)) drop-shadow(0 1px 0 rgb(255 255 255 / 0.08));
@@ -468,7 +573,9 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
     margin: 0 auto;
     padding: 0 40px var(--line);
     background: var(--tex-fiber), var(--leaf);
-    background-size: 320px 320px, auto;
+    background-size:
+      320px 320px,
+      auto;
     box-shadow:
       0 0 0 1px var(--leaf-edge),
       0 1px 2px rgb(0 0 0 / 0.25),
@@ -1369,7 +1476,9 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
     height: var(--hole);
     border-radius: 50%;
     background: var(--tex-cloth), var(--cloth);
-    background-size: 240px 240px, auto;
+    background-size:
+      240px 240px,
+      auto;
     background-position: calc(var(--c) * var(--pitch) * -1) calc(var(--r) * var(--pitch) * -1);
     box-shadow:
       inset 0 1px 1.2px rgb(0 0 0 / 0.75),
@@ -1526,7 +1635,8 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
   @media (max-width: 860px) {
     .sheet {
       grid-template-columns:
-        [line] var(--c-line) [acc date] var(--c-acc) [object medium] minmax(0, 1fr) [cond] var(--c-cond) [end];
+        [line] var(--c-line) [acc date] var(--c-acc) [object medium] minmax(0, 1fr) [cond] var(--c-cond)
+        [end];
     }
 
     .col-heads span:nth-child(3),

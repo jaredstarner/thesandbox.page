@@ -12,7 +12,11 @@ export interface Shape {
 }
 
 const line = (pts: number[]): LineStroke => ({ kind: 'line', mode: 'paint', pts });
-const fill = (ring: number[], mode: FillStroke['mode'] = 'paint'): FillStroke => ({ kind: 'fill', mode, rings: [ring] });
+const fill = (ring: number[], mode: FillStroke['mode'] = 'paint'): FillStroke => ({
+  kind: 'fill',
+  mode,
+  rings: [ring],
+});
 
 /** The square-ish stage a shape is drawn on, leaving room for the masthead and tools. */
 function stage(w: number, h: number) {

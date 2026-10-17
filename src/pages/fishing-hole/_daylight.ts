@@ -30,7 +30,15 @@ interface Key {
   sky: Sky;
 }
 
-function key(hour: number, c: Palette, light: Color, stars: number, rays: number, caustics: number, night: number): Key {
+function key(
+  hour: number,
+  c: Palette,
+  light: Color,
+  stars: number,
+  rays: number,
+  caustics: number,
+  night: number,
+): Key {
   return {
     hour,
     sky: {

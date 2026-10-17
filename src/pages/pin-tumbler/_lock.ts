@@ -349,9 +349,7 @@ export class Lock {
 
     // Counter-rotation: a caught spool being lifted through its lip pushes the plug back.
     const caught = this.pins.find((p) => p.state === 'caught');
-    feel.counter = caught
-      ? Math.max(0, Math.min(1, (caught.drvY - (SHEAR - SPOOL_LIP)) / SPOOL_LIP))
-      : 0;
+    feel.counter = caught ? Math.max(0, Math.min(1, (caught.drvY - (SHEAR - SPOOL_LIP)) / SPOOL_LIP)) : 0;
 
     if (under) {
       const moved = (under.keyY - (before[under.i] ?? under.keyY)) / Math.max(dt, 1e-3);

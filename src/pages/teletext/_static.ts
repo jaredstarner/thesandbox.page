@@ -6,7 +6,20 @@ import { band, bigText, counter, fastext, para } from './_layout';
 import type { Service } from './_service';
 import { store } from './_feeds';
 
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /** The directory on the index, in two columns. */
@@ -71,9 +84,17 @@ function helpPages(): Page[] {
   band(one, b);
   let r = 5;
   r = para(one, r, 'Key any three-digit page number on the remote or the keyboard.', 'yellow');
-  r = para(one, r + 1, 'Pages go out one after another, round and round. The set waits for yours to come by: watch the counter roll in the top row.');
-  r = para(one, r + 1, 'Some pages have several parts that turn over on their own. The counter at the bottom right says which part you are on.');
-  r = para(one, r + 1, 'Every page number you see on screen can be clicked or tapped.');
+  r = para(
+    one,
+    r + 1,
+    'Pages go out one after another, round and round. The set waits for yours to come by: watch the counter roll in the top row.',
+  );
+  r = para(
+    one,
+    r + 1,
+    'Some pages have several parts that turn over on their own. The counter at the bottom right says which part you are on.',
+  );
+  para(one, r + 1, 'Every page number you see on screen can be clicked or tapped.');
   counter(one, 0, 2);
   fastext(one, ['Index', 'News', 'Weather', 'Quiz']);
 
@@ -107,7 +128,11 @@ interface Question {
 }
 
 const QUESTIONS: Question[] = [
-  { q: 'How many colours can a teletext page show, black included?', options: ['Six', 'Eight', 'Sixteen', '256'], answer: 1 },
+  {
+    q: 'How many colours can a teletext page show, black included?',
+    options: ['Six', 'Eight', 'Sixteen', '256'],
+    answer: 1,
+  },
   { q: 'Which is the capital of Australia?', options: ['Sydney', 'Melbourne', 'Perth', 'Canberra'], answer: 3 },
   { q: 'What is the chemical symbol for tungsten?', options: ['W', 'Tu', 'Tn', 'Ts'], answer: 0 },
   { q: 'How many columns of text fit across a teletext page?', options: ['32', '64', '40', '80'], answer: 2 },
@@ -129,7 +154,8 @@ function quizIntro(): Page {
   let r = para(p, 5, 'Eight questions. Answer each one with the coloured key beside it.', 'yellow');
   r = para(p, r + 1, 'Get one wrong and you go back to the start. Get all eight right and you win.');
   r = para(p, r + 1, 'No prizes. There never were.', 'cyan');
-  for (let i = 0; i < 4; i++) p.put(r + 2 + i, 2, G[FAST[i]], 0x7f, 0x7f, A.white, ['Red', 'Green', 'Yellow', 'Cyan'][i] + ' key');
+  for (let i = 0; i < 4; i++)
+    p.put(r + 2 + i, 2, G[FAST[i]], 0x7f, 0x7f, A.white, ['Red', 'Green', 'Yellow', 'Cyan'][i] + ' key');
   p.put(22, 0, A.green, 'Press red to begin');
   fastext(p, ['Begin', '', '', 'Index']);
   return p;
@@ -234,7 +260,20 @@ function sunsetPage(): Page {
   const p = new Page();
   // Sky bands from blue down to yellow, the sun a striped disc, and the sea
   // below with a broken reflection and flashing glints.
-  const sky: (keyof typeof G)[] = ['blue', 'blue', 'blue', 'magenta', 'magenta', 'magenta', 'red', 'red', 'red', 'red', 'yellow', 'yellow'];
+  const sky: (keyof typeof G)[] = [
+    'blue',
+    'blue',
+    'blue',
+    'magenta',
+    'magenta',
+    'magenta',
+    'red',
+    'red',
+    'red',
+    'red',
+    'yellow',
+    'yellow',
+  ];
   const horizon = 1 + sky.length;
   const sunCx = 40;
   const sunCy = (horizon - 1) * 3 + 1;
@@ -303,7 +342,14 @@ function testCard(): Page {
   const cols = Math.ceil(big.w / 2);
   for (let r = 11; r <= 15; r++) p.put(r, 0, G.white);
   p.mosaic(11, 1 + Math.floor((39 - cols) / 2), cols, 5, (x, y) => big.lit(x, y - 1));
-  p.put(19, 0, A.yellow, fit('TELEPAGE', 19), A.white, fit(`${DAYS[now.getDay()].slice(0, 3)} ${now.getDate()} ${MONTHS[now.getMonth()].slice(0, 3)}`, 19, 'right'));
+  p.put(
+    19,
+    0,
+    A.yellow,
+    fit('TELEPAGE', 19),
+    A.white,
+    fit(`${DAYS[now.getDay()].slice(0, 3)} ${now.getDate()} ${MONTHS[now.getMonth()].slice(0, 3)}`, 19, 'right'),
+  );
   p.put(21, 0, A.cyan, 'Every colour a teletext set can show.');
   counter(p, 0, 1);
   fastext(p, ['Sunset', '', '', 'Index']);

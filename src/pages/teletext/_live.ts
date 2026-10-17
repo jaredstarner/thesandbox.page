@@ -8,7 +8,20 @@ import { MAP } from './_mapgrid';
 import { clock, moon, moonLit, sun } from './_sky';
 import type { Service } from './_service';
 
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -18,7 +31,10 @@ function waiting(b: Band, status: Status, labels: Labels): Page[] {
     notice(
       b,
       status === 'error'
-        ? ['This page is not in transmission at the moment.', 'The source it is set from did not answer. The set will try again.']
+        ? [
+            'This page is not in transmission at the moment.',
+            'The source it is set from did not answer. The set will try again.',
+          ]
         : ['Updating...', 'This page is being set from the latest figures.'],
       labels,
     ),
@@ -126,7 +142,8 @@ function onThisDay(): Page[] {
     }
     for (const l of block) {
       if (!l.text) continue;
-      if (l.year !== undefined) p.put(r, 0, A.cyan, fit(l.year < 0 ? `${-l.year}BC` : String(l.year), 5), A.white, l.text);
+      if (l.year !== undefined)
+        p.put(r, 0, A.cyan, fit(l.year < 0 ? `${-l.year}BC` : String(l.year), 5), A.white, l.text);
       else p.put(r, 6, A.white, l.text);
       r++;
     }
@@ -228,7 +245,17 @@ function money(): Page[] {
     const pct = was ? ((now - was) / was) * 100 : 0;
     const flat = Math.abs(pct) < 0.005;
     const sign = flat ? '0.00' : `${pct > 0 ? '+' : '-'}${Math.abs(pct).toFixed(2)}`;
-    p.put(r, 0, A.yellow, c, A.white, fit(NAMES[c], 19), fit(rate(now), 9, 'right'), A[flat ? 'white' : pct > 0 ? 'green' : 'red'], fit(sign, 6, 'right'));
+    p.put(
+      r,
+      0,
+      A.yellow,
+      c,
+      A.white,
+      fit(NAMES[c], 19),
+      fit(rate(now), 9, 'right'),
+      A[flat ? 'white' : pct > 0 ? 'green' : 'red'],
+      fit(sign, 6, 'right'),
+    );
     r++;
   }
   p.put(20, 0, A.white, 'Up means the dollar buys more.');
@@ -259,15 +286,35 @@ function charts(): Page[] {
       const v = a + (z - a) * (t - Math.floor(t));
       return 2 + ((v - lo) / span) * (H - 4);
     };
-    p.put(5, 0, A.yellow, `$1 in ${NAMES[c].toLowerCase()}`, A.white, fit(rate(series[series.length - 1]), 38 - 7 - NAMES[c].length - 1, 'right'));
+    p.put(
+      5,
+      0,
+      A.yellow,
+      `$1 in ${NAMES[c].toLowerCase()}`,
+      A.white,
+      fit(rate(series[series.length - 1]), 38 - 7 - NAMES[c].length - 1, 'right'),
+    );
     for (let r = 0; r < 12; r++) {
       const label = r === 0 ? rate(hi) : r === 11 ? rate(lo) : '';
       p.put(7 + r, 0, A.white, fit(label, 6), G.cyan);
       p.mosaic(7 + r, 8, 32, 1, (x, y) => H - (r * 3 + y) <= height(x));
     }
-    p.put(19, 0, A.white, fit(day(store.rates[0].date), 19), fit(day(store.rates[store.rates.length - 1].date), 19, 'right'));
+    p.put(
+      19,
+      0,
+      A.white,
+      fit(day(store.rates[0].date), 19),
+      fit(day(store.rates[store.rates.length - 1].date), 19, 'right'),
+    );
     const change = ((series[series.length - 1] - series[0]) / series[0]) * 100;
-    p.put(21, 0, A.cyan, 'Over three months', A[change >= 0 ? 'green' : 'red'], `${change >= 0 ? '+' : '-'}${Math.abs(change).toFixed(1)}%`);
+    p.put(
+      21,
+      0,
+      A.cyan,
+      'Over three months',
+      A[change >= 0 ? 'green' : 'red'],
+      `${change >= 0 ? '+' : '-'}${Math.abs(change).toFixed(1)}%`,
+    );
     counter(p, i, CHARTED.length);
     fastext(p, ['Rates', 'Weather', 'News', 'Index']);
     return p;
@@ -289,7 +336,8 @@ function tempColour(f: number): Colour {
 function weatherMap(mask: string): Page[] {
   const p = new Page();
   band(p, { ...WEATHER, title: 'Weather', tag: 'Temperatures F' });
-  const kind = (x: number, y: number) => (x < 0 || y < 0 || x >= MAP.w || y >= MAP.h ? 0 : Number(mask[y * MAP.w + x] ?? 0));
+  const kind = (x: number, y: number) =>
+    x < 0 || y < 0 || x >= MAP.w || y >= MAP.h ? 0 : Number(mask[y * MAP.w + x] ?? 0);
   const rows = MAP.h / 3;
   const cols = MAP.w / 2;
   // Labels go in first so the map can route round them.
@@ -339,12 +387,27 @@ function weatherMap(mask: string): Page[] {
         continue;
       }
       const lit = cells.map((v) => v !== 0);
-      p.put(row, 4 + c, 0x20 | (lit[0] ? 1 : 0) | (lit[1] ? 2 : 0) | (lit[2] ? 4 : 0) | (lit[3] ? 8 : 0) | (lit[4] ? 16 : 0) | (lit[5] ? 64 : 0));
+      p.put(
+        row,
+        4 + c,
+        0x20 |
+          (lit[0] ? 1 : 0) |
+          (lit[1] ? 2 : 0) |
+          (lit[2] ? 4 : 0) |
+          (lit[3] ? 8 : 0) |
+          (lit[4] ? 16 : 0) |
+          (lit[5] ? 64 : 0),
+      );
       c++;
     }
   }
   if (store.weather !== 'ok') {
-    p.put(21, 0, A.white, store.weather === 'error' ? 'Temperatures are not in transmission.' : 'Updating temperatures...');
+    p.put(
+      21,
+      0,
+      A.white,
+      store.weather === 'error' ? 'Temperatures are not in transmission.' : 'Updating temperatures...',
+    );
   } else {
     p.put(21, 0, A.white, 'Now:', A.cyan, 'below 40', A.white, '40-59', A.yellow, '60-84', A.red, '85 up');
   }
@@ -357,18 +420,42 @@ function cityTable(cities: typeof US_CITIES, title: string, fahrenheitFirst: boo
   if (store.weather !== 'ok') return waiting(b, store.weather, labels);
   const p = new Page();
   band(p, b);
-  p.put(5, 0, A.green, fit('', 12), fit(fahrenheitFirst ? 'F' : 'C', 4, 'right'), fit(fahrenheitFirst ? 'C' : 'F', 5, 'right'), fit('Hi/Lo', 7, 'right'), ' ', 'Sky');
+  p.put(
+    5,
+    0,
+    A.green,
+    fit('', 12),
+    fit(fahrenheitFirst ? 'F' : 'C', 4, 'right'),
+    fit(fahrenheitFirst ? 'C' : 'F', 5, 'right'),
+    fit('Hi/Lo', 7, 'right'),
+    ' ',
+    'Sky',
+  );
   let r = 6;
   for (const c of cities) {
     const w = store.conditions[c.name];
     if (!w) continue;
     const f = Math.round(toF(w.temp));
     const cc = Math.round(w.temp);
-    const hl = fahrenheitFirst ? `${Math.round(toF(w.hi))}/${Math.round(toF(w.lo))}` : `${Math.round(w.hi)}/${Math.round(w.lo)}`;
-    p.put(r, 0, A.white, fit(c.short ?? c.name, 12), A[tempColour(f)], fit(String(fahrenheitFirst ? f : cc), 3, 'right'), A.white, fit(String(fahrenheitFirst ? cc : f), 4, 'right'), fit(hl, 7, 'right'), A.cyan, fit(sky(w.code, w.isDay), 10));
+    const hl = fahrenheitFirst
+      ? `${Math.round(toF(w.hi))}/${Math.round(toF(w.lo))}`
+      : `${Math.round(w.hi)}/${Math.round(w.lo)}`;
+    p.put(
+      r,
+      0,
+      A.white,
+      fit(c.short ?? c.name, 12),
+      A[tempColour(f)],
+      fit(String(fahrenheitFirst ? f : cc), 3, 'right'),
+      A.white,
+      fit(String(fahrenheitFirst ? cc : f), 4, 'right'),
+      fit(hl, 7, 'right'),
+      A.cyan,
+      fit(sky(w.code, w.isDay), 10),
+    );
     r++;
   }
-  p.put(21, 0, A.white, 'Now, and today\'s high and low.');
+  p.put(21, 0, A.white, "Now, and today's high and low.");
   fastext(p, labels);
   return [p];
 }
@@ -418,7 +505,17 @@ function moonPage(): Page[] {
         continue;
       }
       const cells = anyLit ? lit : disc;
-      p.put(row, c, 0x20 | (cells[0] ? 1 : 0) | (cells[1] ? 2 : 0) | (cells[2] ? 4 : 0) | (cells[3] ? 8 : 0) | (cells[4] ? 16 : 0) | (cells[5] ? 64 : 0));
+      p.put(
+        row,
+        c,
+        0x20 |
+          (cells[0] ? 1 : 0) |
+          (cells[1] ? 2 : 0) |
+          (cells[2] ? 4 : 0) |
+          (cells[3] ? 8 : 0) |
+          (cells[4] ? 16 : 0) |
+          (cells[5] ? 64 : 0),
+      );
     }
   }
   const x = 21;
@@ -437,7 +534,12 @@ function moonPage(): Page[] {
   return [p];
 }
 
-const SUN_CITIES = [...US_CITIES.filter((c) => ['Seattle', 'Los Angeles', 'Denver', 'Chicago', 'New York', 'Miami'].includes(c.name)), ...WORLD_CITIES.filter((c) => ['Reykjavik', 'London', 'Cairo', 'Tokyo', 'Sydney', 'Anchorage', 'Nairobi'].includes(c.name))];
+const SUN_CITIES = [
+  ...US_CITIES.filter((c) => ['Seattle', 'Los Angeles', 'Denver', 'Chicago', 'New York', 'Miami'].includes(c.name)),
+  ...WORLD_CITIES.filter((c) =>
+    ['Reykjavik', 'London', 'Cairo', 'Tokyo', 'Sydney', 'Anchorage', 'Nairobi'].includes(c.name),
+  ),
+];
 
 function sunPage(): Page[] {
   const p = new Page();
@@ -446,8 +548,25 @@ function sunPage(): Page[] {
   let r = 6;
   for (const c of SUN_CITIES) {
     const s = sun(c.lat, c.lon, c.tz);
-    const len = s.length >= 24 ? 'All day' : s.length <= 0 ? 'None' : `${Math.floor(s.length)}h ${String(Math.round((s.length % 1) * 60)).padStart(2, '0')}m`;
-    p.put(r, 0, A.white, fit(c.name, 15), A.yellow, fit(s.rise ? clock(s.rise, c.tz) : '--:--', 5, 'right'), A.white, ' ', fit(s.set ? clock(s.set, c.tz) : '--:--', 5, 'right'), A.cyan, fit(len, 8, 'right'));
+    const len =
+      s.length >= 24
+        ? 'All day'
+        : s.length <= 0
+          ? 'None'
+          : `${Math.floor(s.length)}h ${String(Math.round((s.length % 1) * 60)).padStart(2, '0')}m`;
+    p.put(
+      r,
+      0,
+      A.white,
+      fit(c.name, 15),
+      A.yellow,
+      fit(s.rise ? clock(s.rise, c.tz) : '--:--', 5, 'right'),
+      A.white,
+      ' ',
+      fit(s.set ? clock(s.set, c.tz) : '--:--', 5, 'right'),
+      A.cyan,
+      fit(len, 8, 'right'),
+    );
     r++;
   }
   p.put(21, 0, A.white, 'Each city in its own time.');
@@ -461,7 +580,8 @@ const QUAKES: Band = { title: 'Earthquakes', bg: 'yellow', fg: 'red', rule: 'yel
 function quakes(): Page[] {
   const labels: Labels = ['Moon', 'Weather', 'News', 'Index'];
   if (store.quakes !== 'ok') return waiting(QUAKES, store.quakes, labels);
-  if (!store.quakeList.length) return [notice(QUAKES, ['No earthquakes of magnitude 4.5 or more in the last day.'], labels)];
+  if (!store.quakeList.length)
+    return [notice(QUAKES, ['No earthquakes of magnitude 4.5 or more in the last day.'], labels)];
   const groups = paginate(store.quakeList, 15);
   return groups.map((g, i) => {
     const p = new Page();
@@ -476,7 +596,18 @@ function quakes(): Page[] {
       // town, until it fits.
       let place = q.place.replace(/^\d+\s*km\s+[NSEW]{1,3}\s+of\s+/, '');
       if (place.length > 27 && place.includes(', ')) place = place.slice(place.lastIndexOf(', ') + 2);
-      p.put(r, 0, A.cyan, t, A[colour], big ? FLASH : 0x20, q.mag.toFixed(1), A.white, big ? 0x09 : 0x20, fit(place, 27));
+      p.put(
+        r,
+        0,
+        A.cyan,
+        t,
+        A[colour],
+        big ? FLASH : 0x20,
+        q.mag.toFixed(1),
+        A.white,
+        big ? 0x09 : 0x20,
+        fit(place, 27),
+      );
       r++;
     }
     p.put(22, 0, A.white, 'Magnitude 4.5 and up. Times are yours.');
@@ -497,8 +628,14 @@ export function addLive(s: Service, mask: string): void {
   s.add(200, { build: money, links: [201, 400, 101, 100] });
   s.add(201, { build: charts, links: [200, 400, 101, 100] });
   s.add(400, { build: () => weatherMap(mask), links: [401, 402, 500, 100] });
-  s.add(401, { build: () => cityTable(US_CITIES, 'US cities', true, ['Map', 'World', 'Moon', 'Index']), links: [400, 402, 500, 100] });
-  s.add(402, { build: () => cityTable(WORLD_CITIES, 'World', false, ['Map', 'US cities', 'Moon', 'Index']), links: [400, 401, 500, 100] });
+  s.add(401, {
+    build: () => cityTable(US_CITIES, 'US cities', true, ['Map', 'World', 'Moon', 'Index']),
+    links: [400, 402, 500, 100],
+  });
+  s.add(402, {
+    build: () => cityTable(WORLD_CITIES, 'World', false, ['Map', 'US cities', 'Moon', 'Index']),
+    links: [400, 401, 500, 100],
+  });
   s.add(500, { build: moonPage, links: [501, 400, 600, 100] });
   s.add(501, { build: sunPage, links: [500, 400, 600, 100] });
   s.add(600, { build: quakes, links: [500, 400, 101, 100] });

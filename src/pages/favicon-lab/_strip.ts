@@ -47,7 +47,9 @@ interface Ghost {
 }
 
 const newId = () =>
-  typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 export function createStrip(lab: Lab): Program {
   const panel = lab.panel('strip');
@@ -94,7 +96,8 @@ export function createStrip(lab: Lab): Program {
     const index = order.indexOf(id);
     paint(lab.ctx, index);
     lab.present();
-    const caption = shared.mode === 'number' ? `Tab ${index + 1} of ${order.length}` : `Strip · ${index + 1} of ${order.length}`;
+    const caption =
+      shared.mode === 'number' ? `Tab ${index + 1} of ${order.length}` : `Strip · ${index + 1} of ${order.length}`;
     if (document.title !== caption) lab.title(caption);
     if (!document.hidden) {
       order.forEach((m, i) => {

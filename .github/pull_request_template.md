@@ -8,6 +8,7 @@
 
 ## Testing
 
+- [ ] `pnpm lint` and `pnpm format:check` pass
 - [ ] `pnpm check` passes
 - [ ] `pnpm build` passes
 - [ ] Checked the change locally with `pnpm dev` or `pnpm preview`

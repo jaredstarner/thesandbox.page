@@ -14,7 +14,9 @@ import { RECIPES } from './_recipes';
 
   <main class="marbling" data-marbling>
     <header class="mast">
-      <a class="home" href="/">thesandbox.page</a>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
       <h1>Marbling</h1>
       <p class="dek">Float colour on size, draw it into veins, and pull a print</p>
     </header>
@@ -47,22 +49,22 @@ import { RECIPES } from './_recipes';
       <fieldset class="pots">
         <legend>Colour</legend>
         <div class="potgrid">
-          {
-            PIGMENTS.map((p, i) => (
-              <label class="pot" title={p.name} style={`--c: ${p.hex}`}>
-                <input type="radio" name="mb-pot" value={p.id} checked={i === 1} />
-                <span class="well" aria-hidden="true" />
-                <span class="vh">{p.name}</span>
-              </label>
-            ))
-          }
+          {PIGMENTS.map((p, i) => (
+            <label class="pot" title={p.name} style={`--c: ${p.hex}`}>
+              <input type="radio" name="mb-pot" value={p.id} checked={i === 1} />
+              <span class="well" aria-hidden="true" />
+              <span class="vh">{p.name}</span>
+            </label>
+          ))}
           <label class="pot gall" title="Gall water: a clear drop that pushes colour aside">
             <input type="radio" name="mb-pot" value="gall" />
             <span class="well" aria-hidden="true"></span>
             <span class="vh">Gall water</span>
           </label>
         </div>
-        <p class="potname" data-potname>Indigo</p>
+        <p class="potname" data-potname>
+          Indigo
+        </p>
       </fieldset>
 
       <fieldset class="tools">
@@ -70,27 +72,49 @@ import { RECIPES } from './_recipes';
         <div class="toolrow">
           <label class="tool" title="Drop (1): hold to let the drop spread">
             <input type="radio" name="mb-tool" value="drop" checked />
-            <svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 4 C 10 11, 7 14.5, 7 18 a 7 7 0 0 0 14 0 C 21 14.5, 18 11, 14 4 Z" /><path class="fine" d="M10.5 18.5 a 3.5 3.5 0 0 0 3 3.2" /></svg>
+            <svg viewBox="0 0 28 28" aria-hidden="true">
+              <path d="M14 4 C 10 11, 7 14.5, 7 18 a 7 7 0 0 0 14 0 C 21 14.5, 18 11, 14 4 Z" />
+              <path class="fine" d="M10.5 18.5 a 3.5 3.5 0 0 0 3 3.2" />
+            </svg>
             <span>Drop</span>
           </label>
           <label class="tool" title="Sprinkle (2): flick a brush to scatter small drops">
             <input type="radio" name="mb-tool" value="sprinkle" />
-            <svg viewBox="0 0 28 28" aria-hidden="true"><path d="M5 23 L 13 15" /><path d="M13 15 L 19 7 M13 15 L 21 10 M13 15 L 17 6 M13 15 L 22 13" /><circle class="dot" cx="22" cy="4.5" r="1.1" /><circle class="dot" cx="25" cy="9" r="0.9" /><circle class="dot" cx="24.5" cy="16" r="1" /></svg>
+            <svg viewBox="0 0 28 28" aria-hidden="true">
+              <path d="M5 23 L 13 15" />
+              <path d="M13 15 L 19 7 M13 15 L 21 10 M13 15 L 17 6 M13 15 L 22 13" />
+              <circle class="dot" cx="22" cy="4.5" r="1.1" />
+              <circle class="dot" cx="25" cy="9" r="0.9" />
+              <circle class="dot" cx="24.5" cy="16" r="1" />
+            </svg>
             <span>Sprinkle</span>
           </label>
           <label class="tool" title="Stylus (3): a single pin drawn through the colour">
             <input type="radio" name="mb-tool" value="stylus" />
-            <svg viewBox="0 0 28 28" aria-hidden="true"><path d="M5 23 L 9 19" /><path class="handle" d="M9 19 L 15 13" /><path class="fine" d="M15 13 L 23 5" /></svg>
+            <svg viewBox="0 0 28 28" aria-hidden="true">
+              <path d="M5 23 L 9 19" />
+              <path class="handle" d="M9 19 L 15 13" />
+              <path class="fine" d="M15 13 L 23 5" />
+            </svg>
             <span>Stylus</span>
           </label>
           <label class="tool" title="Rake (4): wide-set pins across the whole trough">
             <input type="radio" name="mb-tool" value="rake" />
-            <svg viewBox="0 0 28 28" aria-hidden="true"><path class="handle" d="M3 8 H 25" /><path class="fine" d="M5 8 V 22 M11 8 V 22 M17 8 V 22 M23 8 V 22" /></svg>
+            <svg viewBox="0 0 28 28" aria-hidden="true">
+              <path class="handle" d="M3 8 H 25" />
+              <path class="fine" d="M5 8 V 22 M11 8 V 22 M17 8 V 22 M23 8 V 22" />
+            </svg>
             <span>Rake</span>
           </label>
           <label class="tool" title="Comb (5): fine teeth across the whole trough">
             <input type="radio" name="mb-tool" value="comb" />
-            <svg viewBox="0 0 28 28" aria-hidden="true"><path class="handle" d="M3 9 H 25" /><path class="fine" d="M4.5 9 V 18 M7.5 9 V 18 M10.5 9 V 18 M13.5 9 V 18 M16.5 9 V 18 M19.5 9 V 18 M22.5 9 V 18" /></svg>
+            <svg viewBox="0 0 28 28" aria-hidden="true">
+              <path class="handle" d="M3 9 H 25" />
+              <path
+                class="fine"
+                d="M4.5 9 V 18 M7.5 9 V 18 M10.5 9 V 18 M13.5 9 V 18 M16.5 9 V 18 M19.5 9 V 18 M22.5 9 V 18"
+              />
+            </svg>
             <span>Comb</span>
           </label>
         </div>
@@ -101,45 +125,53 @@ import { RECIPES } from './_recipes';
       </fieldset>
 
       <div class="acts">
-        <button type="button" popovertarget="mb-patterns">Patterns</button>
-        <button type="button" data-undo disabled title="Undo (Z)">Undo</button>
-        <button type="button" data-skim title="Skim the size clean">Skim</button>
+        <button type="button" popovertarget="mb-patterns">
+          Patterns
+        </button>
+        <button type="button" data-undo disabled title="Undo (Z)">
+          Undo
+        </button>
+        <button type="button" data-skim title="Skim the size clean">
+          Skim
+        </button>
       </div>
 
-      <button type="button" class="lay" data-lay title="Lay a sheet of paper on the size (P)">Lay paper</button>
-      <button type="button" class="about" popovertarget="mb-notes">About the trough</button>
+      <button type="button" class="lay" data-lay title="Lay a sheet of paper on the size (P)">
+        Lay paper
+      </button>
+      <button type="button" class="about" popovertarget="mb-notes">
+        About the trough
+      </button>
     </aside>
 
     <div class="pop" id="mb-patterns" popover>
       <h2>Patterns</h2>
       <p class="hint">Watch one made from a fresh ground, then work into it yourself.</p>
       <ul>
-        {
-          RECIPES.map((r) => (
-            <li>
-              <button type="button" data-recipe={r.id} popovertarget="mb-patterns" popovertargetaction="hide">
-                <span class="name">{r.name}</span>
-                <span class="by">{r.line}</span>
-              </button>
-            </li>
-          ))
-        }
+        {RECIPES.map((r) => (
+          <li>
+            <button type="button" data-recipe={r.id} popovertarget="mb-patterns" popovertargetaction="hide">
+              <span class="name">{r.name}</span>
+              <span class="by">{r.line}</span>
+            </button>
+          </li>
+        ))}
       </ul>
     </div>
 
     <div class="pop notes" id="mb-notes" popover>
       <h2>On the trough</h2>
       <p>
-        Marbled paper is printed from colour floating on size, water thickened with seaweed. Each drop spreads into a thin
-        film and shoulders every film already there out of its way, so the first colours thrown end up squeezed into veins
-        between the last.
+        Marbled paper is printed from colour floating on size, water thickened with seaweed. Each drop spreads into a
+        thin film and shoulders every film already there out of its way, so the first colours thrown end up squeezed
+        into veins between the last.
       </p>
       <p>
-        Nothing on this trough is painted pixel by pixel. Every film is an outline, and every drop and stroke is an exact
-        transformation of the surface, after Aubrey Jaffer's mathematical marbling. A drop moves each point straight out
-        from its centre just far enough to make room for its own area. A tine slides each point along its path, less the
-        further the point lies from it. Outlines are cut finer as they stretch, so the veins stay sharp at any size, and a
-        print can be saved as vectors.
+        Nothing on this trough is painted pixel by pixel. Every film is an outline, and every drop and stroke is an
+        exact transformation of the surface, after Aubrey Jaffer's mathematical marbling. A drop moves each point
+        straight out from its centre just far enough to make room for its own area. A tine slides each point along its
+        path, less the further the point lies from it. Outlines are cut finer as they stretch, so the veins stay sharp
+        at any size, and a print can be saved as vectors.
       </p>
       <p>
         Paper laid face down on the size comes up as the trough's mirror image, so your print reads the other way round.
@@ -151,9 +183,15 @@ import { RECIPES } from './_recipes';
       <div class="sheet" data-sheet></div>
       <div class="viewbar">
         <p class="viewtitle" data-viewtitle></p>
-        <button type="button" data-png>Save as PNG</button>
-        <button type="button" data-svg>Save as SVG</button>
-        <button type="button" data-close>Back to the trough</button>
+        <button type="button" data-png>
+          Save as PNG
+        </button>
+        <button type="button" data-svg>
+          Save as SVG
+        </button>
+        <button type="button" data-close>
+          Back to the trough
+        </button>
       </div>
     </dialog>
   </main>
@@ -199,8 +237,7 @@ import { RECIPES } from './_recipes';
     /* Laid paper: close wire lines and wide-set chain lines. */
     background:
       repeating-linear-gradient(90deg, transparent 0 118px, rgb(120 96 60 / 0.06) 118px 120px, transparent 120px 148px),
-      repeating-linear-gradient(0deg, transparent 0 2px, rgb(120 96 60 / 0.035) 2px 3px),
-      #ebe3d1;
+      repeating-linear-gradient(0deg, transparent 0 2px, rgb(120 96 60 / 0.035) 2px 3px), #ebe3d1;
   }
 
   .marbling *,

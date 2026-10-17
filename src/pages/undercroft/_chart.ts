@@ -73,7 +73,10 @@ export function chart(base: string, { exit = false } = {}) {
   const cols = [...'abcdefghijkl']
     .map((ch, i) => `<text x="${i * CELL + half}" y="-5">${ch.toUpperCase()}</text>`)
     .join('');
-  const rows = Array.from({ length: SIZE }, (_, i) => `<text x="-5" y="${i * CELL + half + 3}" text-anchor="end">${i + 1}</text>`).join('');
+  const rows = Array.from(
+    { length: SIZE },
+    (_, i) => `<text x="-5" y="${i * CELL + half + 3}" text-anchor="end">${i + 1}</text>`,
+  ).join('');
   const start = plan.start;
   return (
     `<svg class="chart" viewBox="-18 -16 ${span + 28} ${span + 28}" role="img" aria-label="Your chart of the undercroft, inked from the places you have stood">` +

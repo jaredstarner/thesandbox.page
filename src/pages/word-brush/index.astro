@@ -20,13 +20,17 @@ import { SHAPES } from './_shapes';
     <div class="ring" data-ring aria-hidden="true"></div>
 
     <header class="masthead">
-      <a class="home" href="/">thesandbox.page</a>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
       <h1>Word brush</h1>
       <p class="dek">Paint, and the prose finds room.</p>
     </header>
 
     <p class="tally" data-tally aria-live="polite"></p>
-    <p class="hint" data-hint>Draw anywhere on the sheet<small>or let Shapes draw one for you</small></p>
+    <p class="hint" data-hint>
+      Draw anywhere on the sheet<small>or let Shapes draw one for you</small>
+    </p>
 
     <nav class="stick" aria-label="Brush and type">
       <fieldset class="tools">
@@ -49,28 +53,38 @@ import { SHAPES } from './_shapes';
         <input type="range" min="10" max="34" step="1" value="16" data-size />
       </label>
       <span class="rule" aria-hidden="true"></span>
-      <button type="button" popovertarget="wb-texts">Text</button>
-      <button type="button" popovertarget="wb-shapes">Shapes</button>
+      <button type="button" popovertarget="wb-texts">
+        Text
+      </button>
+      <button type="button" popovertarget="wb-shapes">
+        Shapes
+      </button>
       <span class="rule" aria-hidden="true"></span>
-      <button type="button" data-undo disabled title="Undo (Ctrl+Z)">Undo</button>
-      <button type="button" data-clear disabled>Clear</button>
-      <button type="button" data-save disabled title="Save the sheet as a PNG">Save</button>
-      <button type="button" class="about" popovertarget="wb-notes" aria-label="About this page">?</button>
+      <button type="button" data-undo disabled title="Undo (Ctrl+Z)">
+        Undo
+      </button>
+      <button type="button" data-clear disabled>
+        Clear
+      </button>
+      <button type="button" data-save disabled title="Save the sheet as a PNG">
+        Save
+      </button>
+      <button type="button" class="about" popovertarget="wb-notes" aria-label="About this page">
+        ?
+      </button>
     </nav>
 
     <div class="pop" id="wb-texts" popover>
       <h2>Set the text</h2>
       <fieldset class="passages">
         <legend class="vh">Passage</legend>
-        {
-          PASSAGES.map((p, i) => (
-            <label>
-              <input type="radio" name="wb-passage" value={p.id} checked={i === 0} data-passage />
-              <span class="title">{p.title}</span>
-              <span class="credit">{p.credit}</span>
-            </label>
-          ))
-        }
+        {PASSAGES.map((p, i) => (
+          <label>
+            <input type="radio" name="wb-passage" value={p.id} checked={i === 0} data-passage />
+            <span class="title">{p.title}</span>
+            <span class="credit">{p.credit}</span>
+          </label>
+        ))}
         <label>
           <input type="radio" name="wb-passage" value="setter" data-passage />
           <span class="title">The typesetter itself</span>
@@ -84,50 +98,58 @@ import { SHAPES } from './_shapes';
       </fieldset>
       <textarea data-own rows="4" placeholder="Type here, and the drawing fills with it as you go" hidden></textarea>
       <div class="options">
-        <label><input type="checkbox" data-italic /> Italic</label>
-        <label title="Fill each separate drawing on its own, top to bottom, before the next"
-          ><input type="checkbox" data-byshape checked /> Read shape by shape</label
-        >
-        <label><input type="checkbox" data-wash /> Keep the wash</label>
+        <label>
+          <input type="checkbox" data-italic /> Italic
+        </label>
+        <label title="Fill each separate drawing on its own, top to bottom, before the next">
+          <input type="checkbox" data-byshape checked /> Read shape by shape
+        </label>
+        <label>
+          <input type="checkbox" data-wash /> Keep the wash
+        </label>
       </div>
     </div>
 
     <div class="pop" id="wb-shapes" popover>
       <h2>Draw one for me</h2>
       <div class="shapes">
-        {
-          SHAPES.map((s) => (
-            <button type="button" data-shape={s.id}>
-              {s.label}
-            </button>
-          ))
-        }
+        {SHAPES.map((s) => (
+          <button type="button" data-shape={s.id}>
+            {s.label}
+          </button>
+        ))}
       </div>
-      <p class="aside">A shape replaces the sheet; Undo brings your drawing back. Tail and Wings set the poems that first took those shapes.</p>
+      <p class="aside">
+        A shape replaces the sheet; Undo brings your drawing back. Tail and Wings set the poems that first took those
+        shapes.
+      </p>
     </div>
 
     <div class="pop notes" id="wb-notes" popover>
       <h2>Word brush</h2>
       <p>
-        A calligram sets words in the shape of what they say. George Herbert shaped each stanza of Easter Wings like a pair of
-        wings in 1633; Lewis Carroll printed the Mouse’s Tale as a winding tail in 1865; Apollinaire made his letters fall as rain
-        in 1918. This brush does it live: whatever you draw, a passage pours through it.
+        A calligram sets words in the shape of what they say. George Herbert shaped each stanza of Easter Wings like a
+        pair of wings in 1633; Lewis Carroll printed the Mouse’s Tale as a winding tail in 1865; Apollinaire made his
+        letters fall as rain in 1918. This brush does it live: whatever you draw, a passage pours through it.
       </p>
       <p>
-        Every stroke paints a coarse mask. Each row of type asks the mask where it has room, and <a
-          href="https://github.com/chenglou/pretext">Pretext</a
-        >, Cheng Lou’s text layout library, breaks the passage into lines that fit exactly those widths, carrying on from where the
-        last line stopped. It measures with the browser’s own font engine but never touches the DOM, so the whole sheet reflows on
-        every frame of a stroke. Each line is then justified to its edges, and every word glides to its new place, so the type moves
-        like a liquid when you draw or erase.
+        Every stroke paints a coarse mask. Each row of type asks the mask where it has room, and{' '}
+        <a href="https://github.com/chenglou/pretext">Pretext</a>, Cheng Lou’s text layout library, breaks the passage
+        into lines that fit exactly those widths, carrying on from where the last line stopped. It measures with the
+        browser’s own font engine but never touches the DOM, so the whole sheet reflows on every frame of a stroke. Each
+        line is then justified to its edges, and every word glides to its new place, so the type moves like a liquid
+        when you draw or erase.
       </p>
       <p class="keys">B brush · E eraser · [ and ] width · right-drag erases · Ctrl+Z undo</p>
       <p class="credits">
-        Set in EB Garamond by Georg Duffner and Octavio Pardo, under the SIL Open Font License, served from this site. Layout by
-        Pretext, under the MIT License. The passages are in the public domain: Lewis Carroll (1865), George Herbert (1633),
-        William Shakespeare (1609), Walt Whitman (1892 text), and Cicero (45 BC), whose De finibus is where lorem ipsum comes from.
+        Set in EB Garamond by Georg Duffner and Octavio Pardo, under the SIL Open Font License, served from this site.
+        Layout by Pretext, under the MIT License. The passages are in the public domain: Lewis Carroll (1865), George
+        Herbert (1633), William Shakespeare (1609), Walt Whitman (1892 text), and Cicero (45 BC), whose De finibus is
+        where lorem ipsum comes from.
       </p>
-      <p class="credits"><a href="/">Back to thesandbox.page</a></p>
+      <p class="credits">
+        <a href="/">Back to thesandbox.page</a>
+      </p>
     </div>
 
     <noscript>

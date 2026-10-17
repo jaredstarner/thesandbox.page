@@ -233,8 +233,7 @@ export function startSand(root: HTMLElement, items: RelicItem[]): void {
   }
 
   async function buildTitle(): Promise<void> {
-    const family =
-      getComputedStyle(document.documentElement).getPropertyValue('--font-display').trim() || 'serif';
+    const family = getComputedStyle(document.documentElement).getPropertyValue('--font-display').trim() || 'serif';
     try {
       await document.fonts.load(`800 100px ${family}`);
     } catch {

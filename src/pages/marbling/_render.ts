@@ -15,8 +15,8 @@ const RIMS = PIGMENTS.map((p) => rimOf(p.hex));
 /** Trace a film as a smooth closed curve through its vertices' midpoints. */
 function trace(ctx: CanvasRenderingContext2D, pts: Float64Array): void {
   const n = pts.length / 2;
-  let px = pts[(n - 1) * 2];
-  let py = pts[(n - 1) * 2 + 1];
+  const px = pts[(n - 1) * 2];
+  const py = pts[(n - 1) * 2 + 1];
   ctx.moveTo((px + pts[0]) / 2, (py + pts[1]) / 2);
   for (let i = 0; i < n; i++) {
     const x = pts[i * 2];
@@ -24,8 +24,6 @@ function trace(ctx: CanvasRenderingContext2D, pts: Float64Array): void {
     const nx = i === n - 1 ? pts[0] : pts[i * 2 + 2];
     const ny = i === n - 1 ? pts[1] : pts[i * 2 + 3];
     ctx.quadraticCurveTo(x, y, (x + nx) / 2, (y + ny) / 2);
-    px = x;
-    py = y;
   }
   ctx.closePath();
 }
@@ -41,7 +39,14 @@ export function paintBlots(ctx: CanvasRenderingContext2D, blots: Blot[], frame: 
   ctx.save();
   if (opts.print) {
     // Paper laid face down comes up as the trough's mirror image.
-    ctx.setTransform(-frame.scale, 0, 0, frame.scale, frame.ox + (opts.print.w - opts.print.inset) * frame.scale, frame.oy - opts.print.inset * frame.scale);
+    ctx.setTransform(
+      -frame.scale,
+      0,
+      0,
+      frame.scale,
+      frame.ox + (opts.print.w - opts.print.inset) * frame.scale,
+      frame.oy - opts.print.inset * frame.scale,
+    );
   } else {
     ctx.setTransform(frame.scale, 0, 0, frame.scale, frame.ox, frame.oy);
   }

@@ -133,7 +133,8 @@ export function startFishing(root: HTMLElement): void {
   canvas.addEventListener('lostpointercapture', up);
   canvas.addEventListener('contextmenu', (event) => event.preventDefault());
 
-  const isControl = (el: EventTarget | null) => el instanceof HTMLElement && el.closest('button, a, input, [popover]') !== null;
+  const isControl = (el: EventTarget | null) =>
+    el instanceof HTMLElement && el.closest('button, a, input, [popover]') !== null;
   window.addEventListener('keydown', (event) => {
     if (event.key === ' ' || event.key === 'Enter') {
       if (isControl(event.target) || popoverOpen()) return;
@@ -244,7 +245,12 @@ export function startFishing(root: HTMLElement): void {
       time += STEP;
       game.update(STEP, hour);
     }
-    sound.update(dt, { night: sky.night, reeling: game.reeling, dragging: game.dragging, flying: game.state === 'flight' });
+    sound.update(dt, {
+      night: sky.night,
+      reeling: game.reeling,
+      dragging: game.dragging,
+      flying: game.state === 'flight',
+    });
 
     // Page text, touched only when it changes.
     const text = clockText(hour);
@@ -306,9 +312,14 @@ export function startFishing(root: HTMLElement): void {
       sky,
       time,
       skyH,
-      sun: sun === null ? [0, 0, 0, 0] : [vw * (0.1 + 0.8 * sun), waterLine - 6 - arc(sun) * (skyH - 20), 6, 0.001 + (1 - arc(sun)) * 0.999],
+      sun:
+        sun === null
+          ? [0, 0, 0, 0]
+          : [vw * (0.1 + 0.8 * sun), waterLine - 6 - arc(sun) * (skyH - 20), 6, 0.001 + (1 - arc(sun)) * 0.999],
       moon:
-        moon === null ? [0, 0, 0, 0] : [vw * (0.15 + 0.7 * moon), waterLine - 10 - arc(moon) * (skyH - 26), moonPhase(new Date()), 1],
+        moon === null
+          ? [0, 0, 0, 0]
+          : [vw * (0.15 + 0.7 * moon), waterLine - 10 - arc(moon) * (skyH - 26), moonPhase(new Date()), 1],
       glow: 0.6 + 0.6 * sky.night,
     });
     requestAnimationFrame(frame);

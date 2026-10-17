@@ -20,12 +20,17 @@ const longDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'shor
 export function baselineNote(id: string | undefined): BaselineNote | null {
   if (!id) return null;
   const feature = (features as Record<string, unknown>)[id] as
-    | { kind: string; status?: { baseline: 'high' | 'low' | false; baseline_low_date?: string } }
-    | undefined;
+    { kind: string; status?: { baseline: 'high' | 'low' | false; baseline_low_date?: string } } | undefined;
   if (!feature || feature.kind !== 'feature' || !feature.status) return null;
   const { baseline, baseline_low_date: low } = feature.status;
   if (baseline === false || !low) {
-    return { short: 'Limited', long: 'Limited availability, not yet Baseline', year: null, tier: 'limited', since: null };
+    return {
+      short: 'Limited',
+      long: 'Limited availability, not yet Baseline',
+      year: null,
+      tier: 'limited',
+      since: null,
+    };
   }
   // Dates may carry a "≤" prefix when the exact release is unknown.
   const clean = low.replace(/^[^\d]+/, '');

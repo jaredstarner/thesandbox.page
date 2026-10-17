@@ -168,7 +168,10 @@ const LANDINGS: Record<string, () => Landing> = {
       `<div class="l-row"><button type="button" class="l-ghost" data-l="cancel">Cancel my trial</button><button type="button" class="l-btn" data-l="more">Add a second loaf</button></div>`,
     act(action, win) {
       if (action === 'more') {
-        setBody(win, `<p class="l-big">Two loaves every six hours!</p><p>Added. You can remove it by calling the Loaf Line.</p>`);
+        setBody(
+          win,
+          `<p class="l-big">Two loaves every six hours!</p><p>Added. You can remove it by calling the Loaf Line.</p>`,
+        );
       } else if (action === 'cancel') {
         setBody(
           win,
@@ -182,7 +185,10 @@ const LANDINGS: Record<string, () => Landing> = {
             `<div class="l-col"><button type="button" class="l-ghost" data-l="done">Too much bread</button><button type="button" class="l-ghost" data-l="done">Not enough bread</button><button type="button" class="l-ghost" data-l="done">Other (please call)</button></div>`,
         );
       } else if (action === 'done') {
-        setBody(win, `<p class="l-big">Request received.</p><p>A loaf specialist will call you between 3:00 and 3:05 a.m. Please be by the phone.</p>`);
+        setBody(
+          win,
+          `<p class="l-big">Request received.</p><p>A loaf specialist will call you between 3:00 and 3:05 a.m. Please be by the phone.</p>`,
+        );
       }
     },
   }),
@@ -204,7 +210,10 @@ const LANDINGS: Record<string, () => Landing> = {
       `<div class="l-row"><button type="button" class="l-btn" data-l="install">Install the app</button><button type="button" class="l-ghost" data-l="close">Continue in browser</button></div>`,
     act(action, win) {
       if (action !== 'install') return;
-      setBody(win, `<p class="l-big">Installing…</p><div class="l-progress"><i></i></div><p class="l-small" data-pct>0%</p>`);
+      setBody(
+        win,
+        `<p class="l-big">Installing…</p><div class="l-progress"><i></i></div><p class="l-small" data-pct>0%</p>`,
+      );
       const bar = win.querySelector<HTMLElement>('.l-progress i');
       const pct = win.querySelector<HTMLElement>('[data-pct]');
       let p = 0;
@@ -257,7 +266,11 @@ const LANDINGS: Record<string, () => Landing> = {
       `<p class="l-big">This spoon has been banned from three kitchens.</p><p>Find out why in our 47-minute video.</p>` +
       `<button type="button" class="l-btn" data-l="watch">▶ Watch now</button>`,
     act(action, win) {
-      if (action === 'watch') setBody(win, `<p class="l-big">Video unavailable.</p><p>This video isn't available in your region. Your region is your kitchen.</p>`);
+      if (action === 'watch')
+        setBody(
+          win,
+          `<p class="l-big">Video unavailable.</p><p>This video isn't available in your region. Your region is your kitchen.</p>`,
+        );
     },
   }),
   granite: () => ({
@@ -267,7 +280,8 @@ const LANDINGS: Record<string, () => Landing> = {
       `<p class="l-big">Smell like a countertop.</p><p>Choose your finish:</p>` +
       `<div class="l-row"><button type="button" class="l-ghost" data-l="oos">Polished</button><button type="button" class="l-ghost" data-l="oos">Honed</button><button type="button" class="l-ghost" data-l="oos">Leathered</button></div>`,
     act(action, win) {
-      if (action === 'oos') setBody(win, `<p class="l-big">Out of stock.</p><p>Until it's back, stand near your countertop.</p>`);
+      if (action === 'oos')
+        setBody(win, `<p class="l-big">Out of stock.</p><p>Until it's back, stand near your countertop.</p>`);
     },
   }),
   snoozle: () => ({
@@ -277,7 +291,8 @@ const LANDINGS: Record<string, () => Landing> = {
       `<p class="l-big">How do you sleep?</p>` +
       `<div class="l-col"><button type="button" class="l-ghost" data-l="firm">On my back</button><button type="button" class="l-ghost" data-l="firm">On my side</button><button type="button" class="l-ghost" data-l="firm">I don't</button></div>`,
     act(action, win) {
-      if (action === 'firm') setBody(win, `<p class="l-big">Your ideal firmness is: GRANITE.</p><p>Have you considered a countertop?</p>`);
+      if (action === 'firm')
+        setBody(win, `<p class="l-big">Your ideal firmness is: GRANITE.</p><p>Have you considered a countertop?</p>`);
     },
   }),
   breadcoin: () => ({
@@ -287,7 +302,11 @@ const LANDINGS: Record<string, () => Landing> = {
       `<p class="l-big">1 BRC = 1 slice*</p><p class="l-small">*Slice thickness varies. Bread may go stale. Past toast is no guarantee of future toast.</p>` +
       `<button type="button" class="l-btn" data-l="buy">Buy 100 BRC</button>`,
     act(action, win) {
-      if (action === 'buy') setBody(win, `<p class="l-big">▼ 99%</p><p>While you read this, BREADCOIN fell 99%. It's a great time to buy.</p>`);
+      if (action === 'buy')
+        setBody(
+          win,
+          `<p class="l-big">▼ 99%</p><p>While you read this, BREADCOIN fell 99%. It's a great time to buy.</p>`,
+        );
     },
   }),
   slouchmore: () => ({
@@ -298,7 +317,8 @@ const LANDINGS: Record<string, () => Landing> = {
       `<p class="l-big">It's still here.</p><p>The Slouchmore is back in stock, just for you, the way it was yesterday, and the day before.</p>` +
       `<button type="button" class="l-btn" data-l="cart">Add to cart</button>`,
     act(action, win) {
-      if (action === 'cart') setBody(win, `<p class="l-big">Already there.</p><p>It's been in your cart since 2019.</p>`);
+      if (action === 'cart')
+        setBody(win, `<p class="l-big">Already there.</p><p>It's been in your cart since 2019.</p>`);
     },
   }),
   sokkit: () => ({
@@ -306,7 +326,8 @@ const LANDINGS: Record<string, () => Landing> = {
     color: '#ff2e63',
     body: `<p class="l-big">Pair your socks</p><p>SOKKIT pairs with your phone. Then with each other.</p><button type="button" class="l-btn" data-l="pair">Start pairing</button>`,
     act(action, win) {
-      if (action === 'pair') setBody(win, `<p class="l-big">Pairing…</p><p>Left sock: found.<br />Right sock: searching.</p>`);
+      if (action === 'pair')
+        setBody(win, `<p class="l-big">Pairing…</p><p>Left sock: found.<br />Right sock: searching.</p>`);
     },
   }),
   brunchland: () => ({
@@ -316,7 +337,11 @@ const LANDINGS: Record<string, () => Landing> = {
       `<p class="l-big">It's always 11 a.m. here.</p><p>Bottomless coffee, endless toast, and a view of a waiter who has seen you.</p>` +
       `<button type="button" class="l-btn" data-l="book">Book a table</button>`,
     act(action, win) {
-      if (action === 'book') setBody(win, `<p class="l-big">Fully booked until 2031.</p><p>Join the waitlist. The waitlist is also full.</p>`);
+      if (action === 'book')
+        setBody(
+          win,
+          `<p class="l-big">Fully booked until 2031.</p><p>Join the waitlist. The waitlist is also full.</p>`,
+        );
     },
   }),
   quiz: () => ({
@@ -326,7 +351,8 @@ const LANDINGS: Record<string, () => Landing> = {
       `<p class="l-big">Question 1 of 30</p><p>Pick a cloud:</p>` +
       `<div class="l-row"><button type="button" class="l-ghost" data-l="q">☁️</button><button type="button" class="l-ghost" data-l="q">☁️</button><button type="button" class="l-ghost" data-l="q">☁️</button></div>`,
     act(action, win) {
-      if (action === 'q') setBody(win, `<p class="l-big">You are: toast.</p><p>Share your result to see your result.</p>`);
+      if (action === 'q')
+        setBody(win, `<p class="l-big">You are: toast.</p><p>Share your result to see your result.</p>`);
     },
   }),
 };

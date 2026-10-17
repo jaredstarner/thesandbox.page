@@ -113,8 +113,16 @@ export function cookieWall(hell: Hell): Promise<void> {
 // ---------- Newsletter ----------
 
 const NAGS = [
-  { kicker: "WAIT! Don't go yet", title: 'Get <i>101 Toasts</i>, our free e-book', no: 'No thanks, I like my toast pale and sad.' },
-  { kicker: 'Still here? So are we.', title: 'Your free e-book is getting cold', no: "No thanks, I'll just keep burning it." },
+  {
+    kicker: "WAIT! Don't go yet",
+    title: 'Get <i>101 Toasts</i>, our free e-book',
+    no: 'No thanks, I like my toast pale and sad.',
+  },
+  {
+    kicker: 'Still here? So are we.',
+    title: 'Your free e-book is getting cold',
+    no: "No thanks, I'll just keep burning it.",
+  },
   { kicker: 'Last chance (this week)', title: 'Fine. Two free e-books.', no: 'No. I hate free e-books and joy.' },
 ];
 
@@ -253,7 +261,9 @@ export function initPushAsk(hell: Hell): void {
     answered = true;
     const text = $(el, '[data-push-text]');
     const buttons = $(el, '[data-push-buttons]');
-    if (text) text.innerHTML = "<b>We'd love to.</b> A real browser prompt would have to ask you, and this page promised never to raise one.";
+    if (text)
+      text.innerHTML =
+        "<b>We'd love to.</b> A real browser prompt would have to ask you, and this page promised never to raise one.";
     if (buttons) buttons.hidden = true;
     setTimeout(() => (el.hidden = true), 5000);
   });

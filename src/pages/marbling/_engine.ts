@@ -21,7 +21,16 @@ export type PlaneMap = (x: number, y: number, out: Float64Array) => void;
 export type Touches = (x0: number, y0: number, x1: number, y1: number) => boolean;
 
 /** Project a box onto a direction from an origin: the range it covers. */
-function project(x0: number, y0: number, x1: number, y1: number, ox: number, oy: number, dx: number, dy: number): [number, number] {
+function project(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  ox: number,
+  oy: number,
+  dx: number,
+  dy: number,
+): [number, number] {
   const a = (x0 - ox) * dx;
   const b = (x1 - ox) * dx;
   const c = (y0 - oy) * dy;
@@ -89,7 +98,13 @@ export function dropMap(cx: number, cy: number, r2: number): PlaneMap {
  * curved stroke drags along its own path. The ramp is long enough that the
  * map never folds paint over itself.
  */
-export function tineMap(t: Tines, ax: number, ay: number, bx: number, by: number): { map: PlaneMap; touches?: Touches } | null {
+export function tineMap(
+  t: Tines,
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+): { map: PlaneMap; touches?: Touches } | null {
   const len = Math.hypot(bx - ax, by - ay);
   if (len < 1e-6) return null;
   const mx = (bx - ax) / len;
@@ -282,7 +297,18 @@ export class Trough {
 
   private len = 0;
 
-  private split(f: PlaneMap, ax: number, ay: number, fax: number, fay: number, bx: number, by: number, fbx: number, fby: number, depth: number): void {
+  private split(
+    f: PlaneMap,
+    ax: number,
+    ay: number,
+    fax: number,
+    fay: number,
+    bx: number,
+    by: number,
+    fbx: number,
+    fby: number,
+    depth: number,
+  ): void {
     const dx = fbx - fax;
     const dy = fby - fay;
     if (depth > 9 || dx * dx + dy * dy <= this.maxLen * this.maxLen || !this.visible(fax, fay, fbx, fby)) return;

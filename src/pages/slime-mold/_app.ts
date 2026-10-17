@@ -199,8 +199,8 @@ export async function startSlime(root: HTMLElement): Promise<void> {
     const data = new Float32Array(MAZE_AGENTS * 4);
     const { x0, y0, side } = m.bounds;
     for (let i = 0; i < MAZE_AGENTS; i++) {
-      let x = 0;
-      let y = 0;
+      let x: number;
+      let y: number;
       do {
         x = x0 + Math.random() * side;
         y = y0 + Math.random() * side;

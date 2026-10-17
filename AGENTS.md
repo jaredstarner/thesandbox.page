@@ -10,7 +10,7 @@ Testing ground for web experiments: static Astro, strict TypeScript, deployed to
 - Write commit messages as [Conventional Commits](https://www.conventionalcommits.org); semantic-release reads them
   - `feat` releases a minor version, `fix` and `perf` a patch, and a `BREAKING CHANGE:` footer a major. The `!` shorthand (`feat!:`) is not recognized by the release config and releases nothing
   - `build`, `chore`, `ci`, `docs`, `refactor`, `style`, and `test` release nothing
-- Run `pnpm check` and `pnpm build` before pushing; CI runs both as the required `check-and-build` check
+- Run `pnpm lint`, `pnpm format:check`, `pnpm check`, and `pnpm build` before pushing; `pnpm format` fixes formatting. CI runs all four, plus actionlint on workflows and commitlint on every commit in the pull request, as the required `check-and-build` check
 - Name branches `<type>/<short-description>`, using a Conventional Commit type (for example `fix/nav-overflow`)
 - Required checks: `check-and-build`, `dependency-review`, and CodeQL; no approval is needed except for changes under `.github/` or to `.releaserc.json`, which need the owner's review (`.github/CODEOWNERS`)
 - Enable auto-merge on PRs; they merge once checks pass. If a PR from the owner (including `/sandbox` runs) is waiting on code owner review, merge it with the admin bypass after checks pass

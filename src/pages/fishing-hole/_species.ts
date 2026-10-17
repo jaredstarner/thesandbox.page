@@ -377,7 +377,8 @@ export function fishSprite(sp: Species, len: number, frame: 0 | 1, silhouette = 
       put(x, y, c);
     }
     // Dorsal fin along the back's middle.
-    if (u > 0.3 && u < 0.66 && H >= 4) put(x, top - 1, sp.pattern === 'bars' && bx % 2 ? darken(sp.fin, 0.7) : darken(sp.back, 0.9));
+    if (u > 0.3 && u < 0.66 && H >= 4)
+      put(x, top - 1, sp.pattern === 'bars' && bx % 2 ? darken(sp.fin, 0.7) : darken(sp.back, 0.9));
     // A pelvic fin under the belly.
     if (Math.abs(u - 0.62) < 0.05 && H >= 4) put(x, bottom + 1, sp.fin);
   }

@@ -179,7 +179,8 @@ function sideFace(d: number, l: number, side: 'left' | 'right', seed: number): F
   const x = side === 'left' ? l - 0.5 : l + 0.5;
   const z0 = d - 0.5;
   // Facing a left wall, your left hand points back toward the viewer; facing a right wall, forward.
-  const at = side === 'left' ? (u: number, v: number): V3 => [x, v, z0 + u] : (u: number, v: number): V3 => [x, v, z0 + 1 - u];
+  const at =
+    side === 'left' ? (u: number, v: number): V3 => [x, v, z0 + u] : (u: number, v: number): V3 => [x, v, z0 + 1 - u];
   return { at, length: 1, near: Math.max(NEAR, zc([0, 0, z0])), front: false, seed };
 }
 
@@ -235,7 +236,10 @@ function ruled(w: number, h: number, sp: number, slope: number, seed: number): [
   if (slope === 0) {
     for (let b = sp / 2, i = 0; b < h; b += sp, i++) {
       const j = b + hash(seed, i) * sp * 0.18;
-      lines.push([[0, j], [w, j]]);
+      lines.push([
+        [0, j],
+        [w, j],
+      ]);
     }
     return lines;
   }
@@ -265,13 +269,27 @@ function hatchFace(out: Out, f: Face, t: number, z: number) {
 }
 
 /** Hatching on a floor or ceiling cell: one set along or across the passage, crossed on the diagonal. */
-function hatchFlat(out: Out, l: number, d: number, y: number, t: number, z: number, seed: number, primary: 'along' | 'across') {
+function hatchFlat(
+  out: Out,
+  l: number,
+  d: number,
+  y: number,
+  t: number,
+  z: number,
+  seed: number,
+  primary: 'along' | 'across',
+) {
   const sp = spacingAt(z);
   const toWorld = ([a, b]: V2): V3 => [l - 0.5 + a, y, d - 0.5 + b];
   const map = (lines: [V2, V2][]) => lines.map(([p, q]): [V3, V3] => [toWorld(p), toWorld(q)]);
   const rows = ruled(1, 1, sp, 0, seed);
   const across = map(rows);
-  const along = map(rows.map(([p, q]): [V2, V2] => [[p[1], p[0]], [q[1], q[0]]]));
+  const along = map(
+    rows.map(([p, q]): [V2, V2] => [
+      [p[1], p[0]],
+      [q[1], q[0]],
+    ]),
+  );
   const diag = map(ruled(1, 1, sp * 1.15, 0.7, seed + 5));
   hatch(out, [primary === 'along' ? along : across, diag], t, z);
 }
@@ -323,7 +341,18 @@ function archCurve(steps = 16): V2[] {
 function vault(out: Out, f: Face, t: number, w: number, z: number, open: boolean) {
   const curve = archCurve();
   if (open) {
-    const spandrel = facePoly(f, [[0, H], [1, H], [1, 0.0], [0.94, 0.0], ...curve.slice().reverse().map(([u, v]): V2 => [0.06 + u * 0.88, v]), [0.06, 0], [0, 0]]);
+    const spandrel = facePoly(f, [
+      [0, H],
+      [1, H],
+      [1, 0.0],
+      [0.94, 0.0],
+      ...curve
+        .slice()
+        .reverse()
+        .map(([u, v]): V2 => [0.06 + u * 0.88, v]),
+      [0.06, 0],
+      [0, 0],
+    ]);
     out.parts.push(`<path d="${polyPath(spandrel)}" fill="${wash(t, z)}"/>`);
     // Piers and spandrel, ruled like the walls: level lines stopped at the opening.
     const ruling: [V3, V3][] = [];
@@ -371,7 +400,10 @@ function facePoly(f: Face, pts: V2[]): V3[] {
 function arch(u0: number, u1: number, v0: number, spring: number, steps = 14): V2[] {
   const r = (u1 - u0) / 2;
   const cu = u0 + r;
-  const pts: V2[] = [[u0, v0], [u0, spring]];
+  const pts: V2[] = [
+    [u0, v0],
+    [u0, spring],
+  ];
   for (let i = 1; i < steps; i++) {
     const a = Math.PI - (Math.PI * i) / steps;
     pts.push([cu + Math.cos(a) * r, spring + Math.sin(a) * r]);
@@ -405,7 +437,10 @@ function drawFeature(out: Out, f: Face, feature: Feature, t: number, w: number) 
     const n = 9;
     // Scaled so the last riser meets the landing at the top of the flight.
     const sMax = 1 - Math.pow(0.78, n);
-    const edge = (s: number, side: -1 | 1): V2 => [vu + side * (r - 0.03) * (1 - (s / sMax) * 0.58), (s / sMax) * (top - 0.2)];
+    const edge = (s: number, side: -1 | 1): V2 => [
+      vu + side * (r - 0.03) * (1 - (s / sMax) * 0.58),
+      (s / sMax) * (top - 0.2),
+    ];
     for (let k = 0; k < n; k++) {
       const s0 = 1 - Math.pow(0.78, k);
       const s1 = 1 - Math.pow(0.78, k + 1);
@@ -442,7 +477,10 @@ function drawFeature(out: Out, f: Face, feature: Feature, t: number, w: number) 
       const a0 = Math.PI - (Math.PI * i) / 24;
       const a1 = Math.PI - (Math.PI * (i + 1)) / 24;
       const R = r + 0.1;
-      ring.push([f.at(vu + Math.cos(a0) * R, spring + Math.sin(a0) * R), f.at(vu + Math.cos(a1) * R, spring + Math.sin(a1) * R)]);
+      ring.push([
+        f.at(vu + Math.cos(a0) * R, spring + Math.sin(a0) * R),
+        f.at(vu + Math.cos(a1) * R, spring + Math.sin(a1) * R),
+      ]);
     }
     lineSet(out, ring, w, tone(Math.max(0.8, t + 0.3)));
     out.parts.push(
@@ -453,12 +491,23 @@ function drawFeature(out: Out, f: Face, feature: Feature, t: number, w: number) 
 
   if (feature.kind === 'candle') {
     const niche = arch(0.36, 0.64, 0.42, 0.66);
-    out.parts.push(`<path d="${polyPath(facePoly(f, niche))}" fill="${tone(Math.min(0.9, t + 0.25))}" stroke="${tone(0.92)}" stroke-width="${fmt(w)}"/>`);
+    out.parts.push(
+      `<path d="${polyPath(facePoly(f, niche))}" fill="${tone(Math.min(0.9, t + 0.25))}" stroke="${tone(0.92)}" stroke-width="${fmt(w)}"/>`,
+    );
     const [fx, fy] = project(f.at(0.5, 0.6));
     const [ex] = project(f.at(0.56, 0.6));
     const rad = Math.abs(ex - fx) * 6;
     out.parts.push(`<circle cx="${fmt(fx)}" cy="${fmt(fy)}" r="${fmt(rad)}" fill="url(#uc-candle)"/>`);
-    out.parts.push(`<path d="${polyPath(facePoly(f, [[0.48, 0.42], [0.48, 0.535], [0.52, 0.535], [0.52, 0.42]]))}" fill="${tone(0.08)}" stroke="${tone(0.7)}" stroke-width="${fmt(w * 0.5)}"/>`);
+    out.parts.push(
+      `<path d="${polyPath(
+        facePoly(f, [
+          [0.48, 0.42],
+          [0.48, 0.535],
+          [0.52, 0.535],
+          [0.52, 0.42],
+        ]),
+      )}" fill="${tone(0.08)}" stroke="${tone(0.7)}" stroke-width="${fmt(w * 0.5)}"/>`,
+    );
     const flame: V2[] = [];
     for (let i = 0; i <= 12; i++) {
       const a = (i / 12) * Math.PI * 2;
@@ -471,8 +520,15 @@ function drawFeature(out: Out, f: Face, feature: Feature, t: number, w: number) 
   }
 
   if (feature.kind === 'grille') {
-    const hole: V2[] = [[0.3, 0.32], [0.3, 0.78], [0.7, 0.78], [0.7, 0.32]];
-    out.parts.push(`<path d="${polyPath(facePoly(f, hole))}" fill="${tone(1)}" stroke="${tone(0.95)}" stroke-width="${fmt(w * 1.3)}"/>`);
+    const hole: V2[] = [
+      [0.3, 0.32],
+      [0.3, 0.78],
+      [0.7, 0.78],
+      [0.7, 0.32],
+    ];
+    out.parts.push(
+      `<path d="${polyPath(facePoly(f, hole))}" fill="${tone(1)}" stroke="${tone(0.95)}" stroke-width="${fmt(w * 1.3)}"/>`,
+    );
     const bars: [V3, V3][] = [];
     for (let k = 1; k < 6; k++) bars.push([f.at(0.3 + k * 0.0667, 0.32), f.at(0.3 + k * 0.0667, 0.78)]);
     bars.push([f.at(0.3, 0.55), f.at(0.7, 0.55)]);
@@ -619,13 +675,26 @@ export function engrave(cell: Cell, facing: Dir): Plate {
     if (floor) out.parts.push(`<path d="${floor}" fill="${wash(floorT, zFlat)}"/>`);
     hatchFlat(out, l, d, 0, floorT, zFlat, seed, 'along');
     const flags: [V3, V3][] = [
-      [[l - 0.5, 0, d], [l + 0.5, 0, d]],
-      [[l - 0.5, 0, d + 0.5], [l + 0.5, 0, d + 0.5]],
+      [
+        [l - 0.5, 0, d],
+        [l + 0.5, 0, d],
+      ],
+      [
+        [l - 0.5, 0, d + 0.5],
+        [l + 0.5, 0, d + 0.5],
+      ],
     ];
-    for (const [z0, z1, off] of [[d - 0.5, d, 0], [d, d + 0.5, 0.25]] as const) {
+    for (const [z0, z1, off] of [
+      [d - 0.5, d, 0],
+      [d, d + 0.5, 0.25],
+    ] as const) {
       for (let u = off; u <= 1; u += 0.5) {
         const xx = l - 0.5 + u + hash(seed, z0, u) * 0.04;
-        if (xx > l - 0.49 && xx < l + 0.49) flags.push([[xx, 0, z0], [xx, 0, z1]]);
+        if (xx > l - 0.49 && xx < l + 0.49)
+          flags.push([
+            [xx, 0, z0],
+            [xx, 0, z1],
+          ]);
       }
     }
     lineSet(out, flags, fw * 0.9, tone(0.95));
@@ -637,9 +706,14 @@ export function engrave(cell: Cell, facing: Dir): Plate {
         [l + g, 0, d + g],
         [l - g, 0, d + g],
       ]);
-      if (grate) out.parts.push(`<path d="${grate}" fill="${tone(1)}" stroke="${tone(0.95)}" stroke-width="${fmt(fw * 1.4)}"/>`);
+      if (grate)
+        out.parts.push(`<path d="${grate}" fill="${tone(1)}" stroke="${tone(0.95)}" stroke-width="${fmt(fw * 1.4)}"/>`);
       const bars: [V3, V3][] = [];
-      for (let k = -2; k <= 2; k++) bars.push([[l + k * g * 0.36, 0, d - g], [l + k * g * 0.36, 0, d + g]]);
+      for (let k = -2; k <= 2; k++)
+        bars.push([
+          [l + k * g * 0.36, 0, d - g],
+          [l + k * g * 0.36, 0, d + g],
+        ]);
       lineSet(out, bars, fw * 1.4, tone(Math.min(0.6, floorT + 0.1)));
     }
 
@@ -656,16 +730,28 @@ export function engrave(cell: Cell, facing: Dir): Plate {
     if (ceil) out.parts.push(`<path d="${ceil}" fill="${ruledCeiling ? wash(ceilT, zFlat) : tone(ceilT)}"/>`);
     if (ruledCeiling) hatchFlat(out, l, d, H, ceilT, zFlat, seed + 11, 'across');
     const walls: { side: 'front' | 'left' | 'right'; face: Face; dir: Dir; z: number }[] = [];
-    if (h.walls.has('front')) walls.push({ side: 'front', face: frontFace(d, l, seed + 1), dir: facing, z: d + 0.5 + BACKSET });
-    if (h.walls.has('left')) walls.push({ side: 'left', face: sideFace(d, l, 'left', seed + 2), dir: LEFT[facing], z: zMid + 0.2 });
-    if (h.walls.has('right')) walls.push({ side: 'right', face: sideFace(d, l, 'right', seed + 3), dir: RIGHT[facing], z: zMid + 0.2 });
+    if (h.walls.has('front'))
+      walls.push({ side: 'front', face: frontFace(d, l, seed + 1), dir: facing, z: d + 0.5 + BACKSET });
+    if (h.walls.has('left'))
+      walls.push({ side: 'left', face: sideFace(d, l, 'left', seed + 2), dir: LEFT[facing], z: zMid + 0.2 });
+    if (h.walls.has('right'))
+      walls.push({ side: 'right', face: sideFace(d, l, 'right', seed + 3), dir: RIGHT[facing], z: zMid + 0.2 });
     for (const wall of walls) {
       const f = wall.face;
       const z = Math.max(0.25, wall.z);
       // Side walls take the lantern at a glancing angle, so they sit a little darker.
       const t = surfaceTone(c, z, wall.side === 'front' ? 0 : 0.08);
       const w = weight(z);
-      out.parts.push(`<path d="${polyPath(facePoly(f, [[0, 0], [0, H], [1, H], [1, 0]]))}" fill="${wash(t, z)}"/>`);
+      out.parts.push(
+        `<path d="${polyPath(
+          facePoly(f, [
+            [0, 0],
+            [0, H],
+            [1, H],
+            [1, 0],
+          ]),
+        )}" fill="${wash(t, z)}"/>`,
+      );
       hatchFace(out, f, t, z);
       masonry(out, f, w, t, z);
       const feature = c.faces[wall.dir];
@@ -683,11 +769,19 @@ export function engrave(cell: Cell, facing: Dir): Plate {
     }
     if (l <= 0 && c.open[LEFT[facing]]) {
       const x = l - 0.5;
-      arches.push({ face: sideFace(d, l, 'left', seed + 5), z: zMid + 0.2, soffit: d ? (u, v) => [x - 0.05, v, d - 0.5 + u] : null });
+      arches.push({
+        face: sideFace(d, l, 'left', seed + 5),
+        z: zMid + 0.2,
+        soffit: d ? (u, v) => [x - 0.05, v, d - 0.5 + u] : null,
+      });
     }
     if (l >= 0 && c.open[RIGHT[facing]]) {
       const x = l + 0.5;
-      arches.push({ face: sideFace(d, l, 'right', seed + 6), z: zMid + 0.2, soffit: d ? (u, v) => [x + 0.05, v, d + 0.5 - u] : null });
+      arches.push({
+        face: sideFace(d, l, 'right', seed + 6),
+        z: zMid + 0.2,
+        soffit: d ? (u, v) => [x + 0.05, v, d + 0.5 - u] : null,
+      });
     }
     for (const a of arches) {
       const z = Math.max(0.25, a.z);
@@ -697,7 +791,10 @@ export function engrave(cell: Cell, facing: Dir): Plate {
         const curve = archCurve().map(([u, v]): V2 => [0.06 + u * 0.88, v]);
         const soffit = [...curve.map(([u, v]) => a.face.at(u, v)), ...curve.reverse().map(([u, v]) => a.soffit!(u, v))];
         const sp = polyPath(soffit);
-        if (sp) out.parts.push(`<path d="${sp}" fill="${tone(Math.min(1, t + 0.55))}" stroke="${tone(1)}" stroke-width="${fmt(weight(z) * 0.9)}" stroke-linejoin="round"/>`);
+        if (sp)
+          out.parts.push(
+            `<path d="${sp}" fill="${tone(Math.min(1, t + 0.55))}" stroke="${tone(1)}" stroke-width="${fmt(weight(z) * 0.9)}" stroke-linejoin="round"/>`,
+          );
       }
       vault(out, a.face, t, weight(z), z, true);
     }
@@ -725,4 +822,3 @@ export function engrave(cell: Cell, facing: Dir): Plate {
     `</svg>`;
   return { svg, ahead, aheadFeature: wallAhead };
 }
-

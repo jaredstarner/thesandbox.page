@@ -249,7 +249,11 @@ export class Ceremony {
     const from = lamp.y;
     const duration = Math.min(720, 280 + Math.abs(y - from) * 0.8) * (this.brisk ? 0.6 : 1);
     const options = { duration, easing: EASE };
-    const band = this.animate(lamp.el, [{ transform: `translateY(${from}px)` }, { transform: `translateY(${y}px)` }], options);
+    const band = this.animate(
+      lamp.el,
+      [{ transform: `translateY(${from}px)` }, { transform: `translateY(${y}px)` }],
+      options,
+    );
     this.animate(lamp.paper, [{ transform: `translateY(${-from}px)` }, { transform: `translateY(${-y}px)` }], options);
     this.place(lamp, y);
     await this.until(band);
@@ -461,7 +465,8 @@ export class Ceremony {
     for (const lamp of document.querySelectorAll('.survey-lamp')) lamp.remove();
     for (const row of allRows()) {
       if (row.dataset.verdict) {
-        for (const li of row.querySelectorAll<HTMLElement>('.c-medium li[data-result]')) li.dataset.state = li.dataset.result!;
+        for (const li of row.querySelectorAll<HTMLElement>('.c-medium li[data-result]'))
+          li.dataset.state = li.dataset.result!;
         row.dataset.stamped = '';
       }
       delete row.dataset.awaiting;
@@ -516,12 +521,19 @@ export class Ceremony {
   }
 
   private inkIn(el: Element, delay: number, duration = 120) {
-    this.animate(el, [{ opacity: 0, filter: 'blur(0.6px)' }, { opacity: 1, filter: 'blur(0px)' }], {
-      duration,
-      delay,
-      easing: 'ease-out',
-      fill: 'backwards',
-    });
+    this.animate(
+      el,
+      [
+        { opacity: 0, filter: 'blur(0.6px)' },
+        { opacity: 1, filter: 'blur(0px)' },
+      ],
+      {
+        duration,
+        delay,
+        easing: 'ease-out',
+        fill: 'backwards',
+      },
+    );
   }
 
   /** Resolves after ms, or at once when the survey is skipped. */
@@ -569,7 +581,8 @@ export function giltSheen() {
   if (window.matchMedia('(hover: hover)').matches) {
     window.addEventListener(
       'pointermove',
-      (event) => set(105 + (event.clientX / window.innerWidth - 0.5) * 50 + (event.clientY / window.innerHeight - 0.5) * 16),
+      (event) =>
+        set(105 + (event.clientX / window.innerWidth - 0.5) * 50 + (event.clientY / window.innerHeight - 0.5) * 16),
       { passive: true },
     );
   } else {

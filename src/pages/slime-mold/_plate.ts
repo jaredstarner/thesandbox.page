@@ -199,7 +199,11 @@ export class Plate {
         label: 'render',
         layout: 'auto',
         vertex: { module: renderModule, entryPoint: 'vs' },
-        fragment: { module: renderModule, entryPoint: 'fs', targets: [{ format: navigator.gpu.getPreferredCanvasFormat() }] },
+        fragment: {
+          module: renderModule,
+          entryPoint: 'fs',
+          targets: [{ format: navigator.gpu.getPreferredCanvasFormat() }],
+        },
         primitive: { topology: 'triangle-list' },
       }),
     ]);
@@ -226,7 +230,11 @@ export class Plate {
   pour(
     agents: Float32Array,
     alive: number,
-    options: { limit?: number; walls?: Uint32Array; maze?: { x0: number; y0: number; pitch: number; cells: number } } = {},
+    options: {
+      limit?: number;
+      walls?: Uint32Array;
+      maze?: { x0: number; y0: number; pitch: number; cells: number };
+    } = {},
   ): void {
     const { walls, maze } = options;
     this.limit = Math.min(options.limit ?? this.maxAgents, this.maxAgents);
@@ -369,7 +377,12 @@ export class Plate {
     const encoder = this.device.createCommandEncoder();
     const pass = encoder.beginRenderPass({
       colorAttachments: [
-        { view: this.context.getCurrentTexture().createView(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] },
+        {
+          view: this.context.getCurrentTexture().createView(),
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: [0, 0, 0, 1],
+        },
       ],
     });
     pass.setPipeline(this.pipelines.render);

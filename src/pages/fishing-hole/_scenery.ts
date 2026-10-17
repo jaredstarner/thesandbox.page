@@ -3,20 +3,7 @@
 // boot, and the far shore's reeds. All of it is drawn here in code.
 
 import { Layer, rgb, sprite, type Sprite } from './_pixels';
-import {
-  DECK_Y,
-  DOCK_X0,
-  DOCK_X1,
-  LOG,
-  PILINGS,
-  REEDS,
-  ROCKS,
-  TREES,
-  WEEDS,
-  bedAt,
-  rng,
-  type Tree,
-} from './_world';
+import { DECK_Y, DOCK_X0, DOCK_X1, LOG, PILINGS, REEDS, ROCKS, TREES, WEEDS, bedAt, rng, type Tree } from './_world';
 
 const PLANK = rgb(0x9a6538);
 const PLANK_TOP = rgb(0xbb8350);
@@ -67,7 +54,8 @@ function treeSprite(t: Tree, seed: number): Sprite {
         const cy = crown * 0.52;
         const r = crown * 0.5;
         const d = Math.hypot(dx * 0.95, y - cy);
-        if (y < crown && d <= r + (rand() - 0.5) * 1.2) c = y > cy + r * 0.35 || x < mid - r * 0.4 ? 'D' : rand() < 0.15 ? 'L' : 'G';
+        if (y < crown && d <= r + (rand() - 0.5) * 1.2)
+          c = y > cy + r * 0.35 || x < mid - r * 0.4 ? 'D' : rand() < 0.15 ? 'L' : 'G';
         if (y >= crown - 2 && dx < 1) c = 'T';
       }
       row += c;
