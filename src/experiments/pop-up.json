@@ -1,0 +1,8 @@
+{
+  "title": "Pop-up",
+  "summary": "A paper engineer's dummy of a pop-up book in plain white board under a desk lamp: turn a page and a harbour, a street, and a bridge by night fold up out of the gutter, and every cut window throws its light across the page.",
+  "date": "2026-10-17",
+  "tags": ["css-3d-transforms", "clip-path", "svg", "pointer-events", "paper-engineering"],
+  "requires": ["css-3d-transforms", "clip-path"],
+  "plot": 16
+}

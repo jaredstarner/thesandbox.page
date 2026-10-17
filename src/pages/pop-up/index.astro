@@ -1,0 +1,314 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Pop-up"
+  description="A paper engineer's dummy of a pop-up book, in plain white board under a desk lamp: turn the pages and every fold rises, and every cut window throws its light on the page."
+>
+  <Font cssVariable="--font-popup" slot="head" />
+
+  <main class="popup" data-popup>
+    <div class="pp-stage" data-stage aria-hidden="true">
+      <div class="pp-world" data-world></div>
+    </div>
+
+    <header class="pp-head">
+      <a class="pp-home" href="/">thesandbox.page</a>
+      <h1>Pop-up</h1>
+      <p>A paper engineer's dummy, cut from plain white board.</p>
+    </header>
+
+    <nav class="pp-nav" aria-label="Pages">
+      <button type="button" data-prev aria-label="Previous page">&larr;</button>
+      <span data-where aria-live="polite">Cover</span>
+      <button type="button" data-next aria-label="Next page">&rarr;</button>
+    </nav>
+
+    <p class="pp-hint">
+      Drag a page to turn it, or hold it halfway to watch the folds. Drag the table to move the lamp.
+    </p>
+
+    <template data-cover>
+      <div class="pp-label">
+        <p class="pp-label-t">The Town by the Sea</p>
+        <p>a book of pop-ups</p>
+        <p class="pp-label-s">dummy no. 4 &middot; white board &middot; not for press</p>
+      </div>
+    </template>
+
+    <svg class="pp-defs" width="0" height="0" aria-hidden="true">
+      <filter id="pp-soft" x="-5%" y="-5%" width="110%" height="110%">
+        <feGaussianBlur stdDeviation="1.5"></feGaussianBlur>
+      </filter>
+    </svg>
+
+    <noscript><p class="pp-hint">This book needs JavaScript to fold its pages.</p></noscript>
+  </main>
+</Bare>
+
+<script>
+  import { mount } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-popup]');
+  if (root) mount(root);
+</script>
+
+<style is:global>
+  body:has(.popup) {
+    margin: 0;
+    background: #0d0c0b;
+    overflow: hidden;
+  }
+
+  .popup {
+    --pp-ink: #e6dccb;
+    --pp-dim: #a99d8a;
+    --pp-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 -.1 1 0 0 0 -.1 1 0 0 0 -.11 1 0 0 0 0 1'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+    --pp-wood: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='.0025 .06' numOctaves='3' seed='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 -.45 1 0 0 0 -.5 1 0 0 0 -.55 1 0 0 0 0 1'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>");
+    --pp-cloth:
+      repeating-linear-gradient(45deg, rgb(0 0 0 / 0.1) 0 0.8px, transparent 0.8px 2.6px),
+      repeating-linear-gradient(-45deg, rgb(0 0 0 / 0.07) 0 0.8px, transparent 0.8px 2.6px);
+    --pp-edge: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.22) 0 0.7px, transparent 0.7px 3px);
+
+    position: fixed;
+    inset: 0;
+    color: var(--pp-ink);
+    font-family: var(--font-popup);
+  }
+
+  .popup .pp-stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    perspective-origin: 50% 50%;
+    touch-action: none;
+    cursor: grab;
+    background: radial-gradient(
+      circle at var(--pp-lx, 30%) var(--pp-ly, 70%),
+      #2a221b 0,
+      #19140f 32%,
+      #0d0b09 70%
+    );
+  }
+
+  .popup[data-drag] .pp-stage {
+    cursor: grabbing;
+  }
+
+  .popup .pp-world {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+    transform-style: preserve-3d;
+  }
+
+  .popup .pp-face {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
+    backface-visibility: hidden;
+    background-blend-mode: multiply;
+    overflow: hidden;
+  }
+
+  .popup .pp-table {
+    pointer-events: auto;
+  }
+
+  .popup .pp-shade,
+  .popup .pp-art {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+  }
+
+  .popup .pp-shade path {
+    fill: rgb(14 14 24);
+    fill-rule: evenodd;
+  }
+
+  .popup .pp-art {
+    fill: none;
+    stroke: #5b5651;
+    stroke-width: 0.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.72;
+  }
+
+  .popup .pp-art text {
+    fill: #4c4844;
+    stroke: none;
+    font-family: var(--font-popup);
+  }
+
+  .popup .pp-art .thin {
+    stroke-width: 0.6;
+  }
+
+  .popup .pp-art .dot {
+    fill: #5b5651;
+    stroke: none;
+  }
+
+  .popup .pp-art .glue {
+    stroke-dasharray: 6 3 1.5 3;
+    stroke-width: 0.8;
+  }
+
+  .popup .pp-art.pp-marks {
+    opacity: 0.45;
+    stroke-width: 0.7;
+  }
+
+  .popup .pp-back .pp-art.pp-marks {
+    display: none;
+  }
+
+  .popup .pp-label {
+    position: absolute;
+    left: 62px;
+    top: 128px;
+    width: 256px;
+    padding: 22px 18px 18px;
+    box-sizing: border-box;
+    background: #efe9dc;
+    color: #45413c;
+    text-align: center;
+    filter: brightness(var(--lum, 1));
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.15);
+  }
+
+  .popup .pp-label p {
+    margin: 0 0 6px;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  .popup .pp-label .pp-label-t {
+    margin-bottom: 12px;
+    font-size: 25px;
+    letter-spacing: 0.02em;
+  }
+
+  .popup .pp-label .pp-label-s {
+    margin-top: 14px;
+    font-size: 11px;
+    opacity: 0.75;
+  }
+
+  .popup .pp-defs {
+    position: absolute;
+  }
+
+  .popup .pp-head {
+    position: absolute;
+    top: 18px;
+    left: 22px;
+    max-width: 22rem;
+    pointer-events: none;
+  }
+
+  .popup .pp-head a {
+    pointer-events: auto;
+    color: var(--pp-dim);
+    font-size: 13px;
+    text-decoration: none;
+  }
+
+  .popup .pp-head a:hover,
+  .popup .pp-head a:focus-visible {
+    color: var(--pp-ink);
+    text-decoration: underline;
+  }
+
+  .popup .pp-head h1 {
+    margin: 4px 0 2px;
+    font-size: 34px;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .popup .pp-head p {
+    margin: 0;
+    color: var(--pp-dim);
+    font-size: 14px;
+  }
+
+  .popup .pp-nav {
+    position: absolute;
+    left: 50%;
+    bottom: 46px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transform: translateX(-50%);
+    font-size: 17px;
+    white-space: nowrap;
+  }
+
+  .popup .pp-nav span {
+    min-width: 13ch;
+    text-align: center;
+  }
+
+  .popup .pp-nav button {
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgb(230 220 203 / 0.35);
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.25);
+    color: var(--pp-ink);
+    font: inherit;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  .popup .pp-nav button:hover:not(:disabled),
+  .popup .pp-nav button:focus-visible {
+    border-color: var(--pp-ink);
+  }
+
+  .popup .pp-nav button:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .popup .pp-hint {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 14px;
+    margin: 0;
+    padding: 0 16px;
+    color: var(--pp-dim);
+    font-size: 13px;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  @media (max-width: 640px) {
+    .popup .pp-head {
+      top: 12px;
+      left: 16px;
+    }
+
+    .popup .pp-head h1 {
+      font-size: 28px;
+    }
+
+    .popup .pp-nav {
+      bottom: 52px;
+    }
+
+    .popup .pp-hint {
+      font-size: 12px;
+    }
+  }
+</style>
