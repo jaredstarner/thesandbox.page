@@ -1,6 +1,6 @@
 name: Experiment idea
 description: Propose a new feature, experiment, or addition to the sandbox
-labels: [enhancement]
+labels: [experiment]
 body:
   - type: textarea
     id: idea
