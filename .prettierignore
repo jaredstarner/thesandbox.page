@@ -1,0 +1,11 @@
+# Generated or vendored
+dist/
+.astro/
+pnpm-lock.yaml
+
+# CLAUDE.md links to AGENTS.md; the Code of Conduct is upstream text, kept verbatim
+CLAUDE.md
+CODE_OF_CONDUCT.md
+
+# Local only
+docs/session-handoff.md
