@@ -109,7 +109,8 @@ async function surveyRow(row: HTMLElement, env: SurveyEnvironment, now: Date): P
       const evidence = row.querySelector<HTMLElement>(`.r-evidence [data-key="${key}"]`);
       if (evidence) {
         evidence.dataset.state = state;
-        evidence.querySelector('.r-state')!.textContent = `${stateWords[result.state]} (${result.detail})`;
+        evidence.querySelector('.r-state')!.textContent = stateWords[result.state];
+        evidence.querySelector('.r-detail')!.textContent = result.detail;
       }
     }
     const note = technique?.context ? await Promise.resolve(technique.context(env)).catch(() => null) : null;

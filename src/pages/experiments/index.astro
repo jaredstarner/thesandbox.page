@@ -275,11 +275,22 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
                                         <span class="r-role">
                                           {t.required ? 'required' : t.testable ? 'enhancement' : 'technique note'}
                                         </span>
+                                        <button
+                                          type="button"
+                                          class="r-state"
+                                          aria-describedby={`note-${entry.slug}-${t.key}`}
+                                        >
+                                          {t.testable ? 'Not surveyed' : 'No test'}
+                                        </button>
+                                        {t.baseline && <span class="r-base">{t.baseline.year ?? t.baseline.short}</span>}
                                       </span>
-                                      <span class="r-state">
-                                        {t.testable ? 'Not surveyed' : 'Nothing to test in a browser'}
+                                      {/* The test detail and Baseline note, shown on hover, focus, or tap of the line. */}
+                                      <span class="r-note" role="tooltip" id={`note-${entry.slug}-${t.key}`}>
+                                        <span class="r-detail">
+                                          {t.testable ? 'Not surveyed yet' : 'Nothing to test in a browser'}
+                                        </span>
+                                        {t.baseline && <span class="r-base-long">{t.baseline.long}</span>}
                                       </span>
-                                      {t.baseline && <span class="r-base">{t.baseline.long}</span>}
                                     </li>
                                   ))}
                                 </ul>
@@ -459,6 +470,15 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
     const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     document.querySelector('.folio')?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
     void surveyNow(true);
+  });
+  // A tap on an evidence line's state opens its note; Safari doesn't focus buttons on tap.
+  document.addEventListener('click', (event) => {
+    const state = (event.target as Element).closest?.('.r-state');
+    for (const open of document.querySelectorAll<HTMLElement>('.r-evidence li[data-note]')) {
+      if (!state || open !== state.closest('li')) delete open.dataset.note;
+    }
+    const line = state?.closest('li');
+    if (line) line.toggleAttribute('data-note');
   });
   giltSheen();
   // Start once the register's fonts are in, so the form prints in its own type.
@@ -1364,15 +1384,16 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
   }
 
   .r-evidence li {
+    position: relative;
     padding-left: 14px;
     color: var(--ink-graphite);
-    overflow-wrap: anywhere;
   }
 
   .r-line {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
-    gap: 7px;
+    column-gap: 7px;
     margin-left: -14px;
     color: var(--ink);
   }
@@ -1401,8 +1422,52 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
     color: var(--ink-graphite);
   }
 
-  .r-state + .r-base::before {
-    content: ' · ';
+  /* State and Baseline set flush right, so each reads down the report as a column. */
+  .r-state {
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--ink-graphite);
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+    cursor: help;
+  }
+
+  .r-base {
+    min-width: 4ch;
+    font-size: 10.5px;
+    text-align: right;
+    color: var(--ink-graphite);
+  }
+
+  /* A slip tucked under the line: the test's own words and the full Baseline note. */
+  .r-note {
+    display: none;
+    position: absolute;
+    z-index: 2;
+    top: calc(var(--line) - 4px);
+    right: 0;
+    max-width: min(100%, 44ch);
+    padding: 4px 8px;
+    border: 1px solid var(--rule);
+    background: var(--leaf);
+    box-shadow: 0 2px 6px rgb(26 28 30 / 0.18);
+    font-size: 11px;
+    line-height: 18px;
+    color: var(--ink-graphite);
+    overflow-wrap: anywhere;
+  }
+
+  .r-note > span {
+    display: block;
+  }
+
+  .r-evidence li:hover .r-note,
+  .r-evidence li:focus-within .r-note,
+  .r-evidence li[data-note] .r-note {
+    display: block;
   }
 
   /* ---- the survey lamp ---------------------------------------------------- */
