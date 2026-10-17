@@ -275,11 +275,24 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
                                         <span class="r-role">
                                           {t.required ? 'required' : t.testable ? 'enhancement' : 'technique note'}
                                         </span>
+                                        <button
+                                          type="button"
+                                          class="r-state"
+                                          aria-describedby={`note-${entry.slug}-${t.key}`}
+                                        >
+                                          {t.testable ? 'Not surveyed' : 'No test'}
+                                        </button>
+                                        {t.baseline && (
+                                          <span class="r-base">{t.baseline.year ?? t.baseline.short}</span>
+                                        )}
                                       </span>
-                                      <span class="r-state">
-                                        {t.testable ? 'Not surveyed' : 'Nothing to test in a browser'}
+                                      {/* The test detail and Baseline note, shown on hover, focus, or tap of the line. */}
+                                      <span class="r-note" role="tooltip" id={`note-${entry.slug}-${t.key}`}>
+                                        <span class="r-detail">
+                                          {t.testable ? 'Not surveyed yet' : 'Nothing to test in a browser'}
+                                        </span>
+                                        {t.baseline && <span class="r-base-long">{t.baseline.long}</span>}
                                       </span>
-                                      {t.baseline && <span class="r-base">{t.baseline.long}</span>}
                                     </li>
                                   ))}
                                 </ul>
@@ -302,7 +315,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
                             >
                               <span class="light" aria-hidden="true" />
                               <span class="t-label">{t.label}</span>
-                              {t.baseline && <span class="t-base">{t.baseline.short.replace('Baseline ', '')}</span>}
+                              {t.baseline && <span class="t-base">{t.baseline.year ?? t.baseline.short}</span>}
                             </li>
                           ))}
                         </ul>
@@ -352,9 +365,11 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
           <div class="perforation" aria-hidden="true"></div>
           <svg class="seal" viewBox="-60 -60 120 120" width="112" height="112" aria-hidden="true">
             <defs>
-              <path id="seal-ring" d="M 0 -45 A 45 45 0 1 1 0 45 A 45 45 0 1 1 0 -45" />
+              <!-- Two arcs, as on a notary seal: the top reads over the crown, the bottom upright along the base. -->
+              <path id="seal-arc-top" d="M -29.56 29.56 A 41.8 41.8 0 1 1 29.56 29.56" />
+              <path id="seal-arc-bottom" d="M -35.71 -35.71 A 50.5 50.5 0 1 0 35.71 -35.71" />
               <filter id="seal-emboss" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
-                <feGaussianBlur in="SourceAlpha" stdDeviation="1.4" result="height" />
+                <feGaussianBlur in="SourceAlpha" stdDeviation="0.7" result="height" />
                 <feDiffuseLighting
                   class="seal-relief"
                   in="height"
@@ -379,11 +394,18 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
                 <circle r="52" stroke-width="0.6" />
                 <circle r="36" stroke-width="0.8" />
               </g>
-              <text font-size="9.4" letter-spacing="1.6">
-                <textPath href="#seal-ring" startOffset="0">
-                  REGISTER OF OBJECTS · THESANDBOX.PAGE ·
+              <text font-size="12.6" letter-spacing="0.6" text-anchor="middle">
+                <textPath href="#seal-arc-top" startOffset="50%">
+                  REGISTER OF OBJECTS
                 </textPath>
               </text>
+              <text font-size="12.6" letter-spacing="1.6" text-anchor="middle">
+                <textPath href="#seal-arc-bottom" startOffset="50%">
+                  THESANDBOX.PAGE
+                </textPath>
+              </text>
+              <circle cx="-45.53" cy="7.53" r="1.5" />
+              <circle cx="45.53" cy="7.53" r="1.5" />
               <g transform="scale(0.36)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
                 <path d={monogramPaths.t} stroke-width="7" />
                 <path d={monogramPaths.s} stroke-width="6" />
@@ -454,6 +476,15 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
     const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     document.querySelector('.folio')?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
     void surveyNow(true);
+  });
+  // A tap on an evidence line's state opens its note; Safari doesn't focus buttons on tap.
+  document.addEventListener('click', (event) => {
+    const state = (event.target as Element).closest?.('.r-state');
+    for (const open of document.querySelectorAll<HTMLElement>('.r-evidence li[data-note]')) {
+      if (!state || open !== state.closest('li')) delete open.dataset.note;
+    }
+    const line = state?.closest('li');
+    if (line) line.toggleAttribute('data-note');
   });
   giltSheen();
   // Start once the register's fonts are in, so the form prints in its own type.
@@ -1318,7 +1349,7 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
 
   .r-body {
     display: grid;
-    grid-template-columns: 13ch minmax(0, 1fr);
+    grid-template-columns: 12ch minmax(0, 1fr);
     margin: 0;
     font-family: var(--f-data);
     font-size: 12px;
@@ -1359,15 +1390,16 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
   }
 
   .r-evidence li {
+    position: relative;
     padding-left: 14px;
     color: var(--ink-graphite);
-    overflow-wrap: anywhere;
   }
 
   .r-line {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
-    gap: 7px;
+    column-gap: 6px;
     margin-left: -14px;
     color: var(--ink);
   }
@@ -1391,13 +1423,59 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
   .r-role {
     font-family: var(--f-form);
     font-size: 10.5px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--ink-graphite);
   }
 
-  .r-state + .r-base::before {
-    content: ' · ';
+  /* State and Baseline set flush right, so each reads down the report as a column. */
+  .r-state {
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--ink-graphite);
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+    cursor: help;
+  }
+
+  /* The form face, narrower than the data face, so "Not Baseline" holds the line. */
+  .r-base {
+    min-width: 4ch;
+    font-family: var(--f-form);
+    font-size: 11px;
+    text-align: right;
+    color: var(--ink-graphite);
+  }
+
+  /* A slip tucked under the line: the test's own words and the full Baseline note. */
+  .r-note {
+    display: none;
+    position: absolute;
+    z-index: 2;
+    top: calc(var(--line) - 4px);
+    right: 0;
+    max-width: min(100%, 44ch);
+    padding: 4px 8px;
+    border: 1px solid var(--rule);
+    background: var(--leaf);
+    box-shadow: 0 2px 6px rgb(26 28 30 / 0.18);
+    font-size: 11px;
+    line-height: 18px;
+    color: var(--ink-graphite);
+    overflow-wrap: anywhere;
+  }
+
+  .r-note > span {
+    display: block;
+  }
+
+  .r-evidence li:hover .r-note,
+  .r-evidence li:focus-within .r-note,
+  .r-evidence li[data-note] .r-note {
+    display: block;
   }
 
   /* ---- the survey lamp ---------------------------------------------------- */

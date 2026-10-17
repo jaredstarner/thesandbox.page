@@ -3,7 +3,7 @@
 import { features } from 'web-features';
 
 export interface BaselineNote {
-  /** "Baseline 2026", or "Limited". */
+  /** "Baseline 2026", or "Not Baseline". */
   short: string;
   /** A longer line for the condition report, without the feature's name. */
   long: string;
@@ -25,7 +25,7 @@ export function baselineNote(id: string | undefined): BaselineNote | null {
   const { baseline, baseline_low_date: low } = feature.status;
   if (baseline === false || !low) {
     return {
-      short: 'Limited',
+      short: 'Not Baseline',
       long: 'Limited availability, not yet Baseline',
       year: null,
       tier: 'limited',
