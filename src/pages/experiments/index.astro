@@ -282,7 +282,9 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
                                         >
                                           {t.testable ? 'Not surveyed' : 'No test'}
                                         </button>
-                                        {t.baseline && <span class="r-base">{t.baseline.year ?? t.baseline.short}</span>}
+                                        {t.baseline && (
+                                          <span class="r-base">{t.baseline.year ?? t.baseline.short}</span>
+                                        )}
                                       </span>
                                       {/* The test detail and Baseline note, shown on hover, focus, or tap of the line. */}
                                       <span class="r-note" role="tooltip" id={`note-${entry.slug}-${t.key}`}>
@@ -393,10 +395,14 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
                 <circle r="36" stroke-width="0.8" />
               </g>
               <text font-size="12.6" letter-spacing="0.6" text-anchor="middle">
-                <textPath href="#seal-arc-top" startOffset="50%">REGISTER OF OBJECTS</textPath>
+                <textPath href="#seal-arc-top" startOffset="50%">
+                  REGISTER OF OBJECTS
+                </textPath>
               </text>
               <text font-size="12.6" letter-spacing="1.6" text-anchor="middle">
-                <textPath href="#seal-arc-bottom" startOffset="50%">THESANDBOX.PAGE</textPath>
+                <textPath href="#seal-arc-bottom" startOffset="50%">
+                  THESANDBOX.PAGE
+                </textPath>
               </text>
               <circle cx="-45.53" cy="7.53" r="1.5" />
               <circle cx="45.53" cy="7.53" r="1.5" />
