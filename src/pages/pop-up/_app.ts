@@ -34,11 +34,13 @@ const PAPER: RGB = [0.95, 0.935, 0.9];
 const CLOTH: RGB = [0.2, 0.25, 0.3];
 const TABLE: RGB = [0.3, 0.24, 0.19];
 const EDGE: RGB = [0.86, 0.84, 0.79];
-const AMBIENT: RGB = [0.15, 0.165, 0.21];
-const LAMP: RGB = [1, 0.87, 0.7];
+const AMBIENT: RGB = [0.2, 0.21, 0.26];
+const LAMP: RGB = [1, 0.92, 0.8];
 /** Lamp strength: direct light is K * cos / distance^2. */
-const K = 2.7e5;
-const TILT = 36 * DEG;
+const K = 4.6e5;
+/** Camera tilt from straight down, and its turn about the table; a portrait screen looks down more steeply. */
+let TILT = 56 * DEG;
+let YAW = -11 * DEG;
 
 interface Face {
   w: number;
@@ -278,7 +280,7 @@ function buildPiece(world: HTMLElement, p: Piece, spread: number): Placed {
 // Light.
 
 const rgb = (base: RGB, light: RGB) =>
-  `rgb(${base.map((b, i) => Math.round(255 * Math.min(1, b * light[i]))).join(' ')})`;
+  `rgb(${base.map((b, i) => Math.round(255 * Math.pow(Math.min(1, b * light[i]), 0.85))).join(' ')})`;
 
 const lightAt = (i: number): RGB => [
   AMBIENT[0] + i * LAMP[0],
@@ -375,18 +377,18 @@ export function mount(root: HTMLElement) {
   const coverLabel = root.querySelector<HTMLTemplateElement>('[data-cover]')!.innerHTML;
 
   // The table, under everything.
-  const TW = 1800;
-  const TH = 1400;
-  const table = addFace(world, {
+  // The table takes light and shadows, and fades into the dark at its edges.
+  const TW = 2400;
+  const near = addFace(world, {
     w: TW,
-    h: TH,
+    h: 1800,
     frontBase: TABLE,
     glow: 0,
     casts: false,
-    cls: 'pp-table',
+    cls: 'pp-table pp-far',
     frontTex: 'var(--pp-wood)',
   });
-  table.frame = { o: [-TW / 2, TH / 2 - 60, -T - 0.4], ex: [1, 0, 0], ey: [0, -1, 0] };
+  near.frame = { o: [-TW / 2, 900, -T - 0.4], ex: [1, 0, 0], ey: [0, -1, 0] };
 
   // The board edges of each half of the book block.
   const edgeFront = [0, 1].map(() =>
@@ -436,7 +438,7 @@ export function mount(root: HTMLElement) {
   let t = 0;
   let target = 0;
   let vel = 0;
-  const lamp: V3 = [-300, -330, 560];
+  const lamp: V3 = [-230, -470, 700];
   let scale = 1;
   let persp = 2000;
   let ox = 0;
@@ -451,8 +453,17 @@ export function mount(root: HTMLElement) {
     const vw = stage.clientWidth;
     const vh = stage.clientHeight;
     const narrow = vw < 640;
-    scale = Math.min(1.3, (vw - (narrow ? 12 : 40)) / (2 * W + 40), (vh - (narrow ? 150 : 170)) / (H * 0.95 + 260));
-    persp = 2100 * scale;
+    const portrait = vh > vw * 1.2;
+    TILT = (portrait ? 46 : 56) * DEG;
+    YAW = (portrait ? -7 : -11) * DEG;
+    // The open spread, turned by the yaw, plus room for the perspective's nearer edge.
+    const across = 2 * W * Math.cos(YAW) + H * Math.abs(Math.sin(YAW));
+    scale = Math.min(
+      1.4,
+      (vw - (narrow ? 16 : 40)) / (across * (narrow ? 1.3 : 1.04)),
+      (vh - (narrow ? 150 : 170)) / (H * Math.cos(TILT) + 230),
+    );
+    persp = 1700 * scale;
     stage.style.perspective = `${persp}px`;
     dirty = true;
   }
@@ -461,14 +472,19 @@ export function mount(root: HTMLElement) {
     // A shut book sits centred; an open one centres on its spine.
     const shut = Math.max(0, 1 - t * 1.6);
     ox = (-W / 2) * scale * shut;
-    oy = 34 * scale;
-    world.style.transform = `translate3d(${ox.toFixed(2)}px, ${oy.toFixed(2)}px, 0) scale(${scale.toFixed(4)}) rotateX(${TILT}rad)`;
+    oy = 70 * scale;
+    world.style.transform =
+      `translate3d(${ox.toFixed(2)}px, ${oy.toFixed(2)}px, 0) scale(${scale.toFixed(4)}) ` +
+      `rotateX(${TILT}rad) rotateZ(${YAW}rad)`;
   }
 
+  /** Screen position of a world point, by the same transforms the world element gets. */
   function project(p: V3): Pt {
     const r = stage.getBoundingClientRect();
-    const X = p[0];
-    const Yc = -p[1];
+    const X0 = p[0];
+    const Y0 = -p[1];
+    const X = X0 * Math.cos(YAW) - Y0 * Math.sin(YAW);
+    const Yc = X0 * Math.sin(YAW) + Y0 * Math.cos(YAW);
     const Z = p[2];
     const y1 = Yc * Math.cos(TILT) - Z * Math.sin(TILT);
     const z1 = Yc * Math.sin(TILT) + Z * Math.cos(TILT);
@@ -477,19 +493,23 @@ export function mount(root: HTMLElement) {
     return [r.left + r.width / 2 + (scale * X + ox) * k, r.top + r.height / 2 + (scale * y1 + oy) * k];
   }
 
-  function unprojectTable(cx: number, cy: number): Pt {
+  /** The world point under a screen point, on the level plane at height z0. */
+  function unproject(cx: number, cy: number, z0: number): Pt {
     const r = stage.getBoundingClientRect();
     const sx = cx - (r.left + r.width / 2);
     const sy = cy - (r.top + r.height / 2);
-    const z0 = -T;
     const sn = Math.sin(TILT);
     const cs = Math.cos(TILT);
     const P = persp;
     const s = scale;
     const y = (P * oy - sy * P - P * s * z0 * sn + sy * s * z0 * cs) / (s * (sy * sn + P * cs));
     const qz = s * (-y * sn + z0 * cs);
-    const x = (sx * ((P - qz) / P) - ox) / s;
-    return [x, y];
+    const xr = (sx * ((P - qz) / P) - ox) / s;
+    const yr = -y;
+    // Undo the yaw.
+    const X = xr * Math.cos(YAW) + yr * Math.sin(YAW);
+    const Yc = -xr * Math.sin(YAW) + yr * Math.cos(YAW);
+    return [X, -Yc];
   }
 
   // -------------------------------------------------------------------------
@@ -580,12 +600,6 @@ export function mount(root: HTMLElement) {
       }
     }
 
-    // Light pool on the bare table beyond the cloth.
-    const foot = project([lamp[0], lamp[1], -T]);
-    const r = stage.getBoundingClientRect();
-    stage.style.setProperty('--pp-lx', `${(foot[0] - r.left).toFixed(0)}px`);
-    stage.style.setProperty('--pp-ly', `${(foot[1] - r.top).toFixed(0)}px`);
-
     const k = Math.round(t);
     where.textContent = k === 0 ? 'Cover' : `${k} · ${SPREADS[k - 1].title}`;
     prev.disabled = target <= 0;
@@ -641,6 +655,9 @@ export function mount(root: HTMLElement) {
     kind: 'turn' | 'lamp';
     id: number;
     x: number;
+    /** Where on the page it was grabbed, in world x; 0 when grabbed mid-turn. */
+    wx: number;
+    reach: number;
     leaf: number;
     t0: number;
     moved: number;
@@ -651,7 +668,8 @@ export function mount(root: HTMLElement) {
   stage.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
     const onBook = (e.target as Element).closest('.pp-leaf, .pp-piece');
-    const spine = project([0, 0, LEAVES * T])[0];
+    const [wx] = unproject(e.clientX, e.clientY, LEAVES * T);
+    let reach = 0;
     let kind: 'turn' | 'lamp' = onBook ? 'turn' : 'lamp';
     let leaf = 0;
     let dir = 1;
@@ -659,23 +677,27 @@ export function mount(root: HTMLElement) {
       const settled = Math.abs(t - Math.round(t)) < 0.02;
       if (settled) {
         const k = Math.round(t);
-        dir = e.clientX >= spine ? 1 : -1;
+        dir = wx >= 0 ? 1 : -1;
         leaf = dir > 0 ? k : k - 1;
+        // The grabbed point stays under the pointer as the page swings over the spine.
+        reach = Math.max(Math.abs(wx), W * 0.45);
         if (leaf < 0 || leaf >= LEAVES) kind = 'lamp';
       } else {
         leaf = Math.floor(t);
         dir = target > t ? 1 : -1;
       }
     }
-    drag = { kind, id: e.pointerId, x: e.clientX, leaf, t0: t, moved: 0, dir, hist: [[performance.now(), t]] };
-    stage.setPointerCapture?.(e.pointerId);
+    drag = { kind, id: e.pointerId, x: e.clientX, wx, reach, leaf, t0: t, moved: 0, dir, hist: [[performance.now(), t]] };
+    try {
+      stage.setPointerCapture(e.pointerId);
+    } catch {}
     if (kind === 'lamp') moveLamp(e.clientX, e.clientY);
     root.dataset.drag = kind;
     kick();
   });
 
   function moveLamp(cx: number, cy: number) {
-    const [x, y] = unprojectTable(cx, cy);
+    const [x, y] = unproject(cx, cy, -T);
     const r = Math.hypot(x, y);
     const max = 900;
     const k = r > max ? max / r : 1;
@@ -690,8 +712,11 @@ export function mount(root: HTMLElement) {
     if (drag.kind === 'lamp') {
       moveLamp(e.clientX, e.clientY);
     } else {
-      const span = project([W, 0, 0])[0] - project([-W, 0, 0])[0];
-      t = Math.max(drag.leaf, Math.min(drag.leaf + 1, drag.t0 + (drag.x - e.clientX) / span));
+      const [x] = unproject(e.clientX, e.clientY, LEAVES * T);
+      const along = drag.reach
+        ? Math.acos(Math.max(-1, Math.min(1, x / drag.reach))) / Math.PI
+        : drag.t0 - drag.leaf + (drag.wx - x) / (2 * W);
+      t = drag.leaf + Math.max(0, Math.min(1, along));
       target = t;
       drag.hist.push([performance.now(), t]);
       if (drag.hist.length > 6) drag.hist.shift();
@@ -755,6 +780,8 @@ export function mount(root: HTMLElement) {
       get t() {
         return t;
       },
+      /** Screen position of a world point, for scripted drags. */
+      project: (x: number, y: number, z: number) => project([x, y, z]),
     };
   }
 }

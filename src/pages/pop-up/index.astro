@@ -85,12 +85,7 @@ import Bare from '../../layouts/Bare.astro';
     perspective-origin: 50% 50%;
     touch-action: none;
     cursor: grab;
-    background: radial-gradient(
-      circle at var(--pp-lx, 30%) var(--pp-ly, 70%),
-      #2a221b 0,
-      #19140f 32%,
-      #0d0b09 70%
-    );
+    background: #0f0c0a;
   }
 
   .popup[data-drag] .pp-stage {
@@ -116,8 +111,8 @@ import Bare from '../../layouts/Bare.astro';
     overflow: hidden;
   }
 
-  .popup .pp-table {
-    pointer-events: auto;
+  .popup .pp-far {
+    mask-image: radial-gradient(closest-side, #000 55%, transparent);
   }
 
   .popup .pp-shade,
@@ -193,8 +188,8 @@ import Bare from '../../layouts/Bare.astro';
 
   .popup .pp-label .pp-label-t {
     margin-bottom: 12px;
-    font-size: 25px;
-    letter-spacing: 0.02em;
+    font-size: 23px;
+    white-space: nowrap;
   }
 
   .popup .pp-label .pp-label-s {

@@ -70,6 +70,50 @@ const leader = (x0: number, y0: number, x1: number, y1: number) =>
     ' class="thin"',
   ) + `<circle cx="${x1}" cy="${y1}" r="1.6" class="dot" />`;
 
+/** The top of a ring's outline at x: the highest crossing of a vertical line. */
+function topAt(ring: Ring, x: number): number {
+  let best = -Infinity;
+  for (let i = 0; i < ring.length; i++) {
+    const [x0, y0] = ring[i];
+    const [x1, y1] = ring[(i + 1) % ring.length];
+    if ((x0 - x) * (x1 - x) > 0 || x0 === x1) continue;
+    best = Math.max(best, y0 + ((y1 - y0) * (x - x0)) / (x1 - x0));
+  }
+  return best;
+}
+
+/** Pencil contours that follow a ring's top edge, set down by each depth, where the card is tall enough. */
+function contours(ring: Ring, x0: number, x1: number, depths: number[]): Pt[][] {
+  const out: Pt[][] = [];
+  for (const d of depths) {
+    let cur: Pt[] = [];
+    for (let x = x0; x <= x1; x += 3) {
+      const y = topAt(ring, x) - d;
+      if (y > 6) cur.push([x, y + Math.sin(x * 0.21 + d) * 1.2]);
+      else if (cur.length) {
+        if (cur.length > 2) out.push(cur);
+        cur = [];
+      }
+    }
+    if (cur.length > 2) out.push(cur);
+  }
+  return out;
+}
+
+/** Short grass strokes along a ring's top edge. */
+function tufts(ring: Ring, x0: number, x1: number, every: number): Pt[][] {
+  const rnd = seeded(x0 * 7 + x1);
+  const out: Pt[][] = [];
+  for (let x = x0; x <= x1; x += every * (0.6 + rnd() * 0.8)) {
+    const y = topAt(ring, x);
+    out.push([
+      [x, y - 1.5],
+      [x + 1.5 + rnd() * 2, y - 6 - rnd() * 4],
+    ]);
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Spread 1: the harbour. A headland flat behind, a lighthouse corner, a quay.
 
@@ -176,28 +220,32 @@ const harbour: SpreadDef = {
       alpha: 62,
       beta: 90,
       sense: -1,
-      rings: [headland, rect(-155, 107, -150, 112), rect(-146, 107, -142, 112)],
+      rings: [headland, rect(-155, 107, -150, 112), rect(-146, 107, -142, 112), rect(-149, 104, -146, 110)],
       marks: [
+        ...tufts(headland, -246, -84, 7),
+        ...contours(headland, -248, -76, [10, 22, 36]),
+        ...contours(headland, -70, 228, [8]),
+        // Strata down the cliff face.
         [
-          [-238, 52],
-          [-200, 62],
-          [-170, 74],
+          [-72, 88],
+          [-62, 86],
         ],
         [
-          [-120, 90],
-          [-96, 96],
+          [-68, 72],
+          [-56, 70],
         ],
         [
-          [-66, 58],
-          [-58, 38],
+          [-60, 56],
+          [-50, 55],
         ],
+        // The path up to the cottage.
         [
-          [40, 12],
-          [80, 18],
-        ],
-        [
-          [140, 26],
-          [190, 34],
+          [-120, 6],
+          [-104, 30],
+          [-128, 52],
+          [-112, 76],
+          [-140, 98],
+          [-148, 104],
         ],
       ],
     },
@@ -205,29 +253,29 @@ const harbour: SpreadDef = {
     { kind: 'layer', d: 56, h: 22, y0: -232, y1: -150, deck: deckPlanks() },
   ],
   left:
-    note(26, 40, '1. The harbour', 19) +
-    note(26, 62, 'headland flat: V-fold, α 62°, β 90°', 12) +
-    note(26, 80, 'opens toward you, shuts away', 12) +
+    note(26, 40, '1. The harbour', 24) +
+    note(26, 68, 'headland flat: V-fold, α 62°, β 90°', 14) +
+    note(26, 88, 'opens toward you, shuts away', 14) +
     swell(40, 330, 9) +
-    swell(70, 352, 11) +
+    swell(70, 352, 13) +
     swell(30, 376, 8) +
-    swell(110, 398, 12) +
+    swell(110, 398, 14) +
     swell(52, 424, 9) +
     swell(140, 450, 10) +
-    note(30, 470, 'quay: floating layer, walls 56 out, 22 tall', 12) +
+    note(30, 470, 'quay: floating layer, walls 56 out, 22 tall', 14) +
     leader(120, 458, 300, 420),
   right:
-    note(150, 128, 'light: V-fold corner, α 42°', 12) +
-    note(150, 146, 'leans toward you as it shuts:', 12) +
-    note(150, 164, 'keep sin α × 203 short of the quay', 12) +
+    note(150, 128, 'light: V-fold corner, α 42°', 14) +
+    note(150, 148, 'leans toward you as it shuts:', 14) +
+    note(150, 168, 'keep sin α × 203 short of the quay', 14) +
     leader(150, 152, 40, 200) +
     swell(200, 320, 8) +
-    swell(150, 344, 11) +
+    swell(150, 344, 13) +
     swell(230, 368, 9) +
-    swell(170, 392, 12) +
+    swell(170, 392, 14) +
     swell(240, 418, 7) +
     `<g class="rose" transform="translate(318 66)"><circle r="20" /><path d="M0 -26L4 0L0 26L-4 0Z" /><path d="M-26 0L0 3L26 0L0 -3Z" /></g>` +
-    note(313, 34, 'N', 12),
+    note(313, 34, 'N', 14),
 };
 
 // ---------------------------------------------------------------------------
@@ -289,7 +337,7 @@ function house(h: House): { rings: Ring[]; marks: Pt[][] } {
     const y = 4 + f * storey + storey * 0.35;
     rings.push(rect(-gw / 2 - 6, y, -gw / 2 + 6, y + storey * 0.42));
   }
-  rings.push(circle(-gw / 2, eave + (ridge - eave) * 0.42, 3.2, 12));
+  rings.push(circle(-gw / 2, eave + (ridge - eave) * 0.42, 3.2, 14));
   const marks: Pt[][] = [];
   for (let x = 4; x < sw - 8; x += 5)
     marks.push([
@@ -352,10 +400,10 @@ const street: SpreadDef = {
     { kind: 'v', y0: 112, alpha: 36, beta: 90, sense: 1, ...tower(112) },
   ],
   left:
-    note(26, 40, '2. The street', 19) +
-    note(26, 62, 'four corners, all at α 36°', 12) +
-    note(26, 80, 'parallel, so they shut like dominoes', 12) +
-    note(26, 98, 'and never cut through each other', 12) +
+    note(26, 40, '2. The street', 24) +
+    note(26, 68, 'four corners, all at α 36°', 14) +
+    note(26, 88, 'parallel, so they shut like dominoes', 14) +
+    note(26, 108, 'and never cut through each other', 14) +
     line(
       [
         [220, 492],
@@ -370,8 +418,8 @@ const street: SpreadDef = {
       ],
       ' class="thin"',
     ) +
-    note(40, 300, 'tallest at the back:', 12) +
-    note(40, 316, '206 × sin 36° = 121, clears the spine', 12),
+    note(40, 300, 'tallest at the back:', 14) +
+    note(40, 320, '206 × sin 36° = 121, clears the spine', 14),
   right:
     line(
       [
@@ -387,15 +435,15 @@ const street: SpreadDef = {
       ],
       ' class="thin"',
     ) +
-    note(210, 400, 'cobbles', 12, -18) +
+    note(210, 400, 'cobbles', 14, -18) +
     `<g class="thin">${Array.from({ length: 22 }, (_, i) => {
       const r = seeded(i + 7);
       const x = 150 + i * 6.4 + r() * 6;
       const y = 470 - i * 13 + r() * 5;
       return `<path d="M${x.toFixed(1)} ${y.toFixed(1)}q4 -3 8 0" />`;
     }).join('')}</g>` +
-    note(230, 90, 'gable ends face left,', 12) +
-    note(230, 106, 'eaves run right', 12),
+    note(230, 90, 'gable ends face left,', 14) +
+    note(230, 110, 'eaves run right', 14),
 };
 
 // ---------------------------------------------------------------------------
@@ -414,8 +462,8 @@ function bridge(): { rings: Ring[]; marks: Pt[][] } {
   const rings: Ring[] = [outer.reverse()];
   rings.push(arch(0, 84, 8, 16, 14));
   for (const s of [1, -1]) {
-    rings.push(arch(s * 105, 72, 8, 14, 12));
-    rings.push(arch(s * 190, 60, 8, 12, 12));
+    rings.push(arch(s * 105, 72, 8, 14, 14));
+    rings.push(arch(s * 190, 60, 8, 12, 14));
     rings.push(arch(s * 262, 44, 8, 10, 10));
     for (let x = 12; x < 300; x += 9) rings.push(rect(s * x - 2, 63, s * x + 2, 68));
   }
@@ -515,10 +563,10 @@ const night: SpreadDef = {
     { kind: 'v', y0: -40, alpha: 80, beta: 90, sense: -1, ...bridge() },
   ],
   left:
-    note(26, 40, '3. The bridge, by night', 19) +
-    note(26, 62, 'two flats, one behind the other, both α 80°', 12) +
-    note(26, 80, 'every window is a hole: put the lamp in front', 12) +
-    note(26, 98, 'and the town is drawn again on the page in light', 12) +
+    note(26, 40, '3. The bridge, by night', 24) +
+    note(26, 68, 'two flats, one behind the other, both α 80°', 14) +
+    note(26, 88, 'every window is a hole: with the lamp in front', 14) +
+    note(26, 108, 'the town is drawn again on the page, in light', 14) +
     swell(40, 360, 10, 16, 1.8) +
     swell(90, 384, 12, 16, 1.8) +
     swell(30, 410, 9, 16, 1.8) +
@@ -528,8 +576,8 @@ const night: SpreadDef = {
     swell(60, 384, 9, 16, 1.8) +
     swell(20, 410, 12, 16, 1.8) +
     swell(100, 436, 8, 16, 1.8) +
-    note(176, 456, 'Dummy no. 4, white 300 gsm board.', 12) +
-    note(176, 472, 'Shut the book to check every piece folds flat.', 11),
+    note(176, 456, 'Dummy no. 4, white 300 gsm board.', 14) +
+    note(176, 472, 'Shut the book to check every piece folds flat.', 13),
 };
 
 export const SPREADS: SpreadDef[] = [harbour, street, night];
