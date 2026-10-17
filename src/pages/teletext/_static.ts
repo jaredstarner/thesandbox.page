@@ -73,7 +73,7 @@ function helpPages(): Page[] {
   r = para(one, r, 'Key any three-digit page number on the remote or the keyboard.', 'yellow');
   r = para(one, r + 1, 'Pages go out one after another, round and round. The set waits for yours to come by: watch the counter roll in the top row.');
   r = para(one, r + 1, 'Some pages have several parts that turn over on their own. The counter at the bottom right says which part you are on.');
-  r = para(one, r + 1, 'Every page number you see on screen can be clicked or tapped.');
+  para(one, r + 1, 'Every page number you see on screen can be clicked or tapped.');
   counter(one, 0, 2);
   fastext(one, ['Index', 'News', 'Weather', 'Quiz']);
 

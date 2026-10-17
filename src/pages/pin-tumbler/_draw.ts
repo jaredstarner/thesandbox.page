@@ -83,7 +83,6 @@ export const toWorld = (L: Layout, x: number, y: number) => ({ x: (x - L.ox) / L
 const BRASS = { lit: '#d9b264', mid: '#b98d3e', deep: '#7c5a22', edge: '#4a3410' };
 const PLUG = { lit: '#e4c27a', mid: '#c79d4c', deep: '#86622a', edge: '#4f3912' };
 const STEEL = { lit: '#eef1f3', mid: '#a7adb3', deep: '#5d636a', edge: '#2c3035' };
-const VOID = '#141210';
 const SHEAR_INK = '#ef6a3a';
 
 // ---------------------------------------------------------------------------
@@ -385,15 +384,13 @@ function drawDriver(g: CanvasRenderingContext2D, x: number, pin: Pin, px: number
   } else if (pin.driver === 'serrated') {
     g.moveTo(l, t);
     g.lineTo(l + w, t);
-    let y = b + 1.05;
-    g.lineTo(l + w, y);
+    g.lineTo(l + w, b + 1.05);
     for (const s of [0.93, 0.62, 0.31]) {
       g.lineTo(l + w - 0.22, b + s - 0.08);
       g.lineTo(l + w, b + s - 0.16);
     }
     g.lineTo(l + w, b);
     g.lineTo(l, b);
-    y = b;
     for (const s of [0.31, 0.62, 0.93]) {
       g.lineTo(l, b + s - 0.16);
       g.lineTo(l + 0.22, b + s - 0.08);

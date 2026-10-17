@@ -14,9 +14,8 @@ interface Camera {
 const MIN_ZOOM = 5;
 const MAX_ZOOM = 520;
 const WORLD_LIMIT = 2000;
-// Plots size their own labels (see Survey.astro); these zooms only pick where
-// flights land: close enough for a title, or for the full entry.
-const TITLE_ZOOM = 130;
+// Plots size their own labels (see Survey.astro); this zoom only picks where
+// flights land: close enough for the full entry.
 const ENTRY_ZOOM = 280;
 const DRAG_SLOP = 6;
 // The stake counts down to this time in SURVEY_ZONE: when a run's page is

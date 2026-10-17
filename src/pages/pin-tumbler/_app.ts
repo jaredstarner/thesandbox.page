@@ -218,7 +218,7 @@ export function startPinTumbler(root: HTMLElement): void {
       saveBest(best);
       refreshBest();
     }
-    msgEl && (msgEl.textContent = '');
+    if (msgEl) msgEl.textContent = '';
     lastMsg = '';
     window.setTimeout(() => {
       if (!card || !cardTime || !cardBest) return;

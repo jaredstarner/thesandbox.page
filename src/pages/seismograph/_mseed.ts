@@ -24,6 +24,20 @@ function signed(v: number, bits: number): number {
   return (v << shift) >> shift;
 }
 
+/** Steim-2 differences per word and bits per difference, by a code 2 or code 3 word's top two bits (dnib). */
+const STEIM2_CODE2: [number, number][] = [
+  [0, 0],
+  [1, 30],
+  [2, 15],
+  [3, 10],
+];
+const STEIM2_CODE3: [number, number][] = [
+  [5, 6],
+  [6, 5],
+  [7, 4],
+  [0, 0],
+];
+
 function steim(view: DataView, offset: number, length: number, count: number, level: 1 | 2): Int32Array {
   const diffs: number[] = [];
   let x0 = 0;
@@ -50,13 +64,7 @@ function steim(view: DataView, offset: number, length: number, count: number, le
         }
       } else {
         const dnib = word >>> 30;
-        let n = 0;
-        let bits = 0;
-        if (code === 2) {
-          [n, bits] = dnib === 1 ? [1, 30] : dnib === 2 ? [2, 15] : dnib === 3 ? [3, 10] : [0, 0];
-        } else {
-          [n, bits] = dnib === 0 ? [5, 6] : dnib === 1 ? [6, 5] : dnib === 2 ? [7, 4] : [0, 0];
-        }
+        const [n, bits] = (code === 2 ? STEIM2_CODE2 : STEIM2_CODE3)[dnib];
         for (let k = n - 1; k >= 0; k--) diffs.push(signed(word >>> (k * bits), bits));
       }
     }
