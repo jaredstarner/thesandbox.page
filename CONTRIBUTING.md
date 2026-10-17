@@ -27,7 +27,7 @@ The full rules live in the **Workflow** section of [AGENTS.md](AGENTS.md), which
 
 1. Branch from `main`, named `<type>/<short-description>` (for example `feat/scroll-timeline` or `fix/nav-overflow`). Collaborators push branches to this repo; outside contributors push to their fork
 2. Make small, focused, signed commits with [Conventional Commit](https://www.conventionalcommits.org) messages
-3. Run `pnpm check` and `pnpm build`
+3. Run `pnpm lint`, `pnpm format:check`, `pnpm check`, and `pnpm build` (`pnpm format` fixes formatting)
 4. Open a pull request into `main` and fill in the template
 
 ## Merging
