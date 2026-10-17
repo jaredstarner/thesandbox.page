@@ -352,7 +352,9 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
           <div class="perforation" aria-hidden="true"></div>
           <svg class="seal" viewBox="-60 -60 120 120" width="112" height="112" aria-hidden="true">
             <defs>
-              <path id="seal-ring" d="M 0 -45 A 45 45 0 1 1 0 45 A 45 45 0 1 1 0 -45" />
+              <!-- Two arcs, as on a notary seal: the top reads over the crown, the bottom upright along the base. -->
+              <path id="seal-arc-top" d="M -29.56 29.56 A 41.8 41.8 0 1 1 29.56 29.56" />
+              <path id="seal-arc-bottom" d="M -35.71 -35.71 A 50.5 50.5 0 1 0 35.71 -35.71" />
               <filter id="seal-emboss" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="sRGB">
                 <feGaussianBlur in="SourceAlpha" stdDeviation="1.4" result="height" />
                 <feDiffuseLighting
@@ -379,11 +381,14 @@ const cssVars = `--tex-cloth:${bookcloth};--tex-fiber:${leafFiber};--tex-raked:$
                 <circle r="52" stroke-width="0.6" />
                 <circle r="36" stroke-width="0.8" />
               </g>
-              <text font-size="9.4" letter-spacing="1.6">
-                <textPath href="#seal-ring" startOffset="0">
-                  REGISTER OF OBJECTS · THESANDBOX.PAGE ·
-                </textPath>
+              <text font-size="12.6" letter-spacing="0.6" text-anchor="middle">
+                <textPath href="#seal-arc-top" startOffset="50%">REGISTER OF OBJECTS</textPath>
               </text>
+              <text font-size="12.6" letter-spacing="0.6" text-anchor="middle">
+                <textPath href="#seal-arc-bottom" startOffset="50%">THESANDBOX.PAGE</textPath>
+              </text>
+              <circle cx="-44.85" cy="10.89" r="1.5" />
+              <circle cx="44.85" cy="10.89" r="1.5" />
               <g transform="scale(0.36)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
                 <path d={monogramPaths.t} stroke-width="7" />
                 <path d={monogramPaths.s} stroke-width="6" />
