@@ -34,7 +34,10 @@ const PAPER: RGB = [0.95, 0.935, 0.9];
 const CLOTH: RGB = [0.2, 0.25, 0.3];
 const TABLE: RGB = [0.3, 0.24, 0.19];
 const EDGE: RGB = [0.86, 0.84, 0.79];
-const AMBIENT: RGB = [0.2, 0.21, 0.26];
+const DAY: RGB = [0.2, 0.21, 0.26];
+const NIGHT: RGB = [0.07, 0.08, 0.13];
+/** Room light: dimmed as the bridge by night opens, so the lamp is all there is. */
+const AMBIENT: RGB = [...DAY];
 const LAMP: RGB = [1, 0.92, 0.8];
 /** Lamp strength: direct light is K * cos / distance^2. */
 const K = 4.6e5;
@@ -517,6 +520,8 @@ export function mount(root: HTMLElement) {
 
   function render() {
     cameraOffset();
+    const dusk = Math.max(0, Math.min(1, t - (LEAVES - 1)));
+    for (let i = 0; i < 3; i++) AMBIENT[i] = lerp(DAY[i], NIGHT[i], dusk);
     const phis = leaves.map((_, i) => phiOf(i));
     const hinge = (i: number) => lerp(zRight(i), zLeft(i), phis[i] / 180);
     leaves.forEach((f, i) => {

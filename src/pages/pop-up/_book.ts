@@ -563,14 +563,13 @@ const night: SpreadDef = {
     { kind: 'v', y0: -40, alpha: 80, beta: 90, sense: -1, ...bridge() },
   ],
   left:
-    note(26, 40, '3. The bridge, by night', 24) +
-    note(26, 68, 'two flats, one behind the other, both α 80°', 14) +
-    note(26, 88, 'every window is a hole: with the lamp in front', 14) +
-    note(26, 108, 'the town is drawn again on the page, in light', 14) +
-    swell(40, 360, 10, 16, 1.8) +
-    swell(90, 384, 12, 16, 1.8) +
-    swell(30, 410, 9, 16, 1.8) +
-    swell(120, 436, 11, 16, 1.8),
+    swell(60, 352, 10, 16, 1.8) +
+    swell(110, 372, 12, 16, 1.8) +
+    swell(40, 392, 9, 16, 1.8) +
+    note(26, 428, '3. The bridge, by night', 24) +
+    note(26, 452, 'two flats, one behind the other, both α 80°', 14) +
+    note(26, 470, 'every window is a hole: with the lamp in front', 14) +
+    note(26, 488, 'the town is drawn again on the page, in light', 14),
   right:
     swell(10, 360, 11, 16, 1.8) +
     swell(60, 384, 9, 16, 1.8) +
