@@ -605,6 +605,7 @@ export function startHillRun(root: HTMLElement): void {
         return run;
       },
       painter,
+      sound,
       begin,
       showRack,
       get screen() {
