@@ -1628,6 +1628,10 @@ export class Painter {
     const ctx = this.ctx;
     const gx = this.X(r.x);
     const gy = this.Y(ry);
+    // A printed starburst for the first beat of a crash.
+    const crashLen = run.id === 'luge' ? 1.6 : 1.2;
+    if (r.state === 'crash' && crashLen - r.timer < 0.35)
+      this.burst(gx, gy - this.cam.s * 0.6, (crashLen - r.timer) / 0.35, ink);
     if (r.grace > 0 && Math.floor(now / 90) % 2 === 0 && r.state === 'ride') ctx.globalAlpha = 0.45;
     if (run.id === 'bomb') this.skater(run, gx, gy, ink, now);
     else if (run.id === 'cheese') {
@@ -1646,6 +1650,30 @@ export class Painter {
         );
     } else this.luger(run, gx, gy, ink);
     ctx.globalAlpha = 1;
+  }
+
+  private burst(x: number, y: number, age: number, ink: Inks): void {
+    const ctx = this.ctx;
+    const s = this.cam.s;
+    const R = s * (1.1 + age * 0.9);
+    ctx.save();
+    ctx.globalAlpha = 1 - age * 0.6;
+    for (const [k, fill] of [
+      [1, ink.gold],
+      [0.6, ink.red],
+    ] as const) {
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      for (let i = 0; i < 18; i++) {
+        const a = (i / 18) * Math.PI * 2 + 0.2;
+        const rr = (i % 2 ? 0.45 : 1) * R * k;
+        if (i === 0) ctx.moveTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr * 0.8);
+        else ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr * 0.8);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
   }
 
   private skater(run: Run, gx: number, gy: number, ink: Inks, now: number): void {
