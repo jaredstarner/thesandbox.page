@@ -260,6 +260,12 @@ export class Painter {
     items.sort((a, b) => a.y - b.y);
     for (const it of items) it.draw();
 
+    // A printed starburst over everything for the first beat of a crash.
+    const crashLen = run.id === 'luge' ? 1.6 : 1.2;
+    if (r.state === 'crash' && crashLen - r.timer < 0.35) {
+      this.burst(this.X(r.x), this.Y(ry) - this.cam.s * 0.6, (crashLen - r.timer) / 0.35, ink);
+    }
+
     if (run.id === 'luge') this.nightfall(run, top, bottom, now);
     if (run.id === 'cheese') this.clouds(run, top, bottom);
 
@@ -1628,10 +1634,6 @@ export class Painter {
     const ctx = this.ctx;
     const gx = this.X(r.x);
     const gy = this.Y(ry);
-    // A printed starburst for the first beat of a crash.
-    const crashLen = run.id === 'luge' ? 1.6 : 1.2;
-    if (r.state === 'crash' && crashLen - r.timer < 0.35)
-      this.burst(gx, gy - this.cam.s * 0.6, (crashLen - r.timer) / 0.35, ink);
     if (r.grace > 0 && Math.floor(now / 90) % 2 === 0 && r.state === 'ride') ctx.globalAlpha = 0.45;
     if (run.id === 'bomb') this.skater(run, gx, gy, ink, now);
     else if (run.id === 'cheese') {
