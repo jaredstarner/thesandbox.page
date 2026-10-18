@@ -1,0 +1,9 @@
+{
+  "title": "Hill run",
+  "summary": "Three ways down a hill, printed as sports posters: bomb a city street on a skateboard ahead of the street sweeper, chase a cheese down a grass bank with a second one bouncing after you, and ride a luge through floodlit night with the four-man bob coming down behind.",
+  "date": "2026-10-18",
+  "tags": ["canvas", "game", "physics", "web-audio", "pointer-events", "gamepad"],
+  "requires": ["canvas"],
+  "issue": 52,
+  "plot": 17
+}
