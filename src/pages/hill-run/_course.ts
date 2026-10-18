@@ -255,6 +255,8 @@ function bomb(seed: number): Course {
   for (let k = -1; k < BLOCKS + 1; k++) {
     const top = k < 0 ? crosses[0] - BLOCK : crosses[k] + CROSS;
     const bottom = k < 0 ? crosses[0] : k < BLOCKS ? top + BLOCK : end;
+    // Below the last cross street is the waterfront: nothing to build on.
+    if (k === BLOCKS) continue;
     if (k < 0) {
       // Parked cars on the block above the start, for the view back up the hill.
       for (const side of [-1, 1]) {

@@ -671,7 +671,9 @@ const BILLS = [
   }
 
   .hillrun[data-screen='rack'] .sound {
-    bottom: 16px;
+    top: clamp(16px, 4vw, 48px);
+    bottom: auto;
+    right: clamp(16px, 4vw, 48px);
     background: #2b2a2e;
     color: #c8bda4;
     border-color: #c8bda4;
@@ -716,7 +718,7 @@ const BILLS = [
       height: 46px;
     }
 
-    .sound {
+    .hillrun:not([data-screen='rack']) .sound {
       right: 12px;
       bottom: calc(124px + env(safe-area-inset-bottom));
     }

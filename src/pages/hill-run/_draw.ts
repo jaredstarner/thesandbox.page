@@ -647,9 +647,11 @@ export class Painter {
     }
     // Spill along the whole channel, brightest on the ice.
     for (const [w, a] of [
-      [22, 0.2],
-      [14, 0.3],
-      [8, 0.45],
+      [26, 0.1],
+      [21, 0.12],
+      [16, 0.16],
+      [12, 0.2],
+      [8, 0.28],
     ]) {
       g.lineWidth = w * s;
       g.strokeStyle = `rgba(0, 0, 0, ${a})`;
@@ -923,20 +925,40 @@ export class Painter {
       case 'bale':
         return this.boxAt(x, t.y, t.hw, t.hd, t.h, '#e3c97a', '#d1b263', '#c09f50', false, ink);
       case 'ledge': {
-        // The lip of a step: a raw earth face and the shadow under it.
+        // A step in the hill: a bright lip of turf, a raw face of earth and chalk
+        // under it, and the shadow it throws down the slope.
         const yy = this.Y(t.y);
-        ctx.fillStyle = '#9a7646';
+        const r = mulberry(Math.floor(t.seed * 1e6));
+        const lip: [number, number][] = [];
+        const foot: [number, number][] = [];
+        for (let xx = -BANK; xx <= BANK; xx += 1) {
+          lip.push([this.X(xx), yy - s * 0.35 + Math.sin(xx * 0.9 + t.seed * 9) * s * 0.25]);
+          foot.push([this.X(xx), yy + s * (0.7 + r() * 0.5 + Math.sin(xx * 0.37) * 0.3)]);
+        }
+        const shadow = ctx.createLinearGradient(0, yy + s * 0.8, 0, yy + s * 3.6);
+        shadow.addColorStop(0, 'rgba(38, 52, 28, 0.42)');
+        shadow.addColorStop(1, 'rgba(38, 52, 28, 0)');
+        ctx.fillStyle = shadow;
+        ctx.fillRect(this.X(-BANK), yy + s * 0.6, BANK * 2 * s, s * 3);
+        ctx.fillStyle = '#8a6a3e';
         ctx.beginPath();
-        ctx.moveTo(this.X(-BANK - 2), yy - s * 0.2);
-        for (let xx = -BANK; xx <= BANK + 2; xx += 2)
-          ctx.lineTo(this.X(xx), yy - s * 0.2 + Math.sin(xx * 1.7 + t.seed * 9) * s * 0.18);
-        ctx.lineTo(this.X(BANK + 2), yy + s * 0.9);
-        for (let xx = BANK; xx >= -BANK - 2; xx -= 2)
-          ctx.lineTo(this.X(xx), yy + s * 0.9 + Math.sin(xx * 2.3) * s * 0.15);
+        lip.forEach(([px, py], i) => (i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)));
+        for (let i = foot.length - 1; i >= 0; i--) ctx.lineTo(foot[i][0], foot[i][1]);
         ctx.closePath();
         ctx.fill();
-        ctx.fillStyle = ink.shadow;
-        ctx.fillRect(this.X(-BANK - 2), yy + s * 0.9, (BANK + 2) * 2 * s, s * 1.6);
+        // Chalk showing through the earth.
+        ctx.fillStyle = '#e8dfc8';
+        for (let i = 0; i < 40; i++) {
+          const k = Math.floor(r() * (lip.length - 1));
+          const fx = lip[k][0] + r() * s;
+          const fy = lip[k][1] + (foot[k][1] - lip[k][1]) * (0.3 + r() * 0.6);
+          ctx.fillRect(fx, fy, Math.max(1.5, s * 0.16), Math.max(1, s * 0.1));
+        }
+        ctx.strokeStyle = ink.groundLight;
+        ctx.lineWidth = Math.max(2, s * 0.18);
+        ctx.beginPath();
+        lip.forEach(([px, py], i) => (i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)));
+        ctx.stroke();
         return;
       }
       // Luge.
@@ -960,9 +982,26 @@ export class Painter {
       }
       case 'spruce':
         return this.spruce(x, t.y, t.hw, t.h, ink);
-      case 'starthouse':
-        this.boxAt(x, t.y, t.hw, t.hd, t.h, '#c8323c', '#a8272f', '#8f2128', false, ink);
+      case 'starthouse': {
+        // The start gantry: two posts either side of the channel and a lit board across.
+        ctx.strokeStyle = '#3a4560';
+        ctx.lineWidth = Math.max(2, s * 0.18);
+        const ends = [-t.hw, t.hw].map((dx) => [this.P(x + dx, t.y, 0), this.P(x + dx, t.y, t.h)] as const);
+        for (const [g0, g1] of ends) {
+          ctx.beginPath();
+          ctx.moveTo(g0[0], g0[1]);
+          ctx.lineTo(g1[0], g1[1]);
+          ctx.stroke();
+        }
+        const [la, lb] = [ends[0][1], ends[1][1]];
+        ctx.fillStyle = ink.red;
+        ctx.fillRect(la[0] - s * 0.2, la[1] - s * 1.1, lb[0] - la[0] + s * 0.4, s * 1.1);
+        ctx.fillStyle = '#f2f6f9';
+        ctx.font = `${Math.round(s * 0.85)}px ${this.bill}`;
+        ctx.textAlign = 'center';
+        ctx.fillText('START', (la[0] + lb[0]) / 2, la[1] - s * 0.25);
         return;
+      }
       case 'clock': {
         this.boxAt(x, t.y, t.hw, t.hd, 0.1, null, ink.key, ink.key, false, ink);
         const [bx, by] = this.P(x, t.y + t.hd, t.h);

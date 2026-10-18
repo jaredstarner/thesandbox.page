@@ -72,7 +72,8 @@ export function startHillRun(root: HTMLElement): void {
   const painter = new Painter(canvas);
   const sound = new HillSound();
   const save = load();
-  if (debug) save.unlocked = 3;
+  // ?debug opens every bill for this visit without saving that.
+  const open = () => (debug ? LEVELS.length : save.unlocked);
 
   let run: Run | null = null;
   let level: LevelId = 'bomb';
@@ -126,9 +127,9 @@ export function startHillRun(root: HTMLElement): void {
       const i = LEVELS.indexOf(id);
       const btn = root.querySelector<HTMLButtonElement>(`[data-pick="${id}"]`)!;
       const best = root.querySelector<HTMLElement>(`[data-best="${id}"]`)!;
-      btn.disabled = i >= save.unlocked;
+      btn.disabled = i >= open();
       const b = save.best[id];
-      if (i >= save.unlocked) best.textContent = `Finish No. ${i} to print this bill`;
+      if (i >= open()) best.textContent = `Finish No. ${i} to print this bill`;
       else best.textContent = b ? `Best ${clock(b)}` : 'Not yet run';
     }
   }
@@ -290,7 +291,7 @@ export function startHillRun(root: HTMLElement): void {
 
   function nextLevel(): LevelId | null {
     const i = LEVELS.indexOf(level);
-    return i < LEVELS.length - 1 && i + 1 < save.unlocked ? LEVELS[i + 1] : null;
+    return i < LEVELS.length - 1 && i + 1 < open() ? LEVELS[i + 1] : null;
   }
 
   function runFinished(): boolean {
@@ -595,7 +596,7 @@ export function startHillRun(root: HTMLElement): void {
   requestAnimationFrame(frame);
 
   const jump = params.get('level') as LevelId | null;
-  if (jump && LEVELS.includes(jump) && LEVELS.indexOf(jump) < save.unlocked) begin(jump);
+  if (jump && LEVELS.includes(jump) && LEVELS.indexOf(jump) < open()) begin(jump);
   else showRack();
 
   if (debug) {

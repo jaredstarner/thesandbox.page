@@ -368,7 +368,7 @@ export class Run {
       r.stride += r.v * dt * 1.25;
     } else {
       // Push off from a standstill on the flats.
-      if (r.v < 4 && !r.brake) a += 1.6 * (1 - r.v / 4);
+      if (r.v < 5 && !r.brake) a += 2.4 * (1 - r.v / 5);
     }
     r.v = Math.max(0, r.v + a * dt);
     r.x += r.v * Math.sin(r.heading + wob) * dt;
