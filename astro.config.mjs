@@ -228,5 +228,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Comic Sans MS', 'cursive'],
     },
+    // The screenprinted posters on /hill-run/: a condensed gothic for the bills, a grotesk for the small print.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'League Gothic',
+      cssVariable: '--font-hillrun-bill',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Impact', 'Arial Narrow', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Instrument Sans',
+      cssVariable: '--font-hillrun-text',
+      weights: ['400 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Arial', 'sans-serif'],
+    },
   ],
 });
