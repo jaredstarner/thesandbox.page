@@ -510,7 +510,7 @@ export function startHillRun(root: HTMLElement): void {
     for (let y = y0; y <= y1; y += (y1 - y0) / 160) g.lineTo(X(y), Y(y));
     g.lineTo(X(y1), h);
     g.closePath();
-    g.fillStyle = r.id === 'luge' ? '#c9d6e2' : r.id === 'cheese' ? '#a3c172' : '#cbc1aa';
+    g.fillStyle = r.id === 'luge' ? '#a9d4e6' : ink.ground;
     g.fill();
     g.strokeStyle = ink.key;
     g.lineWidth = 1.5;

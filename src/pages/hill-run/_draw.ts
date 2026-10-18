@@ -480,20 +480,17 @@ export class Painter {
       const r = mulberry(cy * 17 + 5);
       const x = ((r() * 160 + drift) % 160) - 80;
       const y = cy + r() * 40;
-      ctx.fillStyle = 'rgba(30, 50, 40, 0.13)';
+      // One shape per cloud, so its lobes merge instead of stacking.
+      ctx.fillStyle = 'rgba(30, 50, 40, 0.12)';
+      ctx.beginPath();
       for (let i = 0; i < 5; i++) {
-        ctx.beginPath();
-        ctx.ellipse(
-          this.X(x + (r() - 0.5) * 18),
-          this.Y(y + (r() - 0.5) * 8),
-          s * (7 + r() * 6),
-          s * (4 + r() * 3),
-          0,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
+        const ex = this.X(x + (r() - 0.5) * 18);
+        const ey = this.Y(y + (r() - 0.5) * 8);
+        const rx = s * (7 + r() * 6);
+        ctx.moveTo(ex + rx, ey);
+        ctx.ellipse(ex, ey, rx, s * (4 + r() * 3), 0, 0, Math.PI * 2);
       }
+      ctx.fill();
     }
   }
 
@@ -712,6 +709,8 @@ export class Painter {
         return this.car(run, t, x, ink, now);
       case 'tree':
         return this.tree(x, t.y, t.h, t.seed, ink);
+      case 'thorn':
+        return this.tree(x, t.y, t.h, t.seed, ink, true);
       case 'lamp': {
         this.groundShadow(x, t.y, 0.25, 0.25);
         const [hx, hy] = this.P(x - Math.sign(x) * 1.2, t.y, t.h);
@@ -1191,7 +1190,7 @@ export class Painter {
       ]);
       ctx.fill();
     }
-    if (r() < 0.35) {
+    if (r() < 0.22) {
       // A plank deck at the back.
       const dx0 = inner(t.hw * 0.15);
       const dx1 = inner(t.hw * 0.85);
@@ -1337,12 +1336,14 @@ export class Painter {
     }
   }
 
-  private tree(x: number, y: number, h: number, seed: number, ink: Inks): void {
+  private tree(x: number, y: number, h: number, seed: number, ink: Inks, wild = false): void {
     const ctx = this.ctx;
     const s = this.cam.s;
     // Tree pit.
-    ctx.fillStyle = '#6d5a42';
-    ctx.fillRect(this.X(x) - s * 0.6, this.Y(y) - s * 0.6, s * 1.2, s * 1.2);
+    if (!wild) {
+      ctx.fillStyle = '#6d5a42';
+      ctx.fillRect(this.X(x) - s * 0.6, this.Y(y) - s * 0.6, s * 1.2, s * 1.2);
+    }
     const [tx, ty] = this.P(x, y, h * 0.6);
     ctx.strokeStyle = '#5a4632';
     ctx.lineWidth = Math.max(2, s * 0.22);
@@ -1365,7 +1366,7 @@ export class Painter {
       ctx.arc(cx + Math.cos(a) * rad * 0.55, cy + Math.sin(a) * rad * 0.45, rad * (0.55 + r() * 0.2), 0, Math.PI * 2);
       ctx.fill();
     }
-    ctx.fillStyle = '#5f8f5a';
+    ctx.fillStyle = wild ? '#7d9a4a' : '#5f8f5a';
     for (let i = 0; i < 5; i++) {
       ctx.beginPath();
       ctx.arc(
@@ -1987,7 +1988,7 @@ export class Painter {
     }
     if (run.id === 'cheese') {
       const bounce = Math.abs(Math.sin(q.spin * 0.45)) * 1.4;
-      this.cheeseWheel(q.x, q.y, bounce, q.spin * 2.4, 0.75, ink, 1.3);
+      this.cheeseWheel(q.x, q.y, bounce, q.spin * 2.4, 0.9, ink, 1.3);
       return;
     }
     // The four-man bob: a long red shell with four helmets in a row.

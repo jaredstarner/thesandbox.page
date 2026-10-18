@@ -376,6 +376,12 @@ function cheese(seed: number): Course {
         things.push(disc('crowd', side * (BANK + 2.4 + rnd() * 5), y, 0.3, 1.6 + rnd() * 0.2, 'none', rnd()));
     }
   }
+  // Hawthorns along the hedge line beyond the crowd.
+  for (const side of [-1, 1]) {
+    for (let y = -30; y < end; y += 14 + rnd() * 18) {
+      things.push(disc('thorn', side * (BANK + 11 + rnd() * 8), y, 0.5, 4 + rnd() * 2, 'none', rnd()));
+    }
+  }
   for (let x = -BANK + 3; x < BANK - 2; x += 4 + rnd() * 3)
     things.push(disc('catcher', x, finish + 6 + rnd() * 3, 0.36, 1.85, 'none', rnd()));
   for (let x = -BANK; x <= BANK; x += 1.9) things.push(box('bale', x, finish + 18, 0.9, 0.55, 0.9, 'crash', rnd()));
