@@ -252,9 +252,16 @@ function bomb(seed: number): Course {
   }
 
   // Street furniture and the houses stepping down the hill.
-  for (let k = 0; k < BLOCKS + 1; k++) {
-    const top = crosses[k] + CROSS;
-    const bottom = k < BLOCKS ? top + BLOCK : end;
+  for (let k = -1; k < BLOCKS + 1; k++) {
+    const top = k < 0 ? crosses[0] - BLOCK : crosses[k] + CROSS;
+    const bottom = k < 0 ? crosses[0] : k < BLOCKS ? top + BLOCK : end;
+    if (k < 0) {
+      // Parked cars on the block above the start, for the view back up the hill.
+      for (const side of [-1, 1]) {
+        for (let y = bottom - 10; y > top; y -= 5.5 + rnd() * 3)
+          things.push(box('car', side * 6.85, y, 0.95, 2.3, 1.45, 'none', rnd()));
+      }
+    }
     for (const side of [-1, 1]) {
       for (let y = top + 3 + rnd() * 4; y < bottom - 3; y += 7 + rnd() * 6) {
         const r = rnd();
@@ -440,7 +447,7 @@ function luge(seed: number): Course {
   // An offset measured square to the track, so curves that run across the hill keep their clearance.
   const off = (y: number, d: number) => at(y) + d * Math.sqrt(1 + sample(dx, y) ** 2);
   // Floodlights on the inside of every curve and every 45 m between.
-  for (let y = -20; y < end; y += 30 + rnd() * 20) {
+  for (let y = -20; y < end; y += 22 + rnd() * 10) {
     const side = sample(k, y + 10) > 0.002 ? 1 : sample(k, y + 10) < -0.002 ? -1 : rnd() < 0.5 ? -1 : 1;
     const t = disc('flood', off(y, side * (ICE + 3.4)), y, 0.18, 11, 'none', rnd());
     t.side = side;

@@ -302,6 +302,16 @@ const BILLS = [
     cursor: default;
   }
 
+  /* The bill's top third is printed solid in its ink, the title knocked out of it. */
+  .bill::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 42%;
+    background: var(--ink);
+    clip-path: polygon(0 0, 100% 0, 100% 78%, 0 100%);
+  }
+
   .art {
     grid-row: 1 / -1;
     grid-column: 1;
@@ -359,6 +369,10 @@ const BILLS = [
     background: var(--ink);
     padding-top: 10px !important;
     padding-bottom: 10px !important;
+  }
+
+  .bill:disabled::before {
+    background: color-mix(in srgb, var(--dark) 22%, var(--stock));
   }
 
   .bill:disabled .art {
@@ -427,7 +441,7 @@ const BILLS = [
     color: var(--paper);
   }
 
-  .title small {
+  .title :global(small) {
     display: block;
     font: 600 11px/1.3 var(--text);
     letter-spacing: 0.08em;
@@ -526,7 +540,7 @@ const BILLS = [
     max-width: 92vw;
   }
 
-  .count small {
+  .count :global(small) {
     display: block;
     font-size: 0.32em;
     color: var(--key);
@@ -588,19 +602,19 @@ const BILLS = [
     margin: 0 0 12px;
   }
 
-  .stats div {
+  .stats :global(div) {
     display: grid;
     gap: 2px;
   }
 
-  .stats dt {
+  .stats :global(dt) {
     font: 600 11px/1 var(--text);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     opacity: 0.7;
   }
 
-  .stats dd {
+  .stats :global(dd) {
     margin: 0;
     font: 400 32px/1 var(--bill);
     font-variant-numeric: tabular-nums;

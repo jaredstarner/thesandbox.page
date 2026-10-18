@@ -89,7 +89,7 @@ const CARS = ['#d4482f', '#e9e0cc', '#2f7f86', '#3a3f55', '#f0b13c', '#7fa7c4', 
 /** How far up the screen a metre of height goes, as a fraction of a metre across. */
 const RISE = 0.82;
 /** How far a tall thing leans away from the middle, per metre of height, per pixel out. */
-const LEAN = 0.02;
+const LEAN = 0.012;
 
 export interface Camera {
   x: number;
@@ -247,7 +247,7 @@ export class Painter {
       items.push({ y: n.y, draw: () => this.runner(n.x, n.y, n.state, n.stride, n.heading, n.seed, ink) });
     if (run.wheel) {
       const w = run.wheel;
-      items.push({ y: w.y + 0.3, draw: () => this.cheeseWheel(w.x, w.y, w.z, w.spin, 0.5, ink, 0) });
+      items.push({ y: w.y + 0.3, draw: () => this.cheeseWheel(w.x, w.y, w.z, w.spin, 0.42, ink, 0) });
     }
     if (run.pursuer.active) items.push({ y: run.pursuer.y + run.spec.hd, draw: () => this.pursuer(run, ink, now) });
     const r = run.rider;
@@ -261,6 +261,7 @@ export class Painter {
     for (const it of items) it.draw();
 
     if (run.id === 'luge') this.nightfall(run, top, bottom, now);
+    if (run.id === 'cheese') this.clouds(run, top, bottom);
 
     // Print grain over everything.
     if (this.grain) {
@@ -305,8 +306,9 @@ export class Painter {
       ctx.stroke();
     }
 
-    for (let k = 0; k <= BLOCKS; k++) {
-      const yc = crosses[k];
+    // The block above the start is drawn too, so the street runs on up out of view.
+    for (let k = -1; k <= BLOCKS; k++) {
+      const yc = k < 0 ? crosses[0] - BLOCK - CROSS : crosses[k];
       const yb = yc + CROSS;
       if (k < BLOCKS) {
         const bt = yb + BLOCK;
@@ -351,7 +353,7 @@ export class Painter {
           ctx.fillRect(this.X(-CURB), this.Y(yb + 6), CURB * 2 * s, (BLOCK - 12) * s);
         }
       }
-      if (yb < top || yc > bottom) continue;
+      if (k < 0 || yb < top || yc > bottom) continue;
       // The cross street runs out of sight both ways.
       ctx.fillStyle = ink.ground;
       ctx.fillRect(0, this.Y(yc), this.w, CROSS * s);
@@ -404,12 +406,21 @@ export class Painter {
     ctx.fillStyle = ink.ground;
     ctx.fillRect(this.X(-BANK - 30), 0, (BANK + 30) * 2 * s, this.h);
     // Steeper ground prints darker, so the ledges read before you reach them.
-    for (let y = Math.floor(top); y < bottom; y++) {
-      const g = sample(run.course.grade, y);
-      const a = Math.max(0, Math.min(0.28, (g - 0.2) * 0.7));
-      if (a > 0) {
-        ctx.fillStyle = `rgba(40, 62, 30, ${a})`;
-        ctx.fillRect(this.X(-BANK - 30), this.Y(y), (BANK + 30) * 2 * s, s + 1);
+    const steep = ctx.createLinearGradient(0, this.Y(top), 0, this.Y(bottom));
+    for (let i = 0; i <= 12; i++) {
+      const y = top + ((bottom - top) * i) / 12;
+      const a = Math.max(0, Math.min(0.26, (sample(run.course.grade, y) - 0.2) * 0.7));
+      steep.addColorStop(i / 12, `rgba(40, 62, 30, ${a.toFixed(3)})`);
+    }
+    ctx.fillStyle = steep;
+    ctx.fillRect(this.X(-BANK - 30), 0, (BANK + 30) * 2 * s, this.h);
+    // Mottling: patches of lusher and drier grass.
+    for (let cy = Math.floor(top / 6) * 6; cy < bottom; cy += 6) {
+      const r = mulberry(cy * 131 + 9);
+      for (let i = 0; i < 4; i++) {
+        ctx.fillStyle = r() < 0.5 ? 'rgba(163, 193, 114, 0.35)' : 'rgba(84, 120, 58, 0.35)';
+        blob(ctx, this.X((r() * 2 - 1) * BANK), this.Y(cy + r() * 6), s * (2 + r() * 3), s * (1 + r() * 1.5), r());
+        ctx.fill();
       }
     }
     // A worn line down the middle where the runners go every year.
@@ -441,11 +452,48 @@ export class Painter {
         ctx.stroke();
       }
     }
+    // Buttercups and clover heads.
+    for (let y = Math.floor(top); y < bottom; y++) {
+      const r = mulberry(y * 733 + 1);
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = r() < 0.6 ? '#f2d24a' : '#f4ead2';
+        ctx.fillRect(this.X((r() * 2 - 1) * BANK), this.Y(y + r()), Math.max(1.5, s * 0.1), Math.max(1.5, s * 0.1));
+      }
+    }
     // Outside the fences: trodden ground under the crowd.
     for (const side of [-1, 1]) {
       ctx.fillStyle = '#a99467';
       const x0 = side < 0 ? -BANK - 14 : BANK + 1.4;
       ctx.fillRect(this.X(x0), 0, 12.6 * s, this.h);
+      ctx.fillStyle = '#5f8a45';
+      const x1 = side < 0 ? -BANK - 60 : BANK + 14;
+      ctx.fillRect(this.X(x1), 0, 46 * s, this.h);
+    }
+  }
+
+  /** Cloud shadows drifting slowly across the hill. */
+  private clouds(run: Run, top: number, bottom: number): void {
+    const ctx = this.ctx;
+    const s = this.cam.s;
+    const drift = run.t * 1.6 + 300;
+    for (let cy = Math.floor((top - 40) / 70) * 70; cy < bottom + 40; cy += 70) {
+      const r = mulberry(cy * 17 + 5);
+      const x = ((r() * 160 + drift) % 160) - 80;
+      const y = cy + r() * 40;
+      ctx.fillStyle = 'rgba(30, 50, 40, 0.13)';
+      for (let i = 0; i < 5; i++) {
+        ctx.beginPath();
+        ctx.ellipse(
+          this.X(x + (r() - 0.5) * 18),
+          this.Y(y + (r() - 0.5) * 8),
+          s * (7 + r() * 6),
+          s * (4 + r() * 3),
+          0,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
     }
   }
 
@@ -578,39 +626,55 @@ export class Painter {
     }
   }
 
-  /** Night over the luge: everything outside the floodlight pools goes dark. */
+  /** Night over the luge: the floodlit channel through dark woods. */
   private nightfall(run: Run, top: number, bottom: number, now: number): void {
     const n = this.night;
     const g = n.getContext('2d')!;
     const k = n.width / this.w;
-    g.setTransform(1, 0, 0, 1, 0, 0);
+    const s = this.cam.s;
+    const tr = run.course.track!;
+    g.setTransform(k, 0, 0, k, 0, 0);
     g.globalCompositeOperation = 'source-over';
-    g.clearRect(0, 0, n.width, n.height);
+    g.clearRect(0, 0, this.w, this.h);
     g.fillStyle = 'rgba(9, 16, 38, 0.86)';
-    g.fillRect(0, 0, n.width, n.height);
+    g.fillRect(0, 0, this.w, this.h);
     g.globalCompositeOperation = 'destination-out';
+    g.lineCap = 'round';
+    g.lineJoin = 'round';
+    const line = new Path2D();
+    for (let y = top - 20; y <= bottom + 20; y += 2) {
+      const px = this.X(sample(tr.cx, y));
+      const py = this.Y(y);
+      if (y === top - 20) line.moveTo(px, py);
+      else line.lineTo(px, py);
+    }
+    // Spill along the whole channel, brightest on the ice.
+    for (const [w, a] of [
+      [22, 0.2],
+      [14, 0.3],
+      [8, 0.45],
+    ]) {
+      g.lineWidth = w * s;
+      g.strokeStyle = `rgba(0, 0, 0, ${a})`;
+      g.stroke(line);
+    }
     const lamps: [number, number, number][] = [];
     for (const t of run.course.things) {
       if (t.kind !== 'flood') continue;
       if (t.y < top - 30 || t.y > bottom + 30) continue;
-      // The light falls across the track from the pole.
-      const tr = run.course.track!;
-      const cx = sample(tr.cx, t.y + 4);
-      const lx = t.x + (cx - t.x) * 0.7;
-      const ly = t.y + 4;
-      const sx = this.X(lx);
-      const sy = this.Y(ly);
-      const rad = this.cam.s * 17;
-      const grd = g.createRadialGradient(sx * k, sy * k, 0, sx * k, sy * k, rad * k);
-      grd.addColorStop(0, 'rgba(0,0,0,1)');
-      grd.addColorStop(0.45, 'rgba(0,0,0,0.85)');
-      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      // Each lamp throws a pool across the track from its pole.
+      const cx = sample(tr.cx, t.y + 3);
+      const sx = this.X(t.x + (cx - t.x) * 0.65);
+      const sy = this.Y(t.y + 3);
+      const rad = s * 13;
+      const grd = g.createRadialGradient(sx, sy, 0, sx, sy, rad);
+      grd.addColorStop(0, 'rgba(0, 0, 0, 0.75)');
+      grd.addColorStop(0.5, 'rgba(0, 0, 0, 0.4)');
+      grd.addColorStop(1, 'rgba(0, 0, 0, 0)');
       g.fillStyle = grd;
-      g.beginPath();
-      g.ellipse(sx * k, sy * k, rad * k, rad * k * 0.8, 0, 0, Math.PI * 2);
-      g.fill();
+      g.fillRect(sx - rad, sy - rad, rad * 2, rad * 2);
       const [hx, hy] = this.P(t.x, t.y, t.h);
-      lamps.push([hx, hy, rad]);
+      lamps.push([hx, hy, s * 16]);
     }
     const ctx = this.ctx;
     ctx.save();
@@ -1016,10 +1080,9 @@ export class Painter {
     const ctx = this.ctx;
     const s = this.cam.s;
     const col = HOUSE[Math.floor(t.seed * HOUSE.length)];
-    const dark = shade(col, -0.18);
     const darker = shade(col, -0.32);
     const shop = t.kind === 'shop';
-    this.boxAt(x, t.y, t.hw, t.hd, t.h, null, darker, dark, false, ink);
+    this.boxAt(x, t.y, t.hw, t.hd, t.h, null, darker, col, false, ink);
     // Windows on the street front, floor by floor, and a door at the bottom.
     const street = x < 0 ? x + t.hw : x - t.hw;
     const floors = Math.max(1, Math.floor(t.h / 3.2));
@@ -1038,8 +1101,20 @@ export class Painter {
           this.P(street, yb, z0 + 1.7),
           this.P(street, ya, z0 + 1.7),
         ];
-        ctx.fillStyle = f === 0 && b === bays - 1 ? ink.key : '#2c3550';
+        // Painted trim round each window, the glass set in it.
+        ctx.fillStyle = '#efe7d6';
         poly(ctx, p);
+        ctx.fill();
+        const inset = (q: [number, number], k: number): [number, number] => {
+          const cx = (p[0][0] + p[1][0] + p[2][0] + p[3][0]) / 4;
+          const cy = (p[0][1] + p[1][1] + p[2][1] + p[3][1]) / 4;
+          return [cx + (q[0] - cx) * k, cy + (q[1] - cy) * k];
+        };
+        ctx.fillStyle = f === 0 && b === bays - 1 ? ink.key : '#2c3550';
+        poly(
+          ctx,
+          p.map((q) => inset(q, 0.74)),
+        );
         ctx.fill();
         // A sash bar and a lit pane or two.
         if (mulberry(Math.floor(t.seed * 1e5) + f * 7 + b)() < 0.18) {
@@ -1073,29 +1148,77 @@ export class Painter {
       poly(ctx, [w0, w1, w2, w3]);
       ctx.fill();
     }
-    // A flat roof with a parapet line and a skylight or chimney.
+    // A flat tar-and-gravel roof behind a parapet in the house colour, with the
+    // clutter roofs collect: a stair hatch, vents, a skylight, a deck.
     const a = this.P(x - t.hw, t.y - t.hd, t.h);
     const b = this.P(x + t.hw, t.y - t.hd, t.h);
     const c = this.P(x + t.hw, t.y + t.hd, t.h);
     const d = this.P(x - t.hw, t.y + t.hd, t.h);
-    ctx.fillStyle = shade(col, 0.12);
+    const r = mulberry(Math.floor(t.seed * 1e6));
+    const tar = ['#9d978d', '#8f8a82', '#a8a196'][Math.floor(r() * 3)];
+    ctx.fillStyle = tar;
     poly(ctx, [a, b, c, d]);
     ctx.fill();
-    ctx.strokeStyle = col;
-    ctx.lineWidth = Math.max(1, s * 0.3);
+    ctx.strokeStyle = shade(col, 0.15);
+    ctx.lineWidth = Math.max(1.5, s * 0.35);
     poly(ctx, [a, b, c, d]);
     ctx.stroke();
-    const r = mulberry(Math.floor(t.seed * 1e6));
-    const k = r();
-    if (k < 0.6) {
-      const cx = x + (r() - 0.5) * t.hw;
-      const cy = t.y + (r() - 0.5) * t.hd;
-      const top = this.P(cx, cy, t.h + 1.2);
-      const base = this.P(cx, cy, t.h);
-      ctx.fillStyle = darker;
-      ctx.fillRect(base[0] - s * 0.3, top[1], s * 0.6, base[1] - top[1]);
-      ctx.fillStyle = dark;
-      ctx.fillRect(top[0] - s * 0.35, top[1] - s * 0.15, s * 0.7, s * 0.3);
+    const roofBox = (cx: number, cy: number, hw: number, hd: number, h: number, fill: string, side: string) => {
+      const p0 = this.P(cx - hw, cy - hd, t.h + h);
+      const p1 = this.P(cx + hw, cy - hd, t.h + h);
+      const p2 = this.P(cx + hw, cy + hd, t.h + h);
+      const p3 = this.P(cx - hw, cy + hd, t.h + h);
+      const q2 = this.P(cx + hw, cy + hd, t.h);
+      const q3 = this.P(cx - hw, cy + hd, t.h);
+      ctx.fillStyle = side;
+      poly(ctx, [q3, q2, p2, p3]);
+      ctx.fill();
+      ctx.fillStyle = fill;
+      poly(ctx, [p0, p1, p2, p3]);
+      ctx.fill();
+    };
+    const inner = (k: number) => x + (x < 0 ? -1 : 1) * k;
+    if (r() < 0.55) roofBox(inner(t.hw * 0.45), t.y - t.hd * 0.3, 1.1, 1.2, 2.2, shade(col, -0.05), darker);
+    if (r() < 0.5) {
+      const sx = inner((r() - 0.5) * t.hw);
+      const sy = t.y + (r() - 0.2) * t.hd * 0.6;
+      ctx.fillStyle = '#b9d0dc';
+      poly(ctx, [
+        this.P(sx - 0.8, sy - 0.5, t.h),
+        this.P(sx + 0.8, sy - 0.5, t.h),
+        this.P(sx + 0.8, sy + 0.5, t.h),
+        this.P(sx - 0.8, sy + 0.5, t.h),
+      ]);
+      ctx.fill();
+    }
+    if (r() < 0.35) {
+      // A plank deck at the back.
+      const dx0 = inner(t.hw * 0.15);
+      const dx1 = inner(t.hw * 0.85);
+      const xa = Math.min(dx0, dx1);
+      const xb = Math.max(dx0, dx1);
+      ctx.fillStyle = '#b98c5a';
+      poly(ctx, [
+        this.P(xa, t.y - t.hd + 0.6, t.h),
+        this.P(xb, t.y - t.hd + 0.6, t.h),
+        this.P(xb, t.y + t.hd - 0.6, t.h),
+        this.P(xa, t.y + t.hd - 0.6, t.h),
+      ]);
+      ctx.fill();
+      ctx.strokeStyle = '#9a7146';
+      ctx.lineWidth = 1;
+      for (let yy = t.y - t.hd + 1; yy < t.y + t.hd - 0.6; yy += 0.5) {
+        const pa = this.P(xa, yy, t.h);
+        const pb = this.P(xb, yy, t.h);
+        ctx.beginPath();
+        ctx.moveTo(pa[0], pa[1]);
+        ctx.lineTo(pb[0], pb[1]);
+        ctx.stroke();
+      }
+    }
+    for (let i = 0; i < 2; i++) {
+      if (r() < 0.6)
+        roofBox(x + (r() - 0.5) * t.hw * 1.2, t.y + (r() - 0.5) * t.hd, 0.3, 0.3, 0.7, '#6f6a63', '#5a5650');
     }
   }
 
@@ -1510,8 +1633,8 @@ export class Painter {
     ctx.ellipse(gx + s * 0.35, gy + s * 0.08, s * 0.55, s * 0.18, r.heading, 0, Math.PI * 2);
     ctx.fill();
     this.deck(gx, gy, r.heading + wob, ink);
-    // Brake: a foot down, sparks of urethane.
-    const k = s * 1.0;
+    // Drawn a size up from true scale, as a poster would.
+    const k = s * 1.25;
     ctx.save();
     ctx.translate(gx, gy - k * 0.12);
     ctx.rotate(lean + wob * 0.5);
@@ -1644,7 +1767,7 @@ export class Painter {
   ): void {
     const ctx = this.ctx;
     const s = this.cam.s;
-    const k = s;
+    const k = s * (you ? 1.25 : 1.1);
     ctx.fillStyle = ink.shadow;
     ctx.beginPath();
     ctx.ellipse(gx + k * 0.3, gy + k * 0.05, k * 0.45, k * 0.14, 0, 0, Math.PI * 2);
@@ -1702,8 +1825,8 @@ export class Painter {
     ctx.restore();
   }
 
-  /** A wheel of Double Gloucester, wobbling as it bounds. */
-  cheeseWheel(x: number, y: number, z: number, spin: number, rad: number, ink: Inks, scaleUp: number): void {
+  /** A wheel of hard cheese, wobbling as it bounds, its paper label going round. */
+  cheeseWheel(x: number, y: number, z: number, spin: number, rad: number, ink: Inks, phase: number): void {
     const ctx = this.ctx;
     const s = this.cam.s;
     const gx = this.X(x);
@@ -1711,31 +1834,43 @@ export class Painter {
     const R = rad * s;
     ctx.fillStyle = ink.shadow;
     ctx.beginPath();
-    ctx.ellipse(gx + R * 0.3, gy, R * (0.9 - Math.min(0.5, z * 0.2)), R * 0.28, 0, 0, Math.PI * 2);
+    ctx.ellipse(gx + R * 0.3, gy, R * (0.9 - Math.min(0.5, z * 0.2)), R * 0.3, 0, 0, Math.PI * 2);
     ctx.fill();
     const cy = gy - z * s * RISE - R;
-    // It rolls straight at you so you mostly see the rind; a wobble shows the face.
-    const face = 0.35 + 0.25 * Math.abs(Math.sin(spin * 0.13 + scaleUp));
+    // It wobbles as it rolls, so its face swings in and out of view.
+    const tilt = Math.sin(spin * 0.13 + phase);
+    const face = 0.55 + 0.4 * Math.abs(tilt);
+    const side = tilt < 0 ? -1 : 1;
+    const thick = R * 0.42;
     ctx.save();
     ctx.translate(gx, cy);
-    ctx.rotate(Math.sin(spin * 0.21) * 0.25);
-    ctx.fillStyle = '#d9a53a';
-    roundRect(ctx, -R * 0.42, -R, R * 0.84, R * 2, R * 0.35);
+    ctx.rotate(Math.sin(spin * 0.21 + phase) * 0.2);
+    // The rind band, then the face over it.
+    ctx.fillStyle = '#c98f2e';
+    ctx.beginPath();
+    ctx.ellipse(-side * thick * 0.5, 0, R * face, R, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#f2c24a';
     ctx.beginPath();
-    ctx.ellipse(-R * 0.42 + R * face * 0.2, 0, R * face, R, 0, 0, Math.PI * 2);
+    ctx.ellipse(side * thick * 0.5, 0, R * face, R, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Rind marks turning with the roll.
-    ctx.strokeStyle = '#c48d2a';
+    // A cut-paper label on the face, turning with the roll.
+    ctx.save();
+    ctx.translate(side * thick * 0.5, 0);
+    ctx.scale(face, 1);
+    ctx.rotate(spin);
+    ctx.fillStyle = ink.red;
+    ctx.beginPath();
+    ctx.arc(0, 0, R * 0.48, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f4ead2';
+    ctx.fillRect(-R * 0.42, -R * 0.09, R * 0.84, R * 0.18);
+    ctx.strokeStyle = '#d9a53a';
     ctx.lineWidth = Math.max(1, s * 0.05);
-    for (let i = 0; i < 3; i++) {
-      const a = spin + (i * Math.PI * 2) / 3;
-      ctx.beginPath();
-      ctx.moveTo(-R * 0.42 + R * face * 0.2, 0);
-      ctx.lineTo(-R * 0.42 + R * face * 0.2 + Math.cos(a) * R * face * 0.8, Math.sin(a) * R * 0.8);
-      ctx.stroke();
-    }
+    ctx.beginPath();
+    ctx.arc(0, 0, R * 0.82, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
     ctx.restore();
   }
 
@@ -1746,6 +1881,7 @@ export class Painter {
     ctx.save();
     ctx.translate(gx, gy);
     ctx.rotate(-r.heading);
+    ctx.scale(1.35, 1.35);
     if (r.state === 'crash') {
       // Off the sled, sliding on your back with the sled spinning away.
       const age = 1.6 - r.timer;
@@ -1851,7 +1987,7 @@ export class Painter {
     }
     if (run.id === 'cheese') {
       const bounce = Math.abs(Math.sin(q.spin * 0.45)) * 1.4;
-      this.cheeseWheel(q.x, q.y, bounce, q.spin * 6, 0.65, ink, 1.3);
+      this.cheeseWheel(q.x, q.y, bounce, q.spin * 2.4, 0.75, ink, 1.3);
       return;
     }
     // The four-man bob: a long red shell with four helmets in a row.

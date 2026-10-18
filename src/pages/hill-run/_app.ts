@@ -164,16 +164,16 @@ export function startHillRun(root: HTMLElement): void {
       r.wheel!.x = 0.6;
       r.wheel!.z = 0.6;
     } else {
-      rider.y = 288;
+      rider.y = 236;
       rider.v = 27;
-      rider.u = 0.9;
+      rider.u = 0.4;
       rider.x = sample(r.course.track!.cx, rider.y) + 0.9 / Math.sqrt(1 + sample(r.course.track!.dx, rider.y) ** 2);
       rider.heading = Math.atan(sample(r.course.track!.dx, rider.y));
       r.t = 14.2;
     }
     p.follow(r, 0, true);
     p.cam.s = p.baseScale() * 1.25;
-    p.cam.ay = 0.55;
+    p.cam.ay = 0.62;
     return r;
   }
 
@@ -331,7 +331,7 @@ export function startHillRun(root: HTMLElement): void {
     const small = document.createElement('small');
     small.textContent = WHERE[id];
     hudTitle.append(small);
-    painter.follow(run, 0, true);
+    resize();
     sound.start(id);
     canvas.focus?.();
   }
