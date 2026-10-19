@@ -44,9 +44,10 @@ function gnomonTemplate(dial: Dial): string {
   const ny = dial.s * Math.sin(phi) * MM;
   const tab = 7;
   const pad = 4;
-  const wv = base + 2 * pad + 26;
+  const left = 24;
+  const wv = Math.max(left + base + pad + 6, 66);
   const hv = height + tab + 2 * pad + 6;
-  const x0 = pad;
+  const x0 = left;
   const y0 = pad + height + 4;
   const arc = Math.min(base * 0.45, 9);
   const deg = Math.abs(dial.place.lat).toFixed(1);

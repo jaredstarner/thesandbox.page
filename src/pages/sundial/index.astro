@@ -809,10 +809,21 @@ import { R } from './_dial';
 
     .sheet :global(.sheet-foot) {
       display: grid;
-      grid-template-columns: 1fr 62mm;
+      grid-template-columns: 1fr 58mm;
       gap: 6mm;
       margin-top: 4mm;
       break-inside: avoid;
+    }
+
+    .sheet :global(.sheet-make) {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0 4mm;
+      align-items: start;
+    }
+
+    .sheet :global(.sheet-make .bar) {
+      grid-column: 1 / -1;
     }
 
     .sheet :global(ol) {
