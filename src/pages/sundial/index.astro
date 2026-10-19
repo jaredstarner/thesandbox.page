@@ -36,7 +36,9 @@ import { R } from './_dial';
             </filter>
             <filter id="sd-speckle" filterUnits="userSpaceOnUse" x="-100" y="-100" width="200" height="200">
               <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3"></feTurbulence>
-              <feColorMatrix type="matrix" values="0 0 0 0 0.35  0 0 0 0 0.3  0 0 0 0 0.22  2.4 0 0 0 -1.25"
+              <feColorMatrix
+                type="matrix"
+                values="0 0 0 0 0.35  0 0 0 0 0.3  0 0 0 0 0.22  2.4 0 0 0 -1.25"
               ></feColorMatrix>
               <feComposite in2="SourceGraphic" operator="in"></feComposite>
             </filter>
@@ -70,8 +72,7 @@ import { R } from './_dial';
               >
                 <feDistantLight azimuth="235" elevation="38" data-light></feDistantLight>
               </feDiffuseLighting>
-              <feComposite in="SourceGraphic" in2="lit" operator="arithmetic" k1="1" k2="0" k3="0" k4="0"
-              ></feComposite>
+              <feComposite in="SourceGraphic" in2="lit" operator="arithmetic" k1="1" k2="0" k3="0" k4="0"></feComposite>
               <feComposite in2="SourceAlpha" operator="in"></feComposite>
             </filter>
           </defs>
@@ -79,7 +80,9 @@ import { R } from './_dial';
         </svg>
         <svg class="shade" viewBox="-100 -100 200 200" aria-hidden="true">
           <defs>
-            <clipPath id="sd-clip"><circle r="99.6"></circle></clipPath>
+            <clipPath id="sd-clip">
+              <circle r="99.6"></circle>
+            </clipPath>
             <filter id="sd-soft" filterUnits="userSpaceOnUse" x="-100" y="-100" width="200" height="200">
               <feGaussianBlur stdDeviation="0.4"></feGaussianBlur>
             </filter>
@@ -106,23 +109,29 @@ import { R } from './_dial';
 
     <aside class="desk">
       <header class="head">
-        <a class="home" href="/">thesandbox.page</a>
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
         <h1>Sundial</h1>
         <p class="lede">
-          A garden dial laid out for one place. Choose where it stands and every line on the plate is set again for
-          that latitude and longitude.
+          A garden dial laid out for one place. Choose where it stands and every line on the plate is set again for that
+          latitude and longitude.
         </p>
       </header>
 
       <section class="reading" aria-live="polite">
-        <p class="big" data-big>–</p>
+        <p class="big" data-big>
+          –
+        </p>
         <p class="sub" data-sub></p>
         <dl class="sum" data-sum></dl>
       </section>
 
       <section class="when" aria-label="Date and time">
         <label class="slider">
-          <span class="label">Day <b data-day-label></b></span>
+          <span class="label">
+            Day <b data-day-label></b>
+          </span>
           <input type="range" min="0" max="364" step="1" data-day />
           <span class="marks" aria-hidden="true">
             <i style="--at: 0.216">Mar</i>
@@ -132,12 +141,18 @@ import { R } from './_dial';
           </span>
         </label>
         <label class="slider">
-          <span class="label">Time <b data-time-label></b></span>
+          <span class="label">
+            Time <b data-time-label></b>
+          </span>
           <input type="range" min="0" max="1439" step="1" data-time />
         </label>
         <div class="buttons">
-          <button type="button" data-now aria-pressed="true">Now</button>
-          <button type="button" data-play>Run the day</button>
+          <button type="button" data-now aria-pressed="true">
+            Now
+          </button>
+          <button type="button" data-play>
+            Run the day
+          </button>
         </div>
       </section>
 
@@ -157,7 +172,9 @@ import { R } from './_dial';
         <canvas class="map" data-map aria-label="World map: click to place the dial anywhere"></canvas>
         <p class="note" data-where-note></p>
         <div class="buttons">
-          <button type="button" data-locate>Use my location</button>
+          <button type="button" data-locate>
+            Use my location
+          </button>
           <span class="zone" data-zone></span>
         </div>
       </section>
@@ -166,13 +183,11 @@ import { R } from './_dial';
         <label>
           <h2>Motto</h2>
           <select data-motto>
-            {
-              MOTTOS.map((m, i) => (
-                <option value={String(i)}>
-                  {m.latin} ({m.english})
-                </option>
-              ))
-            }
+            {MOTTOS.map((m, i) => (
+              <option value={String(i)}>
+                {m.latin} ({m.english})
+              </option>
+            ))}
             <option value="none">No motto</option>
           </select>
         </label>
@@ -185,8 +200,12 @@ import { R } from './_dial';
           alone, for a cutter or an engraver.
         </p>
         <div class="buttons">
-          <button type="button" class="primary" data-print>Print the dial</button>
-          <a class="button" data-svg download="sundial.svg" href="#">Download SVG</a>
+          <button type="button" class="primary" data-print>
+            Print the dial
+          </button>
+          <a class="button" data-svg download="sundial.svg" href="#">
+            Download SVG
+          </a>
         </div>
       </section>
 
@@ -194,20 +213,20 @@ import { R } from './_dial';
         <summary>Reading the plate</summary>
         <ul>
           <li>
-            <b>Hour lines</b> run from the foot of the gnomon. Its sloping edge points at the celestial pole, so its shadow
-            swings at an even pace through the sky but lands on lines that crowd toward noon.
+            <b>Hour lines</b> run from the foot of the gnomon. Its sloping edge points at the celestial pole, so its
+            shadow swings at an even pace through the sky but lands on lines that crowd toward noon.
           </li>
           <li>
-            <b>Date lines</b> are traced by the tip of the shadow: the solstices at either end, the equinoxes on the straight
-            line, the start of each zodiac sign between.
+            <b>Date lines</b> are traced by the tip of the shadow: the solstices at either end, the equinoxes on the
+            straight line, the start of each zodiac sign between.
           </li>
           <li>
-            <b>The figure eight</b> marks where the tip falls at noon on the clock. It leans and loops because the sun runs up
-            to a quarter of an hour fast or slow through the year.
+            <b>The figure eight</b> marks where the tip falls at noon on the clock. It leans and loops because the sun
+            runs up to a quarter of an hour fast or slow through the year.
           </li>
           <li>
-            <b>Off the meridian:</b> the lines are set for the clock zone's meridian, so the XII line sits off the gnomon by
-            however far the place is east or west of it.
+            <b>Off the meridian:</b> the lines are set for the clock zone's meridian, so the XII line sits off the
+            gnomon by however far the place is east or west of it.
           </li>
         </ul>
       </details>
@@ -232,9 +251,7 @@ import { R } from './_dial';
     min-height: 100dvh;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 390px;
-    background:
-      radial-gradient(120% 90% at 35% 45%, var(--lawn-2), var(--lawn) 70%),
-      var(--lawn);
+    background: radial-gradient(120% 90% at 35% 45%, var(--lawn-2), var(--lawn) 70%), var(--lawn);
     color: var(--cream);
     font-family: var(--font-sundial-text);
     font-size: 16px;

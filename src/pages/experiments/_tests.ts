@@ -405,7 +405,8 @@ export const TECHNIQUES: Record<string, Technique> = {
     label: 'Geolocation',
     webFeature: 'geolocation',
     handling: 'May ask for your location when you choose to share it; it is never sent anywhere.',
-    test: () => present('geolocation' in navigator, 'navigator.geolocation present; never called here', 'Geolocation missing'),
+    test: () =>
+      present('geolocation' in navigator, 'navigator.geolocation present; never called here', 'Geolocation missing'),
   },
   // Technique notes: no browser dependency, so no test and no light.
   typography: { label: 'Typography' },

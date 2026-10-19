@@ -31,7 +31,11 @@ function orbit(gamma: number): { decl: number; eot: number } {
   const g = gamma;
   const eot =
     229.18 *
-    (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g) - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));
+    (0.000075 +
+      0.001868 * Math.cos(g) -
+      0.032077 * Math.sin(g) -
+      0.014615 * Math.cos(2 * g) -
+      0.040849 * Math.sin(2 * g));
   const decl =
     (0.006918 -
       0.399912 * Math.cos(g) +

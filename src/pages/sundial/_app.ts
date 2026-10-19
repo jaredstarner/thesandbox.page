@@ -306,10 +306,7 @@ export function start(root: HTMLElement): void {
       sub.textContent = `by the shadow · sun ${Math.round(sun.alt)}° up, bearing ${Math.round(sun.az)}°`;
       const rows: [string, string][] = [
         ['Shadow reads', hm(dialMin)],
-        [
-          eot >= 0 ? `Sun running fast, take off` : 'Sun running slow, add',
-          `${Math.abs(eot)} min`,
-        ],
+        [eot >= 0 ? `Sun running fast, take off` : 'Sun running slow, add', `${Math.abs(eot)} min`],
       ];
       if (dst) rows.push(['Summer time, add', `${dst % 60 ? dst + ' min' : dst / 60 + ' h'}`]);
       rows.push(['On the clock', hm(dialMin - eot + dst)]);
@@ -450,7 +447,7 @@ export function start(root: HTMLElement): void {
     }
     g.setLineDash([]);
     // The point with the sun overhead.
-    const sLon = ((((720 - utcMin - eot) / 4 + 180) % 360) + 360) % 360 - 180;
+    const sLon = (((((720 - utcMin - eot) / 4 + 180) % 360) + 360) % 360) - 180;
     const sx = ((sLon + 180) / 360) * w;
     const sy = ((90 - decl) / 180) * h;
     g.fillStyle = '#e7b55a';
@@ -597,13 +594,7 @@ export function start(root: HTMLElement): void {
       (pos) => {
         locate.disabled = false;
         setPlace(
-          placeIn(
-            '',
-            round3(pos.coords.latitude),
-            round3(pos.coords.longitude),
-            browserZone(),
-            wallOf(place, ms).y,
-          ),
+          placeIn('', round3(pos.coords.latitude), round3(pos.coords.longitude), browserZone(), wallOf(place, ms).y),
         );
       },
       () => {

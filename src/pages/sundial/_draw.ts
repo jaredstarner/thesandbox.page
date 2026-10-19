@@ -65,7 +65,9 @@ export interface FaceOptions {
 
 /** The engraved face: everything cut into the plate. */
 export function face(dial: Dial, o: FaceOptions): string {
-  const w = o.print ? { hour: 0.45, ring: 0.4, tick: 0.3, major: 0.35, minor: 0.22, ana: 0.25 } : { hour: 0.8, ring: 0.7, tick: 0.5, major: 0.6, minor: 0.38, ana: 0.42 };
+  const w = o.print
+    ? { hour: 0.45, ring: 0.4, tick: 0.3, major: 0.35, minor: 0.22, ana: 0.25 }
+    : { hour: 0.8, ring: 0.7, tick: 0.5, major: 0.6, minor: 0.38, ana: 0.42 };
   const out: string[] = [];
   const r0 = R.boss + 1.4;
 
@@ -152,7 +154,9 @@ export function face(dial: Dial, o: FaceOptions): string {
   out.push(
     `<text class="place" font-size="3.1" letter-spacing="0.5" stroke="none"><textPath href="#${o.id}-place" startOffset="50%" text-anchor="middle">${esc(place)}</textPath></text>`,
   );
-  out.push(`<text class="year" font-size="3.4" letter-spacing="0.6" x="0" y="11.5" text-anchor="middle" stroke="none">${yearNumeral(o.year)}</text>`);
+  out.push(
+    `<text class="year" font-size="3.4" letter-spacing="0.6" x="0" y="11.5" text-anchor="middle" stroke="none">${yearNumeral(o.year)}</text>`,
+  );
 
   return out.join('');
 }
