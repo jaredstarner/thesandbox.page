@@ -2,8 +2,8 @@
 //
 // Under every run is a little piece of music that follows your speed (see
 // _music.ts). Over it, kept quiet, the ride itself: urethane wheels and both trucks
-// clacking over tar seams, the sweeper's diesel; footfalls on turf, a crowd along
-// the fences and birds over the hill, the second cheese thumping as it bounds;
+// clacking over tar seams, the sweeper's diesel; footfalls on turf, birds over
+// the hill, the second cheese thumping as it bounds;
 // runners on ice, the sled frame buzzing up a wall, cowbells on the big curves and
 // the bob coming down behind. At the bottom the ride sounds fade and a sting hands
 // over to the results music.
@@ -97,10 +97,7 @@ export class HillSound {
     if (!this.ctx || !this.level) return;
     this.music!.target = 0;
     this.music!.play(RUN_SONGS[this.level]);
-    if (this.level === 'cheese') {
-      this.field!.crowd = 0.5;
-      this.field!.birds = 0.5;
-    }
+    if (this.level === 'cheese') this.field!.birds = 0.5;
   }
 
   /** Back to the rack: everything stops. */
@@ -129,10 +126,9 @@ export class HillSound {
     this.music!.stop(0.4);
     const done = won ? this.music!.fanfare(level) : this.music!.wahwah(level);
     if (level === 'cheese') {
-      // On the hill it's the crowd and the birds, not a jingle on a loop.
-      this.field!.crowd = won ? 0.75 : 0.45;
+      // On the hill it's applause and the birds, not a jingle on a loop.
       this.field!.birds = 0.9;
-      if (won) this.field!.cheer(3.5);
+      if (won) this.field!.applaud(3.5);
     } else this.music!.play(resultSong(level, won), done + 0.2);
   }
 
@@ -284,11 +280,6 @@ export class HillSound {
       const chop = 0.5 + 0.5 * Math.sin(t * 2 * Math.PI * 7);
       set(L.brush.gain.gain, q.active ? 0.015 + chop * 0.03 : 0, 0.01);
     } else if (this.level === 'cheese') {
-      // Crowds bunch at the top and the bottom fence, and get louder when it's close.
-      const c = run.course;
-      const crowdNear = r.y < 60 ? 1 : r.y > c.finish - 80 ? 1 : 0.3;
-      const excite = (q.active && near > 0.2 ? 0.3 : 0) + (r.state === 'tumble' ? 0.3 : 0);
-      if (this.field) this.field.crowd = Math.min(1, 0.15 + 0.45 * crowdNear + excite);
       set(L.turf.gain.gain, r.state === 'tumble' ? 0.03 : 0);
       if (r.state === 'tumble') {
         this.tumbleT -= dt;
