@@ -31,6 +31,7 @@ const places = [
     <header class="cartouche">
       <h1>The coast at night</h1>
       <p class="lede">{count} lights from the NGA and USCG lists, each flashing its own character.</p>
+      <p class="touch">Pinch to zoom and tap a light to read it. Hold a finger on open water to stand on deck there.</p>
       <div class="readout">
         <span class="scale" data-scale>
           <i></i>
@@ -230,6 +231,21 @@ const places = [
     color: var(--ink-dim);
     font-size: 14.5px;
     line-height: 1.35;
+  }
+  .touch {
+    display: none;
+    margin: -4px 0 10px;
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--ink-dim);
+  }
+  @media (pointer: coarse) {
+    .touch {
+      display: block;
+    }
+    .hint {
+      display: none;
+    }
   }
   .readout {
     display: flex;

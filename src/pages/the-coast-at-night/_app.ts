@@ -200,6 +200,8 @@ async function main() {
   const pointers = new Map<number, { x: number; y: number }>();
   let moved = 0;
   let pinch: { d: number; s: number } | null = null;
+  // A long press on open water does on a touch screen what a double-click does with a mouse.
+  let press = 0;
   canvas.addEventListener('pointerdown', (e) => {
     if (root.dataset.mode !== 'chart') return;
     try {
@@ -208,6 +210,17 @@ async function main() {
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     flight = null;
     moved = 0;
+    clearTimeout(press);
+    if (e.pointerType !== 'mouse' && pointers.size === 1) {
+      const x = e.clientX;
+      const y = e.clientY;
+      press = window.setTimeout(() => {
+        if (moved < 8 && pointers.size === 1) {
+          pointers.clear();
+          goOnDeckAt(x, y, 'Press and hold on open water.');
+        }
+      }, 600);
+    }
     if (pointers.size === 2) {
       const [a, b] = [...pointers.values()];
       pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), s: view.s };
@@ -247,6 +260,7 @@ async function main() {
     }
   });
   const up = (e: PointerEvent) => {
+    clearTimeout(press);
     if (!pointers.has(e.pointerId)) return;
     pointers.delete(e.pointerId);
     if (pointers.size < 2) pinch = null;
@@ -271,18 +285,19 @@ async function main() {
     },
     { passive: false },
   );
-  canvas.addEventListener('dblclick', (e) => {
+  function goOnDeckAt(clientX: number, clientY: number, again: string) {
     const r = canvas.getBoundingClientRect();
-    const wx = view.x + (e.clientX - r.left - canvas.clientWidth / 2) / view.s;
-    const wy = view.y + (e.clientY - r.top - canvas.clientHeight / 2) / view.s;
+    const wx = view.x + (clientX - r.left - canvas.clientWidth / 2) / view.s;
+    const wy = view.y + (clientY - r.top - canvas.clientHeight / 2) / view.s;
     const lat = latOf(wy);
     const lon = lonOf(((wx % 1) + 1) % 1);
     if (deck.isLand(lat, lon)) {
-      deck.flash('That is land. Double-click open water.');
+      deck.flash(`That is land. ${again}`);
       return;
     }
     enterDeck(lat, lon, null);
-  });
+  }
+  canvas.addEventListener('dblclick', (e) => goOnDeckAt(e.clientX, e.clientY, 'Double-click open water.'));
   window.addEventListener('keydown', (e) => {
     if (root.dataset.mode !== 'chart' || (e.target as HTMLElement).closest('input')) return;
     const step = 80 / view.s;
