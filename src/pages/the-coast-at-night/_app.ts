@@ -375,7 +375,6 @@ async function main() {
       stepFlight(now);
       clampView();
       if (view.s >= FINE_AT * 0.8) wantFine();
-      const zoom = Chart.zoomOf(view);
       const sectors = Math.max(0, Math.min(1, (Math.log2(view.s / 256) - 7.4) / 0.6));
       chart.draw(view, time, { fine: fineReady && view.s >= FINE_AT, sectors });
       labels.update(view, canvas.clientWidth, canvas.clientHeight, selected);

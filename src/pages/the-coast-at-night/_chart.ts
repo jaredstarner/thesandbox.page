@@ -541,7 +541,7 @@ export class Chart {
     };
 
     if (opts.sectors > 0.01) {
-      const n = this.fillSectors(v, zoom);
+      const n = this.fillSectors(v);
       if (n) {
         gl.useProgram(this.progSector);
         common(this.uSector);
@@ -573,7 +573,7 @@ export class Chart {
   }
 
   /** Writes the sector arcs on screen into the instance buffer; returns how many. */
-  private fillSectors(v: View, zoom: number): number {
+  private fillSectors(v: View): number {
     const gl = this.gl;
     const L = this.lights;
     const hw = this.width / this.dpr / 2 / v.s;
