@@ -77,6 +77,7 @@ export function start(root: HTMLElement): void {
   const tint = $<SVGCircleElement>('[data-tint]');
   const sunmark = $<SVGCircleElement>('[data-sunmark]');
   const compass = $<SVGGElement>('[data-compass]');
+  const ground = $<HTMLElement>('[data-ground]');
   const big = $<HTMLElement>('[data-big]');
   const sub = $<HTMLElement>('[data-sub]');
   const sum = $<HTMLElement>('[data-sum]');
@@ -252,6 +253,21 @@ export function start(root: HTMLElement): void {
       sunmark.style.display = '';
     } else sunmark.style.display = 'none';
 
+    // The pedestal's shadow on the lawn.
+    if (day) {
+      const h = Math.hypot(sx, sy) || 1;
+      const len = Math.min(16, 3.2 / Math.tan(Math.max(4, sun.alt) * RAD));
+      ground.style.setProperty('--gx', `${((-sx / h) * len).toFixed(2)}%`);
+      ground.style.setProperty('--gy', `${((sy / h) * len).toFixed(2)}%`);
+      ground.style.setProperty('--go', (0.3 + 0.25 * Math.min(1, sun.alt / 30)).toFixed(2));
+      ground.style.setProperty('--gb', `${(10 + len * 0.9).toFixed(1)}px`);
+    } else {
+      ground.style.setProperty('--gx', '0%');
+      ground.style.setProperty('--gy', '1.5%');
+      ground.style.setProperty('--go', '0.4');
+      ground.style.setProperty('--gb', '22px');
+    }
+
     // Warm low sun, blue night.
     if (sun.alt > 12) tint.style.fill = 'transparent';
     else if (day) {
@@ -259,9 +275,10 @@ export function start(root: HTMLElement): void {
       tint.style.mixBlendMode = 'multiply';
       tint.style.opacity = String(0.22 * (1 - sun.alt / 12));
     } else {
-      tint.style.fill = '#0a1328';
-      tint.style.mixBlendMode = 'normal';
-      tint.style.opacity = String(0.62 - 0.3 * twilight);
+      // Moonless: darker and cooler, not painted blue.
+      tint.style.fill = '#39445c';
+      tint.style.mixBlendMode = 'multiply';
+      tint.style.opacity = String(0.92 - 0.45 * twilight);
     }
 
     // The reading.
@@ -346,40 +363,60 @@ export function start(root: HTMLElement): void {
     }
   })();
   let mapKey = '';
+  const MAP_TOP = 80;
+  const MAP_BOTTOM = -60;
+  const maskCanvas = document.createElement('canvas');
 
   function drawMap(decl: number, eot: number): void {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const w = Math.round(map.clientWidth * dpr);
-    const h = Math.round(w / 2);
+    // The map shows 80° N to 60° S; h is the whole globe's height, the canvas only the shown band.
+    const h = w / 2;
+    const shown = Math.round((w * (MAP_TOP - MAP_BOTTOM)) / 360);
     if (!w) return;
     const minuteKey = Math.round(ms / 120000);
     const key = `${w}|${minuteKey}|${place.lat}|${place.lon}`;
     if (key === mapKey) return;
     mapKey = key;
-    if (map.width !== w || map.height !== h) {
+    if (map.width !== w || map.height !== shown) {
       map.width = w;
-      map.height = h;
+      map.height = shown;
     }
     const g = map.getContext('2d');
     if (!g) return;
+    g.setTransform(1, 0, 0, 1, 0, 0);
     g.fillStyle = '#e3dccb';
-    g.fillRect(0, 0, w, h);
+    g.fillRect(0, 0, w, shown);
+    g.translate(0, (-(90 - MAP_TOP) / 180) * h);
     const d = new Date(ms);
     const utcMin = d.getUTCHours() * 60 + d.getUTCMinutes();
     const cw = w / cols;
     const ch = h / rowsN;
-    // Night, cell by cell.
+    // Night as a coarse alpha mask, scaled up smooth, then land dots over it.
+    const nightAt = new Float32Array(cols * rowsN);
+    const mask = new ImageData(cols, rowsN);
     for (let r = 0; r < rowsN; r++) {
       const lat = 90 - (r + 0.5) * step;
       for (let c = 0; c < cols; c++) {
         const lon = -180 + (c + 0.5) * step;
-        const ha = (utcMin + eot + 4 * lon) / 4 - 180;
-        const up = sunVector(lat, decl, ha).u;
-        const night = Math.max(0, Math.min(1, (0.1 - up) / 0.2));
-        if (night > 0) {
-          g.fillStyle = `rgb(23 34 27 / ${(0.42 * night).toFixed(3)})`;
-          g.fillRect(c * cw, r * ch, cw + 0.6, ch + 0.6);
-        }
+        const up = sunVector(lat, decl, (utcMin + eot + 4 * lon) / 4 - 180).u;
+        const night = Math.max(0, Math.min(1, (0.06 - up) / 0.16));
+        nightAt[r * cols + c] = night;
+        const i = (r * cols + c) * 4;
+        mask.data[i] = 23;
+        mask.data[i + 1] = 34;
+        mask.data[i + 2] = 27;
+        mask.data[i + 3] = Math.round(110 * night);
+      }
+    }
+    maskCanvas.width = cols;
+    maskCanvas.height = rowsN;
+    maskCanvas.getContext('2d')?.putImageData(mask, 0, 0);
+    g.imageSmoothingEnabled = true;
+    g.drawImage(maskCanvas, 0, 0, w, h);
+    for (let r = 0; r < rowsN; r++) {
+      for (let c = 0; c < cols; c++) {
+        const night = nightAt[r * cols + c];
         if (land[r * cols + c]) {
           g.fillStyle = night > 0.5 ? '#3d463f' : '#56605a';
           g.beginPath();
@@ -427,7 +464,7 @@ export function start(root: HTMLElement): void {
   map.addEventListener('click', (e) => {
     const rect = map.getBoundingClientRect();
     const lon = ((e.clientX - rect.left) / rect.width) * 360 - 180;
-    const lat = 90 - ((e.clientY - rect.top) / rect.height) * 180;
+    const lat = MAP_TOP - ((e.clientY - rect.top) / rect.height) * (MAP_TOP - MAP_BOTTOM);
     setPlace(placeIn('', round3(lat), round3(lon), null, wallOf(place, ms).y));
   });
 
@@ -511,7 +548,11 @@ export function start(root: HTMLElement): void {
         : 'The town search is not answering. Click the map or use your location instead.';
       results.append(li);
     }
+    const seen = new Set<string>();
     for (const h of hits ?? []) {
+      const id = `${h.name}|${h.admin1}|${h.country_code}`;
+      if (seen.has(id)) continue;
+      seen.add(id);
       const li = document.createElement('li');
       const b = document.createElement('button');
       b.type = 'button';

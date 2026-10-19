@@ -180,12 +180,14 @@ function trace(lat: number, k: 1 | -1, tip: Vec3, decl: number): Pt[][] {
       end();
       continue;
     }
-    const p = cast(tip, sun)!;
-    if (Math.hypot(p[0], p[1]) > R.clip) {
+    // Kept to the plate's gnomon side of the root, where the shadow's tip spends the day; the summer
+    // lines' early and late arms would otherwise cross under the root.
+    const q = show(k, cast(tip, sun)!);
+    if (Math.hypot(q[0], q[1]) > R.clip || q[1] < 0) {
       end();
       continue;
     }
-    seg.push(show(k, p));
+    seg.push(q);
   }
   end();
   return segs;

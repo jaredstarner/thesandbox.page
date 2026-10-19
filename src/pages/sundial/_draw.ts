@@ -109,7 +109,7 @@ export function face(dial: Dial, o: FaceOptions): string {
       for (const s of c.segs) for (const p of s) if (!best || Math.abs(p[0]) < Math.abs(best[0])) best = p;
       if (best && Math.abs(best[0]) < 4) {
         out.push(
-          `<text class="tag" font-size="2.7" letter-spacing="0.25" x="${f(-2.9)}" y="${f(-best[1] - 0.9)}" text-anchor="end" stroke="none">${c.label}</text>`,
+          `<text class="tag" font-size="3.1" letter-spacing="0.3" x="${f(-3.2)}" y="${f(-best[1] - 1)}" text-anchor="end" stroke="none">${c.label}</text>`,
         );
       }
     }
