@@ -218,16 +218,6 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Arial Narrow', 'Arial', 'sans-serif'],
     },
-    {
-      // The pencil notes on /pop-up/: an architect's hand.
-      provider: fontProviders.fontsource(),
-      name: 'Architects Daughter',
-      cssVariable: '--font-popup',
-      weights: [400],
-      styles: ['normal'],
-      subsets: ['latin'],
-      fallbacks: ['Comic Sans MS', 'cursive'],
-    },
     // The screenprinted posters on /hill-run/: a condensed gothic for the bills, a grotesk for the small print.
     {
       provider: fontProviders.fontsource(),
