@@ -535,17 +535,14 @@ export function start(root: HTMLElement): void {
     searchAbort?.abort();
     searchAbort = new AbortController();
     const url = `${SEARCH}?name=${encodeURIComponent(q)}&count=6&language=en&format=json`;
-    let hits: Hit[] = [];
     try {
       const res = await fetch(url, { signal: searchAbort.signal });
       if (!res.ok) throw new Error(String(res.status));
-      hits = ((await res.json()) as { results?: Hit[] }).results ?? [];
+      showResults(((await res.json()) as { results?: Hit[] }).results ?? []);
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
       showResults(null);
-      return;
     }
-    showResults(hits);
   }
 
   function showResults(hits: Hit[] | null): void {
