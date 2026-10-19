@@ -1,4 +1,4 @@
-// Hill run: the bill rack, the countdown, the run, and the result card.
+// Hill run: the level rack, the countdown, the run, pause, and the result card.
 
 import { STEP as GRID, sample, type LevelId } from './_course';
 import { Painter, INKS, clock } from './_draw';
@@ -26,16 +26,18 @@ const SAVE_KEY = 'hill-run:v1';
 interface Save {
   unlocked: number;
   best: Partial<Record<LevelId, number>>;
+  /** The furthest you've got on a level you haven't finished, and whether it caught you there. */
+  far: Partial<Record<LevelId, { m: number; caught: boolean }>>;
 }
 
 function load(): Save {
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY) ?? 'null') as Save | null;
-    if (s && typeof s.unlocked === 'number') return { unlocked: s.unlocked, best: s.best ?? {} };
+    if (s && typeof s.unlocked === 'number') return { unlocked: s.unlocked, best: s.best ?? {}, far: s.far ?? {} };
   } catch {
     // Storage can be off; the rack just starts fresh.
   }
-  return { unlocked: 1, best: {} };
+  return { unlocked: 1, best: {}, far: {} };
 }
 
 function store(s: Save): void {
@@ -63,8 +65,12 @@ export function startHillRun(root: HTMLElement): void {
   const chaserEl = q<HTMLElement>('[data-chaser]');
   const callEl = q<HTMLElement>('[data-call]');
   const countEl = q<HTMLElement>('[data-count]');
+  const bannerEl = q<HTMLElement>('[data-banner]');
   const stripCanvas = q<HTMLCanvasElement>('[data-strip]');
   const card = q<HTMLElement>('[data-card]');
+  const pauseEl = q<HTMLElement>('[data-pause]');
+  const pauseBtn = q<HTMLButtonElement>('[data-pause-btn]');
+  const jumpBtn = q<HTMLButtonElement>('[data-jump-btn]');
   const soundBtn = q<HTMLButtonElement>('[data-sound]');
   const params = new URLSearchParams(location.search);
   const debug = params.has('debug');
@@ -72,7 +78,7 @@ export function startHillRun(root: HTMLElement): void {
   const painter = new Painter(canvas);
   const sound = new HillSound();
   const save = load();
-  // ?debug opens every bill for this visit without saving that.
+  // ?debug opens every level for this visit without saving that.
   const open = () => (debug ? LEVELS.length : save.unlocked);
 
   let run: Run | null = null;
@@ -84,6 +90,9 @@ export function startHillRun(root: HTMLElement): void {
   let callTimer = 0;
   let ended = false;
   let paused = false;
+  let jumpQueued = false;
+  let padJump = false;
+  const toldJump = new Set<LevelId>();
 
   // ------------------------------------------------------------ sizing and fonts
 
@@ -104,10 +113,10 @@ export function startHillRun(root: HTMLElement): void {
   window.addEventListener('resize', resize);
   resize();
 
-  // ------------------------------------------------------------ the bills
+  // ------------------------------------------------------------ the level posters
 
   const arts = new Map<LevelId, Painter>();
-  function paintBills(): void {
+  function paintLevels(): void {
     for (const id of LEVELS) {
       const c = root.querySelector<HTMLCanvasElement>(`[data-art="${id}"]`);
       if (!c) continue;
@@ -129,12 +138,15 @@ export function startHillRun(root: HTMLElement): void {
       const best = root.querySelector<HTMLElement>(`[data-best="${id}"]`)!;
       btn.disabled = i >= open();
       const b = save.best[id];
-      if (i >= open()) best.textContent = `Finish No. ${i} to print this bill`;
-      else best.textContent = b ? `Best ${clock(b)}` : 'Not yet run';
+      const far = save.far[id];
+      if (i >= open()) best.textContent = `Finish level ${i} to open this one`;
+      else if (b) best.textContent = `Best ${clock(b)}`;
+      else if (far) best.textContent = `Best ${far.m} m${far.caught ? `, ${CAUGHT[id].toLowerCase()}` : ''}`;
+      else best.textContent = 'Not yet run';
     }
   }
 
-  /** A still of each course for its bill: a moment partway down. */
+  /** A still of each course for its poster: a moment partway down. */
   function posed(id: LevelId, p: Painter): Run {
     const r = new Run(id);
     const rider = r.rider;
@@ -178,9 +190,9 @@ export function startHillRun(root: HTMLElement): void {
     return r;
   }
 
-  void document.fonts?.load(`40px ${painter.bill}`).then(() => paintBills());
-  paintBills();
-  window.addEventListener('resize', paintBills);
+  void document.fonts?.load(`40px ${painter.bill}`).then(() => paintLevels());
+  paintLevels();
+  window.addEventListener('resize', paintLevels);
 
   // ------------------------------------------------------------ input
 
@@ -201,6 +213,10 @@ export function startHillRun(root: HTMLElement): void {
       if (Math.abs(ax) > 0.15) steer = Math.max(-1, Math.min(1, steer + ax));
       if (pad.buttons[0]?.pressed || ay > 0.5 || (pad.buttons[7]?.value ?? 0) > 0.3) tuck = true;
       if (pad.buttons[1]?.pressed || ay < -0.5 || (pad.buttons[6]?.value ?? 0) > 0.3) brake = true;
+      // X or Y to jump, on the press.
+      const j = !!(pad.buttons[2]?.pressed || pad.buttons[3]?.pressed);
+      if (j && !padJump) jumpQueued = true;
+      padJump = j;
     }
     if (pointer && run) {
       const [rx, ry] = painter.toScreen(run);
@@ -216,37 +232,42 @@ export function startHillRun(root: HTMLElement): void {
         if (Math.abs(aim) < 0.5 && Math.hypot(dx, dy) > painter.cam.s * 8) tuck = true;
       }
     }
-    return { steer, aim, tuck, brake };
+    return { steer, aim, tuck, brake, jump: false };
   }
 
   window.addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     sound.unlock();
     const playKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space'];
-    if (screen !== 'rack' && playKeys.includes(e.code)) e.preventDefault();
+    if (screen !== 'rack' && playKeys.includes(e.code) && !(paused && e.code === 'Space')) e.preventDefault();
     keys.add(e.code);
-    if (e.code === 'Escape' && screen !== 'rack') showRack();
-    else if (e.code === 'KeyR' && run && screen !== 'rack') begin(level);
+    if (e.code === 'Escape' || e.code === 'KeyP') {
+      if (screen === 'play' || screen === 'count') setPaused(!paused);
+      else if (screen === 'end' && e.code === 'Escape') showRack();
+    } else if (paused) {
+      return;
+    } else if (e.code === 'KeyR' && run && screen !== 'rack') begin(level);
     else if (e.code === 'KeyM') toggleSound();
+    else if (e.code === 'Space' && screen === 'play' && !e.repeat) jumpQueued = true;
     else if ((e.code === 'Enter' || e.code === 'Space') && screen === 'end') {
       const next = nextLevel();
       if (next && runFinished()) begin(next);
       else begin(level);
-    } else if (e.code === 'KeyP' && screen === 'play') paused = !paused;
+    }
   });
   window.addEventListener('keyup', (e) => keys.delete(e.code));
   window.addEventListener('blur', () => {
     keys.clear();
     pointer = null;
+    if (screen === 'play' || screen === 'count') setPaused(true);
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && screen === 'play') paused = true;
+    if (document.hidden && (screen === 'play' || screen === 'count')) setPaused(true);
     else if (!document.hidden) last = performance.now();
   });
 
   canvas.addEventListener('pointerdown', (e) => {
     sound.unlock();
-    if (paused) paused = false;
     pointer = { id: e.pointerId, x: e.clientX, y: e.clientY };
     try {
       canvas.setPointerCapture(e.pointerId);
@@ -266,6 +287,12 @@ export function startHillRun(root: HTMLElement): void {
   canvas.addEventListener('pointerup', lift);
   canvas.addEventListener('pointercancel', lift);
 
+  jumpBtn.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    sound.unlock();
+    if (screen === 'play' && !paused) jumpQueued = true;
+  });
+
   root.querySelectorAll<HTMLButtonElement>('[data-pick]').forEach((b) =>
     b.addEventListener('click', () => {
       sound.unlock();
@@ -278,6 +305,16 @@ export function startHillRun(root: HTMLElement): void {
     const n = nextLevel();
     if (n) begin(n);
   });
+  pauseBtn.addEventListener('click', () => {
+    sound.unlock();
+    setPaused(true);
+  });
+  q<HTMLButtonElement>('[data-resume]').addEventListener('click', () => setPaused(false));
+  q<HTMLButtonElement>('[data-restart]').addEventListener('click', () => {
+    recordFar(false);
+    begin(level);
+  });
+  q<HTMLButtonElement>('[data-quit]').addEventListener('click', () => showRack());
   soundBtn.addEventListener('click', () => {
     sound.unlock();
     toggleSound();
@@ -289,6 +326,23 @@ export function startHillRun(root: HTMLElement): void {
     soundBtn.setAttribute('aria-pressed', String(sound.on));
   }
 
+  function setPaused(on: boolean): void {
+    if (on === paused) return;
+    paused = on;
+    keys.clear();
+    pointer = null;
+    jumpQueued = false;
+    sound.hold(on);
+    painter.hold = on;
+    pauseEl.hidden = !on;
+    root.toggleAttribute('data-paused', on);
+    if (on) q<HTMLButtonElement>('[data-resume]').focus({ preventScroll: true });
+    else {
+      last = performance.now();
+      canvas.focus?.();
+    }
+  }
+
   function nextLevel(): LevelId | null {
     const i = LEVELS.indexOf(level);
     return i < LEVELS.length - 1 && i + 1 < open() ? LEVELS[i + 1] : null;
@@ -298,40 +352,60 @@ export function startHillRun(root: HTMLElement): void {
     return run?.rider.state === 'finish';
   }
 
+  /** Keep the furthest you've got on a level you haven't finished yet. */
+  function recordFar(caught: boolean): void {
+    const r = run;
+    if (!r || save.best[r.id] || r.rider.state === 'finish') return;
+    const m = Math.max(0, Math.round(r.rider.y - r.course.start));
+    if (m < 5) return;
+    const prev = save.far[r.id];
+    if (!prev || m > prev.m) {
+      save.far[r.id] = { m, caught };
+      store(save);
+    }
+  }
+
   // ------------------------------------------------------------ screens
 
   function showRack(): void {
+    if (screen === 'play' || screen === 'count') recordFar(false);
+    setPaused(false);
     screen = 'rack';
     run = null;
     sound.stop();
+    painter.celebrate(null);
     root.dataset.screen = 'rack';
     rack.hidden = false;
     hud.hidden = true;
     card.hidden = true;
-    paintBills();
+    paintLevels();
     root.querySelector<HTMLButtonElement>(`[data-pick="${level}"]`)?.focus({ preventScroll: true });
   }
 
   function begin(id: LevelId): void {
+    setPaused(false);
     level = id;
     run = new Run(id);
     screen = 'count';
     countT = 0;
     acc = 0;
     ended = false;
-    paused = false;
+    jumpQueued = false;
     root.dataset.screen = 'play';
     root.dataset.level = id;
     rack.hidden = true;
     hud.hidden = false;
     card.hidden = true;
     chaserEl.hidden = true;
+    bannerEl.hidden = true;
+    root.removeAttribute('data-done');
     callEl.removeAttribute('data-on');
     hudTitle.innerHTML = '';
     hudTitle.append(TITLE[id]);
     const small = document.createElement('small');
     small.textContent = WHERE[id];
     hudTitle.append(small);
+    painter.celebrate(null);
     resize();
     sound.start(id);
     canvas.focus?.();
@@ -356,11 +430,20 @@ export function startHillRun(root: HTMLElement): void {
     countEl.textContent = steps[steps.length - 1];
     if (screen === 'count') {
       sound.beep(true);
+      sound.go();
       screen = 'play';
       run!.start();
       setTimeout(() => {
         if (screen === 'play') countEl.textContent = '';
       }, 700);
+      // The first time down each level, say how to jump.
+      if (level !== 'luge' && !toldJump.has(level)) {
+        toldJump.add(level);
+        setTimeout(() => {
+          if (screen === 'play' && callTimer <= 0)
+            call(matchMedia('(pointer: coarse)').matches ? 'Tap Jump to jump' : 'Space to jump', 1.8);
+        }, 1600);
+      }
     }
   }
 
@@ -383,16 +466,38 @@ export function startHillRun(root: HTMLElement): void {
         call(LOOSE[r.id], 2.2);
       } else if (e.type === 'door') {
         call('Door!', 0.9);
+      } else if (e.type === 'land' && e.air > 1.2 && r.rider.state === 'ride') {
+        call(e.air > 1.7 ? 'Big air' : 'Air', 0.8);
+      } else if (e.type === 'finish') {
+        celebrate(r);
+      } else if (e.type === 'caught') {
+        sound.caught();
+        recordFar(true);
+        root.setAttribute('data-done', '');
       }
     }
+  }
+
+  /** Over the line: a printed banner, confetti in the level's inks, the fanfare. */
+  function celebrate(r: Run): void {
+    sound.finish();
+    let title = DONE[r.id];
+    if (r.id === 'cheese') title = r.place === 1 ? 'The cheese is yours' : `${ordinal(r.place)} down`;
+    bannerEl.textContent = title;
+    bannerEl.hidden = false;
+    root.setAttribute('data-done', '');
+    callEl.removeAttribute('data-on');
+    const ink = INKS[r.id];
+    painter.celebrate([ink.red, ink.gold, ink.blue, ink.paper, ink.green]);
   }
 
   function end(r: Run): void {
     ended = true;
     screen = 'end';
+    bannerEl.hidden = true;
     const finished = r.rider.state === 'finish';
     const i = LEVELS.indexOf(r.id);
-    q<HTMLElement>('[data-card-kicker]').textContent = `No. ${i + 1} · ${TITLE[r.id]}`;
+    q<HTMLElement>('[data-card-kicker]').textContent = `Level ${i + 1} · ${TITLE[r.id]}`;
     const stats = q<HTMLElement>('[data-card-stats]');
     stats.innerHTML = '';
     const stat = (k: string, v: string) => {
@@ -411,6 +516,7 @@ export function startHillRun(root: HTMLElement): void {
       const prev = save.best[r.id];
       const record = !prev || r.t < prev;
       if (record) save.best[r.id] = r.t;
+      delete save.far[r.id];
       const unlocking = i + 1 >= save.unlocked && i + 1 < LEVELS.length;
       save.unlocked = Math.max(save.unlocked, i + 2);
       store(save);
@@ -421,8 +527,8 @@ export function startHillRun(root: HTMLElement): void {
       stat(record && prev ? 'New best' : 'Best', clock(save.best[r.id]!));
       if (r.id === 'cheese') stat('Cheeses dodged', String(r.dodged));
       else stat('Crashes', String(r.rider.crashes));
-      if (unlocking) note = `Bill No. ${i + 2} is up: ${TITLE[LEVELS[i + 1]]}.`;
-      else if (i === LEVELS.length - 1) note = 'That is every bill on the rack. Now take the times down.';
+      if (unlocking) note = `Level ${i + 2} is open: ${TITLE[LEVELS[i + 1]]}.`;
+      else if (i === LEVELS.length - 1) note = 'That is every level. Now take the times down.';
       const gap = r.gap;
       if (gap !== null) note = `${note} ${CHASER[r.id]} was ${Math.max(0, Math.round(gap))} m behind you.`.trim();
       if (i + 1 < LEVELS.length) {
@@ -462,6 +568,7 @@ export function startHillRun(root: HTMLElement): void {
       callTimer -= dt;
       if (callTimer <= 0) callEl.removeAttribute('data-on');
     }
+    if (r.rider.state === 'finish') return;
     if (r.id === 'luge') {
       // Call the next curve as you come up on it.
       for (const m of r.course.marks) {
@@ -560,35 +667,38 @@ export function startHillRun(root: HTMLElement): void {
     last = now;
     if (run && screen !== 'rack') {
       const r = run;
-      if (screen === 'count') countdown(dt);
-      if ((screen === 'play' || screen === 'end') && !paused) {
-        acc += dt;
-        const inp = screen === 'end' ? { steer: 0, aim: null, tuck: false, brake: false } : input();
-        let guard = 0;
-        while (acc >= FIXED && guard++ < 24) {
-          r.step(FIXED, inp);
-          acc -= FIXED;
+      if (!paused) {
+        if (screen === 'count') countdown(dt);
+        if (screen === 'play' || screen === 'end') {
+          acc += dt;
+          const inp: Input =
+            screen === 'end' ? { steer: 0, aim: null, tuck: false, brake: false, jump: false } : input();
+          let guard = 0;
+          while (acc >= FIXED && guard++ < 24) {
+            inp.jump = jumpQueued;
+            r.step(FIXED, inp);
+            jumpQueued = false;
+            acc -= FIXED;
+          }
+          if (guard >= 24) acc = 0;
+          if (r.events.length) {
+            onEvents(r, r.events);
+            r.events.length = 0;
+          }
+          if (!ended && (r.rider.state === 'caught' || r.rider.state === 'finish')) {
+            // Long enough at the bottom for the banner, the confetti, and the fanfare.
+            const delay = r.rider.state === 'finish' ? 2300 : 1200;
+            ended = true;
+            setTimeout(() => {
+              if (run === r) end(r);
+            }, delay);
+          }
         }
-        if (guard >= 24) acc = 0;
-        if (r.events.length) {
-          onEvents(r, r.events);
-          r.events.length = 0;
-        }
-        if (!ended && (r.rider.state === 'caught' || r.rider.state === 'finish')) {
-          const delay = r.rider.state === 'finish' ? 1100 : 900;
-          ended = true;
-          setTimeout(() => {
-            if (run === r) end(r);
-          }, delay);
-        }
+        sound.update(r, dt);
+        painter.follow(r, dt);
+        hudUpdate(r, dt);
       }
-      sound.update(r, dt);
-      painter.follow(r, dt);
       painter.draw(r, now);
-      hudUpdate(r, dt);
-      if (paused) {
-        countEl.innerHTML = 'Paused<small>Press P or tap the hill</small>';
-      } else if (screen === 'play' && countEl.textContent === 'Paused') countEl.textContent = '';
       if (stripTick++ % 3 === 0) strip(r);
     }
     requestAnimationFrame(frame);
@@ -608,8 +718,15 @@ export function startHillRun(root: HTMLElement): void {
       sound,
       begin,
       showRack,
+      setPaused,
+      jump: () => {
+        jumpQueued = true;
+      },
       get screen() {
         return screen;
+      },
+      get paused() {
+        return paused;
       },
     };
   }
