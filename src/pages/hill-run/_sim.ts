@@ -21,6 +21,10 @@ import {
 } from './_course';
 
 const G = 9.81;
+/** Gravity in the air: lighter than real, so a kicker gives a SkiFree-sized hang. */
+const G_AIR = 7;
+/** Take-off speed for a jump from flat ground, m/s up. */
+const HOP = 3.2;
 
 export interface Profile {
   /** Rolling resistance (fraction of g) and drag (1/m), upright and tucked. */
@@ -95,6 +99,9 @@ export interface Rider {
   crashes: number;
   /** Where the crash threw the rider, for drawing. */
   spill: number;
+  /** Height off the ground and rate of climb, for jumps. */
+  z: number;
+  vz: number;
 }
 
 export interface Pursuer {
@@ -139,6 +146,8 @@ export interface Input {
   aim: number | null;
   tuck: boolean;
   brake: boolean;
+  /** Pressed this step: take off if on the ground. */
+  jump: boolean;
 }
 
 export type Sound =
@@ -152,7 +161,10 @@ export type Sound =
   | { type: 'release' }
   | { type: 'caught' }
   | { type: 'finish' }
-  | { type: 'door' };
+  | { type: 'door' }
+  | { type: 'jump'; v: number }
+  | { type: 'launch'; v: number }
+  | { type: 'land'; v: number; air: number };
 
 export class Run {
   readonly course: Course;
@@ -174,6 +186,8 @@ export class Run {
   private seams: number[] = [];
   /** The last pothole or tussock ridden over, so it only counts once. */
   private lastTrip: Thing | null = null;
+  /** When the current jump took off, for the landing's hang time. */
+  private tookOff = 0;
 
   constructor(id: LevelId, course?: Course) {
     this.id = id;
@@ -201,6 +215,8 @@ export class Run {
       omega: 0,
       crashes: 0,
       spill: 0,
+      z: 0,
+      vz: 0,
     };
     this.pursuer = { active: false, x: 0, y: c.start - 200, v: 0, u: 0, spin: 0 };
     if (id === 'cheese') {
@@ -250,9 +266,10 @@ export class Run {
     if (r.state === 'ready' || r.state === 'caught') return;
     this.t += dt;
     if (r.state === 'finish') {
-      // Coast to a stop past the line.
+      // Coast to a stop past the line, landing first if the line came mid-jump.
       r.v = Math.max(0, r.v - 6 * dt);
-      if (this.id === 'luge') this.stepLuge(dt, { steer: 0, aim: null, tuck: false, brake: true });
+      this.fly(dt);
+      if (this.id === 'luge') this.stepLuge(dt, { steer: 0, aim: null, tuck: false, brake: true, jump: false });
       else {
         r.heading *= 1 - Math.min(1, 3 * dt);
         r.x += r.v * Math.sin(r.heading) * dt;
@@ -284,6 +301,8 @@ export class Run {
 
     if (r.state === 'crash') {
       r.timer -= dt;
+      r.z = 0;
+      r.vz = 0;
       r.v = Math.max(0, r.v - 14 * dt);
       r.x += r.v * Math.sin(r.heading + r.spill) * dt;
       r.y += r.v * Math.cos(r.heading + r.spill) * dt;
@@ -301,11 +320,20 @@ export class Run {
     }
 
     if (r.state === 'tumble') {
-      // Head over heels: no steering, gravity still pulling, a little sideways drift.
+      // Head over heels, gravity still pulling. You can throw your weight to roll
+      // across the slope, and dig in to slow down, but the hill still has a say.
       r.timer -= dt;
-      const a = G * grade * 0.8 - 0.05 * r.v * r.v - 1.5;
+      r.z = 0;
+      r.vz = 0;
+      // Rolling across the slope sheds speed, as running across it does: that's
+      // how you get your feet back on the steep face.
+      let a = G * grade * 0.8 * Math.cos(r.heading) - 0.05 * r.v * r.v - 1.5;
+      if (input.brake) a -= 1.6;
       r.v = Math.max(0, r.v + a * dt);
-      r.heading += (this.rnd() - 0.5) * 3 * dt;
+      let want = input.steer * 1.7;
+      if (input.aim !== null)
+        want = Math.max(-1.7, Math.min(1.7, (Math.max(-0.9, Math.min(0.9, input.aim)) - r.heading) * 4));
+      r.heading += (want + (this.rnd() - 0.5) * 1.5) * dt;
       r.heading = Math.max(-0.9, Math.min(0.9, r.heading));
       r.x += r.v * Math.sin(r.heading) * dt;
       r.y += r.v * Math.cos(r.heading) * dt;
@@ -321,8 +349,14 @@ export class Run {
       return;
     }
 
+    const flying = r.z > 0 || r.vz > 0;
+    if (!flying && input.jump) {
+      r.vz = HOP;
+      this.tookOff = this.t;
+      this.events.push({ type: 'jump', v: r.v });
+    }
     r.tuck = input.tuck;
-    r.brake = input.brake;
+    r.brake = input.brake && !flying;
     let target: number;
     if (input.aim !== null) {
       target = input.aim;
@@ -333,14 +367,16 @@ export class Run {
       }
     } else target = r.heading + input.steer * p.turn * dt;
     target = Math.max(-p.maxHead, Math.min(p.maxHead, target));
-    const turn = Math.max(-p.turn * dt, Math.min(p.turn * dt, target - r.heading));
+    // In the air you can only twist a little.
+    const rate = p.turn * (flying ? 0.35 : 1);
+    const turn = Math.max(-rate * dt, Math.min(rate * dt, target - r.heading));
     r.omega = turn / dt;
     r.heading += turn;
 
     // Speed wobbles past about 60 km/h unless tucked down low: the board shimmies
     // either side of where you point it, and past a point it throws you.
     let wob = 0;
-    if (this.id === 'bomb') {
+    if (this.id === 'bomb' && !flying) {
       const over = r.v - (r.tuck ? 18.5 : 16.5);
       r.wobble = Math.max(0, Math.min(1, r.wobble + (over > 0 ? over * 0.06 : -0.5) * dt));
       wob = Math.sin(this.t * 38) * r.wobble * 0.09;
@@ -353,7 +389,9 @@ export class Run {
     const cd = r.tuck ? p.tuckCd : p.cd;
     let a = G * grade * Math.cos(r.heading) - cd * r.v * r.v - p.crr * G - p.carve * Math.abs(r.omega) * r.v;
     if (r.brake) a -= p.brake;
-    if (this.id === 'cheese') {
+    // Airborne: still falling down the hill, but no ground to roll on, carve, or run against.
+    if (flying) a = G * grade * Math.cos(r.heading) - cd * r.v * r.v;
+    else if (this.id === 'cheese') {
       // Legs: you can run to a speed on a gentle bank, and fight to slow on a steep one.
       if (r.v < 6) a += (r.tuck ? 3.2 : 2.2) * (1 - r.v / 6);
       const run = r.tuck ? 8.4 : 7.6;
@@ -377,10 +415,15 @@ export class Run {
     if (this.id === 'bomb') {
       while (this.lastSeam < this.seams.length && this.seams[this.lastSeam] < r.y) {
         this.lastSeam++;
-        if (r.v > 2) this.events.push({ type: 'seam', v: r.v });
+        if (r.v > 2 && !flying) this.events.push({ type: 'seam', v: r.v });
       }
     }
-    if (this.id === 'cheese' && Math.floor(r.stride / Math.PI) !== Math.floor((r.stride - r.v * dt * 1.25) / Math.PI)) {
+    if (flying) this.fly(dt);
+    if (
+      this.id === 'cheese' &&
+      !flying &&
+      Math.floor(r.stride / Math.PI) !== Math.floor((r.stride - r.v * dt * 1.25) / Math.PI)
+    ) {
       this.events.push({ type: 'step', v: r.v });
     }
 
@@ -431,6 +474,31 @@ export class Run {
     this.events.push({ type: 'trip', v: r.v });
   }
 
+  /** Rise and fall through a jump; land when the ground comes back. */
+  private fly(dt: number): void {
+    const r = this.rider;
+    if (r.z <= 0 && r.vz <= 0) return;
+    r.vz -= (this.id === 'luge' ? 14 : G_AIR) * dt;
+    r.z += r.vz * dt;
+    if (r.z > 0) return;
+    r.z = 0;
+    const hit = -r.vz;
+    r.vz = 0;
+    const air = this.t - this.tookOff;
+    this.events.push({ type: 'land', v: hit, air });
+    // Coming down hard at a run jars your legs.
+    if (this.id === 'cheese' && r.state === 'ride' && r.v > 7) r.footing += Math.min(0.35, hit * 0.06);
+  }
+
+  /** Off a kicker or a mound: the faster you hit it, the more air. */
+  private launch(): void {
+    const r = this.rider;
+    r.vz = this.id === 'cheese' ? Math.min(5.2, 1.8 + r.v * 0.35) : Math.min(7.5, 2.5 + r.v * 0.3);
+    r.z = 0.01;
+    this.tookOff = this.t;
+    this.events.push({ type: 'launch', v: r.v });
+  }
+
   /** Things near the rider, including moving ones where they are now. */
   *near(y: number, reach: number): Generator<{ t: Thing; x: number }> {
     const things = this.course.things;
@@ -455,6 +523,8 @@ export class Run {
     for (const { t, x } of this.near(r.y, 7)) {
       if (t.effect === 'none' && !t.door) continue;
       if (t.down) continue;
+      // In the air you clear anything lower than you are.
+      if (r.z > 0 && r.z > (t.door ? Math.max(t.h, 1.2) : t.h)) continue;
       // A door that has swung open sticks out into the lane.
       if (t.door && t.door.at >= 0) {
         const open = Math.min(1, (this.t - t.door.at) / 0.35);
@@ -475,6 +545,10 @@ export class Run {
         }
         if (r.grace > 0) continue;
         return this.crash(nameOf(t), (x - r.x > 0 ? -1 : 1) * 0.7);
+      }
+      if (t.effect === 'launch') {
+        if (!tumbling && r.z <= 0 && r.vz <= 0 && r.v > 2) this.launch();
+        continue;
       }
       if (tumbling || r.grace > 0) continue;
       if (t.effect === 'trip') {
@@ -559,7 +633,18 @@ export class Run {
       r.v *= 0.97;
       r.du *= -0.35;
     }
+    const y0 = r.y;
     r.y += (r.v / nn) * dt;
+    // A ridge in the ice kicks the sled up for a moment.
+    for (const { t } of this.near(r.y, 2)) {
+      if (t.kind === 'bump' && t.y > y0 && t.y <= r.y && r.z <= 0 && r.v > 4) {
+        r.vz = Math.min(3, 1.2 + r.v * 0.05);
+        r.z = 0.01;
+        this.tookOff = this.t;
+        this.events.push({ type: 'bump', v: r.v });
+      }
+    }
+    this.fly(dt);
     this.placeLuge();
   }
 

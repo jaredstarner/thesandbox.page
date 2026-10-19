@@ -2,24 +2,24 @@
 import { Font } from 'astro:assets';
 import Bare from '../../layouts/Bare.astro';
 
-const BILLS = [
+const POSTERS = [
   {
     id: 'bomb',
-    no: 'No. 1',
+    no: 'Level 1',
     name: 'Hill bomb',
     place: 'Calloway Street, 6:04 a.m.',
     line: 'Seven blocks of hill on a skateboard, and the street sweeper behind you has lost its brakes.',
   },
   {
     id: 'cheese',
-    no: 'No. 2',
+    no: 'Level 2',
     name: 'Cheese roll',
     place: "Hob's Edge, the last Monday in May",
     line: 'Chase a wheel of cheese down a bank too steep to run. They always send a second one after you.',
   },
   {
     id: 'luge',
-    no: 'No. 3',
+    no: 'Level 3',
     name: 'Luge',
     place: 'The Black Vein, night session',
     line: 'Twelve curves of floodlit ice, feet first, and the four-man bob is already in the chute.',
@@ -47,19 +47,19 @@ const BILLS = [
           thesandbox.page
         </a>
         <h1 id="hr-title">Hill run</h1>
-        <p class="strap">Three ways down. Get to the bottom of one and the next bill goes up.</p>
+        <p class="strap">Three ways down. Get to the bottom of one and the next level opens.</p>
       </header>
-      <ol class="bills">
-        {BILLS.map((b, i) => (
+      <ol class="levels">
+        {POSTERS.map((b, i) => (
           <li>
-            <button class="bill" type="button" data-pick={b.id} data-ink={b.id} disabled={i > 0}>
+            <button class="level" type="button" data-pick={b.id} data-ink={b.id} disabled={i > 0}>
               <canvas class="art" data-art={b.id} aria-hidden="true" />
               <span class="no">{b.no}</span>
               <span class="name">{b.name}</span>
               <span class="place">{b.place}</span>
               <span class="line">{b.line}</span>
               <span class="best" data-best={b.id}>
-                {i === 0 ? 'Not yet run' : `Finish No. ${i} to print this bill`}
+                {i === 0 ? 'Not yet run' : `Finish level ${i} to open this one`}
               </span>
             </button>
           </li>
@@ -67,16 +67,21 @@ const BILLS = [
       </ol>
       <p class="keys">
         <span>
-          <kbd>←</kbd> <kbd>→</kbd> steer
+          <kbd>←</kbd> <kbd>→</kbd> or <kbd>A</kbd> <kbd>D</kbd> steer
         </span>
         <span>
-          <kbd>↓</kbd> tuck
+          <kbd>↓</kbd> or <kbd>S</kbd> tuck
         </span>
         <span>
-          <kbd>↑</kbd> brake
+          <kbd>↑</kbd> or <kbd>W</kbd> brake
         </span>
-        <span>or hold on the hill to steer toward your finger</span>
-        <span>gamepads work too</span>
+        <span>
+          <kbd>Space</kbd> jump
+        </span>
+        <span>
+          <kbd>P</kbd> or <kbd>Esc</kbd> pause
+        </span>
+        <span>On a phone, hold on the hill to steer toward your finger. Gamepads work too.</span>
       </p>
     </section>
 
@@ -94,10 +99,32 @@ const BILLS = [
       <p class="chaser" data-chaser hidden></p>
       <p class="call" data-call aria-live="polite"></p>
       <p class="count" data-count></p>
+      <p class="banner" data-banner hidden></p>
       <div class="strip" aria-hidden="true">
         <canvas data-strip></canvas>
       </div>
+      <button class="pause-btn" type="button" data-pause-btn>
+        Pause <kbd>P</kbd>
+      </button>
+      <button class="jump-btn" type="button" data-jump-btn>
+        Jump
+      </button>
     </div>
+
+    <section class="pause" data-pause hidden aria-labelledby="hr-paused">
+      <h2 id="hr-paused">Paused</h2>
+      <div class="actions">
+        <button type="button" data-resume>
+          Resume <kbd>P</kbd>
+        </button>
+        <button type="button" data-restart>
+          Restart
+        </button>
+        <button type="button" data-quit>
+          All levels
+        </button>
+      </div>
+    </section>
 
     <section class="card" data-card hidden aria-live="polite">
       <p class="kicker" data-card-kicker></p>
@@ -109,10 +136,10 @@ const BILLS = [
           Run it again <kbd>R</kbd>
         </button>
         <button type="button" data-next hidden>
-          Next bill
+          Next level
         </button>
         <button type="button" data-back>
-          All bills <kbd>Esc</kbd>
+          All levels <kbd>Esc</kbd>
         </button>
       </div>
     </section>
@@ -174,7 +201,7 @@ const BILLS = [
     display: block;
   }
 
-  /* ---------------------------------------------------------- the bill rack */
+  /* ---------------------------------------------------------- the level rack */
 
   .rack {
     position: absolute;
@@ -222,7 +249,7 @@ const BILLS = [
     max-width: 52ch;
   }
 
-  .bills {
+  .levels {
     list-style: none;
     margin: 0 auto;
     padding: 0;
@@ -232,7 +259,7 @@ const BILLS = [
     gap: clamp(14px, 2.4vw, 32px);
   }
 
-  .bill {
+  .level {
     --ink: #d4482f;
     --stock: #f1e6cf;
     --dark: #232637;
@@ -259,30 +286,30 @@ const BILLS = [
     overflow: hidden;
   }
 
-  .bills li:nth-child(1) .bill {
+  .levels li:nth-child(1) .level {
     --tilt: -1.2deg;
   }
-  .bills li:nth-child(2) .bill {
+  .levels li:nth-child(2) .level {
     --tilt: 0.8deg;
   }
-  .bills li:nth-child(3) .bill {
+  .levels li:nth-child(3) .level {
     --tilt: -0.6deg;
   }
 
-  .bill[data-ink='cheese'] {
+  .level[data-ink='cheese'] {
     --ink: #cf4b33;
     --stock: #f4ead2;
     --dark: #2c3320;
   }
 
-  .bill[data-ink='luge'] {
+  .level[data-ink='luge'] {
     --ink: #c8323c;
     --stock: #eef1f2;
     --dark: #14203a;
   }
 
-  .bill:not(:disabled):hover,
-  .bill:not(:disabled):focus-visible {
+  .level:not(:disabled):hover,
+  .level:not(:disabled):focus-visible {
     transform: rotate(0deg) translateY(-6px);
     box-shadow:
       0 1px 0 rgb(255 255 255 / 0.15) inset,
@@ -290,7 +317,7 @@ const BILLS = [
     outline: none;
   }
 
-  .bill:focus-visible::after {
+  .level:focus-visible::after {
     content: '';
     position: absolute;
     inset: 6px;
@@ -298,12 +325,12 @@ const BILLS = [
     pointer-events: none;
   }
 
-  .bill:disabled {
+  .level:disabled {
     cursor: default;
   }
 
-  /* The bill's top third is printed solid in its ink, the title knocked out of it. */
-  .bill::before {
+  /* The poster's top third is printed solid in its ink, the title knocked out of it. */
+  .level::before {
     content: '';
     position: absolute;
     inset: 0 0 auto;
@@ -320,7 +347,7 @@ const BILLS = [
     display: block;
   }
 
-  .bill > span {
+  .level > span {
     grid-column: 1;
     position: relative;
     padding: 0 clamp(14px, 1.6vw, 22px);
@@ -371,23 +398,23 @@ const BILLS = [
     padding-bottom: 10px !important;
   }
 
-  .bill:disabled::before {
+  .level:disabled::before {
     background: color-mix(in srgb, var(--dark) 22%, var(--stock));
   }
 
-  .bill:disabled .art {
+  .level:disabled .art {
     filter: grayscale(1) contrast(0.7) brightness(1.15);
     opacity: 0.55;
   }
 
-  .bill:disabled .name,
-  .bill:disabled .no,
-  .bill:disabled .place {
+  .level:disabled .name,
+  .level:disabled .no,
+  .level:disabled .place {
     color: var(--dark);
     opacity: 0.55;
   }
 
-  .bill:disabled .best {
+  .level:disabled .best {
     background: transparent;
     color: var(--dark);
     border-top: 2px dashed currentColor;
@@ -550,6 +577,118 @@ const BILLS = [
     margin-top: 12px;
   }
 
+  /* The finish: a poster strip printed across the screen, slapped on like a stamp. */
+  .banner {
+    position: absolute;
+    left: 50%;
+    top: 24%;
+    margin: 0;
+    padding: 0.12em 0.4em 0.04em;
+    max-width: 92vw;
+    white-space: nowrap;
+    font: 400 clamp(40px, 8vw, 112px) / 0.9 var(--bill);
+    text-transform: uppercase;
+    text-align: center;
+    background: var(--red);
+    color: var(--paper);
+    box-shadow: 8px 8px 0 var(--key);
+    transform: translate(-50%, -50%) rotate(-3deg);
+    animation: hr-stamp 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+  }
+
+  @keyframes hr-stamp {
+    from {
+      transform: translate(-50%, -50%) rotate(-9deg) scale(1.8);
+      opacity: 0;
+    }
+    60% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .banner {
+      animation: none;
+    }
+  }
+
+  .pause-btn,
+  .jump-btn {
+    position: absolute;
+    pointer-events: auto;
+    font: 600 12px/1 var(--text);
+    border: 2px solid var(--key);
+    background: var(--paper);
+    color: var(--key);
+    box-shadow: 3px 3px 0 var(--key);
+    cursor: pointer;
+  }
+
+  .pause-btn {
+    right: 16px;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    padding: 7px 10px;
+  }
+
+  .pause-btn kbd {
+    margin-left: 4px;
+    font-size: 10px;
+    padding: 0 3px;
+  }
+
+  /* Touch screens get a big jump button under the right thumb. */
+  .jump-btn {
+    display: none;
+    right: 16px;
+    bottom: calc(132px + env(safe-area-inset-bottom));
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    font: 400 26px/1 var(--bill);
+    text-transform: uppercase;
+    background: var(--gold);
+    touch-action: none;
+  }
+
+  @media (pointer: coarse) {
+    .hillrun:not([data-level='luge']) .jump-btn {
+      display: block;
+    }
+  }
+
+  .pause-btn:hover,
+  .pause-btn:focus-visible {
+    outline: 3px solid var(--red);
+    outline-offset: 2px;
+  }
+
+  .hillrun[data-paused] .hud {
+    filter: saturate(0.4);
+  }
+
+  .hillrun[data-done] .pause-btn,
+  .hillrun[data-done] .jump-btn {
+    display: none;
+  }
+
+  .pause {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(1deg);
+    width: min(380px, calc(100vw - 32px));
+    padding: 20px 24px;
+    background: var(--paper);
+    color: var(--key);
+    box-shadow: 6px 6px 0 var(--key);
+  }
+
+  .pause h2 {
+    margin: 0 0 14px;
+    font: 400 clamp(52px, 9vw, 76px) / 0.86 var(--bill);
+    text-transform: uppercase;
+  }
+
   .strip {
     position: absolute;
     left: 16px;
@@ -663,7 +802,7 @@ const BILLS = [
 
   .sound {
     position: absolute;
-    right: 16px;
+    right: 112px;
     bottom: calc(80px + env(safe-area-inset-bottom));
     padding: 7px 10px;
     font-size: 12px;
@@ -681,12 +820,12 @@ const BILLS = [
   }
 
   @media (max-width: 860px) {
-    .bills {
+    .levels {
       grid-template-columns: minmax(0, 1fr);
       max-width: 420px;
     }
 
-    .bill {
+    .level {
       aspect-ratio: 4 / 4.4;
     }
   }
@@ -723,6 +862,24 @@ const BILLS = [
       left: 12px;
       right: auto;
       bottom: auto;
+    }
+
+    .pause-btn {
+      top: 92px;
+      left: 104px;
+      right: auto;
+      bottom: auto;
+    }
+
+    .pause-btn kbd {
+      display: none;
+    }
+
+    .jump-btn {
+      right: 12px;
+      bottom: calc(118px + env(safe-area-inset-bottom));
+      width: 76px;
+      height: 76px;
     }
   }
 </style>

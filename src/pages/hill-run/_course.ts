@@ -6,7 +6,7 @@
 
 export type LevelId = 'bomb' | 'cheese' | 'luge';
 
-export type Effect = 'crash' | 'trip' | 'slow' | 'knock' | 'none';
+export type Effect = 'crash' | 'trip' | 'slow' | 'knock' | 'launch' | 'none';
 
 export interface Move {
   /** Moves along x between from and to, wrapping. */
@@ -112,6 +112,11 @@ function disc(kind: string, x: number, y: number, r: number, h: number, effect: 
   return { kind, x, y, hw: r, hd: r, round: true, h, effect, seed };
 }
 
+/** A plywood launch ramp: low edge uphill, lip downhill. */
+function kicker(x: number, y: number, seed: number): Thing {
+  return box('kicker', x, y, 1.1, 1.25, 0.5, 'launch', seed);
+}
+
 function gradeFrom(end: number, fn: (y: number) => number): Float32Array {
   const n = Math.ceil((end - ORIGIN) / STEP) + 2;
   const g = new Float32Array(n);
@@ -136,6 +141,8 @@ export function crossStreets(): number[] {
 
 function bomb(seed: number): Course {
   const rnd = mulberry(seed);
+  // Kickers draw from their own stream so the rest of the street lays out as it always has.
+  const krnd = mulberry(seed + 1);
   const things: Thing[] = [];
   const crosses = crossStreets();
   const finish = crosses[BLOCKS] + 4;
@@ -199,6 +206,8 @@ function bomb(seed: number): Course {
         }
         things.push(disc('cone', cx, y - 6.2, 0.22, 0.7, 'knock', rnd()));
         things.push(box('sign', cx + side * 0.6, y - 5.4, 0.35, 0.1, 1.4, 'crash', rnd()));
+        // Someone has left a kicker in line with the pit, so you can clear the lot.
+        things.push(kicker(cx, y - 13, krnd()));
       } else if (r < 0.42) {
         const x = lane();
         const n = 1 + Math.floor(rnd() * 3);
@@ -212,10 +221,14 @@ function bomb(seed: number): Course {
       } else if (r < 0.8 && k > 0) {
         const side = rnd() < 0.5 ? -1 : 1;
         things.push(box('truck', side * 3.6, y, 1.15, 3.3, 2.6, 'crash', rnd()));
+        if (krnd() < 0.6) things.push(kicker(side * 3.6, y - 13.3, krnd()));
       } else {
         things.push(box('plate', lane(), y, 1.1, 0.8, 0, 'none', rnd()));
       }
     }
+
+    // A kicker just over the crest of every block below the first.
+    if (k > 0) things.push(kicker((krnd() * 2 - 1) * 4.2, top + 8, krnd()));
 
     // Storm drains at the foot of the block, right against the curb.
     for (const side of [-1, 1]) things.push(box('grate', side * 7.45, bottom - 2.5, 0.42, 0.75, 0, 'crash', rnd()));
@@ -369,6 +382,19 @@ function cheese(seed: number): Course {
       disc('thistle', (rnd() * 2 - 1) * (BANK - 3), 25 + rnd() * (finish - 50), 1.4 + rnd(), 0.5, 'slow', rnd()),
     );
 
+  // Grassy mounds to leap from, a few of them just above a gorse clump. Their own
+  // stream, so the rest of the bank lays out as it always has.
+  const mrnd = mulberry(seed + 1);
+  const gorse = things.filter((t) => t.kind === 'gorse');
+  for (let i = 0; i < 9; i++) {
+    const g = gorse[Math.floor(mrnd() * gorse.length)];
+    things.push(disc('mound', g.x + (mrnd() - 0.5) * 1.5, g.y - g.hw - 6 - mrnd() * 2, 1.5, 0.5, 'launch', mrnd()));
+  }
+  for (let i = 0; i < 8; i++) {
+    const y = 40 + mrnd() * (finish - 90);
+    things.push(disc('mound', (mrnd() * 2 - 1) * (BANK - 4), y, 1.5, 0.5, 'launch', mrnd()));
+  }
+
   // Fences, the crowd along them, and the catchers waiting at the bottom.
   for (const side of [-1, 1]) {
     for (let y = -30; y < end; y += 3) things.push(disc('post', side * (BANK + 1), y, 0.1, 1.1, 'none', rnd()));
@@ -483,6 +509,10 @@ function luge(seed: number): Course {
       t.side = side;
       things.push(t);
     }
+  }
+  // Ridges in the ice on the straights between curves, each good for a small hop.
+  for (const y of [32, 151, 237, 352, 496, 672, 776, 892, 1074, 1190]) {
+    things.push(box('bump', at(y), y, ICE, 0.25, 0, 'none', 0));
   }
   things.push(box('line', at(0), 0, ICE, 0.3, 0, 'none', 1));
   things.push(box('line', at(finish), finish, ICE, 0.3, 0, 'none', 0));
