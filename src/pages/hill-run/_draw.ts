@@ -112,6 +112,13 @@ export class Painter {
   cam: Camera = { x: 0, y: 0, s: 24, ay: 0.3, shake: 0 };
   bill = 'Impact, sans-serif';
   text = 'Arial, sans-serif';
+  /** Paused: confetti hangs where it is. */
+  hold = false;
+  /** How far the rider is drawn above their shadow, in CSS pixels. */
+  private air = 0;
+  private confetti: { x: number; y: number; vx: number; vy: number; a: number; va: number; c: string; w: number }[] =
+    [];
+  private lastNow = 0;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -207,11 +214,59 @@ export class Painter {
     return [gx + (gx - this.w / 2) * z * LEAN, this.Y(y) - z * this.cam.s * RISE];
   }
 
+  /** Throw confetti in these inks over the finish, or clear it with null. */
+  celebrate(colors: string[] | null): void {
+    this.confetti = [];
+    if (!colors) return;
+    const n = Math.round(Math.min(260, 90 + this.w * 0.12));
+    for (let i = 0; i < n; i++) {
+      // Two bursts from the bottom corners, the way a confetti cannon throws.
+      const left = i % 2 === 0;
+      this.confetti.push({
+        x: left ? -10 : this.w + 10,
+        y: this.h * (0.75 + Math.random() * 0.2),
+        vx: (left ? 1 : -1) * (this.w * (0.25 + Math.random() * 0.45)),
+        vy: -this.h * (0.9 + Math.random() * 0.7),
+        a: Math.random() * Math.PI * 2,
+        va: (Math.random() - 0.5) * 14,
+        c: colors[i % colors.length],
+        w: 6 + Math.random() * 7,
+      });
+    }
+  }
+
+  private drawConfetti(dt: number): void {
+    if (!this.confetti.length) return;
+    const ctx = this.ctx;
+    const g = this.h * 1.1;
+    for (const p of this.confetti) {
+      if (dt > 0) {
+        p.vy += g * dt;
+        // Paper flutters: drag holds it to a slow fall.
+        p.vx *= 1 - Math.min(1, 1.6 * dt);
+        p.vy = Math.min(p.vy, this.h * 0.18);
+        p.x += p.vx * dt + Math.sin(p.a) * 18 * dt;
+        p.y += p.vy * dt;
+        p.a += p.va * dt;
+      }
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.a);
+      ctx.scale(1, Math.abs(Math.cos(p.a * 1.3)) * 0.9 + 0.1);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.w / 2, -p.w * 0.3, p.w, p.w * 0.6);
+      ctx.restore();
+    }
+    this.confetti = this.confetti.filter((p) => p.y < this.h + 30);
+  }
+
   // ------------------------------------------------------------ frame
 
   draw(run: Run, now: number): void {
     const ctx = this.ctx;
     const ink = INKS[run.id];
+    const dt = this.hold || !this.lastNow ? 0 : Math.min(0.05, (now - this.lastNow) / 1000);
+    this.lastNow = now;
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     if (this.cam.shake > 0) {
       const a = this.cam.shake * 6;
@@ -256,7 +311,8 @@ export class Painter {
       const m = sample(run.course.track!.dx, r.y);
       ry = r.y - (r.u * m) / Math.sqrt(1 + m * m);
     }
-    items.push({ y: ry + 0.2, draw: () => this.rider(run, ry, ink, now) });
+    // In the air, draw over whatever is underneath.
+    items.push({ y: ry + 0.2 + (r.z > 0.15 ? 8 : 0), draw: () => this.rider(run, ry, ink, now) });
     items.sort((a, b) => a.y - b.y);
     for (const it of items) it.draw();
 
@@ -268,6 +324,8 @@ export class Painter {
 
     if (run.id === 'luge') this.nightfall(run, top, bottom, now);
     if (run.id === 'cheese') this.clouds(run, top, bottom);
+
+    this.drawConfetti(dt);
 
     // Print grain over everything.
     if (this.grain) {
@@ -845,6 +903,88 @@ export class Painter {
       }
       case 'line':
         return this.finishLine(run, t, x, ink);
+      case 'kicker': {
+        // A plywood wedge: low edge uphill, the lip up off the road at the bottom.
+        const lo = t.y - t.hd;
+        const hi = t.y + t.hd;
+        const a = this.P(x - t.hw, lo, 0);
+        const b = this.P(x + t.hw, lo, 0);
+        const c = this.P(x + t.hw, hi, t.h);
+        const d = this.P(x - t.hw, hi, t.h);
+        const e = this.P(x + t.hw, hi, 0);
+        const f = this.P(x - t.hw, hi, 0);
+        this.groundShadow(x + 0.3, hi + 0.5, t.hw * 1.1, 0.5);
+        // The face under the lip.
+        ctx.fillStyle = '#8a6a3e';
+        poly(ctx, [f, e, c, d]);
+        ctx.fill();
+        ctx.fillStyle = '#e2c387';
+        poly(ctx, [a, b, c, d]);
+        ctx.fill();
+        // Grain lines, and a painted stripe on the lip.
+        ctx.strokeStyle = 'rgba(138, 106, 62, 0.55)';
+        ctx.lineWidth = 1;
+        for (let i = 1; i < 4; i++) {
+          const p0 = lerp2(a, d, i / 4);
+          const p1 = lerp2(b, c, i / 4);
+          ctx.beginPath();
+          ctx.moveTo(p0[0], p0[1]);
+          ctx.lineTo(p1[0], p1[1]);
+          ctx.stroke();
+        }
+        ctx.fillStyle = ink.red;
+        poly(ctx, [lerp2(a, d, 0.82), lerp2(b, c, 0.82), c, d]);
+        ctx.fill();
+        return;
+      }
+      case 'mound': {
+        // A grassy hump: a lit crown and a shadow on its downhill side.
+        ctx.fillStyle = ink.shadow;
+        ctx.beginPath();
+        ctx.ellipse(gx + s * 0.25, gy + t.hw * s * 0.35, t.hw * s * 1.05, t.hw * s * 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = ink.groundDark;
+        ctx.beginPath();
+        ctx.ellipse(gx, gy, t.hw * s, t.hw * s * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = ink.green;
+        ctx.lineWidth = Math.max(1.5, s * 0.1);
+        ctx.stroke();
+        ctx.fillStyle = ink.groundLight;
+        ctx.beginPath();
+        ctx.ellipse(gx - t.hw * s * 0.15, gy - t.hw * s * 0.18, t.hw * s * 0.62, t.hw * s * 0.38, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Long grass along the crown, combed downhill.
+        ctx.strokeStyle = ink.green;
+        ctx.lineWidth = Math.max(1, s * 0.06);
+        for (let i = -3; i <= 3; i++) {
+          const fx = gx + i * t.hw * s * 0.22;
+          const fy = gy + t.hw * s * (0.25 - Math.abs(i) * 0.04);
+          ctx.beginPath();
+          ctx.moveTo(fx, fy);
+          ctx.lineTo(fx + s * 0.08, fy + s * 0.32);
+          ctx.stroke();
+        }
+        return;
+      }
+      case 'bump': {
+        // A ridge across the ice: a bright edge over its shadow.
+        const half = t.hw * Math.sqrt(1 + sample(run.course.track!.dx, t.y) ** 2) * 0.9;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = 'rgba(46, 95, 166, 0.35)';
+        ctx.lineWidth = Math.max(2, s * 0.22);
+        ctx.beginPath();
+        ctx.moveTo(this.X(x - half), gy + s * 0.12);
+        ctx.lineTo(this.X(x + half), gy + s * 0.12);
+        ctx.stroke();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = Math.max(1.5, s * 0.12);
+        ctx.beginPath();
+        ctx.moveTo(this.X(x - half), gy - s * 0.04);
+        ctx.lineTo(this.X(x + half), gy - s * 0.04);
+        ctx.stroke();
+        return;
+      }
       // Cheese hill.
       case 'tussock': {
         ctx.strokeStyle = ink.green;
@@ -1633,7 +1773,8 @@ export class Painter {
     const r = run.rider;
     const ctx = this.ctx;
     const gx = this.X(r.x);
-    const gy = this.Y(ry);
+    this.air = r.z * this.cam.s * RISE;
+    const gy = this.Y(ry) - this.air;
     if (r.grace > 0 && Math.floor(now / 90) % 2 === 0 && r.state === 'ride') ctx.globalAlpha = 0.45;
     if (run.id === 'bomb') this.skater(run, gx, gy, ink, now);
     else if (run.id === 'cheese') {
@@ -1652,6 +1793,7 @@ export class Painter {
         );
     } else this.luger(run, gx, gy, ink);
     ctx.globalAlpha = 1;
+    this.air = 0;
   }
 
   private burst(x: number, y: number, age: number, ink: Inks): void {
@@ -1698,11 +1840,22 @@ export class Painter {
     const lean = Math.max(-0.5, Math.min(0.5, r.omega * 0.18));
     const crouch = r.tuck ? 0.72 : 1;
     const wob = r.wobble > 0.05 ? Math.sin(now * 0.04) * r.wobble * 0.25 : 0;
+    // The shadow stays on the road under a jump, shrinking as you rise.
+    const shrink = 1 / (1 + this.air / (s * 2.5));
     ctx.fillStyle = ink.shadow;
     ctx.beginPath();
-    ctx.ellipse(gx + s * 0.35, gy + s * 0.08, s * 0.55, s * 0.18, r.heading, 0, Math.PI * 2);
+    ctx.ellipse(
+      gx + s * 0.35 * shrink,
+      gy + this.air + s * 0.08,
+      s * 0.55 * shrink,
+      s * 0.18 * shrink,
+      r.heading,
+      0,
+      Math.PI * 2,
+    );
     ctx.fill();
-    this.deck(gx, gy, r.heading + wob, ink);
+    // A little tilt to the board in the air, as if grabbed.
+    this.deck(gx, gy, r.heading + wob + (this.air > 0 ? 0.25 : 0), ink);
     // Drawn a size up from true scale, as a poster would.
     const k = s * 1.25;
     ctx.save();
@@ -1838,9 +1991,11 @@ export class Painter {
     const ctx = this.ctx;
     const s = this.cam.s;
     const k = s * (you ? 1.25 : 1.1);
+    const air = you ? this.air : 0;
+    const shrink = 1 / (1 + air / (s * 2.5));
     ctx.fillStyle = ink.shadow;
     ctx.beginPath();
-    ctx.ellipse(gx + k * 0.3, gy + k * 0.05, k * 0.45, k * 0.14, 0, 0, Math.PI * 2);
+    ctx.ellipse(gx + k * 0.3 * shrink, gy + air + k * 0.05, k * 0.45 * shrink, k * 0.14 * shrink, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.save();
     if (state === 'tumble') {
