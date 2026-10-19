@@ -19,6 +19,10 @@ Both are works of the United States Government. The NGA title page reads "Copyri
 
 The columns are `src, ref, name, region, lat, lon, char, height, range, structure, remarks`, with height in metres and NGA's characteristic lines joined by `; `.
 
+## Lakes
+
+Natural Earth's land polygons (the coast, via world-atlas) don't cut out lakes, so the Great Lakes and every other lake would read as land. `lakes-50m.tsv` and `lakes-10m.tsv` are Natural Earth's lake layers (public domain, `nvkelso/natural-earth-vector` 5.2.0-pre, read 2026-10-19), one polygon per line: rings parted by `;`, points `lon,lat` to four decimals. The 1:10m file leaves out the smallest lakes (scale rank 9). Write them with `node lakes.mjs ne_50m_lakes.geojson lakes-50m.tsv` and `node lakes.mjs ne_10m_lakes.geojson lakes-10m.tsv 8`.
+
 ## Refreshing it
 
 1. Save the seven NGA responses as `nga-110.json` to `nga-116.json` in one folder

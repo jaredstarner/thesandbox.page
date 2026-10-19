@@ -1,12 +1,16 @@
-// Build time only: Natural Earth land (via world-atlas) as Web Mercator
-// polygons for the browser to triangulate (see _land.ts for the reader).
+// Build time only: Natural Earth land (via world-atlas) and lakes (from
+// _data/lakes-*.tsv; the land polygons don't cut them out) as Web Mercator
+// polygons for the browser (see _land.ts for the reader).
 //
 // Layout: a 16-byte header (magic, polygon count, ring count, point count),
-// rings per polygon, points per ring, then x and y on a 2^24 grid over the
-// Mercator square, each a difference from the point before.
+// rings per polygon, points per ring, one byte per ring (0 land, 1 lake),
+// padded to 4 bytes, then x and y on a 2^24 grid over the Mercator square,
+// each a difference from the point before.
 
 import land10 from 'world-atlas/land-10m.json';
 import land50 from 'world-atlas/land-50m.json';
+import lakes10 from './_data/lakes-10m.tsv?raw';
+import lakes50 from './_data/lakes-50m.tsv?raw';
 
 export const LAND_MAGIC = 0x444e414c;
 export const GRID = 1 << 24;
@@ -77,11 +81,29 @@ function unwrap(r: [number, number][]): [number, number][] {
   return out;
 }
 
+/** One lake polygon per line: rings parted by ";", points "lon,lat" by spaces. */
+function lakePolygons(tsv: string): [number, number][][][] {
+  return tsv
+    .split('\n')
+    .filter(Boolean)
+    .map((line) =>
+      line
+        .split(';')
+        .map((ring) => ring.split(' ').map((p) => p.split(',').map(Number) as [number, number]))
+        .filter((r) => r.length > 2),
+    );
+}
+
 export function packLand(res: '50m' | '10m'): Uint8Array<ArrayBuffer> {
-  const polys = polygons((res === '10m' ? land10 : land50) as unknown as Topology);
+  const land = polygons((res === '10m' ? land10 : land50) as unknown as Topology);
+  const lakes = lakePolygons(res === '10m' ? lakes10 : lakes50);
+  const polys = [...land, ...lakes];
   const rings = polys.flat();
+  const landRings = land.flat().length;
   const points = rings.reduce((a, r) => a + r.length, 0);
-  const buf = new ArrayBuffer(16 + 4 * polys.length + 4 * rings.length + 8 * points);
+  const offKind = 16 + 4 * polys.length + 4 * rings.length;
+  const offXy = (offKind + rings.length + 3) & ~3;
+  const buf = new ArrayBuffer(offXy + 8 * points);
   const dv = new DataView(buf);
   dv.setUint32(0, LAND_MAGIC, true);
   dv.setUint32(4, polys.length, true);
@@ -89,9 +111,13 @@ export function packLand(res: '50m' | '10m'): Uint8Array<ArrayBuffer> {
   dv.setUint32(12, points, true);
   const perPoly = new Uint32Array(buf, 16, polys.length);
   const perRing = new Uint32Array(buf, 16 + 4 * polys.length, rings.length);
-  const xy = new Int32Array(buf, 16 + 4 * polys.length + 4 * rings.length, points * 2);
+  const kind = new Uint8Array(buf, offKind, rings.length);
+  const xy = new Int32Array(buf, offXy, points * 2);
   polys.forEach((p, i) => (perPoly[i] = p.length));
-  rings.forEach((r, i) => (perRing[i] = r.length));
+  rings.forEach((r, i) => {
+    perRing[i] = r.length;
+    kind[i] = i < landRings ? 0 : 1;
+  });
   let k = 0;
   let px = 0;
   let py = 0;

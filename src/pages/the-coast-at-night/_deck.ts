@@ -186,21 +186,29 @@ export class Deck {
     if (!land) return false;
     const y = mercY(lat);
     // Rings may run past the antimeridian (see _landpack.ts), so try the point in each copy of the world.
+    // Count crossings over all three copies of the world together, as the
+    // chart's stencil does: an outline can run on past the antimeridian into
+    // the next copy while its holes stay in this one (see _landpack.ts).
+    // Land counts only outside the lakes, which are rings of their own.
+    let inLand = false;
+    let inLake = false;
+    const xy = land.xy;
     for (const shift of [0, 1, -1]) {
       const x = mercX(lon) + shift;
-      let inside = false;
       for (const r of land.rings) {
         if (x < r.x0 || x > r.x1 || y < r.y0 || y > r.y1) continue;
-        const xy = land.xy;
+        let cross = false;
         for (let a = r.start, b = r.start + r.count - 1; a < r.start + r.count; b = a++) {
           const ya = xy[a * 2 + 1];
           const yb = xy[b * 2 + 1];
-          if (ya > y !== yb > y && x < ((xy[b * 2] - xy[a * 2]) * (y - ya)) / (yb - ya) + xy[a * 2]) inside = !inside;
+          if (ya > y !== yb > y && x < ((xy[b * 2] - xy[a * 2]) * (y - ya)) / (yb - ya) + xy[a * 2]) cross = !cross;
         }
+        if (!cross) continue;
+        if (r.lake) inLake = !inLake;
+        else inLand = !inLand;
       }
-      if (inside) return true;
     }
-    return false;
+    return inLand && !inLake;
   }
 
   /** A spot at sea that looks at light i from inside its widest sector. */
@@ -286,24 +294,28 @@ export class Deck {
     const x1 = mercX(this.lon + dLon);
     const y0 = mercY(this.lat + dLat);
     const y1 = mercY(this.lat - dLat);
-    g.fillStyle = '#fff';
-    g.beginPath();
     const xy = land.xy;
-    for (const r of land.rings) {
-      for (const shift of [-1, 0, 1]) {
-        if (r.x1 + shift < x0 || r.x0 + shift > x1 || r.y1 < y0 || r.y0 > y1) continue;
-        for (let p = 0; p < r.count; p++) {
-          const lonP = (xy[(r.start + p) * 2] + shift) * 360 - 180;
-          const latP = (Math.atan(Math.sinh(Math.PI * (1 - 2 * xy[(r.start + p) * 2 + 1]))) * 180) / Math.PI;
-          const px = MASK / 2 + (lonP - this.lon) * 60 * cos * k;
-          const py = MASK / 2 - (latP - this.lat) * 60 * k;
-          if (p === 0) g.moveTo(px, py);
-          else g.lineTo(px, py);
+    // Land in white, then the lakes cut back out in black.
+    for (const lake of [false, true]) {
+      g.fillStyle = lake ? '#000' : '#fff';
+      g.beginPath();
+      for (const r of land.rings) {
+        if (r.lake !== lake) continue;
+        for (const shift of [-1, 0, 1]) {
+          if (r.x1 + shift < x0 || r.x0 + shift > x1 || r.y1 < y0 || r.y0 > y1) continue;
+          for (let p = 0; p < r.count; p++) {
+            const lonP = (xy[(r.start + p) * 2] + shift) * 360 - 180;
+            const latP = (Math.atan(Math.sinh(Math.PI * (1 - 2 * xy[(r.start + p) * 2 + 1]))) * 180) / Math.PI;
+            const px = MASK / 2 + (lonP - this.lon) * 60 * cos * k;
+            const py = MASK / 2 - (latP - this.lat) * 60 * k;
+            if (p === 0) g.moveTo(px, py);
+            else g.lineTo(px, py);
+          }
+          g.closePath();
         }
-        g.closePath();
       }
+      g.fill('evenodd');
     }
-    g.fill('evenodd');
     const img = g.getImageData(0, 0, MASK, MASK).data;
     this.mask = new Uint8Array(MASK * MASK);
     for (let p = 0; p < MASK * MASK; p++) this.mask[p] = img[p * 4] > 127 ? 1 : 0;

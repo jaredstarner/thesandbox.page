@@ -219,6 +219,8 @@ interface LandBuffers {
   vao: WebGLVertexArrayObject;
   linesVao: WebGLVertexArrayObject;
   fanCount: number;
+  lakeVao: WebGLVertexArrayObject;
+  lakeCount: number;
   lineCount: number;
 }
 
@@ -398,16 +400,27 @@ export class Chart {
     const fb = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, fb);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, land.fan, gl.STATIC_DRAW);
-    const linesVao = gl.createVertexArray()!;
-    gl.bindVertexArray(linesVao);
-    gl.bindBuffer(gl.ARRAY_BUFFER, vb);
-    gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    const lb = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lb);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, land.lines, gl.STATIC_DRAW);
+    const indexed = (indices: Uint32Array) => {
+      const v = gl.createVertexArray()!;
+      gl.bindVertexArray(v);
+      gl.bindBuffer(gl.ARRAY_BUFFER, vb);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+      return v;
+    };
+    const lakeVao = indexed(land.lakeFan);
+    const linesVao = indexed(land.lines);
     gl.bindVertexArray(null);
-    this.land[which] = { vao, linesVao, fanCount: land.fan.length, lineCount: land.lines.length };
+    this.land[which] = {
+      vao,
+      linesVao,
+      lakeVao,
+      fanCount: land.fan.length,
+      lakeCount: land.lakeFan.length,
+      lineCount: land.lines.length,
+    };
   }
 
   resize() {
@@ -498,8 +511,16 @@ export class Chart {
         gl.uniform1f(this.uLand.u_offset, o);
         gl.drawElements(gl.TRIANGLES, land.fanCount, gl.UNSIGNED_INT, 0);
       }
+      // Lakes into a second bit: land is where the first is set and the second is not.
+      gl.stencilMask(0x02);
+      gl.bindVertexArray(land.lakeVao);
+      for (const o of offsets) {
+        gl.uniform1f(this.uLand.u_offset, o);
+        gl.drawElements(gl.TRIANGLES, land.lakeCount, gl.UNSIGNED_INT, 0);
+      }
+      gl.stencilMask(0xff);
       gl.colorMask(true, true, true, true);
-      gl.stencilFunc(gl.EQUAL, 1, 0x01);
+      gl.stencilFunc(gl.EQUAL, 1, 0x03);
       gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
       gl.disable(gl.BLEND);
       gl.useProgram(this.progFill);
