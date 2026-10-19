@@ -256,5 +256,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Georgia', 'serif'],
     },
+    // The chart on /the-coast-at-night/: a book face for names and italic light notation, a mono for readouts.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Newsreader',
+      cssVariable: '--font-coast',
+      weights: [400, 500, 600],
+      styles: ['normal', 'italic'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Red Hat Mono',
+      cssVariable: '--font-coast-mono',
+      weights: [400, 500],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });

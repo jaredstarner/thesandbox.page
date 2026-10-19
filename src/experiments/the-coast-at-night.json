@@ -1,0 +1,8 @@
+{
+  "title": "The coast at night",
+  "summary": "Sixty thousand lighthouses, beacons, and buoys from the NGA and USCG lists of lights, each flashing its own published character on a night chart of the world, with coloured sectors you can read like a mariner and a view from the deck of a boat you put anywhere at sea.",
+  "date": "2026-10-19",
+  "tags": ["webgl2", "canvas", "pointer-events", "static-generation", "light-lists", "web-mercator"],
+  "requires": ["webgl2"],
+  "plot": 18
+}

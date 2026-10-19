@@ -1,0 +1,173 @@
+// Build time only: Natural Earth land (via world-atlas) and lakes (from
+// _data/lakes-*.tsv; the land polygons don't cut them out) as Web Mercator
+// polygons for the browser (see _land.ts for the reader).
+//
+// Layout: a 16-byte header (magic, polygon count, ring count, point count),
+// rings per polygon, points per ring, one byte per ring (0 land, 1 lake),
+// padded to 4 bytes, then x and y on a 2^24 grid over the Mercator square,
+// each a difference from the point before.
+
+import land10 from 'world-atlas/land-10m.json';
+import land50 from 'world-atlas/land-50m.json';
+import lakes10 from './_data/lakes-10m.tsv?raw';
+import lakes50 from './_data/lakes-50m.tsv?raw';
+import rivers from './_data/rivers.tsv?raw';
+
+export const LAND_MAGIC = 0x444e414c;
+export const GRID = 1 << 24;
+
+interface Topology {
+  transform: { scale: [number, number]; translate: [number, number] };
+  arcs: [number, number][][];
+  objects: { land: { geometries: { type: string; arcs: number[][][] | number[][][][] }[] } };
+}
+
+const mercY = (lat: number) => {
+  const s = Math.sin((Math.max(-85, Math.min(85, lat)) * Math.PI) / 180);
+  return 0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI);
+};
+
+function polygons(t: Topology): [number, number][][][] {
+  const [sx, sy] = t.transform.scale;
+  const [tx, ty] = t.transform.translate;
+  const arcs = t.arcs.map((arc) => {
+    let x = 0;
+    let y = 0;
+    return arc.map(([dx, dy]) => {
+      x += dx;
+      y += dy;
+      return [x * sx + tx, y * sy + ty] as [number, number];
+    });
+  });
+  const ring = (ids: number[]) => {
+    const out: [number, number][] = [];
+    for (const id of ids) {
+      const a = id < 0 ? arcs[~id].slice().reverse() : arcs[id];
+      out.push(...(out.length ? a.slice(1) : a));
+    }
+    return unwrap(out);
+  };
+  const out: [number, number][][][] = [];
+  for (const g of t.objects.land.geometries) {
+    const polys = (g.type === 'Polygon' ? [g.arcs] : g.arcs) as number[][][];
+    for (const p of polys) {
+      const rings = p.map(ring).filter((r) => r.length > 2);
+      if (rings.length) out.push(rings);
+    }
+  }
+  return out;
+}
+
+/**
+ * world-atlas joins rings across the antimeridian (Chukotka, Wrangel Island,
+ * Fiji), so a ring can step from 180° to -180°. Carry the longitude on past
+ * 180° instead; the chart draws the world three times side by side, so the
+ * overhang lands where it belongs. A ring that goes all the way round
+ * (Antarctica) is closed along the pole.
+ */
+function unwrap(r: [number, number][]): [number, number][] {
+  if (r.every((p) => Math.abs(p[1]) >= 89.99)) return [];
+  const out: [number, number][] = [r[0]];
+  let shift = 0;
+  for (let i = 1; i < r.length; i++) {
+    const d = r[i][0] - r[i - 1][0];
+    if (d > 180) shift -= 360;
+    else if (d < -180) shift += 360;
+    out.push([r[i][0] + shift, r[i][1]]);
+  }
+  if (shift !== 0) {
+    const pole = out.reduce((a, p) => a + p[1], 0) < 0 ? -89.9 : 89.9;
+    out.push([out[out.length - 1][0], pole], [out[0][0], pole]);
+  }
+  return out;
+}
+
+/** One lake polygon per line: rings parted by ";", points "lon,lat" by spaces. */
+function lakePolygons(tsv: string): [number, number][][][] {
+  return tsv
+    .split('\n')
+    .filter(Boolean)
+    .map((line) =>
+      line
+        .split(';')
+        .map((ring) => ring.split(' ').map((p) => p.split(',').map(Number) as [number, number]))
+        .filter((r) => r.length > 2),
+    );
+}
+
+export function packLand(res: '50m' | '10m'): Uint8Array<ArrayBuffer> {
+  const land = polygons((res === '10m' ? land10 : land50) as unknown as Topology);
+  const lakes = lakePolygons(res === '10m' ? lakes10 : lakes50);
+  const polys = [...land, ...lakes];
+  const rings = polys.flat();
+  const landRings = land.flat().length;
+  const points = rings.reduce((a, r) => a + r.length, 0);
+  const offKind = 16 + 4 * polys.length + 4 * rings.length;
+  const offXy = (offKind + rings.length + 3) & ~3;
+  const buf = new ArrayBuffer(offXy + 8 * points);
+  const dv = new DataView(buf);
+  dv.setUint32(0, LAND_MAGIC, true);
+  dv.setUint32(4, polys.length, true);
+  dv.setUint32(8, rings.length, true);
+  dv.setUint32(12, points, true);
+  const perPoly = new Uint32Array(buf, 16, polys.length);
+  const perRing = new Uint32Array(buf, 16 + 4 * polys.length, rings.length);
+  const kind = new Uint8Array(buf, offKind, rings.length);
+  const xy = new Int32Array(buf, offXy, points * 2);
+  polys.forEach((p, i) => (perPoly[i] = p.length));
+  rings.forEach((r, i) => {
+    perRing[i] = r.length;
+    kind[i] = i < landRings ? 0 : 1;
+  });
+  let k = 0;
+  let px = 0;
+  let py = 0;
+  for (const r of rings) {
+    for (const [lon, lat] of r) {
+      const x = Math.round(((lon + 180) / 360) * GRID);
+      const y = Math.round(mercY(lat) * GRID);
+      xy[k++] = x - px;
+      xy[k++] = y - py;
+      px = x;
+      py = y;
+    }
+  }
+  return new Uint8Array(buf);
+}
+
+export const RIVER_MAGIC = 0x53525652;
+
+/**
+ * Lit rivers (see _data/rivers.mjs) as Mercator polylines: a 12-byte header
+ * (magic, line count, point count), points per line, then x and y on the same
+ * 2^24 grid as the land, each a difference from the point before.
+ */
+export function packRivers(): Uint8Array<ArrayBuffer> {
+  const lines = rivers
+    .split('\n')
+    .filter(Boolean)
+    .map((l) => l.split(' ').map((p) => p.split(',').map(Number) as [number, number]));
+  const points = lines.reduce((a, l) => a + l.length, 0);
+  const buf = new ArrayBuffer(12 + 4 * lines.length + 8 * points);
+  const dv = new DataView(buf);
+  dv.setUint32(0, RIVER_MAGIC, true);
+  dv.setUint32(4, lines.length, true);
+  dv.setUint32(8, points, true);
+  const per = new Uint32Array(buf, 12, lines.length);
+  const xy = new Int32Array(buf, 12 + 4 * lines.length, points * 2);
+  let k = 0;
+  let px = 0;
+  let py = 0;
+  lines.forEach((l, i) => {
+    per[i] = l.length;
+    for (const [lon, lat] of l) {
+      const x = Math.round(((lon + 180) / 360) * GRID);
+      const y = Math.round(mercY(lat) * GRID);
+      xy[k++] = x - px;
+      xy[k++] = y - py;
+      px = x;
+      py = y;
+    }
+  });
+  return new Uint8Array(buf);
+}
