@@ -5,5 +5,5 @@
   "tags": ["canvas", "game", "physics", "web-audio", "pointer-events", "gamepad"],
   "requires": ["canvas"],
   "issue": 52,
-  "plot": 17
+  "plot": 16
 }
