@@ -100,7 +100,9 @@ export function catalog(): Catalog {
   const rows = tsv.split('\n').slice(1);
   for (const row of rows) {
     if (!row) continue;
-    const [src, ref, name, heading, lat, lon, char, height, range, structure, remarks] = row.split('\t');
+    const [src, ref, raw, heading, lat, lon, char, height, range, structure, remarks] = row.split('\t');
+    // NGA writes degrees in names as ^ and minutes as a backtick.
+    const name = raw.replace(/(\d)\^/g, '$1°').replace(/(\d)`/g, '$1′');
     const c = parseCharacter(char);
     if (!c) continue;
     const rk = JSON.stringify(c.rhythm);
@@ -176,7 +178,7 @@ export function packed(): Uint8Array<ArrayBuffer> {
   const json = new TextEncoder().encode(
     JSON.stringify({
       chunk: CHUNK,
-      rhythms: rhythms.map((r) => [r.label, r.period, r.steps, r.base]),
+      rhythms: rhythms.map((r) => [r.label, r.says, r.period, r.steps, r.base]),
       sectors,
       seasons: lights.flatMap((l, i) => (l.season ? [[i, ...l.season]] : [])),
     }),

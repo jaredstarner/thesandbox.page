@@ -16,6 +16,8 @@ export const code = (c: Colour): number => COLOURS.indexOf(c) + 1;
 export interface Rhythm {
   /** Chart abbreviation, e.g. "Fl(2)WR.10s". */
   label: string;
+  /** The same in words: "Two white flashes every 10 seconds". */
+  says: string;
   /** Seconds; 0 for a fixed light. */
   period: number;
   /** [duration, code] pairs, flattened. Empty for a fixed light. */
@@ -153,7 +155,13 @@ export function parseCharacter(text: string): Character | null {
   const head = lines[0] ?? '';
   if (/^STROBE/i.test(head)) {
     return {
-      rhythm: { label: 'Q.W', period: 1, steps: [0.1, ON, 0.9, 0], base: 0 },
+      rhythm: {
+        label: 'Q.W',
+        says: 'A white strobe, flashing every second',
+        period: 1,
+        steps: [0.1, ON, 0.9, 0],
+        base: 0,
+      },
       colours: ['W'],
       directional: false,
     };
@@ -278,7 +286,13 @@ export function parseCharacter(text: string): Character | null {
   steps = steps.map((v, i) => (i % 2 === 0 ? round(v) : v));
   const total = steps.reduce((a, v, i) => (i % 2 === 0 ? a + v : a), 0);
   if (steps.length) period = round(total);
-  const rhythm = { label: label(parts, colours, alternating, directional, printed), period, steps, base };
+  const rhythm = {
+    label: label(parts, colours, alternating, directional, printed),
+    says: describe(parts, colours, alternating, directional, printed),
+    period,
+    steps,
+    base,
+  };
   return { rhythm, colours, directional };
 }
 
@@ -298,6 +312,100 @@ function label(parts: Part[], colours: Colour[], al: boolean, dir: boolean, prin
   const sep = cls && !cls.endsWith(')') ? '.' : '';
   const per = printed ? `.${round(printed)}s` : '';
   return `${dir ? 'Dir.' : ''}${al ? 'Al.' : ''}${cls}${sep}${colours.join('')}${per}`;
+}
+
+const WORDS: Record<Colour, string> = {
+  W: 'white',
+  R: 'red',
+  G: 'green',
+  Y: 'yellow',
+  Bu: 'blue',
+  Vi: 'violet',
+  Or: 'orange',
+};
+const NUMBERS = [
+  'no',
+  'one',
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine',
+  'ten',
+  'eleven',
+  'twelve',
+];
+const count = (n: number) => NUMBERS[n] ?? String(n);
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const DOTS: Record<string, string> = { '.': '·', '-': '−' };
+
+function list(words: string[], join: string): string {
+  return words.length < 2 ? (words[0] ?? '') : `${words.slice(0, -1).join(', ')} ${join} ${words[words.length - 1]}`;
+}
+
+/** The character in words. Sectored colours are named by the card, which knows the bearings. */
+function describe(parts: Part[], colours: Colour[], al: boolean, dir: boolean, period: number): string {
+  const names = colours.map((c) => WORDS[c]);
+  const c = al && names.length > 1 ? `alternately ${list(names, 'and')}` : names.length > 1 ? '' : names[0];
+  const col = (noun: string) => (c ? `${c} ${noun}` : noun);
+  const every = period ? ` every ${period} second${period === 1 ? '' : 's'}` : '';
+  const p = parts[0];
+  const groups = p.group
+    .split('+')
+    .map((g) => parseInt(g, 10))
+    .filter((n) => n > 0);
+  const n = groups[0] ?? 1;
+  let out: string;
+  if (parts.every((q) => q.kind === 'F')) {
+    out = dir
+      ? `A steady ${col('light')}, shown along a narrow line`
+      : al
+        ? `A steady light, ${c}`
+        : `A steady ${col('light')}`;
+    return cap(out);
+  }
+  switch (p.kind) {
+    case 'Fl':
+    case 'FFl':
+      if (groups.length > 1) out = `${col('flashes')} in groups of ${list(groups.map(count), 'then')}${every}`;
+      else out = n === 1 ? `a ${col('flash')}${every}` : `${count(n)} ${col('flashes')}${every}`;
+      if (p.kind === 'FFl') out = `a steady ${col('light')} with a brighter flash${every}`;
+      break;
+    case 'LFl':
+      out = n === 1 ? `a long ${col('flash')}${every}` : `${count(n)} long ${col('flashes')}${every}`;
+      break;
+    case 'Oc':
+      out = `a ${col('light')} that goes dark ${n === 1 ? 'once' : n === 2 ? 'twice' : `${count(n)} times`}${every}`;
+      break;
+    case 'Iso':
+      out = `${col('light')} and dark in equal parts${every}`;
+      break;
+    case 'Mo': {
+      const letter = p.group.trim().toUpperCase();
+      const code = [...(MORSE[letter] ?? '')].map((ch) => DOTS[ch]).join(' ');
+      out = `Morse ${letter} (${code}) in ${col('light')}${every}`;
+      break;
+    }
+    case 'IQ':
+    case 'IVQ':
+    case 'IUQ':
+      out = `quick ${col('flashes')}, broken by a dark spell${every}`;
+      break;
+    default: {
+      const speed = p.kind === 'Q' ? 'quick' : p.kind === 'VQ' ? 'very quick' : 'ultra quick';
+      const rate = p.kind === 'Q' ? 60 : p.kind === 'VQ' ? 120 : 240;
+      if (!p.group) out = `${speed} ${col('flashes')}, ${rate} a minute`;
+      else {
+        out = `${count(n)} ${speed} ${col('flashes')}`;
+        if (parts.some((q) => q.kind === 'LFl')) out += ' and a long flash';
+        out += every;
+      }
+    }
+  }
+  return cap(out);
 }
 
 /**

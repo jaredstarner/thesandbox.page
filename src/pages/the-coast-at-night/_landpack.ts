@@ -40,12 +40,39 @@ function polygons(t: Topology): [number, number][][][] {
       const a = id < 0 ? arcs[~id].slice().reverse() : arcs[id];
       out.push(...(out.length ? a.slice(1) : a));
     }
-    return out;
+    return unwrap(out);
   };
   const out: [number, number][][][] = [];
   for (const g of t.objects.land.geometries) {
     const polys = (g.type === 'Polygon' ? [g.arcs] : g.arcs) as number[][][];
-    for (const p of polys) out.push(p.map(ring));
+    for (const p of polys) {
+      const rings = p.map(ring).filter((r) => r.length > 2);
+      if (rings.length) out.push(rings);
+    }
+  }
+  return out;
+}
+
+/**
+ * world-atlas joins rings across the antimeridian (Chukotka, Wrangel Island,
+ * Fiji), so a ring can step from 180° to -180°. Carry the longitude on past
+ * 180° instead; the chart draws the world three times side by side, so the
+ * overhang lands where it belongs. A ring that goes all the way round
+ * (Antarctica) is closed along the pole.
+ */
+function unwrap(r: [number, number][]): [number, number][] {
+  if (r.every((p) => Math.abs(p[1]) >= 89.99)) return [];
+  const out: [number, number][] = [r[0]];
+  let shift = 0;
+  for (let i = 1; i < r.length; i++) {
+    const d = r[i][0] - r[i - 1][0];
+    if (d > 180) shift -= 360;
+    else if (d < -180) shift += 360;
+    out.push([r[i][0] + shift, r[i][1]]);
+  }
+  if (shift !== 0) {
+    const pole = out.reduce((a, p) => a + p[1], 0) < 0 ? -89.9 : 89.9;
+    out.push([out[out.length - 1][0], pole], [out[0][0], pole]);
   }
   return out;
 }
