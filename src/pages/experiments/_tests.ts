@@ -428,6 +428,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   'svg-lighting': { label: 'SVG lighting filters' },
   print: { label: 'Print stylesheet' },
   gnomonics: { label: 'Gnomonics' },
+  'light-lists': { label: 'Lists of lights' },
+  'web-mercator': { label: 'Web Mercator' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

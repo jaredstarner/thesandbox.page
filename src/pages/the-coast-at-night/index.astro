@@ -1,0 +1,720 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { catalog } from './_catalog';
+
+const count = catalog().lights.length.toLocaleString('en-US');
+const places = [
+  { name: 'English Channel', lat: 50.4, lon: -1.2, zoom: 8.2 },
+  { name: 'The Sound', lat: 55.9, lon: 12.6, zoom: 9.6 },
+  { name: 'Chesapeake Bay', lat: 37.6, lon: -76.2, zoom: 8.4 },
+  { name: 'Bosporus', lat: 41.1, lon: 29.05, zoom: 10.4 },
+  { name: 'Hong Kong', lat: 22.3, lon: 114.1, zoom: 10 },
+  { name: 'Strait of Magellan', lat: -53.2, lon: -70.6, zoom: 7.6 },
+  { name: 'Great Lakes', lat: 44.2, lon: -83.6, zoom: 6.4 },
+  { name: 'Norwegian coast', lat: 63.5, lon: 9.4, zoom: 7.2 },
+];
+---
+
+<Bare
+  title="The coast at night"
+  description="Every lighthouse and beacon in the NGA and USCG lists of lights, flashing its own character on a night chart, and the view from the deck of a boat you put anywhere at sea."
+>
+  <Font cssVariable="--font-coast" slot="head" />
+  <Font cssVariable="--font-coast-mono" slot="head" />
+
+  <main class="coast" data-coast data-mode="chart">
+    <canvas class="chart" data-chart aria-label="A night chart of the world's coasts, drawn by their lights"></canvas>
+    <canvas class="deck" data-deck aria-label="The view from the deck at night" hidden></canvas>
+    <div class="labels" data-labels aria-hidden="true"></div>
+
+    <header class="cartouche">
+      <h1>The coast at night</h1>
+      <p class="lede">{count} lights from the NGA and USCG lists, each flashing its own character.</p>
+      <div class="readout">
+        <span class="scale" data-scale>
+          <i></i>
+          <b data-scale-text>&nbsp;</b>
+        </span>
+        <span class="cursor" data-cursor>
+          &nbsp;
+        </span>
+      </div>
+    </header>
+
+    <section class="find" aria-label="Find a light or a coast">
+      <form data-find role="search">
+        <input type="search" data-query placeholder="Find a light by name" autocomplete="off" spellcheck="false" />
+        <ol class="results" data-results hidden></ol>
+      </form>
+      <ul class="places">
+        {places.map((p) => (
+          <li>
+            <button type="button" data-place={`${p.lat},${p.lon},${p.zoom}`}>
+              {p.name}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <aside class="card" data-card aria-live="polite" hidden>
+      <button class="close" type="button" data-card-close aria-label="Close">
+        ×
+      </button>
+      <p class="region" data-card-region></p>
+      <h2 data-card-name></h2>
+      <p class="notation" data-card-notation></p>
+      <figure class="strip">
+        <svg data-card-strip viewBox="0 0 300 40" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <figcaption data-card-says></figcaption>
+      </figure>
+      <div class="facts">
+        <svg class="rose" data-card-rose viewBox="-50 -50 100 100" aria-hidden="true"></svg>
+        <dl data-card-facts></dl>
+      </div>
+      <p class="remarks" data-card-remarks></p>
+      <p class="source" data-card-source></p>
+      <button class="go" type="button" data-card-deck>
+        View it from the sea
+      </button>
+    </aside>
+
+    <p class="hint" data-hint>
+      Drag to move, scroll or pinch to zoom, and click a light to read it. Double-click open water to stand on deck
+      there.
+    </p>
+
+    <div class="deckbar" data-deckbar hidden>
+      <button class="back" type="button" data-deck-back>
+        Back to the chart
+      </button>
+      <p class="where" data-deck-where></p>
+      <div class="eye" role="radiogroup" aria-label="Eye height">
+        <label>
+          <input type="radio" name="eye" value="2" />
+          Small boat, 2 m
+        </label>
+        <label>
+          <input type="radio" name="eye" value="5" checked />
+          Deck, 5 m
+        </label>
+        <label>
+          <input type="radio" name="eye" value="20" />
+          Bridge, 20 m
+        </label>
+      </div>
+    </div>
+    <aside class="sight" data-sight hidden>
+      <h2>In sight</h2>
+      <ol data-sight-list></ol>
+      <p class="none" data-sight-none hidden>
+        No light in sight from here. Try the bridge, or closer to the coast.
+      </p>
+    </aside>
+    <p class="tip" data-tip hidden></p>
+
+    <footer class="credits">
+      Lights: NGA Pub. 110 to 116, <i>List of Lights</i> (2026), and USCG <i>Light List</i> (October 2026). Coast:
+      Natural Earth. Not for navigation.
+    </footer>
+
+    <noscript>
+      <p class="fallback">The chart is drawn by script, so it needs JavaScript to show.</p>
+    </noscript>
+    <p class="fallback" data-fallback hidden>
+      This chart needs WebGL2, which this browser does not offer.
+    </p>
+  </main>
+</Bare>
+
+<style>
+  .coast {
+    --sea: #03060b;
+    --ink: #e2dccd;
+    --ink-dim: #9c978b;
+    --ink-faint: #6b6860;
+    --rule: rgb(226 220 205 / 0.16);
+    --panel: rgb(6 9 14 / 0.86);
+    --glow: #ffd98a;
+    --serif: var(--font-coast);
+    --mono: var(--font-coast-mono);
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--sea);
+    color: var(--ink);
+    font: 400 15px/1.45 var(--serif);
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  :global(body:has(.coast)) {
+    margin: 0;
+    background: #03060b;
+    overscroll-behavior: none;
+  }
+  .coast [hidden] {
+    display: none !important;
+  }
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+  }
+  .chart {
+    cursor: grab;
+  }
+  .coast[data-dragging] .chart {
+    cursor: grabbing;
+  }
+  .coast[data-hovering] .chart {
+    cursor: pointer;
+  }
+
+  .labels {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .labels :global(span) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    white-space: nowrap;
+    font: italic 400 12.5px/1.15 var(--serif);
+    letter-spacing: 0.01em;
+    color: rgb(226 220 205 / 0.72);
+    text-shadow:
+      0 0 3px var(--sea),
+      0 0 6px var(--sea);
+  }
+  .labels :global(span b) {
+    display: block;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    color: rgb(226 220 205 / 0.5);
+  }
+
+  .cartouche {
+    position: absolute;
+    left: 20px;
+    top: 18px;
+    max-width: 330px;
+    padding: 14px 18px 12px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    outline: 1px solid rgb(226 220 205 / 0.07);
+    outline-offset: 3px;
+    backdrop-filter: blur(6px);
+  }
+  .cartouche h1 {
+    margin: 0;
+    font: 500 27px/1.05 var(--serif);
+    letter-spacing: -0.005em;
+  }
+  .lede {
+    margin: 6px 0 10px;
+    font-style: italic;
+    color: var(--ink-dim);
+    font-size: 14.5px;
+    line-height: 1.35;
+  }
+  .readout {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rule);
+    font: 400 11px/1 var(--mono);
+    color: var(--ink-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .scale {
+    display: grid;
+    gap: 4px;
+  }
+  .scale i {
+    display: block;
+    height: 4px;
+    width: var(--w, 60px);
+    border: 1px solid var(--ink-dim);
+    border-top: 0;
+    background: linear-gradient(
+      90deg,
+      var(--ink-dim) 0 25%,
+      transparent 25% 50%,
+      var(--ink-dim) 50% 75%,
+      transparent 75%
+    );
+    background-size: 100% 1px;
+    background-repeat: no-repeat;
+    background-position: bottom;
+  }
+  .scale b {
+    font-weight: 400;
+  }
+
+  .find {
+    position: absolute;
+    right: 20px;
+    top: 18px;
+    width: 270px;
+  }
+  .find form {
+    position: relative;
+  }
+  .find input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    font: italic 400 15px/1.2 var(--serif);
+    border-radius: 0;
+    outline: none;
+    backdrop-filter: blur(6px);
+  }
+  .find input::placeholder {
+    color: var(--ink-faint);
+  }
+  .find input:focus {
+    border-color: rgb(255 217 138 / 0.5);
+  }
+  .results {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    background: rgb(6 9 14 / 0.96);
+    border: 1px solid var(--rule);
+    border-top: 0;
+    max-height: 50vh;
+    overflow: auto;
+    z-index: 3;
+  }
+  .results :global(button) {
+    display: block;
+    width: 100%;
+    padding: 6px 12px;
+    text-align: left;
+    background: none;
+    border: 0;
+    color: var(--ink);
+    font: 400 14px/1.25 var(--serif);
+    cursor: pointer;
+  }
+  .results :global(button small) {
+    display: block;
+    font: italic 400 12.5px/1.25 var(--serif);
+    color: var(--ink-dim);
+  }
+  .results :global(button:hover),
+  .results :global(button:focus-visible),
+  .results :global(button[aria-selected='true']) {
+    background: rgb(255 217 138 / 0.08);
+    outline: none;
+  }
+  .places {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .places button,
+  .deckbar button,
+  .card .go {
+    padding: 4px 9px 5px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    color: var(--ink-dim);
+    font: italic 400 13px/1.2 var(--serif);
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+  }
+  .places button:hover,
+  .deckbar button:hover,
+  .card .go:hover {
+    color: var(--ink);
+    border-color: rgb(255 217 138 / 0.45);
+  }
+
+  .card {
+    position: absolute;
+    right: 20px;
+    top: 128px;
+    width: 330px;
+    max-height: calc(100% - 190px);
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 16px 18px 18px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    backdrop-filter: blur(8px);
+    user-select: text;
+    -webkit-user-select: text;
+  }
+  .card .close {
+    position: absolute;
+    right: 8px;
+    top: 6px;
+    width: 28px;
+    height: 28px;
+    background: none;
+    border: 0;
+    color: var(--ink-dim);
+    font: 300 22px/1 var(--serif);
+    cursor: pointer;
+  }
+  .card .close:hover {
+    color: var(--ink);
+  }
+  .region {
+    margin: 0 28px 2px 0;
+    font: italic 400 13px/1.3 var(--serif);
+    color: var(--ink-dim);
+  }
+  .card h2 {
+    margin: 0 24px 6px 0;
+    font: 500 22px/1.15 var(--serif);
+  }
+  .notation {
+    margin: 0;
+    font: italic 400 16px/1.3 var(--serif);
+    color: var(--glow);
+  }
+  .strip {
+    margin: 12px 0 10px;
+  }
+  .strip svg {
+    display: block;
+    width: 100%;
+    height: 40px;
+    background: #010204;
+    border: 1px solid var(--rule);
+  }
+  .strip figcaption {
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .facts {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 14px;
+    align-items: start;
+    padding-top: 10px;
+    border-top: 1px solid var(--rule);
+  }
+  .rose {
+    width: 92px;
+    height: 92px;
+  }
+  .facts dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 10px;
+    font-size: 13.5px;
+    line-height: 1.3;
+  }
+  .facts :global(dt) {
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+  .facts :global(dd) {
+    margin: 0;
+  }
+  .remarks {
+    margin: 10px 0 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ink-dim);
+  }
+  .remarks:empty {
+    display: none;
+  }
+  .source {
+    margin: 8px 0 12px;
+    font: 400 10.5px/1.3 var(--mono);
+    color: var(--ink-faint);
+  }
+  .card .go {
+    width: 100%;
+    padding: 8px;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  .hint {
+    position: absolute;
+    left: 20px;
+    bottom: 34px;
+    max-width: 420px;
+    margin: 0;
+    font: italic 400 13.5px/1.35 var(--serif);
+    color: var(--ink-dim);
+    text-shadow: 0 0 4px var(--sea);
+    pointer-events: none;
+  }
+  .credits {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 10px;
+    font: 400 10.5px/1.2 var(--mono);
+    color: var(--ink-faint);
+    pointer-events: none;
+  }
+
+  /* On deck */
+  .coast[data-mode='deck'] .cartouche,
+  .coast[data-mode='deck'] .find,
+  .coast[data-mode='deck'] .card,
+  .coast[data-mode='deck'] .hint,
+  .coast[data-mode='deck'] .labels {
+    display: none;
+  }
+  .deckbar {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .where {
+    margin: 0;
+    font: 400 12px/1.3 var(--mono);
+    color: var(--ink-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .eye {
+    display: flex;
+    margin-left: auto;
+    border: 1px solid var(--rule);
+    background: var(--panel);
+  }
+  .eye label {
+    padding: 4px 10px 5px;
+    font: italic 400 13px/1.2 var(--serif);
+    color: var(--ink-dim);
+    cursor: pointer;
+  }
+  .eye label + label {
+    border-left: 1px solid var(--rule);
+  }
+  .eye input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .eye label:has(input:checked) {
+    color: var(--ink);
+    background: rgb(255 217 138 / 0.1);
+  }
+  .eye label:has(input:focus-visible) {
+    outline: 1px solid var(--glow);
+  }
+  .sight {
+    position: absolute;
+    right: 20px;
+    top: 62px;
+    width: 270px;
+    max-height: calc(100% - 210px);
+    overflow: auto;
+    padding: 12px 14px;
+    box-sizing: border-box;
+    background: rgb(6 9 14 / 0.7);
+    border: 1px solid var(--rule);
+  }
+  .sight h2 {
+    margin: 0 0 6px;
+    font: 500 15px/1.2 var(--serif);
+  }
+  .sight ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sight :global(li button) {
+    display: grid;
+    grid-template-columns: 10px 1fr auto;
+    gap: 2px 8px;
+    align-items: center;
+    width: 100%;
+    padding: 5px 0;
+    text-align: left;
+    background: none;
+    border: 0;
+    border-top: 1px solid rgb(226 220 205 / 0.07);
+    color: var(--ink);
+    font: 400 13.5px/1.25 var(--serif);
+    cursor: pointer;
+  }
+  .sight :global(li button:hover) {
+    color: #fff;
+  }
+  .sight :global(li i) {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .sight :global(li small) {
+    grid-column: 2 / 4;
+    font: italic 400 12.5px/1.2 var(--serif);
+    color: var(--ink-dim);
+  }
+  .sight :global(li em) {
+    font: 400 11px/1 var(--mono);
+    font-style: normal;
+    color: var(--ink-dim);
+  }
+  .sight .none {
+    margin: 0;
+    font-style: italic;
+    color: var(--ink-dim);
+    font-size: 13.5px;
+  }
+  .tip {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    padding: 6px 10px;
+    background: rgb(6 9 14 / 0.92);
+    border: 1px solid var(--rule);
+    font-size: 13.5px;
+    line-height: 1.3;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .tip :global(i) {
+    display: block;
+    color: var(--glow);
+  }
+  .tip :global(small) {
+    display: block;
+    font: 400 11px/1.3 var(--mono);
+    color: var(--ink-dim);
+  }
+
+  .fallback {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    max-width: 360px;
+    margin: 0;
+    text-align: center;
+    font-style: italic;
+    color: var(--ink-dim);
+  }
+
+  @media (max-width: 720px) {
+    .cartouche {
+      left: 12px;
+      right: 12px;
+      top: 12px;
+      max-width: none;
+      padding: 10px 14px 9px;
+    }
+    .cartouche h1 {
+      font-size: 22px;
+    }
+    .lede {
+      font-size: 13.5px;
+      margin: 3px 0 7px;
+    }
+    .find {
+      left: 12px;
+      right: 12px;
+      top: auto;
+      bottom: 30px;
+      width: auto;
+    }
+    .places {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      justify-content: flex-start;
+      scrollbar-width: none;
+    }
+    .places button {
+      white-space: nowrap;
+    }
+    .results {
+      top: auto;
+      bottom: 100%;
+      border-top: 1px solid var(--rule);
+      border-bottom: 0;
+    }
+    .hint {
+      display: none;
+    }
+    .card {
+      left: 0;
+      right: 0;
+      top: auto;
+      bottom: 0;
+      width: auto;
+      max-height: 62%;
+      border-width: 1px 0 0;
+      z-index: 4;
+    }
+    .credits {
+      left: 12px;
+      right: 12px;
+      bottom: 8px;
+      font-size: 9.5px;
+    }
+    .deckbar {
+      left: 12px;
+      right: 12px;
+      top: 10px;
+      gap: 8px;
+    }
+    .where {
+      order: 3;
+      width: 100%;
+      font-size: 11px;
+    }
+    .eye {
+      margin-left: auto;
+    }
+    .eye label {
+      padding: 4px 7px 5px;
+      font-size: 12px;
+    }
+    .sight {
+      left: 12px;
+      right: 12px;
+      top: auto;
+      bottom: 92px;
+      width: auto;
+      max-height: 30%;
+    }
+  }
+</style>
+
+<script>
+  import './_app';
+</script>
