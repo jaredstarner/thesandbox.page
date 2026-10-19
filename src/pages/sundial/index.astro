@@ -86,11 +86,15 @@ import { R } from './_dial';
           </defs>
           <g class="compass" data-compass></g>
           <g clip-path="url(#sd-clip)">
-            <path class="shadow" data-shadow filter="url(#sd-soft)"></path>
+            <g class="shadow" data-shadow-group filter="url(#sd-soft)">
+              <path data-shadow></path>
+              <circle data-bead-shadow></circle>
+            </g>
           </g>
           <g class="gnomon" data-gnomon>
             <rect class="side" data-side="l"></rect>
             <rect class="side" data-side="r"></rect>
+            <circle class="bead" data-bead></circle>
             <circle class="boss" r={R.boss}></circle>
             <circle class="boss-hi" r={R.boss * 0.55} cx="-0.8" cy="-0.8"></circle>
           </g>
@@ -299,6 +303,12 @@ import { R } from './_dial';
 
   .boss {
     fill: #8c6532;
+  }
+
+  .bead {
+    fill: #c99a52;
+    stroke: #4a3518;
+    stroke-width: 0.18;
   }
 
   .boss-hi {

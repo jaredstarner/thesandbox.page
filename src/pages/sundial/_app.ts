@@ -2,7 +2,7 @@
 // the sun's real position, casts the gnomon's shadow, and keeps a print sheet
 // in step with it.
 
-import { R, gnomonShadow, layout, reading, type Dial, type Place } from './_dial';
+import { R, gnomonShadow, layout, nodusShadow, reading, type Dial, type Place } from './_dial';
 import { dms, face } from './_draw';
 import { MOTTOS } from './_mottos';
 import { sheet, svgFile } from './_print';
@@ -73,11 +73,14 @@ export function start(root: HTMLElement): void {
   const light = $<SVGElement>('[data-light]');
   const lamp = $<SVGElement>('[data-lamp]');
   const shadowEl = $<SVGPathElement>('[data-shadow]');
+  const shadowGroup = $<SVGGElement>('[data-shadow-group]');
   const sides = [...root.querySelectorAll<SVGRectElement>('[data-side]')];
   const tint = $<SVGCircleElement>('[data-tint]');
   const sunmark = $<SVGCircleElement>('[data-sunmark]');
   const compass = $<SVGGElement>('[data-compass]');
   const ground = $<HTMLElement>('[data-ground]');
+  const bead = $<SVGCircleElement>('[data-bead]');
+  const beadShadow = $<SVGCircleElement>('[data-bead-shadow]');
   const big = $<HTMLElement>('[data-big]');
   const sub = $<HTMLElement>('[data-sub]');
   const sum = $<HTMLElement>('[data-sum]');
@@ -130,8 +133,11 @@ export function start(root: HTMLElement): void {
     dial = layout(place, year);
     faceEl.innerHTML = face(dial, { motto: mottoText(), year, id: 'sd' });
     // The gnomon seen from above: a bronze plate from the root to its foot, lit on the sun's side.
-    const foot = dial.tip.n * dial.k;
+    const foot = dial.top.n * dial.k;
     const w = dial.width;
+    const nodusY = -dial.tip.n * dial.k;
+    bead.setAttribute('cy', nodusY.toFixed(2));
+    bead.setAttribute('r', String(w * 1.15));
     sides[0].setAttribute('x', String(-w / 2));
     sides[1].setAttribute('x', '0');
     for (const s of sides) {
@@ -240,7 +246,14 @@ export function start(root: HTMLElement): void {
       'd',
       outline ? 'M' + outline.map(([x, y]) => `${x.toFixed(2)} ${(-y).toFixed(2)}`).join('L') + 'Z' : '',
     );
-    shadowEl.style.opacity = String(0.62 * Math.min(1, Math.max(0, sun.alt / 4)));
+    shadowGroup.style.opacity = String(0.62 * Math.min(1, Math.max(0, sun.alt / 4)));
+    const nod = day ? nodusShadow(dial, sun.dir) : null;
+    if (nod && Math.hypot(nod[0], nod[1]) < 99) {
+      beadShadow.setAttribute('cx', nod[0].toFixed(2));
+      beadShadow.setAttribute('cy', (-nod[1]).toFixed(2));
+      beadShadow.setAttribute('r', (dial.width * 1.15).toFixed(2));
+      beadShadow.style.display = '';
+    } else beadShadow.style.display = 'none';
     const litSide = sx >= 0 ? 1 : 0;
     sides[litSide].style.fill = day ? '#d9ab62' : '#5d4a2e';
     sides[1 - litSide].style.fill = day ? '#7b582b' : '#3c3020';

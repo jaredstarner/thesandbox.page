@@ -12,7 +12,7 @@ export const MM = 150 / (2 * R.plate);
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function inkFace(dial: Dial, motto: string, year: number, id: string): string {
-  const footY = -dial.tip.n * dial.k;
+  const footY = -dial.top.n * dial.k;
   const w = dial.width;
   return (
     `<circle r="${R.plate}" fill="none" stroke="#000" stroke-width="0.35"/>` +
@@ -37,8 +37,11 @@ export function svgFile(dial: Dial, motto: string, year: number): string {
 
 function gnomonTemplate(dial: Dial): string {
   const phi = Math.abs(dial.place.lat) * RAD;
-  const base = dial.s * Math.cos(phi) * MM;
-  const height = dial.s * Math.sin(phi) * MM;
+  const base = dial.L * Math.cos(phi) * MM;
+  const height = dial.L * Math.sin(phi) * MM;
+  // The nodus: a notch in the sloping edge, whose shadow marks the date lines.
+  const nx = dial.s * Math.cos(phi) * MM;
+  const ny = dial.s * Math.sin(phi) * MM;
   const tab = 7;
   const pad = 4;
   const wv = base + 2 * pad + 26;
@@ -52,7 +55,8 @@ function gnomonTemplate(dial: Dial): string {
     <path d="M${x0} ${y0}L${x0 + base} ${y0}L${x0 + base - 1.5} ${y0 + tab}L${x0 + 1.5} ${y0 + tab}Z" fill="none" stroke="#000" stroke-width="0.25" stroke-dasharray="1 0.8"/>
     <path d="M${x0 + arc} ${y0}A${arc} ${arc} 0 0 0 ${x0 + arc * Math.cos(phi)} ${y0 - arc * Math.sin(phi)}" fill="none" stroke="#000" stroke-width="0.2"/>
     <text x="${x0 + arc + 1}" y="${y0 - 1.2}" font-size="2.6">${deg}°</text>
-    <text x="${x0 + base + 2}" y="${y0 - height / 2}" font-size="2.4">tip</text>
+    <circle cx="${(x0 + nx).toFixed(2)}" cy="${(y0 - ny).toFixed(2)}" r="0.9" fill="none" stroke="#000" stroke-width="0.25"/>
+    <text x="${(x0 + nx - 1.5).toFixed(2)}" y="${(y0 - ny - 2).toFixed(2)}" font-size="2.2" text-anchor="end">nodus: cut a small notch</text>
     <text x="${x0}" y="${y0 + tab + 3.2}" font-size="2.2">root end · fold the tab along the dashes</text>
   </svg>`;
 }
@@ -96,9 +100,9 @@ export function sheet(dial: Dial, motto: string, year: number, info: SheetInfo):
       ${gnomonTemplate(dial)}
       <ol>
         <li>Print at 100%, not fit to page; the bar below should measure 50 mm.</li>
-        <li>Glue the dial to something flat and stiff. Cut out the gnomon, fold its tab, and glue it on the dashed outline: its root on the cross, its sloping edge rising toward the ${pole} rim.</li>
+        <li>Glue the dial to something flat and stiff. Cut out the gnomon, notch its sloping edge at the circle, fold its tab, and glue it on the dashed outline: its root on the cross, its sloping edge rising toward the ${pole} rim.</li>
         <li>Set the board level and turn it until the gnomon points to true ${pole}, not magnetic ${pole}. On ${info.dayLabel} the shadow of an upright stick lies on the true north-south line at ${info.noon} by your clocks.</li>
-        <li>The shadow of the sloping edge gives the hour. Correct it by the table, and add an hour in summer time.</li>
+        <li>The shadow of the sloping edge gives the hour; the shadow of the notch runs along the date lines. Correct the hour by the table, and add an hour in summer time.</li>
       </ol>
       <p class="bar"><span></span> 50 mm</p>
     </div>

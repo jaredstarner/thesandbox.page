@@ -52,10 +52,13 @@ export interface Dial {
   place: Place;
   /** +1 north of the equator, -1 south. */
   k: 1 | -1;
-  /** Length of the style from root to tip. */
+  /** Distance along the style from the root to the nodus. */
   s: number;
-  /** The style's tip, the dial's nodus, in the local frame. */
+  /** The nodus, a bead on the style whose shadow traces the date lines, in the local frame. */
   tip: Vec3;
+  /** Full length of the style, and its upper end. */
+  L: number;
+  top: Vec3;
   width: number;
   hours: HourLine[];
   ticks: { angle: number; half: boolean }[];
@@ -132,6 +135,9 @@ export function layout(place: Place, year: number): Dial {
   }
   s = Math.max(12, Math.min(29, s));
   const tip: Vec3 = { e: 0, n: u.n * s, u: u.u * s };
+  // The style runs on past the nodus so the gnomon reaches well across the plate and its shadow reads at a glance.
+  const L = Math.max(s * 1.25, Math.min(64, (0.62 * R.clip) / Math.abs(u.n)));
+  const top: Vec3 = { e: 0, n: u.n * L, u: u.u * L };
 
   // Hours the sun can be up for at midsummer.
   const reach = Math.min(180, halfDay(lat, k * OBLIQUITY, 0) + 7.5);
@@ -164,7 +170,7 @@ export function layout(place: Place, year: number): Dial {
   }
   if (seg.length > 1) analemma.push(seg);
 
-  return { place, k, s, tip, width: 1.7, hours, ticks, curves, analemma, shift: lonShift * 4 };
+  return { place, k, s, tip, L, top, width: 1.8, hours, ticks, curves, analemma, shift: lonShift * 4 };
 }
 
 function trace(lat: number, k: 1 | -1, tip: Vec3, decl: number): Pt[][] {
@@ -199,10 +205,10 @@ export function gnomonShadow(dial: Dial, sun: Vec3): Pt[] | null {
   const w = dial.width / 2;
   const pts: Pt[] = [];
   for (const side of [-w, w]) {
-    // Root, foot, and tip; the root and foot sit on the plate.
+    // Root, foot, and the style's upper end; the root and foot sit on the plate.
     pts.push(show(dial.k, [side, 0]));
-    pts.push(show(dial.k, [side, dial.tip.n]));
-    pts.push(show(dial.k, cast({ e: side, n: dial.tip.n, u: dial.tip.u }, sun)!));
+    pts.push(show(dial.k, [side, dial.top.n]));
+    pts.push(show(dial.k, cast({ e: side, n: dial.top.n, u: dial.top.u }, sun)!));
   }
   return hull(pts);
 }
@@ -227,4 +233,10 @@ function hull(points: Pt[]): Pt[] {
 export function reading(dial: Dial, ha: number): number {
   const t = 12 + (ha - dial.shift / 4) / 15;
   return ((t % 24) + 24) % 24;
+}
+
+/** Where the nodus's shadow falls, in the display frame: the point that marks the date. */
+export function nodusShadow(dial: Dial, sun: Vec3): Pt | null {
+  const p = cast(dial.tip, sun);
+  return p ? show(dial.k, p) : null;
 }

@@ -78,7 +78,11 @@ export function face(dial: Dial, o: FaceOptions): string {
   // Hour lines, then the ten-minute and half-hour ticks.
   let lines = '';
   for (const h of dial.hours) lines += `M${xy(at(r0, h.angle))}L${xy(at(h.r1, h.angle))}`;
-  out.push(`<path d="${lines}" fill="none" stroke-width="${w.hour}" stroke-linecap="round"/>`);
+  // Lines go in a group the date labels knock out of, so the labels read clear.
+  const lined: string[] = [];
+  const tags: string[] = [];
+  const knock: string[] = [];
+  lined.push(`<path d="${lines}" fill="none" stroke-width="${w.hour}" stroke-linecap="round"/>`);
   let ticks = '';
   let halves = '';
   for (const t of dial.ticks) {
@@ -102,25 +106,33 @@ export function face(dial: Dial, o: FaceOptions): string {
   for (const c of dial.curves) {
     const d = c.segs.map((s) => pathOf(s)).join('');
     if (!d) continue;
-    out.push(`<path d="${d}" fill="none" stroke-width="${c.major ? w.major : w.minor}" stroke-linejoin="round"/>`);
+    lined.push(`<path d="${d}" fill="none" stroke-width="${c.major ? w.major : w.minor}" stroke-linejoin="round"/>`);
     if (c.label) {
       // Label beside the gnomon, where the line crosses noon.
       let best: Pt | null = null;
       for (const s of c.segs) for (const p of s) if (!best || Math.abs(p[0]) < Math.abs(best[0])) best = p;
       if (best && Math.abs(best[0]) < 4) {
-        out.push(
-          `<text class="tag" font-size="3.1" letter-spacing="0.3" x="${f(-3.2)}" y="${f(-best[1] - 1)}" text-anchor="end" stroke="none">${c.label}</text>`,
+        const y = -best[1] - 1;
+        const width = c.label.length * 2.55 + 1.2;
+        tags.push(
+          `<text class="tag" font-size="3.1" letter-spacing="0.3" x="${f(-3.2)}" y="${f(y)}" text-anchor="end" stroke="none">${c.label}</text>`,
         );
+        knock.push(`<rect x="${f(-3.2 - width)}" y="${f(y - 3)}" width="${f(width + 0.9)}" height="4" rx="0.6"/>`);
       }
     }
   }
 
   // The figure eight of clock noon.
   if (dial.analemma.length) {
-    out.push(
+    lined.push(
       `<path d="${dial.analemma.map((s) => pathOf(s)).join('')}" fill="none" stroke-width="${w.ana}" stroke-dasharray="${o.print ? '0.9 0.7' : '1.4 1'}"/>`,
     );
   }
+  out.push(
+    `<mask id="${o.id}-knock" maskUnits="userSpaceOnUse" x="-100" y="-100" width="200" height="200"><rect x="-100" y="-100" width="200" height="200" fill="#fff" stroke="none"/><g fill="#000" stroke="none">${knock.join('')}</g></mask>`,
+    `<g mask="url(#${o.id}-knock)">${lined.join('')}</g>`,
+    ...tags,
+  );
 
   // Motto and place along the foot of the plate, and the year under the root.
   const arc = (r: number, id: string) => {
