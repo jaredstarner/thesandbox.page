@@ -401,6 +401,13 @@ export const TECHNIQUES: Record<string, Technique> = {
     webFeature: 'pointer-events',
     test: () => present(typeof PointerEvent === 'function', 'PointerEvent present', 'PointerEvent missing'),
   },
+  geolocation: {
+    label: 'Geolocation',
+    webFeature: 'geolocation',
+    handling: 'May ask for your location when you choose to share it; it is never sent anywhere.',
+    test: () =>
+      present('geolocation' in navigator, 'navigator.geolocation present; never called here', 'Geolocation missing'),
+  },
   // Technique notes: no browser dependency, so no test and no light.
   typography: { label: 'Typography' },
   pretext: { label: 'Pretext' },
@@ -418,6 +425,9 @@ export const TECHNIQUES: Record<string, Technique> = {
   visited: { label: ':visited' },
   'static-generation': { label: 'Static generation' },
   teletext: { label: 'Teletext' },
+  'svg-lighting': { label: 'SVG lighting filters' },
+  print: { label: 'Print stylesheet' },
+  gnomonics: { label: 'Gnomonics' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

@@ -1,0 +1,8 @@
+{
+  "title": "Sundial",
+  "summary": "A slate garden sundial laid out for any place on Earth: choose where it stands and the hour lines, date lines, and noon figure eight are cut again for that latitude, the real sun lights the engraving and casts the gnomon's shadow, and a print sheet makes one you can set up outside.",
+  "date": "2026-10-19",
+  "tags": ["svg", "svg-lighting", "geolocation", "print", "gnomonics"],
+  "requires": [],
+  "plot": 17
+}

@@ -1,0 +1,879 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { landBitmap, MAP_STEP } from './_land';
+import { MOTTOS } from './_mottos';
+import { R } from './_dial';
+---
+
+<Bare
+  title="Sundial"
+  description="A garden sundial laid out for wherever you choose: hour lines, date lines, and a live shadow for that place, and a sheet to print and set up outside."
+>
+  <Font cssVariable="--font-sundial-cut" slot="head" />
+  <Font cssVariable="--font-sundial-text" slot="head" />
+
+  <main class="sundial" data-sundial data-land={landBitmap()} data-step={MAP_STEP}>
+    <section class="stage" aria-label="The dial">
+      <div class="dial" data-dial>
+        <div class="ground" data-ground aria-hidden="true"></div>
+        <svg class="stone" viewBox="-100 -100 200 200" aria-hidden="true">
+          <defs>
+            <radialGradient id="sd-lime" cx="0.4" cy="0.36" r="0.72">
+              <stop offset="0" stop-color="#ebe4d4"></stop>
+              <stop offset="0.7" stop-color="#d6cdb9"></stop>
+              <stop offset="1" stop-color="#bdb29b"></stop>
+            </radialGradient>
+            <radialGradient id="sd-slate" cx="0.42" cy="0.38" r="0.75">
+              <stop offset="0" stop-color="#4a545b"></stop>
+              <stop offset="0.65" stop-color="#3b444a"></stop>
+              <stop offset="1" stop-color="#30373c"></stop>
+            </radialGradient>
+            <filter id="sd-cleave" filterUnits="userSpaceOnUse" x="-100" y="-100" width="200" height="200">
+              <feTurbulence type="fractalNoise" baseFrequency="0.035 0.7" numOctaves="3" seed="11"></feTurbulence>
+              <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1.8 0 0 0 -0.82"></feColorMatrix>
+              <feComposite in2="SourceGraphic" operator="in"></feComposite>
+            </filter>
+            <filter id="sd-speckle" filterUnits="userSpaceOnUse" x="-100" y="-100" width="200" height="200">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3"></feTurbulence>
+              <feColorMatrix
+                type="matrix"
+                values="0 0 0 0 0.35  0 0 0 0 0.3  0 0 0 0 0.22  2.4 0 0 0 -1.25"
+              ></feColorMatrix>
+              <feComposite in2="SourceGraphic" operator="in"></feComposite>
+            </filter>
+          </defs>
+          <circle r="99.6" fill="url(#sd-lime)"></circle>
+          <circle r="99.6" fill="#fff" filter="url(#sd-speckle)"></circle>
+          <circle r="99.1" fill="none" stroke="#f3eee3" stroke-width="0.5" opacity="0.7"></circle>
+          <circle r={R.plate + 1.1} fill="#262c30"></circle>
+          <circle r={R.plate} fill="url(#sd-slate)"></circle>
+          <circle r={R.plate} fill="#fff" filter="url(#sd-cleave)" opacity="0.07"></circle>
+        </svg>
+        <svg class="cut" viewBox="-100 -100 200 200" aria-hidden="true">
+          <defs>
+            <filter
+              id="sd-light"
+              filterUnits="userSpaceOnUse"
+              x="-100"
+              y="-100"
+              width="200"
+              height="200"
+              color-interpolation-filters="sRGB"
+            >
+              <feGaussianBlur in="SourceAlpha" stdDeviation="0.3" result="h"></feGaussianBlur>
+              <feDiffuseLighting
+                in="h"
+                surfaceScale="-1.5"
+                diffuseConstant="1.25"
+                lighting-color="#ffffff"
+                result="lit"
+                data-lamp
+              >
+                <feDistantLight azimuth="235" elevation="38" data-light></feDistantLight>
+              </feDiffuseLighting>
+              <feComposite in="SourceGraphic" in2="lit" operator="arithmetic" k1="1" k2="0" k3="0" k4="0"></feComposite>
+              <feComposite in2="SourceAlpha" operator="in"></feComposite>
+            </filter>
+          </defs>
+          <g class="face" filter="url(#sd-light)" data-face></g>
+        </svg>
+        <svg class="shade" viewBox="-100 -100 200 200" aria-hidden="true">
+          <defs>
+            <clipPath id="sd-clip">
+              <circle r="99.6"></circle>
+            </clipPath>
+            <filter id="sd-soft" filterUnits="userSpaceOnUse" x="-100" y="-100" width="200" height="200">
+              <feGaussianBlur stdDeviation="0.4"></feGaussianBlur>
+            </filter>
+          </defs>
+          <g class="compass" data-compass></g>
+          <g clip-path="url(#sd-clip)">
+            <g class="shadow" data-shadow-group filter="url(#sd-soft)">
+              <path data-shadow></path>
+              <circle data-bead-shadow></circle>
+            </g>
+          </g>
+          <g class="gnomon" data-gnomon>
+            <rect class="side" data-side="l"></rect>
+            <rect class="side" data-side="r"></rect>
+            <circle class="bead" data-bead></circle>
+            <circle class="boss" r={R.boss}></circle>
+            <circle class="boss-hi" r={R.boss * 0.55} cx="-0.8" cy="-0.8"></circle>
+          </g>
+          <circle class="sunmark" r="1.5" data-sunmark></circle>
+          <circle class="tint" r="99.6" data-tint></circle>
+        </svg>
+      </div>
+    </section>
+
+    <aside class="desk">
+      <header class="head">
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
+        <h1>Sundial</h1>
+        <p class="lede">
+          A garden dial laid out for one place. Choose where it stands and every line on the plate is set again for that
+          latitude and longitude.
+        </p>
+      </header>
+
+      <section class="reading" aria-live="polite">
+        <p class="big" data-big>
+          –
+        </p>
+        <p class="sub" data-sub></p>
+        <dl class="sum" data-sum></dl>
+      </section>
+
+      <section class="when" aria-label="Date and time">
+        <label class="slider">
+          <span class="label">
+            Day <b data-day-label></b>
+          </span>
+          <input type="range" min="0" max="364" step="1" data-day />
+          <span class="marks" aria-hidden="true">
+            <i style="--at: 0.216">Mar</i>
+            <i style="--at: 0.468">Jun</i>
+            <i style="--at: 0.725">Sep</i>
+            <i style="--at: 0.97">Dec</i>
+          </span>
+        </label>
+        <label class="slider">
+          <span class="label">
+            Time <b data-time-label></b>
+          </span>
+          <input type="range" min="0" max="1439" step="1" data-time />
+        </label>
+        <div class="buttons">
+          <button type="button" data-now aria-pressed="true">
+            Now
+          </button>
+          <button type="button" data-play>
+            Run the day
+          </button>
+        </div>
+      </section>
+
+      <section class="where" aria-label="Where the dial stands">
+        <h2>Where it stands</h2>
+        <div class="search">
+          <input
+            type="search"
+            placeholder="Search for a town"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Search for a town"
+            data-search
+          />
+          <ul class="results" data-results hidden></ul>
+        </div>
+        <canvas class="map" data-map aria-label="World map: click to place the dial anywhere"></canvas>
+        <p class="note" data-where-note></p>
+        <div class="buttons">
+          <button type="button" data-locate>
+            Use my location
+          </button>
+          <span class="zone" data-zone></span>
+        </div>
+      </section>
+
+      <section class="motto-pick">
+        <label>
+          <h2>Motto</h2>
+          <select data-motto>
+            {MOTTOS.map((m, i) => (
+              <option value={String(i)}>
+                {m.latin} ({m.english})
+              </option>
+            ))}
+            <option value="none">No motto</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="make">
+        <h2>Make one</h2>
+        <p>
+          The print sheet has this dial at full size, a gnomon to cut out, and how to set it up. The SVG is the face
+          alone, for a cutter or an engraver.
+        </p>
+        <div class="buttons">
+          <button type="button" class="primary" data-print>
+            Print the dial
+          </button>
+          <a class="button" data-svg download="sundial.svg" href="#">
+            Download SVG
+          </a>
+        </div>
+      </section>
+
+      <details class="key">
+        <summary>Reading the plate</summary>
+        <ul>
+          <li>
+            <b>Hour lines</b> run from the foot of the gnomon. Its sloping edge points at the celestial pole, so its
+            shadow swings at an even pace through the sky but lands on lines that crowd toward noon.
+          </li>
+          <li>
+            <b>Date lines</b> are traced by the tip of the shadow: the solstices at either end, the equinoxes on the
+            straight line, the start of each zodiac sign between.
+          </li>
+          <li>
+            <b>The figure eight</b> marks where the tip falls at noon on the clock. It leans and loops because the sun
+            runs up to a quarter of an hour fast or slow through the year.
+          </li>
+          <li>
+            <b>Off the meridian:</b> the lines are set for the clock zone's meridian, so the XII line sits off the
+            gnomon by however far the place is east or west of it.
+          </li>
+        </ul>
+      </details>
+    </aside>
+
+    <section class="sheet" data-sheet aria-hidden="true"></section>
+  </main>
+</Bare>
+
+<style>
+  .sundial {
+    --lawn: #17221b;
+    --lawn-2: #22322a;
+    --cream: #efe8d8;
+    --muted: #a8b4a6;
+    --rule: rgb(239 232 216 / 0.16);
+    --gold: #e7b55a;
+    --cut: #c9d1d4;
+    --field: rgb(10 16 12 / 0.45);
+
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 390px;
+    background: radial-gradient(120% 90% at 35% 45%, var(--lawn-2), var(--lawn) 70%), var(--lawn);
+    color: var(--cream);
+    font-family: var(--font-sundial-text);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  :global(body:has(.sundial)) {
+    margin: 0;
+    background: #17221b;
+  }
+
+  .stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 3vmin;
+    box-sizing: border-box;
+  }
+
+  .dial {
+    position: relative;
+    width: min(100%, calc(100dvh - 6vmin));
+    aspect-ratio: 1;
+  }
+
+  /* The pedestal's shadow on the lawn, thrown away from the sun. */
+  .ground {
+    position: absolute;
+    inset: 1%;
+    border-radius: 50%;
+    background: rgb(4 8 5 / var(--go, 0.45));
+    filter: blur(var(--gb, 14px));
+    transform: translate(var(--gx, 0%), var(--gy, 2%));
+  }
+
+  .dial svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .face {
+    fill: var(--cut);
+    stroke: var(--cut);
+  }
+
+  .face :global(text) {
+    font-family: var(--font-sundial-cut);
+  }
+
+  .shadow {
+    fill: #0b1115;
+    opacity: 0.6;
+  }
+
+  .side {
+    stroke: #4a3518;
+    stroke-width: 0.18;
+    transition: fill 0.4s;
+  }
+
+  .boss {
+    fill: #8c6532;
+  }
+
+  .bead {
+    fill: #c99a52;
+    stroke: #4a3518;
+    stroke-width: 0.18;
+  }
+
+  .boss-hi {
+    fill: #d6aa63;
+    opacity: 0.55;
+  }
+
+  .compass :global(text) {
+    font-family: var(--font-sundial-cut);
+    fill: #8a7f69;
+    font-size: 3.3px;
+    letter-spacing: 0.3px;
+  }
+
+  .sunmark {
+    fill: var(--gold);
+    stroke: #fff6dc;
+    stroke-width: 0.5;
+  }
+
+  .tint {
+    pointer-events: none;
+  }
+
+  /* The desk */
+  .desk {
+    padding: 34px 32px 48px;
+    border-left: 1px solid var(--rule);
+    background: rgb(8 14 10 / 0.28);
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .home {
+    color: var(--muted);
+    font-family: var(--font-sundial-cut);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+  }
+
+  .home:hover {
+    color: var(--cream);
+  }
+
+  h1 {
+    margin: 10px 0 8px;
+    font-family: var(--font-sundial-cut);
+    font-weight: 400;
+    font-size: 46px;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    margin: 0 0 10px;
+    font-family: var(--font-sundial-cut);
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .lede {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .reading {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 18px 0 16px;
+  }
+
+  .big {
+    margin: 0;
+    font-family: var(--font-sundial-cut);
+    font-size: 54px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sub {
+    margin: 6px 0 12px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .sum {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 3px 0;
+    margin: 0;
+    font-size: 15px;
+  }
+
+  .sum :global(dt) {
+    color: var(--muted);
+  }
+
+  .sum :global(dd) {
+    margin: 0;
+    padding-left: 16px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sum :global(.total) {
+    border-top: 1px solid var(--rule);
+    padding-top: 5px;
+    margin-top: 3px;
+    color: var(--cream);
+  }
+
+  .slider {
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  .label {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-sundial-cut);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .label b {
+    font-weight: 400;
+    color: var(--cream);
+    letter-spacing: 0.06em;
+  }
+
+  input[type='range'] {
+    width: 100%;
+    margin: 8px 0 2px;
+    accent-color: var(--gold);
+    --day: linear-gradient(90deg, #26302a, #26302a);
+  }
+
+  input[type='range'][data-time] {
+    appearance: none;
+    height: 22px;
+    background: transparent;
+  }
+
+  input[type='range'][data-time]::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--day);
+  }
+
+  input[type='range'][data-time]::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--day);
+  }
+
+  input[type='range'][data-time]::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    margin-top: -5px;
+    border-radius: 50%;
+    background: var(--cream);
+    border: 2px solid var(--lawn);
+    box-shadow: 0 0 0 1px var(--gold);
+  }
+
+  input[type='range'][data-time]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--cream);
+    border: 2px solid var(--lawn);
+    box-shadow: 0 0 0 1px var(--gold);
+  }
+
+  .marks {
+    position: relative;
+    display: block;
+    height: 16px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .marks i {
+    position: absolute;
+    left: calc(var(--at) * (100% - 16px) + 8px);
+    transform: translateX(-50%);
+    font-style: normal;
+    letter-spacing: 0.06em;
+  }
+
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  button,
+  .button {
+    font: inherit;
+    font-family: var(--font-sundial-cut);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cream);
+    background: transparent;
+    border: 1px solid rgb(239 232 216 / 0.35);
+    border-radius: 999px;
+    padding: 7px 15px 6px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  button:hover,
+  .button:hover {
+    border-color: var(--cream);
+  }
+
+  button[aria-pressed='true'] {
+    background: var(--cream);
+    color: var(--lawn);
+    border-color: var(--cream);
+  }
+
+  button.primary {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #1d1a12;
+  }
+
+  button:focus-visible,
+  .button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  .search {
+    position: relative;
+  }
+
+  input[type='search'],
+  select {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 15px;
+    color: var(--cream);
+    background: var(--field);
+    border: 1px solid rgb(239 232 216 / 0.22);
+    border-radius: 6px;
+    padding: 9px 12px;
+  }
+
+  input[type='search']::-webkit-search-cancel-button {
+    appearance: none;
+  }
+
+  input[type='search']::placeholder {
+    color: rgb(168 180 166 / 0.8);
+  }
+
+  select option {
+    background: #1d2a22;
+  }
+
+  .results {
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    right: 0;
+    top: calc(100% + 4px);
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    background: #223128;
+    border: 1px solid rgb(239 232 216 / 0.25);
+    border-radius: 6px;
+    box-shadow: 0 10px 28px rgb(0 0 0 / 0.4);
+  }
+
+  .results[hidden] {
+    display: none;
+  }
+
+  .results :global(button),
+  .zone :global(button) {
+    font: inherit;
+    color: var(--cream);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .results :global(button) {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: 0;
+    border-radius: 4px;
+    font-family: var(--font-sundial-text);
+    font-size: 15px;
+    letter-spacing: 0;
+    text-transform: none;
+    padding: 6px 9px;
+  }
+
+  .results :global(button:hover),
+  .results :global(button:focus-visible) {
+    background: rgb(239 232 216 / 0.1);
+  }
+
+  .results :global(small) {
+    color: var(--muted);
+  }
+
+  .results :global(.empty) {
+    padding: 6px 9px;
+    color: var(--muted);
+  }
+
+  .map {
+    display: block;
+    width: 100%;
+    aspect-ratio: 360 / 140;
+    margin: 12px 0 6px;
+    border-radius: 4px;
+    cursor: crosshair;
+    touch-action: manipulation;
+  }
+
+  .note {
+    margin: 0 0 10px;
+    min-height: 1.5em;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .zone {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .zone :global(button) {
+    min-width: 30px;
+    padding: 1px 9px 2px;
+    margin-left: 6px;
+    border: 1px solid rgb(239 232 216 / 0.35);
+    border-radius: 999px;
+    line-height: 1.3;
+  }
+
+  .zone :global(button:hover) {
+    border-color: var(--cream);
+  }
+
+  .make p {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .key {
+    border-top: 1px solid var(--rule);
+    padding-top: 14px;
+    font-size: 15px;
+  }
+
+  .key summary {
+    cursor: pointer;
+    font-family: var(--font-sundial-cut);
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .key ul {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+    color: var(--muted);
+  }
+
+  .key b {
+    font-weight: 500;
+    color: var(--cream);
+  }
+
+  .sheet {
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    .sundial {
+      grid-template-columns: 1fr;
+    }
+
+    .stage {
+      position: static;
+      height: auto;
+      padding: 16px 12px 8px;
+    }
+
+    .dial {
+      width: min(100%, 640px);
+    }
+
+    .desk {
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+      padding: 24px 16px 40px;
+    }
+
+    .head {
+      order: -2;
+    }
+  }
+
+  /* Print: the sheet alone, at true size. */
+  @media print {
+    :global(body:has(.sundial)) {
+      background: #fff;
+    }
+
+    .sundial {
+      display: block;
+      background: none;
+      color: #000;
+      min-height: 0;
+    }
+
+    .stage,
+    .desk {
+      display: none;
+    }
+
+    .sheet {
+      display: block;
+      font-family: var(--font-sundial-text);
+      font-size: 10pt;
+      line-height: 1.35;
+      color: #000;
+    }
+
+    .sheet :global(h2) {
+      font-family: var(--font-sundial-cut);
+      font-weight: 400;
+      font-size: 15pt;
+      letter-spacing: 0.06em;
+      color: #000;
+      text-transform: none;
+      margin: 0;
+    }
+
+    .sheet :global(.sheet-head p) {
+      margin: 1mm 0 3mm;
+    }
+
+    .sheet :global(.sheet-dial) {
+      display: block;
+      margin: 0 auto;
+    }
+
+    .sheet :global(.sheet-dial text) {
+      font-family: var(--font-sundial-cut);
+    }
+
+    .sheet :global(.sheet-foot) {
+      display: grid;
+      grid-template-columns: 1fr 58mm;
+      gap: 6mm;
+      margin-top: 4mm;
+      break-inside: avoid;
+    }
+
+    .sheet :global(.sheet-make) {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0 4mm;
+      align-items: start;
+    }
+
+    .sheet :global(.sheet-make .bar) {
+      grid-column: 1 / -1;
+    }
+
+    .sheet :global(ol) {
+      margin: 2mm 0;
+      padding-left: 5mm;
+    }
+
+    .sheet :global(.bar) {
+      display: flex;
+      align-items: center;
+      gap: 2mm;
+      margin: 0;
+    }
+
+    .sheet :global(.bar span) {
+      display: inline-block;
+      width: 50mm;
+      height: 1.6mm;
+      border: 0.3mm solid #000;
+      border-top: 0;
+    }
+
+    .sheet :global(.eot) {
+      border-collapse: collapse;
+      font-size: 8.5pt;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sheet :global(.eot caption) {
+      text-align: left;
+      font-style: italic;
+      margin-bottom: 1mm;
+    }
+
+    .sheet :global(.eot td) {
+      padding: 0.2mm 1.6mm 0.2mm 0;
+    }
+
+    .sheet :global(.gnomon-cut text) {
+      font-family: var(--font-sundial-text);
+    }
+
+    @page {
+      margin: 10mm;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+  const root = document.querySelector<HTMLElement>('[data-sundial]');
+  if (root) start(root);
+</script>
