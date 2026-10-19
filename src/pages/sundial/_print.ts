@@ -2,7 +2,7 @@
 // setting-up steps, and the equation of time, so a printout makes a working dial.
 
 import { R, type Dial } from './_dial';
-import { dms, face } from './_draw';
+import { dms, esc, face } from './_draw';
 import { RAD, season } from './_sun';
 import { zoneLabel } from './_zones';
 
@@ -89,10 +89,10 @@ export function sheet(dial: Dial, motto: string, year: number, info: SheetInfo):
   const where = `${dms(p.lat, 'N', 'S')}, ${dms(p.lon, 'E', 'W')}`;
   const pole = dial.k > 0 ? 'north' : 'south';
   const size = (2 * R.plate * MM).toFixed(0);
-  const zone = `${zoneLabel(p)}${info.zoneName ? ` (${info.zoneName})` : ''}`;
+  const zone = `${zoneLabel(p)}${info.zoneName ? ` (${esc(info.zoneName)})` : ''}`;
   return `
   <header class="sheet-head">
-    <h2>A horizontal sundial for ${p.name || where}</h2>
+    <h2>A horizontal sundial for ${p.name ? esc(p.name) : where}</h2>
     <p>${p.name ? `${where} · ` : ''}hour lines set for clocks on ${zone}</p>
   </header>
   <svg class="sheet-dial" width="${size}mm" height="${size}mm" viewBox="${-R.plate - 1} ${-R.plate - 1} ${2 * R.plate + 2} ${2 * R.plate + 2}" role="img" aria-label="The dial face at true size">${inkFace(dial, motto, year, 'print')}</svg>

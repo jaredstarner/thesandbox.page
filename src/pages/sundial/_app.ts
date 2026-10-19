@@ -105,7 +105,12 @@ export function start(root: HTMLElement): void {
   const saved = load();
   const thisYear = new Date().getUTCFullYear();
 
-  let place: Place = saved.place ?? guessPlace(thisYear);
+  const kept = saved.place;
+  let place: Place =
+    kept && Number.isFinite(kept.lat) && Number.isFinite(kept.lon) && Number.isFinite(kept.zoneLon)
+      ? placeIn(String(kept.name ?? ''), kept.lat, kept.lon, kept.zone, thisYear)
+      : guessPlace(thisYear);
+  if (kept && !kept.zone && Number.isFinite(kept.zoneLon)) place = { ...place, zoneLon: kept.zoneLon };
   const qLat = Number(params.get('lat'));
   const qLon = Number(params.get('lon'));
   if (params.has('lat') && params.has('lon') && Math.abs(qLat) <= 90 && Math.abs(qLon) <= 180) {

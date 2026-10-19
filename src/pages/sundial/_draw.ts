@@ -52,7 +52,9 @@ export function yearNumeral(y: number): string {
   return out;
 }
 
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+/** Escape text for markup: place names come from the URL, storage, and a third-party search. */
+export const esc = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 export interface FaceOptions {
   motto: string;
