@@ -23,6 +23,12 @@ The columns are `src, ref, name, region, lat, lon, char, height, range, structur
 
 Natural Earth's land polygons (the coast, via world-atlas) don't cut out lakes, so the Great Lakes and every other lake would read as land. `lakes-50m.tsv` and `lakes-10m.tsv` are Natural Earth's lake layers (public domain, `nvkelso/natural-earth-vector` 5.2.0-pre, read 2026-10-19), one polygon per line: rings parted by `;`, points `lon,lat` to four decimals. The 1:10m file leaves out the smallest lakes (scale rank 9). Write them with `node lakes.mjs ne_50m_lakes.geojson lakes-50m.tsv` and `node lakes.mjs ne_10m_lakes.geojson lakes-10m.tsv 8`.
 
+## Rivers
+
+`rivers.tsv` is Natural Earth's 1:10m river centerlines (`ne_10m_rivers_lake_centerlines`, same source and terms as the lakes), kept only where a river is lit: at least three lights within 1.5 km of its line. That leaves 73 rivers and canals, among them the Mississippi system, the Hudson, the Columbia, the St. Lawrence, the Elbe, the Rhine's Waal and Lek, and the Suez and Panama canals. One polyline per line, points `lon,lat`. Write it with `node rivers.mjs ne_10m_rivers_lake_centerlines.geojson lights.tsv rivers.tsv`.
+
+A centerline has no banks, so the page counts a band 0.7 km either side as water. The lines are coarse: on the Mississippi system, lights stand a median 0.85 km from the drawn river and one in ten more than 2.2 km off, so the deck lets a river light's line of sight cross that much land at the light's end.
+
 ## Refreshing it
 
 1. Save the seven NGA responses as `nga-110.json` to `nga-116.json` in one folder

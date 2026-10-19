@@ -9,6 +9,7 @@ import { Card } from './_card';
 import { Labels } from './_labels';
 import { Finder } from './_finder';
 import { Deck } from './_deck';
+import { loadRivers } from './_rivers';
 
 const root = document.querySelector<HTMLElement>('[data-coast]')!;
 const canvas = root.querySelector<HTMLCanvasElement>('[data-chart]')!;
@@ -40,10 +41,20 @@ async function main() {
     console.error(e);
     return;
   }
-  const coarse = await loadLand(`${base}land-50m.bin`);
+  const [coarse, rivers] = await Promise.all([
+    loadLand(`${base}land-50m.bin`),
+    loadRivers(`${base}rivers.bin`).catch((e) => {
+      console.error(e);
+      return null;
+    }),
+  ]);
   chart.setLand(coarse, 'coarse');
   const deck = new Deck(root, lights);
   deck.setLand(coarse, true);
+  if (rivers) {
+    chart.setRivers(rivers.segments);
+    deck.setRivers(rivers);
+  }
   let fineLoading = false;
   let fineReady = false;
   const wantFine = () => {
@@ -110,6 +121,7 @@ async function main() {
   card.onDeck = (i) => {
     const spot = deck.spotFor(i);
     if (spot) enterDeck(spot.lat, spot.lon, spot.heading);
+    else deck.flash('No open water near enough to see this light from.');
   };
 
   // Hit testing: a grid of light indices over the Mercator square.

@@ -11,6 +11,7 @@ import land10 from 'world-atlas/land-10m.json';
 import land50 from 'world-atlas/land-50m.json';
 import lakes10 from './_data/lakes-10m.tsv?raw';
 import lakes50 from './_data/lakes-50m.tsv?raw';
+import rivers from './_data/rivers.tsv?raw';
 
 export const LAND_MAGIC = 0x444e414c;
 export const GRID = 1 << 24;
@@ -131,5 +132,42 @@ export function packLand(res: '50m' | '10m'): Uint8Array<ArrayBuffer> {
       py = y;
     }
   }
+  return new Uint8Array(buf);
+}
+
+export const RIVER_MAGIC = 0x53525652;
+
+/**
+ * Lit rivers (see _data/rivers.mjs) as Mercator polylines: a 12-byte header
+ * (magic, line count, point count), points per line, then x and y on the same
+ * 2^24 grid as the land, each a difference from the point before.
+ */
+export function packRivers(): Uint8Array<ArrayBuffer> {
+  const lines = rivers
+    .split('\n')
+    .filter(Boolean)
+    .map((l) => l.split(' ').map((p) => p.split(',').map(Number) as [number, number]));
+  const points = lines.reduce((a, l) => a + l.length, 0);
+  const buf = new ArrayBuffer(12 + 4 * lines.length + 8 * points);
+  const dv = new DataView(buf);
+  dv.setUint32(0, RIVER_MAGIC, true);
+  dv.setUint32(4, lines.length, true);
+  dv.setUint32(8, points, true);
+  const per = new Uint32Array(buf, 12, lines.length);
+  const xy = new Int32Array(buf, 12 + 4 * lines.length, points * 2);
+  let k = 0;
+  let px = 0;
+  let py = 0;
+  lines.forEach((l, i) => {
+    per[i] = l.length;
+    for (const [lon, lat] of l) {
+      const x = Math.round(((lon + 180) / 360) * GRID);
+      const y = Math.round(mercY(lat) * GRID);
+      xy[k++] = x - px;
+      xy[k++] = y - py;
+      px = x;
+      py = y;
+    }
+  });
   return new Uint8Array(buf);
 }

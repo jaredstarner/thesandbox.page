@@ -10,6 +10,7 @@ import { LIGHT_RGB } from './_chart';
 import { DetailStore, type Detail } from './_card';
 import { bearing, destination, dip, distanceNm, formatPosition, geographicRange, mercX, mercY } from './_geo';
 import type { Land } from './_land';
+import { onRiver, riverKm, RIVER_HALF_KM, type Rivers } from './_rivers';
 import type { Lights } from './_lights';
 import { levelAt, COLOURS } from './_rhythm';
 import { sectorAt, span } from './_sectors';
@@ -55,6 +56,7 @@ export class Deck {
   private eye = 5;
   private seen: Seen[] = [];
   private coarse: Land | null = null;
+  private rivers: Rivers | null = null;
   private fine: Land | null = null;
   private mask: Uint8Array | null = null;
   private sprites: HTMLCanvasElement[] = [];
@@ -181,7 +183,12 @@ export class Deck {
   }
 
   /** Even-odd test against the land rings. */
+  setRivers(r: Rivers) {
+    this.rivers = r;
+  }
+
   isLand(lat: number, lon: number): boolean {
+    if (this.rivers && onRiver(this.rivers, lat, lon)) return false;
     const land = this.land();
     if (!land) return false;
     const y = mercY(lat);
@@ -234,7 +241,7 @@ export class Deck {
       for (const b of dirs) {
         // The vessel looks along b toward the light, so it lies on the reciprocal.
         const [lat, lon] = destination(L.lat[i], L.lon[i], (b + 180) % 360, d);
-        if (this.isLand(lat, lon)) continue;
+        if (this.isLand(lat, lon) || !this.clearTo(lat, lon, i, d)) continue;
         // Prefer open water: count the sea around the spot.
         let sea = 0;
         for (let a = 0; a < 360; a += 45) {
@@ -247,7 +254,34 @@ export class Deck {
       }
       if (best && best.score >= 6) break;
     }
-    return best ? { lat: best.lat, lon: best.lon, heading: best.heading } : null;
+    if (best) return { lat: best.lat, lon: best.lon, heading: best.heading };
+    // A light on a river or in a narrow harbour: the nearest water close in, inside a
+    // shown sector, with the light in view, or failing that any water close in.
+    const all = L.sectors[L.sector[i]];
+    let any: { lat: number; lon: number; heading: number } | null = null;
+    for (const d of [0.2, 0.35, 0.5, 0.8, 1.2, 1.8]) {
+      for (let a = 0; a < 360; a += 10) {
+        const [lat, lon] = destination(L.lat[i], L.lon[i], a, d);
+        const heading = (a + 180) % 360;
+        if (all.length && !sectorAt(all, heading)?.colour) continue;
+        if (this.isLand(lat, lon)) continue;
+        if (this.clearTo(lat, lon, i, d)) return { lat, lon, heading };
+        any ??= { lat, lon, heading };
+      }
+    }
+    return any;
+  }
+
+  /** Whether the line from a spot to light i, nm away, stays on water short of the light's own shore. */
+  private clearTo(lat: number, lon: number, i: number, nm: number): boolean {
+    const L = this.lights;
+    const b = bearing(lat, lon, L.lat[i], L.lon[i]);
+    const end = nm - this.shoreNm(i, nm);
+    for (let t = 0.15; t < end; t += 0.12) {
+      const [la, lo] = destination(lat, lon, b, t);
+      if (this.isLand(la, lo)) return false;
+    }
+    return true;
   }
 
   enter(lat: number, lon: number, heading: number | null) {
@@ -316,20 +350,52 @@ export class Deck {
       }
       g.fill('evenodd');
     }
+    // Rivers run through the land as a band of water.
+    if (this.rivers) {
+      g.strokeStyle = '#000';
+      g.lineWidth = Math.max(1.5, ((2 * RIVER_HALF_KM) / 1.852) * k);
+      g.lineJoin = 'round';
+      g.lineCap = 'round';
+      g.beginPath();
+      const dl = dLon + 0.5;
+      for (const line of this.rivers.lines) {
+        if (!line.some(([lo, la]) => Math.abs(la - this.lat) < dLat + 0.5 && Math.abs(lo - this.lon) < dl)) continue;
+        line.forEach(([lo, la], p) => {
+          const px = MASK / 2 + (lo - this.lon) * 60 * cos * k;
+          const py = MASK / 2 - (la - this.lat) * 60 * k;
+          if (p === 0) g.moveTo(px, py);
+          else g.lineTo(px, py);
+        });
+      }
+      g.stroke();
+    }
     const img = g.getImageData(0, 0, MASK, MASK).data;
     this.mask = new Uint8Array(MASK * MASK);
     for (let p = 0; p < MASK * MASK; p++) this.mask[p] = img[p * 4] > 127 ? 1 : 0;
   }
 
-  /** True when land lies between the boat and a point brg/nm away, near ends excepted. */
-  private blocked(brg: number, nm: number): boolean {
+  /**
+   * How much of a sight line, at the light's end, to let cross land. A light
+   * stands on land itself, and charted coasts are only good to about a
+   * kilometre; a river light may stand further still from the river as
+   * drawn (Natural Earth's centerline is often 1 to 3 km off the channel).
+   */
+  private shoreNm(i: number, nm: number): number {
+    const L = this.lights;
+    const base = Math.max(0.7, nm * 0.06);
+    if (!this.rivers) return base;
+    const km = riverKm(this.rivers, L.lat[i], L.lon[i]);
+    return km < 4 ? Math.max(base, km / 1.852 + 0.3) : base;
+  }
+
+  /** True when land lies between the boat and a point brg/nm away, the last `shore` nm excepted. */
+  private blocked(brg: number, nm: number, shore: number): boolean {
     if (!this.mask) return false;
     const k = MASK / (2 * MASK_NM);
     const rad = (brg * Math.PI) / 180;
     const sx = Math.sin(rad);
     const sy = -Math.cos(rad);
-    // The light stands on land itself, and charted coasts are only good to about a kilometre.
-    const end = nm - Math.max(0.7, nm * 0.06);
+    const end = nm - shore;
     for (let d = 0.25; d < end && d < MASK_NM; d += 0.12) {
       const px = Math.round(MASK / 2 + sx * d * k);
       const py = Math.round(MASK / 2 + sy * d * k);
@@ -367,7 +433,7 @@ export class Deck {
       if (nm > nominal * 1.15) continue;
       const loom = nm > geo;
       if (loom && nominal < 14) continue;
-      if (!loom && this.blocked(brg, nm)) continue;
+      if (!loom && this.blocked(brg, nm, this.shoreNm(i, nm))) continue;
       const m = nm * 1852;
       // Angle above the sea horizon: the light's height over distance, less the
       // drop of the earth (with refraction) below the line of sight.

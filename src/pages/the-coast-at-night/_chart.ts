@@ -31,6 +31,9 @@ export const LIGHT_RGB: [number, number, number][] = [
 ];
 
 const MAX_STEPS = 64;
+/** Land, a warm grey well clear of the sea, and the line along every shore. */
+const LAND = [0.118, 0.114, 0.106] as const;
+const COAST = [0.56, 0.64, 0.73] as const;
 
 const RHYTHM_GLSL = `
 uniform highp sampler2D u_rhythms;
@@ -67,6 +70,26 @@ uniform vec2 u_res;
 uniform float u_offset;
 void main() {
   vec2 p = (a_pos + vec2(u_offset, 0.0) - u_center) * u_scale;
+  gl_Position = vec4(p.x * 2.0 / u_res.x, -p.y * 2.0 / u_res.y, 0.0, 1.0);
+}`;
+
+// A river segment as a quad with square ends, a set width in pixels.
+const RIVER_VS = `#version 300 es
+layout(location = 0) in vec2 a_corner; // x 0..1 along, y -1..1 across
+layout(location = 1) in vec4 a_seg;
+uniform vec2 u_center;
+uniform float u_scale;
+uniform vec2 u_res;
+uniform float u_offset;
+uniform float u_width;
+void main() {
+  vec2 p0 = (a_seg.xy + vec2(u_offset, 0.0) - u_center) * u_scale;
+  vec2 p1 = (a_seg.zw + vec2(u_offset, 0.0) - u_center) * u_scale;
+  vec2 d = p1 - p0;
+  float len = length(d);
+  vec2 dir = len > 0.0 ? d / len : vec2(1.0, 0.0);
+  vec2 n = vec2(-dir.y, dir.x);
+  vec2 p = mix(p0, p1, a_corner.x) + n * a_corner.y * u_width * 0.5 + dir * (a_corner.x * 2.0 - 1.0) * u_width * 0.5;
   gl_Position = vec4(p.x * 2.0 / u_res.x, -p.y * 2.0 / u_res.y, 0.0, 1.0);
 }`;
 
@@ -232,6 +255,10 @@ export class Chart {
   private progComposite: WebGLProgram;
   private progFill: WebGLProgram;
   private uFill: Uniforms;
+  private progRiver: WebGLProgram;
+  private uRiver: Uniforms;
+  private riverVao: WebGLVertexArrayObject | null = null;
+  private riverCount = 0;
   private progLight: WebGLProgram;
   private progSector: WebGLProgram;
   private uLand: Uniforms;
@@ -265,6 +292,8 @@ export class Chart {
 
     this.progLand = compile(gl, LAND_VS, FLAT_FS);
     this.uLand = uniforms(gl, this.progLand, ['u_center', 'u_scale', 'u_res', 'u_offset', 'u_colour']);
+    this.progRiver = compile(gl, RIVER_VS, FLAT_FS);
+    this.uRiver = uniforms(gl, this.progRiver, ['u_center', 'u_scale', 'u_res', 'u_offset', 'u_width', 'u_colour']);
     this.progFill = compile(gl, FULL_VS, FLAT_FS);
     this.uFill = uniforms(gl, this.progFill, ['u_colour']);
     this.progComposite = compile(gl, FULL_VS, COMPOSITE_FS);
@@ -423,6 +452,24 @@ export class Chart {
     };
   }
 
+  /** Lit rivers, as segments x0 y0 x1 y1 in Mercator. */
+  setRivers(segments: Float32Array) {
+    const gl = this.gl;
+    this.riverVao = gl.createVertexArray()!;
+    gl.bindVertexArray(this.riverVao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, -1, 1, -1, 0, 1, 1, 1]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, segments, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribDivisor(1, 1);
+    gl.bindVertexArray(null);
+    this.riverCount = segments.length / 4;
+  }
+
   resize() {
     this.dpr = Math.min(2, window.devicePixelRatio || 1);
     const w = Math.max(1, Math.round(this.canvas.clientWidth * this.dpr));
@@ -524,14 +571,35 @@ export class Chart {
       gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
       gl.disable(gl.BLEND);
       gl.useProgram(this.progFill);
-      gl.uniform4f(this.uFill.u_colour, 0.074, 0.076, 0.08, 1);
+      gl.uniform4f(this.uFill.u_colour, LAND[0], LAND[1], LAND[2], 1);
       gl.bindVertexArray(null);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       gl.disable(gl.STENCIL_TEST);
       gl.enable(gl.BLEND);
+      if (this.riverVao && this.riverCount) {
+        // Rivers: a shore-coloured band, then the water down its middle.
+        const z = Math.log2(v.s / 256);
+        const w = Math.max(0.7, Math.min(3.4, 0.6 + (z - 4) * 0.45));
+        gl.useProgram(this.progRiver);
+        gl.uniform2f(this.uRiver.u_center, v.x, v.y);
+        gl.uniform1f(this.uRiver.u_scale, S);
+        gl.uniform2f(this.uRiver.u_res, W, H);
+        gl.bindVertexArray(this.riverVao);
+        for (const [width, colour] of [
+          [w + 1.4, [...COAST, 0.4 + 0.3 * zoom]],
+          [w, [0.012, 0.024, 0.043, 1]],
+        ] as const) {
+          gl.uniform1f(this.uRiver.u_width, width * this.dpr);
+          gl.uniform4f(this.uRiver.u_colour, colour[0], colour[1], colour[2], colour[3]);
+          for (const o of offsets) {
+            gl.uniform1f(this.uRiver.u_offset, o);
+            gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.riverCount);
+          }
+        }
+      }
       gl.useProgram(this.progLand);
       gl.bindVertexArray(land.linesVao);
-      gl.uniform4f(this.uLand.u_colour, 0.42, 0.5, 0.58, 0.32 + 0.25 * zoom);
+      gl.uniform4f(this.uLand.u_colour, COAST[0], COAST[1], COAST[2], 0.5 + 0.3 * zoom);
       for (const o of offsets) {
         gl.uniform1f(this.uLand.u_offset, o);
         gl.drawElements(gl.LINE_STRIP, land.lineCount, gl.UNSIGNED_INT, 0);
