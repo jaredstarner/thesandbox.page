@@ -553,7 +553,9 @@ export class Chart {
 
     gl.useProgram(this.progLight);
     common(this.uLight);
-    gl.uniform1f(this.uLight.u_gain, gain * (0.5 + 0.5 * zoom));
+    // A small screen packs the whole world's lights closer together; dim them to match.
+    const density = Math.min(1, Math.max(0.45, (v.s / 1500) ** 0.7));
+    gl.uniform1f(this.uLight.u_gain, gain * (0.5 + 0.5 * zoom) * density);
     gl.bindVertexArray(this.lightVao);
     gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.lights.n);
 
@@ -583,7 +585,7 @@ export class Chart {
     let n = 0;
     const d = this.sectorData;
     for (const a of this.arcs) {
-      if (L.range[a.i] < minRange || (a.plain && z < 10.5)) continue;
+      if (a.plain || L.range[a.i] < minRange) continue;
       let dx = L.xy[a.i * 2] - v.x;
       dx -= Math.floor(dx + 0.5);
       const dy = L.xy[a.i * 2 + 1] - v.y;

@@ -31,6 +31,13 @@ const MASK = 1024;
 const MASK_NM = 48;
 const SKY_STARS = 1100;
 
+/** "Borstahusen, Entrance channel, S. side range, front" to "Borstahusen, Entrance channel". */
+function short(name: string | undefined): string {
+  if (!name) return '';
+  const parts = name.split(', ');
+  return parts.length > 2 && name.length > 30 ? parts.slice(0, 2).join(', ') : name;
+}
+
 function rgb(code: number, a: number): string {
   const [r, g, b] = LIGHT_RGB[code];
   return `rgb(${Math.round(r * 255)} ${Math.round(g * 255)} ${Math.round(b * 255)} / ${a})`;
@@ -211,7 +218,9 @@ export class Deck {
         for (const f of [0.5, 0.3, 0.7, 0.15, 0.85]) dirs.push((s.from + w * f) % 360);
       }
     } else for (let a = 0; a < 360; a += 15) dirs.push(a);
-    const dists = [0.45, 0.3, 0.65, 0.2, 0.85].map((f) => Math.max(0.6, reach * f));
+    // Close enough that the light stands clear of the horizon and lights the water.
+    const near = Math.max(1.2, Math.min(5.5, reach * 0.3));
+    const dists = [1, 0.7, 1.4, 0.5, 2].map((f) => Math.min(reach, near * f));
     let best: { lat: number; lon: number; heading: number; score: number } | null = null;
     for (const d of dists) {
       for (const b of dirs) {
@@ -239,6 +248,7 @@ export class Deck {
     this.canvas.hidden = false;
     this.root.querySelector<HTMLElement>('[data-deckbar]')!.hidden = false;
     this.root.querySelector<HTMLElement>('[data-sight]')!.hidden = false;
+    this.root.querySelector<HTMLElement>('[data-deckhint]')!.hidden = false;
     this.fov = window.innerWidth < 720 ? 48 : 64;
     this.compute();
     if (heading !== null) this.heading = heading;
@@ -254,6 +264,7 @@ export class Deck {
     this.canvas.hidden = true;
     this.root.querySelector<HTMLElement>('[data-deckbar]')!.hidden = true;
     this.root.querySelector<HTMLElement>('[data-sight]')!.hidden = true;
+    this.root.querySelector<HTMLElement>('[data-deckhint]')!.hidden = true;
     this.tip.hidden = true;
     this.onLeave();
   }
@@ -377,7 +388,7 @@ export class Deck {
       const dot = document.createElement('i');
       dot.style.color = rgb(s.colour, 1);
       const name = document.createElement('span');
-      name.textContent = this.names.get(s.i)?.[0] || '…';
+      name.textContent = short(this.names.get(s.i)?.[0]) || '…';
       const em = document.createElement('em');
       em.textContent = `${String(Math.round(s.brg)).padStart(3, '0')}° ${s.nm < 10 ? s.nm.toFixed(1) : Math.round(s.nm)} M`;
       const small = document.createElement('small');
@@ -392,7 +403,8 @@ export class Deck {
           .get(s.i)
           .then((d) => {
             this.names.set(s.i, d);
-            name.textContent = d[0] || 'Unnamed light';
+            name.textContent = short(d[0]) || 'Unnamed light';
+            name.title = d[0];
           })
           .catch(() => (name.textContent = 'A light'));
       }
@@ -508,48 +520,170 @@ export class Deck {
       const code = lv.code === 8 ? s.colour : lv.code;
       const x = W / 2 + r * ppd;
       const y = horizonY - s.alt * ppd;
-      if (s.loom) {
-        // The loom: a glow in the sky over a light still below the horizon.
-        const a = 0.1 * lv.level * Math.min(1, s.bright * 4 + 0.4);
-        const rad = (40 + 30 * Math.min(1, s.bright)) * this.dpr * Math.sqrt(zoom);
-        g.globalAlpha = a;
-        g.drawImage(this.sprites[code], x - rad, horizonY - rad * 0.55, rad * 2, rad * 1.1);
-        g.globalAlpha = 1;
-        continue;
-      }
-      const b = s.bright * lv.level;
-      if (b <= 0.002) continue;
-      const rad = (3 + 9 * Math.sqrt(Math.min(3, b))) * this.dpr * Math.min(2.5, Math.sqrt(zoom));
-      g.globalAlpha = Math.min(1, 0.35 + b);
-      g.drawImage(this.sprites[code], x - rad, y - rad, rad * 2, rad * 2);
-      // Its path across the water toward the boat.
-      const len = Math.min(H - y, (14 + 120 * Math.min(1, b)) * this.dpr * Math.sqrt(zoom));
-      const segs = Math.max(4, Math.round(len / (5 * this.dpr)));
-      g.fillStyle = rgb(code, 1);
-      for (let k = 1; k < segs; k++) {
-        const t = k / segs;
-        const yy = y + 3 * this.dpr + t * len;
-        const wob = Math.sin(time * 3.1 + k * 2.3 + s.i) * (1 + t * 5) * this.dpr;
-        const w = (1 + t * 3.5) * this.dpr * Math.min(2, Math.sqrt(zoom));
-        const a = (1 - t) * 0.22 * Math.min(1, b) * (0.5 + 0.5 * Math.sin(time * 5 + k * 1.3 + s.i * 0.7));
-        g.globalAlpha = a;
-        g.fillRect(x - w / 2 + wob, yy, w, 1.2 * this.dpr);
-      }
-      g.globalAlpha = 1;
-      if (this.pointer) {
+      const dot = this.rows.get(s.i);
+      if (dot) dot.style.opacity = String(0.25 + 0.75 * lv.level);
+      if (this.pointer && !s.loom) {
         const d = Math.hypot(this.pointer.x * this.dpr - x, this.pointer.y * this.dpr - y);
         if (d < hoverD) {
           hoverD = d;
           hover = s;
         }
       }
-      const dot = this.rows.get(s.i);
-      if (dot) dot.style.opacity = String(0.25 + 0.75 * lv.level);
+      const lens = Math.min(2.6, Math.sqrt(zoom));
+      if (s.loom) {
+        // The loom: light thrown up into the air over a lamp still below the horizon.
+        const a = 0.22 * lv.level * Math.min(1, s.bright * 3 + 0.5);
+        const rad = (70 + 50 * Math.min(1, s.bright)) * this.dpr * lens;
+        g.globalAlpha = a;
+        g.drawImage(this.sprites[code], x - rad * 0.7, horizonY - rad * 0.9, rad * 1.4, rad * 1.2);
+        g.globalAlpha = 1;
+        continue;
+      }
+      const b = s.bright * lv.level;
+      if (b <= 0.002) continue;
+      const rb = Math.sqrt(Math.min(3, b));
+      // Scatter in the air around a bright light, then the lamp itself.
+      if (b > 0.25) {
+        const halo = (26 + 40 * rb) * this.dpr * lens;
+        g.globalAlpha = Math.min(0.5, 0.12 * b);
+        g.drawImage(this.sprites[code], x - halo, y - halo, halo * 2, halo * 2);
+      }
+      const rad = (5 + 15 * rb) * this.dpr * lens;
+      g.globalAlpha = Math.min(1, 0.45 + b);
+      g.drawImage(this.sprites[code], x - rad, y - rad, rad * 2, rad * 2);
+      // Its path across the water toward the boat, broken by the swell.
+      const len = Math.min(H - y, (20 + 170 * Math.min(1, b)) * this.dpr * Math.sqrt(zoom));
+      const segs = Math.max(4, Math.round(len / (4 * this.dpr)));
+      g.fillStyle = rgb(code, 1);
+      for (let k = 1; k < segs; k++) {
+        const t = k / segs;
+        const yy = y + 3 * this.dpr + t * t * len;
+        const wob = Math.sin(time * 2.1 + k * 2.3 + s.i) * (1 + t * 7) * this.dpr;
+        const w = (1.5 + t * 6) * this.dpr * Math.min(2, Math.sqrt(zoom)) * (0.6 + 0.4 * rb);
+        const a =
+          (1 - t) * 0.42 * Math.min(1, b) * (0.35 + 0.65 * Math.max(0, Math.sin(time * 4 + k * 1.7 + s.i * 0.7)));
+        g.globalAlpha = a;
+        g.fillRect(x - w / 2 + wob, yy, w, (1 + t * 1.5) * this.dpr);
+      }
+      g.globalAlpha = 1;
     }
     g.globalCompositeOperation = 'source-over';
+    // Through binoculars the boat drops out of the view.
+    if (this.fov > 30) this.drawBow(W, H, horizonY);
+    else this.vignette(W, H);
 
     this.drawTape(W, H, ppd, rel);
     this.showTip(hover, W);
+  }
+
+  /**
+   * The boat under the lookout, black against the water: a yacht's foredeck,
+   * pulpit, forestay, and its own red and green sidelights, or from the
+   * bridge, a ship's long bow and jackstaff.
+   */
+  private drawBow(W: number, H: number, horizonY: number) {
+    const g = this.ctx;
+    const d = this.dpr;
+    const base = H - 46 * d;
+    const ship = this.eye > 10;
+    const yS = horizonY + (base - horizonY) * (ship ? 0.62 : this.eye < 3 ? 0.42 : 0.5);
+    const w = Math.min(W * (ship ? 0.9 : 0.7), (ship ? 1300 : 980) * d);
+    const sheer = (side: number) => {
+      g.moveTo(W / 2 + (side * w) / 2, base);
+      g.bezierCurveTo(
+        W / 2 + side * w * 0.46,
+        yS + (base - yS) * 0.4,
+        W / 2 + side * w * (ship ? 0.2 : 0.12),
+        yS + 2 * d,
+        W / 2,
+        yS,
+      );
+    };
+    g.fillStyle = '#010204';
+    g.beginPath();
+    sheer(-1);
+    g.lineTo(W / 2, yS);
+    g.bezierCurveTo(
+      W / 2 + w * (ship ? 0.2 : 0.12),
+      yS + 2 * d,
+      W / 2 + w * 0.46,
+      yS + (base - yS) * 0.4,
+      W / 2 + w / 2,
+      base,
+    );
+    g.closePath();
+    g.fill();
+
+    // The toe rail catches a little sky.
+    const rail = g.createLinearGradient(0, yS, 0, base);
+    rail.addColorStop(0, 'rgb(160 180 210 / 0.2)');
+    rail.addColorStop(1, 'rgb(160 180 210 / 0.03)');
+    g.strokeStyle = rail;
+    g.lineWidth = 1.2 * d;
+    g.beginPath();
+    sheer(-1);
+    sheer(1);
+    g.stroke();
+    g.strokeStyle = 'rgb(160 180 210 / 0.035)';
+    g.lineWidth = d;
+    g.beginPath();
+    g.moveTo(W / 2, yS + 4 * d);
+    g.lineTo(W / 2, base);
+    g.stroke();
+
+    g.strokeStyle = 'rgb(160 180 210 / 0.13)';
+    if (ship) {
+      g.beginPath();
+      g.moveTo(W / 2, yS);
+      g.lineTo(W / 2, yS - 46 * d);
+      g.stroke();
+      return;
+    }
+    // Pulpit: a rail on stanchions round the bow, and the forestay rising out of frame.
+    const railH = 30 * d;
+    const legs: [number, number][] = [];
+    g.beginPath();
+    for (const side of [-1, 1]) {
+      const x0 = W / 2 + side * w * 0.16;
+      const y0 = yS + (base - yS) * 0.32;
+      g.moveTo(x0, y0 - railH);
+      g.quadraticCurveTo(W / 2 + side * w * 0.05, yS - railH * 0.95, W / 2, yS - railH * 0.9);
+      legs.push([x0, y0]);
+      g.moveTo(x0, y0);
+      g.lineTo(x0, y0 - railH);
+    }
+    g.moveTo(W / 2, yS);
+    g.lineTo(W / 2, yS - railH * 0.9);
+    g.stroke();
+    g.strokeStyle = 'rgb(160 180 210 / 0.1)';
+    g.beginPath();
+    // The forestay climbs to a masthead behind the lookout, who stands to starboard of it.
+    g.moveTo(W / 2, yS);
+    g.lineTo(W / 2 - W * 0.2, 0);
+    g.stroke();
+    // Sidelights on the pulpit legs: red to port, green to starboard.
+    g.globalCompositeOperation = 'lighter';
+    legs.forEach(([x, y], k) => {
+      const code = k === 0 ? 2 : 3;
+      const r = 26 * d;
+      g.globalAlpha = 0.5;
+      g.drawImage(this.sprites[code], x - r, y - railH * 0.45 - r, r * 2, r * 2);
+      g.globalAlpha = 0.07;
+      g.drawImage(this.sprites[code], x - r * 4, y - r * 1.2, r * 8, r * 3);
+    });
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = 'source-over';
+  }
+
+  /** The round field of binoculars. */
+  private vignette(W: number, H: number) {
+    const g = this.ctx;
+    const r = Math.min(W, H) * 0.62;
+    const v = g.createRadialGradient(W / 2, H * 0.5, r * 0.7, W / 2, H * 0.5, r * 1.25);
+    v.addColorStop(0, 'rgb(0 0 0 / 0)');
+    v.addColorStop(1, 'rgb(0 0 0 / 0.85)');
+    g.fillStyle = v;
+    g.fillRect(0, 0, W, H);
   }
 
   private drawTape(W: number, H: number, ppd: number, rel: (b: number) => number) {

@@ -113,6 +113,9 @@ const places = [
       </p>
     </aside>
     <p class="tip" data-tip hidden></p>
+    <p class="deckhint" data-deckhint hidden>
+      Drag to look around. Scroll or pinch to look closer, as through binoculars.
+    </p>
 
     <footer class="credits">
       Lights: NGA Pub. 110 to 116, <i>List of Lights</i> (2026), and USCG <i>Light List</i> (October 2026). Coast:
@@ -284,6 +287,9 @@ const places = [
     border-radius: 0;
     outline: none;
     backdrop-filter: blur(6px);
+  }
+  .find input::-webkit-search-cancel-button {
+    display: none;
   }
   .find input::placeholder {
     color: var(--ink-faint);
@@ -488,6 +494,7 @@ const places = [
   .coast[data-mode='deck'] .find,
   .coast[data-mode='deck'] .card,
   .coast[data-mode='deck'] .hint,
+  .coast[data-mode='deck'] .credits,
   .coast[data-mode='deck'] .labels {
     display: none;
   }
@@ -595,6 +602,15 @@ const places = [
     color: var(--ink-dim);
     font-size: 13.5px;
   }
+  .deckhint {
+    position: absolute;
+    left: 20px;
+    bottom: 58px;
+    margin: 0;
+    font: italic 400 13.5px/1.35 var(--serif);
+    color: var(--ink-dim);
+    pointer-events: none;
+  }
   .tip {
     position: absolute;
     left: 0;
@@ -681,7 +697,7 @@ const places = [
       left: 12px;
       right: 12px;
       top: auto;
-      bottom: 30px;
+      bottom: 52px;
       width: auto;
     }
     .places {
@@ -716,7 +732,8 @@ const places = [
       left: 12px;
       right: 12px;
       bottom: 8px;
-      font-size: 9.5px;
+      font-size: 9px;
+      line-height: 1.25;
     }
     .deckbar {
       left: 12px;
@@ -740,9 +757,27 @@ const places = [
       left: 12px;
       right: 12px;
       top: auto;
-      bottom: 92px;
+      bottom: 100px;
       width: auto;
-      max-height: 30%;
+      max-height: 24%;
+      padding: 8px 12px;
+    }
+    .sight h2 {
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    .sight :global(li button) {
+      padding: 3px 0;
+      font-size: 13px;
+    }
+    .sight :global(li small) {
+      display: none;
+    }
+    .deckhint {
+      left: 12px;
+      right: 12px;
+      bottom: 54px;
+      font-size: 12.5px;
     }
   }
 </style>

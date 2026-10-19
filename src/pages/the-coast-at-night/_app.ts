@@ -21,7 +21,8 @@ const FINE_AT = 256 * 2 ** 4.6;
 
 const clampS = (s: number) => Math.max(minScale(), Math.min(MAX_S, s));
 function minScale() {
-  return Math.max(MIN_S, canvas.clientWidth * 1.02, canvas.clientHeight * 0.9);
+  // Fill the width, and on a tall phone screen the height too, so the poles stay off screen.
+  return Math.max(MIN_S, canvas.clientWidth * 1.02, canvas.clientHeight * 1.12);
 }
 
 async function main() {
@@ -67,9 +68,28 @@ async function main() {
   const labels = new Labels(root.querySelector('[data-labels]')!, lights, `${base}names.json`);
   const card = new Card(root, lights, base);
   const finder = new Finder(root, `${base}names.json`, lights, (i) => {
-    flyTo(lights.xy[i * 2], lights.xy[i * 2 + 1], Math.max(view.s, 256 * 2 ** 10.5));
     select(i);
+    reveal(i, Math.max(view.s, 256 * 2 ** 10.5), true);
   });
+
+  /** Brings light i into the part of the screen the card leaves clear. */
+  function reveal(i: number, s: number, always: boolean) {
+    const W = canvas.clientWidth;
+    const H = canvas.clientHeight;
+    const c = root.querySelector<HTMLElement>('[data-card]')!.getBoundingClientRect();
+    const r = canvas.getBoundingClientRect();
+    const phone = c.width > W * 0.8;
+    // Where the light should land: the middle of the open water beside or above the card.
+    const tx = phone ? W / 2 : (c.left - r.left) / 2;
+    const ty = phone ? Math.max(120, (c.top - r.top) / 2 + 60) : H / 2;
+    let dx = lights.xy[i * 2] - view.x;
+    dx -= Math.round(dx);
+    const px = dx * view.s + W / 2;
+    const py = (lights.xy[i * 2 + 1] - view.y) * view.s + H / 2;
+    const covered = phone ? py > c.top - r.top - 30 : px > c.left - r.left - 30;
+    if (!always && !covered && s === view.s) return;
+    flyTo(lights.xy[i * 2] - (tx - W / 2) / s, lights.xy[i * 2 + 1] - (ty - H / 2) / s, s);
+  }
 
   let selected = -1;
   const pick = document.createElement('div');
@@ -235,6 +255,7 @@ async function main() {
       const r = canvas.getBoundingClientRect();
       const hit = nearest(e.clientX - r.left, e.clientY - r.top, e.pointerType === 'mouse' ? 10 : 18);
       select(hit);
+      if (hit >= 0) reveal(hit, view.s, false);
     }
   };
   canvas.addEventListener('pointerup', up);
@@ -329,8 +350,10 @@ async function main() {
   ro.observe(canvas);
 
   const t0 = performance.now();
+  let shift = 0;
+  let held: number | null = null;
   function frame(now: number) {
-    const time = (now - t0) / 1000;
+    const time = held ?? (now - t0) / 1000 + shift;
     if (root.dataset.mode === 'deck') {
       deck.draw(time);
     } else {
@@ -371,6 +394,10 @@ async function main() {
       deck: (lat: number, lon: number, heading: number | null) => enterDeck(lat, lon, heading),
       deckView: deck,
       fine: () => fineReady,
+      /** Moves the page clock, so a render check can catch a light mid-flash. */
+      setTime: (t: number) => (shift = t - (performance.now() - t0) / 1000),
+      /** Stops the page clock at t seconds, or starts it again with null. */
+      hold: (t: number | null) => (held = t),
       wantFine,
       finder,
     };
