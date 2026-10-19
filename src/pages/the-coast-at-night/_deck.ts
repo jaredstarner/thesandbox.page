@@ -31,6 +31,41 @@ interface Seen {
 const MASK = 1024;
 const MASK_NM = 48;
 const SKY_STARS = 1100;
+/** Rays round the boat for the shoreline silhouette: one every half degree. */
+const RAYS = 720;
+/** Earth's radius with standard refraction, metres, as for the lights. */
+const R_EFF = 6371000 * 1.08;
+const DEG = 180 / Math.PI;
+
+function hash2(x: number, y: number): number {
+  let h = Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263);
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+
+/** Smooth value noise, 0 to 1. */
+function noise(x: number, y: number): number {
+  const xi = Math.floor(x);
+  const yi = Math.floor(y);
+  const fx = x - xi;
+  const fy = y - yi;
+  const sx = fx * fx * (3 - 2 * fx);
+  const sy = fy * fy * (3 - 2 * fy);
+  const a = hash2(xi, yi) + (hash2(xi + 1, yi) - hash2(xi, yi)) * sx;
+  const b = hash2(xi, yi + 1) + (hash2(xi + 1, yi + 1) - hash2(xi, yi + 1)) * sx;
+  return a + (b - a) * sy;
+}
+
+/**
+ * A stand-in height for the shore at a place, metres: the lists give no
+ * terrain, so low hills and a treeline, varying over a kilometre or two and
+ * fixed to the ground so the skyline holds still as the view turns.
+ */
+function shoreHeight(lat: number, lon: number): number {
+  const x = (lon * 111.32 * Math.cos((lat * Math.PI) / 180)) / 1.6;
+  const y = (lat * 111.32) / 1.6;
+  return 7 + 20 * noise(x, y) + 9 * noise(x * 4.1, y * 4.1) ** 2 + 2.5 * hash2(Math.floor(x * 22), Math.floor(y * 22));
+}
 
 /** "Borstahusen, Entrance channel, S. side range, front" to "Borstahusen, Entrance channel". */
 function short(name: string | undefined): string {
@@ -59,6 +94,8 @@ export class Deck {
   private rivers: Rivers | null = null;
   private fine: Land | null = null;
   private mask: Uint8Array | null = null;
+  /** Degrees above the sea horizon of the nearest shore's top and waterline, per ray; NaN where none shows. */
+  private shore: { top: Float32Array; foot: Float32Array } | null = null;
   private sprites: HTMLCanvasElement[] = [];
   private stars: { az: number; alt: number; m: number; tw: number }[] = [];
   private pointer: { x: number; y: number } | null = null;
@@ -407,6 +444,7 @@ export class Deck {
 
   private compute() {
     this.buildMask();
+    this.buildShore();
     const L = this.lights;
     const seen: Seen[] = [];
     const dLat = 45 / 60;
@@ -582,6 +620,7 @@ export class Deck {
     // Horizon.
     g.fillStyle = 'rgb(150 170 200 / 0.08)';
     g.fillRect(0, horizonY - this.dpr * 0.5, W, this.dpr);
+    this.drawShore(W, horizonY, ppd);
 
     // Lights, nearest last so they sit over the far ones.
     g.globalCompositeOperation = 'lighter';
@@ -629,13 +668,14 @@ export class Deck {
       const rad = (5 + 15 * rb) * this.dpr * lens;
       g.globalAlpha = Math.min(1, 0.45 + b);
       g.drawImage(this.sprites[code], x - rad, y - rad, rad * 2, rad * 2);
-      // Its path across the water toward the boat, broken by the swell.
-      const len = Math.min(H - y, (20 + 170 * Math.min(1, b)) * this.dpr * Math.sqrt(zoom));
+      // Its path across the water toward the boat, broken by the swell, from its waterline down.
+      const foot = Math.max(y + 3 * this.dpr, horizonY - this.waterline(s.nm) * ppd);
+      const len = Math.min(H - foot, (20 + 170 * Math.min(1, b)) * this.dpr * Math.sqrt(zoom));
       const segs = Math.max(4, Math.round(len / (4 * this.dpr)));
       g.fillStyle = rgb(code, 1);
       for (let k = 1; k < segs; k++) {
         const t = k / segs;
-        const yy = y + 3 * this.dpr + t * t * len;
+        const yy = foot + t * t * len;
         const wob = Math.sin(time * 2.1 + k * 2.3 + s.i) * (1 + t * 7) * this.dpr;
         const w = (1.5 + t * 6) * this.dpr * Math.min(2, Math.sqrt(zoom)) * (0.6 + 0.4 * rb);
         const a =
@@ -652,6 +692,107 @@ export class Deck {
 
     this.drawTape(W, H, ppd, rel);
     this.showTip(hover, W);
+  }
+
+  /** Degrees above the sea horizon of the waterline nm away: 0 past the horizon, where it is hidden. */
+  private waterline(nm: number): number {
+    const m = nm * 1852;
+    if (m > Math.sqrt(2 * this.eye * R_EFF)) return 0;
+    return (Math.atan2(-this.eye, m) - m / (2 * R_EFF)) * DEG + dip(this.eye);
+  }
+
+  /** Walks each ray out across the land mask to the first shore, and works out how much of it stands above the sea. */
+  private buildShore() {
+    this.shore = null;
+    if (!this.mask) return;
+    const top = new Float32Array(RAYS).fill(NaN);
+    const foot = new Float32Array(RAYS).fill(NaN);
+    const k = MASK / (2 * MASK_NM);
+    const cos = Math.cos((this.lat * Math.PI) / 180);
+    // The lists' one clue to terrain: a light stands on ground not far below its own height.
+    const L = this.lights;
+    const tall = new Map<string, number>();
+    const cell = (la: number, lo: number) => `${Math.floor(la / 0.01)},${Math.floor(lo / 0.01)}`;
+    for (let i = 0; i < L.n; i++) {
+      if (
+        !L.height[i] ||
+        Math.abs(L.lat[i] - this.lat) > 0.85 ||
+        Math.abs(L.lon[i] - this.lon) > 0.85 / Math.max(0.05, cos)
+      )
+        continue;
+      const key = cell(L.lat[i], L.lon[i]);
+      tall.set(key, Math.max(tall.get(key) ?? 0, L.height[i] * 0.8));
+    }
+    const ground = (la: number, lo: number) => {
+      let h = shoreHeight(la, lo);
+      for (let a = -1; a <= 1; a++)
+        for (let b = -1; b <= 1; b++) h = Math.max(h, tall.get(cell(la + a * 0.01, lo + b * 0.01)) ?? 0);
+      return h;
+    };
+    for (let r = 0; r < RAYS; r++) {
+      const rad = (((r * 360) / RAYS) * Math.PI) / 180;
+      const sx = Math.sin(rad);
+      const sy = -Math.cos(rad);
+      for (let d = 0.05; d < MASK_NM * 0.98; d *= 1.02) {
+        const px = Math.round(MASK / 2 + sx * d * k);
+        const py = Math.round(MASK / 2 + sy * d * k);
+        if (px < 0 || py < 0 || px >= MASK || py >= MASK) break;
+        if (!this.mask[py * MASK + px]) continue;
+        const lat = this.lat + (-sy * d) / 60;
+        const lon = this.lon + (sx * d) / 60 / Math.max(0.05, cos);
+        const m = d * 1852;
+        const t = (Math.atan2(ground(lat, lon) - this.eye, m) - m / (2 * R_EFF)) * DEG + dip(this.eye);
+        if (t > 0.002) {
+          top[r] = t;
+          foot[r] = this.waterline(d);
+        }
+        break;
+      }
+    }
+    this.shore = { top, foot };
+  }
+
+  /** The shore in black against the sky, from its waterline to its skyline, with a little sky caught on the edge. */
+  private drawShore(W: number, horizonY: number, ppd: number) {
+    if (!this.shore) return;
+    const g = this.ctx;
+    const step = 2 * this.dpr;
+    const runs: { x: number; top: number; foot: number }[][] = [];
+    let run: { x: number; top: number; foot: number }[] = [];
+    for (let x = -step; x <= W + step; x += step) {
+      const brg = this.heading + (x - W / 2) / ppd;
+      const f = (((brg % 360) + 360) % 360) * (RAYS / 360);
+      const i0 = Math.floor(f) % RAYS;
+      const i1 = (i0 + 1) % RAYS;
+      const a = this.shore.top[i0];
+      const b = this.shore.top[i1];
+      if (Number.isNaN(a) && Number.isNaN(b)) {
+        if (run.length) runs.push(run);
+        run = [];
+        continue;
+      }
+      const t = f - Math.floor(f);
+      const tt = Number.isNaN(a) ? b : Number.isNaN(b) ? a : a + (b - a) * t;
+      const fa = this.shore.foot[Number.isNaN(a) ? i1 : i0];
+      run.push({ x, top: horizonY - tt * ppd, foot: horizonY - fa * ppd + this.dpr });
+    }
+    if (run.length) runs.push(run);
+    g.fillStyle = '#020307';
+    for (const r of runs) {
+      g.beginPath();
+      g.moveTo(r[0].x, r[0].top);
+      for (const p of r) g.lineTo(p.x, p.top);
+      for (let i = r.length - 1; i >= 0; i--) g.lineTo(r[i].x, r[i].foot);
+      g.closePath();
+      g.fill();
+    }
+    g.strokeStyle = 'rgb(130 150 185 / 0.12)';
+    g.lineWidth = this.dpr;
+    for (const r of runs) {
+      g.beginPath();
+      r.forEach((p, i) => (i ? g.lineTo(p.x, p.top) : g.moveTo(p.x, p.top)));
+      g.stroke();
+    }
   }
 
   /**
