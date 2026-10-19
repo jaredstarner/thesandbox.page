@@ -1,5 +1,5 @@
 // Hill run: the music under each run and on the results card, the stings at the
-// bottom, and the crowd and birds on the cheese hill.
+// bottom, and the birds and applause on the cheese hill.
 //
 // A small step sequencer schedules every note on the audio clock a beat ahead, so
 // the rhythm holds whatever the frame rate does. Run songs follow your speed: the
@@ -517,16 +517,15 @@ export class Music {
   }
 }
 
-/** A crowd murmuring along the fences, and birds over the hill. */
+/** Birds over the hill, and applause from the fences when you win. */
 export class Field {
-  /** 0 to 1: how many voices, and how loud. */
-  crowd = 0;
   /** 0 to 1: how often birds sing. */
   birds = 0;
   private bus: GainNode;
-  private nextVoice = 0;
+  private nextClap = 0;
   private nextBird = 0;
-  private cheerUntil = 0;
+  private applauseFrom = 0;
+  private applauseUntil = 0;
 
   constructor(
     private ctx: AudioContext,
@@ -541,75 +540,34 @@ export class Field {
     this.bus.connect(lp).connect(out);
   }
 
-  /** The crowd goes up: a burst of shouts and applause. */
-  cheer(seconds = 3): void {
-    this.cheerUntil = this.ctx.currentTime + seconds;
+  /** A round of applause that dies away over a few seconds. */
+  applaud(seconds = 3): void {
+    this.applauseFrom = this.ctx.currentTime;
+    this.applauseUntil = this.applauseFrom + seconds;
   }
 
   stop(): void {
-    this.crowd = 0;
     this.birds = 0;
-    this.cheerUntil = 0;
+    this.applauseUntil = 0;
   }
 
   tick(): void {
     const t = this.ctx.currentTime;
     const ahead = t + 0.2;
-    const cheering = t < this.cheerUntil;
-    if (this.nextVoice < t - 0.2) this.nextVoice = t;
+    if (this.nextClap < t - 0.2) this.nextClap = t;
     if (this.nextBird < t - 0.2) this.nextBird = t + 0.5;
-    // Voices arrive at random: a few a second when quiet, dozens in a cheer.
-    const rate = cheering ? 45 : this.crowd * 28;
-    while (rate > 0 && this.nextVoice < ahead) {
-      this.syllable(this.nextVoice, cheering);
-      if (cheering && Math.random() < 0.7) this.clapAt(this.nextVoice + Math.random() * 0.05);
-      this.nextVoice += -Math.log(1 - Math.random()) / rate;
+    // Claps arrive at random, thinning out as the applause dies away.
+    const left = (this.applauseUntil - t) / Math.max(0.01, this.applauseUntil - this.applauseFrom);
+    const rate = left > 0 ? 8 + 40 * left : 0;
+    while (rate > 0 && this.nextClap < ahead) {
+      this.clapAt(this.nextClap);
+      this.nextClap += -Math.log(1 - Math.random()) / rate;
     }
-    if (rate <= 0) this.nextVoice = ahead;
+    if (rate <= 0) this.nextClap = ahead;
     if (this.birds > 0 && this.nextBird < ahead) {
       this.song(this.nextBird);
       this.nextBird += (1.2 + Math.random() * 3) / Math.max(0.3, this.birds);
     } else if (this.birds <= 0) this.nextBird = ahead;
-  }
-
-  /** One voice saying one thing: a buzz through two vowel formants, gliding a little. */
-  private syllable(t: number, cheer: boolean): void {
-    const ctx = this.ctx;
-    const vowels: [number, number][] = [
-      [730, 1090],
-      [530, 1840],
-      [570, 840],
-      [300, 2200],
-      [440, 1020],
-    ];
-    const [f1, f2] = vowels[Math.floor(Math.random() * vowels.length)];
-    const high = Math.random() < 0.45;
-    const f0 = (high ? 190 + Math.random() * 70 : 100 + Math.random() * 50) * (cheer ? 1.25 : 1);
-    const dur = cheer ? 0.25 + Math.random() * 0.4 : 0.08 + Math.random() * 0.16;
-    const o = ctx.createOscillator();
-    o.type = 'sawtooth';
-    o.frequency.setValueAtTime(f0, t);
-    o.frequency.linearRampToValueAtTime(f0 * (cheer ? 1.15 : 0.9 + Math.random() * 0.2), t + dur);
-    const g = ctx.createGain();
-    const lvl = (cheer ? 0.14 : 0.09 + this.crowd * 0.08) * (0.4 + Math.random() * 0.6);
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(lvl, t + Math.min(0.04, dur * 0.3));
-    g.gain.linearRampToValueAtTime(0, t + dur);
-    const pan = ctx.createStereoPanner();
-    pan.pan.value = (Math.random() - 0.5) * 1.6;
-    for (const [f, q] of [
-      [f1, 6],
-      [f2, 8],
-    ]) {
-      const bp = ctx.createBiquadFilter();
-      bp.type = 'bandpass';
-      bp.frequency.value = f;
-      bp.Q.value = q;
-      o.connect(bp).connect(g);
-    }
-    g.connect(pan).connect(this.bus);
-    o.start(t);
-    o.stop(t + dur + 0.02);
   }
 
   private clapAt(t: number): void {
