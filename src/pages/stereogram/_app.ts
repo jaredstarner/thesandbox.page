@@ -342,8 +342,11 @@ export function start(root: HTMLElement) {
   const setSlide = (offset: number) => {
     slideOffset = Math.round(Math.min(W / 2, Math.max(8, offset)));
     const css = slideOffset / scale;
-    slideCanvas.style.transform = `translateX(${-css}px)`;
-    veil.style.width = `${css}px`;
+    // Half the shift each way, so the difference compares x - s/2 with x + s/2, the very pairs the solver links,
+    // and the shape shows where it stands. The strips at either edge with only one copy are blacked out.
+    sheetCanvas.style.transform = `translateX(${css / 2}px)`;
+    slideCanvas.style.transform = `translateX(${-css / 2}px)`;
+    veil.style.setProperty('--edge', `${Math.ceil(css / 2)}px`);
     const where =
       slideOffset === separation(groundZ(), eye)
         ? 'the background cancels, so the shape shows'
@@ -358,6 +361,7 @@ export function start(root: HTMLElement) {
     slideButton.ariaPressed = String(on);
     root.toggleAttribute('data-sliding', on);
     slideCanvas.hidden = veil.hidden = readout.hidden = !on;
+    if (!on) sheetCanvas.style.transform = '';
     if (on) {
       slideCtx.drawImage(sheetCanvas, 0, 0);
       setSlide(separation(groundZ(), eye));
