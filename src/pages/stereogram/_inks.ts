@@ -108,7 +108,6 @@ const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => 
 export function mottle(id: InkId, w: number, h: number, seed: number, cell: number): Uint32Array {
   const ink = INKS[id];
   const ramp = ink.ramp.map(rgba);
-  const fleck = weighted(ink);
   const next = random(seed);
   const lattice = new Float32Array(4096);
   for (let i = 0; i < lattice.length; i++) lattice[i] = next();
@@ -145,7 +144,10 @@ export function mottle(id: InkId, w: number, h: number, seed: number, cell: numb
       const s = Math.min(0.999, Math.max(0, (v - 0.22) / 0.56));
       const level = s * (ramp.length - 1) + BAYER[(y & 3) * 4 + (x & 3)] - 0.5;
       const i = y * w + x;
-      tex[i] = next() < 0.14 ? fleck[(next() * 64) | 0] : ramp[Math.min(ramp.length - 1, Math.max(0, Math.round(level)))];
+      // Flecks a step or two off the local tone: fine detail without a coat of grit.
+      const roll = next();
+      const off = roll < 0.06 ? -1 : roll < 0.12 ? 1 : roll < 0.14 ? 2 : roll < 0.16 ? -2 : 0;
+      tex[i] = ramp[Math.min(ramp.length - 1, Math.max(0, Math.round(level) + off))];
     }
   }
   return tex;

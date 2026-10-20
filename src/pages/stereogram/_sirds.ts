@@ -64,12 +64,21 @@ export class Sheet {
   }
 
   /** Solve every row's constraints for a depth map of w * h values in 0..1. */
-  link(depth: Float32Array, hidden = true): void {
+  link(depth: Float32Array, occlude = true): void {
     const { w, h, links, sep, rise, near } = this;
     const top = LEVELS - 1;
     for (let y = 0; y < h; y++) {
       const o = y * w;
-      for (let x = 0; x < w; x++) links[o + x] = x;
+      let lo = Infinity;
+      let hi = -Infinity;
+      for (let x = 0; x < w; x++) {
+        links[o + x] = x;
+        const v = depth[o + x];
+        if (v < lo) lo = v;
+        if (v > hi) hi = v;
+      }
+      // On a row all at one depth nothing can stand in front of anything else.
+      const hidden = occlude && hi > lo;
       if (hidden) this.windowMax(depth, o);
       const odd = y & 1;
       for (let x = 0; x < w; x++) {
@@ -133,18 +142,28 @@ export class Sheet {
     }
   }
 
-  /** Colour the sheet: free pixels take the texture at (x mod texW, y mod texH), the rest copy their link. */
+  /**
+   * Colour the sheet from a texture texW wide. Each pixel carries a texture
+   * column: a linked pixel takes its partner's, and a free pixel carries on
+   * one column left of its right-hand neighbour, so the texture runs on
+   * unbroken through gaps instead of being sampled afresh at each one.
+   */
   paint(tex: Uint32Array, texW: number, texH: number, out: Uint32Array): void {
     const { w, h, links } = this;
+    const column = this.column.length === w ? this.column : (this.column = new Int32Array(w));
     for (let y = 0; y < h; y++) {
       const o = y * w;
       const t = (y % texH) * texW;
-      let tx = (w - 1) % texW;
+      let next = (w - 1) % texW;
       for (let x = w - 1; x >= 0; x--) {
         const k = links[o + x];
-        out[o + x] = k === x ? tex[t + tx] : out[o + k];
-        tx = tx === 0 ? texW - 1 : tx - 1;
+        const c = k === x ? next : column[k];
+        column[x] = c;
+        out[o + x] = tex[t + c];
+        next = c === 0 ? texW - 1 : c - 1;
       }
     }
   }
+
+  private column = new Int32Array(0);
 }
