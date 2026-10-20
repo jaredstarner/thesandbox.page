@@ -18,9 +18,10 @@ const HELP_KEY = 'stereogram:seen-help';
 const INKS: InkId[] = ['newsprint', 'riso', 'phosphor', 'ember'];
 const GRAINS: Grain[] = ['fine', 'coarse', 'mottle'];
 
-/** Assumed for the test: a CSS pixel is 1/96 inch, and the eyes are 60 cm from the screen. */
+/** Assumed for the test: a CSS pixel is 1/96 inch, the eyes are 60 cm from the screen and 63 mm apart. */
 const MM_PER_CSS_PX = 25.4 / 96;
 const VIEWING_MM = 600;
+const EYES_MM = 63;
 const ARCSEC_PER_RADIAN = 206265;
 
 function load<T>(key: string): T | null {
@@ -97,10 +98,16 @@ export function start(root: HTMLElement) {
 
   // ------------------------------------------------------------ size
 
+  /** The depth of the picture's background: the far plane, except the clay, which starts a third of the way up. */
+  const groundZ = () => {
+    const z = plate === 'sculpt' ? 0.3 : 0;
+    return look.cross ? 1 - z : z;
+  };
+
   const placeGuides = () => {
     if (!eye) return;
-    // The guide dots sit at the separation of whatever is the background: the far plane, or the near one when crossed.
-    const s = separation(look.cross ? 1 : 0, eye) / scale;
+    // The guide dots repeat at the background's separation, so lining them up sets the eyes for the background.
+    const s = separation(groundZ(), eye) / scale;
     guides.style.setProperty('--guide-x', `${s / 2}px`);
   };
 
@@ -109,8 +116,20 @@ export function start(root: HTMLElement) {
     cssW = rect.width;
     cssH = rect.height;
     if (cssW < 40 || cssH < 40) return;
-    // The test draws in device pixels, so its steps in depth are as fine as the screen allows.
-    scale = plate === 'test' ? Math.max(1, devicePixelRatio) : look.grain === 'coarse' ? 0.5 : 1;
+    // Each dot is a whole number of device pixels, as fine as about 1.2 million dots allows. The test always draws
+    // in device pixels, so its steps in depth are as fine as the screen can show.
+    const dpr = Math.max(1, devicePixelRatio);
+    if (plate === 'test') scale = dpr;
+    else {
+      scale = 1;
+      for (let k = 1; dpr / k > 1; k++) {
+        if (cssW * cssH * (dpr / k) ** 2 <= 1.2e6) {
+          scale = dpr / k;
+          break;
+        }
+      }
+      if (look.grain === 'coarse') scale /= 2;
+    }
     const far = Math.round(Math.min(120, cssW / 3.3) * scale);
     const nw = Math.round(cssW * scale);
     const nh = Math.round(cssH * scale);
@@ -141,9 +160,22 @@ export function start(root: HTMLElement) {
     reply.bitmap.close();
   };
 
+  // ?debug keeps frame timings on window.stereogram, for checking the worker's pace, and can name the test's answer.
+  const stats = new URLSearchParams(location.search).has('debug')
+    ? { frames: 0, ms: [] as number[], scale: () => scale, target: () => trial?.target ?? null }
+    : null;
+  if (stats) (window as unknown as { stereogram: unknown }).stereogram = stats;
+
   worker.onmessage = (event: MessageEvent<Reply>) => {
     busy = false;
-    if (event.data.type === 'frame') draw(event.data);
+    if (event.data.type === 'frame') {
+      if (stats) {
+        stats.frames++;
+        stats.ms.push(Math.round(event.data.ms * 10) / 10);
+        if (stats.ms.length > 120) stats.ms.shift();
+      }
+      draw(event.data);
+    }
   };
 
   const tick = (t: number) => {
@@ -166,6 +198,8 @@ export function start(root: HTMLElement) {
     for (const t of tools) t.hidden = t.dataset.tool !== plate;
     send({ type: 'plate', plate });
     resize();
+    placeGuides();
+    if (sliding) setSlide(separation(groundZ(), eye));
     if (plate === 'word') queueWords();
     if (plate === 'test') openTest();
   };
@@ -310,13 +344,12 @@ export function start(root: HTMLElement) {
     const css = slideOffset / scale;
     slideCanvas.style.transform = `translateX(${-css}px)`;
     veil.style.width = `${css}px`;
-    const z = depthFor(slideOffset, eye);
     const where =
-      slideOffset === separation(look.cross ? 1 : 0, eye)
-        ? 'the background cancels out'
-        : z > 0 && z <= 1
-          ? `cancels whatever stands ${Math.round((look.cross ? 1 - z : z) * 100)}% of the way up`
-          : 'nothing cancels at this shift';
+      slideOffset === separation(groundZ(), eye)
+        ? 'the background cancels, so the shape shows'
+        : slideOffset < separation(1, eye) || slideOffset > separation(0, eye)
+          ? 'nothing in the picture repeats at this distance'
+          : 'whatever lies at this depth cancels';
     readout.textContent = `Shifted ${Math.round(css)} px: ${where}`;
   };
 
@@ -327,7 +360,7 @@ export function start(root: HTMLElement) {
     slideCanvas.hidden = veil.hidden = readout.hidden = !on;
     if (on) {
       slideCtx.drawImage(sheetCanvas, 0, 0);
-      setSlide(separation(look.cross ? 1 : 0, eye));
+      setSlide(separation(groundZ(), eye));
     }
   };
   slideButton.addEventListener('click', () => toggleSlide(!sliding));
@@ -354,7 +387,7 @@ export function start(root: HTMLElement) {
   $<HTMLInputElement>('[data-cross]').addEventListener('change', (e) => {
     look.cross = (e.target as HTMLInputElement).checked;
     sendLook();
-    if (sliding) setSlide(separation(look.cross ? 1 : 0, eye));
+    if (sliding) setSlide(separation(groundZ(), eye));
   });
   motion.addEventListener('change', sendLook);
 
@@ -371,7 +404,7 @@ export function start(root: HTMLElement) {
     g.fillStyle = ground(look.ink);
     g.fillRect(0, H, W, strip);
     g.fillStyle = getComputedStyle(root).getPropertyValue('--ink').trim() || '#000';
-    const s = separation(look.cross ? 1 : 0, eye);
+    const s = separation(groundZ(), eye);
     for (const x of [W / 2 - s / 2, W / 2 + s / 2]) {
       g.beginPath();
       g.arc(x, H + strip / 2, 6 * scale, 0, Math.PI * 2);
@@ -452,20 +485,28 @@ export function start(root: HTMLElement) {
     const figure = $<HTMLElement>('[data-result-figure]');
     const note = $<HTMLElement>('[data-result-note]');
     const floor = Math.round(arcsec(1));
+    // How much nearer one thing must be than another, at the viewing distance, to make that angle.
+    const mm = (seconds: number) => {
+      const d = ((seconds / ARCSEC_PER_RADIAN) * VIEWING_MM * VIEWING_MM) / EYES_MM;
+      return d < 10 ? d.toFixed(1) : String(Math.round(d));
+    };
+    const title = $<HTMLElement>('[data-result-title]');
     if (kind === 'none') {
-      $<HTMLElement>('[data-result-title]').textContent = 'No depth found';
+      title.textContent = 'No depth found';
       figure.textContent = '—';
-      note.textContent =
-        'The biggest step went unseen three times running. Try the Ring first with How to see it, then come back.';
+      note.textContent = 'You missed the biggest step three times in a row. Get the Ring to stand out first, then come back.';
     } else if (kind === 'floor') {
+      title.textContent = 'Your result';
       figure.textContent = `${floor}″ or finer`;
-      note.textContent = `You saw the smallest step this screen can draw, every time. That step is about ${floor} seconds of arc, assuming you sit about 60 cm away.`;
+      note.textContent = `You picked out the smallest step this screen can draw, every time: ${floor} seconds of arc. At 60 cm, that is telling that one thing stands ${mm(floor)} mm nearer than another.`;
     } else {
       const tail = r.reversals.slice(2);
       const levels = tail.length >= 2 ? tail : r.reversals;
       const mean = Math.exp(levels.reduce((s, v) => s + Math.log(v), 0) / levels.length);
-      figure.textContent = `${Math.round(arcsec(mean))}″`;
-      note.textContent = `The smallest difference in depth you picked out reliably, as an angle between your two eyes' views, in seconds of arc, assuming you sit about 60 cm from the screen. This screen can't draw a step finer than ${floor}″.`;
+      const seconds = Math.round(arcsec(mean));
+      title.textContent = 'Your result';
+      figure.textContent = `${seconds}″`;
+      note.textContent = `Seconds of arc: the smallest difference between your two eyes' views that you picked out reliably. At 60 cm, that is telling that one thing stands ${mm(seconds)} mm nearer than another. This screen can't draw a step finer than ${floor}″.`;
     }
     status.textContent = 'Test finished';
   };

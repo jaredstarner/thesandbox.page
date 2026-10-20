@@ -96,7 +96,9 @@ import Bare from '../../layouts/Bare.astro';
       <div class="actions">
         <button type="button" data-slide-toggle aria-pressed="false">Slide</button>
         <button type="button" popovertarget="st-look">Look</button>
-        <button type="button" popovertarget="st-help">How to see it</button>
+        <button type="button" popovertarget="st-help"
+          ><span class="long">How to see it</span><span class="short">Help</span></button
+        >
         <button type="button" data-save>Save</button>
       </div>
     </footer>
@@ -261,6 +263,7 @@ import Bare from '../../layouts/Bare.astro';
   }
 
   .card {
+    box-sizing: border-box;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -489,6 +492,10 @@ import Bare from '../../layouts/Bare.astro';
     margin-left: auto;
   }
 
+  .short {
+    display: none;
+  }
+
   .sr {
     position: absolute;
     width: 1px;
@@ -499,6 +506,7 @@ import Bare from '../../layouts/Bare.astro';
   }
 
   .panel {
+    box-sizing: border-box;
     position: fixed;
     inset: auto 16px 94px auto;
     width: min(360px, calc(100vw - 32px));
@@ -697,10 +705,39 @@ import Bare from '../../layouts/Bare.astro';
       font-size: 17px;
     }
 
+    /* Pictures on top, their tools under them, then the title beside the page actions. */
     .plates {
+      order: 0;
       flex-basis: 100%;
       margin-left: 0;
       justify-content: space-between;
+    }
+
+    .tools {
+      order: 1;
+    }
+
+    .masthead {
+      order: 2;
+    }
+
+    .actions {
+      order: 3;
+      flex-basis: auto;
+      margin-left: auto;
+      justify-content: flex-end;
+    }
+
+    .long {
+      display: none;
+    }
+
+    .short {
+      display: inline;
+    }
+
+    .panel {
+      bottom: 124px;
     }
 
     .plates button,
