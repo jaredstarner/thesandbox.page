@@ -94,7 +94,7 @@ export class Sheet {
           // Otherwise climb both lines of sight; once they pass the tallest thing in reach, nothing can block them.
           const tallest = near[x];
           if (tallest >= z + d) {
-            let visible = true;
+            let visible: boolean;
             let t = 1;
             let zt: number;
             do {
