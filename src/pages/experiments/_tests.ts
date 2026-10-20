@@ -282,6 +282,11 @@ export const TECHNIQUES: Record<string, Technique> = {
     webFeature: 'container-queries',
     test: () => supports('container-type: inline-size', 'container-type: inline-size'),
   },
+  'mix-blend-mode': {
+    label: 'mix-blend-mode',
+    webFeature: 'mix-blend-mode',
+    test: () => supports('mix-blend-mode: difference', 'mix-blend-mode: difference'),
+  },
   popover: {
     label: 'Popover',
     webFeature: 'popover',
@@ -430,6 +435,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   gnomonics: { label: 'Gnomonics' },
   'light-lists': { label: 'Lists of lights' },
   'web-mercator': { label: 'Web Mercator' },
+  autostereogram: { label: 'Autostereogram' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
