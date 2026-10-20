@@ -1,0 +1,16 @@
+{
+  "title": "Stereogram",
+  "summary": "A field of dots with a solid world hidden in it, redrawn live as it moves: relax your eyes and a ring turns in the air, a pond ripples where you tap, your own words stand off the page, a shape you carve blind comes up out of the dots, and a test finds the smallest step in depth you can see.",
+  "date": "2026-10-20",
+  "tags": [
+    "canvas",
+    "web-workers",
+    "offscreen-canvas",
+    "pointer-events",
+    "popover",
+    "mix-blend-mode",
+    "autostereogram"
+  ],
+  "requires": ["canvas", "web-workers", "offscreen-canvas"],
+  "plot": 19
+}

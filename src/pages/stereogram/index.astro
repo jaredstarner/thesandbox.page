@@ -1,0 +1,838 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Stereogram"
+  description="A field of dots with a solid world hidden in it, redrawn live: a turning ring, a pond you can ripple, your own words in relief, a shape you carve blind, and a test of your depth vision."
+>
+  <Font cssVariable="--font-stereogram" slot="head" />
+
+  <main class="stereogram" data-stereogram data-plate="ring" data-ink="newsprint">
+    <div class="field" data-field>
+      <canvas
+        class="sheet"
+        data-sheet
+        role="img"
+        aria-label="An autostereogram: a field of dots that hides a solid shape"
+      ></canvas>
+      <canvas class="slide" data-slide aria-hidden="true" hidden></canvas>
+      <div class="veil" data-veil aria-hidden="true" hidden></div>
+      <p class="readout" data-readout hidden></p>
+
+      <section class="card" data-test-card hidden>
+        <div data-test-intro>
+          <h2>Depth test</h2>
+          <p>
+            Four discs float above the dots. One of them floats a little nearer to you than the other three. Pick it
+            with the arrow keys, or tap where it is.
+          </p>
+          <p>
+            Each right answer makes the next difference smaller, and each wrong one makes it bigger, until the test
+            settles on the smallest step you can see. It takes about two minutes.
+          </p>
+          <button class="primary" type="button" data-test-start>
+            Start
+          </button>
+        </div>
+        <div data-test-result hidden>
+          <h2 data-result-title>Your result</h2>
+          <p class="result" data-result-figure></p>
+          <p data-result-note></p>
+          <button class="primary" type="button" data-test-start>
+            Try again
+          </button>
+        </div>
+      </section>
+
+      <p class="unsupported" data-unsupported hidden>
+        This browser can't draw the stereograms: they need web workers and OffscreenCanvas.
+      </p>
+      <noscript>
+        <p class="unsupported">The stereograms are drawn with JavaScript, which is off.</p>
+      </noscript>
+    </div>
+
+    <div class="guides" data-guides aria-hidden="true">
+      <i></i>
+      <i></i>
+    </div>
+
+    <footer class="bar">
+      <div class="masthead">
+        <a class="home" href="/" title="Back to thesandbox.page">
+          thesandbox.page
+        </a>
+        <h1>Stereogram</h1>
+      </div>
+
+      <nav class="plates" aria-label="Pictures">
+        <button type="button" data-plate-pick="ring" aria-pressed="true">
+          Ring
+        </button>
+        <button type="button" data-plate-pick="pond" aria-pressed="false">
+          Pond
+        </button>
+        <button type="button" data-plate-pick="word" aria-pressed="false">
+          Words
+        </button>
+        <button type="button" data-plate-pick="sculpt" aria-pressed="false">
+          Carve
+        </button>
+        <button type="button" data-plate-pick="test" aria-pressed="false">
+          Test
+        </button>
+      </nav>
+
+      <div class="tools">
+        <div class="tool" data-tool="ring">
+          <div class="segmented" role="group" aria-label="Shape">
+            <button type="button" data-shape="torus" aria-pressed="true">
+              Ring
+            </button>
+            <button type="button" data-shape="knot" aria-pressed="false">
+              Knot
+            </button>
+          </div>
+        </div>
+        <div class="tool" data-tool="pond" hidden>
+          <span class="hint">Tap the water to drop a stone</span>
+        </div>
+        <div class="tool" data-tool="word" hidden>
+          <label class="words">
+            <span class="sr">Words to raise</span>
+            <input type="text" data-words value="Hello" maxlength="16" spellcheck="false" autocomplete="off" />
+          </label>
+        </div>
+        <div class="tool" data-tool="sculpt" hidden>
+          <div class="segmented" role="group" aria-label="Brush">
+            <button type="button" data-brush="raise" aria-pressed="true">
+              Raise
+            </button>
+            <button type="button" data-brush="carve" aria-pressed="false">
+              Carve
+            </button>
+            <button type="button" data-brush="smooth" aria-pressed="false">
+              Smooth
+            </button>
+          </div>
+          <label class="size">
+            <span>Size</span>
+            <input type="range" data-brush-size min="12" max="120" value="44" />
+          </label>
+          <button type="button" class="plain" data-clear>
+            Clear
+          </button>
+        </div>
+        <div class="tool" data-tool="test" hidden>
+          <span class="hint" data-test-status>
+            Find the nearest disc
+          </span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" data-slide-toggle aria-pressed="false">
+          Slide
+        </button>
+        <button type="button" popovertarget="st-look">
+          Look
+        </button>
+        <button type="button" popovertarget="st-help">
+          <span class="long">How to see it</span>
+          <span class="short">Help</span>
+        </button>
+        <button type="button" data-save>
+          Save
+        </button>
+      </div>
+    </footer>
+
+    <div class="panel look" id="st-look" popover>
+      <h2>Look</h2>
+      <fieldset>
+        <legend>Ink</legend>
+        <div class="inks">
+          <button type="button" data-ink-pick="newsprint" aria-pressed="true">
+            <i></i>Newsprint
+          </button>
+          <button type="button" data-ink-pick="riso" aria-pressed="false">
+            <i></i>Riso
+          </button>
+          <button type="button" data-ink-pick="phosphor" aria-pressed="false">
+            <i></i>Phosphor
+          </button>
+          <button type="button" data-ink-pick="ember" aria-pressed="false">
+            <i></i>Ember
+          </button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Grain</legend>
+        <div class="segmented" role="group" aria-label="Grain">
+          <button type="button" data-grain="fine" aria-pressed="true">
+            Fine
+          </button>
+          <button type="button" data-grain="coarse" aria-pressed="false">
+            Coarse
+          </button>
+          <button type="button" data-grain="mottle" aria-pressed="false">
+            Mottle
+          </button>
+        </div>
+      </fieldset>
+      <label class="check">
+        <input type="checkbox" data-shimmer />
+        <span>
+          Shimmer <small>New dots every frame, so only the shape holds still</small>
+        </span>
+      </label>
+      <label class="check">
+        <input type="checkbox" data-cross />
+        <span>
+          Cross-eyed <small>Turn the depth inside out for viewing with crossed eyes</small>
+        </span>
+      </label>
+    </div>
+
+    <div class="panel help" id="st-help" popover>
+      <h2>How to see it</h2>
+      <ol>
+        <li>Sit about an arm's length from the screen.</li>
+        <li>
+          Look at the two dots under the picture, then let your eyes relax as if you were looking at something far
+          behind the screen. Each dot splits in two.
+        </li>
+        <li>
+          Let the four dots drift until the middle pair overlaps and you see three. Hold the middle one, then let your
+          gaze wander up into the picture.
+        </li>
+        <li>
+          The shape firms up the longer you hold it. If it sinks into the page instead of standing out, your eyes are
+          crossed: relax them the other way, or turn on Cross-eyed under Look.
+        </li>
+      </ol>
+      <p>
+        Still nothing? <strong>Slide</strong> lays a copy of the picture over itself. Drag it sideways and the shape
+        shows up where the copy stops matching.
+      </p>
+      <button class="primary" type="button" popovertarget="st-help" popovertargetaction="hide">
+        Got it
+      </button>
+    </div>
+  </main>
+</Bare>
+
+<style>
+  .stereogram {
+    --paper: #ebe5d8;
+    --ink: #1b1916;
+    --muted: #6d665a;
+    --rule: color-mix(in oklab, var(--ink) 18%, transparent);
+    --accent: #1b1916;
+    --bar: var(--paper);
+    --field: #ebe5d8;
+
+    position: fixed;
+    inset: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    background: var(--paper);
+    color: var(--ink);
+    font:
+      400 15px/1.4 var(--font-stereogram),
+      Arial,
+      sans-serif;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .stereogram[data-ink='riso'] {
+    --paper: #f3efe4;
+    --ink: #23214f;
+    --muted: #6c6a8f;
+    --accent: #ff4f9a;
+  }
+
+  .stereogram[data-ink='phosphor'] {
+    --paper: #060d08;
+    --ink: #9dffb9;
+    --muted: #4d9a63;
+    --accent: #5cff8a;
+  }
+
+  .stereogram[data-ink='ember'] {
+    --paper: #150a06;
+    --ink: #f6c48a;
+    --muted: #a8673c;
+    --accent: #f08a3c;
+  }
+
+  :global(body:has(.stereogram)) {
+    margin: 0;
+    background: #ebe5d8;
+    overflow: hidden;
+  }
+
+  .field {
+    position: relative;
+    overflow: clip;
+    background: var(--paper);
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .stereogram[data-plate='ring'] .field,
+  .stereogram[data-plate='word'] .field {
+    cursor: default;
+  }
+
+  .sheet,
+  .slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+
+  .slide {
+    mix-blend-mode: difference;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .stereogram[data-sliding] .field {
+    cursor: ew-resize;
+  }
+
+  .veil {
+    box-sizing: border-box;
+    position: absolute;
+    inset: 0;
+    border-inline: var(--edge, 0) solid #000;
+    pointer-events: none;
+  }
+
+  .readout {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    translate: -50% 0;
+    margin: 0;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.72);
+    color: #f1ece2;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .card {
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: min(420px, calc(100% - 32px));
+    padding: 22px 24px 24px;
+    border-radius: 14px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow:
+      0 0 0 1px var(--rule),
+      0 18px 50px rgb(0 0 0 / 0.28);
+  }
+
+  .card h2,
+  .panel h2 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+
+  .card p {
+    margin: 0 0 12px;
+    color: color-mix(in oklab, var(--ink) 82%, var(--paper));
+  }
+
+  .card .result {
+    margin: 4px 0 10px;
+    color: var(--ink);
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .unsupported {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .unsupported[hidden],
+  .card[hidden],
+  .readout[hidden],
+  .veil[hidden],
+  .slide[hidden],
+  .tool[hidden],
+  [data-test-intro][hidden],
+  [data-test-result][hidden] {
+    display: none;
+  }
+
+  .guides {
+    position: relative;
+    height: 26px;
+    background: var(--paper);
+  }
+
+  .guides i {
+    position: absolute;
+    top: 7px;
+    left: calc(50% + var(--guide-x, 60px) * var(--side) - 6px);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+
+  .guides i:first-child {
+    --side: -1;
+  }
+
+  .guides i:last-child {
+    --side: 1;
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px 22px;
+    min-height: 52px;
+    padding: 6px 16px 8px;
+    border-top: 1px solid var(--rule);
+    background: var(--bar);
+  }
+
+  .masthead {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex: none;
+  }
+
+  .masthead h1 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .home {
+    color: var(--muted);
+    font-size: 13px;
+    text-decoration: none;
+  }
+
+  .home:hover {
+    color: var(--ink);
+  }
+
+  .plates {
+    display: flex;
+    gap: 2px;
+    flex: none;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .plates button,
+  .actions button,
+  .segmented button,
+  .plain {
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .plates button:hover,
+  .actions button:hover,
+  .segmented button:hover,
+  .plain:hover {
+    color: var(--ink);
+    background: color-mix(in oklab, var(--ink) 7%, transparent);
+  }
+
+  .plates button[aria-pressed='true'] {
+    color: var(--ink);
+    box-shadow: inset 0 -2px 0 var(--accent);
+    border-radius: 0;
+  }
+
+  .tools {
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .tool {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .segmented {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border-radius: 10px;
+    background: color-mix(in oklab, var(--ink) 6%, transparent);
+  }
+
+  .segmented button[aria-pressed='true'],
+  .actions button[aria-pressed='true'] {
+    color: var(--paper);
+    background: var(--ink);
+  }
+
+  .hint {
+    color: var(--muted);
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .words input {
+    width: 15ch;
+    padding: 6px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: color-mix(in oklab, var(--paper) 85%, #fff);
+    color: var(--ink);
+    font:
+      600 15px/1.2 var(--font-stereogram),
+      Arial,
+      sans-serif;
+  }
+
+  .stereogram[data-ink='phosphor'] .words input,
+  .stereogram[data-ink='ember'] .words input {
+    background: color-mix(in oklab, var(--paper) 85%, var(--ink));
+  }
+
+  .size {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .size input {
+    width: 96px;
+    accent-color: var(--ink);
+  }
+
+  .actions {
+    display: flex;
+    gap: 2px;
+    flex: none;
+    margin-left: auto;
+  }
+
+  .short {
+    display: none;
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .panel {
+    box-sizing: border-box;
+    position: fixed;
+    inset: auto 16px 94px auto;
+    width: min(360px, calc(100vw - 32px));
+    margin: 0;
+    padding: 18px 20px 20px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow:
+      0 0 0 1px var(--rule),
+      0 18px 50px rgb(0 0 0 / 0.3);
+    font:
+      400 15px/1.45 var(--font-stereogram),
+      Arial,
+      sans-serif;
+  }
+
+  .panel.help {
+    inset: 50% auto auto 50%;
+    translate: -50% -50%;
+    width: min(460px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+  }
+
+  .panel::backdrop {
+    background: rgb(0 0 0 / 0.18);
+  }
+
+  .panel.look::backdrop {
+    background: transparent;
+  }
+
+  .help ol {
+    margin: 0 0 14px;
+    padding-left: 1.3em;
+  }
+
+  .help li {
+    margin-bottom: 8px;
+    padding-left: 2px;
+  }
+
+  .help li::marker {
+    font-weight: 700;
+  }
+
+  .help p {
+    margin: 0 0 16px;
+    color: color-mix(in oklab, var(--ink) 82%, var(--paper));
+  }
+
+  .primary {
+    padding: 9px 18px;
+    border-radius: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 600;
+  }
+
+  .primary:hover {
+    background: color-mix(in oklab, var(--ink) 86%, var(--paper));
+  }
+
+  fieldset {
+    margin: 0 0 14px;
+    padding: 0;
+    border: 0;
+  }
+
+  legend {
+    margin-bottom: 6px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .inks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .inks button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 9px;
+    border-radius: 9px;
+    box-shadow: inset 0 0 0 1px var(--rule);
+    font-size: 14px;
+    text-align: left;
+  }
+
+  .inks button[aria-pressed='true'] {
+    box-shadow: inset 0 0 0 2px var(--ink);
+  }
+
+  .inks i {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    border-radius: 6px;
+    background-size: 4px 4px;
+  }
+
+  [data-ink-pick='newsprint'] i {
+    background:
+      radial-gradient(circle at 1px 1px, #1b1916 0.9px, transparent 1.1px) 0 0 / 4px 4px,
+      radial-gradient(circle at 1px 1px, #8d8577 0.9px, transparent 1.1px) 2px 2px / 4px 4px,
+      #ebe5d8;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+  }
+
+  [data-ink-pick='riso'] i {
+    background:
+      radial-gradient(circle at 1px 1px, #ff4f9a 0.9px, transparent 1.1px) 0 0 / 4px 4px,
+      radial-gradient(circle at 1px 1px, #2f5bd0 0.9px, transparent 1.1px) 2px 2px / 4px 4px,
+      #f3efe4;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+  }
+
+  [data-ink-pick='phosphor'] i {
+    background:
+      radial-gradient(circle at 1px 1px, #5cff8a 0.9px, transparent 1.1px) 0 0 / 4px 4px,
+      radial-gradient(circle at 1px 1px, #1f7a3a 0.9px, transparent 1.1px) 2px 2px / 4px 4px,
+      #060d08;
+  }
+
+  [data-ink-pick='ember'] i {
+    background:
+      radial-gradient(circle at 1px 1px, #f3a14b 0.9px, transparent 1.1px) 0 0 / 4px 4px,
+      radial-gradient(circle at 1px 1px, #8c2c12 0.9px, transparent 1.1px) 2px 2px / 4px 4px,
+      #150a06;
+  }
+
+  .check {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+
+  .check input {
+    margin: 3px 0 0;
+    accent-color: var(--ink);
+  }
+
+  .check small {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  @media (max-width: 860px) {
+    .bar {
+      flex-wrap: wrap;
+      padding: 6px 12px 10px;
+    }
+
+    .masthead {
+      order: 0;
+    }
+
+    .home {
+      display: none;
+    }
+
+    .plates {
+      order: 1;
+      margin-left: auto;
+    }
+
+    .tools {
+      order: 2;
+      flex-basis: 100%;
+    }
+
+    .actions {
+      order: 3;
+      flex-basis: 100%;
+      margin-left: 0;
+      justify-content: space-between;
+    }
+
+    .panel {
+      inset: auto 12px 132px 12px;
+      width: auto;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .stereogram {
+      font-size: 14px;
+    }
+
+    .masthead h1 {
+      font-size: 17px;
+    }
+
+    /* Pictures on top, their tools under them, then the title beside the page actions. */
+    .plates {
+      order: 0;
+      flex-basis: 100%;
+      margin-left: 0;
+      justify-content: space-between;
+    }
+
+    .tools {
+      order: 1;
+    }
+
+    .masthead {
+      order: 2;
+    }
+
+    .actions {
+      order: 3;
+      flex-basis: auto;
+      margin-left: auto;
+      justify-content: flex-end;
+    }
+
+    .long {
+      display: none;
+    }
+
+    .short {
+      display: inline;
+    }
+
+    .panel {
+      bottom: 124px;
+    }
+
+    .plates button,
+    .actions button {
+      padding: 6px 7px;
+    }
+
+    .tool {
+      gap: 8px;
+    }
+
+    .size input {
+      width: 72px;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-stereogram]');
+  if (root) start(root);
+</script>
