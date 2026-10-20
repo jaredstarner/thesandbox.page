@@ -3,7 +3,19 @@
 
 import { Sheet } from './_sirds';
 import { dots, mottle, type Grain, type InkId } from './_inks';
-import { Clay, Pond, discs, drawMesh, knot, relief, rotation, torus, type Brush, type Disc, type Mesh } from './_scenes';
+import {
+  Clay,
+  Pond,
+  discs,
+  drawMesh,
+  knot,
+  relief,
+  rotation,
+  torus,
+  type Brush,
+  type Disc,
+  type Mesh,
+} from './_scenes';
 
 export type Plate = 'ring' | 'pond' | 'word' | 'sculpt' | 'test';
 
@@ -15,7 +27,8 @@ export type Message =
   | { type: 'words'; mask: Uint8Array; w: number; h: number; radius: number }
   | { type: 'drop'; x: number; y: number; strength: number }
   | { type: 'stroke'; points: number[]; r: number; brush: Brush }
-  | { type: 'cursor'; x: number; y: number; r: number } | { type: 'cursor'; x: null }
+  | { type: 'cursor'; x: number; y: number; r: number }
+  | { type: 'cursor'; x: null }
   | { type: 'clear' }
   | { type: 'discs'; discs: Disc[]; seed: number }
   | { type: 'frame'; t: number };

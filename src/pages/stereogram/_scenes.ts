@@ -388,7 +388,8 @@ export class Clay {
     if (!cursor) return;
     const { w, h } = this;
     const { x, y, r } = cursor;
-    const under = this.height[Math.min(h - 1, Math.max(0, Math.round(y))) * w + Math.min(w - 1, Math.max(0, Math.round(x)))];
+    const under =
+      this.height[Math.min(h - 1, Math.max(0, Math.round(y))) * w + Math.min(w - 1, Math.max(0, Math.round(x)))];
     const lift = Math.min(1, under + 0.12);
     const band = Math.max(1.5, r * 0.06);
     for (let j = Math.max(0, Math.floor(y - r - band)); j <= Math.min(h - 1, Math.ceil(y + r + band)); j++) {

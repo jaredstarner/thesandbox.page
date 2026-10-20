@@ -498,7 +498,8 @@ export function start(root: HTMLElement) {
     if (kind === 'none') {
       title.textContent = 'No depth found';
       figure.textContent = '—';
-      note.textContent = 'You missed the biggest step three times in a row. Get the Ring to stand out first, then come back.';
+      note.textContent =
+        'You missed the biggest step three times in a row. Get the Ring to stand out first, then come back.';
     } else if (kind === 'floor') {
       title.textContent = 'Your result';
       figure.textContent = `${floor}″ or finer`;
