@@ -171,7 +171,7 @@ export function drawMesh(
 
 // ---------------------------------------------------------------- pond
 
-const GROUND = 0.08;
+const GROUND = 0;
 const LIP = 0.6;
 const WATER = 0.34;
 
@@ -327,14 +327,14 @@ function blur(field: Float32Array, w: number, h: number, r: number, tmp: Float32
   }
 }
 
-/** Letters raised off a low ground, with rounded shoulders, from an alpha mask. */
+/** Letters raised off the far plane, with rounded shoulders, from an alpha mask. */
 export function relief(mask: Uint8Array, w: number, h: number, radius: number): Float32Array {
   const field = new Float32Array(w * h);
   for (let i = 0; i < field.length; i++) field[i] = mask[i] / 255;
   blur(field, w, h, Math.max(1, Math.round(radius / 2)), new Float32Array(w * h));
   for (let i = 0; i < field.length; i++) {
     const t = Math.min(1, Math.max(0, (field[i] - 0.12) / 0.62));
-    field[i] = 0.1 + 0.58 * t * t * (3 - 2 * t);
+    field[i] = 0.62 * t * t * (3 - 2 * t);
   }
   return field;
 }

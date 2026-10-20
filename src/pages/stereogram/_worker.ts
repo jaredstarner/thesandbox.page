@@ -62,6 +62,14 @@ let clay: Clay | null = null;
 let cursor: { x: number; y: number; r: number } | null = null;
 let test: Disc[] = [];
 
+function multiply(a: number[], b: number[]): number[] {
+  const m = new Array<number>(9);
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) m[r * 3 + c] = a[r * 3] * b[c] + a[r * 3 + 1] * b[3 + c] + a[r * 3 + 2] * b[6 + c];
+  }
+  return m;
+}
+
 function retexture() {
   if (!sheet) return;
   texW = sheet.far;
@@ -108,8 +116,10 @@ function compose(t: number): boolean {
       if (still && !relink) return false;
       const mesh = (meshes[shape] ??= shape === 'torus' ? torus() : knot());
       if (scratch.length < mesh.pos.length) scratch = new Float32Array(mesh.pos.length);
-      const s = still ? 9.5 : t / 1000;
-      const m = rotation(0.9 + s * 0.23, s * 0.31, s * 0.11);
+      const s = still ? 4 : t / 1000;
+      // Tip the shape back and forth between nearly face-on and well over, while the tilt slowly swings round,
+      // so the ring's hole stays in view; the knot also turns about its own axis.
+      const m = multiply(rotation(0.62 + 0.3 * Math.sin(s * 0.37), 0, s * 0.21), rotation(0, 0, s * 0.33));
       depth.fill(0);
       drawMesh(mesh, m, depth, w, h, Math.min(w, h) * 0.8, 0.52, 0.32, scratch);
       return true;
@@ -147,7 +157,7 @@ function compose(t: number): boolean {
     case 'word': {
       if (!relink) return false;
       if (words) depth.set(words);
-      else depth.fill(0.1);
+      else depth.fill(0);
       return true;
     }
     case 'sculpt': {
