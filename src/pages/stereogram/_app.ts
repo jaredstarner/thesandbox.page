@@ -232,7 +232,9 @@ export function start(root: HTMLElement) {
     const g = c.getContext('2d')!;
     g.font = `800 100px ${family}`;
     const width = Math.max(1, g.measureText(text).width);
-    const size = Math.min(H * 0.46, (100 * W * 0.84) / width);
+    // Keep the words a separation clear of the edges, where pixels have no partner to repeat in.
+    const room = Math.min(W * 0.84, W - eye * 0.6);
+    const size = Math.min(H * 0.46, (100 * room) / width);
     g.font = `800 ${size}px ${family}`;
     g.textAlign = 'center';
     g.textBaseline = 'middle';
