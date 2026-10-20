@@ -717,3 +717,10 @@ import Bare from '../../layouts/Bare.astro';
     }
   }
 </style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-stereogram]');
+  if (root) start(root);
+</script>
