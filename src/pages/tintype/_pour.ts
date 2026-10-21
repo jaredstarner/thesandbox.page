@@ -146,7 +146,8 @@ export class Pour {
   }
 
   step(dt: number) {
-    this.age += dt;
+    // The film starts to set from the moment it is poured.
+    if (this.poured > 0) this.age += dt;
     const t = this.tune;
     const mob = t.mobility * (1 - this.setting());
     const tiltMag = Math.hypot(this.tiltX, this.tiltY);

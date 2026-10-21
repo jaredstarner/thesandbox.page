@@ -83,6 +83,7 @@ import Bare from '../../layouts/Bare.astro';
         <div class="group" data-for="coat" hidden>
           <button type="button" data-auto-coat>Pour it for me</button>
           <button class="primary" type="button" data-to-bath disabled>Into the silver bath</button>
+          <button class="quiet" type="button" data-wipe>Wipe the plate</button>
         </div>
 
         <div class="group" data-for="bath" hidden>
@@ -173,6 +174,7 @@ import Bare from '../../layouts/Bare.astro';
     --ty: 0;
 
     position: relative;
+    isolation: isolate;
     min-height: 100dvh;
     display: grid;
     grid-template-columns: minmax(0, 1fr) var(--desk-w);
@@ -197,6 +199,7 @@ import Bare from '../../layouts/Bare.astro';
   .room {
     position: fixed;
     inset: 0;
+    z-index: -1;
     pointer-events: none;
   }
 
@@ -628,32 +631,41 @@ import Bare from '../../layouts/Bare.astro';
     text-wrap: pretty;
   }
 
+  /* Phones: one column, the title above the plate and the desk below it. */
   @media (max-width: 900px) {
     .tintype {
       grid-template-columns: minmax(0, 1fr);
-    }
-
-    .bench {
-      min-height: 0;
-      padding: 16px 16px 8px;
-    }
-
-    .stand {
-      width: min(100%, calc((100dvh - 260px) * 0.8), 560px);
+      align-content: start;
     }
 
     .desk {
-      min-height: 0;
-      padding: 8px 16px 28px;
-      gap: 16px;
+      display: contents;
     }
 
     .masthead {
-      grid-row: 1;
+      order: -1;
+      padding: 18px 16px 0;
     }
 
     h1 {
       font-size: 44px;
+    }
+
+    .bench {
+      min-height: 0;
+      padding: 12px 16px 8px;
+    }
+
+    .stand {
+      width: min(100%, calc((100dvh - 300px) * 0.8), 560px);
+    }
+
+    .steps,
+    .say,
+    .controls,
+    .book,
+    .notes {
+      margin: 14px 16px 0;
     }
 
     .say {
@@ -662,7 +674,7 @@ import Bare from '../../layouts/Bare.astro';
     }
 
     .notes {
-      margin-top: 8px;
+      margin-bottom: 28px;
     }
   }
 </style>

@@ -336,15 +336,18 @@ export function start(root: HTMLElement) {
     tell(
       blue
         ? 'Through blue glass you see roughly what the plate will: reds go dark, blues go pale.'
-        : 'This is the camera’s ground glass, so you are upside down and back to front. Choose an exposure, then coat a plate.',
+        : glassLine(),
     );
   });
+
+  const glassLine = () =>
+    `This is the camera’s ground glass, so ${sitter?.kind === 'camera' ? 'you are' : 'the picture is'} upside down and back to front. Choose an exposure, then coat a plate.`;
 
   const compose = () => {
     setStage('compose');
     blue = false;
     button('blue').setAttribute('aria-pressed', 'false');
-    tell('This is the camera’s ground glass, so you are upside down and back to front. Choose an exposure, then coat a plate.');
+    tell(glassLine());
     meterAt = 0;
     canvas.setAttribute('aria-label', 'The camera’s ground glass, showing the sitter upside down');
   };
@@ -430,6 +433,13 @@ export function start(root: HTMLElement) {
     canvas.setAttribute('aria-label', 'A tintype plate being coated with collodion');
   });
 
+  button('wipe').addEventListener('click', () => {
+    newPlate();
+    button('to-bath').disabled = true;
+    button('auto-coat').disabled = false;
+    tell('Wiped clean. Hold down on the plate to pour a fresh pool.');
+  });
+
   button('auto-coat').addEventListener('click', () => {
     if (pour.poured > 0) newPlate();
     coatPhase = 'auto';
@@ -507,7 +517,8 @@ export function start(root: HTMLElement) {
     const cov = pour.coverage();
     const mobile = pour.mobile();
     if (coatPhase === 'tilt' || coatPhase === 'auto') {
-      button('to-bath').disabled = cov < 0.4;
+      button('to-bath').disabled = coatPhase === 'auto' || cov < 0.4;
+      button('wipe').disabled = coatPhase === 'auto';
       if (pour.setting() > 0.85 && coatPhase !== 'auto') {
         coatPhase = 'set';
         tell(
@@ -516,8 +527,13 @@ export function start(root: HTMLElement) {
             : 'The collodion has set. The bare patches will stay black on the finished plate. Into the silver bath.',
         );
       } else if (coatPhase === 'tilt') {
-        if (cov > 0.985 && mobile < 40) tell('Coated. Into the silver bath before the film skins over.');
-        else if (cov > 0.97 && pour.drained < 50)
+        if (mobile < 40 && pour.drained > 50) {
+          tell(
+            cov > 0.985
+              ? 'Coated. Into the silver bath before the film skins over.'
+              : 'Coated, but the pool missed some of the plate, and bare iron will print black. Into the bath anyway, or wipe it and pour again.',
+          );
+        } else if (cov > 0.97 && pour.drained < 50)
           tell(
             'Covered. Now drag out past one corner to tip the rest back into the bottle, rocking it a little as it drains.',
           );
@@ -785,8 +801,13 @@ export function start(root: HTMLElement) {
     button('varnish').disabled = false;
     button('bare').disabled = false;
     st.wetVarnish = 0;
-    tell('Your tintype. Like every tintype, it is a mirror image: this is you as your mirror sees you.');
-    if (sitter?.kind === 'card') tell('Your tintype of the colour chart: red gone to black, blue to white, and the lettering back to front.');
+    tell(
+      sitter?.kind === 'card'
+        ? 'Your tintype of the colour chart: red gone to black, blue to white, and the lettering back to front.'
+        : sitter?.kind === 'photo'
+          ? 'Your tintype. Like every tintype it is a mirror image, the picture turned left for right.'
+          : 'Your tintype. Like every tintype it is a mirror image: this is you as your mirror sees you.',
+    );
     canvas.setAttribute('aria-label', 'The finished tintype');
     const thumb = plateImage(224, 280).toDataURL('image/png');
     const li = document.createElement('li');

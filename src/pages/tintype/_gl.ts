@@ -153,7 +153,7 @@ float windowLight(vec2 s) {
   vec2 d = (s - uLight) * vec2(ASPECT, 1.0);
   vec2 box = abs(d) - vec2(0.15, 0.2);
   float o = length(max(box, 0.0)) + min(max(box.x, box.y), 0.0);
-  float w = 1.0 - smoothstep(-0.02, 0.05, o);
+  float w = 1.0 - smoothstep(-0.08, 0.14, o);
   float fall = 0.75 + 0.25 * smoothstep(0.2, -0.2, d.y);
   return w * fall + exp(-max(o, 0.0) * 9.0) * 0.06;
 }
@@ -266,6 +266,8 @@ void main() {
     E *= 1.0 - 0.42 * r2 - 0.25 * r2 * r2;
     vec2 cp = min(p, 1.0 - p) * vec2(ASPECT, 1.0);
     E *= smoothstep(0.034, 0.042, cp.x + cp.y);
+    // The holder's frame shades a ragged margin all round.
+    E *= smoothstep(0.006, 0.02, -sd + (fbm(p * 26.0 + uSeed * 1.3) - 0.5) * 0.014);
     E *= 1.0 - uStreak * streaks * 0.8;
     E *= 0.72 + 0.56 * clamp(thick, 0.0, 1.4);
   }
