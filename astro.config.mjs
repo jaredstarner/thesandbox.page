@@ -285,5 +285,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Arial', 'sans-serif'],
     },
+    {
+      // The studio lettering on /tintype/: a Didone, as on a portrait studio's printed card mounts.
+      provider: fontProviders.fontsource(),
+      name: 'Bodoni Moda',
+      cssVariable: '--font-tintype',
+      weights: ['400 900'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Didot', 'Bodoni 72', 'Georgia', 'serif'],
+    },
   ],
 });
