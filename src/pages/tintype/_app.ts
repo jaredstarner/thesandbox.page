@@ -249,7 +249,7 @@ export function start(root: HTMLElement) {
         const denied = e instanceof DOMException && e.name === 'NotAllowedError';
         note.textContent = denied
           ? 'The camera is blocked for this page. Bring a photograph instead, or use the colour chart.'
-          : "No camera answered. Bring a photograph instead, or use the colour chart.";
+          : 'No camera answered. Bring a photograph instead, or use the colour chart.';
       } finally {
         b.disabled = false;
       }
@@ -296,7 +296,7 @@ export function start(root: HTMLElement) {
     let wsum = 0;
     for (let y = 0; y < 50; y++) {
       for (let x = 0; x < 40; x++) {
-        const w = 0.3 + Math.exp(-(((x / 40 - 0.5) ** 2) / 0.05 + ((y / 50 - 0.42) ** 2) / 0.07));
+        const w = 0.3 + Math.exp(-((x / 40 - 0.5) ** 2 / 0.05 + (y / 50 - 0.42) ** 2 / 0.07));
         const i = (y * 40 + x) * 4;
         sum += ortho(px[i + 1], px[i + 2]) * w;
         wsum += w;
@@ -333,11 +333,7 @@ export function start(root: HTMLElement) {
   button('blue').addEventListener('click', () => {
     blue = !blue;
     button('blue').setAttribute('aria-pressed', String(blue));
-    tell(
-      blue
-        ? 'Through blue glass you see roughly what the plate will: reds go dark, blues go pale.'
-        : glassLine(),
-    );
+    tell(blue ? 'Through blue glass you see roughly what the plate will: reds go dark, blues go pale.' : glassLine());
   });
 
   const glassLine = () =>
@@ -488,9 +484,7 @@ export function start(root: HTMLElement) {
     if (stage === 'coat' && coatPhase === 'pour' && pour.poured > 0) {
       if (pour.poured >= POUR_MIN) {
         coatPhase = 'tilt';
-        tell(
-          'Now tip the plate: press and drag toward where the pool should run. Take it into each corner in turn.',
-        );
+        tell('Now tip the plate: press and drag toward where the pool should run. Take it into each corner in turn.');
       } else tell('That pool won’t cover the plate. Pour a little more.');
     }
   };
@@ -588,7 +582,9 @@ export function start(root: HTMLElement) {
     button('lift').hidden = false;
     button('rebath').hidden = true;
     button('to-expose').hidden = true;
-    tell('Three minutes in the silver bath turns the film creamy and sensitive to light. Lift it out when it stops looking greasy.');
+    tell(
+      'Three minutes in the silver bath turns the film creamy and sensitive to light. Lift it out when it stops looking greasy.',
+    );
     setTimeout(() => dip(true), 350);
   });
 
@@ -785,9 +781,10 @@ export function start(root: HTMLElement) {
 
   button('varnish').addEventListener('click', () => {
     varnishPour = new Pour(GW, GH, VARNISH);
-    const plan = coatPlan(
-      st.drain[0] === 0 ? (st.drain[1] === 0 ? 0 : 3) : st.drain[1] === 0 ? 1 : 2,
-    ).map((s) => ({ ...s, until: s.until * 0.7 }));
+    const plan = coatPlan(st.drain[0] === 0 ? (st.drain[1] === 0 ? 0 : 3) : st.drain[1] === 0 ? 1 : 2).map((s) => ({
+      ...s,
+      until: s.until * 0.7,
+    }));
     auto = { t: 0, plan, target: varnishPour };
     button('varnish').disabled = true;
     button('bare').disabled = true;

@@ -18,11 +18,17 @@ import Bare from '../../layouts/Bare.astro';
     <section class="bench" data-bench>
       <div class="stand" data-stand>
         <div class="plate" data-plate>
-          <canvas class="sheet" data-canvas role="img" aria-label="A blank tintype plate: a sheet of black iron"
+          <canvas
+            class="sheet"
+            data-canvas
+            role="img"
+            aria-label="A blank tintype plate: a sheet of black iron"
           ></canvas>
           <p class="count" data-count aria-live="assertive" hidden></p>
         </div>
-        <div class="tank" data-tank aria-hidden="true"><i></i></div>
+        <div class="tank" data-tank aria-hidden="true">
+          <i></i>
+        </div>
       </div>
       <p class="unsupported" data-unsupported hidden>
         This browser can't open a WebGL 2 context, which the plate is drawn with.
@@ -34,7 +40,9 @@ import Bare from '../../layouts/Bare.astro';
 
     <aside class="desk">
       <header class="masthead">
-        <a class="home" href="/" title="Back to thesandbox.page">thesandbox.page</a>
+        <a class="home" href="/" title="Back to thesandbox.page">
+          thesandbox.page
+        </a>
         <h1>Tintype</h1>
       </header>
 
@@ -55,66 +63,131 @@ import Bare from '../../layouts/Bare.astro';
 
       <div class="controls">
         <div class="group" data-for="open">
-          <button class="primary" type="button" data-source="camera">Use my camera</button>
-          <button type="button" data-source="photo">Bring a photograph</button>
-          <button type="button" data-source="card">Use the colour chart</button>
-          <p class="fine" data-source-note>The picture never leaves this page.</p>
+          <button class="primary" type="button" data-source="camera">
+            Use my camera
+          </button>
+          <button type="button" data-source="photo">
+            Bring a photograph
+          </button>
+          <button type="button" data-source="card">
+            Use the colour chart
+          </button>
+          <p class="fine" data-source-note>
+            The picture never leaves this page.
+          </p>
         </div>
 
         <div class="group" data-for="compose" hidden>
           <fieldset class="exposure" data-exposure>
             <legend>Exposure, in seconds</legend>
             <div class="seconds">
-              <label><input type="radio" name="exposure" value="1" /><span>1</span></label>
-              <label><input type="radio" name="exposure" value="2" /><span>2</span></label>
-              <label><input type="radio" name="exposure" value="3" /><span>3</span></label>
-              <label><input type="radio" name="exposure" value="4" checked /><span>4</span></label>
-              <label><input type="radio" name="exposure" value="6" /><span>6</span></label>
-              <label><input type="radio" name="exposure" value="8" /><span>8</span></label>
-              <label><input type="radio" name="exposure" value="12" /><span>12</span></label>
+              <label>
+                <input type="radio" name="exposure" value="1" />
+                <span>1</span>
+              </label>
+              <label>
+                <input type="radio" name="exposure" value="2" />
+                <span>2</span>
+              </label>
+              <label>
+                <input type="radio" name="exposure" value="3" />
+                <span>3</span>
+              </label>
+              <label>
+                <input type="radio" name="exposure" value="4" checked />
+                <span>4</span>
+              </label>
+              <label>
+                <input type="radio" name="exposure" value="6" />
+                <span>6</span>
+              </label>
+              <label>
+                <input type="radio" name="exposure" value="8" />
+                <span>8</span>
+              </label>
+              <label>
+                <input type="radio" name="exposure" value="12" />
+                <span>12</span>
+              </label>
             </div>
             <p class="fine" data-meter></p>
           </fieldset>
-          <button type="button" data-blue aria-pressed="false">Look through blue glass</button>
-          <button class="primary" type="button" data-to-coat>Coat a plate</button>
-          <button class="quiet" type="button" data-to-open>Change the sitter</button>
+          <button type="button" data-blue aria-pressed="false">
+            Look through blue glass
+          </button>
+          <button class="primary" type="button" data-to-coat>
+            Coat a plate
+          </button>
+          <button class="quiet" type="button" data-to-open>
+            Change the sitter
+          </button>
         </div>
 
         <div class="group" data-for="coat" hidden>
-          <button type="button" data-auto-coat>Pour it for me</button>
-          <button class="primary" type="button" data-to-bath disabled>Into the silver bath</button>
-          <button class="quiet" type="button" data-wipe>Wipe the plate</button>
+          <button type="button" data-auto-coat>
+            Pour it for me
+          </button>
+          <button class="primary" type="button" data-to-bath disabled>
+            Into the silver bath
+          </button>
+          <button class="quiet" type="button" data-wipe>
+            Wipe the plate
+          </button>
         </div>
 
         <div class="group" data-for="bath" hidden>
-          <button class="primary" type="button" data-lift disabled>Lift it out</button>
-          <button type="button" data-rebath hidden>Back in the bath</button>
-          <button class="primary" type="button" data-to-expose hidden>Load the holder</button>
+          <button class="primary" type="button" data-lift disabled>
+            Lift it out
+          </button>
+          <button type="button" data-rebath hidden>
+            Back in the bath
+          </button>
+          <button class="primary" type="button" data-to-expose hidden>
+            Load the holder
+          </button>
         </div>
 
         <div class="group" data-for="expose" hidden>
-          <button class="primary" type="button" data-uncap>Take the cap off the lens</button>
+          <button class="primary" type="button" data-uncap>
+            Take the cap off the lens
+          </button>
         </div>
 
         <div class="group" data-for="develop" hidden>
           <p class="clock" data-devclock aria-live="off"></p>
-          <button type="button" data-auto-dev>Pour it for me</button>
-          <button class="primary" type="button" data-rinse disabled>Rinse</button>
+          <button type="button" data-auto-dev>
+            Pour it for me
+          </button>
+          <button class="primary" type="button" data-rinse disabled>
+            Rinse
+          </button>
         </div>
 
         <div class="group" data-for="fix" hidden>
-          <button class="primary" type="button" data-to-fix>Into the fixer</button>
-          <button class="primary" type="button" data-to-varnish hidden>Dry it off</button>
+          <button class="primary" type="button" data-to-fix>
+            Into the fixer
+          </button>
+          <button class="primary" type="button" data-to-varnish hidden>
+            Dry it off
+          </button>
         </div>
 
         <div class="group" data-for="varnish" hidden>
-          <button class="primary" type="button" data-varnish>Varnish it</button>
-          <button type="button" data-bare>Leave it bare</button>
+          <button class="primary" type="button" data-varnish>
+            Varnish it
+          </button>
+          <button type="button" data-bare>
+            Leave it bare
+          </button>
         </div>
 
         <div class="group" data-for="done" hidden>
-          <button class="primary" type="button" data-save>Save the plate</button>
-          <button type="button" data-again>Sit again</button>
+          <button class="primary" type="button" data-save>
+            Save the plate
+          </button>
+          <button type="button" data-again>
+            Sit again
+          </button>
         </div>
       </div>
 
@@ -308,7 +381,13 @@ import Bare from '../../layouts/Bare.astro';
     right: 0;
     top: 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, rgb(255 160 130 / 0.5) 12%, rgb(255 160 130 / 0.5) 88%, transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(255 160 130 / 0.5) 12%,
+      rgb(255 160 130 / 0.5) 88%,
+      transparent
+    );
   }
 
   .tank::before {

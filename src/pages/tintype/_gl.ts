@@ -426,17 +426,7 @@ export class PlateRenderer {
     const gl = this.gl;
     const rgba = data.length === w * h * 4;
     gl.bindTexture(gl.TEXTURE_2D, t.tex);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      rgba ? gl.RGBA16F : gl.R16F,
-      w,
-      h,
-      0,
-      rgba ? gl.RGBA : gl.RED,
-      gl.FLOAT,
-      data,
-    );
+    gl.texImage2D(gl.TEXTURE_2D, 0, rgba ? gl.RGBA16F : gl.R16F, w, h, 0, rgba ? gl.RGBA : gl.RED, gl.FLOAT, data);
     t.w = w;
     t.h = h;
   }
