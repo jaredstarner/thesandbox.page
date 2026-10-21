@@ -383,14 +383,15 @@ export function start(root: HTMLElement) {
 
   /** The usual order: pour high on the right, run it round the corners, drain from the last. */
   const coatPlan = (drain: number): AutoStep[] => [
-    { until: 1.3, tilt: [0, 0], pour: [GW * 0.62, GH * 0.32] },
-    { until: 1.8, tilt: [0, 0] },
-    { until: 3.8, tilt: corner(1, 0.5) },
-    { until: 6.1, tilt: corner(0, 0.5) },
-    { until: 8.4, tilt: corner(3, 0.5) },
-    { until: 10.6, tilt: corner(2, 0.5) },
-    { until: 15.5, tilt: corner(drain, 0.94), rock: true },
-    { until: 16.5, tilt: [0, 0] },
+    { until: 1.6, tilt: [0, 0], pour: [GW * 0.6, GH * 0.32] },
+    { until: 2.0, tilt: [0, 0] },
+    { until: 4.0, tilt: corner(1, 0.5) },
+    { until: 6.3, tilt: corner(0, 0.5) },
+    { until: 8.6, tilt: corner(3, 0.5) },
+    { until: 9.6, tilt: [0, 0.45] },
+    { until: 11.6, tilt: corner(2, 0.5) },
+    { until: 16.4, tilt: corner(drain, 0.94), rock: true },
+    { until: 17.4, tilt: [0, 0] },
   ];
 
   const newPlate = () => {
@@ -469,12 +470,17 @@ export function start(root: HTMLElement) {
     const [x, y] = cellAt(e);
     pointer.x = x;
     pointer.y = y;
-    if (stage === 'done') {
+    // On a bare or finished plate, the window's reflection follows the pointer as if the plate were turned.
+    if (stage === 'open' || stage === 'done') {
       lightTarget = [
         0.5 - (e.offsetX / canvas.clientWidth - 0.5) * 0.9,
         0.3 - (e.offsetY / canvas.clientHeight - 0.5) * 0.7,
       ];
     }
+  });
+
+  canvas.addEventListener('pointerleave', () => {
+    lightTarget = [...WINDOW_LIGHT];
   });
 
   const release = () => {
@@ -890,6 +896,7 @@ export function start(root: HTMLElement) {
 
   const ease = (a: number, b: number, k: number) => a + (b - a) * k;
   let last = performance.now();
+  let lastKey = '';
 
   const frame = (now: number) => {
     const real = Math.min(0.05, (now - last) / 1000);
@@ -929,7 +936,7 @@ export function start(root: HTMLElement) {
     st.blue = blue;
 
     for (let i = 0; i < 3; i++) st.ambient[i] = ease(st.ambient[i], ambientTarget[i], Math.min(1, real * 1.6));
-    if (stage !== 'done') lightTarget = [...WINDOW_LIGHT];
+    if (stage !== 'done' && stage !== 'open') lightTarget = [...WINDOW_LIGHT];
     st.light[0] = ease(st.light[0], lightTarget[0], Math.min(1, real * 4));
     st.light[1] = ease(st.light[1], lightTarget[1], Math.min(1, real * 4));
     const tilt: [number, number] = stage === 'coat' ? [pour.tiltX, pour.tiltY] : [0, 0];
@@ -938,9 +945,29 @@ export function start(root: HTMLElement) {
     root.style.setProperty('--ty', tilt[1].toFixed(3));
 
     renderer.resize();
-    renderer.draw(st);
+    // A bare or finished plate at rest needs no redrawing.
+    const still = stage === 'open' || stage === 'done' || (stage === 'varnish' && !auto);
+    const key = still
+      ? [stage, ...st.light, ...st.ambient, st.wetVarnish, st.wetFix, st.varnish, canvas.width, canvas.height]
+          .map((v) => (typeof v === 'number' ? v.toFixed(4) : v))
+          .join()
+      : '';
+    if (!still || key !== lastKey) renderer.draw(st);
+    lastKey = key;
     requestAnimationFrame(frame);
   };
+
+  // The camera goes dark while the page is out of sight, and comes back on return.
+  let cameraPaused = false;
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && stream && stage === 'compose') {
+      stopCamera();
+      cameraPaused = true;
+    } else if (!document.hidden && cameraPaused) {
+      cameraPaused = false;
+      if (stage === 'compose' && sitter?.kind === 'camera') startCamera().catch(() => undefined);
+    }
+  });
 
   newPlate();
   st.wetCoat = 0;

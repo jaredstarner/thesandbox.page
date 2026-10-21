@@ -305,9 +305,9 @@ void main() {
 
   // Surface: liquid on the plate bends the window's reflection.
   vec2 grad = vec2(0.0);
-  grad += heightGrad(uCoat, p, uCoatSize, 0) * uWetCoat * 9.0;
-  grad += heightGrad(uDev, p, uCoatSize, 3) * 0.3;
-  grad += heightGrad(uVarnish, p, uCoatSize, 0) * uWetVarnish * 9.0;
+  if (uWetCoat > 0.0) grad += heightGrad(uCoat, p, uCoatSize, 0) * uWetCoat * 9.0;
+  if (uDevOn > 0.5) grad += heightGrad(uDev, p, uCoatSize, 3) * 0.3;
+  if (uWetVarnish > 0.0) grad += heightGrad(uVarnish, p, uCoatSize, 0) * uWetVarnish * 9.0;
   float pool = clamp((film - uResidual) * 4.0, 0.0, 1.0) * uWetCoat;
   vec2 s = p + grad * 1.6 + uTilt * vec2(-0.08, -0.08);
   float gloss = 0.035 + 0.045 * max(pool, max(dev.a * uDevOn, uWetFix * cover)) + 0.02 * vAmt + 0.03 * uWetVarnish;
