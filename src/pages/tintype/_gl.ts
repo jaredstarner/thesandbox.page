@@ -142,21 +142,20 @@ float plateEdge(vec2 p) {
 vec3 lacquer(vec2 p, float sd) {
   float peel = fbm(p * vec2(60.0, 75.0) + uSeed) - 0.5;
   float cloud = fbm(p * 3.0 + uSeed * 1.7) - 0.5;
-  vec3 c = vec3(0.0105, 0.0078, 0.0062) * (1.0 + cloud * 0.35 + peel * 0.12);
+  vec3 c = vec3(0.0062, 0.0047, 0.0038) * (1.0 + cloud * 0.35 + peel * 0.12);
   float rim = smoothstep(-0.012, -0.002, sd);
-  c = mix(c, vec3(0.032, 0.017, 0.009), rim * 0.8);
+  c = mix(c, vec3(0.026, 0.014, 0.008), rim * 0.8);
   return c;
 }
 
-// The window the studio is lit from, as the plate reflects it: a tall skylight with glazing bars.
+// The window the studio is lit from, as the plate reflects it: a tall softbox of a skylight.
 float windowLight(vec2 s) {
   vec2 d = (s - uLight) * vec2(ASPECT, 1.0);
   vec2 box = abs(d) - vec2(0.15, 0.2);
   float o = length(max(box, 0.0)) + min(max(box.x, box.y), 0.0);
   float w = 1.0 - smoothstep(-0.02, 0.05, o);
-  vec2 g = abs(fract(d / vec2(0.1, 0.133) + 0.5) - 0.5) * vec2(0.1, 0.133);
-  float bars = smoothstep(0.0, 0.0035, min(g.x, g.y));
-  return w * mix(0.35, 1.0, bars) + exp(-max(o, 0.0) * 9.0) * 0.12;
+  float fall = 0.75 + 0.25 * smoothstep(0.2, -0.2, d.y);
+  return w * fall + exp(-max(o, 0.0) * 9.0) * 0.06;
 }
 
 vec2 heightGrad(sampler2D t, vec2 p, vec2 size, int ch) {
@@ -181,7 +180,7 @@ float latent(vec2 p) {
   for (int i = -7; i <= 7; i++) {
     float t = float(i) / 7.0;
     float ang = t * a;
-    vec2 rd = mat2(cos(ang), sin(ang), -sin(ang), cos(ang)) * d * (1.0 + t * arc * 0.18);
+    vec2 rd = mat2(cos(ang), sin(ang), -sin(ang), cos(ang)) * d;
     vec2 q = c + rd / vec2(ASPECT, 1.0);
     float w = 1.0 - abs(t) * 0.6;
     sum += texture(uLatent, q).r * w;
@@ -255,20 +254,22 @@ void main() {
   float ridge = sin(dr * 260.0 + fbm(p * 20.0 + uSeed) * 5.0) * smoothstep(0.32, 0.04, dr) * uRidge;
   float thick = clamp((film - uResidual) / 0.08, 0.0, 1.0) + ridge * 0.35;
 
+  float streaks = smoothstep(0.35, 0.75, fbm(vec2(p.x * 26.0, p.y * 1.6) + uSeed * 2.0));
+
   // Exposure: the integrated image through the lens, falling off toward the
   // corners, missing where the holder's corner wires held the plate.
   float E = 0.0;
   if (uHasLatent > 0.5) {
     E = latent(p) * uLatentScale;
     vec2 q = (p - 0.5) * vec2(ASPECT, 1.0) * 2.0;
-    E *= 1.0 - 0.32 * dot(q, q) / 1.64;
+    float r2 = dot(q, q) / 1.64;
+    E *= 1.0 - 0.42 * r2 - 0.25 * r2 * r2;
     vec2 cp = min(p, 1.0 - p) * vec2(ASPECT, 1.0);
     E *= smoothstep(0.034, 0.042, cp.x + cp.y);
-    float streaks = smoothstep(0.35, 0.75, fbm(vec2(p.x * 26.0, p.y * 1.6) + uSeed * 2.0));
     E *= 1.0 - uStreak * streaks * 0.8;
     E *= 0.72 + 0.56 * clamp(thick, 0.0, 1.4);
   }
-  float L = pow(E, 1.6) / (pow(E, 1.6) + pow(0.9, 1.6));
+  float L = pow(E, 1.9) / (pow(E, 1.9) + pow(0.95, 1.9));
 
   vec4 dev = uDevOn > 0.5 ? smoothTex(uDev, p, uCoatSize) : vec4(0.0);
   float D = L * dev.r + dev.g + dev.b * 0.14 * dev.r;
@@ -282,30 +283,34 @@ void main() {
   D = clamp(D + stain * 0.18, 0.0, 1.0);
 
   vec3 cream = vec3(0.6, 0.5, 0.29);
-  vec3 silver = vec3(0.5, 0.475, 0.43);
-  vec3 neg = mix(cream * (0.96 + 0.08 * fbm(p * 30.0)), vec3(0.13, 0.115, 0.09), clamp(D * 0.85, 0.0, 1.0));
-  vec3 clearFilm = lac * 1.25 + vec3(0.003, 0.0024, 0.001);
-  vec3 pos = mix(clearFilm, silver, pow(D, 1.05));
+  vec3 silver = vec3(0.53, 0.49, 0.42);
+  cream *= (0.95 + 0.1 * fbm(p * 30.0)) * (1.0 - uStreak * streaks * 0.45);
+  vec3 neg = mix(cream, vec3(0.13, 0.115, 0.09), clamp(D * 0.85, 0.0, 1.0));
+  vec3 clearFilm = lac * 1.1 + vec3(0.0015, 0.0012, 0.0006);
+  vec3 pos = mix(clearFilm, silver, pow(D, 1.35));
   pos = mix(pos, pos * vec3(1.05, 0.86, 0.66), stain * 0.6);
   float clearAt = smoothTex(uClear, p, uCoatSize).r;
-  float fixedAmt = uFix < 0.0 ? 0.0 : smoothstep(clearAt - 0.35, clearAt + 0.35, uFix + (vnoise(p * 90.0) - 0.5) * 0.3);
+  vec2 fp = mat2(0.8, 0.6, -0.6, 0.8) * p;
+  float front = (fbm(fp * 18.0 + uSeed) - 0.5) * 0.9 + (fbm(fp * 70.0) - 0.5) * 0.35;
+  float fixedAmt = uFix < 0.0 ? 0.0 : smoothstep(clearAt - 0.45, clearAt + 0.45, uFix + front);
   vec3 coated = mix(mix(clearFilm, neg, uSens), pos, fixedAmt);
   vec3 col = mix(lac, coated, cover);
 
   float vFilm = smoothTex(uVarnish, p, uCoatSize).r;
-  float vAmt = clamp(vFilm * 9.0, 0.0, 1.0) * uVarnishAmt;
+  // Varnish covers the whole plate; where it ran thick it yellows a little more.
+  float vAmt = uVarnishAmt * (0.8 + 0.2 * clamp((vFilm - 0.05) * 10.0, 0.0, 1.0));
   col *= mix(vec3(1.0), vec3(1.0, 0.9, 0.72), vAmt);
 
   // Surface: liquid on the plate bends the window's reflection.
   vec2 grad = vec2(0.0);
   grad += heightGrad(uCoat, p, uCoatSize, 0) * uWetCoat * 9.0;
-  grad += heightGrad(uDev, p, uCoatSize, 3) * 0.9;
+  grad += heightGrad(uDev, p, uCoatSize, 3) * 0.3;
   grad += heightGrad(uVarnish, p, uCoatSize, 0) * uWetVarnish * 9.0;
   float pool = clamp((film - uResidual) * 4.0, 0.0, 1.0) * uWetCoat;
   vec2 s = p + grad * 1.6 + uTilt * vec2(-0.08, -0.08);
-  float gloss = 0.05 + 0.05 * max(pool, max(dev.a * uDevOn, uWetFix * cover)) + 0.04 * vAmt + 0.03 * uWetVarnish;
+  float gloss = 0.035 + 0.045 * max(pool, max(dev.a * uDevOn, uWetFix * cover)) + 0.02 * vAmt + 0.03 * uWetVarnish;
   float spec = windowLight(s) * gloss;
-  spec += pool * 0.012 + dev.a * uDevOn * 0.006;
+  spec += pool * 0.004 + dev.a * uDevOn * 0.004;
   float bevel = smoothstep(-0.004, -0.0015, sd) * (1.0 - smoothstep(-0.0015, 0.0, sd));
   spec += bevel * 0.05 * clamp(0.5 - (p.x + p.y - 1.0), 0.0, 1.0);
 
