@@ -1,0 +1,8 @@
+{
+  "title": "Tintype",
+  "summary": "A wet-plate portrait studio: pour collodion over a sheet of black iron, sit still before your camera for a few seconds, then develop and fix the plate under the safelight and watch your mirror image clear out of the cream.",
+  "date": "2026-10-21",
+  "tags": ["webgl2", "camera", "canvas", "pointer-events", "collodion"],
+  "requires": ["webgl2"],
+  "plot": 20
+}

@@ -210,6 +210,24 @@ export const TECHNIQUES: Record<string, Technique> = {
         ? `Microphone permission for this site: ${permissionWords[env.microphone]}. Permission is per site, so this is the state the exhibit will see.`
         : 'Microphone permission for this site: not disclosed by this browser.',
   },
+  camera: {
+    label: 'Camera',
+    webFeature: 'media-capture',
+    handling: 'May ask for your camera. This register never does.',
+    test: async () => {
+      if (!window.isSecureContext) return { state: 'blocked', detail: 'not a secure context' };
+      if (typeof navigator.mediaDevices?.getUserMedia !== 'function') {
+        return { state: 'absent', detail: 'mediaDevices.getUserMedia missing' };
+      }
+      const state = await queryPermission('camera');
+      if (state === 'denied') return { state: 'blocked', detail: 'camera permission denied for this site' };
+      return { state: 'detected', detail: 'present; never called here' };
+    },
+    context: (env) =>
+      env.camera
+        ? `Camera permission for this site: ${permissionWords[env.camera]}. Permission is per site, so this is the state the exhibit will see.`
+        : 'Camera permission for this site: not disclosed by this browser.',
+  },
   webgl: {
     label: 'WebGL',
     webFeature: 'webgl',
@@ -436,6 +454,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   'light-lists': { label: 'Lists of lights' },
   'web-mercator': { label: 'Web Mercator' },
   autostereogram: { label: 'Autostereogram' },
+  collodion: { label: 'Wet-plate collodion' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
