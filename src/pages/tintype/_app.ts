@@ -637,19 +637,23 @@ export function start(root: HTMLElement) {
         tell('The camera has gone. Bring a photograph or use the colour chart instead.');
       }
     }
+    const span = `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`;
     tell(
-      `The plate is in the camera. Sit back, look into the lens, and keep still for ${seconds} ${seconds === 1 ? 'second' : 'seconds'}.`,
+      sitter?.kind === 'camera'
+        ? `The plate is in the camera. Sit back, look into the lens, and keep still for ${span}.`
+        : `The plate is in the camera, facing the picture. The lens will be open for ${span}.`,
     );
     canvas.setAttribute('aria-label', 'The sitter in the camera’s view, as the plate will see them');
   });
 
   button('uncap').addEventListener('click', () => {
     button('uncap').hidden = true;
-    exposing = { t: 0, lead: 3 };
+    const live = sitter?.kind === 'camera';
+    exposing = { t: 0, lead: live ? 3 : 0 };
     acc.fill(0);
     count.hidden = false;
-    count.textContent = '3';
-    tell('Hold still…');
+    count.textContent = live ? '3' : '';
+    tell(live ? 'Hold still…' : 'The cap is off.');
   });
 
   const accumulate = (dt: number) => {
@@ -720,7 +724,9 @@ export function start(root: HTMLElement) {
       if (button('rinse').disabled) {
         button('rinse').disabled = false;
         button('auto-dev').disabled = true;
-        tell('Watch the light parts come up. Rinse when the face is clear and before the shadows start to veil: about fifteen seconds.');
+        tell(
+          `Watch the light parts come up. Rinse when ${sitter?.kind === 'camera' ? 'your face' : 'the picture'} is clear and before the shadows start to veil: about fifteen seconds.`,
+        );
       }
       clock.textContent = `${Math.floor(dev.time - dev.firstPourAt)} s`;
     }
