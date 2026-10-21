@@ -14,8 +14,8 @@ const STEPS: Stage[] = ['compose', 'coat', 'bath', 'expose', 'develop', 'fix', '
 const GW = 64;
 const GH = 80;
 /** The integrated exposure's resolution, plate-shaped. */
-const ACC_W = 480;
-const ACC_H = 600;
+const ACC_W = 600;
+const ACC_H = 750;
 /** A scene this bright (collodion's view, centre-weighted) is right at this many seconds. */
 const REF_ORTHO = 0.12;
 const REF_SECONDS = 4;
@@ -25,7 +25,7 @@ const POUR_MAX = 900;
 const POUR_MIN = 380;
 const BATH_SECONDS = 3.2;
 const DAY: Rgb = [1, 0.985, 0.955];
-const SAFE: Rgb = [0.92, 0.27, 0.11];
+const SAFE: Rgb = [0.62, 0.17, 0.06];
 const WINDOW_LIGHT: [number, number] = [0.3, 0.16];
 
 interface Sitter {
@@ -123,6 +123,7 @@ export function start(root: HTMLElement) {
   let fixEnd = 0;
   let varnishPour: Pour | null = null;
   const zeroGrid = new Float32Array(GW * GH);
+  const filmBuf = new Float32Array(GW * GH);
 
   const st: PlateState = {
     mode: 0,
@@ -413,7 +414,7 @@ export function start(root: HTMLElement) {
     st.wetVarnish = 0;
     st.wetCoat = 1;
     st.comets.fill(0);
-    renderer.setCoat(pour.depth);
+    renderer.setCoat(pour.smoothed(filmBuf));
     renderer.setVarnish(zeroGrid);
     renderer.setClear(zeroGrid);
     dev.fill(devBuf);
@@ -486,8 +487,9 @@ export function start(root: HTMLElement) {
     }
     if (coatPhase === 'tilt') {
       if (pointer.down) {
-        let tx = ((pointer.x / GW) * 2 - 1) * 0.85;
-        let ty = ((pointer.y / GH) * 2 - 1) * 0.85;
+        // Inside the plate the tip stays gentle enough to hold the pool; past an edge it steepens.
+        let tx = ((pointer.x / GW) * 2 - 1) * 0.45;
+        let ty = ((pointer.y / GH) * 2 - 1) * 0.45;
         const m = Math.hypot(tx, ty);
         if (m > 1) {
           tx /= m;
@@ -500,7 +502,7 @@ export function start(root: HTMLElement) {
     pour.tiltX += (targetTilt[0] - pour.tiltX) * k;
     pour.tiltY += (targetTilt[1] - pour.tiltY) * k;
     pour.step(dt);
-    renderer.setCoat(pour.depth);
+    renderer.setCoat(pour.smoothed(filmBuf));
 
     const cov = pour.coverage();
     const mobile = pour.mobile();
@@ -516,7 +518,9 @@ export function start(root: HTMLElement) {
       } else if (coatPhase === 'tilt') {
         if (cov > 0.985 && mobile < 40) tell('Coated. Into the silver bath before the film skins over.');
         else if (cov > 0.97 && pour.drained < 50)
-          tell('Covered. Tip it hard toward one corner to pour the rest back into the bottle, rocking it a little as it drains.');
+          tell(
+            'Covered. Now drag out past one corner to tip the rest back into the bottle, rocking it a little as it drains.',
+          );
       }
     }
   };
@@ -525,7 +529,7 @@ export function start(root: HTMLElement) {
 
   /** Freeze the film: whatever still stands in a pool sets where it is. */
   const settleCoat = () => {
-    const film = new Float32Array(pour.depth);
+    const film = pour.smoothed(filmBuf);
     for (let i = 0; i < film.length; i++) film[i] = Math.min(film[i], COLLODION.residual + 0.14);
     renderer.setCoat(film);
     const drainCorner = pour.drained > 30 ? pour.drainCorner : 2;
@@ -602,7 +606,7 @@ export function start(root: HTMLElement) {
 
   button('to-expose').addEventListener('click', async () => {
     setStage('expose');
-    button('uncap').disabled = false;
+    button('uncap').hidden = false;
     count.hidden = true;
     if (sitter?.kind === 'camera' && !stream) {
       try {
@@ -618,7 +622,7 @@ export function start(root: HTMLElement) {
   });
 
   button('uncap').addEventListener('click', () => {
-    button('uncap').disabled = true;
+    button('uncap').hidden = true;
     exposing = { t: 0, lead: 3 };
     acc.fill(0);
     count.hidden = false;
@@ -759,7 +763,7 @@ export function start(root: HTMLElement) {
     auto = { t: 0, plan, target: varnishPour };
     button('varnish').disabled = true;
     button('bare').disabled = true;
-    st.varnish = 1;
+    st.varnish = 0;
     st.wetVarnish = 1;
     tell('Warmed over the lamp, the plate takes the varnish evenly. The excess goes back in the bottle.');
   });
@@ -858,7 +862,8 @@ export function start(root: HTMLElement) {
       target.tiltX += (tx - target.tiltX) * k;
       target.tiltY += (ty - target.tiltY) * k;
       target.step(dt);
-      renderer.setVarnish(target.depth);
+      renderer.setVarnish(target.smoothed(filmBuf));
+      st.varnish = Math.min(1, auto.t / (auto.plan[auto.plan.length - 1].until * 0.8));
     }
   };
 

@@ -101,6 +101,30 @@ export class Pour {
     this.poured += amount;
   }
 
+  /** The depth softened by one cell, for drawing: the grid's staircase would show along a pool's edge. */
+  smoothed(out: Float32Array) {
+    const { w, h, depth } = this;
+    for (let j = 0; j < h; j++) {
+      for (let i = 0; i < w; i++) {
+        let s = 0;
+        let n = 0;
+        for (let dj = -1; dj <= 1; dj++) {
+          const y = j + dj;
+          if (y < 0 || y >= h) continue;
+          for (let di = -1; di <= 1; di++) {
+            const x = i + di;
+            if (x < 0 || x >= w) continue;
+            const k = (di ? 1 : 2) * (dj ? 1 : 2);
+            s += depth[y * w + x] * k;
+            n += k;
+          }
+        }
+        out[j * w + i] = s / n;
+      }
+    }
+    return out;
+  }
+
   /** Fraction of the plate the liquid has reached. */
   coverage(): number {
     let n = 0;
@@ -189,7 +213,7 @@ export class Pour {
       if (d > 0) out += d;
       if (i > 0 && flux[(a - 1) * 2] < 0) out -= flux[(a - 1) * 2];
       if (j > 0 && flux[(a - w) * 2 + 1] < 0) out -= flux[(a - w) * 2 + 1];
-      const avail = Math.max(0, depth[a] - res * 0.5);
+      const avail = Math.max(0, depth[a] - res);
       if (out > avail && out > 0) {
         const k = avail / out;
         if (r > 0) flux[a * 2] *= k;
