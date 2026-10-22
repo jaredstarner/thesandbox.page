@@ -885,8 +885,13 @@ export class Tank {
       if (w) {
         const x = this.x[i];
         const y = this.y[i];
-        const edge = Math.min(x - w.left, w.right - x, y - w.top, w.bottom - y);
-        if (edge < near) {
+        const side = Math.min(x - w.left, w.right - x);
+        const end = Math.min(y - w.top, w.bottom - y);
+        if (side < near && end < near) {
+          // Wedged in a corner, where the fizz is worst.
+          low = 30;
+          slow = 700;
+        } else if (Math.min(side, end) < near) {
           low = 16;
           slow = 450;
         }
