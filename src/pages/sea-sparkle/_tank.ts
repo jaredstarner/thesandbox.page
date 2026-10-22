@@ -123,7 +123,8 @@ function attach(port: Port, shared: boolean) {
         tank.placeWall(client.slot, message.box.x, message.box.y, message.box.w, message.box.h, 0);
         // The first window is poured full; later ones open empty, waiting to be poured into.
         if (clients.size === 1 && tank.count === 0 && !tank.pouring) {
-          tank.pour(client.slot, particlesFor(tank, FILL, message.box), 0.32);
+          // Off to the right of the label, and clear of the hint on a wide window.
+          tank.pour(client.slot, particlesFor(tank, FILL, message.box), message.box.w < 640 ? 0.76 : 0.6);
         }
         port.postMessage({ type: 'welcome', slot: client.slot, radius: tank.r, shared });
         run();

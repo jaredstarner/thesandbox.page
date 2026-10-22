@@ -103,7 +103,9 @@ export function start(root: HTMLElement) {
     const step = [50, 100, 250, 500, 1000].find((ml) => ml / perPx >= 22) ?? 1000;
     const label = step * (step >= 250 ? 2 : 5);
     const parts: string[] = [];
-    for (let ml = step; ml / perPx < innerHeight * 0.82; ml += step) {
+    // Up to just under the label and hint.
+    const ceiling = innerHeight - (innerWidth <= 640 ? 190 : 150);
+    for (let ml = step; ml / perPx < ceiling; ml += step) {
       const y = ml / perPx;
       const major = ml % label === 0;
       parts.push(`<i class="${major ? 'major' : ''}" style="bottom:${y.toFixed(1)}px"></i>`);
