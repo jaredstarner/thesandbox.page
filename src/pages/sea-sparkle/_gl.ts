@@ -27,7 +27,8 @@ void main() {
   vec2 ndc = p / u_view * 2.0 - 1.0;
   gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
   gl_PointSize = u_size;
-  v_light = a_lt.x;
+  // Squared, so a faint flicker stays faint and only real flashes bloom.
+  v_light = a_lt.x * a_lt.x;
 }`;
 
 const SPLAT_FS = `#version 300 es
@@ -44,7 +45,7 @@ void main() {
   o = vec4(w, w * v_light, 0.0, 1.0) * u_gain;
 }`;
 
-// A 9-tap Gaussian along one axis, on the light channel only.
+// A 9-tap Gaussian along one axis, on the water and light channels.
 const BLUR_FS = `#version 300 es
 precision highp float;
 in vec2 v_uv;
@@ -52,12 +53,12 @@ uniform sampler2D u_src;
 uniform vec2 u_step;
 out vec4 o;
 void main() {
-  float g = texture(u_src, v_uv).g * 0.2270270;
-  g += (texture(u_src, v_uv + u_step).g + texture(u_src, v_uv - u_step).g) * 0.1945946;
-  g += (texture(u_src, v_uv + 2.0 * u_step).g + texture(u_src, v_uv - 2.0 * u_step).g) * 0.1216216;
-  g += (texture(u_src, v_uv + 3.0 * u_step).g + texture(u_src, v_uv - 3.0 * u_step).g) * 0.0540540;
-  g += (texture(u_src, v_uv + 4.0 * u_step).g + texture(u_src, v_uv - 4.0 * u_step).g) * 0.0162162;
-  o = vec4(0.0, g, 0.0, 1.0);
+  vec2 g = texture(u_src, v_uv).rg * 0.2270270;
+  g += (texture(u_src, v_uv + u_step).rg + texture(u_src, v_uv - u_step).rg) * 0.1945946;
+  g += (texture(u_src, v_uv + 2.0 * u_step).rg + texture(u_src, v_uv - 2.0 * u_step).rg) * 0.1216216;
+  g += (texture(u_src, v_uv + 3.0 * u_step).rg + texture(u_src, v_uv - 3.0 * u_step).rg) * 0.0540540;
+  g += (texture(u_src, v_uv + 4.0 * u_step).rg + texture(u_src, v_uv - 4.0 * u_step).rg) * 0.0162162;
+  o = vec4(g, 0.0, 1.0);
 }`;
 
 const COMPOSITE_FS = `#version 300 es
@@ -121,24 +122,26 @@ void main() {
   float len = length(n);
   n = len > 1e-5 ? n / len : vec2(0.0, -1.0);
 
-  // Seawater in a dark room: a little darker and greener than the air, and a
-  // cool rim where the surface catches the lamp.
-  vec3 sea = vec3(0.008, 0.026, 0.034) + vec3(0.012, 0.03, 0.036) * lamp;
-  float deep = smoothstep(0.6, 2.2, d);
-  sea *= 1.0 - 0.35 * deep;
-  col = mix(col, sea, water * 0.92);
+  // Seawater in a dark room: deep teal, lit a little from above, so it is
+  // lightest just under the surface and darkens with depth.
+  float body = texture(u_near, v_uv).r / u_ref;
+  float shallow = water * (1.0 - smoothstep(0.45, 0.95, body));
+  vec3 sea = vec3(0.012, 0.038, 0.05) + vec3(0.018, 0.05, 0.06) * lamp;
+  sea += vec3(0.02, 0.05, 0.06) * shallow * (0.5 + 0.5 * lamp);
+  col = mix(col, sea, water * 0.94);
+  // A cool line where the surface catches the lamp.
   float rim = water * (1.0 - water) * 4.0;
   float facing = max(0.0, dot(n, vec2(-0.25, -0.97)));
-  col += vec3(0.32, 0.42, 0.5) * rim * (0.08 + 0.42 * facing * facing) * (0.4 + 0.6 * lamp);
+  col += vec3(0.4, 0.52, 0.6) * rim * (0.1 + 0.5 * facing * facing) * (0.45 + 0.55 * lamp);
 
   // The plankton's light: sharp where it is, a near halo, and a wide one that
   // reaches the glass and the room.
   float sharp = f.g / u_ref;
   float near = texture(u_near, v_uv).g / u_ref;
   float far = texture(u_far, v_uv).g / u_ref;
-  float glow = sharp * 0.35 * water + near * 0.75 + far * 0.55;
-  vec3 blue = vec3(0.06, 0.48, 1.0);
-  col += blue * (1.0 - exp(-glow * 1.6));
+  float glow = sharp * 0.5 * water + near * 0.5 + far * 0.32;
+  vec3 blue = vec3(0.08, 0.56, 1.0);
+  col += blue * (1.0 - exp(-glow * 1.4));
   col += vec3(0.55, 0.85, 1.0) * smoothstep(0.55, 1.6, sharp * water) * 0.35;
 
   float g = 0.0;
@@ -171,8 +174,8 @@ void main() {
   float light = a_lt.x;
   float twinkle = 0.45 + 0.55 * sin(u_time * (6.0 + 10.0 * hash(tag * 0.31 + k)) + tag);
   float flash = light * light * (0.55 + 0.45 * twinkle) * 2.2;
-  float rest = 0.05 + 0.05 * hash(tag * 1.7 + k);
-  v_col = vec3(0.42, 0.47, 0.46) * rest + vec3(0.3, 0.72, 1.0) * flash;
+  float rest = 0.07 + 0.1 * hash(tag * 1.7 + k);
+  v_col = vec3(0.5, 0.56, 0.54) * rest + vec3(0.3, 0.72, 1.0) * flash;
   vec2 ndc = p / u_view * 2.0 - 1.0;
   gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
   gl_PointSize = (1.5 + 1.6 * light) * u_dpr;
@@ -326,7 +329,7 @@ export class Renderer {
 
     // Field: water weight in r, light in g. The 8-bit fallback stores a quarter scale.
     const gain = this.float ? 1 : 0.25;
-    const splatR = radius * 2.6;
+    const splatR = radius * 3.2;
     const scale = (this.dpr * field.w) / this.canvas.width;
     gl.bindFramebuffer(gl.FRAMEBUFFER, field.fbo);
     gl.viewport(0, 0, field.w, field.h);
