@@ -61,12 +61,16 @@ export class Tank {
   readonly light: Float32Array;
   /** How much light each particle's plankton has left to give. */
   readonly charge: Float32Array;
+  /** The steady jostling each particle has got used to and no longer flashes at. */
+  readonly used: Float32Array;
   /** A fixed random number per particle, for drawing. */
   readonly tag: Float32Array;
   /** The slot of the window the particle was last inside. */
   readonly owner: Int8Array;
   /** Shear rate around each particle, 1/s. */
   readonly shear: Float32Array;
+  /** Neighbours within reach at the last shear measurement: few means the surface. */
+  readonly crowd: Uint8Array;
 
   gravityX = 0;
   gravityY: number;
@@ -75,6 +79,7 @@ export class Tank {
   stick = { active: false, x: 0, y: 0, r: 26, vx: 0, vy: 0 };
   pressureIters = 36;
   flipRatio = 0.85;
+  wallFlip = 0.3;
   driftGain = 0.05;
 
   private pours: Pour[] = [];
@@ -119,9 +124,11 @@ export class Tank {
     this.vy = new Float32Array(n);
     this.light = new Float32Array(n);
     this.charge = new Float32Array(n);
+    this.used = new Float32Array(n);
     this.tag = new Float32Array(n);
     this.owner = new Int8Array(n);
     this.shear = new Float32Array(n);
+    this.crowd = new Uint8Array(n);
     this.cellIds = new Int32Array(n);
     // Particles settle about 2r apart on a hexagonal lattice; this is how many
     // that puts in a cell, a little under so the surface layer doesn't count against it.
@@ -301,6 +308,7 @@ export class Tank {
     this.vy[i] = vy;
     this.light[i] = 0;
     this.charge[i] = 1;
+    this.used[i] = 0;
     this.tag[i] = this.random();
     this.owner[i] = slot;
     this.shear[i] = 0;
@@ -315,6 +323,7 @@ export class Tank {
     this.vy[i] = this.vy[j];
     this.light[i] = this.light[j];
     this.charge[i] = this.charge[j];
+    this.used[i] = this.used[j];
     this.tag[i] = this.tag[j];
     this.owner[i] = this.owner[j];
     this.shear[i] = this.shear[j];
@@ -762,8 +771,19 @@ export class Tank {
   private gather(f: Float32Array, prev: Float32Array, vel: Float32Array, dx: number, dy: number, offset: number) {
     const { nx, ny, h, type } = this;
     const inv = 1 / h;
-    const flip = this.flipRatio;
     for (let i = 0; i < this.count; i++) {
+      // Against the glass, mostly PIC: pure FLIP keeps a jittering layer
+      // alive on the floor, and the damping stands in for the drag of a real wall.
+      const ci = Math.max(1, Math.min(nx - 2, Math.floor((this.x[i] - this.gx0) * inv)));
+      const cj = Math.max(1, Math.min(ny - 2, Math.floor((this.y[i] - this.gy0) * inv)));
+      const cc = ci * ny + cj;
+      const walled =
+        type[cc] === SOLID ||
+        type[cc - ny] === SOLID ||
+        type[cc + ny] === SOLID ||
+        type[cc - 1] === SOLID ||
+        type[cc + 1] === SOLID;
+      const flip = walled ? this.wallFlip : this.flipRatio;
       const x = Math.max(h, Math.min((nx - 1) * h, this.x[i] - this.gx0)) - dx;
       const y = Math.max(h, Math.min((ny - 1) * h, this.y[i] - this.gy0)) - dy;
       const x0 = Math.min(Math.floor(x * inv), nx - 2);
@@ -832,18 +852,43 @@ export class Tank {
         }
       }
       shear[i] = n > 0 ? sum / n : 0;
+      this.crowd[i] = Math.min(255, n);
     }
   }
 
   /** Light from shear, as in a dinoflagellate: a flash that fades, and a charge that tires and recovers. */
   private glow(dt: number) {
     const fade = Math.exp(-dt / 0.32);
-    const low = 10;
-    const high = 70;
-    const { light, charge, shear } = this;
+    const { light, charge, shear, crowd } = this;
+    const near = 3 * this.h;
+    const bySlot: (Wall | undefined)[] = [];
+    for (const w of this.walls) bySlot[w.slot] = w;
     for (let i = 0; i < this.count; i++) {
-      const e = Math.min(1, Math.max(0, (shear[i] - low) / (high - low)));
-      const flash = e * charge[i];
+      const w = bySlot[this.owner[i]];
+      // Water resting against the glass fizzes a little in the solver; ask more of it there.
+      let low = 7;
+      let slow = 260;
+      let rel = 0;
+      if (w) {
+        const x = this.x[i];
+        const y = this.y[i];
+        const edge = Math.min(x - w.left, w.right - x, y - w.top, w.bottom - y);
+        if (edge < near) {
+          low = 16;
+          slow = 450;
+        }
+        rel = Math.hypot(this.vx[i] - w.vx, this.vy[i] - w.vy);
+      }
+      const sheared = (shear[i] - low) / (50 - low);
+      // The solver's walls don't drag, so it has no boundary layers to shear;
+      // speed through the tank stands in for them, most of all at the surface.
+      const surface = crowd[i] <= 4 ? 1 : 0.55;
+      const stirred = ((rel - slow) / 700) * surface;
+      const e = Math.min(1, Math.max(0, sheared, stirred));
+      // Like any sense, they get used to a steady small stimulus, so the
+      // solver's own fizz at rest fades to dark while a real disturbance still flashes.
+      this.used[i] += (Math.min(e, 0.35) - this.used[i]) * Math.min(1, dt / 2.5);
+      const flash = Math.max(0, e - this.used[i]) * charge[i];
       light[i] = Math.max(light[i] * fade, flash);
       charge[i] = Math.min(1, Math.max(0.3, charge[i] - flash * dt * 0.5 + dt / 9));
     }
