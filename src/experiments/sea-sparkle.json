@@ -1,0 +1,17 @@
+{
+  "title": "Sea sparkle",
+  "summary": "A tank of glowing plankton that lives behind your screen: drag the browser window and the water sloshes and lights up blue, then open a second window and pour it from one into the other.",
+  "date": "2026-10-22",
+  "tags": [
+    "webgl2",
+    "shared-workers",
+    "web-workers",
+    "multiple-windows",
+    "device-motion",
+    "pointer-events",
+    "flip-fluid",
+    "physics"
+  ],
+  "requires": ["webgl2", "web-workers"],
+  "plot": 21
+}
