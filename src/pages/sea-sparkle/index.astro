@@ -11,6 +11,7 @@ import Bare from '../../layouts/Bare.astro';
 
   <main class="sparkle" data-sparkle>
     <canvas class="water" data-water aria-hidden="true"></canvas>
+    <div class="marks" data-marks aria-hidden="true"></div>
 
     <header class="label">
       <a class="home" href="/" title="Back to thesandbox.page">thesandbox.page</a>
@@ -69,6 +70,37 @@ import Bare from '../../layouts/Bare.astro';
     width: 100%;
     height: 100%;
     display: block;
+  }
+
+  .marks {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 60px;
+    pointer-events: none;
+  }
+
+  .marks :global(i) {
+    position: absolute;
+    left: 0;
+    width: 9px;
+    height: 1px;
+    background: rgb(232 240 246 / 0.28);
+  }
+
+  .marks :global(i.major) {
+    width: 16px;
+    background: rgb(232 240 246 / 0.45);
+  }
+
+  .marks :global(b) {
+    position: absolute;
+    left: 21px;
+    transform: translateY(50%);
+    color: rgb(232 240 246 / 0.45);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
   }
 
   .label {

@@ -323,14 +323,14 @@ export class Tank {
   /** Feed the pours: rows of particles falling from just under each window's top edge. */
   private emit(dt: number) {
     const spacing = 2 * this.r * 1.02;
-    const speed = 700;
+    const speed = 900;
     for (const p of this.pours) {
       const w = this.wall(p.slot);
       if (!w) {
         p.left = 0;
         continue;
       }
-      const width = Math.min(w.w * 0.3, 18 * spacing);
+      const width = Math.min(w.w * 0.3, 26 * spacing);
       const across = Math.max(1, Math.floor(width / spacing));
       const cx = w.left + this.r + (w.right - w.left - 2 * this.r) * p.at;
       const x0 = Math.max(w.left + this.r, Math.min(w.right - this.r - across * spacing, cx - (across * spacing) / 2));
