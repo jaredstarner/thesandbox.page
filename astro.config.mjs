@@ -295,5 +295,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Didot', 'Bodoni 72', 'Georgia', 'serif'],
     },
+    {
+      // The enamel marks on the glass on /sea-sparkle/: a geometric sans, as printed on lab glassware.
+      provider: fontProviders.fontsource(),
+      name: 'Jost',
+      cssVariable: '--font-seasparkle',
+      weights: ['300 600'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Futura', 'Century Gothic', 'Arial', 'sans-serif'],
+    },
   ],
 });

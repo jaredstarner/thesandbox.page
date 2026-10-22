@@ -327,6 +327,12 @@ export const TECHNIQUES: Record<string, Technique> = {
     webFeature: 'dedicated-workers',
     test: () => present(typeof Worker === 'function', 'Worker present', 'Worker missing'),
   },
+  'shared-workers': {
+    label: 'Shared workers',
+    webFeature: 'shared-workers',
+    handling: 'Runs one script shared by its own copies in your other windows, and nowhere else.',
+    test: () => present(typeof SharedWorker === 'function', 'SharedWorker present', 'SharedWorker missing'),
+  },
   'device-orientation': {
     label: 'Device orientation',
     webFeature: 'device-orientation-events',
@@ -336,6 +342,22 @@ export const TECHNIQUES: Record<string, Technique> = {
         return { state: 'absent', detail: 'DeviceOrientationEvent missing' };
       const needsPermission =
         typeof (DeviceOrientationEvent as unknown as { requestPermission?: unknown }).requestPermission === 'function';
+      return {
+        state: 'detected',
+        detail: needsPermission
+          ? 'present; requires permission, asked on a tap'
+          : 'present; a sensor is not guaranteed',
+      };
+    },
+  },
+  'device-motion': {
+    label: 'Device motion',
+    webFeature: 'device-orientation-events',
+    handling: 'Responds to the device being tilted or shaken, and may ask for motion access.',
+    test: () => {
+      if (typeof DeviceMotionEvent !== 'function') return { state: 'absent', detail: 'DeviceMotionEvent missing' };
+      const needsPermission =
+        typeof (DeviceMotionEvent as unknown as { requestPermission?: unknown }).requestPermission === 'function';
       return {
         state: 'detected',
         detail: needsPermission
@@ -455,6 +477,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   'web-mercator': { label: 'Web Mercator' },
   autostereogram: { label: 'Autostereogram' },
   collodion: { label: 'Wet-plate collodion' },
+  'multiple-windows': { label: 'Multiple windows', handling: 'May open a second window when you ask it to.' },
+  'flip-fluid': { label: 'FLIP fluid' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
