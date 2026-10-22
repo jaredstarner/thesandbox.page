@@ -8,7 +8,7 @@ import type { Box, FromTank, ToTank } from './_tank';
 const ML_PER_PX2 = ((25.4 / 96) * (25.4 / 96) * 40) / 1000;
 const EMPTY = new Float32Array(0);
 
-type Hint = 'filling' | 'drag' | 'phone' | 'open' | 'empty' | 'none';
+type Hint = 'filling' | 'drag' | 'phone' | 'open' | 'pour' | 'empty' | 'none';
 
 export function start(root: HTMLElement) {
   const $ = <T extends Element>(sel: string) => root.querySelector(sel) as T;
@@ -69,6 +69,8 @@ export function start(root: HTMLElement) {
   let full = false;
   let stepMs = 0;
   let moved = false;
+  let peak = 0;
+  let poured = false;
   let tilting = false;
   const start = box();
 
@@ -78,6 +80,7 @@ export function start(root: HTMLElement) {
       radius = m.radius;
       tankEl.textContent = `Tank ${slot + 1}`;
       openBtn.hidden = !m.shared || coarse;
+      if (slot > 0) openBtn.textContent = 'Open another tank';
     } else {
       frame = { data: m.data, count: m.count, at: performance.now() };
       others = m.others;
@@ -118,6 +121,7 @@ export function start(root: HTMLElement) {
       drag: 'Drag this window around by its title bar. The arrow keys knock the tank, too.',
       phone: 'Tilt your phone, or stir the water with a finger.',
       open: 'Open a second tank, then drag one window over the other to pour across.',
+      pour: 'Drag one window over the other to pour across.',
       empty: 'This tank is empty. Drag another tank over it and pour some in.',
       none: '',
     };
@@ -126,12 +130,16 @@ export function start(root: HTMLElement) {
 
   const updateUi = (b: Box) => {
     if (!moved && (Math.abs(b.x - start.x) > 60 || Math.abs(b.y - start.y) > 60)) moved = true;
-    if (volume < 1 && total > 0 && others.length > 0) setHint('empty');
+    peak = Math.max(peak, volume);
+    if (volume < peak * 0.8) poured = true;
+    if (others.length > 0 && volume < 1) setHint(total > 0 ? 'empty' : 'none');
+    else if (others.length > 0 && slot === 0 && !poured) setHint('pour');
+    else if (others.length > 0 || slot > 0) setHint('none');
     else if (pouring && total < 1 + volume * 2 && !moved) setHint('filling');
     else if (!moved) setHint(coarse ? 'phone' : 'drag');
     else if (!openBtn.hidden && others.length === 0) setHint('open');
     else setHint('none');
-    tankEl.textContent = slot < 0 ? '' : `Tank ${slot + 1} · ${Math.round(volume)} mL`;
+    tankEl.textContent = slot < 0 ? '' : `Tank ${slot + 1} · ${Math.round(volume).toLocaleString('en-US')} mL`;
     fillBtn.disabled = pouring || full;
     drawMarks();
   };
@@ -321,6 +329,7 @@ export function start(root: HTMLElement) {
       { x: b.x, y: b.y, w: b.w, h: b.h, screenW: screen.width, screenH: screen.height },
       others,
       radius,
+      radius / 0.3,
       now / 1000,
     );
     updateUi(b);

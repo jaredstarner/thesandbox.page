@@ -182,6 +182,33 @@ import Bare from '../../layouts/Bare.astro';
     margin: 0;
     text-align: center;
   }
+
+  @media (max-width: 640px) {
+    .label {
+      top: 16px;
+      left: 18px;
+    }
+
+    h1 {
+      font-size: 26px;
+    }
+
+    .hint {
+      top: 122px;
+      left: 18px;
+      right: 18px;
+      max-width: none;
+      text-align: left;
+    }
+
+    .controls {
+      right: 16px;
+      bottom: 16px;
+      left: 16px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+  }
 </style>
 
 <script>

@@ -290,6 +290,19 @@ export class Tank {
     }
     this.measureShear();
     this.glow(dt);
+    this.twinkle(dt);
+  }
+
+  /** A few cells flash on their own, as a culture left alone does now and then. */
+  private twinkle(dt: number) {
+    let n = this.count * 0.0006 * dt;
+    while (n > 0 && this.count > 0) {
+      if (this.random() < n) {
+        const i = Math.floor(this.random() * this.count);
+        this.light[i] = Math.max(this.light[i], 0.5 + 0.45 * this.random());
+      }
+      n -= 1;
+    }
   }
 
   private containing(x: number, y: number, inset: number) {

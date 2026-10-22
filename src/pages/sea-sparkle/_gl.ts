@@ -72,6 +72,7 @@ uniform vec2 u_view;
 uniform vec2 u_screen;
 uniform vec2 u_texel;
 uniform float u_ref;
+uniform float u_edge;
 uniform vec4 u_others[8];
 uniform int u_otherCount;
 out vec4 o;
@@ -93,9 +94,8 @@ bool joined(vec2 p) {
   return false;
 }
 
-// A pane of glass along one edge, unless another window carries on past it.
-float glass(float d, vec2 outside) {
-  if (joined(outside)) return 0.0;
+// A pane of glass along a closed edge: a bright line and a faint inner sheen.
+float glass(float d) {
   return exp(-d / 0.9) * 0.34 + exp(-d / 7.0) * 0.045;
 }
 
@@ -110,13 +110,26 @@ void main() {
   vec3 col = vec3(0.016, 0.021, 0.03) + vec3(0.03, 0.036, 0.046) * lamp;
   col += (hash(floor(world)) - 0.5) * 0.006;
 
-  vec4 f = texture(u_field, v_uv);
+  // The water stops a few pixels short of a closed edge (the solver's walls
+  // sit on its grid). Read it from just inside, so it meets the glass cleanly.
+  bool openL = joined(vec2(-3.0, css.y));
+  bool openR = joined(vec2(u_view.x + 3.0, css.y));
+  bool openT = joined(vec2(css.x, -3.0));
+  bool openB = joined(vec2(css.x, u_view.y + 3.0));
+  vec2 at = css;
+  if (!openL) at.x = max(at.x, u_edge);
+  if (!openR) at.x = min(at.x, u_view.x - u_edge);
+  if (!openT) at.y = max(at.y, u_edge);
+  if (!openB) at.y = min(at.y, u_view.y - u_edge);
+  vec2 uv = vec2(at.x / u_view.x, 1.0 - at.y / u_view.y);
+
+  vec4 f = texture(u_field, uv);
   float d = f.r / u_ref;
   float water = smoothstep(0.3, 0.6, d);
-  float l = texture(u_field, v_uv - vec2(u_texel.x, 0.0)).r;
-  float r = texture(u_field, v_uv + vec2(u_texel.x, 0.0)).r;
-  float dn = texture(u_field, v_uv - vec2(0.0, u_texel.y)).r;
-  float up = texture(u_field, v_uv + vec2(0.0, u_texel.y)).r;
+  float l = texture(u_field, uv - vec2(u_texel.x, 0.0)).r;
+  float r = texture(u_field, uv + vec2(u_texel.x, 0.0)).r;
+  float dn = texture(u_field, uv - vec2(0.0, u_texel.y)).r;
+  float up = texture(u_field, uv + vec2(0.0, u_texel.y)).r;
   // Outward normal, in screen orientation (y down).
   vec2 n = -vec2(r - l, dn - up);
   float len = length(n);
@@ -124,7 +137,7 @@ void main() {
 
   // Seawater in a dark room: deep teal, lit a little from above, so it is
   // lightest just under the surface and darkens with depth.
-  float body = texture(u_near, v_uv).r / u_ref;
+  float body = texture(u_near, uv).r / u_ref;
   float shallow = water * (1.0 - smoothstep(0.45, 0.95, body));
   vec3 sea = vec3(0.012, 0.038, 0.05) + vec3(0.018, 0.05, 0.06) * lamp;
   sea += vec3(0.02, 0.05, 0.06) * shallow * (0.5 + 0.5 * lamp);
@@ -137,18 +150,18 @@ void main() {
   // The plankton's light: sharp where it is, a near halo, and a wide one that
   // reaches the glass and the room.
   float sharp = f.g / u_ref;
-  float near = texture(u_near, v_uv).g / u_ref;
-  float far = texture(u_far, v_uv).g / u_ref;
+  float near = texture(u_near, uv).g / u_ref;
+  float far = texture(u_far, uv).g / u_ref;
   float glow = sharp * 0.5 * water + near * 0.5 + far * 0.32;
   vec3 blue = vec3(0.08, 0.56, 1.0);
   col += blue * (1.0 - exp(-glow * 1.4));
   col += vec3(0.55, 0.85, 1.0) * smoothstep(0.55, 1.6, sharp * water) * 0.35;
 
   float g = 0.0;
-  g += glass(css.x, vec2(-3.0, css.y));
-  g += glass(u_view.x - css.x, vec2(u_view.x + 3.0, css.y));
-  g += glass(css.y, vec2(css.x, -3.0));
-  g += glass(u_view.y - css.y, vec2(css.x, u_view.y + 3.0));
+  if (!openL) g += glass(css.x);
+  if (!openR) g += glass(u_view.x - css.x);
+  if (!openT) g += glass(css.y);
+  if (!openB) g += glass(u_view.y - css.y);
   col += vec3(0.62, 0.72, 0.8) * g * (0.5 + 0.5 * lamp) + blue * g * (near + far) * 0.6;
 
   o = vec4(col, 1.0);
@@ -316,7 +329,16 @@ export class Renderer {
     return true;
   }
 
-  draw(data: Float32Array, count: number, ahead: number, view: View, others: Box[], radius: number, time: number) {
+  draw(
+    data: Float32Array,
+    count: number,
+    ahead: number,
+    view: View,
+    others: Box[],
+    radius: number,
+    cell: number,
+    time: number,
+  ) {
     const gl = this.gl;
     const field = this.field!;
     const bytes = count * STRIDE * 4;
@@ -385,6 +407,7 @@ export class Renderer {
     const spacing = 2 * radius;
     const ref = ((Math.PI * splatR * splatR) / 3 / (spacing * spacing * 0.866)) * gain;
     gl.uniform1f(this.u(c, 'u_ref'), ref);
+    gl.uniform1f(this.u(c, 'u_edge'), cell * 0.5 + splatR);
     const flat = new Float32Array(32);
     const n = Math.min(8, others.length);
     for (let i = 0; i < n; i++) flat.set([others[i].x, others[i].y, others[i].w, others[i].h], i * 4);

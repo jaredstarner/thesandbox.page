@@ -85,12 +85,14 @@ function freeSlot() {
 
 /**
  * Size the grid so the first window's water is about 7,000 particles, which a
- * worker steps in well under a frame. A bigger window gets coarser water
- * rather than a slower tank.
+ * worker steps in well under a frame; a phone-sized window gets about 4,500,
+ * for a slower processor. A bigger window gets coarser water rather than a
+ * slower tank.
  */
 function makeTank(box: Box) {
   const particleArea = 0.312;
-  const cell = Math.sqrt((box.w * box.h * FILL) / (7000 * particleArea));
+  const budget = box.w * box.h < 500_000 ? 4500 : 7000;
+  const cell = Math.sqrt((box.w * box.h * FILL) / (budget * particleArea));
   return new Tank({ cell: Math.max(8, Math.min(22, Math.round(cell))), cap: 26000, gravity: GRAVITY });
 }
 
