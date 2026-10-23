@@ -1760,10 +1760,6 @@ function hexA(col: string, a: number): string {
   return `rgba(${r},${g},${b},${a})`;
 }
 
-function shadeHex(col: string, f: number): string {
-  return mix(col, '#000000', f);
-}
-
 function nearTrack(x: number, y: number, m: number): boolean {
   if (Math.abs(y - (DOWN_Y + UP_Y) / 2) < m) return true;
   for (const path of ['DB', 'UB'] as PathId[])
