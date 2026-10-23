@@ -13,14 +13,14 @@ import { rng, type ShiftId, type Vehicle } from './_timetable';
 type V3 = [number, number, number];
 
 const CAM: V3 = [0, -4, 7.5];
-const PITCH = (-12 * Math.PI) / 180;
+const PITCH = (-8.5 * Math.PI) / 180;
 const PANES = [
   { y0: -90, y1: -33 },
   { y0: -33, y1: 33 },
   { y0: 33, y1: 90 },
 ];
 /** Signals drawn a little larger than life, so their arms read at this distance. */
-const SIG_SCALE = 1.75;
+const SIG_SCALE = 1.45;
 
 interface Pane {
   x: number;
@@ -124,13 +124,19 @@ const PALETTES: Record<ShiftId, Palette> = {
   },
 };
 
+/** Channels of a #rrggbb or rgb() colour. */
+function channels(col: string): number[] {
+  if (col.startsWith('#')) {
+    const n = parseInt(col.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  return (col.match(/[\d.]+/g) ?? ['0', '0', '0']).slice(0, 3).map(Number);
+}
+
 function mix(a: string, b: string, t: number): string {
-  const pa = parseInt(a.slice(1), 16);
-  const pb = parseInt(b.slice(1), 16);
-  const ch = (s: number) => [(s >> 16) & 255, (s >> 8) & 255, s & 255];
-  const ca = ch(pa);
-  const cb = ch(pb);
-  const out = ca.map((v, i) => Math.round(v + (cb[i] - v) * t));
+  const ca = channels(a);
+  const cb = channels(b);
+  const out = ca.map((v, i) => Math.round(Math.min(255, Math.max(0, v + (cb[i] - v) * t))));
   return `rgb(${out[0]},${out[1]},${out[2]})`;
 }
 
@@ -138,6 +144,22 @@ interface Field {
   pts: [number, number][];
   colour: string;
   d: number;
+  /** Plough lines run this way across the field, in radians; null for grass. */
+  furrow: number | null;
+}
+
+interface Building {
+  x: number;
+  y: number;
+  /** Width along X, depth along Y, wall height, and the roof's rise to its ridge. */
+  w: number;
+  d: number;
+  h: number;
+  rise: number;
+  wall: string;
+  roof: string;
+  /** A tower with a short spire. */
+  tower?: boolean;
 }
 
 interface Sig {
@@ -153,7 +175,7 @@ interface Sig {
 interface Upright {
   x: number;
   y: number;
-  kind: 'tree' | 'pole' | 'bush' | 'hut';
+  kind: 'tree' | 'pole' | 'bush' | 'hut' | 'sheep';
   h: number;
   r: number;
   v: number;
@@ -180,6 +202,7 @@ export class View {
   private shift: ShiftId = 'early';
   private pal: Palette = PALETTES.early;
   private fields: Field[] = [];
+  private buildings: Building[] = [];
   private uprights: Upright[] = [];
   private stars: [number, number, number][] = [];
   private bgStamp = '';
@@ -274,10 +297,10 @@ export class View {
             pts[0][1] = Math.min(pts[0][1], UP_Y - 3.5);
             pts[1][1] = Math.min(pts[1][1], UP_Y - 3.5);
           }
-          this.fields.push({ pts, colour: '', d: 0 });
+          this.fields.push({ pts, colour: '', d: 0, furrow: null });
           // Hedgerow trees along the field's near edge.
-          if (r() < 0.55) {
-            const n = 1 + Math.floor(r() * 3);
+          if (r() < 0.7) {
+            const n = 1 + Math.floor(r() * 4);
             for (let k = 0; k < n; k++)
               this.uprights.push({ x: x + r() * wdt, y: ya + (r() - 0.5) * 4, kind: 'tree', h: 8 + r() * 10, r: 3 + r() * 4, v: r() });
           }
@@ -304,16 +327,33 @@ export class View {
       if (Math.abs(x) < 12) continue;
       this.uprights.push({ x, y: DOWN_Y + 6.5, kind: 'pole', h: 8, r: 0.14, v: 0 });
     }
+    // Sheep grazing the pasture beyond the line.
+    for (let k = 0; k < 16; k++)
+      this.uprights.push({ x: -70 + r() * 150, y: 58 + r() * 30, kind: 'sheep', h: 0.8, r: 0.55, v: r() });
+    // Farms, a railway cottage, and a church on the skyline.
+    const farm = (x: number, y: number) => {
+      this.buildings.push({ x, y, w: 11, d: 7, h: 5.5, rise: 3.2, wall: '#cdbb9a', roof: '#6b4a3a' });
+      this.buildings.push({ x: x + 16, y: y + 6, w: 18, d: 9, h: 6, rise: 2.6, wall: '#7b5038', roof: '#4d4c4a' });
+      for (let k = 0; k < 5; k++)
+        this.uprights.push({ x: x - 10 + r() * 40, y: y + 14 + r() * 10, kind: 'tree', h: 11 + r() * 6, r: 4 + r() * 2, v: r() });
+    };
+    farm(55, 240);
+    farm(-260, 420);
+    farm(420, 900);
+    this.buildings.push({ x: -150, y: 36, w: 8, d: 6, h: 5, rise: 2.8, wall: '#b8805a', roof: '#3f3a38' });
+    this.buildings.push({ x: -720, y: 1900, w: 7, d: 7, h: 19, rise: 9, wall: '#a7a091', roof: '#55524d', tower: true });
+    this.buildings.push({ x: -706, y: 1896, w: 22, d: 10, h: 9, rise: 4, wall: '#a7a091', roof: '#5c5853' });
     // A platelayers' hut by the up line.
     this.uprights.push({ x: -62, y: UP_Y - 6.5, kind: 'hut', h: 2.6, r: 2, v: 0 });
     // Keep the tracks clear of trees, and the nearest fields clear of anything that would fill a pane.
     this.uprights = this.uprights.filter((u) => {
       if (u.kind === 'tree' && nearTrack(u.x, u.y, 14)) return false;
-      if ((u.kind === 'tree' || u.kind === 'bush') && Math.hypot(u.x - CAM[0], u.y - CAM[1]) < 90) return false;
+      if ((u.kind === 'tree' || u.kind === 'bush') && Math.hypot(u.x - CAM[0], u.y - CAM[1]) < 130) return false;
       return true;
     });
     for (const f of this.fields) {
       f.colour = String(Math.floor(r() * 6));
+      if (f.colour === '3' || f.colour === '1') f.furrow = r() < 0.5 ? 0 : Math.PI / 2;
       const cx = f.pts.reduce((a, p) => a + p[0], 0) / 4;
       const cy = f.pts.reduce((a, p) => a + p[1], 0) / 4;
       f.d = Math.hypot(cx - CAM[0], cy - CAM[1]);
@@ -344,16 +384,22 @@ export class View {
       c.fillStyle = g;
       c.fillRect(p.x, hy, p.w, p.h - hy);
       for (const f of this.fields) this.drawField(c, p, f);
+      this.drawCanal(c, p);
       this.drawTrack(c, p);
-      // Point rodding from the box out to the junction.
-      c.strokeStyle = pal.night ? '#1a1a1a' : '#3b3631';
-      c.lineWidth = Math.max(1, 1.2 * this.dpr);
-      for (const off of [0.25, 0.55]) this.groundLine(c, p, [[-2, 3 + off], [24, 3 + off], [30, UP_Y - 2.2 + off]]);
+      // Point rodding from the box along the cess to the junction.
+      c.strokeStyle = pal.night ? '#1a1a1a' : '#47413b';
+      c.lineWidth = Math.max(0.8, 0.9 * this.dpr);
+      for (const off of [0, 0.3, 0.6]) this.groundLine(c, p, [[1.5 + off, 7.2], [2.5 + off, 8.1 + off], [28, 8.1 + off], [30 + off, UP_Y - 1.4]], 0.25);
+      this.drawFence(c, p);
       // Far uprights: trees, bushes, poles, and the hut beyond the near track are part of the scene.
       const ups = this.uprights
         .map((u) => ({ u, d: Math.hypot(u.x - CAM[0], u.y - CAM[1]) }))
         .sort((a, b) => b.d - a.d);
       for (const { u } of ups) this.drawUpright(c, p, u);
+      for (const bd of this.buildings
+        .map((bd) => ({ bd, d: Math.hypot(bd.x - CAM[0], bd.y - CAM[1]) }))
+        .sort((a, b) => b.d - a.d))
+        this.drawBuilding(c, p, bd.bd);
       this.drawWires(c, p);
       c.restore();
     }
@@ -495,6 +541,24 @@ export class View {
     for (const q of pts) c.lineTo(q[0], q[1]);
     c.closePath();
     c.fill();
+    if (f.furrow !== null && f.d < 900) {
+      c.save();
+      c.clip();
+      c.strokeStyle = pal.night ? 'rgba(0,0,0,0.25)' : 'rgba(40,30,20,0.13)';
+      c.lineWidth = Math.max(0.5, (1.2 * this.dpr * 200) / Math.max(200, f.d));
+      const xs = f.pts.map((q) => q[0]);
+      const ys = f.pts.map((q) => q[1]);
+      const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+      const step = 7;
+      if (f.furrow === 0)
+        for (let y = y0; y < y1; y += step) this.groundLine(c, p, [[x0, y], [x1, y]], 0.02);
+      else for (let x = x0; x < x1; x += step) this.groundLine(c, p, [[x, y0], [x, y1]], 0.02);
+      c.restore();
+      c.beginPath();
+      c.moveTo(pts[0][0], pts[0][1]);
+      for (const q of pts) c.lineTo(q[0], q[1]);
+      c.closePath();
+    }
     c.strokeStyle = mix(pal.hedge, pal.haze, haze * 0.6);
     c.lineWidth = Math.max(0.6, (2.2 * this.dpr * 180) / Math.max(180, f.d));
     c.stroke();
@@ -566,6 +630,11 @@ export class View {
       c.closePath();
       c.fill();
     };
+    for (const [path, a, b] of runs.slice(0, 2)) {
+      const pts = this.sample(path, a, b);
+      c.fillStyle = mix(pal.ballast, pal.ground, 0.45);
+      strip(pts, path === 'DM' ? 2.2 : -3.6, path === 'DM' ? 3.6 : -2.2, 0.01);
+    }
     for (const [path, a, b] of runs) {
       const pts = this.sample(path, a, b);
       c.fillStyle = pal.ballastDark;
@@ -652,6 +721,18 @@ export class View {
       }
       return;
     }
+    if (u.kind === 'sheep') {
+      const r = Math.max(0.8, u.r * k);
+      c.fillStyle = pal.night ? '#2a2c30' : mix('#e9e4d6', pal.haze, haze);
+      c.beginPath();
+      c.ellipse(base[0], base[1] - r * 0.8, r * 1.5, r * 0.85, 0, 0, Math.PI * 2);
+      c.fill();
+      c.fillStyle = pal.night ? '#101012' : '#2a2622';
+      c.beginPath();
+      c.arc(base[0] + (u.v > 0.5 ? 1 : -1) * r * 1.45, base[1] - r * 0.95, r * 0.42, 0, Math.PI * 2);
+      c.fill();
+      return;
+    }
     if (u.kind === 'pole') {
       const w = Math.max(0.8, 0.26 * k);
       c.fillStyle = mix(pal.night ? '#151515' : '#4a3a2c', pal.haze, haze);
@@ -679,6 +760,100 @@ export class View {
       this.poly(c, p, corners, pal.night ? '#1a1412' : '#6b4636');
       this.poly(c, p, [[u.x - 1.8, u.y + 1.4, 2.1], [u.x + 1.8, u.y + 1.4, 2.1], [u.x + 1.8, u.y - 1.4, 2.6], [u.x - 1.8, u.y - 1.4, 2.6]], pal.night ? '#101012' : '#3a3633');
       this.poly(c, p, [[u.x - 0.4, u.y + 1.21, 0], [u.x + 0.4, u.y + 1.21, 0], [u.x + 0.4, u.y + 1.21, 1.8], [u.x - 0.4, u.y + 1.21, 1.8]], pal.night ? '#0c0a0a' : '#3d2a20');
+    }
+  }
+
+  /** A canal running alongside the line, holding the sky, with a towpath on its near bank. */
+  private drawCanal(c: CanvasRenderingContext2D, p: Pane): void {
+    const pal = this.pal;
+    const y0 = 146;
+    const y1 = 156;
+    const strip = (ya: number, yb: number, fill: string | CanvasGradient) => {
+      const top: [number, number][] = [];
+      const bot: [number, number][] = [];
+      for (let x = -3000; x <= 3000; x += 25) {
+        const a = this.proj(p, x, yb, 0.01);
+        const b = this.proj(p, x, ya, 0.01);
+        if (a && b) {
+          top.push([a[0], a[1]]);
+          bot.push([b[0], b[1]]);
+        }
+      }
+      if (top.length < 2) return;
+      c.fillStyle = fill;
+      c.beginPath();
+      c.moveTo(top[0][0], top[0][1]);
+      for (const q of top) c.lineTo(q[0], q[1]);
+      for (let i = bot.length - 1; i >= 0; i--) c.lineTo(bot[i][0], bot[i][1]);
+      c.closePath();
+      c.fill();
+    };
+    strip(y0 - 3.5, y0, pal.night ? '#141814' : mix('#b9ad8c', pal.haze, 0.25));
+    const far = this.proj(p, 0, y1, 0);
+    const near = this.proj(p, 0, y0, 0);
+    let water: string | CanvasGradient = mix(pal.skyMid, pal.skyLow, 0.5);
+    if (far && near && Math.abs(near[1] - far[1]) > 0.5) {
+      const g = c.createLinearGradient(0, far[1], 0, near[1]);
+      g.addColorStop(0, mix(pal.skyLow, '#000000', pal.night ? 0.2 : 0.05));
+      g.addColorStop(1, mix(pal.skyMid, '#000000', pal.night ? 0.4 : 0.18));
+      water = g;
+    }
+    strip(y0, y1, water);
+    c.strokeStyle = pal.night ? 'rgba(160,170,200,0.12)' : 'rgba(255,255,255,0.28)';
+    c.lineWidth = Math.max(0.5, 0.6 * this.dpr);
+    this.groundLine(c, p, [[-3000, y0 + 3], [3000, y0 + 3]], 0.02);
+    c.strokeStyle = pal.night ? '#060808' : mix(pal.hedge, pal.haze, 0.2);
+    c.lineWidth = Math.max(0.6, 1 * this.dpr);
+    this.groundLine(c, p, [[-3000, y1], [3000, y1]], 0.02);
+  }
+
+  /** The railway's boundary fence, posts and wire, along the north side. */
+  private drawFence(c: CanvasRenderingContext2D, p: Pane): void {
+    const y = DOWN_Y + 10.5;
+    c.strokeStyle = this.pal.night ? 'rgba(60,60,70,0.5)' : 'rgba(58,48,38,0.55)';
+    c.lineWidth = Math.max(0.5, 0.6 * this.dpr);
+    for (const z of [0.55, 1.05]) this.groundLine(c, p, [[-1800, y], [1800, y]], z);
+    c.fillStyle = this.pal.night ? '#151518' : '#4b3c2e';
+    for (let x = -260; x <= 260; x += 3) {
+      const a = this.proj(p, x, y, 0);
+      const b = this.proj(p, x, y, 1.2);
+      if (!a || !b || a[0] < p.x - 4 || a[0] > p.x + p.w + 4) continue;
+      const w = Math.max(0.6, (0.1 * p.f) / a[2]);
+      c.fillRect(a[0] - w / 2, b[1], w, a[1] - b[1]);
+    }
+  }
+
+  private drawBuilding(c: CanvasRenderingContext2D, p: Pane, bd: Building): void {
+    const pal = this.pal;
+    const d = Math.hypot(bd.x - CAM[0], bd.y - CAM[1]);
+    const haze = Math.min(0.85, Math.pow(d / 2600, 0.7)) * (pal.night ? 0.3 : 0.7);
+    const tone = (col: string, f = 0) => mix(mix(col, pal.night ? '#05060a' : '#000000', pal.night ? 0.8 : f), pal.haze, haze);
+    const x0 = bd.x - bd.w / 2;
+    const x1 = bd.x + bd.w / 2;
+    const y0 = bd.y - bd.d / 2;
+    const y1 = bd.y + bd.d / 2;
+    const ym = bd.y;
+    const top = bd.h + bd.rise;
+    const P = (x: number, y: number, z: number): V3 => [x, y, z];
+    // The south wall faces the box; one gable end shows, whichever side the box is on.
+    const gx = CAM[0] < x0 ? x0 : x1;
+    this.poly(c, p, [P(gx, y0, 0), P(gx, y1, 0), P(gx, y1, bd.h), P(gx, ym, bd.tower ? bd.h : top), P(gx, y0, bd.h)], tone(bd.wall, 0.22));
+    this.poly(c, p, [P(x0, y0, 0), P(x1, y0, 0), P(x1, y0, bd.h), P(x0, y0, bd.h)], tone(bd.wall));
+    if (bd.tower) {
+      this.poly(c, p, [P(x0, y0, bd.h), P(x1, y0, bd.h), P(bd.x, bd.y, top)], tone(bd.roof));
+      this.poly(c, p, [P(gx, y0, bd.h), P(gx, y1, bd.h), P(bd.x, bd.y, top)], tone(bd.roof, 0.25));
+    } else {
+      this.poly(c, p, [P(x0 - 0.3, y0 - 0.3, bd.h), P(x1 + 0.3, y0 - 0.3, bd.h), P(x1 + 0.3, ym, top), P(x0 - 0.3, ym, top)], tone(bd.roof));
+    }
+    // Windows: lit at night, dark panes by day.
+    if (!bd.tower && d < 1200) {
+      const win = pal.night ? '#f2c46a' : tone('#2b2a28');
+      const n = Math.max(1, Math.round(bd.w / 4.5));
+      for (let i = 0; i < n; i++) {
+        const cx = x0 + ((i + 0.5) / n) * bd.w;
+        if (pal.night && i % 2) continue;
+        this.poly(c, p, [P(cx - 0.5, y0 - 0.02, bd.h * 0.35), P(cx + 0.5, y0 - 0.02, bd.h * 0.35), P(cx + 0.5, y0 - 0.02, bd.h * 0.62), P(cx - 0.5, y0 - 0.02, bd.h * 0.62)], win);
+      }
     }
   }
 
@@ -1292,20 +1467,6 @@ export class View {
       }
       c.fillStyle = g;
       c.fillRect(p.x, 0, p.w, p.h);
-      // Transom bar and the glazing bars of the upper lights.
-      const ty = Math.round(p.h * 0.2);
-      c.fillStyle = paint;
-      c.fillRect(p.x, ty - 4 * this.dpr, p.w, 8 * this.dpr);
-      c.fillStyle = edge;
-      c.fillRect(p.x, ty + 4 * this.dpr, p.w, 1.5 * this.dpr);
-      const n = Math.max(2, Math.round(p.w / (150 * this.dpr)));
-      for (let i = 1; i < n; i++) {
-        const x = Math.round(p.x + (p.w * i) / n);
-        c.fillStyle = paint;
-        c.fillRect(x - 2.5 * this.dpr, 0, 5 * this.dpr, ty);
-        c.fillStyle = edge;
-        c.fillRect(x + 2.5 * this.dpr, 0, 1 * this.dpr, ty);
-      }
     }
     for (let i = 0; i < this.panes.length - 1; i++) {
       const x0 = this.panes[i].x + this.panes[i].w;
@@ -1387,8 +1548,8 @@ const SHAPES: Record<Vehicle['kind'], Shape> = {
 };
 
 function hexA(col: string, a: number): string {
-  const n = parseInt(col.slice(1), 16);
-  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+  const [r, g, b] = channels(col);
+  return `rgba(${r},${g},${b},${a})`;
 }
 
 function shadeHex(col: string, f: number): string {
