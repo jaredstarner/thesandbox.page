@@ -6,6 +6,7 @@
 import { CLASSES, beatTimes } from './_codes';
 import { BOXES, PASS_S, PATH_SIGNALS, type BoxId } from './_layout';
 import type { BlockState, Box, Train } from './_sim';
+import { clock } from './_timetable';
 
 export type Advice =
   | { kind: 'tap'; box: BoxId; code: string; why: string }
@@ -224,6 +225,14 @@ export function advise(box: Box): Advice {
   }
 
   if (held) return { kind: 'wait', why: held };
+  const next = box.trains
+    .filter((tr) => tr.state === 'due' && tr.entry.offeredAt === undefined)
+    .sort((a, b) => a.entry.booked - b.entry.booked)[0];
+  if (next)
+    return {
+      kind: 'wait',
+      why: `Nothing to do until the next bell. Next booked past the box: ${next.b.hc}, ${CLASSES[next.b.cls].asks}, from ${name(next.from)} for ${name(next.to)}, at ${clock(box.shift.start + next.entry.booked)}.`,
+    };
   return { kind: 'wait', why: 'Nothing to do until the next bell.' };
 }
 

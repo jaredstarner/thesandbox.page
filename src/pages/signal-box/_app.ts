@@ -41,6 +41,9 @@ export function startSignalBox(root: HTMLElement): void {
   const demoTaps: { t: number; box: BoxId }[] = [];
   let hintFlash = 0;
   let lastAdvice: Advice | null = null;
+  // The debug runner's own guide, kept between calls.
+  let runBusy = 0;
+  const runTaps: { t: number; b: BoxId }[] = [];
   let registerStamp = '';
 
   const frame = new Frame((n) => {
@@ -100,8 +103,9 @@ export function startSignalBox(root: HTMLElement): void {
     root.dataset.shift = id;
     turnLabel.textContent = `${SHIFT.get(id)!.name}, from ${clock(SHIFT.get(id)!.start)}`;
     registerStamp = '';
+    runBusy = 0;
+    runTaps.length = 0;
     phone.replaceChildren();
-    phone.classList.remove('on');
     demoTaps.length = 0;
     for (const b of root.querySelectorAll<HTMLButtonElement>('[data-pick]')) b.setAttribute('aria-pressed', String(b.dataset.pick === id));
     renderRegister();
@@ -252,12 +256,12 @@ export function startSignalBox(root: HTMLElement): void {
 
   function showPhone(from: string, text: string): void {
     const p = document.createElement('p');
+    p.dataset.until = String(performance.now() + 30000);
     const who = document.createElement('b');
     who.textContent = `${clock(box.shift.start + box.t)} ${from}`;
     p.append(who, document.createTextNode(` ${text}`));
     phone.prepend(p);
     while (phone.children.length > 3) phone.lastElementChild?.remove();
-    phone.classList.add('on');
   }
 
   function highlight(a: Advice | null): void {
@@ -406,6 +410,7 @@ export function startSignalBox(root: HTMLElement): void {
       dt = 0;
     }
     if (hintFlash > 0) hintFlash -= Math.max(dt, 1 / 60);
+    for (const p of phone.querySelectorAll<HTMLElement>('p')) if (Number(p.dataset.until) < now) p.remove();
     for (const id of IDS) instruments[id].update(box, Math.max(dt, 1 / 60));
     frame.update(box, Math.max(dt, 1 / 60));
     diagram.update(box, Math.max(dt, 1 / 60));
@@ -414,8 +419,6 @@ export function startSignalBox(root: HTMLElement): void {
   }
   requestAnimationFrame(frameStep);
 
-  let runBusy = 0;
-  const runTaps: { t: number; b: BoxId }[] = [];
   if (debug)
     (window as unknown as { signalbox: unknown }).signalbox = {
       get box() {
