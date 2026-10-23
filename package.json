@@ -19,7 +19,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@chenglou/pretext": "0.0.9",
+    "@chenglou/pretext": "1.0.0",
     "astro": "^7.4.1"
   },
   "devDependencies": {
