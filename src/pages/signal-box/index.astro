@@ -616,7 +616,7 @@ import { SHIFTS, clock } from './_timetable';
   }
 
   .signalbox :global(.lever.next .plate rect:first-child),
-  .signalbox :global(.tapper.next circle:nth-child(3)),
+  .signalbox :global(.tapper.next .ring),
   .signalbox :global(.turn-hit.next) {
     animation: sb-ring 1.1s ease-in-out infinite;
   }
@@ -626,9 +626,14 @@ import { SHIFTS, clock } from './_timetable';
     stroke-width: 3;
   }
 
-  .signalbox :global(.tapper.next circle:nth-child(3)) {
-    stroke: #f2c14e;
-    stroke-width: 3;
+  .signalbox :global(.tapper .ring) {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .signalbox :global(.tapper.next .ring) {
+    opacity: 1;
+    filter: drop-shadow(0 0 3px rgb(255 212 90 / 0.9));
   }
 
   .signalbox :global(.turn-hit.next) {

@@ -301,6 +301,8 @@ export function startSignalBox(root: HTMLElement): void {
     mode = 'ended';
     root.dataset.mode = 'ended';
     highlight(null);
+    renderRegister();
+    setHint('The turn is over. The register shows how each train ran.');
     const trains = box.trains.length;
     const late = box.trains.map((t) => box.lateness(t) ?? 0);
     const rt = late.filter((l) => l === 0).length;

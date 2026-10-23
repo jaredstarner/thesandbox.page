@@ -54,6 +54,7 @@ interface LeverView {
   p: number;
   shown: number;
   jolt: number;
+  refusedT: number;
 }
 
 export class Frame {
@@ -153,7 +154,7 @@ export class Frame {
         }
       });
       this.svg.append(g);
-      const v: LeverView = { def, x, g, shadow, side, body, shine, catchBar, handle, glint, badge, plate, p: 0, shown: -1, jolt: 0 };
+      const v: LeverView = { def, x, g, shadow, side, body, shine, catchBar, handle, glint, badge, plate, p: 0, shown: -1, jolt: 0, refusedT: 0 };
       this.levers.push(v);
       this.draw(v);
     }
@@ -258,9 +259,9 @@ export class Frame {
   jolt(n: number): void {
     const v = this.levers[n - 1];
     v.jolt = 0.32;
-    v.g.classList.remove('refused');
-    void v.g.getBoundingClientRect();
     v.g.classList.add('refused');
+    clearTimeout(v.refusedT);
+    v.refusedT = window.setTimeout(() => v.g.classList.remove('refused'), 900);
   }
 
   /** Ring the lever the guide wants next, scrolling it into view where the frame scrolls sideways. */

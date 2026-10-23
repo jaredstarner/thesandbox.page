@@ -63,7 +63,7 @@ function dial(cx: number, cy: number, label: string, id: string): { g: SVGGEleme
   const needle = el(
     'g',
     {},
-    el('polygon', { points: '-2,12 2,12 0.8,-34 -0.8,-34', fill: '#141210' }),
+    el('polygon', { points: '-2,10 2,10 0.8,-17 0,-20 -0.8,-17', fill: '#141210' }),
     el('circle', { r: 4.2, fill: '#141210' }),
   );
   g.append(needle, el('circle', { r: 1.4, fill: '#c69a46' }));
@@ -157,6 +157,7 @@ export class Instrument {
       el('circle', { cx: 0, cy: 2, r: 17, fill: '#24130a' }),
       el('circle', { cx: 0, cy: 0, r: 15.5, fill: `url(#sb-brass-${id})` }),
       el('g', { class: 'knob' }, el('circle', { r: 11, fill: '#161311' }), el('circle', { cx: -3.5, cy: -3.5, r: 4, fill: '#fff', opacity: 0.16 })),
+      el('circle', { r: 20.5, class: 'ring', fill: 'none', stroke: '#ffd45a', 'stroke-width': 3 }),
     );
     const tapG = el('g', { transform: 'translate(59 200)' }, this.knob);
     this.svg.append(tapG);
