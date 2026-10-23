@@ -479,6 +479,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   collodion: { label: 'Wet-plate collodion' },
   'multiple-windows': { label: 'Multiple windows', handling: 'May open a second window when you ask it to.' },
   'flip-fluid': { label: 'FLIP fluid' },
+  'absolute-block': { label: 'Absolute block signalling' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

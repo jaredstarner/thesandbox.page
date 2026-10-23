@@ -1,0 +1,39 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Signal box"
+  description="A mechanical signal box at a country junction in 1964: answer the bells, pull the levers the interlocking allows, and keep the trains running to time."
+>
+  <Font cssVariable="--font-signalbox" slot="head" />
+  <Font cssVariable="--font-signalbox-hand" slot="head" />
+
+  <main class="signalbox" data-signalbox>
+    <header class="nameboard">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Wenlow Junction</h1>
+    </header>
+    <noscript>
+      <p class="nojs">The box is worked with JavaScript. Turn scripts on to take a shift.</p>
+    </noscript>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.signalbox)) {
+    margin: 0;
+    background: #2b211a;
+  }
+
+  .signalbox {
+    --face: var(--font-signalbox, 'Cabin', 'Gill Sans', Arial, sans-serif);
+    --hand: var(--font-signalbox-hand, 'Kalam', cursive);
+    --cream: #efe6cf;
+
+    min-height: 100vh;
+    color: var(--cream);
+    font-family: var(--face);
+  }
+</style>
