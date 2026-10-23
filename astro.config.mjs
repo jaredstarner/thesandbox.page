@@ -305,5 +305,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Futura', 'Century Gothic', 'Arial', 'sans-serif'],
     },
+    // The enamel plates and diagram on /signal-box/: a humanist sans after Johnston and Gill, and the register's hand.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Cabin',
+      cssVariable: '--font-signalbox',
+      weights: ['400 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Gill Sans', 'Gill Sans MT', 'Arial', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Kalam',
+      cssVariable: '--font-signalbox-hand',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['cursive'],
+    },
   ],
 });

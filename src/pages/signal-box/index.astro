@@ -1,0 +1,1099 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { SHIFTS, clock } from './_timetable';
+---
+
+<Bare
+  title="Signal box"
+  description="A mechanical signal box at a country junction in 1964: answer the bells, pull the levers the interlocking allows, and keep the trains running to time."
+>
+  <Font cssVariable="--font-signalbox" slot="head" />
+  <Font cssVariable="--font-signalbox-hand" slot="head" />
+
+  <main class="signalbox" data-signalbox data-shift="early" data-mode="intro">
+    <header class="topbar">
+      <div class="nameboard">
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
+        <h1>Wenlow Junction</h1>
+        <p class="turn" data-turn></p>
+      </div>
+      <nav class="controls" aria-label="Signal box">
+        <div class="picks" role="group" aria-label="Turn of duty">
+          {SHIFTS.map((s) => (
+            <button type="button" data-pick={s.id} aria-pressed={s.id === 'early' ? 'true' : 'false'}>
+              {s.name.replace(' turn', '')}
+            </button>
+          ))}
+        </div>
+        <button type="button" data-guide aria-pressed="true" title="Show what to do next">
+          Guide
+        </button>
+        <button type="button" data-hurry aria-pressed="false" title="Run the clock fast until something needs you">
+          Hurry
+        </button>
+        <button type="button" data-demo aria-pressed="false" title="Let the box be worked for you">
+          Demo
+        </button>
+        <button type="button" data-sound aria-pressed="true" title="Sound">
+          Sound
+        </button>
+        <button type="button" class="about" popovertarget="sb-notes" aria-label="How it works">
+          ?
+        </button>
+      </nav>
+    </header>
+
+    <section class="windowband">
+      <canvas
+        class="view"
+        data-view
+        aria-label="The view from the box: the main line runs left to right below the windows, and the branch curves away to the right."
+      ></canvas>
+      <div class="phone" data-phone aria-live="polite"></div>
+    </section>
+
+    <section class="shelf">
+      <div class="slot" data-instrument="callow"></div>
+      <div class="board">
+        <div class="diagram" data-diagram></div>
+        <p class="hint" data-hint aria-live="polite"></p>
+        <div class="clockwrap" data-clock></div>
+      </div>
+      <div class="slot" data-instrument="pell"></div>
+      <div class="slot" data-instrument="marsh"></div>
+    </section>
+
+    <section class="lower">
+      <div class="framewrap" data-frame></div>
+      <aside class="desk">
+        <h2>Train register</h2>
+        <div class="register" data-register></div>
+        <details class="codes">
+          <summary>Bell codes</summary>
+          <ul data-codes></ul>
+        </details>
+      </aside>
+    </section>
+
+    <div class="card intro" data-intro>
+      <p class="kicker">Signal box, 1964</p>
+      <h2>Wenlow Junction</h2>
+      <p>
+        The box stands where the Pell Wood branch leaves a double-track main line. Callow Bank, to the west, Marsh Lane,
+        to the east, and Pell Wood, up the branch, offer you their trains by bell.
+      </p>
+      <p>
+        Accept a train on the block instrument, set the road with the levers, offer it on to the next box, and clear it
+        out of section once its tail lamp has gone by. The frame is interlocked: a lever that would make a conflict
+        won't move.
+      </p>
+      <div class="picks" role="group" aria-label="Turn of duty">
+        {SHIFTS.map((s) => (
+          <button type="button" data-pick={s.id} aria-pressed={s.id === 'early' ? 'true' : 'false'}>
+            <b>{s.name}</b>
+            <span>
+              {clock(s.start)}, {s.bookings.length} trains
+            </span>
+          </button>
+        ))}
+      </div>
+      <div class="actions">
+        <button type="button" class="primary" data-start>
+          Take the turn
+        </button>
+        <button type="button" data-watch>
+          Watch a demonstration
+        </button>
+      </div>
+      <p class="small">
+        The guide is on: it names each next move and rings the control to use. Turn it off once you have the knack.
+      </p>
+    </div>
+
+    <div class="card report" data-report hidden>
+      <p class="kicker">End of turn</p>
+      <h2 data-r-turn></h2>
+      <dl>
+        <div>
+          <dt>Trains worked</dt>
+          <dd data-r-trains></dd>
+        </div>
+        <div>
+          <dt>Right time</dt>
+          <dd data-r-rt></dd>
+        </div>
+        <div>
+          <dt>Time lost</dt>
+          <dd data-r-mins></dd>
+        </div>
+      </dl>
+      <p class="verdict" data-r-verdict></p>
+      <ul class="irr" data-r-irr></ul>
+      <div class="actions">
+        <button type="button" class="primary" data-next>
+          Next turn
+        </button>
+        <button type="button" data-again>
+          Work it again
+        </button>
+      </div>
+    </div>
+
+    <div class="notes" id="sb-notes" popover>
+      <h2>Working the box</h2>
+      <p>
+        Only one train may be in a block section at a time. A section runs from one box's last signal to the next box's,
+        and the two signalmen agree every train by bell, with the block instrument keeping a record of the answer: Line
+        blocked, Line clear, or Train on line.
+      </p>
+      <h3>A train from Callow Bank</h3>
+      <ol>
+        <li>Callow Bank rings 1, call attention. Answer it with 1.</li>
+        <li>
+          They ring the train's code, say 3-1 for an ordinary passenger. Repeat it to accept, and turn their handle to
+          Line clear.
+        </li>
+        <li>
+          When it sets off they ring 2, Train entering section. Acknowledge, and turn the handle to Train on line.
+        </li>
+        <li>Offer it on: 1 and the code to the box ahead. Their needle on your instrument goes to Line clear.</li>
+        <li>
+          Set the road. Points first, then the facing point lock, then the starting signal, the home, and the distant
+          last.
+        </li>
+        <li>When it has passed, ring 2 to the box ahead, and put the signals back.</li>
+        <li>
+          Once the tail lamp has gone by, ring 1 and 2-1, Train out of section, to Callow Bank, and turn their handle
+          back to Line blocked.
+        </li>
+      </ol>
+      <h3>The frame</h3>
+      <p>
+        Red levers work stop signals, yellow the distants, black the points, blue the facing point lock that holds the
+        junction points under a train. The numbers along the bottom of each plate are the levers that must be pulled
+        first. A starting signal can only be pulled while the box ahead shows Line clear, and a home signal only while
+        the track beyond it is clear; the lamps on the diagram light where trains stand.
+      </p>
+      <h3>Tapping a code</h3>
+      <p>
+        Beats close together make a group; a pause starts the next group; a longer pause sends it. Keep a steady hand.
+        If you ring Train entering section too soon, 3-5 cancels it.
+      </p>
+      <p class="aside">
+        Wenlow Junction and its neighbours are made up. The bell codes follow British Railways' 1960 regulations for
+        train signalling; lever colours and the absolute block method are as they were worked.
+      </p>
+    </div>
+
+    <noscript>
+      <p class="nojs">The box is worked with JavaScript. Turn scripts on to take a turn.</p>
+    </noscript>
+  </main>
+</Bare>
+
+<script>
+  import { startSignalBox } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-signalbox]');
+  if (root) startSignalBox(root);
+</script>
+
+<style>
+  :global(body:has(.signalbox)) {
+    margin: 0;
+    background: #20160f;
+  }
+
+  .signalbox {
+    --face: var(--font-signalbox, 'Cabin', 'Gill Sans', Arial, sans-serif);
+    --hand: var(--font-signalbox-hand, 'Kalam', cursive);
+    --cream: #efe6cf;
+    --paper: #f3ecd8;
+    --ink: #1d1915;
+    --brown: #4a2f1e;
+    --wall: #e4d9bc;
+    --red: #a8261c;
+
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-rows: auto minmax(220px, 32vh) auto minmax(290px, 1fr);
+    min-height: 100vh;
+    color: var(--ink);
+    font-family: var(--face);
+    background: linear-gradient(#5a3a24, #3a2618 60%, #2a1c12);
+    box-sizing: border-box;
+  }
+
+  .signalbox :global(*),
+  .signalbox :global(*::before),
+  .signalbox :global(*::after) {
+    box-sizing: border-box;
+  }
+
+  .signalbox button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .signalbox :focus-visible {
+    outline: 2px solid #f2c14e;
+    outline-offset: 2px;
+  }
+
+  /* The nameboard and controls, along the top of the box. */
+  .topbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: linear-gradient(#3a2618, #2b1d14);
+    border-bottom: 3px solid #1a110b;
+  }
+
+  .nameboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+    align-items: baseline;
+    padding: 5px 14px 6px;
+    background: #2b1d16;
+    border: 2px solid #c9b27a;
+    border-radius: 3px;
+    color: #f3ecd8;
+  }
+
+  .nameboard .home {
+    color: rgb(243 236 216 / 0.62);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .nameboard .home:hover {
+    color: #f3ecd8;
+  }
+
+  .nameboard h1 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .nameboard .turn {
+    margin: 0;
+    color: #e8c77a;
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .controls .picks {
+    display: flex;
+    margin-right: 6px;
+  }
+
+  .controls button {
+    min-height: 32px;
+    padding: 4px 11px;
+    background: rgb(43 29 22 / 0.86);
+    border: 1px solid rgb(201 178 122 / 0.7);
+    border-radius: 3px;
+    color: #f3ecd8;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+  }
+
+  .controls .picks button {
+    border-radius: 0;
+  }
+
+  .controls .picks button:first-child {
+    border-radius: 3px 0 0 3px;
+  }
+
+  .controls .picks button:last-child {
+    border-radius: 0 3px 3px 0;
+  }
+
+  .controls button[aria-pressed='true'] {
+    background: #e8c77a;
+    border-color: #e8c77a;
+    color: #2b1d16;
+  }
+
+  .controls .about {
+    width: 32px;
+    padding: 0;
+    font-weight: 700;
+  }
+
+  /* The windows across the front of the box. */
+  .windowband {
+    position: relative;
+    overflow: hidden;
+    background: #e4d9bc;
+    border-bottom: 10px solid #6e4a30;
+    box-shadow: inset 0 -4px 0 #8d6542;
+  }
+
+  .view {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Telephone messages, pinned to the bottom of the left-hand window. */
+  .phone {
+    position: absolute;
+    left: 16px;
+    bottom: 14px;
+    display: grid;
+    gap: 4px;
+    width: min(360px, calc(100% - 32px));
+  }
+
+  .phone :global(p) {
+    margin: 0;
+    padding: 7px 10px 8px 32px;
+    background: #f3ecd8 no-repeat 10px 50% / 14px
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 1c1 0 2 2 2.5 3S5 6 4.5 6.5c.7 2 2.4 3.8 4.5 4.5.5-.5 1.5-1 2.5-.5s3 1.5 3 2.5-1.5 2-3 2C6 15 1 10 1 4c0-1.5 1-3 2-3z' fill='%23a8261c'/%3E%3C/svg%3E");
+    border-radius: 2px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.35);
+    color: var(--ink);
+    font-size: 12.5px;
+    line-height: 1.3;
+  }
+
+  .phone :global(p:not(:first-child)) {
+    opacity: 0.72;
+  }
+
+  .phone :global(b) {
+    font-weight: 700;
+  }
+
+  /* The block shelf. */
+  .shelf {
+    display: grid;
+    grid-template-columns: minmax(150px, 220px) minmax(0, 1fr) minmax(150px, 220px) minmax(150px, 220px);
+    gap: 10px;
+    align-items: start;
+    padding: 12px 14px 14px;
+    background: linear-gradient(#6b442b, #4f321f);
+    border-bottom: 8px solid #2c1c12;
+    box-shadow: inset 0 6px 10px rgb(0 0 0 / 0.25);
+  }
+
+  .slot :global(.instrument) {
+    position: relative;
+  }
+
+  .slot :global(.instrument svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 4px 4px rgb(0 0 0 / 0.4));
+  }
+
+  .slot :global(.caption) {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    top: 100%;
+    z-index: 3;
+    margin: 4px 0 0;
+    padding: 5px 8px;
+    background: #f7f0da;
+    border-radius: 2px;
+    box-shadow: 0 3px 8px rgb(0 0 0 / 0.4);
+    color: var(--ink);
+    font-size: 12.5px;
+    line-height: 1.3;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition:
+      opacity 0.2s,
+      transform 0.2s;
+    pointer-events: none;
+  }
+
+  .slot :global(.caption.on) {
+    opacity: 1;
+    transform: none;
+  }
+
+  .board {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: start;
+  }
+
+  .diagram {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .diagram :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 4px 5px rgb(0 0 0 / 0.4));
+  }
+
+  .clockwrap {
+    width: 58px;
+  }
+
+  /* The guide's note, on a slip tucked under the diagram. */
+  .hint {
+    align-self: stretch;
+    min-height: 44px;
+    margin: 0;
+    padding: 7px 14px 8px;
+    background: #f7f0da;
+    border-left: 4px solid var(--red);
+    box-shadow: 0 3px 8px rgb(0 0 0 / 0.3);
+    color: var(--ink);
+    font-family: var(--hand);
+    font-size: 16.5px;
+    line-height: 1.3;
+    transition: opacity 0.25s;
+  }
+
+  .hint:not(:global(.on)) {
+    opacity: 0.35;
+  }
+
+  .clockwrap :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 3px 4px rgb(0 0 0 / 0.45));
+  }
+
+  /* The frame and the desk. */
+  .lower {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 470px);
+    min-height: 0;
+  }
+
+  .framewrap {
+    position: relative;
+    min-width: 0;
+    min-height: 300px;
+    overflow: hidden;
+    background: #2b1d14;
+  }
+
+  .framewrap :global(svg) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .desk {
+    padding: 14px 16px 18px;
+    background: linear-gradient(90deg, rgb(0 0 0 / 0.18), transparent 14px), linear-gradient(#6e4a30, #5a3a24);
+    color: var(--cream);
+    overflow: auto;
+  }
+
+  .desk h2 {
+    margin: 0 0 8px;
+    color: #f3ecd8;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .register {
+    background: repeating-linear-gradient(transparent 0 25px, rgb(60 80 140 / 0.22) 25px 26px), #f6efd9;
+    border-radius: 2px;
+    box-shadow:
+      0 4px 10px rgb(0 0 0 / 0.35),
+      inset 3px 0 0 rgb(168 38 28 / 0.25);
+    color: var(--ink);
+    overflow-x: auto;
+  }
+
+  .register :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .register :global(th) {
+    padding: 6px 4px 4px;
+    border-bottom: 1.5px solid rgb(168 38 28 / 0.55);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-align: left;
+    text-transform: uppercase;
+    vertical-align: bottom;
+  }
+
+  .register :global(td) {
+    height: 26px;
+    padding: 0 4px;
+    border-left: 1px solid rgb(168 38 28 / 0.18);
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  .register :global(td.hc) {
+    border-left: 0;
+    line-height: 1.05;
+  }
+
+  .register :global(td.hc b) {
+    display: block;
+    font-size: 12.5px;
+  }
+
+  .register :global(td.hc small) {
+    display: block;
+    color: #5d5243;
+    font-size: 9.5px;
+  }
+
+  .register :global(td.bk) {
+    color: #5d5243;
+  }
+
+  .register :global(td.w) {
+    color: #1c2f6b;
+    font-family: var(--hand);
+    font-size: 14px;
+  }
+
+  .register :global(td.late) {
+    color: var(--red);
+  }
+
+  .register :global(tr.live td) {
+    background: rgb(232 199 122 / 0.28);
+  }
+
+  .codes {
+    margin-top: 12px;
+  }
+
+  .codes summary {
+    color: #f3ecd8;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .codes ul {
+    margin: 8px 0 0;
+    padding: 8px 12px;
+    list-style: none;
+    background: #f6efd9;
+    border-radius: 2px;
+    color: var(--ink);
+    font-size: 12.5px;
+    columns: 2 220px;
+    column-gap: 18px;
+  }
+
+  .codes :global(li) {
+    display: flex;
+    gap: 8px;
+    padding: 2px 0;
+    break-inside: avoid;
+  }
+
+  .codes :global(li b) {
+    flex: 0 0 44px;
+    font-weight: 700;
+  }
+
+  /* Things to press, when the guide wants them. */
+  .signalbox :global(.lever) {
+    cursor: pointer;
+  }
+
+  .signalbox :global(.lever:hover .plate rect:first-child) {
+    stroke: #e8c77a;
+    stroke-width: 2;
+  }
+
+  .signalbox :global(.lever.next .plate rect:first-child),
+  .signalbox :global(.tapper.next .ring),
+  .signalbox :global(.turn-hit.next) {
+    animation: sb-ring 1.1s ease-in-out infinite;
+  }
+
+  .signalbox :global(.lever.next .plate rect:first-child) {
+    stroke: #f2c14e;
+    stroke-width: 3;
+  }
+
+  .signalbox :global(.tapper .ring) {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .signalbox :global(.tapper.next .ring) {
+    opacity: 1;
+    filter: drop-shadow(0 0 3px rgb(255 212 90 / 0.9));
+  }
+
+  .signalbox :global(.turn-hit.next) {
+    fill: rgb(242 193 78 / 0.45);
+  }
+
+  .signalbox :global(.lever.refused .plate rect:first-child) {
+    stroke: var(--red);
+    stroke-width: 3;
+  }
+
+  .signalbox :global(.tapper) {
+    cursor: pointer;
+  }
+
+  .signalbox :global(.tapper .knob) {
+    transition: transform 0.06s;
+  }
+
+  .signalbox :global(.tapper.down .knob) {
+    transform: scale(0.9);
+  }
+
+  .signalbox :global(.turn-hit) {
+    cursor: pointer;
+  }
+
+  @keyframes sb-ring {
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  /* Lettering inside the SVG. */
+  .signalbox :global(.plate-n) {
+    fill: var(--ink);
+    font: 700 19px var(--face);
+  }
+
+  .signalbox :global(.plate-d) {
+    fill: #3b3127;
+    font: 600 8.4px var(--face);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+
+  .signalbox :global(.plate-lead) {
+    fill: var(--red);
+    font: 700 11px var(--face);
+  }
+
+  .signalbox :global(.badge) {
+    font: 700 10px var(--face);
+  }
+
+  .signalbox :global(.nameplate) {
+    fill: #2b1d0a;
+    font: 700 11px var(--face);
+    letter-spacing: 0.1em;
+  }
+
+  .signalbox :global(.dial-t) {
+    font: 700 4.6px var(--face);
+    letter-spacing: 0.03em;
+  }
+
+  .signalbox :global(.dial-cap) {
+    fill: #f0dfb0;
+    font: 700 8px var(--face);
+    letter-spacing: 0.12em;
+  }
+
+  .signalbox :global(.tape) {
+    fill: #f2c14e;
+    font: 700 9px var(--face);
+    letter-spacing: 0.1em;
+  }
+
+  .signalbox :global(.clock-n) {
+    fill: #1c1712;
+    font: 700 10px var(--face);
+  }
+
+  .signalbox :global(.dg-n),
+  .signalbox :global(.dg-sig) {
+    fill: var(--ink);
+    font: 700 10px var(--face);
+  }
+
+  .signalbox :global(.dg-n.rev) {
+    fill: var(--red);
+  }
+
+  .signalbox :global(.dg-fpl) {
+    fill: #1f4f9b;
+    font: 700 9px var(--face);
+  }
+
+  .signalbox :global(.dg-l) {
+    fill: #5d5243;
+    font: 700 7.5px var(--face);
+    letter-spacing: 0.1em;
+  }
+
+  .signalbox :global(.dg-to) {
+    fill: var(--ink);
+    font: 600 9px var(--face);
+    letter-spacing: 0.04em;
+  }
+
+  .signalbox :global(.dg-box) {
+    fill: #f5efdc;
+    font: 700 6.5px var(--face);
+    letter-spacing: 0.06em;
+  }
+
+  /* Cards over the box: the start, and the end of a turn. */
+  .card {
+    position: absolute;
+    top: 64px;
+    left: 50%;
+    z-index: 10;
+    width: min(560px, calc(100% - 32px));
+    padding: 22px 26px 24px;
+    background: var(--paper);
+    border-top: 6px solid var(--red);
+    border-radius: 2px;
+    box-shadow: 0 18px 50px rgb(0 0 0 / 0.55);
+    color: var(--ink);
+    transform: translateX(-50%);
+  }
+
+  .card[hidden] {
+    display: none;
+  }
+
+  .card:global(.wiggle) {
+    animation: sb-wiggle 0.35s;
+  }
+
+  @keyframes sb-wiggle {
+    25% {
+      transform: translateX(calc(-50% - 6px));
+    }
+    75% {
+      transform: translateX(calc(-50% + 6px));
+    }
+  }
+
+  .card .kicker {
+    margin: 0;
+    color: var(--red);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .card h2 {
+    margin: 4px 0 10px;
+    font-size: 26px;
+    letter-spacing: 0.04em;
+  }
+
+  .card p {
+    margin: 0 0 10px;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .card .small {
+    margin: 12px 0 0;
+    color: #5d5243;
+    font-size: 13px;
+  }
+
+  .card .picks {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 14px 0 16px;
+  }
+
+  .card .picks button {
+    display: grid;
+    gap: 2px;
+    padding: 8px 10px;
+    background: #fbf7ea;
+    border: 1.5px solid #c9b88f;
+    border-radius: 3px;
+    text-align: left;
+  }
+
+  .card .picks button[aria-pressed='true'] {
+    background: #2b1d16;
+    border-color: #2b1d16;
+    color: #f3ecd8;
+  }
+
+  .card .picks span {
+    font-size: 12px;
+    opacity: 0.75;
+  }
+
+  .card .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .card .actions button {
+    min-height: 40px;
+    padding: 8px 16px;
+    background: #fbf7ea;
+    border: 1.5px solid #2b1d16;
+    border-radius: 3px;
+    font-size: 15px;
+  }
+
+  .card .actions .primary {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff6ea;
+    font-weight: 700;
+  }
+
+  .report dl {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 6px 0 12px;
+  }
+
+  .report dl div {
+    padding: 8px 10px;
+    background: #fbf7ea;
+    border: 1px solid #d8cba7;
+  }
+
+  .report dt {
+    color: #5d5243;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .report dd {
+    margin: 2px 0 0;
+    font-family: var(--hand);
+    font-size: 22px;
+    color: #1c2f6b;
+  }
+
+  .report .verdict {
+    font-weight: 700;
+  }
+
+  .report .irr {
+    margin: 0 0 14px;
+    padding-left: 18px;
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+
+  .notes {
+    width: min(620px, calc(100% - 32px));
+    max-height: calc(100vh - 48px);
+    padding: 22px 26px;
+    overflow: auto;
+    background: var(--paper);
+    border: 0;
+    border-top: 6px solid var(--red);
+    border-radius: 2px;
+    box-shadow: 0 18px 50px rgb(0 0 0 / 0.55);
+    color: var(--ink);
+    font-family: var(--face);
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .notes::backdrop {
+    background: rgb(20 12 6 / 0.45);
+  }
+
+  .notes h2 {
+    margin: 0 0 8px;
+    font-size: 22px;
+  }
+
+  .notes h3 {
+    margin: 16px 0 4px;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .notes p,
+  .notes ol {
+    margin: 0 0 8px;
+  }
+
+  .notes ol {
+    padding-left: 20px;
+  }
+
+  .notes .aside {
+    margin-top: 14px;
+    color: #5d5243;
+    font-size: 13px;
+  }
+
+  .nojs {
+    position: absolute;
+    inset: 40% 16px auto;
+    color: var(--cream);
+    text-align: center;
+  }
+
+  /* Wide screens with room: the whole box on one screen, the register scrolling on the desk. */
+  @media (min-width: 901px) and (min-height: 720px) {
+    .signalbox {
+      height: 100vh;
+      min-height: 0;
+    }
+
+    .lower {
+      min-height: 0;
+    }
+
+    .desk {
+      min-height: 0;
+    }
+  }
+
+  /* Phones and narrow windows: everything in a column, the frame and diagram scroll sideways. */
+  @media (max-width: 900px) {
+    .signalbox {
+      grid-template-rows: auto auto auto auto;
+    }
+
+    .windowband {
+      height: 230px;
+    }
+
+    .topbar {
+      padding: 8px 10px;
+    }
+
+    .nameboard {
+      padding: 4px 10px 5px;
+    }
+
+    .nameboard h1 {
+      font-size: 15px;
+    }
+
+    .controls {
+      justify-content: flex-start;
+    }
+
+    .controls button {
+      min-height: 32px;
+      padding: 3px 9px;
+      font-size: 12.5px;
+    }
+
+    .hint {
+      font-size: 15px;
+    }
+
+    .phone {
+      left: 10px;
+      bottom: 10px;
+    }
+
+    .shelf {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      padding: 10px;
+    }
+
+    .board {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    .diagram {
+      overflow-x: auto;
+    }
+
+    .diagram :global(svg) {
+      min-width: 620px;
+    }
+
+    .board {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .slot :global(.caption) {
+      font-size: 11.5px;
+    }
+
+    .lower {
+      grid-template-columns: 1fr;
+    }
+
+    .framewrap {
+      min-height: 0;
+      overflow-x: auto;
+    }
+
+    .framewrap :global(svg) {
+      position: static;
+      width: 720px;
+      height: auto;
+    }
+
+    .card {
+      top: 16px;
+      padding: 18px 18px 20px;
+    }
+
+    .card .picks {
+      grid-template-columns: 1fr;
+    }
+
+    .report dl {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

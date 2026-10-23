@@ -1,0 +1,8 @@
+{
+  "title": "Signal box",
+  "summary": "A mechanical signal box at a country junction in 1964: answer the bells from the boxes either side, pull the levers the interlocking will let you, and keep every train on the timetable through a dawn, an afternoon, and a night shift.",
+  "date": "2026-10-23",
+  "tags": ["svg", "canvas", "web-audio", "pointer-events", "popover", "game", "absolute-block"],
+  "requires": ["canvas"],
+  "plot": 22
+}
