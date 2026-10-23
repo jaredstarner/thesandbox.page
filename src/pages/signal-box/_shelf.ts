@@ -55,7 +55,16 @@ function dial(cx: number, cy: number, label: string, id: string): { g: SVGGEleme
     const [l1, l2] = text.split('|');
     const w = l2.length > 5 ? 30 : 26;
     g.append(
-      el('rect', { x: x - w / 2, y: y - 8.5, width: w, height: 17, rx: 2, fill: bg, stroke: '#1d1a16', 'stroke-width': 0.6 }),
+      el('rect', {
+        x: x - w / 2,
+        y: y - 8.5,
+        width: w,
+        height: 17,
+        rx: 2,
+        fill: bg,
+        stroke: '#1d1a16',
+        'stroke-width': 0.6,
+      }),
       el('text', { x, y: y - 1.6, 'text-anchor': 'middle', class: 'dial-t', fill: ink }, l1),
       el('text', { x, y: y + 5.4, 'text-anchor': 'middle', class: 'dial-t', fill: ink }, l2),
     );
@@ -95,7 +104,11 @@ export class Instrument {
     this.root = document.createElement('div');
     this.root.className = 'instrument';
     this.root.dataset.box = id;
-    this.svg = el('svg', { viewBox: '0 0 220 250', role: 'group', 'aria-label': `Block instrument for ${BOXES[id].name}` });
+    this.svg = el('svg', {
+      viewBox: '0 0 220 250',
+      role: 'group',
+      'aria-label': `Block instrument for ${BOXES[id].name}`,
+    });
     const defs = el(
       'defs',
       {},
@@ -127,8 +140,26 @@ export class Instrument {
     this.svg.append(
       el('rect', { x: 4, y: 24, width: 212, height: 222, rx: 9, fill: '#1e0d05' }),
       el('rect', { x: 6, y: 25, width: 208, height: 218, rx: 8, fill: `url(#sb-case-${id})` }),
-      el('rect', { x: 12, y: 31, width: 196, height: 206, rx: 5, fill: 'none', stroke: '#9a5532', 'stroke-opacity': 0.35 }),
-      el('rect', { x: 66, y: 32, width: 140, height: 20, rx: 2, fill: `url(#sb-brass-${id})`, stroke: '#5b3f12', 'stroke-width': 0.6 }),
+      el('rect', {
+        x: 12,
+        y: 31,
+        width: 196,
+        height: 206,
+        rx: 5,
+        fill: 'none',
+        stroke: '#9a5532',
+        'stroke-opacity': 0.35,
+      }),
+      el('rect', {
+        x: 66,
+        y: 32,
+        width: 140,
+        height: 20,
+        rx: 2,
+        fill: `url(#sb-brass-${id})`,
+        stroke: '#5b3f12',
+        'stroke-width': 0.6,
+      }),
       el('text', { x: 136, y: 46.5, 'text-anchor': 'middle', class: 'nameplate' }, BOXES[id].name.toUpperCase()),
     );
 
@@ -137,7 +168,12 @@ export class Instrument {
       'g',
       { transform: 'translate(34 26)' },
       el('rect', { x: -2, y: -2, width: 4, height: 10, fill: '#3a2a1a' }),
-      el('path', { d: 'M -19 2 Q -19 -18 0 -18 Q 19 -18 19 2 Z', fill: `url(#sb-brass-${id})`, stroke: '#5b3f12', 'stroke-width': 0.8 }),
+      el('path', {
+        d: 'M -19 2 Q -19 -18 0 -18 Q 19 -18 19 2 Z',
+        fill: `url(#sb-brass-${id})`,
+        stroke: '#5b3f12',
+        'stroke-width': 0.8,
+      }),
       el('ellipse', { cx: 0, cy: 2, rx: 19, ry: 3, fill: '#8a6424' }),
       el('circle', { cx: 0, cy: -19, r: 2.6, fill: '#5b3f12' }),
     );
@@ -156,7 +192,12 @@ export class Instrument {
       el('circle', { cx: 0, cy: 0, r: 22, fill: 'transparent' }),
       el('circle', { cx: 0, cy: 2, r: 17, fill: '#24130a' }),
       el('circle', { cx: 0, cy: 0, r: 15.5, fill: `url(#sb-brass-${id})` }),
-      el('g', { class: 'knob' }, el('circle', { r: 11, fill: '#161311' }), el('circle', { cx: -3.5, cy: -3.5, r: 4, fill: '#fff', opacity: 0.16 })),
+      el(
+        'g',
+        { class: 'knob' },
+        el('circle', { r: 11, fill: '#161311' }),
+        el('circle', { cx: -3.5, cy: -3.5, r: 4, fill: '#fff', opacity: 0.16 }),
+      ),
       el('circle', { r: 20.5, class: 'ring', fill: 'none', stroke: '#ffd45a', 'stroke-width': 3 }),
     );
     const tapG = el('g', { transform: 'translate(59 200)' }, this.knob);
@@ -174,11 +215,13 @@ export class Instrument {
     });
 
     // The commutator handle, turned to one of three positions.
-    const turn = el('g', { transform: 'translate(161 204)', class: 'commutator', role: 'group', 'aria-label': `Block handle for the line from ${BOXES[id].name}` });
-    turn.append(
-      el('circle', { r: 14, fill: '#24130a' }),
-      el('circle', { r: 12, fill: `url(#sb-brass-${id})` }),
-    );
+    const turn = el('g', {
+      transform: 'translate(161 204)',
+      class: 'commutator',
+      role: 'group',
+      'aria-label': `Block handle for the line from ${BOXES[id].name}`,
+    });
+    turn.append(el('circle', { r: 14, fill: '#24130a' }), el('circle', { r: 12, fill: `url(#sb-brass-${id})` }));
     for (const st of ORDER) {
       const a = (ANGLE[st] * Math.PI) / 180;
       turn.append(el('circle', { cx: f1(Math.sin(a) * 21), cy: f1(-Math.cos(a) * 21), r: 1.6, fill: '#c69a46' }));
@@ -291,10 +334,7 @@ export class Clock {
 
   constructor() {
     this.svg = el('svg', { viewBox: '-50 -50 100 100', class: 'clock', role: 'img', 'aria-label': 'Clock' });
-    this.svg.append(
-      el('circle', { r: 48, fill: '#1c1712' }),
-      el('circle', { r: 45, fill: '#f6f2e6' }),
-    );
+    this.svg.append(el('circle', { r: 48, fill: '#1c1712' }), el('circle', { r: 45, fill: '#f6f2e6' }));
     for (let i = 0; i < 60; i++) {
       const a = (i * Math.PI) / 30;
       const big = i % 5 === 0;
@@ -312,10 +352,32 @@ export class Clock {
     }
     for (let i = 1; i <= 12; i++) {
       const a = (i * Math.PI) / 6;
-      this.svg.append(el('text', { x: f1(Math.sin(a) * 27), y: f1(-Math.cos(a) * 27 + 4), 'text-anchor': 'middle', class: 'clock-n' }, String(i)));
+      this.svg.append(
+        el(
+          'text',
+          { x: f1(Math.sin(a) * 27), y: f1(-Math.cos(a) * 27 + 4), 'text-anchor': 'middle', class: 'clock-n' },
+          String(i),
+        ),
+      );
     }
-    this.h = el('line', { x1: 0, y1: 5, x2: 0, y2: -22, stroke: '#1c1712', 'stroke-width': 4.2, 'stroke-linecap': 'round' });
-    this.m = el('line', { x1: 0, y1: 6, x2: 0, y2: -36, stroke: '#1c1712', 'stroke-width': 2.8, 'stroke-linecap': 'round' });
+    this.h = el('line', {
+      x1: 0,
+      y1: 5,
+      x2: 0,
+      y2: -22,
+      stroke: '#1c1712',
+      'stroke-width': 4.2,
+      'stroke-linecap': 'round',
+    });
+    this.m = el('line', {
+      x1: 0,
+      y1: 6,
+      x2: 0,
+      y2: -36,
+      stroke: '#1c1712',
+      'stroke-width': 2.8,
+      'stroke-linecap': 'round',
+    });
     this.s = el('line', { x1: 0, y1: 9, x2: 0, y2: -38, stroke: '#a8261c', 'stroke-width': 1 });
     this.svg.append(this.h, this.m, this.s, el('circle', { r: 2.4, fill: '#a8261c' }));
   }

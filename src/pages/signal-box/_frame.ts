@@ -141,7 +141,16 @@ export class Frame {
       const badge = el(
         'g',
         {},
-        el('rect', { x: -9, y: -7.5, width: 18, height: 15, rx: 2, fill: paint.side, stroke: paint.ink, 'stroke-width': 0.8 }),
+        el('rect', {
+          x: -9,
+          y: -7.5,
+          width: 18,
+          height: 15,
+          rx: 2,
+          fill: paint.side,
+          stroke: paint.ink,
+          'stroke-width': 0.8,
+        }),
         el('text', { x: 0, y: 4.6, 'text-anchor': 'middle', class: 'badge', fill: paint.ink }, String(def.n)),
       );
       const plate = this.makePlate(def, x);
@@ -154,7 +163,24 @@ export class Frame {
         }
       });
       this.svg.append(g);
-      const v: LeverView = { def, x, g, shadow, side, body, shine, catchBar, handle, glint, badge, plate, p: 0, shown: -1, jolt: 0, refusedT: 0 };
+      const v: LeverView = {
+        def,
+        x,
+        g,
+        shadow,
+        side,
+        body,
+        shine,
+        catchBar,
+        handle,
+        glint,
+        badge,
+        plate,
+        p: 0,
+        shown: -1,
+        jolt: 0,
+        refusedT: 0,
+      };
       this.levers.push(v);
       this.draw(v);
     }
@@ -164,8 +190,27 @@ export class Frame {
     const w = GAP - 8;
     const g = el('g', { class: 'plate', transform: `translate(${x - w / 2} 376)` });
     g.append(
-      el('rect', { x: 0, y: 0, width: w, height: 74, rx: 3, fill: 'url(#sb-enamel)', stroke: '#2e2318', 'stroke-width': 1 }),
-      el('rect', { class: 'plate-ring', x: 2, y: 2, width: w - 4, height: 70, rx: 2, fill: 'none', stroke: '#6b5a40', 'stroke-width': 0.6 }),
+      el('rect', {
+        x: 0,
+        y: 0,
+        width: w,
+        height: 74,
+        rx: 3,
+        fill: 'url(#sb-enamel)',
+        stroke: '#2e2318',
+        'stroke-width': 1,
+      }),
+      el('rect', {
+        class: 'plate-ring',
+        x: 2,
+        y: 2,
+        width: w - 4,
+        height: 70,
+        rx: 2,
+        fill: 'none',
+        stroke: '#6b5a40',
+        'stroke-width': 0.6,
+      }),
       el('text', { x: w / 2, y: 22, 'text-anchor': 'middle', class: 'plate-n' }, String(def.n)),
       el('text', { x: w / 2, y: 38, 'text-anchor': 'middle', class: 'plate-d' }, def.plate[0]),
       el('text', { x: w / 2, y: 49, 'text-anchor': 'middle', class: 'plate-d' }, def.plate[1]),
@@ -216,18 +261,25 @@ export class Frame {
     set(v.glint, { points: pts([pt(0.79, -2.2), pt(0.97, -1.6), pt(0.97, -0.9), pt(0.79, -1.3)]) });
     const c0 = pt(0.72, 4.6);
     const c1 = pt(0.93, 4.0);
-    set(v.catchBar, { points: pts([c0, c1, [c1[0] + 2.4 * project(0.93, p).k, c1[1]], [c0[0] + 2.8 * project(0.72, p).k, c0[1]]]) });
+    set(v.catchBar, {
+      points: pts([c0, c1, [c1[0] + 2.4 * project(0.93, p).k, c1[1]], [c0[0] + 2.8 * project(0.72, p).k, c0[1]]]),
+    });
 
     // A soft shadow thrown back across the floor by the box's lamp.
     const s0: [number, number] = [x - 7, PIVOT_Y - 4];
     const top = project(1, p);
     const len = (PIVOT_Y - top.y) * 0.18;
     set(v.shadow, {
-      points: pts([s0, [x + 7, PIVOT_Y - 4], [x + 10 + len, PIVOT_Y - 10 - len * 0.2], [x + 4 + len, PIVOT_Y - 12 - len * 0.2]]),
+      points: pts([
+        s0,
+        [x + 7, PIVOT_Y - 4],
+        [x + 10 + len, PIVOT_Y - 10 - len * 0.2],
+        [x + 4 + len, PIVOT_Y - 12 - len * 0.2],
+      ]),
     });
 
     const b = project(0.66, p);
-    set(v.badge, { transform: `translate(${(x).toFixed(1)} ${b.y.toFixed(1)}) scale(${(b.k * 0.92).toFixed(3)})` });
+    set(v.badge, { transform: `translate(${x.toFixed(1)} ${b.y.toFixed(1)}) scale(${(b.k * 0.92).toFixed(3)})` });
   }
 
   /** Follow the box: lean every lever to where the frame says it is. */

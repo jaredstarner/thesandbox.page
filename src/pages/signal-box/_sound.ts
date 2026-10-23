@@ -68,7 +68,8 @@ export class Sound {
       if (this.ctx.state === 'suspended') void this.ctx.resume();
       return;
     }
-    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const AC =
+      window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AC) return;
     const ctx = new AC();
     this.ctx = ctx;
@@ -112,7 +113,15 @@ export class Sound {
   }
 
   /** A short burst of filtered noise. */
-  private burst(t: number, dur: number, f: number, q: number, level: number, type: BiquadFilterType = 'bandpass', dest?: AudioNode): void {
+  private burst(
+    t: number,
+    dur: number,
+    f: number,
+    q: number,
+    level: number,
+    type: BiquadFilterType = 'bandpass',
+    dest?: AudioNode,
+  ): void {
     const L = this.live();
     if (!L) return;
     const c = L.c;
@@ -127,12 +136,23 @@ export class Sound {
     g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(level, t + Math.min(0.004, dur / 4));
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    src.connect(bp).connect(g).connect(dest ?? L.out);
+    src
+      .connect(bp)
+      .connect(g)
+      .connect(dest ?? L.out);
     src.start(t, Math.random() * 0.5);
     src.stop(t + dur + 0.05);
   }
 
-  private tone(t: number, f: number, dur: number, level: number, type: OscillatorType = 'sine', attack = 0.003, dest?: AudioNode): void {
+  private tone(
+    t: number,
+    f: number,
+    dur: number,
+    level: number,
+    type: OscillatorType = 'sine',
+    attack = 0.003,
+    dest?: AudioNode,
+  ): void {
     const L = this.live();
     if (!L) return;
     const c = L.c;
@@ -342,7 +362,15 @@ export class Sound {
           const p = c.createStereoPanner();
           p.pan.value = pan * 0.85;
           p.connect(L.out);
-          this.burst(t, Math.min(0.22, interval * 0.7), 620 + power * 300, 0.8, (0.08 + power * 0.18) * near, 'bandpass', p);
+          this.burst(
+            t,
+            Math.min(0.22, interval * 0.7),
+            620 + power * 300,
+            0.8,
+            (0.08 + power * 0.18) * near,
+            'bandpass',
+            p,
+          );
         }
       }
       // Rail joints every 18.3 m: each axle near the box clicks as it crosses one.

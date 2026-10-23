@@ -107,7 +107,8 @@ export function startSignalBox(root: HTMLElement): void {
     runTaps.length = 0;
     phone.replaceChildren();
     demoTaps.length = 0;
-    for (const b of root.querySelectorAll<HTMLButtonElement>('[data-pick]')) b.setAttribute('aria-pressed', String(b.dataset.pick === id));
+    for (const b of root.querySelectorAll<HTMLButtonElement>('[data-pick]'))
+      b.setAttribute('aria-pressed', String(b.dataset.pick === id));
     renderRegister();
   }
 
@@ -120,7 +121,11 @@ export function startSignalBox(root: HTMLElement): void {
     report.hidden = true;
     demoBtn.setAttribute('aria-pressed', String(m === 'demo'));
     demoBusy = box.t + 1;
-    setHint(m === 'demo' ? 'Demonstration: the box is being worked for you. Watch the bells, the needles, and the levers.' : '');
+    setHint(
+      m === 'demo'
+        ? 'Demonstration: the box is being worked for you. Watch the bells, the needles, and the levers.'
+        : '',
+    );
   }
 
   function nudge(): void {
@@ -175,7 +180,8 @@ export function startSignalBox(root: HTMLElement): void {
     save();
   });
   soundBtn.setAttribute('aria-pressed', String(!sound.muted));
-  for (const b of root.querySelectorAll<HTMLButtonElement>('[data-again]')) b.addEventListener('click', () => begin('running'));
+  for (const b of root.querySelectorAll<HTMLButtonElement>('[data-again]'))
+    b.addEventListener('click', () => begin('running'));
   q('[data-next]').addEventListener('click', () => {
     const i = SHIFTS.findIndex((s) => s.id === shiftId);
     newBox(SHIFTS[(i + 1) % SHIFTS.length].id);
@@ -307,7 +313,8 @@ export function startSignalBox(root: HTMLElement): void {
     const late = box.trains.map((t) => box.lateness(t) ?? 0);
     const rt = late.filter((l) => l === 0).length;
     const mins = late.reduce((a, b) => a + b, 0);
-    q('[data-r-turn]').textContent = `${box.shift.name}, ${clock(box.shift.start)} to ${clock(box.shift.start + box.t)}`;
+    q('[data-r-turn]').textContent =
+      `${box.shift.name}, ${clock(box.shift.start)} to ${clock(box.shift.start + box.t)}`;
     q('[data-r-trains]').textContent = String(trains);
     q('[data-r-rt]').textContent = `${rt} of ${trains}`;
     q('[data-r-mins]').textContent = mins === 0 ? 'none' : `${mins} min`;
@@ -402,7 +409,8 @@ export function startSignalBox(root: HTMLElement): void {
       } else if (mode === 'demo') {
         const a = advise(box);
         highlight(a.kind === 'wait' ? null : a);
-        if (hintFlash <= 0) setHint(a.kind === 'wait' ? 'Demonstration: waiting for the next bell.' : `Demonstration: ${a.why}`);
+        if (hintFlash <= 0)
+          setHint(a.kind === 'wait' ? 'Demonstration: waiting for the next bell.' : `Demonstration: ${a.why}`);
       } else if (hintFlash <= 0 && hint.classList.contains('on')) setHint('');
       sound.tick(Math.floor(box.shift.start + box.t));
       sound.trains(box.trains, (tr) => view.pan(tr), dt, false);

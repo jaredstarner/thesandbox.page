@@ -6,17 +6,7 @@ import { PASS_S, PATH_BOXES, type BoxId, type PathId } from './_layout';
 export type ShiftId = 'early' | 'day' | 'night';
 
 export type VehicleKind =
-  | 'diesel'
-  | 'steam'
-  | 'tender'
-  | 'dmu'
-  | 'coach'
-  | 'van'
-  | 'open'
-  | 'mineral'
-  | 'tank'
-  | 'brake'
-  | 'sleeper';
+  'diesel' | 'steam' | 'tender' | 'dmu' | 'coach' | 'van' | 'open' | 'mineral' | 'tank' | 'brake' | 'sleeper';
 
 export interface Vehicle {
   kind: VehicleKind;
@@ -167,7 +157,13 @@ export function consist(b: Booking, night: boolean): Vehicle[] {
       loco();
       for (let i = 0; i < 24; i++) {
         const k = r();
-        out.push(k < 0.45 ? { kind: 'open', len: 5.8, v: Math.floor(r() * 4) } : k < 0.75 ? { kind: 'van', len: 6.5, v: Math.floor(r() * 4) } : { kind: 'tank', len: 7.2, v: Math.floor(r() * 4) });
+        out.push(
+          k < 0.45
+            ? { kind: 'open', len: 5.8, v: Math.floor(r() * 4) }
+            : k < 0.75
+              ? { kind: 'van', len: 6.5, v: Math.floor(r() * 4) }
+              : { kind: 'tank', len: 7.2, v: Math.floor(r() * 4) },
+        );
       }
       add('brake', 7.5, 1);
       break;

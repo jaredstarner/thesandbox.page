@@ -17,23 +17,82 @@ const BU = 66;
 
 /** Each track circuit as polylines on the board. */
 const TC: Record<TrackId, [number, number][][]> = {
-  DA: [[[226, DY], [352, DY]]],
+  DA: [
+    [
+      [226, DY],
+      [352, DY],
+    ],
+  ],
   DJ: [
-    [[352, DY], [540, DY]],
-    [[420, DY], [452, DY - 32]],
+    [
+      [352, DY],
+      [540, DY],
+    ],
+    [
+      [420, DY],
+      [452, DY - 32],
+    ],
   ],
-  DM1: [[[540, DY], [626, DY]]],
-  DM2: [[[626, DY], [716, DY]]],
-  DB1: [[[452, DY - 32], [484, BD], [600, BD]]],
-  DB2: [[[600, BD], [700, BD]]],
-  UA: [[[572, UY], [684, UY]]],
-  UBA: [[[600, BU], [700, BU]]],
+  DM1: [
+    [
+      [540, DY],
+      [626, DY],
+    ],
+  ],
+  DM2: [
+    [
+      [626, DY],
+      [716, DY],
+    ],
+  ],
+  DB1: [
+    [
+      [452, DY - 32],
+      [484, BD],
+      [600, BD],
+    ],
+  ],
+  DB2: [
+    [
+      [600, BD],
+      [700, BD],
+    ],
+  ],
+  UA: [
+    [
+      [572, UY],
+      [684, UY],
+    ],
+  ],
+  UBA: [
+    [
+      [600, BU],
+      [700, BU],
+    ],
+  ],
   UJ: [
-    [[420, UY], [572, UY]],
-    [[474, UY], [544, BU], [600, BU]],
+    [
+      [420, UY],
+      [572, UY],
+    ],
+    [
+      [474, UY],
+      [544, BU],
+      [600, BU],
+    ],
   ],
-  U1: [[[300, UY], [420, UY]]],
-  U2: [[[196, UY], [300, UY]]],
+  U1: [
+    [
+      [300, UY],
+      [420, UY],
+    ],
+  ],
+  U2: [
+    [
+      [196, UY],
+      [300, UY],
+    ],
+  ],
 };
 
 interface SignalSym {
@@ -97,15 +156,40 @@ export class Diagram {
     );
 
     // Plain track beyond the circuits, then each circuit, then its lamp layer.
-    const ink = { stroke: '#1d1915', 'stroke-width': 3.2, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
-    const line = (p: [number, number][]) => el('polyline', { points: p.map(([x, y]) => `${x},${y}`).join(' '), ...ink });
+    const ink = {
+      stroke: '#1d1915',
+      'stroke-width': 3.2,
+      fill: 'none',
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+    };
+    const line = (p: [number, number][]) =>
+      el('polyline', { points: p.map(([x, y]) => `${x},${y}`).join(' '), ...ink });
     this.svg.append(
-      line([[20, DY], [226, DY]]),
-      line([[716, DY], [740, DY]]),
-      line([[20, UY], [196, UY]]),
-      line([[684, UY], [740, UY]]),
-      line([[700, BD], [740, BD]]),
-      line([[700, BU], [740, BU]]),
+      line([
+        [20, DY],
+        [226, DY],
+      ]),
+      line([
+        [716, DY],
+        [740, DY],
+      ]),
+      line([
+        [20, UY],
+        [196, UY],
+      ]),
+      line([
+        [684, UY],
+        [740, UY],
+      ]),
+      line([
+        [700, BD],
+        [740, BD],
+      ]),
+      line([
+        [700, BU],
+        [740, BU],
+      ]),
     );
     for (const [id, segs] of Object.entries(TC) as [TrackId, [number, number][][]][]) {
       const lit: SVGElement[] = [];
@@ -146,7 +230,16 @@ export class Diagram {
       p7,
       p8,
       el('text', { x: 404, y: DY + 15, 'text-anchor': 'middle', class: 'dg-fpl' }, '6'),
-      el('rect', { x: 398, y: DY + 4, width: 12, height: 14, rx: 1, fill: 'none', stroke: '#1f4f9b', 'stroke-width': 0.8 }),
+      el('rect', {
+        x: 398,
+        y: DY + 4,
+        width: 12,
+        height: 14,
+        rx: 1,
+        fill: 'none',
+        stroke: '#1f4f9b',
+        'stroke-width': 0.8,
+      }),
     );
 
     // Signals.

@@ -71,7 +71,8 @@ export function advise(box: Box): Advice {
     const nb = box.neighbours[id];
     if (!nb.awaiting || !quiet(box, id)) continue;
     const code = nb.awaiting.code;
-    if (code === '1') return { kind: 'tap', box: id, code, why: `${name(id)} is calling attention. Answer with one beat.` };
+    if (code === '1')
+      return { kind: 'tap', box: id, code, why: `${name(id)} is calling attention. Answer with one beat.` };
     if (code === '2') {
       const hc = nb.offer?.train.b.hc ?? 'the train';
       return {
@@ -160,14 +161,24 @@ export function advise(box: Box): Advice {
         why: `${tr.b.hc} is clear of the junction with its tail lamp. Call attention to ${name(id)} before Train out of section.`,
       };
     if (nb.answered)
-      return { kind: 'tap', box: id, code: '2-1', why: `Ring 2-1, Train out of section, to ${name(id)} for ${tr.b.hc}.` };
+      return {
+        kind: 'tap',
+        box: id,
+        code: '2-1',
+        why: `Ring 2-1, Train out of section, to ${name(id)} for ${tr.b.hc}.`,
+      };
   }
 
   // Block handles back to normal once the section is empty.
   for (const id of IDS) {
     const o = box.neighbours[id].offer;
     if (box.inState[id] === 'TOL' && (!o || o.stage === 'call' || o.stage === 'ask'))
-      return { kind: 'block', box: id, state: 'LB', why: `The section from ${name(id)} is clear. Turn its handle back to Line blocked.` };
+      return {
+        kind: 'block',
+        box: id,
+        state: 'LB',
+        why: `The section from ${name(id)} is clear. Turn its handle back to Line blocked.`,
+      };
   }
 
   // Accept an offered train.

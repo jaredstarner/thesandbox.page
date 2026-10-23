@@ -216,7 +216,8 @@ export class Neighbour {
       if (tr.to !== this.id || tr.state !== 'gone' || this.clearing.has(tr.id)) continue;
       if (tr.goneAt === null || t < tr.goneAt + 5) continue;
       this.clearing.add(tr.id);
-      if (tr.entry.sentOnAt === undefined) box.irregular(`${tr.b.hc} ran into ${this.name}'s section with no Train entering section from you`);
+      if (tr.entry.sentOnAt === undefined)
+        box.irregular(`${tr.b.hc} ran into ${this.name}'s section with no Train entering section from you`);
       if (tr.noTail && !tr.complete) {
         tr.complete = true;
         box.phone(this.name, `${tr.b.hc} has arrived here complete. Its tail lamp was out; we've lit it.`);
@@ -308,7 +309,9 @@ export class Neighbour {
       if (tr) {
         tr.entry.offeredOnAt = t;
         if (CLASSES[tr.b.cls].code !== code)
-          box.irregular(`Described ${tr.b.hc} to ${this.name} as ${code}; it is ${CLASSES[tr.b.cls].code}, ${CLASSES[tr.b.cls].asks}`);
+          box.irregular(
+            `Described ${tr.b.hc} to ${this.name} as ${code}; it is ${CLASSES[tr.b.cls].code}, ${CLASSES[tr.b.cls].asks}`,
+          );
       }
       this.ring(
         code,

@@ -20,7 +20,14 @@ export interface ClassDef {
 
 export const CLASSES: Record<TrainClass, ClassDef> = {
   express: { code: '4', asks: 'an express passenger train', short: 'Express', vmax: 33.5, accel: 0.32, brake: 0.62 },
-  stopping: { code: '3-1', asks: 'an ordinary passenger train', short: 'Passenger', vmax: 22.4, accel: 0.5, brake: 0.7 },
+  stopping: {
+    code: '3-1',
+    asks: 'an ordinary passenger train',
+    short: 'Passenger',
+    vmax: 22.4,
+    accel: 0.5,
+    brake: 0.7,
+  },
   expressFreight: {
     code: '3-1-1',
     asks: 'an express freight train',
@@ -30,7 +37,14 @@ export const CLASSES: Record<TrainClass, ClassDef> = {
     brake: 0.34,
   },
   freight: { code: '3', asks: 'a stopping freight train', short: 'Freight', vmax: 15.6, accel: 0.1, brake: 0.26 },
-  mineral: { code: '4-1', asks: 'a mineral or empty wagon train', short: 'Mineral', vmax: 15.6, accel: 0.09, brake: 0.24 },
+  mineral: {
+    code: '4-1',
+    asks: 'a mineral or empty wagon train',
+    short: 'Mineral',
+    vmax: 15.6,
+    accel: 0.09,
+    brake: 0.24,
+  },
   light: { code: '2-3', asks: 'a light engine', short: 'Light eng.', vmax: 20, accel: 0.45, brake: 0.6 },
   ecs: { code: '2-2-1', asks: 'an empty coaching stock train', short: 'E.C.S.', vmax: 22.4, accel: 0.3, brake: 0.55 },
 };

@@ -242,7 +242,15 @@ export class View {
       const pw = Math.round(((p.y1 - p.y0) / span) * total);
       const yaw = (((p.y0 + p.y1) / 2) * Math.PI) / 180;
       const fov = ((p.y1 - p.y0) * Math.PI) / 180;
-      const pane: Pane = { x, w: pw, h: this.h, yaw, f: pw / 2 / Math.tan(fov / 2), cosY: Math.cos(yaw), sinY: Math.sin(yaw) };
+      const pane: Pane = {
+        x,
+        w: pw,
+        h: this.h,
+        yaw,
+        f: pw / 2 / Math.tan(fov / 2),
+        cosY: Math.cos(yaw),
+        sinY: Math.sin(yaw),
+      };
       x += pw + mull;
       return pane;
     });
@@ -270,7 +278,12 @@ export class View {
     const yw = (yawDeg * Math.PI) / 180;
     const e = (elDeg * Math.PI) / 180;
     const r = 1e6;
-    const q = this.proj(p, CAM[0] + Math.sin(yw) * Math.cos(e) * r, CAM[1] + Math.cos(yw) * Math.cos(e) * r, CAM[2] + Math.sin(e) * r);
+    const q = this.proj(
+      p,
+      CAM[0] + Math.sin(yw) * Math.cos(e) * r,
+      CAM[1] + Math.cos(yw) * Math.cos(e) * r,
+      CAM[2] + Math.sin(e) * r,
+    );
     return q ? [q[0], q[1]] : null;
   }
 
@@ -302,10 +315,18 @@ export class View {
           if (r() < 0.7) {
             const n = 1 + Math.floor(r() * 4);
             for (let k = 0; k < n; k++)
-              this.uprights.push({ x: x + r() * wdt, y: ya + (r() - 0.5) * 4, kind: 'tree', h: 8 + r() * 10, r: 3 + r() * 4, v: r() });
+              this.uprights.push({
+                x: x + r() * wdt,
+                y: ya + (r() - 0.5) * 4,
+                kind: 'tree',
+                h: 8 + r() * 10,
+                r: 3 + r() * 4,
+                v: r(),
+              });
           }
           if (r() < 0.6) {
-            for (let k = 0; k < 5; k++) this.uprights.push({ x: x + r() * wdt, y: ya, kind: 'bush', h: 2 + r() * 1.5, r: 2 + r() * 2, v: r() });
+            for (let k = 0; k < 5; k++)
+              this.uprights.push({ x: x + r() * wdt, y: ya, kind: 'bush', h: 2 + r() * 1.5, r: 2 + r() * 2, v: r() });
           }
           x = x2;
         }
@@ -315,12 +336,26 @@ export class View {
     for (let k = 0; k < 70; k++) {
       const a = r() * Math.PI * 2;
       const d = Math.sqrt(r()) * 160;
-      this.uprights.push({ x: 900 + Math.cos(a) * d * 1.6, y: 560 + Math.sin(a) * d, kind: 'tree', h: 12 + r() * 9, r: 5 + r() * 4, v: r() });
+      this.uprights.push({
+        x: 900 + Math.cos(a) * d * 1.6,
+        y: 560 + Math.sin(a) * d,
+        kind: 'tree',
+        h: 12 + r() * 9,
+        r: 5 + r() * 4,
+        v: r(),
+      });
     }
     for (let k = 0; k < 26; k++) {
       const a = r() * Math.PI * 2;
       const d = Math.sqrt(r()) * 60;
-      this.uprights.push({ x: -620 + Math.cos(a) * d * 1.5, y: 120 + Math.sin(a) * d, kind: 'tree', h: 10 + r() * 7, r: 4 + r() * 3, v: r() });
+      this.uprights.push({
+        x: -620 + Math.cos(a) * d * 1.5,
+        y: 120 + Math.sin(a) * d,
+        kind: 'tree',
+        h: 10 + r() * 7,
+        r: 4 + r() * 3,
+        v: r(),
+      });
     }
     // The telegraph route along the north side of the line.
     for (let x = -1600; x <= 1600; x += 55) {
@@ -335,13 +370,30 @@ export class View {
       this.buildings.push({ x, y, w: 11, d: 7, h: 5.5, rise: 3.2, wall: '#cdbb9a', roof: '#6b4a3a' });
       this.buildings.push({ x: x + 16, y: y + 6, w: 18, d: 9, h: 6, rise: 2.6, wall: '#7b5038', roof: '#4d4c4a' });
       for (let k = 0; k < 5; k++)
-        this.uprights.push({ x: x - 10 + r() * 40, y: y + 14 + r() * 10, kind: 'tree', h: 11 + r() * 6, r: 4 + r() * 2, v: r() });
+        this.uprights.push({
+          x: x - 10 + r() * 40,
+          y: y + 14 + r() * 10,
+          kind: 'tree',
+          h: 11 + r() * 6,
+          r: 4 + r() * 2,
+          v: r(),
+        });
     };
     farm(55, 240);
     farm(-260, 420);
     farm(420, 900);
     this.buildings.push({ x: -150, y: 36, w: 8, d: 6, h: 5, rise: 2.8, wall: '#b8805a', roof: '#3f3a38' });
-    this.buildings.push({ x: -720, y: 1900, w: 7, d: 7, h: 19, rise: 9, wall: '#a7a091', roof: '#55524d', tower: true });
+    this.buildings.push({
+      x: -720,
+      y: 1900,
+      w: 7,
+      d: 7,
+      h: 19,
+      rise: 9,
+      wall: '#a7a091',
+      roof: '#55524d',
+      tower: true,
+    });
     this.buildings.push({ x: -706, y: 1896, w: 22, d: 10, h: 9, rise: 4, wall: '#a7a091', roof: '#5c5853' });
     // A platelayers' hut by the up line.
     this.uprights.push({ x: -62, y: UP_Y - 6.5, kind: 'hut', h: 2.6, r: 2, v: 0 });
@@ -389,7 +441,18 @@ export class View {
       // Point rodding from the box along the cess to the junction.
       c.strokeStyle = pal.night ? '#1a1a1a' : '#47413b';
       c.lineWidth = Math.max(0.8, 0.9 * this.dpr);
-      for (const off of [0, 0.3, 0.6]) this.groundLine(c, p, [[1.5 + off, 7.2], [2.5 + off, 8.1 + off], [28, 8.1 + off], [30 + off, UP_Y - 1.4]], 0.25);
+      for (const off of [0, 0.3, 0.6])
+        this.groundLine(
+          c,
+          p,
+          [
+            [1.5 + off, 7.2],
+            [2.5 + off, 8.1 + off],
+            [28, 8.1 + off],
+            [30 + off, UP_Y - 1.4],
+          ],
+          0.25,
+        );
       this.drawFence(c, p);
       // Far uprights: trees, bushes, poles, and the hut beyond the near track are part of the scene.
       const ups = this.uprights
@@ -472,10 +535,19 @@ export class View {
         if (!q) continue;
         const len = (60 + r() * 160) * this.dpr;
         const th = (6 + r() * 10) * this.dpr;
-        c.fillStyle = this.shift === 'early' ? `rgba(255,${190 + Math.round(r() * 30)},170,0.32)` : 'rgba(255,255,255,0.55)';
+        c.fillStyle =
+          this.shift === 'early' ? `rgba(255,${190 + Math.round(r() * 30)},170,0.32)` : 'rgba(255,255,255,0.55)';
         for (let i = 0; i < 4; i++) {
           c.beginPath();
-          c.ellipse(q[0] + (i - 1.5) * len * 0.28, q[1] + (r() - 0.5) * th, len * 0.3, th * (0.6 + r() * 0.5), 0, 0, Math.PI * 2);
+          c.ellipse(
+            q[0] + (i - 1.5) * len * 0.28,
+            q[1] + (r() - 0.5) * th,
+            len * 0.3,
+            th * (0.6 + r() * 0.5),
+            0,
+            0,
+            Math.PI * 2,
+          );
           c.fill();
         }
       }
@@ -551,8 +623,27 @@ export class View {
       const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
       const step = 7;
       if (f.furrow === 0)
-        for (let y = y0; y < y1; y += step) this.groundLine(c, p, [[x0, y], [x1, y]], 0.02);
-      else for (let x = x0; x < x1; x += step) this.groundLine(c, p, [[x, y0], [x, y1]], 0.02);
+        for (let y = y0; y < y1; y += step)
+          this.groundLine(
+            c,
+            p,
+            [
+              [x0, y],
+              [x1, y],
+            ],
+            0.02,
+          );
+      else
+        for (let x = x0; x < x1; x += step)
+          this.groundLine(
+            c,
+            p,
+            [
+              [x, y0],
+              [x, y1],
+            ],
+            0.02,
+          );
       c.restore();
       c.beginPath();
       c.moveTo(pts[0][0], pts[0][1]);
@@ -709,7 +800,15 @@ export class View {
         const oy = (rr() - 0.5) * r * (u.kind === 'tree' ? 1.5 : 0.6);
         c.fillStyle = mix(i < 3 ? pal.treeDark : pal.tree, pal.haze, haze);
         c.beginPath();
-        c.ellipse(base[0] + ox, cy + oy, r * (0.55 + rr() * 0.35), r * (0.5 + rr() * 0.3) * (u.kind === 'tree' ? 1.1 : 0.7), 0, 0, Math.PI * 2);
+        c.ellipse(
+          base[0] + ox,
+          cy + oy,
+          r * (0.55 + rr() * 0.35),
+          r * (0.5 + rr() * 0.3) * (u.kind === 'tree' ? 1.1 : 0.7),
+          0,
+          0,
+          Math.PI * 2,
+        );
         c.fill();
       }
       if (!pal.night && this.shift !== 'night') {
@@ -758,8 +857,28 @@ export class View {
         [u.x - 1.6, u.y + 1.2, 2.1],
       ];
       this.poly(c, p, corners, pal.night ? '#1a1412' : '#6b4636');
-      this.poly(c, p, [[u.x - 1.8, u.y + 1.4, 2.1], [u.x + 1.8, u.y + 1.4, 2.1], [u.x + 1.8, u.y - 1.4, 2.6], [u.x - 1.8, u.y - 1.4, 2.6]], pal.night ? '#101012' : '#3a3633');
-      this.poly(c, p, [[u.x - 0.4, u.y + 1.21, 0], [u.x + 0.4, u.y + 1.21, 0], [u.x + 0.4, u.y + 1.21, 1.8], [u.x - 0.4, u.y + 1.21, 1.8]], pal.night ? '#0c0a0a' : '#3d2a20');
+      this.poly(
+        c,
+        p,
+        [
+          [u.x - 1.8, u.y + 1.4, 2.1],
+          [u.x + 1.8, u.y + 1.4, 2.1],
+          [u.x + 1.8, u.y - 1.4, 2.6],
+          [u.x - 1.8, u.y - 1.4, 2.6],
+        ],
+        pal.night ? '#101012' : '#3a3633',
+      );
+      this.poly(
+        c,
+        p,
+        [
+          [u.x - 0.4, u.y + 1.21, 0],
+          [u.x + 0.4, u.y + 1.21, 0],
+          [u.x + 0.4, u.y + 1.21, 1.8],
+          [u.x - 0.4, u.y + 1.21, 1.8],
+        ],
+        pal.night ? '#0c0a0a' : '#3d2a20',
+      );
     }
   }
 
@@ -801,10 +920,26 @@ export class View {
     strip(y0, y1, water);
     c.strokeStyle = pal.night ? 'rgba(160,170,200,0.12)' : 'rgba(255,255,255,0.28)';
     c.lineWidth = Math.max(0.5, 0.6 * this.dpr);
-    this.groundLine(c, p, [[-3000, y0 + 3], [3000, y0 + 3]], 0.02);
+    this.groundLine(
+      c,
+      p,
+      [
+        [-3000, y0 + 3],
+        [3000, y0 + 3],
+      ],
+      0.02,
+    );
     c.strokeStyle = pal.night ? '#060808' : mix(pal.hedge, pal.haze, 0.2);
     c.lineWidth = Math.max(0.6, 1 * this.dpr);
-    this.groundLine(c, p, [[-3000, y1], [3000, y1]], 0.02);
+    this.groundLine(
+      c,
+      p,
+      [
+        [-3000, y1],
+        [3000, y1],
+      ],
+      0.02,
+    );
   }
 
   /** The railway's boundary fence, posts and wire, along the north side. */
@@ -812,7 +947,16 @@ export class View {
     const y = DOWN_Y + 10.5;
     c.strokeStyle = this.pal.night ? 'rgba(60,60,70,0.5)' : 'rgba(58,48,38,0.55)';
     c.lineWidth = Math.max(0.5, 0.6 * this.dpr);
-    for (const z of [0.55, 1.05]) this.groundLine(c, p, [[-1800, y], [1800, y]], z);
+    for (const z of [0.55, 1.05])
+      this.groundLine(
+        c,
+        p,
+        [
+          [-1800, y],
+          [1800, y],
+        ],
+        z,
+      );
     c.fillStyle = this.pal.night ? '#151518' : '#4b3c2e';
     for (let x = -260; x <= 260; x += 3) {
       const a = this.proj(p, x, y, 0);
@@ -827,7 +971,8 @@ export class View {
     const pal = this.pal;
     const d = Math.hypot(bd.x - CAM[0], bd.y - CAM[1]);
     const haze = Math.min(0.85, Math.pow(d / 2600, 0.7)) * (pal.night ? 0.3 : 0.7);
-    const tone = (col: string, f = 0) => mix(mix(col, pal.night ? '#05060a' : '#000000', pal.night ? 0.8 : f), pal.haze, haze);
+    const tone = (col: string, f = 0) =>
+      mix(mix(col, pal.night ? '#05060a' : '#000000', pal.night ? 0.8 : f), pal.haze, haze);
     const x0 = bd.x - bd.w / 2;
     const x1 = bd.x + bd.w / 2;
     const y0 = bd.y - bd.d / 2;
@@ -837,13 +982,23 @@ export class View {
     const P = (x: number, y: number, z: number): V3 => [x, y, z];
     // The south wall faces the box; one gable end shows, whichever side the box is on.
     const gx = CAM[0] < x0 ? x0 : x1;
-    this.poly(c, p, [P(gx, y0, 0), P(gx, y1, 0), P(gx, y1, bd.h), P(gx, ym, bd.tower ? bd.h : top), P(gx, y0, bd.h)], tone(bd.wall, 0.22));
+    this.poly(
+      c,
+      p,
+      [P(gx, y0, 0), P(gx, y1, 0), P(gx, y1, bd.h), P(gx, ym, bd.tower ? bd.h : top), P(gx, y0, bd.h)],
+      tone(bd.wall, 0.22),
+    );
     this.poly(c, p, [P(x0, y0, 0), P(x1, y0, 0), P(x1, y0, bd.h), P(x0, y0, bd.h)], tone(bd.wall));
     if (bd.tower) {
       this.poly(c, p, [P(x0, y0, bd.h), P(x1, y0, bd.h), P(bd.x, bd.y, top)], tone(bd.roof));
       this.poly(c, p, [P(gx, y0, bd.h), P(gx, y1, bd.h), P(bd.x, bd.y, top)], tone(bd.roof, 0.25));
     } else {
-      this.poly(c, p, [P(x0 - 0.3, y0 - 0.3, bd.h), P(x1 + 0.3, y0 - 0.3, bd.h), P(x1 + 0.3, ym, top), P(x0 - 0.3, ym, top)], tone(bd.roof));
+      this.poly(
+        c,
+        p,
+        [P(x0 - 0.3, y0 - 0.3, bd.h), P(x1 + 0.3, y0 - 0.3, bd.h), P(x1 + 0.3, ym, top), P(x0 - 0.3, ym, top)],
+        tone(bd.roof),
+      );
     }
     // Windows: lit at night, dark panes by day.
     if (!bd.tower && d < 1200) {
@@ -852,7 +1007,17 @@ export class View {
       for (let i = 0; i < n; i++) {
         const cx = x0 + ((i + 0.5) / n) * bd.w;
         if (pal.night && i % 2) continue;
-        this.poly(c, p, [P(cx - 0.5, y0 - 0.02, bd.h * 0.35), P(cx + 0.5, y0 - 0.02, bd.h * 0.35), P(cx + 0.5, y0 - 0.02, bd.h * 0.62), P(cx - 0.5, y0 - 0.02, bd.h * 0.62)], win);
+        this.poly(
+          c,
+          p,
+          [
+            P(cx - 0.5, y0 - 0.02, bd.h * 0.35),
+            P(cx + 0.5, y0 - 0.02, bd.h * 0.35),
+            P(cx + 0.5, y0 - 0.02, bd.h * 0.62),
+            P(cx - 0.5, y0 - 0.02, bd.h * 0.62),
+          ],
+          win,
+        );
       }
     }
   }
@@ -1021,7 +1186,12 @@ export class View {
     this.poly(
       c,
       p,
-      [P(L - 0.42 * SIG_SCALE, -T / 2), P(L - 0.24 * SIG_SCALE, -T / 2), P(L - 0.24 * SIG_SCALE, T / 2), P(L - 0.42 * SIG_SCALE, T / 2)],
+      [
+        P(L - 0.42 * SIG_SCALE, -T / 2),
+        P(L - 0.24 * SIG_SCALE, -T / 2),
+        P(L - 0.24 * SIG_SCALE, T / 2),
+        P(L - 0.42 * SIG_SCALE, T / 2),
+      ],
       stripe,
     );
     // Spectacle and lamp by the post: red or green from the front, the small back light from behind.
@@ -1048,8 +1218,17 @@ export class View {
     void box;
   }
 
-  private vehicles(box: Box): { tr: Train; v: Vehicle; a: { x: number; y: number }; b: { x: number; y: number }; d: number; idx: number }[] {
-    const out: { tr: Train; v: Vehicle; a: { x: number; y: number }; b: { x: number; y: number }; d: number; idx: number }[] = [];
+  private vehicles(
+    box: Box,
+  ): { tr: Train; v: Vehicle; a: { x: number; y: number }; b: { x: number; y: number }; d: number; idx: number }[] {
+    const out: {
+      tr: Train;
+      v: Vehicle;
+      a: { x: number; y: number };
+      b: { x: number; y: number };
+      d: number;
+      idx: number;
+    }[] = [];
     for (const tr of box.trains) {
       if (tr.state !== 'running') continue;
       let s = tr.s;
@@ -1190,10 +1369,22 @@ export class View {
         this.polyFill(
           c,
           p,
-          [N(0.04, z0 + 0.3), N(0.96, z0 + 0.3), N(0.96, z1 - 0.5, W * 0.95), N(0.96, z1, W * 0.35), N(0.04, z1, W * 0.35), N(0.04, z1 - 0.5, W * 0.95)],
+          [
+            N(0.04, z0 + 0.3),
+            N(0.96, z0 + 0.3),
+            N(0.96, z1 - 0.5, W * 0.95),
+            N(0.96, z1, W * 0.35),
+            N(0.04, z1, W * 0.35),
+            N(0.04, z1 - 0.5, W * 0.95),
+          ],
           fill,
         );
-        this.poly(c, p, [N(0.44, z1), N(0.56, z1), N(0.56, z1 + 0.35, 0.3), N(0.44, z1 + 0.35, 0.3)], dark(bodyCol, 0.25));
+        this.poly(
+          c,
+          p,
+          [N(0.44, z1), N(0.56, z1), N(0.56, z1 + 0.35, 0.3), N(0.44, z1 + 0.35, 0.3)],
+          dark(bodyCol, 0.25),
+        );
         break;
       }
       default: {
@@ -1291,13 +1482,26 @@ export class View {
     this.polyFill(
       c,
       p,
-      [N(0.26, 1.5, 1.25), N(0.98, 1.5, 1.25), N(0.98, 2.75, 1.25), N(0.98, 3.25, 0.4), N(0.26, 3.25, 0.4), N(0.26, 2.75, 1.25)],
+      [
+        N(0.26, 1.5, 1.25),
+        N(0.98, 1.5, 1.25),
+        N(0.98, 2.75, 1.25),
+        N(0.98, 3.25, 0.4),
+        N(0.26, 3.25, 0.4),
+        N(0.26, 2.75, 1.25),
+      ],
       fill,
     );
     // Boiler bands.
     for (const t of [0.42, 0.6, 0.78]) side(t, t + 0.008, 1.6, 3.2, face('#4a4744'), 1.26);
     // Smokebox front, if it faces the box.
-    if (endT === 1) this.poly(c, p, [N(0.985, 1.5, 1.2), F(0.985, 1.5, 1.2), F(0.985, 3.2, 0.4), N(0.985, 3.2, 0.4)], face('#141312'));
+    if (endT === 1)
+      this.poly(
+        c,
+        p,
+        [N(0.985, 1.5, 1.2), F(0.985, 1.5, 1.2), F(0.985, 3.2, 0.4), N(0.985, 3.2, 0.4)],
+        face('#141312'),
+      );
     // Chimney and dome.
     side(0.86, 0.92, 3.2, 4.15, face('#151413'), 0.35);
     top(0.86, 0.92, 4.15, face('#0d0c0c'), 0.35);
@@ -1440,7 +1644,11 @@ export class View {
       const r = (pf.r * p.f) / q[2];
       if (r < 0.5) continue;
       const a = (1 - pf.age / pf.life) * (night ? 0.18 : 0.42);
-      c.fillStyle = night ? `rgba(120,125,140,${a})` : this.shift === 'early' ? `rgba(236,214,206,${a})` : `rgba(238,238,236,${a})`;
+      c.fillStyle = night
+        ? `rgba(120,125,140,${a})`
+        : this.shift === 'early'
+          ? `rgba(236,214,206,${a})`
+          : `rgba(238,238,236,${a})`;
       c.beginPath();
       c.arc(q[0], q[1], r, 0, Math.PI * 2);
       c.fill();
@@ -1565,4 +1773,3 @@ function nearTrack(x: number, y: number, m: number): boolean {
     }
   return false;
 }
-
