@@ -288,8 +288,9 @@ export class Neighbour {
       return;
     }
     const o = this.offer;
-    if (o?.stage === 'ask' && code === CLASSES[o.train.b.cls].code) {
-      o.repeated = true; // our repeat of their offer
+    // Our repeat of their offer, unless we couldn't take it anyway: then it's an offer of our own.
+    if (o?.stage === 'ask' && code === CLASSES[o.train.b.cls].code && !box.whyNot(this.id, 'LC')) {
+      o.repeated = true;
       return;
     }
     if (code === '1') {
@@ -541,13 +542,14 @@ export class Box {
         return this.clear('UJ', 'U1', 'DJ');
       case 12:
         return this.clear('UJ', 'U1');
-      // A starting signal gets one pull per line clear; the train replaces it as it passes.
+      // A starting signal gets one pull per line clear; the train replaces it as it passes, and a
+      // cancelled line clear puts it back.
       case 4:
-        return this.released.has(4) && this.clear('DM2');
+        return this.released.has(4) && this.clear('DM2') && this.outState.marsh !== 'LB';
       case 5:
-        return this.released.has(5) && this.clear('DB2');
+        return this.released.has(5) && this.clear('DB2') && this.outState.pell !== 'LB';
       case 10:
-        return this.released.has(10) && this.clear('U2');
+        return this.released.has(10) && this.clear('U2') && this.outState.callow !== 'LB';
     }
     return false;
   }
@@ -611,12 +613,13 @@ export class Box {
     this.neighbours[box].hear(code);
   }
 
-  /** The first train booked to run on to a box that hasn't been accepted there yet. */
+  /** The first train booked to run on to a box that hasn't yet passed our starting signal or been accepted there. */
   nextTrainTo(box: BoxId): Train | null {
     let best: Train | null = null;
+    const held = this.neighbours[box].acceptedFor;
     for (const tr of this.trains) {
-      if (tr.to !== box || tr.entry.acceptedOnAt !== undefined || tr.entry.offeredOnAt !== undefined) continue;
-      if (tr.state === 'gone') continue;
+      if (tr.to !== box || tr === held || tr.state === 'gone') continue;
+      if (tr.state === 'running' && tr.s > starterOf(tr)) continue;
       if (!best || tr.entry.booked < best.entry.booked) best = tr;
     }
     return best;
@@ -739,7 +742,7 @@ export class Box {
       if (tail - tr.s < 450 && tail < limit) {
         limit = Math.max(tr.s, tail);
         heldBy = null;
-        if (!tr.caughtUp && tr.s < 1390) {
+        if (!tr.caughtUp && tr.s < 1440) {
           tr.caughtUp = true;
           this.irregular(`${tr.b.hc} was let into the section behind ${ahead.b.hc} and had to stop for it`);
         }
@@ -803,6 +806,9 @@ export class Box {
       tr.entry.passedAt = t;
       this.emit({ type: 'pass', train: tr.id });
     }
+    // Past the starting signal it is the box ahead's train, whichever train they gave the line clear for.
+    const st = starterOf(tr);
+    if (before < st && tr.s >= st) this.neighbours[tr.to].acceptedFor = tr;
     if (!tr.tailSeen && tr.s - tr.len >= PASS_S) tr.tailSeen = true;
     if (tr.s - tr.len > PATH_END) {
       tr.state = 'gone';

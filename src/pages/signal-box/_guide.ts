@@ -100,7 +100,7 @@ export function advise(box: Box): Advice {
     if (tr.state !== 'running' || tr.entry.passedAt === undefined || tr.entry.sentOnAt !== undefined) continue;
     if (box.outState[tr.to] !== 'LC' || !quiet(box, tr.to)) continue;
     const starter = PATH_SIGNALS[tr.path].find((g) => g.role === 'starting')!;
-    if (tr.s < starter.s && !box.armOff(starter.lever)) continue;
+    if (tr.s < starter.s && !(box.armOff(starter.lever) && tr.v > 3)) continue;
     return {
       kind: 'tap',
       box: tr.to,
@@ -113,6 +113,7 @@ export function advise(box: Box): Advice {
   for (const tr of box.trains) {
     const starter = PATH_SIGNALS[tr.path].find((g) => g.role === 'starting')!;
     if (tr.state !== 'running' || tr.heldAt !== starter.lever || box.outState[tr.to] !== 'TOL') continue;
+    if (box.armOff(starter.lever)) continue;
     if (!quiet(box, tr.to)) continue;
     return {
       kind: 'tap',
@@ -191,10 +192,11 @@ export function advise(box: Box): Advice {
 
   // Offer trains on to the box ahead.
   for (const tr of coming(box)) {
-    if (tr.entry.acceptedOnAt !== undefined || tr.entry.offeredOnAt !== undefined) continue;
     const ahead = box.neighbours[tr.to];
     if (box.outState[tr.to] !== 'LB' || ahead.acceptedFor || box.nextTrainTo(tr.to) !== tr) continue;
-    if (ahead.awaiting || ahead.offer?.stage === 'call' || ahead.offer?.stage === 'ask' || !quiet(box, tr.to)) continue;
+    // While they're offering us a train we can take, deal with that first.
+    const asking = ahead.offer?.stage === 'ask' && !box.whyNot(tr.to, 'LC');
+    if (ahead.awaiting || ahead.offer?.stage === 'call' || asking || !quiet(box, tr.to)) continue;
     const c = CLASSES[tr.b.cls];
     if (ahead.called === null || (!ahead.answered && t - ahead.called > 12))
       return {
