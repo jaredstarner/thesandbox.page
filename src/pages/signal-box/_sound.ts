@@ -154,7 +154,7 @@ export class Sound {
     if (!L) return;
     const t = L.c.currentTime + delay;
     const b = BELLS[box];
-    for (const [r, lv, dec] of b.parts) this.tone(t, b.f * r * (1 + (Math.random() - 0.5) * 0.002), dec, 0.13 * lv);
+    for (const [r, lv, dec] of b.parts) this.tone(t, b.f * r * (1 + (Math.random() - 0.5) * 0.002), dec, 0.2 * lv);
     this.burst(t, 0.012, 3800, 1.2, 0.08);
   }
 
@@ -235,7 +235,7 @@ export class Sound {
     const p = c.createStereoPanner();
     p.pan.value = pan * 0.8;
     const g = c.createGain();
-    g.gain.value = Math.min(1, 40 / Math.max(25, dist));
+    g.gain.value = Math.min(1, 60 / Math.max(30, dist));
     p.connect(g).connect(L.out);
     if (steam) {
       this.tone(t, 880, 0.9, 0.06, 'triangle', 0.05, p);
@@ -255,8 +255,8 @@ export class Sound {
       lp.frequency.value = 1500;
       const e = c.createGain();
       e.gain.setValueAtTime(0, t + start);
-      e.gain.linearRampToValueAtTime(0.05, t + start + 0.04);
-      e.gain.setValueAtTime(0.05, t + start + 0.46);
+      e.gain.linearRampToValueAtTime(0.13, t + start + 0.04);
+      e.gain.setValueAtTime(0.13, t + start + 0.46);
       e.gain.linearRampToValueAtTime(0, t + start + 0.52);
       o.connect(lp).connect(e).connect(p);
       o.start(t + start);
@@ -328,7 +328,7 @@ export class Sound {
         const base = (dmu ? 52 : 34) + power * (dmu ? 22 : 16);
         for (const [i, o] of v.osc.entries()) o.frequency.setTargetAtTime(base * [1, 2.005, 3.01][i], t, 0.6);
         v.filter.frequency.setTargetAtTime(260 + power * 900, t, 0.3);
-        v.gain.gain.setTargetAtTime((tr.v > 0.1 || power > 0.2 ? 0.16 : 0.07) * near, t, 0.15);
+        v.gain.gain.setTargetAtTime((tr.v > 0.1 || power > 0.2 ? 0.22 : 0.09) * near, t, 0.15);
       }
       if (v.whine && v.whineGain) {
         v.whine.frequency.setTargetAtTime(180 + tr.v * 28, t, 0.2);

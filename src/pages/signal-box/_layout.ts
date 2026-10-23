@@ -29,13 +29,13 @@ export interface LeverDef {
 }
 
 export const LEVERS: LeverDef[] = [
-  { n: 1, kind: 'distant', name: 'Down main distant', plate: ['Down main', 'distant'], reverse: [2, 4] },
-  { n: 2, kind: 'stop', name: 'Down main home', plate: ['Down main', 'home'], reverse: [6], normal: [7, 11] },
-  { n: 3, kind: 'stop', name: 'Down branch home', plate: ['Down branch', 'home'], reverse: [6, 7] },
-  { n: 4, kind: 'stop', name: 'Down main starting', plate: ['Down main', 'starting'] },
-  { n: 5, kind: 'stop', name: 'Down branch starting', plate: ['Down branch', 'starting'] },
+  { n: 1, kind: 'distant', name: 'Down main distant', plate: ['Dn main', 'distant'], reverse: [2, 4] },
+  { n: 2, kind: 'stop', name: 'Down main home', plate: ['Dn main', 'home'], reverse: [6], normal: [7, 11] },
+  { n: 3, kind: 'stop', name: 'Down branch home', plate: ['Dn branch', 'home'], reverse: [6, 7] },
+  { n: 4, kind: 'stop', name: 'Down main starting', plate: ['Dn main', 'starting'] },
+  { n: 5, kind: 'stop', name: 'Down branch starting', plate: ['Dn branch', 'starting'] },
   { n: 6, kind: 'fpl', name: 'Facing point lock on 7 points', plate: ['F.P.L.', 'on 7'], locks: [7] },
-  { n: 7, kind: 'points', name: 'Down junction points', plate: ['Down jcn', 'points'] },
+  { n: 7, kind: 'points', name: 'Down junction points', plate: ['Dn jcn', 'points'] },
   { n: 8, kind: 'points', name: 'Up junction points', plate: ['Up jcn', 'points'] },
   { n: 9, kind: 'spare', name: 'Spare', plate: ['Spare', ''] },
   { n: 10, kind: 'stop', name: 'Up starting', plate: ['Up', 'starting'] },

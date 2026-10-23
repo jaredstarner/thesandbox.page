@@ -263,12 +263,21 @@ export class Frame {
     v.g.classList.add('refused');
   }
 
-  /** Ring the lever the guide wants next. */
+  /** Ring the lever the guide wants next, scrolling it into view where the frame scrolls sideways. */
   highlight(n: number | null): void {
     if (this.target === n) return;
     if (this.target !== null) this.levers[this.target - 1].g.classList.remove('next');
     this.target = n;
-    if (n !== null) this.levers[n - 1].g.classList.add('next');
+    if (n === null) return;
+    const g = this.levers[n - 1].g;
+    g.classList.add('next');
+    const wrap = this.svg.parentElement;
+    if (wrap && wrap.scrollWidth > wrap.clientWidth + 4) {
+      const r = g.getBoundingClientRect();
+      const w = wrap.getBoundingClientRect();
+      if (r.left < w.left + 20 || r.right > w.right - 20)
+        wrap.scrollBy({ left: r.left + r.width / 2 - (w.left + w.width / 2), behavior: 'smooth' });
+    }
   }
 }
 
