@@ -53,30 +53,30 @@ export type TrackId = 'DA' | 'DJ' | 'DM1' | 'DM2' | 'DB1' | 'DB2' | 'UA' | 'UBA'
 /** Where each running line's track circuits lie, as [from, to] in that path's metres. */
 export const TRACKS: Record<PathId, [TrackId, number, number][]> = {
   DM: [
-    ['DA', 1090, 1390],
-    ['DJ', 1390, 1600],
-    ['DM1', 1600, 1750],
-    ['DM2', 1750, 2150],
+    ['DA', 1140, 1440],
+    ['DJ', 1440, 1600],
+    ['DM1', 1600, 1700],
+    ['DM2', 1700, 2100],
   ],
   DB: [
-    ['DA', 1090, 1390],
-    ['DJ', 1390, 1600],
-    ['DB1', 1600, 1750],
-    ['DB2', 1750, 2150],
+    ['DA', 1140, 1440],
+    ['DJ', 1440, 1600],
+    ['DB1', 1600, 1700],
+    ['DB2', 1700, 2100],
   ],
   UM: [
-    ['UA', 1030, 1330],
-    ['UJ', 1330, 1500],
-    ['U1', 1500, 1650],
-    ['U2', 1650, 2050],
+    ['UA', 1100, 1400],
+    ['UJ', 1400, 1500],
+    ['U1', 1500, 1590],
+    ['U2', 1590, 1990],
   ],
   UB: [
-    ['UBA', 1020, 1320],
-    ['UJ', 1320, 1500],
+    ['UBA', 1080, 1380],
+    ['UJ', 1380, 1500],
     // The up branch crosses the down main on the diamond, inside the down junction's circuit.
     ['DJ', 1418, 1438],
-    ['U1', 1500, 1650],
-    ['U2', 1650, 2050],
+    ['U1', 1500, 1590],
+    ['U2', 1590, 1990],
   ],
 };
 
@@ -108,23 +108,23 @@ export interface PathSignal {
 export const PATH_SIGNALS: Record<PathId, PathSignal[]> = {
   DM: [
     { s: 600, lever: 1, role: 'distant' },
-    { s: 1390, lever: 2, role: 'home', other: 3 },
-    { s: 1750, lever: 4, role: 'starting' },
+    { s: 1440, lever: 2, role: 'home', other: 3 },
+    { s: 1700, lever: 4, role: 'starting' },
   ],
   DB: [
     { s: 600, lever: 1, role: 'distant' },
-    { s: 1390, lever: 3, role: 'home', other: 2 },
-    { s: 1750, lever: 5, role: 'starting' },
+    { s: 1440, lever: 3, role: 'home', other: 2 },
+    { s: 1700, lever: 5, role: 'starting' },
   ],
   UM: [
     { s: 600, lever: 13, role: 'distant' },
-    { s: 1330, lever: 12, role: 'home' },
-    { s: 1650, lever: 10, role: 'starting' },
+    { s: 1400, lever: 12, role: 'home' },
+    { s: 1590, lever: 10, role: 'starting' },
   ],
   UB: [
     { s: 700, lever: 0, role: 'fixed-distant' },
-    { s: 1320, lever: 11, role: 'home' },
-    { s: 1650, lever: 10, role: 'starting' },
+    { s: 1380, lever: 11, role: 'home' },
+    { s: 1590, lever: 10, role: 'starting' },
   ],
 };
 
@@ -142,8 +142,8 @@ export const LIMITS: Record<PathId, [number, number, number][]> = {
   ],
   UM: [],
   UB: [
-    [0, 1330, 22.4],
-    [1330, 1480, 11.2],
+    [0, 1390, 22.4],
+    [1390, 1480, 11.2],
   ],
 };
 
