@@ -324,5 +324,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['cursive'],
     },
+    // The readouts and labels on /datamosh/: a monospace drawn for interfaces, and a grotesk for its notes.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Martian Mono',
+      cssVariable: '--font-datamosh',
+      weights: ['100 800'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Familjen Grotesk',
+      cssVariable: '--font-datamosh-text',
+      weights: ['400 700'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Arial', 'sans-serif'],
+    },
   ],
 });

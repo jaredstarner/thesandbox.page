@@ -446,6 +446,25 @@ export const TECHNIQUES: Record<string, Technique> = {
     webFeature: 'pointer-events',
     test: () => present(typeof PointerEvent === 'function', 'PointerEvent present', 'PointerEvent missing'),
   },
+  'screen-capture': {
+    label: 'Screen capture',
+    webFeature: 'screen-capture',
+    handling: 'May ask to capture your screen or a window when you choose to; nothing leaves the page.',
+    test: () => {
+      if (!window.isSecureContext) return { state: 'blocked', detail: 'not a secure context' };
+      return present(
+        typeof navigator.mediaDevices?.getDisplayMedia === 'function',
+        'present; never called here',
+        'mediaDevices.getDisplayMedia missing',
+      );
+    },
+  },
+  'media-recorder': {
+    label: 'MediaRecorder',
+    webFeature: 'mediastream-recording',
+    handling: 'Can save what it shows as a video file.',
+    test: () => present(typeof MediaRecorder === 'function', 'MediaRecorder present', 'MediaRecorder missing'),
+  },
   geolocation: {
     label: 'Geolocation',
     webFeature: 'geolocation',
@@ -480,6 +499,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   'multiple-windows': { label: 'Multiple windows', handling: 'May open a second window when you ask it to.' },
   'flip-fluid': { label: 'FLIP fluid' },
   'absolute-block': { label: 'Absolute block signalling' },
+  'motion-compensation': { label: 'Motion compensation' },
+  dct: { label: 'Discrete cosine transform' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
