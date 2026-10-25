@@ -111,7 +111,7 @@ const plates = [
         <p class="head"><span class="num">01</span><span class="name" id="fins-name">Fins</span><span class="kind">Measure</span></p>
         <p class="instr">Make the lower line as long as the upper one. Judge the lines, not the fins.</p>
         <label class="control">
-          <span>Length</span>
+          <span>Length<em>or drag across the figure</em></span>
           <input type="range" min="220" max="500" step="1" value={start.fins} data-input />
         </label>
         <div class="actions">
@@ -179,7 +179,7 @@ const plates = [
         </p>
         <p class="instr">Stretch the right tabletop until it is the same shape as the left one.</p>
         <label class="control">
-          <span>Length</span>
+          <span>Length<em>or drag across the figure</em></span>
           <input type="range" min="150" max="380" step="1" value={start.tables} data-input />
         </label>
         <div class="actions">
@@ -258,7 +258,7 @@ const plates = [
         </p>
         <p class="instr">The grey lines between the rows look tilted. Tilt them back until they all look level.</p>
         <label class="control">
-          <span>Tilt</span>
+          <span>Tilt<em>or drag across the figure</em></span>
           <input type="range" min="-3.5" max="3.5" step="0.05" value={start.mortar} data-input />
         </label>
         <div class="actions">
@@ -319,7 +319,7 @@ const plates = [
         <p class="head"><span class="num">07</span><span class="name" id="halo-name">Halo</span><span class="kind">Measure</span></p>
         <p class="instr">Size the right centre disc until it matches the left one.</p>
         <label class="control">
-          <span>Size</span>
+          <span>Size<em>or drag across the figure</em></span>
           <input type="range" min="20" max="56" step="0.25" value={start.halo} data-input />
         </label>
         <div class="actions">
@@ -393,7 +393,7 @@ const plates = [
         </p>
         <p class="instr">Set the grey of the right bars to match the left bars.</p>
         <label class="control">
-          <span>Grey</span>
+          <span>Grey<em>or drag across the figure</em></span>
           <input type="range" min="70" max="190" step="1" value={start.stripes} data-input />
         </label>
         <div class="actions">
@@ -548,6 +548,13 @@ const plates = [
     cy: 44%;
     r: min(30vmin, 300px);
   }
+  @media (max-width: 860px) {
+    .ouchi-disc {
+      cx: 50%;
+      cy: 22%;
+      r: min(36vw, 26vh);
+    }
+  }
   .title-card {
     position: relative;
     max-width: 640px;
@@ -641,15 +648,18 @@ const plates = [
   .rail a[aria-current='true'] {
     color: var(--ink);
   }
+  .rail a {
+    position: relative;
+  }
   .rail a[data-done]::after {
     content: '';
+    position: absolute;
+    left: -11px;
+    top: calc(50% - 3px);
     width: 6px;
     height: 6px;
     border-radius: 50%;
     background: var(--red);
-    order: -1;
-    margin-left: -12px;
-    margin-right: 6px;
   }
   .rail a:focus-visible {
     outline: 2px solid var(--red);
@@ -746,6 +756,23 @@ const plates = [
     display: grid;
     gap: 4px;
     margin: 0 0 16px;
+  }
+  .control > span {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .control em {
+    font-style: normal;
+    font-weight: 500;
+    font-stretch: 100%;
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 12px;
+  }
+  [data-kind='measure'][data-state='set'] .figure svg {
+    cursor: ew-resize;
+    touch-action: pan-y;
   }
   .control > span,
   .swatches legend {
@@ -1025,9 +1052,19 @@ const plates = [
       min-height: auto;
       padding: 48px 16px 40px;
     }
-    .scale-head,
+    table {
+      font-size: 15px;
+    }
+    th,
+    td {
+      padding: 12px 8px 12px 0;
+      white-space: nowrap;
+    }
+    tbody th {
+      font-stretch: 100%;
+    }
     .scale {
-      display: none;
+      width: 20%;
     }
   }
 </style>
