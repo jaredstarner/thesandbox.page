@@ -39,7 +39,7 @@ const plates = [
 >
   <Font cssVariable="--font-seeing" slot="head" />
 
-  <main class="seeing" data-seeing>
+  <main class="seeing" data-seeing data-opener>
     <header class="opener" id="top">
       <svg class="ouchi" aria-hidden="true">
         <defs>
@@ -599,6 +599,11 @@ const plates = [
     z-index: 2;
     translate: 0 -50%;
     display: none;
+    transition: opacity 0.3s;
+  }
+  .seeing[data-opener] .rail {
+    opacity: 0;
+    pointer-events: none;
   }
   .rail ol {
     margin: 0;

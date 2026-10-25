@@ -249,6 +249,44 @@ function start(root: HTMLElement) {
     });
   }
 
+  // Buses: two bars at one steady speed, and the stripes' contrast.
+  const busPlate = plate('buses');
+  const buses = [...busPlate.querySelectorAll<SVGRectElement>('[data-bus]')];
+  const speed = BUSES.stripe * 2 * 0.9;
+  const span = 800 + BUSES.len * 2;
+  let busX = 0;
+  let busFrame = 0;
+  let busThen = 0;
+  const busLoop = () => {
+    if (!busPlate.hasAttribute('data-run')) {
+      cancelAnimationFrame(busFrame);
+      busFrame = 0;
+      return;
+    }
+    if (busFrame) return;
+    busThen = performance.now();
+    const step = (t: number) => {
+      busX = (busX + (speed * Math.min(t - busThen, 100)) / 1000) % span;
+      busThen = t;
+      const x = busX - BUSES.len;
+      for (const b of buses) b.setAttribute('x', x.toFixed(2));
+      busFrame = requestAnimationFrame(step);
+    };
+    busFrame = requestAnimationFrame(step);
+  };
+  {
+    const svg = svgOf(busPlate);
+    const input = inputOf(busPlate);
+    const mid = 128;
+    input.addEventListener('input', () => {
+      const c = Number(input.value);
+      const lo = Math.round(mid + (15 - mid) * c);
+      const hi = Math.round(mid + (251 - mid) * c);
+      svg.style.setProperty('--bus-dark', `rgb(${lo},${lo},${lo})`);
+      svg.style.setProperty('--bus-light', `rgb(${hi},${hi},${hi})`);
+    });
+  }
+
   // Motion figures run only while on screen and not paused.
   const playing = new Map<HTMLElement, boolean>();
   const live = new Set<HTMLElement>();
@@ -290,44 +328,6 @@ function start(root: HTMLElement) {
     for (const r of p.querySelectorAll<HTMLInputElement>('[data-colour]')) {
       r.addEventListener('change', () => svg.style.setProperty('--chase', r.value));
     }
-  }
-
-  // Buses: two bars at one steady speed, and the stripes' contrast.
-  const busPlate = plate('buses');
-  const buses = [...busPlate.querySelectorAll<SVGRectElement>('[data-bus]')];
-  const speed = BUSES.stripe * 2 * 0.9;
-  const span = 800 + BUSES.len * 2;
-  let busX = 0;
-  let busFrame = 0;
-  let busThen = 0;
-  function busLoop() {
-    if (!busPlate.hasAttribute('data-run')) {
-      cancelAnimationFrame(busFrame);
-      busFrame = 0;
-      return;
-    }
-    if (busFrame) return;
-    busThen = performance.now();
-    const step = (t: number) => {
-      busX = (busX + (speed * Math.min(t - busThen, 100)) / 1000) % span;
-      busThen = t;
-      const x = busX - BUSES.len;
-      for (const b of buses) b.setAttribute('x', x.toFixed(2));
-      busFrame = requestAnimationFrame(step);
-    };
-    busFrame = requestAnimationFrame(step);
-  }
-  {
-    const svg = svgOf(busPlate);
-    const input = inputOf(busPlate);
-    const mid = 128;
-    input.addEventListener('input', () => {
-      const c = Number(input.value);
-      const lo = Math.round(mid + (15 - mid) * c);
-      const hi = Math.round(mid + (251 - mid) * c);
-      svg.style.setProperty('--bus-dark', `rgb(${lo},${lo},${lo})`);
-      svg.style.setProperty('--bus-light', `rgb(${hi},${hi},${hi})`);
-    });
   }
 
   // Spiral: turn for twenty seconds, then stop and let the after-effect run.
@@ -430,6 +430,14 @@ function start(root: HTMLElement) {
     { rootMargin: '-45% 0px -45% 0px' },
   );
   for (const s of sections) where.observe(s);
+
+  // The rail stays off the opener, where it would sit on the pattern.
+  const opener = root.querySelector<HTMLElement>('.opener');
+  if (opener) {
+    new IntersectionObserver(([e]) => root.toggleAttribute('data-opener', e.intersectionRatio > 0.35), {
+      threshold: [0, 0.35, 1],
+    }).observe(opener);
+  }
 }
 
 /* ---------------------------------------------------- storage */
