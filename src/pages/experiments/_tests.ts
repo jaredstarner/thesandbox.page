@@ -501,6 +501,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   'absolute-block': { label: 'Absolute block signalling' },
   'motion-compensation': { label: 'Motion compensation' },
   dct: { label: 'Discrete cosine transform' },
+  'optical-illusions': { label: 'Optical illusions' },
+  psychophysics: { label: 'Psychophysics' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

@@ -343,5 +343,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Arial', 'sans-serif'],
     },
+    {
+      // The plate lettering on /seeing-things/: a grotesk whose width axis runs out to the wide cuts of op-art catalogues.
+      provider: fontProviders.fontsource(),
+      name: 'Archivo',
+      cssVariable: '--font-seeing',
+      weights: ['100 900'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Arial', 'sans-serif'],
+    },
   ],
 });
