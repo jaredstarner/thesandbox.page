@@ -159,6 +159,7 @@ function start(root: HTMLElement) {
     const result = p.querySelector<HTMLElement>('[data-result]')!;
     const note = p.querySelector<HTMLElement>('[data-note]')!;
 
+    let firstTry = true;
     const draw = () => {
       adj.innerHTML = m.adjust(Number(input.value));
     };
@@ -195,6 +196,10 @@ function start(root: HTMLElement) {
       p.dataset.context = 'off';
       if (truth) truth.innerHTML = m.truth(v);
       result.replaceChildren(r.say[0], Object.assign(document.createElement('b'), { textContent: r.say[1] }), r.say[2]);
+      // A first try starts at the truth, so any change was the illusion's doing.
+      if (firstTry && r.bar !== 0) {
+        result.append(Object.assign(document.createElement('span'), { textContent: ' It started out exactly right.' }));
+      }
       note.hidden = false;
       check.hidden = true;
       again.hidden = false;
@@ -214,6 +219,7 @@ function start(root: HTMLElement) {
     });
 
     again.addEventListener('click', () => {
+      firstTry = false;
       input.value = String(m.fresh());
       input.disabled = false;
       p.dataset.state = 'set';

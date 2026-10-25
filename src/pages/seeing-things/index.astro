@@ -5,6 +5,7 @@ import {
   busesFigure,
   chaserFigure,
   driftFigure,
+  FINS,
   finsFigure,
   gridFigure,
   haloFigure,
@@ -12,12 +13,14 @@ import {
   HALO_MEET,
   mortarFigure,
   spiralFigure,
+  STRIPES,
   stripesFigure,
+  TABLES,
   tablesFigure,
 } from './_figures';
 
-// Where each measured figure starts on a first visit; Again picks a fresh start.
-const start = { fins: 412, tables: 214, halo: 29, mortar: 1.8, stripes: 152 };
+// Each measured figure starts out true, so whatever the visitor sets is the illusion itself; Again starts it off.
+const start = { fins: FINS.len, tables: TABLES.long, halo: HALO.r, mortar: 0, stripes: STRIPES.grey };
 
 const plates = [
   { id: 'fins', num: '01', name: 'Fins' },
@@ -149,8 +152,8 @@ const plates = [
           <input type="range" min="0" max="14" step="0.5" value="0" data-input />
         </label>
         <p class="note">
-          There are no dark dots. Bending the bars makes them go away, though nothing changes at the discs, which is hard
-          to square with the old textbook account of cells in the retina sharpening edges.
+          There are no dark dots. Bend the bars and they go away, which is hard to square with the old textbook account
+          of cells in the retina sharpening edges.
         </p>
       </div>
     </section>
@@ -1224,11 +1227,18 @@ const plates = [
     fill: #e3a32a;
     transition: transform 1.2s cubic-bezier(0.6, 0, 0.2, 1) 0.3s;
   }
-  .seeing [data-state='checked'] .halo-fixed {
+  /* With the rings hidden, the two centres slide out side by side; showing the rings slides them home. */
+  .seeing [data-plate='halo'][data-context='off'] .ctx {
+    opacity: 0;
+  }
+  .seeing [data-state='checked'][data-context='off'] .halo-fixed {
     transform: translateX(var(--meet-left));
   }
-  .seeing [data-state='checked'] .halo-set {
+  .seeing [data-state='checked'][data-context='off'] .halo-set {
     transform: translateX(var(--meet-right));
+  }
+  .seeing [data-plate='halo'][data-context='on'] [data-truth] {
+    opacity: 0;
   }
 
   /* Spiral */
