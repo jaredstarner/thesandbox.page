@@ -197,13 +197,14 @@ const reels = [
       <div class="cols">
         <p>
           Compressed video keeps only a few whole pictures, the keyframes. Every frame in between cuts the picture into
-          16-pixel blocks and says where each block moved from, plus a small correction. The bar chart under the picture
-          shows the difference: a keyframe is a tall bar, the frames after it are small ones.
+          16-pixel blocks and says where each block moved from, plus a small correction, the residual. The bar chart
+          under the picture shows the difference: a keyframe is a tall bar, the frames after it are small ones.
         </p>
         <p>
           At a cut, the new shot starts with a keyframe. Leave it out and the decoder carries on with the picture it
           already has, so the new shot's movement is applied to the old shot. Turn on Vectors to see the blocks being
-          pushed.
+          pushed. With Residual off only the movement is applied, so a pan slides the picture away and drags its edge in
+          behind it.
         </p>
         <p>
           Hold repeats one frame's movement until you let go, so the picture keeps flowing the same way. Blocks the
