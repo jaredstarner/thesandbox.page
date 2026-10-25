@@ -88,8 +88,7 @@ let wantKey = false;
 let cutToStill = false;
 let lastDelta: Frame | null = null;
 
-const post = (m: OutMessage, transfer: Transferable[] = []) =>
-  (self as unknown as Worker).postMessage(m, transfer);
+const post = (m: OutMessage, transfer: Transferable[] = []) => (self as unknown as Worker).postMessage(m, transfer);
 
 function encodeNext(src: Source) {
   const reel = src.reel!;
@@ -193,7 +192,10 @@ function tick(m: TickMessage) {
     cutToStill = false;
   }
 
-  const out = m.recycle && m.recycle.byteLength === W * H * 4 ? new Uint8ClampedArray(m.recycle) : new Uint8ClampedArray(W * H * 4);
+  const out =
+    m.recycle && m.recycle.byteLength === W * H * 4
+      ? new Uint8ClampedArray(m.recycle)
+      : new Uint8ClampedArray(W * H * 4);
   toRGBA(cur, out);
   const info: FrameInfo = {
     kind,
@@ -220,7 +222,10 @@ function work() {
   const reels = [...sources.values()].filter((s) => s.kind === 'reel' && s.frames.length < s.reel!.length);
   if (!reels.length) return;
   const air = onAir?.kind === 'reel' && reels.includes(onAir) ? onAir : null;
-  const target = air && air.frames.length < air.pos + 48 ? air : reels.reduce((a, b) => (a.frames.length <= b.frames.length ? a : b));
+  const target =
+    air && air.frames.length < air.pos + 48
+      ? air
+      : reels.reduce((a, b) => (a.frames.length <= b.frames.length ? a : b));
   encodeNext(target);
   idle = self.setTimeout(work, 0);
 }

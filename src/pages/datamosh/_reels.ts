@@ -81,7 +81,15 @@ function spin(): Reel {
       const a = r() * TAU;
       const off = s * r() * 0.7;
       d.beginPath();
-      d.ellipse(x + Math.cos(a) * off, y + Math.sin(a) * off, s * (0.45 + r() * 0.4), s * (0.3 + r() * 0.35), r() * TAU, 0, TAU);
+      d.ellipse(
+        x + Math.cos(a) * off,
+        y + Math.sin(a) * off,
+        s * (0.45 + r() * 0.4),
+        s * (0.3 + r() * 0.35),
+        r() * TAU,
+        0,
+        TAU,
+      );
       d.fill();
     }
     const drops = 3 + Math.floor(r() * 9);
@@ -351,8 +359,7 @@ function tunnel(): Reel {
           const far = Math.min(1, Math.max(0, (depth - 240) / 520));
           const near = 1 - far;
           for (let k = 0; k < 3; k++) {
-            const t =
-              tex[i00 * 3 + k] * w00 + tex[i01 * 3 + k] * w01 + tex[i10 * 3 + k] * w10 + tex[i11 * 3 + k] * w11;
+            const t = tex[i00 * 3 + k] * w00 + tex[i01 * 3 + k] * w01 + tex[i10 * 3 + k] * w10 + tex[i11 * 3 + k] * w11;
             out[p + k] = (t * near + rowMean[row * 3 + k] * far) * fog + lit * LAMP[k];
           }
           out[p + 3] = 255;
@@ -673,7 +680,8 @@ function koi(): Reel {
       nx /= n;
       ny /= n;
       const s = i / SEG;
-      const width = (s < 0.25 ? Math.sqrt(s / 0.25) * 0.9 + 0.1 : 1 - Math.pow((s - 0.25) / 0.75, 1.3) * 0.85) * 8.5 * f.size;
+      const width =
+        (s < 0.25 ? Math.sqrt(s / 0.25) * 0.9 + 0.1 : 1 - Math.pow((s - 0.25) / 0.75, 1.3) * 0.85) * 8.5 * f.size;
       const w = wave(i);
       const cx = pts[i][0] + nx * w;
       const cy = pts[i][1] + ny * w;
@@ -715,7 +723,15 @@ function koi(): Reel {
       const [bx, by] = side > 0 ? left[3] : right[3];
       const [hx, hy] = mid[2];
       const a = Math.atan2(by - hy, bx - hx) + side * 0.9 + Math.sin(t * 0.3 + f.phase) * 0.2 * side;
-      fins.ellipse(bx + Math.cos(a) * 5 * f.size + off, by + Math.sin(a) * 5 * f.size + off, 7 * f.size, 3.2 * f.size, a, 0, TAU);
+      fins.ellipse(
+        bx + Math.cos(a) * 5 * f.size + off,
+        by + Math.sin(a) * 5 * f.size + off,
+        7 * f.size,
+        3.2 * f.size,
+        a,
+        0,
+        TAU,
+      );
     }
     if (shadow) {
       ctx.fillStyle = 'rgba(2,10,12,0.42)';
@@ -736,8 +752,13 @@ function koi(): Reel {
       const i1 = Math.min(SEG, Math.round((at + l * 0.5) * SEG));
       ctx.fillStyle = f.colours[1];
       ctx.beginPath();
-      for (let i = i0; i <= i1; i++) ctx.lineTo(left[i][0] * (1 - w) + mid[i][0] * w, left[i][1] * (1 - w) + mid[i][1] * w);
-      for (let i = i1; i >= i0; i--) ctx.lineTo(right[i][0] * (0.6 + w * 0.3) + mid[i][0] * (0.4 - w * 0.3), right[i][1] * (0.6 + w * 0.3) + mid[i][1] * (0.4 - w * 0.3));
+      for (let i = i0; i <= i1; i++)
+        ctx.lineTo(left[i][0] * (1 - w) + mid[i][0] * w, left[i][1] * (1 - w) + mid[i][1] * w);
+      for (let i = i1; i >= i0; i--)
+        ctx.lineTo(
+          right[i][0] * (0.6 + w * 0.3) + mid[i][0] * (0.4 - w * 0.3),
+          right[i][1] * (0.6 + w * 0.3) + mid[i][1] * (0.4 - w * 0.3),
+        );
       ctx.fill();
     }
     if (f.colours[2]) {

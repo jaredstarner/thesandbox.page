@@ -110,7 +110,13 @@ export function start(root: HTMLElement) {
     video = null;
   }
 
-  function cover(ctx: OffscreenCanvasRenderingContext2D, src: CanvasImageSource, sw: number, sh: number, flip: boolean) {
+  function cover(
+    ctx: OffscreenCanvasRenderingContext2D,
+    src: CanvasImageSource,
+    sw: number,
+    sh: number,
+    flip: boolean,
+  ) {
     const scale = Math.max(W / sw, H / sh);
     const dw = sw * scale;
     const dh = sh * scale;
