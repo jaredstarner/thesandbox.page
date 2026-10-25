@@ -68,7 +68,9 @@ const plates = [
       </svg>
 
       <div class="title-card">
-        <a class="home" href="/">thesandbox.page</a>
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
         <h1>Seeing things</h1>
         <p class="lede">
           Ten figures that fool the eye. Five ask you to set a line, a tabletop, a row of tiles, a circle, or a shade
@@ -80,16 +82,14 @@ const plates = [
 
     <nav class="rail" aria-label="Figures">
       <ol>
-        {
-          plates.map((p) => (
-            <li>
-              <a href={`#${p.id}`} data-rail={p.id}>
-                <span class="rail-num">{p.num}</span>
-                <span class="rail-name">{p.name}</span>
-              </a>
-            </li>
-          ))
-        }
+        {plates.map((p) => (
+          <li>
+            <a href={`#${p.id}`} data-rail={p.id}>
+              <span class="rail-num">{p.num}</span>
+              <span class="rail-name">{p.name}</span>
+            </a>
+          </li>
+        ))}
         <li>
           <a href="#readings" data-rail="readings">
             <span class="rail-num">&mdash;</span>
@@ -111,16 +111,30 @@ const plates = [
         />
       </figure>
       <div class="panel">
-        <p class="head"><span class="num">01</span><span class="name" id="fins-name">Fins</span><span class="kind">Measure</span></p>
+        <p class="head">
+          <span class="num">01</span>
+          <span class="name" id="fins-name">
+            Fins
+          </span>
+          <span class="kind">Measure</span>
+        </p>
         <p class="instr">Make the lower line as long as the upper one. Judge the lines, not the fins.</p>
         <label class="control">
-          <span>Length<em>or drag across the figure</em></span>
+          <span>
+            Length<em>or drag across the figure</em>
+          </span>
           <input type="range" min="220" max="500" step="1" value={start.fins} data-input />
         </label>
         <div class="actions">
-          <button class="btn primary" type="button" data-check>Check</button>
-          <button class="btn" type="button" data-context hidden aria-pressed="false">Hide the fins</button>
-          <button class="btn" type="button" data-again hidden>Again</button>
+          <button class="btn primary" type="button" data-check>
+            Check
+          </button>
+          <button class="btn" type="button" data-context hidden aria-pressed="false">
+            Hide the fins
+          </button>
+          <button class="btn" type="button" data-again hidden>
+            Again
+          </button>
         </div>
         <p class="result" data-result aria-live="polite"></p>
         <p class="note" data-note hidden>
@@ -142,10 +156,16 @@ const plates = [
         />
       </figure>
       <div class="panel">
-        <p class="head"><span class="num">02</span><span class="name" id="grid-name">Grid</span><span class="kind">Watch</span></p>
+        <p class="head">
+          <span class="num">02</span>
+          <span class="name" id="grid-name">
+            Grid
+          </span>
+          <span class="kind">Watch</span>
+        </p>
         <p class="instr">
-          Let your eyes wander over the grid. Dark dots flicker in the white discs you aren't looking at, and vanish from
-          any disc you look at straight on.
+          Let your eyes wander over the grid. Dark dots flicker in the white discs you aren't looking at, and vanish
+          from any disc you look at straight on.
         </p>
         <label class="control">
           <span>Bend the bars</span>
@@ -178,22 +198,34 @@ const plates = [
       </figure>
       <div class="panel">
         <p class="head">
-          <span class="num">03</span><span class="name" id="tables-name">Tables</span><span class="kind">Measure</span>
+          <span class="num">03</span>
+          <span class="name" id="tables-name">
+            Tables
+          </span>
+          <span class="kind">Measure</span>
         </p>
         <p class="instr">Stretch the right tabletop until it is the same shape as the left one.</p>
         <label class="control">
-          <span>Length<em>or drag across the figure</em></span>
+          <span>
+            Length<em>or drag across the figure</em>
+          </span>
           <input type="range" min="150" max="380" step="1" value={start.tables} data-input />
         </label>
         <div class="actions">
-          <button class="btn primary" type="button" data-check>Check</button>
-          <button class="btn" type="button" data-context hidden aria-pressed="false">Hide the legs</button>
-          <button class="btn" type="button" data-again hidden>Again</button>
+          <button class="btn primary" type="button" data-check>
+            Check
+          </button>
+          <button class="btn" type="button" data-context hidden aria-pressed="false">
+            Hide the legs
+          </button>
+          <button class="btn" type="button" data-again hidden>
+            Again
+          </button>
         </div>
         <p class="result" data-result aria-live="polite"></p>
         <p class="note" data-note hidden>
-          The two tops were the same shape, one turned a quarter turn. The legs make you see surfaces lying in depth, and
-          the eye lengthens the one that seems to point away from you. After Roger Shepard's tables.
+          The two tops were the same shape, one turned a quarter turn. The legs make you see surfaces lying in depth,
+          and the eye lengthens the one that seems to point away from you. After Roger Shepard's tables.
         </p>
       </div>
     </section>
@@ -211,7 +243,11 @@ const plates = [
       </figure>
       <div class="panel">
         <p class="head">
-          <span class="num">04</span><span class="name" id="chaser-name">Chaser</span><span class="kind">Watch</span>
+          <span class="num">04</span>
+          <span class="name" id="chaser-name">
+            Chaser
+          </span>
+          <span class="kind">Watch</span>
         </p>
         <p class="instr">
           Look at the cross and keep looking for half a minute. The gap becomes a disc of the opposite colour running
@@ -219,20 +255,32 @@ const plates = [
         </p>
         <fieldset class="swatches">
           <legend>Discs</legend>
-          <label><input type="radio" name="seeing-chase" value="#d98ad9" checked data-colour /><span style="--s:#d98ad9">Lilac</span></label>
-          <label><input type="radio" name="seeing-chase" value="#3bb7ad" data-colour /><span style="--s:#3bb7ad">Teal</span></label>
-          <label><input type="radio" name="seeing-chase" value="#e4be2d" data-colour /><span style="--s:#e4be2d">Gold</span></label>
+          <label>
+            <input type="radio" name="seeing-chase" value="#d98ad9" checked data-colour />
+            <span style="--s:#d98ad9">Lilac</span>
+          </label>
+          <label>
+            <input type="radio" name="seeing-chase" value="#3bb7ad" data-colour />
+            <span style="--s:#3bb7ad">Teal</span>
+          </label>
+          <label>
+            <input type="radio" name="seeing-chase" value="#e4be2d" data-colour />
+            <span style="--s:#e4be2d">Gold</span>
+          </label>
         </fieldset>
         <label class="control">
           <span>Blur</span>
           <input type="range" min="0" max="22" step="0.5" value="13" data-input />
         </label>
         <div class="actions">
-          <button class="btn" type="button" data-play aria-pressed="true">Pause</button>
+          <button class="btn" type="button" data-play aria-pressed="true">
+            Pause
+          </button>
         </div>
         <p class="note">
           Nothing on the screen is that colour. Each gap leaves an afterimage in the opposite colour, and blurred discs
-          you hold still in your gaze fade from view. Sharpen them and they stop fading. Jeremy Hinton made the first one.
+          you hold still in your gaze fade from view. Sharpen them and they stop fading. Jeremy Hinton made the first
+          one.
         </p>
       </div>
     </section>
@@ -257,17 +305,29 @@ const plates = [
       </figure>
       <div class="panel">
         <p class="head">
-          <span class="num">05</span><span class="name" id="mortar-name">Mortar</span><span class="kind">Measure</span>
+          <span class="num">05</span>
+          <span class="name" id="mortar-name">
+            Mortar
+          </span>
+          <span class="kind">Measure</span>
         </p>
         <p class="instr">The grey lines between the rows look tilted. Tilt them back until they all look level.</p>
         <label class="control">
-          <span>Tilt<em>or drag across the figure</em></span>
+          <span>
+            Tilt<em>or drag across the figure</em>
+          </span>
           <input type="range" min="-3.5" max="3.5" step="0.05" value={start.mortar} data-input />
         </label>
         <div class="actions">
-          <button class="btn primary" type="button" data-check>Check</button>
-          <button class="btn" type="button" data-context hidden aria-pressed="false">Hide the tiles</button>
-          <button class="btn" type="button" data-again hidden>Again</button>
+          <button class="btn primary" type="button" data-check>
+            Check
+          </button>
+          <button class="btn" type="button" data-context hidden aria-pressed="false">
+            Hide the tiles
+          </button>
+          <button class="btn" type="button" data-again hidden>
+            Again
+          </button>
         </div>
         <p class="result" data-result aria-live="polite"></p>
         <p class="note" data-note hidden>
@@ -289,14 +349,22 @@ const plates = [
         />
       </figure>
       <div class="panel">
-        <p class="head"><span class="num">06</span><span class="name" id="buses-name">Buses</span><span class="kind">Watch</span></p>
+        <p class="head">
+          <span class="num">06</span>
+          <span class="name" id="buses-name">
+            Buses
+          </span>
+          <span class="kind">Watch</span>
+        </p>
         <p class="instr">Watch the two bars cross the stripes. They seem to take turns stepping forward, like feet.</p>
         <label class="control">
           <span>Stripes</span>
           <input type="range" min="0" max="1" step="0.01" value="1" data-input />
         </label>
         <div class="actions">
-          <button class="btn" type="button" data-play aria-pressed="true">Pause</button>
+          <button class="btn" type="button" data-play aria-pressed="true">
+            Pause
+          </button>
         </div>
         <p class="note">
           They move together at one steady speed. A bar looks faster while its ends stand out against the stripes and
@@ -319,16 +387,30 @@ const plates = [
         />
       </figure>
       <div class="panel">
-        <p class="head"><span class="num">07</span><span class="name" id="halo-name">Halo</span><span class="kind">Measure</span></p>
+        <p class="head">
+          <span class="num">07</span>
+          <span class="name" id="halo-name">
+            Halo
+          </span>
+          <span class="kind">Measure</span>
+        </p>
         <p class="instr">Size the right centre disc until it matches the left one.</p>
         <label class="control">
-          <span>Size<em>or drag across the figure</em></span>
+          <span>
+            Size<em>or drag across the figure</em>
+          </span>
           <input type="range" min="20" max="56" step="0.25" value={start.halo} data-input />
         </label>
         <div class="actions">
-          <button class="btn primary" type="button" data-check>Check</button>
-          <button class="btn" type="button" data-context hidden aria-pressed="false">Hide the rings</button>
-          <button class="btn" type="button" data-again hidden>Again</button>
+          <button class="btn primary" type="button" data-check>
+            Check
+          </button>
+          <button class="btn" type="button" data-context hidden aria-pressed="false">
+            Hide the rings
+          </button>
+          <button class="btn" type="button" data-again hidden>
+            Again
+          </button>
         </div>
         <p class="result" data-result aria-live="polite"></p>
         <p class="note" data-note hidden>
@@ -351,18 +433,30 @@ const plates = [
       </figure>
       <div class="panel">
         <p class="head">
-          <span class="num">08</span><span class="name" id="spiral-name">Spiral</span><span class="kind">Watch</span>
+          <span class="num">08</span>
+          <span class="name" id="spiral-name">
+            Spiral
+          </span>
+          <span class="kind">Watch</span>
         </p>
         <p class="instr" data-spiral-say>
           Press start and keep your eyes on the red dot while the spiral turns. When it stops, keep looking.
         </p>
         <fieldset class="swatches toggles">
           <legend>Turning</legend>
-          <label><input type="radio" name="seeing-spin" value="out" checked data-dir /><span>Outward</span></label>
-          <label><input type="radio" name="seeing-spin" value="in" data-dir /><span>Inward</span></label>
+          <label>
+            <input type="radio" name="seeing-spin" value="out" checked data-dir />
+            <span>Outward</span>
+          </label>
+          <label>
+            <input type="radio" name="seeing-spin" value="in" data-dir />
+            <span>Inward</span>
+          </label>
         </fieldset>
         <div class="actions">
-          <button class="btn primary" type="button" data-start>Start · 20 s</button>
+          <button class="btn primary" type="button" data-start>
+            Start · 20 s
+          </button>
         </div>
         <p class="note">
           Once it stops, the still spiral seems to flow the other way, and so does whatever you look at next. Cells that
@@ -392,22 +486,34 @@ const plates = [
       </figure>
       <div class="panel">
         <p class="head">
-          <span class="num">09</span><span class="name" id="stripes-name">Stripes</span><span class="kind">Measure</span>
+          <span class="num">09</span>
+          <span class="name" id="stripes-name">
+            Stripes
+          </span>
+          <span class="kind">Measure</span>
         </p>
         <p class="instr">Set the grey of the right bars to match the left bars.</p>
         <label class="control">
-          <span>Grey<em>or drag across the figure</em></span>
+          <span>
+            Grey<em>or drag across the figure</em>
+          </span>
           <input type="range" min="70" max="190" step="1" value={start.stripes} data-input />
         </label>
         <div class="actions">
-          <button class="btn primary" type="button" data-check>Check</button>
-          <button class="btn" type="button" data-context hidden aria-pressed="false">Hide the stripes</button>
-          <button class="btn" type="button" data-again hidden>Again</button>
+          <button class="btn primary" type="button" data-check>
+            Check
+          </button>
+          <button class="btn" type="button" data-context hidden aria-pressed="false">
+            Hide the stripes
+          </button>
+          <button class="btn" type="button" data-again hidden>
+            Again
+          </button>
         </div>
         <p class="result" data-result aria-live="polite"></p>
         <p class="note" data-note hidden>
-          The two greys were the same. Which way the stripes push a bar depends on whether it lies in a black stripe or a
-          white one, and why is still argued over. Michael White described it in 1979.
+          The two greys were the same. Which way the stripes push a bar depends on whether it lies in a black stripe or
+          a white one, and why is still argued over. Michael White described it in 1979.
         </p>
       </div>
     </section>
@@ -424,20 +530,30 @@ const plates = [
         />
       </figure>
       <div class="panel">
-        <p class="head"><span class="num">10</span><span class="name" id="drift-name">Drift</span><span class="kind">Watch</span></p>
+        <p class="head">
+          <span class="num">10</span>
+          <span class="name" id="drift-name">
+            Drift
+          </span>
+          <span class="kind">Watch</span>
+        </p>
         <p class="instr">Let your eyes roam over the wheels. They seem to turn, though the picture is still.</p>
         <label class="control">
           <span>Contrast</span>
           <input type="range" min="0" max="1" step="0.01" value="1" data-input />
         </label>
         <div class="actions">
-          <button class="btn" type="button" data-grey aria-pressed="false">Grey</button>
-          <button class="btn" type="button" data-reverse aria-pressed="false">Reverse</button>
+          <button class="btn" type="button" data-grey aria-pressed="false">
+            Grey
+          </button>
+          <button class="btn" type="button" data-reverse aria-pressed="false">
+            Reverse
+          </button>
         </div>
         <p class="note">
-          Each ring repeats black, dark, white, light. Out of the corner of the eye the pattern seems to creep from black
-          toward dark and from white toward light, so reversing the order reverses the turn. Alan Fraser and Kimberley
-          Wilcox found the effect in 1979; Akiyoshi Kitaoka made it famous in colour.
+          Each ring repeats black, dark, white, light. Out of the corner of the eye the pattern seems to creep from
+          black toward dark and from white toward light, so reversing the order reverses the turn. Alan Fraser and
+          Kimberley Wilcox found the effect in 1979; Akiyoshi Kitaoka made it famous in colour.
         </p>
       </div>
     </section>
@@ -449,30 +565,34 @@ const plates = [
       </p>
       <table>
         <thead>
-          <tr><th scope="col">Figure</th><th scope="col">You</th><th scope="col" class="scale-head">Off by</th><th
-              scope="col">Last time</th></tr>
+          <tr>
+            <th scope="col">Figure</th>
+            <th scope="col">You</th>
+            <th scope="col" class="scale-head">
+              Off by
+            </th>
+            <th scope="col">Last time</th>
+          </tr>
         </thead>
         <tbody>
-          {
-            [
-              { id: 'fins', label: '01 Fins' },
-              { id: 'tables', label: '03 Tables' },
-              { id: 'mortar', label: '05 Mortar' },
-              { id: 'halo', label: '07 Halo' },
-              { id: 'stripes', label: '09 Stripes' },
-            ].map((r) => (
-              <tr data-reading={r.id}>
-                <th scope="row">
-                  <a href={`#${r.id}`}>{r.label}</a>
-                </th>
-                <td data-now>Not set</td>
-                <td class="scale">
-                  <span class="bar" data-bar />
-                </td>
-                <td data-last>&mdash;</td>
-              </tr>
-            ))
-          }
+          {[
+            { id: 'fins', label: '01 Fins' },
+            { id: 'tables', label: '03 Tables' },
+            { id: 'mortar', label: '05 Mortar' },
+            { id: 'halo', label: '07 Halo' },
+            { id: 'stripes', label: '09 Stripes' },
+          ].map((r) => (
+            <tr data-reading={r.id}>
+              <th scope="row">
+                <a href={`#${r.id}`}>{r.label}</a>
+              </th>
+              <td data-now>Not set</td>
+              <td class="scale">
+                <span class="bar" data-bar />
+              </td>
+              <td data-last>&mdash;</td>
+            </tr>
+          ))}
         </tbody>
       </table>
       <footer class="colophon">
@@ -481,7 +601,9 @@ const plates = [
           Gregory and Priscilla Heard, Stuart Anstis, Hermann Ebbinghaus, Robert Addams, Michael White, Alan Fraser and
           Kimberley Wilcox, Akiyoshi Kitaoka, and Hajime Ouchi.
         </p>
-        <p><a href="/">thesandbox.page</a></p>
+        <p>
+          <a href="/">thesandbox.page</a>
+        </p>
       </footer>
     </section>
   </main>

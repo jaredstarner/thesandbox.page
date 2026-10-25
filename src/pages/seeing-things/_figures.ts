@@ -87,7 +87,8 @@ export function gridBars(amp: number): string {
   }
   let discs = '';
   for (let j = 0; j <= 8; j++) {
-    for (let i = 0; i <= 11; i++) discs += `M${pt(ox + i * step - GRID.disc, oy + j * step)}a${n(GRID.disc)} ${n(GRID.disc)} 0 1 0 ${n(GRID.disc * 2)} 0a${n(GRID.disc)} ${n(GRID.disc)} 0 1 0 ${n(-GRID.disc * 2)} 0`;
+    for (let i = 0; i <= 11; i++)
+      discs += `M${pt(ox + i * step - GRID.disc, oy + j * step)}a${n(GRID.disc)} ${n(GRID.disc)} 0 1 0 ${n(GRID.disc * 2)} 0a${n(GRID.disc)} ${n(GRID.disc)} 0 1 0 ${n(-GRID.disc * 2)} 0`;
   }
   return `<path class="grid-bars" d="${lines.join('')}"/><path class="grid-discs" d="${discs}"/>`;
 }
@@ -179,7 +180,13 @@ function table(t: Top, cls: string): string {
     const nx = by - ay;
     const ny = -(bx - ax);
     const outward = nx * mx + ny * my > 0 ? ny : -ny;
-    if (outward > 0) sides += poly([[ax, ay], [bx, by], [bx, by + edge], [ax, ay + edge]]);
+    if (outward > 0)
+      sides += poly([
+        [ax, ay],
+        [bx, by],
+        [bx, by + edge],
+        [ax, ay + edge],
+      ]);
   }
   return (
     `<g class="${cls}"><path class="legs ctx" d="${legs}"/><path class="edges ctx" d="${sides}"/>` +
@@ -297,7 +304,8 @@ export const BUSES = { stripe: 16, len: 96, top: 196, bottom: 360, h: 44, y0: 0,
 
 export function busesFigure(): string {
   let stripes = '';
-  for (let x = 0; x < 800; x += BUSES.stripe * 2) stripes += `M${n(x)} ${BUSES.y0}h${BUSES.stripe}V${BUSES.y1}h${-BUSES.stripe}Z`;
+  for (let x = 0; x < 800; x += BUSES.stripe * 2)
+    stripes += `M${n(x)} ${BUSES.y0}h${BUSES.stripe}V${BUSES.y1}h${-BUSES.stripe}Z`;
   return (
     `<rect class="card" width="800" height="600"/>` +
     `<rect class="bus-light" y="${BUSES.y0}" width="800" height="${BUSES.y1 - BUSES.y0}"/>` +
