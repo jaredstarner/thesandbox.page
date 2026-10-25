@@ -1,6 +1,15 @@
 ---
 import { Font } from 'astro:assets';
 import Bare from '../../layouts/Bare.astro';
+
+const reels = [
+  { id: 'bars', name: 'Bars' },
+  { id: 'spin', name: 'Spin' },
+  { id: 'tunnel', name: 'Tunnel' },
+  { id: 'window', name: 'Window' },
+  { id: 'koi', name: 'Koi' },
+  { id: 'balloons', name: 'Balloons' },
+];
 ---
 
 <Bare
@@ -11,29 +20,707 @@ import Bare from '../../layouts/Bare.astro';
   <Font cssVariable="--font-datamosh-text" slot="head" />
 
   <main class="datamosh" data-datamosh>
-    <h1>Datamosh</h1>
-    <canvas class="monitor" data-monitor width="512" height="288"></canvas>
+    <header class="top">
+      <h1 class="mark">Datamosh</h1>
+      <p class="sub">A vision mixer that leaves out the keyframes</p>
+      <a class="home" href="/">thesandbox.page</a>
+    </header>
+
+    <section class="stage" aria-label="Program">
+      <div class="screen" data-screen>
+        <canvas class="picture" data-picture width="512" height="288" role="img" aria-label="The program output"
+        ></canvas>
+        <canvas class="overlay" data-overlay aria-hidden="true"></canvas>
+        <p class="tally" data-tally><b>PGM</b> <span data-tally-name>Bars</span></p>
+        <p class="rec-lamp" data-rec-lamp hidden><b></b> <span data-rec-time>0:00</span></p>
+        <p class="hint" data-hint>Press and hold the picture to make it flow</p>
+        <noscript><p class="unsupported">The codec runs in JavaScript, which is off.</p></noscript>
+        <p class="unsupported" data-unsupported hidden>
+          This browser can't run the codec: it needs web workers and OffscreenCanvas.
+        </p>
+      </div>
+
+      <div class="meter">
+        <p class="readout" data-readout>
+          <span data-r-frame>Frame 000000</span>
+          <span data-r-kind>&nbsp;</span>
+          <span data-r-bits>&nbsp;</span>
+          <span data-r-modes>&nbsp;</span>
+        </p>
+        <canvas class="strip" data-strip aria-hidden="true"></canvas>
+        <ul class="legend">
+          <li><i class="k"></i>Keyframe</li>
+          <li><i class="x"></i>Keyframe left out</li>
+          <li><i class="d"></i>Delta frame</li>
+          <li><i class="h"></i>Held delta</li>
+          <li class="scale">Bar height: frame size, log scale</li>
+        </ul>
+      </div>
+    </section>
+
+    <aside class="desk" aria-label="Mixer">
+      <section class="bus">
+        <h2>
+          Sources
+          <button type="button" class="auto" data-auto aria-pressed="true" title="Let the mixer cut on its own">
+            Auto
+          </button>
+        </h2>
+        <div class="sources" data-sources>
+          {
+            reels.map((reel, i) => (
+              <button type="button" class="source" data-source={reel.id} aria-pressed="false">
+                <canvas width="192" height="108" data-poster={reel.id} aria-hidden="true" />
+                <span>
+                  <kbd>{i + 1}</kbd> {reel.name}
+                </span>
+              </button>
+            ))
+          }
+          <button type="button" class="source live" data-source="camera" aria-pressed="false">
+            <span class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 24 24"
+                ><rect x="3" y="7" width="13" height="10" rx="1.5"></rect><path d="M16 11l5-3v8l-5-3z"></path></svg
+              >
+            </span>
+            <span><kbd>7</kbd> Camera</span>
+          </button>
+          <button type="button" class="source live" data-source="screen" aria-pressed="false">
+            <span class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 24 24"
+                ><rect x="3" y="5" width="18" height="12" rx="1.5"></rect><path d="M9 20h6M12 17v3"></path></svg
+              >
+            </span>
+            <span><kbd>8</kbd> Screen</span>
+          </button>
+          <button type="button" class="source live" data-source="file" aria-pressed="false">
+            <span class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg>
+            </span>
+            <span><kbd>9</kbd> <span data-file-name>A file</span></span>
+          </button>
+          <input type="file" accept="video/*,image/*" data-file hidden />
+        </div>
+      </section>
+
+      <section class="switches">
+        <div class="switch" role="group" aria-labelledby="sw-key">
+          <span id="sw-key">Keyframes</span>
+          <button type="button" data-set="keyframes" data-value="drop" aria-pressed="true">Drop</button>
+          <button type="button" data-set="keyframes" data-value="keep" aria-pressed="false">Keep</button>
+        </div>
+        <div class="switch" role="group" aria-labelledby="sw-intra">
+          <span id="sw-intra">Intra blocks</span>
+          <button type="button" data-set="intra" data-value="heal" aria-pressed="true">Heal</button>
+          <button type="button" data-set="intra" data-value="smear" aria-pressed="false">Smear</button>
+        </div>
+        <div class="switch" role="group" aria-labelledby="sw-res">
+          <span id="sw-res">Residual</span>
+          <button type="button" data-set="residual" data-value="on" aria-pressed="true">On</button>
+          <button type="button" data-set="residual" data-value="off" aria-pressed="false">Off</button>
+        </div>
+        <div class="switch" role="group" aria-labelledby="sw-show">
+          <span id="sw-show">Show</span>
+          <button type="button" data-toggle="vectors" aria-pressed="false">Vectors</button>
+          <button type="button" data-toggle="blocks" aria-pressed="false">Blocks</button>
+        </div>
+      </section>
+
+      <section class="actions">
+        <button type="button" class="hold" data-hold aria-pressed="false"><kbd>Space</kbd> Hold</button>
+        <button type="button" data-key><kbd>K</kbd> Key</button>
+        <button type="button" class="record" data-record aria-pressed="false"><kbd>R</kbd> Rec</button>
+        <a class="save" data-save hidden>Save</a>
+      </section>
+      <p class="status" data-status role="status"></p>
+    </aside>
+
+    <section class="notes">
+      <h2>How the picture breaks</h2>
+      <div class="cols">
+        <p>
+          Compressed video keeps only a few whole pictures, the keyframes. Every frame in between cuts the picture into
+          16-pixel blocks and says where each block moved from, plus a small correction. The bar chart under the picture
+          shows the difference: a keyframe is a tall bar, the frames after it are small ones.
+        </p>
+        <p>
+          At a cut, the new shot starts with a keyframe. Leave it out and the decoder carries on with the picture it
+          already has, so the new shot's movement is applied to the old shot. Turn on Vectors to see the blocks being
+          pushed.
+        </p>
+        <p>
+          Hold repeats one frame's movement until you let go, so the picture keeps flowing the same way. Blocks the
+          encoder couldn't predict are sent whole: Heal lets them through, so the new shot fills in bit by bit, and Smear
+          moves them along with their neighbours instead. Key puts a clean picture back.
+        </p>
+        <p>
+          The codec is this page's own, in the style of MPEG: 16x16 macroblocks, colour at half resolution, and an 8x8
+          cosine transform for the corrections, so it behaves the same in every browser. The camera, screen, and files
+          you show it stay on your device. Rec saves what's on the program monitor as a video.
+        </p>
+      </div>
+    </section>
   </main>
 </Bare>
 
 <style>
   :global(body:has(.datamosh)) {
     margin: 0;
-    background: #0b0b0c;
+    background: #0d0c0b;
   }
 
   .datamosh {
-    color: #e9e6df;
+    --bg: #0d0c0b;
+    --panel: #151412;
+    --line: #2b2925;
+    --ink: #ebe6dc;
+    --dim: #8c867b;
+    --tally: #ff3b2f;
+    --key: #ff5b3a;
+    --delta: #4f8dff;
+    --held: #a9c6ff;
+
+    box-sizing: border-box;
+    min-height: 100vh;
+    padding: 0 28px 48px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-areas:
+      'top top'
+      'stage desk'
+      'notes notes';
+    column-gap: 28px;
+    color: var(--ink);
     font-family: var(--font-datamosh-text);
+    -webkit-font-smoothing: antialiased;
   }
 
-  h1 {
+  .datamosh :global(*),
+  .datamosh :global(*::before),
+  .datamosh :global(*::after) {
+    box-sizing: border-box;
+  }
+
+  .datamosh [hidden] {
+    display: none !important;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  kbd {
     font-family: var(--font-datamosh);
+    font-size: 0.72em;
+    color: var(--dim);
   }
 
-  .monitor {
+  .top {
+    grid-area: top;
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    padding: 18px 0 16px;
+  }
+
+  .mark {
+    margin: 0;
+    font-family: var(--font-datamosh);
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .sub {
+    margin: 0;
+    color: var(--dim);
+    font-size: 15px;
+  }
+
+  .home {
+    margin-left: auto;
+    color: var(--dim);
+    font-family: var(--font-datamosh);
+    font-size: 12px;
+    text-decoration: none;
+  }
+
+  .home:hover,
+  .home:focus-visible {
+    color: var(--ink);
+  }
+
+  /* ------------------------------------------------ program */
+
+  .stage {
+    grid-area: stage;
+    min-width: 0;
+  }
+
+  .screen {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    max-height: calc(100vh - 230px);
+    min-height: 200px;
+    margin: 0 auto;
+    background: #000;
+    outline: 1px solid var(--line);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+  }
+
+  .screen.held {
+    cursor: grabbing;
+  }
+
+  .picture,
+  .overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .overlay {
+    pointer-events: none;
+  }
+
+  .tally,
+  .rec-lamp {
+    position: absolute;
+    top: 12px;
+    margin: 0;
+    padding: 4px 8px 3px;
+    font-family: var(--font-datamosh);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: rgb(0 0 0 / 0.55);
+    pointer-events: none;
+  }
+
+  .tally {
+    left: 12px;
+  }
+
+  .tally b {
+    color: var(--tally);
+    font-weight: 700;
+  }
+
+  .rec-lamp {
+    right: 12px;
+  }
+
+  .rec-lamp b {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 4px;
+    border-radius: 50%;
+    background: var(--tally);
+    vertical-align: 1px;
+  }
+
+  .hint {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    margin: 0;
+    padding: 6px 12px;
+    transform: translateX(-50%);
+    font-size: 14px;
+    white-space: nowrap;
+    background: rgb(0 0 0 / 0.6);
+    pointer-events: none;
+    transition: opacity 0.8s;
+  }
+
+  .hint.gone {
+    opacity: 0;
+  }
+
+  .unsupported {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    text-align: center;
+    background: #000;
+  }
+
+  .meter {
+    margin-top: 14px;
+  }
+
+  .readout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 22px;
+    margin: 0 0 8px;
+    font-family: var(--font-datamosh);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--dim);
+  }
+
+  .readout [data-r-kind] {
+    min-width: 13ch;
+    color: var(--ink);
+  }
+
+  .strip {
+    display: block;
+    width: 100%;
+    height: 56px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    color: var(--dim);
+  }
+
+  .legend i {
+    display: inline-block;
+    width: 8px;
+    height: 12px;
+    margin-right: 6px;
+    vertical-align: -1px;
+  }
+
+  .legend .k {
+    background: var(--key);
+  }
+
+  .legend .x {
+    background: repeating-linear-gradient(to bottom, var(--key) 0 2px, transparent 2px 4px);
+  }
+
+  .legend .d {
+    background: var(--delta);
+  }
+
+  .legend .h {
+    background: var(--held);
+  }
+
+  .legend .scale {
+    margin-left: auto;
+  }
+
+  /* ------------------------------------------------ mixer */
+
+  .desk {
+    grid-area: desk;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .desk h2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 10px;
+    font-family: var(--font-datamosh);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .auto {
+    padding: 2px 8px;
+    font-family: var(--font-datamosh);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dim);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+
+  .auto[aria-pressed='true'] {
+    color: #0d0c0b;
+    background: #e6c34a;
+    border-color: #e6c34a;
+  }
+
+  .sources {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .source {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 0 6px;
+    text-align: left;
+    background: none;
+    border: 0;
+    font-size: 13px;
+  }
+
+  .source canvas,
+  .source .glyph {
     display: block;
     width: 100%;
     aspect-ratio: 16 / 9;
+    background: var(--panel);
+    outline: 1px solid var(--line);
+    outline-offset: 0;
+  }
+
+  .source .glyph {
+    display: grid;
+    place-items: center;
+  }
+
+  .source svg {
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: var(--dim);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .source:hover canvas,
+  .source:hover .glyph,
+  .source:focus-visible canvas,
+  .source:focus-visible .glyph {
+    outline-color: var(--dim);
+  }
+
+  .source:focus-visible {
+    outline: none;
+  }
+
+  .source[aria-pressed='true'] canvas,
+  .source[aria-pressed='true'] .glyph {
+    outline: 3px solid var(--tally);
+    outline-offset: -1px;
+  }
+
+  .source[aria-pressed='true'] svg {
+    stroke: var(--ink);
+  }
+
+  .source > span:last-child {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .switches {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .switch {
+    display: grid;
+    grid-template-columns: 104px 1fr 1fr;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .switch > span {
+    font-family: var(--font-datamosh);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .switch button,
+  .actions button,
+  .save {
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+  }
+
+  .switch button[aria-pressed='true'] {
+    color: #0d0c0b;
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 6px;
+  }
+
+  .actions button {
+    min-height: 54px;
+  }
+
+  .actions kbd {
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .hold[aria-pressed='true'] {
+    color: #0d0c0b;
+    background: var(--held);
+    border-color: var(--held);
+  }
+
+  .hold[aria-pressed='true'] kbd,
+  .record[aria-pressed='true'] kbd {
+    color: inherit;
+  }
+
+  .record[aria-pressed='true'] {
+    color: #fff;
+    background: var(--tally);
+    border-color: var(--tally);
+  }
+
+  .save {
+    grid-column: 1 / -1;
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .status {
+    min-height: 1.4em;
+    margin: -8px 0 0;
+    font-size: 13px;
+    color: var(--dim);
+  }
+
+  /* ------------------------------------------------ notes */
+
+  .notes {
+    grid-area: notes;
+    margin-top: 48px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+  }
+
+  .notes h2 {
+    margin: 0 0 16px;
+    font-family: var(--font-datamosh);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 28px;
+  }
+
+  .cols p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #c9c3b7;
+  }
+
+  @media (max-width: 1100px) {
+    .cols {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 860px) {
+    .datamosh {
+      padding: 0 16px 40px;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'top'
+        'stage'
+        'desk'
+        'notes';
+    }
+
+    .top {
+      flex-wrap: wrap;
+      gap: 2px 14px;
+      padding: 14px 0 12px;
+    }
+
+    .sub {
+      order: 3;
+      flex-basis: 100%;
+      font-size: 14px;
+    }
+
+    .screen {
+      max-height: none;
+      min-height: 0;
+      margin: 0 -16px;
+      outline: 0;
+    }
+
+    .hint {
+      font-size: 12px;
+      bottom: 10px;
+    }
+
+    .tally,
+    .rec-lamp {
+      top: 8px;
+    }
+
+    .tally {
+      left: 8px;
+    }
+
+    .rec-lamp {
+      right: 8px;
+    }
+
+    .desk {
+      margin-top: 22px;
+    }
+
+    .legend .scale {
+      margin-left: 0;
+    }
+
+    .cols {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+    }
   }
 </style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-datamosh]');
+  if (root) start(root);
+</script>
