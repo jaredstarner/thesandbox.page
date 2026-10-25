@@ -63,10 +63,11 @@ export const GRID = { step: 64, bar: 9, disc: 7.6 };
 /** Bars on a dark ground with a white disc at every crossing; amp bends the bars into waves that still meet at the discs. */
 export function gridBars(amp: number): string {
   const { step } = GRID;
-  const ox = 400 - step * 6;
-  const oy = 300 - step * 4.5;
+  // Eleven by eight cells, so every disc sits whole inside the card and the bars run off its edges.
+  const ox = 400 - step * 5.5;
+  const oy = 300 - step * 4;
   const lines: string[] = [];
-  for (let j = 0; j <= 9; j++) {
+  for (let j = 0; j <= 8; j++) {
     const y0 = oy + j * step;
     let d = '';
     for (let x = -24; x <= 824; x += 4) {
@@ -75,7 +76,7 @@ export function gridBars(amp: number): string {
     }
     lines.push(d);
   }
-  for (let i = 0; i <= 12; i++) {
+  for (let i = 0; i <= 11; i++) {
     const x0 = ox + i * step;
     let d = '';
     for (let y = -24; y <= 624; y += 4) {
@@ -85,8 +86,8 @@ export function gridBars(amp: number): string {
     lines.push(d);
   }
   let discs = '';
-  for (let j = 0; j <= 9; j++) {
-    for (let i = 0; i <= 12; i++) discs += `M${pt(ox + i * step - GRID.disc, oy + j * step)}a${n(GRID.disc)} ${n(GRID.disc)} 0 1 0 ${n(GRID.disc * 2)} 0a${n(GRID.disc)} ${n(GRID.disc)} 0 1 0 ${n(-GRID.disc * 2)} 0`;
+  for (let j = 0; j <= 8; j++) {
+    for (let i = 0; i <= 11; i++) discs += `M${pt(ox + i * step - GRID.disc, oy + j * step)}a${n(GRID.disc)} ${n(GRID.disc)} 0 1 0 ${n(GRID.disc * 2)} 0a${n(GRID.disc)} ${n(GRID.disc)} 0 1 0 ${n(-GRID.disc * 2)} 0`;
   }
   return `<path class="grid-bars" d="${lines.join('')}"/><path class="grid-discs" d="${discs}"/>`;
 }
@@ -156,8 +157,18 @@ function table(t: Top, cls: string): string {
   const c = corners(t);
   const [cx, cy] = centroid(t);
   const { leg, edge } = TABLES;
+  // Each leg is set in from its corner and starts under the top, so none pokes out past an edge;
+  // a leg under the far corners is hidden by the top it holds up.
   let legs = '';
-  for (const [x, y] of c) legs += poly([[x - 6, y], [x + 6, y], [x + 6, y + leg], [x - 6, y + leg]]);
+  for (const [x, y] of c) {
+    const lx = x + Math.sign(cx - x) * 8;
+    legs += poly([
+      [lx - 6.5, y + 6],
+      [lx + 6.5, y + 6],
+      [lx + 6.5, y + leg],
+      [lx - 6.5, y + leg],
+    ]);
+  }
   let sides = '';
   for (let i = 0; i < 4; i++) {
     const [ax, ay] = c[i];
@@ -281,7 +292,8 @@ export function mortarTruth(): string {
 
 /* ---------------------------------------------------------------- Buses */
 
-export const BUSES = { stripe: 18, len: 72, top: 214, bottom: 346, h: 40, y0: 104, y1: 496 };
+/** The bars are a whole number of stripe pairs long, so both ends of a bar cross the same shade at once. */
+export const BUSES = { stripe: 16, len: 96, top: 196, bottom: 360, h: 44, y0: 0, y1: 600 };
 
 export function busesFigure(): string {
   let stripes = '';
@@ -420,7 +432,7 @@ export function driftFigure(): string {
   const paths = ['', '', '', ''];
   const widths = [0.14, 0.36, 0.14, 0.36];
   WHEELS.forEach(([cx, cy], w) => {
-    const radii = [22, 44, 66, 88, 110, 132];
+    const radii = [20, 40, 60, 80, 100, 120];
     for (let k = 0; k + 1 < radii.length; k++) {
       const r0 = radii[k] + 1.5;
       const r1 = radii[k + 1] - 1.5;
