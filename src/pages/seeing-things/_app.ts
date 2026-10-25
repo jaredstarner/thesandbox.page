@@ -38,6 +38,8 @@ interface Measure {
   fresh: () => number;
   /** Labels for the context button while the context is hidden and shown. */
   context: [string, string];
+  /** How far the value moves for a drag of one figure unit to the right. */
+  drag: number;
 }
 
 const pct = (e: number) => `${(Math.abs(e) * 100).toFixed(Math.abs(e) < 0.1 ? 1 : 0)}%`;
@@ -60,6 +62,8 @@ const MEASURES: Record<MeasureId, Measure> = {
     },
     fresh: () => Math.round(clamp(FINS.len * (1 + away(0.1, 0.24)), 220, 500)),
     context: ['Show the fins', 'Hide the fins'],
+    // Both ends move, so the line grows twice as fast as the pointer.
+    drag: 2,
   },
   tables: {
     adjust: tablesAdjustable,
@@ -76,6 +80,7 @@ const MEASURES: Record<MeasureId, Measure> = {
     },
     fresh: () => Math.round(clamp(TABLES.long * (1 + away(0.12, 0.3)), 150, 380)),
     context: ['Show the legs', 'Hide the legs'],
+    drag: 1,
   },
   mortar: {
     adjust: mortarRows,
@@ -91,6 +96,7 @@ const MEASURES: Record<MeasureId, Measure> = {
     },
     fresh: () => Math.round(away(1, 2.6) * 20) / 20,
     context: ['Show the tiles', 'Hide the tiles'],
+    drag: 0.01,
   },
   halo: {
     adjust: haloAdjustable,
@@ -107,6 +113,7 @@ const MEASURES: Record<MeasureId, Measure> = {
     },
     fresh: () => Math.round(clamp(HALO.r * (1 + away(0.15, 0.35)), 20, 56) * 4) / 4,
     context: ['Show the rings', 'Hide the rings'],
+    drag: 0.12,
   },
   stripes: {
     adjust: stripesAdjustable,
@@ -123,11 +130,9 @@ const MEASURES: Record<MeasureId, Measure> = {
     },
     fresh: () => Math.round(clamp(STRIPES.grey + away(16, 44), 70, 190)),
     context: ['Show the stripes', 'Hide the stripes'],
+    drag: 0.3,
   },
 };
-
-const root = document.querySelector<HTMLElement>('[data-seeing]');
-if (root) start(root);
 
 function start(root: HTMLElement) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -158,6 +163,29 @@ function start(root: HTMLElement) {
       adj.innerHTML = m.adjust(Number(input.value));
     };
     input.addEventListener('input', draw);
+
+    // Dragging sideways across the figure moves the value too; vertical drags still scroll on touch.
+    let grab: { x: number; v: number } | null = null;
+    svg.addEventListener('pointerdown', (e) => {
+      if (input.disabled || e.button !== 0) return;
+      grab = { x: e.clientX, v: Number(input.value) };
+      try {
+        svg.setPointerCapture(e.pointerId);
+      } catch {
+        // A synthetic pointer can't be captured; the drag still works while over the figure.
+      }
+    });
+    svg.addEventListener('pointermove', (e) => {
+      if (!grab) return;
+      const units = (e.clientX - grab.x) * (800 / svg.getBoundingClientRect().width);
+      input.value = String(clamp(grab.v + units * m.drag, Number(input.min), Number(input.max)));
+      draw();
+    });
+    const drop = () => {
+      grab = null;
+    };
+    svg.addEventListener('pointerup', drop);
+    svg.addEventListener('pointercancel', drop);
 
     check.addEventListener('click', () => {
       const v = Number(input.value);
@@ -230,7 +258,7 @@ function start(root: HTMLElement) {
     }
     lede.textContent =
       count === 5
-        ? 'All five set. The bar runs from the truth at the red line to where you put it, out to the edge of the scale.'
+        ? 'All five set. Each bar runs from the truth, at the red line, to where you put it.'
         : count
           ? `${count} of 5 set. Zero is the truth; the bar shows which way you went.`
           : 'Set the five measured figures and your readings collect here. Zero is the truth.';
@@ -465,3 +493,7 @@ function writeStore(v: Partial<Record<MeasureId, number>>) {
     // Private windows can refuse storage; the readings still show for this visit.
   }
 }
+
+// Last, once everything above is defined.
+const root = document.querySelector<HTMLElement>('[data-seeing]');
+if (root) start(root);
