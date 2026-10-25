@@ -167,7 +167,7 @@ export function quality(scale: number): Quality {
   return {
     intraLuma: make(LUMA_TABLE),
     intraChroma: make(CHROMA_TABLE),
-    inter: Math.max(2, 14 * scale),
+    inter: Math.max(2, 28 * scale),
     lambda: 3 + 3 * scale,
   };
 }
@@ -487,7 +487,7 @@ export class Encoder {
       const q = table ? table[k] : step;
       const c = block[k] / q;
       // Inter residuals use a dead zone, as encoders do, so noise rounds to nothing.
-      const level = intra ? Math.round(c) : Math.trunc(c + (c < 0 ? -1 / 3 : 1 / 3));
+      const level = intra ? Math.round(c) : Math.trunc(c + (c < 0 ? -0.25 : 0.25));
       levels[k] = level;
       block[k] = level * q;
       if (level) count++;
