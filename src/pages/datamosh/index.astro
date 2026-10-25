@@ -1,0 +1,39 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Datamosh"
+  description="A video codec written to be broken: cut between reels without a keyframe and one picture is dragged along by the next one's motion."
+>
+  <Font cssVariable="--font-datamosh" slot="head" />
+  <Font cssVariable="--font-datamosh-text" slot="head" />
+
+  <main class="datamosh" data-datamosh>
+    <h1>Datamosh</h1>
+    <canvas class="monitor" data-monitor width="512" height="288"></canvas>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.datamosh)) {
+    margin: 0;
+    background: #0b0b0c;
+  }
+
+  .datamosh {
+    color: #e9e6df;
+    font-family: var(--font-datamosh-text);
+  }
+
+  h1 {
+    font-family: var(--font-datamosh);
+  }
+
+  .monitor {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+  }
+</style>

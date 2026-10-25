@@ -1,0 +1,17 @@
+{
+  "title": "Datamosh",
+  "summary": "A video codec written for this page so it can be broken: cut between reels without a keyframe and one picture is dragged along by the next one's motion, hold a frame to make it flow, or turn on your camera and smear the picture with your own movement.",
+  "date": "2026-10-25",
+  "tags": [
+    "canvas",
+    "web-workers",
+    "offscreen-canvas",
+    "camera",
+    "screen-capture",
+    "media-recorder",
+    "motion-compensation",
+    "dct"
+  ],
+  "requires": ["canvas", "web-workers", "offscreen-canvas"],
+  "plot": 23
+}
