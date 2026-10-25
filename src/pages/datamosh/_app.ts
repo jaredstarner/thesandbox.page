@@ -22,21 +22,28 @@ interface Bar {
   cut: string | null;
 }
 
-// The autopilot's running order, in seconds of program time.
+// The autopilot's running order, in seconds of program time: mostly a clean
+// shot, then a cut without its keyframe, so each mosh starts from a picture
+// you've just seen.
 const SCRIPT: { at: number; cut?: string; hold?: number; key?: boolean }[] = [
   { at: 2.2, cut: 'spin' },
+  { at: 4.6, key: true },
   { at: 5.6, cut: 'tunnel' },
   { at: 7.4, hold: 1.4 },
-  { at: 10.2, cut: 'window' },
-  { at: 14.4, cut: 'koi' },
-  { at: 16.2, hold: 1.1 },
+  { at: 9.6, key: true },
+  { at: 10.4, cut: 'window' },
+  { at: 13.0, key: true },
+  { at: 14.0, cut: 'koi' },
+  { at: 16.0, hold: 1.1 },
+  { at: 17.6, key: true },
   { at: 18.6, cut: 'balloons' },
+  { at: 21.6, key: true },
   { at: 22.4, cut: 'spin' },
-  { at: 24.6, key: true },
-  { at: 26.2, cut: 'tunnel' },
-  { at: 29.4, cut: 'bars' },
+  { at: 24.6, cut: 'tunnel' },
+  { at: 26.0, hold: 1.2 },
+  { at: 28.6, cut: 'bars' },
 ];
-const SCRIPT_LENGTH = 31.6;
+const SCRIPT_LENGTH = 30.6;
 
 export function start(root: HTMLElement) {
   const $ = <T extends Element>(sel: string) => root.querySelector<T>(sel)!;
@@ -291,6 +298,13 @@ export function start(root: HTMLElement) {
 
   for (const b of root.querySelectorAll<HTMLButtonElement>('[data-source]')) {
     b.addEventListener('click', () => choose(b.dataset.source!));
+  }
+  // Phones and some browsers have no screen capture; leave the button out rather than fail.
+  if (typeof navigator.mediaDevices?.getDisplayMedia !== 'function') {
+    $<HTMLElement>('[data-source="screen"]').hidden = true;
+  }
+  if (typeof navigator.mediaDevices?.getUserMedia !== 'function') {
+    $<HTMLElement>('[data-source="camera"]').hidden = true;
   }
 
   function stopAuto() {

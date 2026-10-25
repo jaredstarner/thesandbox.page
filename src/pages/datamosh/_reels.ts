@@ -310,6 +310,7 @@ function tunnel(): Reel {
     }
   }
   const K = 26000;
+  const LAMP = [255, 226, 170];
   const speed = T / length;
   const twist = T / length;
   return {
@@ -330,17 +331,30 @@ function tunnel(): Reel {
           const depth = K / rr;
           const u = ((((Math.atan2(dy, dx) / TAU) * T * 2 + shiftU) % T) + T) % T;
           const v = (depth + shiftV) % T;
+          // Bilinear, so the wall slides smoothly instead of stepping a texel at a time.
           const row = v | 0;
-          const i = row * T + (u | 0);
+          const colA = u | 0;
+          const fy = v - row;
+          const fx = u - colA;
+          const i00 = row * T + colA;
+          const i01 = row * T + ((colA + 1) % T);
+          const i10 = ((row + 1) % T) * T + colA;
+          const i11 = ((row + 1) % T) * T + ((colA + 1) % T);
+          const w00 = (1 - fx) * (1 - fy);
+          const w01 = fx * (1 - fy);
+          const w10 = (1 - fx) * fy;
+          const w11 = fx * fy;
           const p = (y * W + x) * 4;
           // Light falls off with depth; the lamps carry further.
           const fog = Math.exp(-depth / 520);
-          const lit = glow[i] * Math.exp(-depth / 1400);
+          const lit = (glow[i00] * w00 + glow[i01] * w01 + glow[i10] * w10 + glow[i11] * w11) * Math.exp(-depth / 1400);
           const far = Math.min(1, Math.max(0, (depth - 240) / 520));
           const near = 1 - far;
-          out[p] = (tex[i * 3] * near + rowMean[row * 3] * far) * fog + lit * 255;
-          out[p + 1] = (tex[i * 3 + 1] * near + rowMean[row * 3 + 1] * far) * fog + lit * 226;
-          out[p + 2] = (tex[i * 3 + 2] * near + rowMean[row * 3 + 2] * far) * fog + lit * 170;
+          for (let k = 0; k < 3; k++) {
+            const t =
+              tex[i00 * 3 + k] * w00 + tex[i01 * 3 + k] * w01 + tex[i10 * 3 + k] * w10 + tex[i11 * 3 + k] * w11;
+            out[p + k] = (t * near + rowMean[row * 3 + k] * far) * fog + lit * LAMP[k];
+          }
           out[p + 3] = 255;
         }
       }

@@ -107,16 +107,23 @@ function reelFrame(src: Source, pos: number) {
   return src.frames[pos];
 }
 
-/** An intra-coded picture of what a source shows right now, for the Key button. */
-function freshKey(src: Source): Frame {
-  if (src.kind === 'reel') {
-    src.reel!.render(src.pos, rgba);
-    fromRGBA(rgba, input);
-  } else if (src.kind === 'still') {
-    copyPicture(src.still!, input);
+/**
+ * For the Key button: the reel's encoded keyframe nearest its playhead. Jumping
+ * there, rather than coding a fresh picture, keeps the frames after it
+ * predicting from exactly the picture the encoder saw, so nothing drifts.
+ */
+function nearestKey(src: Source) {
+  const length = src.reel!.length;
+  let best = 0;
+  let bestDist = Infinity;
+  for (let k = 0; k < Math.min(length, src.frames.length); k += GOP) {
+    const d = Math.min(Math.abs(k - src.pos), length - Math.abs(k - src.pos));
+    if (d < bestDist) {
+      best = k;
+      bestDist = d;
+    }
   }
-  spare.reset();
-  return spare.encode(input, true);
+  return best;
 }
 
 function apply(frame: Frame, opts: { heal: boolean; residual: boolean }) {
@@ -150,14 +157,16 @@ function tick(m: TickMessage) {
   let length = 0;
 
   if (m.hold && lastDelta) {
+    // A held frame repeats its movement only: adding its correction again every
+    // time would wash the picture out to one flat colour within a second.
     frame = lastDelta;
-    apply(frame, opts);
+    apply(frame, { heal: m.heal, residual: false });
     kind = 'hold';
   } else if (src) {
     if (src.kind === 'reel') {
-      pos = src.pos;
       length = src.reel!.length;
-      frame = wantKey ? freshKey(src) : reelFrame(src, pos);
+      pos = wantKey ? nearestKey(src) : src.pos;
+      frame = reelFrame(src, pos);
       src.pos = (pos + 1) % length;
     } else if (src.kind === 'live' && m.live) {
       fromRGBA(new Uint8ClampedArray(m.live), input);
