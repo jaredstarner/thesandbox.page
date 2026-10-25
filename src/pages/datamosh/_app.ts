@@ -143,8 +143,11 @@ export function start(root: HTMLElement) {
     v.muted = true;
     v.playsInline = true;
     v.loop = true;
-    if (typeof media === 'string') v.src = media;
-    else {
+    if (typeof media === 'string') {
+      // Only an object URL this page created may reach the video element.
+      if (!media.startsWith('blob:')) throw new Error('Expected a blob: URL');
+      v.src = media;
+    } else {
       stream = media;
       v.srcObject = media;
     }
@@ -190,7 +193,8 @@ export function start(root: HTMLElement) {
     $<HTMLElement>('[data-file-name]').textContent = file.name;
     names.set('file', file.name);
     if (fileUrl) URL.revokeObjectURL(fileUrl);
-    fileUrl = URL.createObjectURL(file);
+    // The video plays the file's bytes from a Blob made here, never anything named by the file itself.
+    fileUrl = URL.createObjectURL(new Blob([file], { type: file.type }));
     try {
       if (file.type.startsWith('image/')) {
         stopLive();
