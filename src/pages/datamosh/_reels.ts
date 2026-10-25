@@ -291,7 +291,7 @@ function tunnel(): Reel {
       let c: [number, number, number] = [214, 208, 192];
       if (row % 8 === 3) c = bands[(row >> 3) % bands.length];
       const h = Math.sin(col * 12.9898 + row * 78.233) * 43758.5453;
-      const jitter = (h - Math.floor(h)) * 22 - 11;
+      const jitter = (h - Math.floor(h)) * 14 - 7;
       // Bevelled glaze: a highlight along each tile's leading edge.
       const bevel = 0.86 + 0.24 * Math.exp(-ty / 3) + 0.06 * Math.exp(-tx / 3);
       const grout = tx < 1.5 || ty < 1.5;
@@ -300,6 +300,13 @@ function tunnel(): Reel {
       if (row % 16 === 11 && ty > 3 && ty < 13 && (col % 32 < 6 || (col % 32 >= 16 && col % 32 < 22))) {
         glow[i] = 1;
       }
+    }
+  }
+  // Each row's average, for far away, where single tiles are smaller than a pixel and would only shimmer.
+  const rowMean = new Float32Array(T * 3);
+  for (let y = 0; y < T; y++) {
+    for (let x = 0; x < T; x++) {
+      for (let k = 0; k < 3; k++) rowMean[y * 3 + k] += tex[(y * T + x) * 3 + k] / T;
     }
   }
   const K = 26000;
@@ -323,14 +330,17 @@ function tunnel(): Reel {
           const depth = K / rr;
           const u = ((((Math.atan2(dy, dx) / TAU) * T * 2 + shiftU) % T) + T) % T;
           const v = (depth + shiftV) % T;
-          const i = (v | 0) * T + (u | 0);
+          const row = v | 0;
+          const i = row * T + (u | 0);
           const p = (y * W + x) * 4;
           // Light falls off with depth; the lamps carry further.
           const fog = Math.exp(-depth / 520);
           const lit = glow[i] * Math.exp(-depth / 1400);
-          out[p] = tex[i * 3] * fog + lit * 255;
-          out[p + 1] = tex[i * 3 + 1] * fog + lit * 226;
-          out[p + 2] = tex[i * 3 + 2] * fog + lit * 170;
+          const far = Math.min(1, Math.max(0, (depth - 240) / 520));
+          const near = 1 - far;
+          out[p] = (tex[i * 3] * near + rowMean[row * 3] * far) * fog + lit * 255;
+          out[p + 1] = (tex[i * 3 + 1] * near + rowMean[row * 3 + 1] * far) * fog + lit * 226;
+          out[p + 2] = (tex[i * 3 + 2] * near + rowMean[row * 3 + 2] * far) * fog + lit * 170;
           out[p + 3] = 255;
         }
       }

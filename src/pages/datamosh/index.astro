@@ -53,7 +53,7 @@ const reels = [
           <li><i class="x"></i>Keyframe left out</li>
           <li><i class="d"></i>Delta frame</li>
           <li><i class="h"></i>Held delta</li>
-          <li class="scale">Bar height: frame size, log scale</li>
+          <li class="scale">Bar height: bits in the frame</li>
         </ul>
       </div>
     </section>
@@ -585,18 +585,18 @@ const reels = [
     margin-bottom: 2px;
   }
 
-  .hold[aria-pressed='true'] {
+  .actions .hold[aria-pressed='true'] {
     color: #0d0c0b;
     background: var(--held);
     border-color: var(--held);
   }
 
-  .hold[aria-pressed='true'] kbd,
-  .record[aria-pressed='true'] kbd {
+  .actions .hold[aria-pressed='true'] kbd,
+  .actions .record[aria-pressed='true'] kbd {
     color: inherit;
   }
 
-  .record[aria-pressed='true'] {
+  .actions .record[aria-pressed='true'] {
     color: #fff;
     background: var(--tally);
     border-color: var(--tally);

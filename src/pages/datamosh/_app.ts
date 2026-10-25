@@ -65,7 +65,12 @@ export function start(root: HTMLElement) {
   let held = false;
   let autoHoldUntil = 0;
   let onAir = 'bars';
-  const names = new Map<string, string>([['bars', 'Bars']]);
+  const names = new Map<string, string>([
+    ['bars', 'Bars'],
+    ['camera', 'Camera'],
+    ['screen', 'Screen'],
+    ['file', 'File'],
+  ]);
   let inflight = false;
   let lastTick = 0;
   let programFrames = 0;
@@ -256,6 +261,7 @@ export function start(root: HTMLElement) {
 
   function cut(id: string, byHand = false) {
     if (byHand) stopAuto();
+    if (!LIVE.has(id)) say('');
     // Cameras and screens are only held open while they're on air.
     if (id !== onAir && LIVE.has(onAir) && !LIVE.has(id)) stopLive();
     onAir = id;
@@ -540,7 +546,8 @@ export function start(root: HTMLElement) {
     const shown = bars.slice(-n);
     const top = 12 * dpr;
     const span = h - top - 1;
-    const height = (bits: number) => Math.max(2 * dpr, (Math.min(1, Math.max(0, (Math.log10(bits) - 2.6) / 3)) * span) | 0);
+    // Linear, as codec analysers draw it, topping out at 200 kbit.
+    const height = (bits: number) => Math.max(2 * dpr, Math.round(Math.min(1, bits / 200_000) * span));
     sctx.font = `${9 * dpr}px ${getComputedStyle(root).getPropertyValue('--font-datamosh') || 'monospace'}`;
     sctx.textBaseline = 'top';
     shown.forEach((b, i) => {
