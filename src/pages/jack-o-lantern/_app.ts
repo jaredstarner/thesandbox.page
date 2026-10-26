@@ -144,6 +144,15 @@ export function start(root: HTMLElement): void {
   const jobs: Job[] = [];
   let lidBins = new Float32Array(LID_BINS).fill(-1);
   let saveTimer = 0;
+  // When the first cut was made: a carved pumpkin dries and goes mouldy over the following days.
+  // ?days= shows it that many days on.
+  let carvedAt: number | null = null;
+  const daysParam = Number(new URLSearchParams(location.search).get('days'));
+  const age = () =>
+    Math.min(14, daysParam > 0 ? daysParam : carvedAt ? Math.max(0, (Date.now() - carvedAt) / 86_400_000) : 0);
+  const noteCut = () => {
+    carvedAt ??= Date.now();
+  };
 
   const setLook = () => {
     renderer.setLook(geo.look);
@@ -396,6 +405,7 @@ export function start(root: HTMLElement): void {
       stemBaseY: geo.stemBaseY,
       rMax: geo.rMax,
       exposure: 1.0 + (1 - lamp) * 0.7,
+      age: age(),
     };
     const w = Math.max(1, Math.round(canvas.width * renderScale));
     const h = Math.max(1, Math.round(canvas.height * renderScale));
@@ -448,6 +458,7 @@ export function start(root: HTMLElement): void {
   const resetPumpkin = (id: VarietyId) => {
     geo = geometry(VARIETIES[id]);
     carving = new Carving(geo.vr);
+    carvedAt = null;
     lidCut = false;
     lidCone = [-1, -1];
     lidPos = 0;
@@ -642,6 +653,7 @@ export function start(root: HTMLElement): void {
     stroke = null;
     if (!s) return;
     if (s.tool === 'saw') finishSaw(s.path, s.obj);
+    if (step === 'carve') noteCut();
     carving.endStroke();
     updateButtons();
     scheduleSave();
@@ -799,6 +811,7 @@ export function start(root: HTMLElement): void {
         prevDone?.();
         carving.endStroke();
         say.textContent = `${at.p.name} is carved. Light the candle to see it glow.`;
+        noteCut();
         updateButtons();
       };
     }
@@ -874,7 +887,7 @@ export function start(root: HTMLElement): void {
   const save = async () => {
     if (jobs.length || stroke) return;
     try {
-      const meta = { variety: geo.vr.id, step, lidCut, lidBins: [...lidBins], yaw: yawTarget, at: Date.now() };
+      const meta = { variety: geo.vr.id, step, lidCut, lidBins: [...lidBins], yaw: yawTarget, carvedAt };
       let map: string | null = null;
       if ('CompressionStream' in window) {
         const stream = new Blob([carving.data]).stream().pipeThrough(new CompressionStream('deflate-raw'));
@@ -899,6 +912,7 @@ export function start(root: HTMLElement): void {
         lidCut: boolean;
         lidBins: number[];
         yaw: number;
+        carvedAt?: number | null;
         map: string | null;
       };
       if (!VARIETIES[s.variety] || !s.map || !('DecompressionStream' in window)) return false;
@@ -911,6 +925,13 @@ export function start(root: HTMLElement): void {
       carving.data.set(data);
       lidBins = Float32Array.from(s.lidBins);
       lidCut = s.lidCut;
+      carvedAt = typeof s.carvedAt === 'number' ? s.carvedAt : null;
+      const days = Math.floor(age());
+      const since =
+        days < 1
+          ? ''
+          : `Carved ${days === 1 ? 'a day' : `${days} days`} ago. ` +
+            (days >= 3 ? 'The cuts have dried brown, and there is mould on them. ' : 'The cut edges are drying out. ');
       if (lidCut) {
         measureLid();
         lidPos = s.step === 'lit' ? 0 : 1;
@@ -921,9 +942,12 @@ export function start(root: HTMLElement): void {
         lampTarget = lamp = 0;
         candleTarget = 1;
         lampBtn.textContent = 'Lamp on';
-        setStep('lit', 'Still here from your last visit. Drag to turn it round.');
+        setStep('lit', since || 'Still here from your last visit. Drag to turn it round.');
       } else {
-        setStep(s.step === 'choose' ? 'choose' : s.step, s.step === 'choose' ? undefined : 'Your pumpkin is where you left it.');
+        setStep(
+          s.step === 'choose' ? 'choose' : s.step,
+          s.step === 'choose' ? undefined : since || 'Your pumpkin is where you left it.',
+        );
       }
       wake();
       return true;

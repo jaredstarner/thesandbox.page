@@ -33,6 +33,8 @@ export interface Frame {
   stemBaseY: number;
   rMax: number;
   exposure: number;
+  /** Days since the first cut. */
+  age: number;
 }
 
 export interface Look {
@@ -85,7 +87,7 @@ uniform vec2 uLidSphere;
 uniform float uLamp, uCandle;
 uniform vec3 uFlame;
 uniform float uFloorY, uStemBaseY, uRMax;
-uniform float uRind, uWhite;
+uniform float uRind, uWhite, uAge;
 uniform vec3 uSkin, uGroove, uGround, uFlesh, uStemColor, uFleshSigma, uRindSigma;
 uniform vec4 uStem;
 
@@ -514,6 +516,22 @@ vec3 bumpSkin(vec3 n, Shell s) {
   return normalize(n - 0.22 * ((hx - h0) * t1 + (hy - h0) * t2));
 }
 
+// Mould: soft grey-white fuzz in colonies a centimetre or two across, some going green-grey.
+// Noise in three dimensions, so it sits the same on a cut wall as on a floor.
+float mouldMask(vec3 q, float amount) {
+  if (amount <= 0.0) return 0.0;
+  float m = fbm3(q * 0.6 + 3.7);
+  float edge = 0.66 - 0.24 * amount;
+  float fuzz = vnoise3(q * 22.0);
+  return smoothstep(edge - 0.02, edge + 0.07, m) * (0.5 + 0.5 * fuzz);
+}
+vec3 mouldColor(vec3 q) {
+  float fuzz = vnoise3(q * 30.0);
+  float colony = fbm3(q * 0.35 + 9.1);
+  vec3 c = mix(vec3(0.5, 0.52, 0.46), vec3(0.8, 0.82, 0.76), fuzz);
+  return mix(c, vec3(0.26, 0.34, 0.22) * (0.8 + 0.4 * fuzz), smoothstep(0.55, 0.68, colony));
+}
+
 // Shade a point on the pumpkin; q and n are in the object's local frame, and so is v.
 vec3 shadeShell(vec3 q, vec3 n, vec3 v, bool lidObj, vec3 world) {
   Shell s = shellAt(q, 0.0);
@@ -528,10 +546,28 @@ vec3 shadeShell(vec3 q, vec3 n, vec3 v, bool lidObj, vec3 world) {
   vec3 spec;
   vec3 col;
   float blur = textureLod(uDepth, depthUv(s.theta, s.phi), 3.0).r * DEPTH_MAX;
+  // Age, in days since the first cut: cut flesh dries brown from the outside in, the skin
+  // round the cuts puckers and dulls, and after a few days mould comes up on the cuts.
+  float dry = smoothstep(0.4, 6.0, uAge);
+  float mould = smoothstep(2.5, 9.0, uAge);
   if (skin) {
     vec3 nb = bumpSkin(n, s);
-    vec3 nbW = toWorld(nb);
     vec3 albedo = skinColor(s, d);
+    float nearCut = clamp((textureLod(uDepth, depthUv(s.theta, s.phi), 4.5).r * DEPTH_MAX - s.D) * 0.8, 0.0, 1.0);
+    float rimCut = clamp((textureLod(uDepth, depthUv(s.theta, s.phi), 2.5).r * DEPTH_MAX - s.D) * 1.2, 0.0, 1.0);
+    float pucker = nearCut * dry;
+    if (pucker > 0.001) {
+      vec2 wp = vec2(s.phi * 150.0, s.theta * 130.0);
+      float w0 = vnoise(wp);
+      float w1 = vnoise(wp + vec2(0.6, 0.0));
+      float w2 = vnoise(wp + vec2(0.0, 0.6));
+      vec3 t1 = normalize(cross(vec3(0.0, 1.0, 0.0), nb) + 1e-4);
+      vec3 t2 = cross(nb, t1);
+      nb = normalize(nb - pucker * 1.1 * ((w1 - w0) * t1 + (w2 - w0) * t2));
+      albedo = mix(albedo, albedo * vec3(0.6, 0.48, 0.38), pucker * 0.7);
+      albedo = mix(albedo, mouldColor(q), mouldMask(q, mould * rimCut * 0.8));
+    }
+    vec3 nbW = toWorld(nb);
     float g = grooveAt(s.phi) * sin(s.theta);
     float ao = (1.0 - 0.5 * smoothstep(0.1, 0.9, g)) * mix(0.55, 1.0, smoothstep(-0.95, -0.4, d.y) * 0.6 + 0.4);
     // Pin holes and the edges of cuts read darker.
@@ -551,6 +587,8 @@ vec3 shadeShell(vec3 q, vec3 n, vec3 v, bool lidObj, vec3 world) {
     // The hollow: scraped flesh with strings left in it.
     float strings = fbm(vec2(s.phi * 40.0, s.theta * 4.0 + fbm(vec2(s.phi * 6.0, s.theta)) * 2.0));
     vec3 albedo = uFlesh * (0.75 + 0.45 * strings);
+    albedo *= mix(vec3(1.0), vec3(0.34, 0.24, 0.18), dry * 0.6);
+    albedo = mix(albedo, mouldColor(q), mouldMask(q, mould * 0.3));
     vec3 lamp = lampAt(world, nW, vW, 20.0, 0.1, spec);
     float open = (uHasLid > 0.5 && length(uLidOffset) > 0.01) ? 0.3 : 0.06;
     col = albedo * (lamp * open * 0.6 + vec3(0.06) * uLamp * open);
@@ -560,15 +598,19 @@ vec3 shadeShell(vec3 q, vec3 n, vec3 v, bool lidObj, vec3 world) {
     }
   } else {
     // Carved flesh: a floor where the wall was thinned, or the side of a cut.
-    float fib = fbm3o(vec2(s.phi * 60.0, s.theta * 30.0));
+    float fib = fbm3(q * 2.2);
     vec3 under = mix(uFlesh, vec3(0.78, 0.66, 0.2), 0.45);
     vec3 albedo = mix(under, uFlesh * 1.12, smoothstep(uRind * 0.6, uRind * 2.5, s.D));
     albedo *= 0.85 + 0.25 * fib;
     // A sliver of skin at the top of every cut wall.
     float rim = 1.0 - smoothstep(uRind * 0.6, uRind * 1.1, s.r - s.rho);
     albedo = mix(albedo, skinColor(s, d) * 0.8, rim);
+    // Drying starts at the outer edge of a cut and works in.
+    float exposed = 1.0 - smoothstep(0.2, 1.6, s.r - s.rho);
+    albedo *= mix(vec3(1.0), vec3(0.2, 0.12, 0.09) * (0.8 + 0.4 * fib), dry * (0.75 + 0.25 * exposed));
+    albedo = mix(albedo, mouldColor(q), mouldMask(q, mould * (0.35 + 0.45 * exposed)));
     float ao = 1.0 - clamp((s.D - blur) * 0.5, 0.0, 0.55);
-    vec3 lamp = lampAt(world, nW, vW, 60.0, 0.22, spec);
+    vec3 lamp = lampAt(world, nW, vW, 60.0, 0.22 * (1.0 - 0.8 * dry), spec);
     vec3 fill = vec3(0.1) * uLamp + vec3(0.01, 0.015, 0.025);
     col = albedo * (lamp + fill) * ao + spec * ao;
     if (lidHome) {
@@ -936,6 +978,7 @@ export class Renderer {
     gl.uniform1f(this.u(p, 'uSeed'), look.seed);
     gl.uniform1f(this.u(p, 'uRind'), look.rind);
     gl.uniform1f(this.u(p, 'uWhite'), look.white ? 1 : 0);
+    gl.uniform1f(this.u(p, 'uAge'), f.age);
     gl.uniform3fv(this.u(p, 'uSkin'), look.skin);
     gl.uniform3fv(this.u(p, 'uGroove'), look.groove);
     gl.uniform3fv(this.u(p, 'uGround'), look.ground);
