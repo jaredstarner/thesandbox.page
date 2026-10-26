@@ -1,0 +1,643 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { PATTERNS, previewSvg } from './_patterns';
+import { VARIETIES } from './_shape';
+
+const varieties = Object.values(VARIETIES);
+---
+
+<Bare
+  title="Jack-o'-lantern"
+  description="Saw the lid off a pumpkin, carve a face into it at three depths, then light the candle inside and turn it to see where the light gets out."
+>
+  <Font cssVariable="--font-lantern-display" slot="head" />
+  <Font cssVariable="--font-lantern-text" slot="head" />
+
+  <main class="lantern" data-lantern data-step="choose" data-light="lamp">
+    <section class="stage" data-stage>
+      <canvas
+        class="scene"
+        data-canvas
+        role="img"
+        aria-label="A pumpkin on a wooden table under a lamp"
+        tabindex="0"></canvas>
+      <div class="brush" data-brush aria-hidden="true"></div>
+      <p class="unsupported" data-unsupported hidden>
+        This browser can't open a WebGL 2 context, which the pumpkin is drawn with.
+      </p>
+      <noscript>
+        <p class="unsupported">The pumpkin is carved with JavaScript, which is off.</p>
+      </noscript>
+      <div class="turn" data-turn>
+        <button type="button" data-turn-by="-1" aria-label="Turn the pumpkin left">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6 4 11l5 5M4.5 11H15a5 5 0 0 1 0 10h-2"></path></svg>
+        </button>
+        <button type="button" data-turn-by="1" aria-label="Turn the pumpkin right">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6 5 5-5 5M19.5 11H9a5 5 0 0 0 0 10h2"></path></svg>
+        </button>
+      </div>
+    </section>
+
+    <aside class="kit">
+      <header class="masthead">
+        <a class="home" href="/">thesandbox.page</a>
+        <h1>Jack-o'-lantern</h1>
+      </header>
+
+      <ol class="steps" data-steps aria-label="Steps">
+        <li data-step-mark="choose"><span>1</span> Pick</li>
+        <li data-step-mark="lid"><span>2</span> Lid</li>
+        <li data-step-mark="carve"><span>3</span> Carve</li>
+        <li data-step-mark="lit"><span>4</span> Light</li>
+      </ol>
+
+      <p class="say" data-say aria-live="polite">Pick a pumpkin from the pile.</p>
+
+      <div class="panel" data-for="choose">
+        <fieldset class="varieties">
+          <legend class="sr">Pumpkin</legend>
+          {
+            varieties.map((v, i) => (
+              <label class="variety">
+                <input type="radio" name="variety" value={v.id} checked={i === 0} />
+                <span class="variety-name">{v.name}</span>
+                <span class="variety-note">{v.note}</span>
+              </label>
+            ))
+          }
+        </fieldset>
+        <button class="primary" type="button" data-take>Carve this one</button>
+      </div>
+
+      <div class="panel" data-for="lid" hidden>
+        <p>
+          Draw a ring all the way round the stem with the saw. The cut runs in toward the middle, so the lid sits on its
+          rim instead of dropping inside.
+        </p>
+        <button type="button" data-auto-lid>Cut it for me</button>
+        <button class="quiet" type="button" data-back>Pick another pumpkin</button>
+      </div>
+
+      <div class="panel" data-for="carve" hidden>
+        <fieldset class="tools">
+          <legend>Tool</legend>
+          <label class="tool">
+            <input type="radio" name="tool" value="saw" checked />
+            <svg viewBox="0 0 40 40" aria-hidden="true">
+              <path d="M6 30 30 6l4 4-24 24z"></path>
+              <path d="M10 26l2 2M13 23l2 2M16 20l2 2M19 17l2 2M22 14l2 2M25 11l2 2"></path>
+            </svg>
+            <span class="tool-name">Saw</span>
+            <span class="tool-note">Cuts through. Go all the way round a shape to take it out.</span>
+          </label>
+          <label class="tool">
+            <input type="radio" name="tool" value="gouge" />
+            <svg viewBox="0 0 40 40" aria-hidden="true">
+              <path d="M8 32 26 14"></path>
+              <path d="M24 8c4 0 8 4 8 8l-4 2c0-3-3-6-6-6z"></path>
+            </svg>
+            <span class="tool-name">Gouge</span>
+            <span class="tool-note">Thins the wall so it glows. Go over it again to go deeper.</span>
+          </label>
+          <label class="tool">
+            <input type="radio" name="tool" value="scraper" />
+            <svg viewBox="0 0 40 40" aria-hidden="true">
+              <path d="M8 32 24 16"></path>
+              <path d="M22 10a7 7 0 1 1 8 8"></path>
+            </svg>
+            <span class="tool-name">Scraper</span>
+            <span class="tool-note">Takes off only the skin, for a faint glow.</span>
+          </label>
+        </fieldset>
+
+        <fieldset class="patterns">
+          <legend>Pattern</legend>
+          <p class="fine">Prick one onto the side facing you, then carve along the holes.</p>
+          <div class="pattern-row">
+            {
+              PATTERNS.map((p) => (
+                <button type="button" class="pattern" data-pattern={p.id} title={p.note}>
+                  <Fragment set:html={previewSvg(p)} />
+                  <span>{p.name}</span>
+                </button>
+              ))
+            }
+          </div>
+          <button type="button" data-auto-carve disabled>Carve the pattern for me</button>
+        </fieldset>
+
+        <div class="row">
+          <button type="button" data-undo disabled>Undo</button>
+          <button class="primary" type="button" data-light-up>Light the candle</button>
+        </div>
+      </div>
+
+      <div class="panel" data-for="lit" hidden>
+        <p>Drag to turn it round. Light gets out wherever the wall is thin, and throws the shapes on the table.</p>
+        <div class="row">
+          <button type="button" data-lamp aria-pressed="false">Lamp on</button>
+          <button type="button" data-photo>Save a photo</button>
+        </div>
+        <div class="row">
+          <button class="quiet" type="button" data-carve-more>Carve some more</button>
+          <button class="quiet" type="button" data-new>New pumpkin</button>
+        </div>
+      </div>
+
+      <dl class="key">
+        <div>
+          <dt><i class="sw sw-cut"></i>Cut through</dt>
+          <dd>The flame shows, and its light reaches the table.</dd>
+        </div>
+        <div>
+          <dt><i class="sw sw-thin"></i>Thinned</dt>
+          <dd>The flesh glows yellow; thinner is brighter.</dd>
+        </div>
+        <div>
+          <dt><i class="sw sw-skin"></i>Skin off</dt>
+          <dd>A low orange glow through the full wall.</dd>
+        </div>
+      </dl>
+    </aside>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.lantern)) {
+    margin: 0;
+    background: #0d0b09;
+  }
+
+  .lantern,
+  .lantern :global(*) {
+    box-sizing: border-box;
+  }
+
+  .lantern {
+    --ink: #f1e6d0;
+    --muted: #a8987d;
+    --line: rgb(241 230 208 / 0.16);
+    --accent: #f08a2c;
+    --accent-ink: #1a0f06;
+    --panel: #15110d;
+    --kit-w: 372px;
+
+    display: grid;
+    grid-template-columns: var(--kit-w) minmax(0, 1fr);
+    min-height: 100dvh;
+    color: var(--ink);
+    background: #0d0b09;
+    font:
+      400 16px/1.45 var(--font-lantern-text),
+      'Trebuchet MS',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .stage {
+    position: relative;
+    grid-column: 2;
+    grid-row: 1;
+    height: 100dvh;
+    overflow: hidden;
+    background: #0d0b09;
+  }
+
+  .scene {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: grab;
+    outline: none;
+  }
+
+  .lantern[data-step='lid'] .scene,
+  .lantern[data-step='carve'] .scene {
+    cursor: crosshair;
+  }
+
+  .scene:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--accent);
+  }
+
+  .brush {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 1.5px solid rgb(255 244 222 / 0.85);
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.35);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .brush[data-on] {
+    opacity: 1;
+  }
+
+  .unsupported {
+    position: absolute;
+    inset: auto 24px 24px;
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+  }
+
+  .turn {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .lantern[data-step='choose'] .turn {
+    display: none;
+  }
+
+  .turn button {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgb(241 230 208 / 0.28);
+    border-radius: 50%;
+    background: rgb(13 11 9 / 0.55);
+    color: var(--ink);
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+  }
+
+  .turn svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .kit {
+    grid-column: 1;
+    grid-row: 1;
+    height: 100dvh;
+    overflow-y: auto;
+    padding: 28px 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+  }
+
+  .masthead {
+    display: grid;
+    gap: 6px;
+  }
+
+  .home {
+    justify-self: start;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+
+  .home:hover,
+  .home:focus-visible {
+    color: var(--ink);
+  }
+
+  h1 {
+    margin: 0;
+    font: 400 46px/1 var(--font-lantern-display);
+    letter-spacing: -0.01em;
+    color: #f6a03c;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .steps li {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 2px solid var(--line);
+  }
+
+  .steps span {
+    font: 400 20px/1 var(--font-lantern-display);
+  }
+
+  .steps li[data-state='now'] {
+    color: var(--ink);
+    border-top-color: var(--accent);
+  }
+
+  .steps li[data-state='done'] {
+    color: #d8c7a6;
+    border-top-color: rgb(240 138 44 / 0.45);
+  }
+
+  .say {
+    margin: 0;
+    min-height: 2.9em;
+    font-size: 18px;
+    line-height: 1.35;
+  }
+
+  .panel {
+    display: grid;
+    gap: 14px;
+  }
+
+  .panel[hidden] {
+    display: none;
+  }
+
+  .panel p {
+    margin: 0;
+    color: #d6c8ad;
+  }
+
+  fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: grid;
+    gap: 8px;
+  }
+
+  legend {
+    padding: 0;
+    margin-bottom: 8px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .fine {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .variety,
+  .tool {
+    position: relative;
+    display: grid;
+    gap: 2px;
+    padding: 11px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      background-color 0.15s;
+  }
+
+  .variety input,
+  .tool input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .variety:has(input:checked),
+  .tool:has(input:checked) {
+    border-color: var(--accent);
+    background: rgb(240 138 44 / 0.08);
+  }
+
+  .variety:has(input:focus-visible),
+  .tool:has(input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .variety-name,
+  .tool-name {
+    font-weight: 700;
+    font-size: 17px;
+  }
+
+  .variety-note,
+  .tool-note {
+    font-size: 14px;
+    line-height: 1.35;
+    color: var(--muted);
+  }
+
+  .tool {
+    grid-template-columns: 34px 1fr;
+    column-gap: 12px;
+    padding: 10px 12px;
+  }
+
+  .tool svg {
+    grid-row: span 2;
+    width: 34px;
+    height: 34px;
+    fill: none;
+    stroke: #f0b05e;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .pattern-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .pattern {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    padding: 8px 4px 6px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .pattern :global(svg) {
+    width: 100%;
+    max-width: 64px;
+    aspect-ratio: 1;
+  }
+
+  .pattern[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: rgb(240 138 44 / 0.08);
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .row > * {
+    flex: 1 1 auto;
+  }
+
+  button:not(.pattern, .turn button) {
+    min-height: 44px;
+    padding: 10px 16px;
+    border: 1px solid rgb(241 230 208 / 0.3);
+    border-radius: 999px;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  button:not(.pattern, .turn button):hover:not(:disabled) {
+    border-color: rgb(241 230 208 / 0.6);
+  }
+
+  button.primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 700;
+  }
+
+  button.primary:hover:not(:disabled) {
+    background: #f59c45;
+  }
+
+  button.quiet {
+    border-color: transparent;
+    color: var(--muted);
+  }
+
+  button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  button[aria-pressed='true'] {
+    border-color: var(--accent);
+    color: #f6b468;
+  }
+
+  .key {
+    margin: auto 0 0;
+    padding-top: 16px;
+    display: grid;
+    gap: 10px;
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+  }
+
+  .key div {
+    display: grid;
+    grid-template-columns: 112px 1fr;
+    gap: 10px;
+  }
+
+  .key dt {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+  }
+
+  .key dd {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .sw {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .sw-cut {
+    background: radial-gradient(circle at 50% 60%, #fff4c8 0 30%, #ffb54a 60%);
+    box-shadow: 0 0 8px #ffb54a;
+  }
+
+  .sw-thin {
+    background: #f7b23e;
+  }
+
+  .sw-skin {
+    background: #a8400f;
+  }
+
+  @media (max-width: 860px) {
+    .lantern {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto;
+    }
+
+    .stage {
+      grid-column: 1;
+      grid-row: 1;
+      height: 60svh;
+      min-height: 340px;
+    }
+
+    .kit {
+      grid-column: 1;
+      grid-row: 2;
+      height: auto;
+      overflow: visible;
+      padding: 20px 16px 28px;
+      border-right: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    h1 {
+      font-size: 38px;
+    }
+
+    .turn {
+      right: 12px;
+      bottom: 12px;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-lantern]');
+  if (root) start(root);
+</script>

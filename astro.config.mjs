@@ -353,5 +353,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Arial', 'sans-serif'],
     },
+    // The title and step numbers on /jack-o-lantern/, and its text face.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Gloock',
+      cssVariable: '--font-lantern-display',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Alegreya Sans',
+      cssVariable: '--font-lantern-text',
+      weights: [400, 500, 700],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Trebuchet MS', 'sans-serif'],
+    },
   ],
 });
