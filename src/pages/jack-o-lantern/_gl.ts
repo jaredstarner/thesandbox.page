@@ -125,6 +125,11 @@ float fbm(vec2 p) {
   for (int i = 0; i < 5; i++) { s += a * vnoise(p); p = p * 2.02 + 13.7; a *= 0.5; }
   return s;
 }
+float fbm3o(vec2 p) {
+  float s = 0.0, a = 0.5;
+  for (int i = 0; i < 3; i++) { s += a * vnoise(p); p = p * 2.03 + 5.3; a *= 0.5; }
+  return s / 0.875;
+}
 float fbm3(vec3 p) {
   float s = 0.0, a = 0.5;
   for (int i = 0; i < 4; i++) { s += a * vnoise3(p); p = p * 2.03 + 7.1; a *= 0.5; }
@@ -178,8 +183,9 @@ float field(vec3 q, bool lidObj) {
 }
 
 vec3 fieldNormal(vec3 q, bool lidObj) {
+  // A little over a texel apart, so steep carved edges don't show the texel grid.
   const vec2 k = vec2(1.0, -1.0);
-  const float h = 0.03;
+  const float h = 0.07;
   return normalize(
     k.xyy * field(q + k.xyy * h, lidObj) + k.yyx * field(q + k.yyx * h, lidObj) +
     k.yxy * field(q + k.yxy * h, lidObj) + k.xxx * field(q + k.xxx * h, lidObj));
@@ -332,8 +338,10 @@ vec3 candleThrough(vec3 x, vec3 n) {
     // The lid is off: everything under it is open.
     T = mix(T, vec3(1.0), smoothstep(0.4, 0.6, t.g));
   } else if (uHasLid > 0.5) {
-    // The lid sits on its rim, so the cut round it lets out only a little.
-    T *= 1.0 - 0.9 * smoothstep(0.02, 0.3, t.g);
+    // The lid sits on its rim and closes the cut round it. The mask is read blurred
+    // well past the width of the cut, so both halves of the cut count as closed.
+    float g = textureLod(uDepth, depthUv(o.y, o.z), max(lod, 4.5)).g;
+    T *= 1.0 - smoothstep(0.01, 0.12, 1.0 - abs(2.0 * g - 1.0));
   }
   vec3 Lw = toWorld(-dir);
   float ndl = max(dot(n, Lw), 0.0);
@@ -358,14 +366,15 @@ vec3 pumpkinGlow(vec3 x, vec3 n) {
     float a = fk * 2.39996;
     vec3 d = normalize(axis + t1 * cos(a) * rr + t2 * sin(a) * rr);
     vec3 o = outerRadius(d);
-    vec2 dl = textureLod(uDepth, depthUv(o.y, o.z), 3.0).rg;
+    // Blurred well past a sample's spacing, so a thin cut never flickers in and out between samples.
+    vec2 dl = textureLod(uDepth, depthUv(o.y, o.z), 5.0).rg;
     float wall = wallAt(o.y);
     float D = dl.r * DEPTH_MAX;
-    float hole = smoothstep(wall - 0.4, wall + 0.2, D);
-    if (uHasLid > 0.5 && length(uLidOffset) > 0.01) hole = max(hole, smoothstep(0.4, 0.6, dl.g));
-    else if (uHasLid > 0.5) hole *= 1.0 - 0.9 * smoothstep(0.02, 0.3, dl.g);
+    float hole = smoothstep(wall * 0.3, wall, D);
     vec3 Ein = candleAt(d * (o.x - wall), -d);
     vec3 L = mix(Ein * transmit(D, wall) * uFlesh, hollow, hole);
+    if (uHasLid > 0.5 && length(uLidOffset) > 0.01) L = mix(L, hollow, smoothstep(0.4, 0.6, dl.g));
+    else if (uHasLid > 0.5) L *= 1.0 - smoothstep(0.01, 0.12, 1.0 - abs(2.0 * dl.g - 1.0));
     vec3 p = d * o.x;
     vec3 toX = q - p;
     float dist2 = dot(toX, toX);
@@ -387,6 +396,20 @@ float sphShadow(vec3 ro, vec3 rd, vec3 c, float r) {
   float d = -r + sqrt(max(0.0, r * r - h));
   float t = -b - sqrt(max(h, 0.0));
   return (b > 0.0) ? 1.0 : smoothstep(0.0, 1.0, 2.2 * d / t);
+}
+
+// The pumpkin as an occluder: its ellipsoid, squashed to a sphere of radius uA.
+vec3 squash(vec3 v) { return vec3(v.x, v.y * uA / uB, v.z); }
+float bodyShadow(vec3 x, vec3 L) {
+  vec3 o = squash(x - uCenter);
+  return sphShadow(o, normalize(squash(L)), vec3(0.0), uA * 0.94);
+}
+float bodyOcclusion(vec3 x, vec3 n) {
+  vec3 o = squash(x - uCenter);
+  vec3 di = -o;
+  float l = length(di);
+  float r = uA * 0.97;
+  return clamp(1.0 - max(0.0, dot(normalize(squash(n)), di / l)) * (r * r) / (l * l), 0.0, 1.0);
 }
 
 float sphOcclusion(vec3 p, vec3 n, vec3 c, float r) {
@@ -425,8 +448,8 @@ vec3 tableShade(vec3 x, vec3 v) {
   vec3 sun;
   vec3 spec;
   vec3 c = uCenter;
-  float shadow = sphShadow(x, normalize(LAMP - x), c, uA * 0.92);
-  float occ = sphOcclusion(x, n, c, uA * 0.95);
+  float shadow = bodyShadow(x, LAMP - x);
+  float occ = bodyOcclusion(x, n);
   if (uHasLid > 0.5 && length(uLidOffset) > 0.01) {
     vec3 lc = c + uLidOffset + vec3(0.0, uLidSphere.x * 0.6, 0.0);
     shadow *= sphShadow(x, normalize(LAMP - x), lc, uLidSphere.y * 0.55);
@@ -451,7 +474,7 @@ vec3 wallShade(vec3 x, vec3 v) {
   float plaster = fbm(x.xy * 0.08) * 0.6 + fbm(x.xy * 0.6) * 0.4;
   vec3 paint = vec3(0.040, 0.055, 0.058) * (0.86 + 0.28 * plaster);
   vec3 spec;
-  float shadow = sphShadow(x, normalize(LAMP - x), uCenter, uA * 0.92);
+  float shadow = bodyShadow(x, LAMP - x);
   vec3 lamp = lampAt(x, n, v, 8.0, 0.0, spec);
   float fall = 1.0 / (1.0 + dot(x.xy - vec2(0.0, 30.0), x.xy - vec2(0.0, 30.0)) * 0.0004);
   float occ = mix(0.45, 1.0, smoothstep(0.0, 12.0, x.y));
@@ -466,11 +489,15 @@ vec3 skinColor(Shell s, vec3 d) {
   // Pale patch where it sat in the field.
   float spot = smoothstep(0.62, 0.92, dot(d, normalize(vec3(-0.55, -0.62, -0.56)))) * (0.6 + 0.4 * fbm(vec2(s.phi, s.theta) * 9.0));
   base = mix(base, uGround, spot * 0.85);
-  // Fine streaks along the ribs and freckles.
-  float streak = fbm(vec2(s.phi * 26.0, s.theta * 3.0));
-  base *= 0.86 + 0.26 * streak;
-  float fr = step(0.992, hash12(floor(vec2(s.phi * 160.0, s.theta * 90.0))));
-  base = mix(base, uWhite > 0.5 ? uGroove : uGround, fr * 0.5);
+  // Soft streaks along the ribs, and round freckles of a few sizes.
+  float streak = fbm3o(vec2(s.phi * 22.0, s.theta * 2.5));
+  base *= 0.9 + 0.2 * streak;
+  vec2 fg = vec2(s.phi * 95.0, s.theta * 95.0);
+  vec2 cell = floor(fg);
+  float h = hash12(cell);
+  vec2 c = vec2(hash12(cell + 7.1), hash12(cell + 3.7)) * 0.6 + 0.2;
+  float fr = (1.0 - smoothstep(0.08, 0.16 + 0.1 * h, length(fract(fg) - c))) * step(0.9, h);
+  base = mix(base, uWhite > 0.5 ? uGroove : uGround, fr * 0.45);
   // Towards the top, a greener tone round the stem.
   base = mix(base, uGroove * vec3(0.8, 1.0, 0.7), smoothstep(0.55, 0.2, s.theta) * 0.35);
   return base;
@@ -478,10 +505,10 @@ vec3 skinColor(Shell s, vec3 d) {
 
 vec3 bumpSkin(vec3 n, Shell s) {
   float e = 0.01;
-  vec2 p = vec2(s.phi * 30.0, s.theta * 9.0);
-  float h0 = fbm(p);
-  float hx = fbm(p + vec2(e * 30.0, 0.0));
-  float hy = fbm(p + vec2(0.0, e * 30.0));
+  vec2 p = vec2(s.phi * 24.0, s.theta * 8.0);
+  float h0 = fbm3o(p);
+  float hx = fbm3o(p + vec2(e * 30.0, 0.0));
+  float hy = fbm3o(p + vec2(0.0, e * 30.0));
   vec3 t1 = normalize(cross(vec3(0.0, 1.0, 0.0), n) + 1e-4);
   vec3 t2 = cross(n, t1);
   return normalize(n - 0.22 * ((hx - h0) * t1 + (hy - h0) * t2));
@@ -533,7 +560,7 @@ vec3 shadeShell(vec3 q, vec3 n, vec3 v, bool lidObj, vec3 world) {
     }
   } else {
     // Carved flesh: a floor where the wall was thinned, or the side of a cut.
-    float fib = fbm(vec2(s.phi * 70.0, s.rho * 6.0));
+    float fib = fbm3o(vec2(s.phi * 60.0, s.theta * 30.0));
     vec3 under = mix(uFlesh, vec3(0.78, 0.66, 0.2), 0.45);
     vec3 albedo = mix(under, uFlesh * 1.12, smoothstep(uRind * 0.6, uRind * 2.5, s.D));
     albedo *= 0.85 + 0.25 * fib;
