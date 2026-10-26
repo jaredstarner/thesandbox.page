@@ -123,7 +123,12 @@ export class Carving {
   scales(u: number, v: number): [number, number] {
     const theta = v * Math.PI;
     const phi = (u - 0.5) * Math.PI * 2;
-    const { r } = outerRadius(this.vr, Math.sin(theta) * Math.cos(phi), Math.cos(theta), Math.sin(theta) * Math.sin(phi));
+    const { r } = outerRadius(
+      this.vr,
+      Math.sin(theta) * Math.cos(phi),
+      Math.cos(theta),
+      Math.sin(theta) * Math.sin(phi),
+    );
     return [Math.max(0.5, Math.PI * 2 * r * Math.sin(theta)), Math.PI * r];
   }
 
@@ -169,7 +174,9 @@ export class Carving {
     const vr = this.vr;
     if (tool === 'saw') {
       const half = 0.13;
-      this.dab(u, v, half + 0.06, (d) => (d <= half ? DEPTH_MAX : d <= half + 0.06 ? DEPTH_MAX * (1 - (d - half) / 0.06) : null));
+      this.dab(u, v, half + 0.06, (d) =>
+        d <= half ? DEPTH_MAX : d <= half + 0.06 ? DEPTH_MAX * (1 - (d - half) / 0.06) : null,
+      );
       return;
     }
     if (tool === 'gouge') {
@@ -235,7 +242,11 @@ export class Carving {
     const x1 = Math.ceil(maxU * MAP_W) + 1;
     const y0 = Math.max(0, Math.floor(minV * MAP_H) - 1);
     // upTo carves only the top part of the region, so a tool can be seen working down it.
-    const y1 = Math.min(MAP_H - 1, Math.ceil(maxV * MAP_H) + 1, Math.floor(y0 + (Math.ceil(maxV * MAP_H) + 2 - y0) * upTo));
+    const y1 = Math.min(
+      MAP_H - 1,
+      Math.ceil(maxV * MAP_H) + 1,
+      Math.floor(y0 + (Math.ceil(maxV * MAP_H) + 2 - y0) * upTo),
+    );
     const SUB = 4;
     const width = x1 - x0 + 1;
     const cov = new Float32Array(width);

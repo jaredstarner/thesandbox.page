@@ -21,7 +21,8 @@ const varieties = Object.values(VARIETIES);
         data-canvas
         role="img"
         aria-label="A pumpkin on a wooden table under a lamp"
-        tabindex="0"></canvas>
+        tabindex="0"
+      ></canvas>
       <div class="brush" data-brush aria-hidden="true"></div>
       <p class="unsupported" data-unsupported hidden>
         This browser can't open a WebGL 2 context, which the pumpkin is drawn with.
@@ -31,43 +32,59 @@ const varieties = Object.values(VARIETIES);
       </noscript>
       <div class="turn" data-turn>
         <button type="button" data-turn-by="-1" aria-label="Turn the pumpkin left">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6 4 11l5 5M4.5 11H15a5 5 0 0 1 0 10h-2"></path></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 6 4 11l5 5M4.5 11H15a5 5 0 0 1 0 10h-2"></path>
+          </svg>
         </button>
         <button type="button" data-turn-by="1" aria-label="Turn the pumpkin right">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6 5 5-5 5M19.5 11H9a5 5 0 0 0 0 10h2"></path></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m15 6 5 5-5 5M19.5 11H9a5 5 0 0 0 0 10h2"></path>
+          </svg>
         </button>
       </div>
     </section>
 
     <aside class="kit">
       <header class="masthead">
-        <a class="home" href="/">thesandbox.page</a>
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
         <h1>Jack-o'-lantern</h1>
       </header>
 
       <ol class="steps" data-steps aria-label="Steps">
-        <li data-step-mark="choose"><span>1</span> Pick</li>
-        <li data-step-mark="lid"><span>2</span> Lid</li>
-        <li data-step-mark="carve"><span>3</span> Carve</li>
-        <li data-step-mark="lit"><span>4</span> Light</li>
+        <li data-step-mark="choose">
+          <span>1</span> Pick
+        </li>
+        <li data-step-mark="lid">
+          <span>2</span> Lid
+        </li>
+        <li data-step-mark="carve">
+          <span>3</span> Carve
+        </li>
+        <li data-step-mark="lit">
+          <span>4</span> Light
+        </li>
       </ol>
 
-      <p class="say" data-say aria-live="polite">Pick a pumpkin to carve.</p>
+      <p class="say" data-say aria-live="polite">
+        Pick a pumpkin to carve.
+      </p>
 
       <div class="panel" data-for="choose">
         <fieldset class="varieties">
           <legend class="sr">Pumpkin</legend>
-          {
-            varieties.map((v, i) => (
-              <label class="variety">
-                <input type="radio" name="variety" value={v.id} checked={i === 0} />
-                <span class="variety-name">{v.name}</span>
-                <span class="variety-note">{v.note}</span>
-              </label>
-            ))
-          }
+          {varieties.map((v, i) => (
+            <label class="variety">
+              <input type="radio" name="variety" value={v.id} checked={i === 0} />
+              <span class="variety-name">{v.name}</span>
+              <span class="variety-note">{v.note}</span>
+            </label>
+          ))}
         </fieldset>
-        <button class="primary" type="button" data-take>Carve this one</button>
+        <button class="primary" type="button" data-take>
+          Carve this one
+        </button>
       </div>
 
       <div class="panel" data-for="lid" hidden>
@@ -75,8 +92,12 @@ const varieties = Object.values(VARIETIES);
           Draw a ring all the way round the stem with the saw. The cut runs in toward the middle, so the lid sits on its
           rim instead of dropping inside.
         </p>
-        <button type="button" data-auto-lid>Cut it for me</button>
-        <button class="quiet" type="button" data-back>Pick another pumpkin</button>
+        <button type="button" data-auto-lid>
+          Cut it for me
+        </button>
+        <button class="quiet" type="button" data-back>
+          Pick another pumpkin
+        </button>
       </div>
 
       <div class="panel" data-for="carve" hidden>
@@ -115,47 +136,65 @@ const varieties = Object.values(VARIETIES);
           <legend>Pattern</legend>
           <p class="fine">Prick one onto the side facing you, then carve along the holes.</p>
           <div class="pattern-row">
-            {
-              PATTERNS.map((p) => (
-                <button type="button" class="pattern" data-pattern={p.id} title={p.note}>
-                  <Fragment set:html={previewSvg(p)} />
-                  <span>{p.name}</span>
-                </button>
-              ))
-            }
+            {PATTERNS.map((p) => (
+              <button type="button" class="pattern" data-pattern={p.id} title={p.note}>
+                <Fragment set:html={previewSvg(p)} />
+                <span>{p.name}</span>
+              </button>
+            ))}
           </div>
-          <button type="button" data-auto-carve disabled>Carve the pattern for me</button>
+          <button type="button" data-auto-carve disabled>
+            Carve the pattern for me
+          </button>
         </fieldset>
 
         <div class="row">
-          <button type="button" data-undo disabled>Undo</button>
-          <button class="primary" type="button" data-light-up>Light the candle</button>
+          <button type="button" data-undo disabled>
+            Undo
+          </button>
+          <button class="primary" type="button" data-light-up>
+            Light the candle
+          </button>
         </div>
       </div>
 
       <div class="panel" data-for="lit" hidden>
         <p>Drag to turn it round. Light gets out wherever the wall is thin.</p>
         <div class="row">
-          <button type="button" data-lamp aria-pressed="false">Lamp on</button>
-          <button type="button" data-photo>Save a photo</button>
+          <button type="button" data-lamp aria-pressed="false">
+            Lamp on
+          </button>
+          <button type="button" data-photo>
+            Save a photo
+          </button>
         </div>
         <div class="row">
-          <button class="quiet" type="button" data-carve-more>Carve some more</button>
-          <button class="quiet" type="button" data-new>New pumpkin</button>
+          <button class="quiet" type="button" data-carve-more>
+            Carve some more
+          </button>
+          <button class="quiet" type="button" data-new>
+            New pumpkin
+          </button>
         </div>
       </div>
 
       <dl class="key">
         <div>
-          <dt><i class="sw sw-cut"></i>Cut through</dt>
+          <dt>
+            <i class="sw sw-cut"></i>Cut through
+          </dt>
           <dd>The flame shows, and its light reaches the table.</dd>
         </div>
         <div>
-          <dt><i class="sw sw-thin"></i>Thinned</dt>
+          <dt>
+            <i class="sw sw-thin"></i>Thinned
+          </dt>
           <dd>The flesh glows yellow; thinner is brighter.</dd>
         </div>
         <div>
-          <dt><i class="sw sw-skin"></i>Skin off</dt>
+          <dt>
+            <i class="sw sw-skin"></i>Skin off
+          </dt>
           <dd>A low orange glow through the full wall.</dd>
         </div>
       </dl>

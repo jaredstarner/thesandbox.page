@@ -203,7 +203,11 @@ export function start(root: HTMLElement): void {
     }
     maxY = Math.max(maxY, geo.stemBaseY + vr.stem.length);
     const cy = (minY + maxY) / 2;
-    const rad = Math.hypot(Math.max(maxXZ, vr.stem.radius * 2 + Math.abs(vr.stem.bend) + vr.stem.length * Math.abs(vr.stem.lean)), (maxY - minY) / 2) + 0.6;
+    const rad =
+      Math.hypot(
+        Math.max(maxXZ, vr.stem.radius * 2 + Math.abs(vr.stem.bend) + vr.stem.length * Math.abs(vr.stem.lean)),
+        (maxY - minY) / 2,
+      ) + 0.6;
     lidSphere = [cy, rad];
     // On the table to the right, a little behind the pumpkin.
     lidRest = [vr.a * 0.98 + maxXZ * 0.85, -geo.center[1] - minY + 0.05, -vr.a * 0.45];
@@ -383,8 +387,13 @@ export function start(root: HTMLElement): void {
   };
 
   const draw = (time: number) => {
-    const flick = 0.82 + 0.13 * n1(time * 6.3) + 0.08 * n1(time * 17.1 + 4) - 0.06 * Math.max(0, n1(time * 0.7) - 0.75) * 4;
-    const sway: V3 = [(n1(time * 2.1) - 0.5) * 0.35, (n1(time * 5.3 + 2) - 0.5) * 0.2, (n1(time * 1.7 + 9) - 0.5) * 0.35];
+    const flick =
+      0.82 + 0.13 * n1(time * 6.3) + 0.08 * n1(time * 17.1 + 4) - 0.06 * Math.max(0, n1(time * 0.7) - 0.75) * 4;
+    const sway: V3 = [
+      (n1(time * 2.1) - 0.5) * 0.35,
+      (n1(time * 5.3 + 2) - 0.5) * 0.2,
+      (n1(time * 1.7 + 9) - 0.5) * 0.35,
+    ];
     const f: Frame = {
       time,
       camPos: cam.pos,
@@ -729,7 +738,11 @@ export function start(root: HTMLElement): void {
     const at = { u: frontU(), v: 0.5 - 0.035, s };
     carving.beginStroke();
     for (const r of p.regions) {
-      for (const run of boundaryRuns(r)) carving.prick(run.map((pt) => toUV(pt, at)), false);
+      for (const run of boundaryRuns(r))
+        carving.prick(
+          run.map((pt) => toUV(pt, at)),
+          false,
+        );
     }
     carving.endStroke();
     pattern = { p, ...at };
@@ -788,7 +801,12 @@ export function start(root: HTMLElement): void {
           run: (_a, b) => {
             carving.carveTo(add, subs, depth, b);
             // Finish along the outline, which takes the pin holes with it.
-            if (b >= 1) for (const run of boundaryRuns(r)) carving.edge(run.map((pt) => toUV(pt, at)), depth);
+            if (b >= 1)
+              for (const run of boundaryRuns(r))
+                carving.edge(
+                  run.map((pt) => toUV(pt, at)),
+                  depth,
+                );
           },
           at: (t) => {
             const p = add[0];
@@ -921,7 +939,8 @@ export function start(root: HTMLElement): void {
       const data = new Uint8Array(await new Response(stream).arrayBuffer());
       if (data.length !== MAP_W * MAP_H * 2) return false;
       resetPumpkin(s.variety);
-      for (const input of root.querySelectorAll<HTMLInputElement>('input[name=variety]')) input.checked = input.value === s.variety;
+      for (const input of root.querySelectorAll<HTMLInputElement>('input[name=variety]'))
+        input.checked = input.value === s.variety;
       carving.data.set(data);
       lidBins = Float32Array.from(s.lidBins);
       lidCut = s.lidCut;
@@ -970,7 +989,19 @@ export function start(root: HTMLElement): void {
   if (debug) {
     (window as unknown as { lantern: unknown }).lantern = {
       get state() {
-        return { step, tool, yaw, lidCut, lidCone, lidPos, lamp, candle, jobs: jobs.length, renderScale, variety: geo.vr.id };
+        return {
+          step,
+          tool,
+          yaw,
+          lidCut,
+          lidCone,
+          lidPos,
+          lamp,
+          candle,
+          jobs: jobs.length,
+          renderScale,
+          variety: geo.vr.id,
+        };
       },
       variety: (id: VarietyId) => {
         resetPumpkin(id);

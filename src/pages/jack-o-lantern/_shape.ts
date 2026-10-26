@@ -143,7 +143,8 @@ const TAU = Math.PI * 2;
 /** Groove amount at a longitude: 1 in a groove, 0 mid-lobe. */
 export function grooveAt(vr: Variety, phi: number): number {
   const s = vr.seed;
-  const warped = phi + 0.09 * Math.sin(phi + s) + 0.05 * Math.sin(2 * phi + s * 1.7) + 0.03 * Math.sin(3 * phi + s * 2.3);
+  const warped =
+    phi + 0.09 * Math.sin(phi + s) + 0.05 * Math.sin(2 * phi + s * 1.7) + 0.03 * Math.sin(3 * phi + s * 2.3);
   const k = (vr.ribs * warped) / TAU;
   const f = k - Math.floor(k);
   const lobe = Math.sin(Math.PI * f);
@@ -151,7 +152,12 @@ export function grooveAt(vr: Variety, phi: number): number {
 }
 
 /** Skin radius in a direction (unit vector), before carving. */
-export function outerRadius(vr: Variety, dx: number, dy: number, dz: number): { r: number; theta: number; phi: number } {
+export function outerRadius(
+  vr: Variety,
+  dx: number,
+  dy: number,
+  dz: number,
+): { r: number; theta: number; phi: number } {
   const sinT = Math.min(1, Math.hypot(dx, dz));
   const cosT = dy;
   const theta = Math.atan2(sinT, cosT);
