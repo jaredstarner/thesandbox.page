@@ -134,7 +134,7 @@ const varieties = Object.values(VARIETIES);
       </div>
 
       <div class="panel" data-for="lit" hidden>
-        <p>Drag to turn it round. Light gets out wherever the wall is thin, and throws the shapes on the table.</p>
+        <p>Drag to turn it round. Light gets out wherever the wall is thin.</p>
         <div class="row">
           <button type="button" data-lamp aria-pressed="false">Lamp on</button>
           <button type="button" data-photo>Save a photo</button>
@@ -512,7 +512,7 @@ const varieties = Object.values(VARIETIES);
     flex: 1 1 auto;
   }
 
-  button:not(.pattern, .turn button) {
+  .kit button:where(:not(.pattern)) {
     min-height: 44px;
     padding: 10px 16px;
     border: 1px solid rgb(241 230 208 / 0.3);
@@ -524,32 +524,32 @@ const varieties = Object.values(VARIETIES);
     cursor: pointer;
   }
 
-  button:not(.pattern, .turn button):hover:not(:disabled) {
+  .kit button:where(:not(.pattern)):hover:not(:disabled) {
     border-color: rgb(241 230 208 / 0.6);
   }
 
-  button.primary {
+  .kit button.primary {
     border-color: var(--accent);
     background: var(--accent);
     color: var(--accent-ink);
     font-weight: 700;
   }
 
-  button.primary:hover:not(:disabled) {
+  .kit button.primary:hover:not(:disabled) {
     background: #f59c45;
   }
 
-  button.quiet {
+  .kit button.quiet {
     border-color: transparent;
     color: var(--muted);
   }
 
-  button:disabled {
+  .kit button:disabled {
     opacity: 0.4;
     cursor: default;
   }
 
-  button[aria-pressed='true'] {
+  .kit button[aria-pressed='true'] {
     border-color: var(--accent);
     color: #f6b468;
   }
