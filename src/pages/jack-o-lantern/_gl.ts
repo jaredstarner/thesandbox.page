@@ -330,8 +330,10 @@ vec3 candleThrough(vec3 x, vec3 n) {
   vec3 T = transmit(t.r * DEPTH_MAX, wall);
   if (uHasLid > 0.5 && length(uLidOffset) > 0.01) {
     // The lid is off: everything under it is open.
-    float open = smoothstep(0.4, 0.6, textureLod(uDepth, depthUv(o.y, o.z), lod).g);
-    T = mix(T, vec3(1.0), open);
+    T = mix(T, vec3(1.0), smoothstep(0.4, 0.6, t.g));
+  } else if (uHasLid > 0.5) {
+    // The lid sits on its rim, so the cut round it lets out only a little.
+    T *= 1.0 - 0.9 * smoothstep(0.02, 0.3, t.g);
   }
   vec3 Lw = toWorld(-dir);
   float ndl = max(dot(n, Lw), 0.0);
@@ -361,6 +363,7 @@ vec3 pumpkinGlow(vec3 x, vec3 n) {
     float D = dl.r * DEPTH_MAX;
     float hole = smoothstep(wall - 0.4, wall + 0.2, D);
     if (uHasLid > 0.5 && length(uLidOffset) > 0.01) hole = max(hole, smoothstep(0.4, 0.6, dl.g));
+    else if (uHasLid > 0.5) hole *= 1.0 - 0.9 * smoothstep(0.02, 0.3, dl.g);
     vec3 Ein = candleAt(d * (o.x - wall), -d);
     vec3 L = mix(Ein * transmit(D, wall) * uFlesh, hollow, hole);
     vec3 p = d * o.x;
@@ -409,11 +412,14 @@ vec3 tableShade(vec3 x, vec3 v) {
   float row = floor((x.z + 300.0) / 14.0);
   float zin = fract((x.z + 300.0) / 14.0);
   float seam = smoothstep(0.0, 0.012, zin) * smoothstep(1.0, 0.988, zin);
-  vec2 g = vec2(x.x * 0.045 + row * 7.3, (x.z + row * 3.1) * 0.9);
-  float grain = fbm(vec2(g.x * 0.9, g.y * 2.4 + fbm(g * 0.6) * 2.6));
-  float ring = 0.5 + 0.5 * sin(g.y * 4.0 + grain * 9.0);
-  vec3 wood = mix(vec3(0.050, 0.024, 0.012), vec3(0.135, 0.068, 0.032), grain * 0.75 + ring * 0.25);
-  wood *= 0.85 + 0.3 * hash12(vec2(row, 3.0));
+  // Grain runs along the plank: long, low-contrast figure, wavy growth lines, and fine pores.
+  float warp = fbm(vec2(x.x * 0.012 + row * 4.1, x.z * 0.08));
+  float figure = fbm(vec2(x.x * 0.018 + row * 7.3, x.z * 0.45 + warp * 2.0));
+  float lines = 0.5 + 0.5 * sin((x.z + warp * 9.0 + sin(x.x * 0.05 + row) * 1.5) * 2.1);
+  float pores = vnoise(vec2(x.x * 0.35, x.z * 6.0 + row * 9.0));
+  float t = figure * 0.7 + lines * 0.18 + pores * 0.12;
+  vec3 wood = mix(vec3(0.056, 0.027, 0.013), vec3(0.128, 0.066, 0.031), t);
+  wood *= 0.82 + 0.32 * hash12(vec2(row, 3.0));
   wood *= mix(0.35, 1.0, seam);
   // Pumpkin's soft shadow and contact darkening from the lamp.
   vec3 sun;
@@ -558,7 +564,10 @@ vec3 shadeStem(vec3 q, vec3 n, vec3 v, vec3 world) {
   albedo = mix(albedo, vec3(0.32, 0.3, 0.22), smoothstep(uStemBaseY + uStem.x * 0.4, uStemBaseY + uStem.x, q.y) * 0.4);
   vec3 spec;
   vec3 lamp = lampAt(world, nW, vW, 16.0, 0.08, spec);
-  vec3 fill = vec3(0.1) * uLamp + vec3(0.012, 0.018, 0.03) * max(0.3 + 0.7 * dot(nW, MOON), 0.0);
+  vec3 fill = vec3(0.1) * uLamp + vec3(0.03, 0.034, 0.05) * max(0.3 + 0.7 * dot(nW, MOON), 0.0);
+  // The candle's glow on the lid reaches the foot of the stem.
+  float foot = exp(-max(q.y - uStemBaseY, 0.0) * 0.5);
+  fill += vec3(1.0, 0.5, 0.18) * 0.05 * uCandle * foot * step(length(uLidOffset), 0.01);
   return albedo * (lamp + fill) + spec;
 }
 

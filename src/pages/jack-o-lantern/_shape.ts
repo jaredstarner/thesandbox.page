@@ -114,7 +114,7 @@ export const VARIETIES: Record<VarietyId, Variety> = {
     ground: srgb('#e3d6a6'),
     flesh: srgb('#f3a43c'),
     fleshSigma: [0.8, 1.3, 2.4],
-    rindSigma: [8, 11, 16],
+    rindSigma: [11, 15, 22],
     stem: { length: 6.2, radius: 1.35, bend: 2.2, lean: 0.2, color: srgb('#6b6a45') },
     seed: 7.9,
   },
