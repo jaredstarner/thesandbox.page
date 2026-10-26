@@ -996,6 +996,22 @@ export function start(root: HTMLElement): void {
         wake();
       },
       pick: (x: number, y: number) => pick(x, y),
+      get carving() {
+        return carving;
+      },
+      upload: () => {
+        renderer.uploadDepth(carving.data);
+        wake();
+      },
+      // A region of the canvas in device pixels, read straight after drawing it, as a PNG data URL.
+      crop: (x: number, y: number, w: number, h: number) => {
+        draw(performance.now() / 1000);
+        const c = document.createElement('canvas');
+        c.width = w;
+        c.height = h;
+        c.getContext('2d')?.drawImage(canvas, x, y, w, h, 0, 0, w, h);
+        return c.toDataURL('image/png');
+      },
       project: (u: number, v: number) => {
         const p = project(u, v);
         const r = canvas.getBoundingClientRect();
