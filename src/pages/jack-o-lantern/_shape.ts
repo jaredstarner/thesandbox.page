@@ -169,9 +169,20 @@ export function outerRadius(vr: Variety, dx: number, dy: number, dz: number): { 
   return { r, theta, phi };
 }
 
-/** Wall thickness in a direction: thicker round the stem and the base. */
+/**
+ * Wall thickness in a direction. The hollow inside is a smooth dome under the stem and a
+ * shallow bowl over the base, so the wall thickens into the shoulders round the stem and
+ * thins again where the dimples press in from outside.
+ */
 export function wallAt(vr: Variety, theta: number): number {
-  return vr.wall + 1.6 * Math.exp(-((theta / 0.42) ** 2)) + 0.8 * Math.exp(-(((Math.PI - theta) / 0.5) ** 2));
+  const top = Math.PI - theta;
+  return (
+    vr.wall +
+    0.95 * vr.dimpleTop * Math.exp(-((theta / 0.6) ** 2)) +
+    0.95 * vr.dimpleBottom * Math.exp(-((top / 0.65) ** 2)) -
+    vr.dimpleTop * Math.exp(-((theta / 0.36) ** 2)) -
+    vr.dimpleBottom * Math.exp(-((top / 0.42) ** 2))
+  );
 }
 
 export function radii(vr: Variety, dx: number, dy: number, dz: number, sample: DepthSampler): Radii {
@@ -251,7 +262,9 @@ vec3 outerRadius(vec3 d) {
 }
 
 float wallAt(float theta) {
-  return uWall + 1.6 * exp(-pow(theta / 0.42, 2.0)) + 0.8 * exp(-pow((PI - theta) / 0.5, 2.0));
+  float top = PI - theta;
+  return uWall + 0.95 * uDimpleTop * exp(-pow(theta / 0.6, 2.0)) + 0.95 * uDimpleBottom * exp(-pow(top / 0.65, 2.0))
+    - uDimpleTop * exp(-pow(theta / 0.36, 2.0)) - uDimpleBottom * exp(-pow(top / 0.42, 2.0));
 }
 
 vec2 depthUv(float theta, float phi) {

@@ -364,15 +364,16 @@ export class Carving {
   }
 
   /** Clean up along an outline down to a depth (cm, by latitude), so the pin holes on it go. */
-  edge(path: UV[], depth: (theta: number) => number, radius = 0.12): void {
+  edge(path: UV[], depth: (theta: number) => number, radius = 0.16): void {
     for (let i = 0; i + 1 < path.length; i++) {
       const [a, b] = [path[i], path[i + 1]];
       const [su, sv] = this.scales(a[0], a[1]);
       const n = Math.max(1, Math.ceil(Math.hypot(wrap(b[0] - a[0]) * su, (b[1] - a[1]) * sv) / 0.05));
       for (let k = 0; k <= n; k++) {
         const t = k / n;
+        // A rounded tip, so overlapping dabs make a smooth edge and not a row of scallops.
         this.dab(a[0] + wrap(b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, radius, (d, theta) =>
-          d <= radius ? depth(theta) : null,
+          d <= radius ? depth(theta) * (1 - smooth(radius * 0.4, radius, d)) : null,
         );
       }
     }
