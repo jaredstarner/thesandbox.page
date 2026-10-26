@@ -340,20 +340,6 @@ export class Carving {
     );
   }
 
-  /** Mark the part of the shell inside a loop round the stem as the lid. */
-  markLid(loop: UV[]): void {
-    const poly = closeAtPole(loop, 0);
-    this.cover(
-      [poly],
-      [],
-      (i, c) => {
-        const b = Math.round(c * 255);
-        if (b > this.data[i + 1]) this.data[i + 1] = b;
-      },
-      0,
-    );
-  }
-
   /** The range of latitude the lid covers, for the renderer's cone test. */
   lidCone(): [number, number] {
     let lo = Infinity;
@@ -427,24 +413,6 @@ export function unwrap(path: UV[]): UV[] {
     }
   }
   return out;
-}
-
-/** Close a loop that goes once round a pole by running along the pole's edge of the map. */
-export function closeAtPole(loop: UV[], pole: 0 | 1): UV[] {
-  const p = unwrap(loop);
-  const first = p[0];
-  const last = p[p.length - 1];
-  const turned = last[0] - first[0] + wrap(first[0] - last[0]);
-  // Make sure the loop has gone a full turn; then join its ends along the pole.
-  const end: UV = [first[0] + turned, first[1]];
-  return [...p, end, [end[0], pole], [first[0], pole]];
-}
-
-/** How many times a path goes round the stem: the change in longitude over a closed loop. */
-export function turns(path: UV[]): number {
-  const p = unwrap(path);
-  const closing = wrap(p[0][0] - p[p.length - 1][0]);
-  return (p[p.length - 1][0] - p[0][0] + closing) / 1;
 }
 
 /** Hit test against the shell: returns where along the ray it lands, or null. Local coordinates. */
