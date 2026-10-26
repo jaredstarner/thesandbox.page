@@ -1,0 +1,8 @@
+{
+  "title": "Jack-o'-lantern",
+  "summary": "A pumpkin on the kitchen table and a carving kit: saw off the lid, cut, gouge, and scrape a face into the wall, then put out the lamp, light the candle inside, and turn it to see where the light gets out.",
+  "date": "2026-10-26",
+  "tags": ["webgl2", "raymarching", "translucency", "pointer-events", "compression-streams"],
+  "requires": ["webgl2"],
+  "plot": 25
+}
