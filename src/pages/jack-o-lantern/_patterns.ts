@@ -227,7 +227,6 @@ const moonCat: Pattern = {
     { depth: 'cut', add: [star(6.4, 5.0, 0.7)] },
     { depth: 'cut', add: [star(-6.6, 0.6, 0.6)] },
     { depth: 'cut', add: [star(7.0, 0.9, 0.85)] },
-    { depth: 'skin', add: [[[-8.6, -2.6], [8.6, -2.3], [8.4, -3.3], [-8.4, -3.6]]] },
   ],
 };
 
@@ -275,6 +274,55 @@ const bats: Pattern = {
 };
 
 export const PATTERNS: Pattern[] = [classic, owl, moonCat, bats];
+
+const inside = (pt: Pt, poly: Pt[]): boolean => {
+  let c = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i];
+    const [xj, yj] = poly[j];
+    if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c;
+  }
+  return c;
+};
+
+/**
+ * The outline a region actually has once its holes are taken out: the parts of each add
+ * polygon outside every sub, and the parts of each sub inside an add, as open runs of
+ * points about `step` cm apart. This is where the pins go, and where the edge is cleaned up.
+ */
+export function boundaryRuns(r: Region, step = 0.15): Pt[][] {
+  const runs: Pt[][] = [];
+  const walk = (poly: Pt[], keep: (p: Pt) => boolean) => {
+    const pts: Pt[] = [];
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i];
+      const b = poly[(i + 1) % poly.length];
+      const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / step));
+      for (let k = 0; k < n; k++) pts.push([a[0] + ((b[0] - a[0]) * k) / n, a[1] + ((b[1] - a[1]) * k) / n]);
+    }
+    const flags = pts.map(keep);
+    if (flags.every(Boolean)) {
+      runs.push([...pts, pts[0]]);
+      return;
+    }
+    // Start just after a dropped point, so a run that crosses the start of the outline stays whole.
+    const start = flags.indexOf(false);
+    let run: Pt[] = [];
+    for (let i = 1; i <= pts.length; i++) {
+      const j = (start + i) % pts.length;
+      if (flags[j]) run.push(pts[j]);
+      else if (run.length) {
+        runs.push(run);
+        run = [];
+      }
+    }
+    if (run.length) runs.push(run);
+  };
+  const subs = r.sub ?? [];
+  for (const poly of r.add) walk(poly, (p) => !subs.some((s) => inside(p, s)));
+  for (const poly of subs) walk(poly, (p) => r.add.some((a) => inside(p, a)));
+  return runs.filter((run) => run.length > 1);
+}
 
 /** Bounds of a pattern in cm: [minX, minY, maxX, maxY]. */
 export function bounds(p: Pattern): [number, number, number, number] {

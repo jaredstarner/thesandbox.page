@@ -3,7 +3,7 @@
 
 import { Carving, MAP_H, MAP_W, pickShell, unwrap, type Tool, type UV } from './_carve';
 import { Renderer, type Frame, type Look } from './_gl';
-import { PATTERNS, type Pattern, type Pt } from './_patterns';
+import { boundaryRuns, PATTERNS, type Pattern, type Pt } from './_patterns';
 import { maxRadius, outerRadius, restHeight, VARIETIES, wallAt, type Variety, type VarietyId } from './_shape';
 
 type Step = 'choose' | 'lid' | 'carve' | 'lit';
@@ -416,12 +416,13 @@ export function start(root: HTMLElement): void {
       m.dataset.state = i < idx ? 'done' : i === idx ? 'now' : 'next';
     }
     say.textContent = message ?? defaultSay[s];
+    delete brush.dataset.on;
     canvas.setAttribute('aria-label', label());
     updateButtons();
     scheduleSave();
   };
   const defaultSay: Record<Step, string> = {
-    choose: 'Pick a pumpkin from the pile.',
+    choose: 'Pick a pumpkin to carve.',
     lid: 'Saw all the way round the stem to take the lid off.',
     carve: 'Carve the side facing you. Drag on the table, or use the arrows, to turn it.',
     lit: 'Turn the face toward the wall and it is thrown up behind the pumpkin.',
@@ -514,7 +515,7 @@ export function start(root: HTMLElement): void {
     if (covered === LID_BINS) finishLid();
     else if (covered > 0) {
       const pct = Math.round((covered / LID_BINS) * 100);
-      say.textContent = `Keep going round the stem: about ${pct}% of the way.`;
+      say.textContent = `About ${pct}% of the way round. Turn the pumpkin to reach the back and keep going.`;
     }
   };
 
@@ -716,7 +717,7 @@ export function start(root: HTMLElement): void {
     const at = { u: frontU(), v: 0.5 - 0.035, s };
     carving.beginStroke();
     for (const r of p.regions) {
-      for (const poly of [...r.add, ...(r.sub ?? [])]) carving.prick(poly.map((pt) => toUV(pt, at)));
+      for (const run of boundaryRuns(r)) carving.prick(run.map((pt) => toUV(pt, at)), false);
     }
     carving.endStroke();
     pattern = { p, ...at };
@@ -772,7 +773,11 @@ export function start(root: HTMLElement): void {
           kind: 'region',
           dur: (r.depth === 'thin' ? 2.4 : 1.6) * speed,
           t: 0,
-          run: (_a, b) => carving.carveTo(add, subs, depth, b),
+          run: (_a, b) => {
+            carving.carveTo(add, subs, depth, b);
+            // Finish along the outline, which takes the pin holes with it.
+            if (b >= 1) for (const run of boundaryRuns(r)) carving.edge(run.map((pt) => toUV(pt, at)), depth);
+          },
           at: (t) => {
             const p = add[0];
             const lo = Math.min(...p.map((x) => x[1]));
@@ -991,6 +996,11 @@ export function start(root: HTMLElement): void {
         wake();
       },
       pick: (x: number, y: number) => pick(x, y),
+      project: (u: number, v: number) => {
+        const p = project(u, v);
+        const r = canvas.getBoundingClientRect();
+        return p ? [p[0] + r.left, p[1] + r.top] : null;
+      },
       frontU,
       scale: (s: number) => {
         renderScale = s;

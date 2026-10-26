@@ -363,6 +363,21 @@ export class Carving {
     return [Math.max(0, (lo === Infinity ? 0 : lo) - 0.02), hi + 0.03];
   }
 
+  /** Clean up along an outline down to a depth (cm, by latitude), so the pin holes on it go. */
+  edge(path: UV[], depth: (theta: number) => number, radius = 0.12): void {
+    for (let i = 0; i + 1 < path.length; i++) {
+      const [a, b] = [path[i], path[i + 1]];
+      const [su, sv] = this.scales(a[0], a[1]);
+      const n = Math.max(1, Math.ceil(Math.hypot(wrap(b[0] - a[0]) * su, (b[1] - a[1]) * sv) / 0.05));
+      for (let k = 0; k <= n; k++) {
+        const t = k / n;
+        this.dab(a[0] + wrap(b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, radius, (d, theta) =>
+          d <= radius ? depth(theta) : null,
+        );
+      }
+    }
+  }
+
   /** Little holes along an outline, a few millimetres apart, as a pin leaves them. */
   prick(outline: UV[], closed = true, spacing = 0.32): void {
     const pts = closed ? [...outline, outline[0]] : outline;
