@@ -7,6 +7,8 @@ export type PlaceId = 'cover' | 'headstone' | 'leaves' | 'floor' | 'coin' | 'pla
 export interface Place {
   id: PlaceId;
   no: number;
+  /** A short name for the sheet's ticket. */
+  name: string;
   /** Where the sheet is, shown before anything is rubbed. */
   where: string;
   /** What is under it, shown once the sheet has been lifted. */
@@ -26,6 +28,7 @@ export interface Place {
 export const PLACES: Place[] = [
   {
     id: 'cover',
+    name: 'Mill Lane',
     no: 1,
     where: 'Mill Lane, in the road by the kerb',
     what: 'A cast-iron surface-water cover, 62 cm across, cast in 1931, in a frame set among granite setts.',
@@ -37,6 +40,7 @@ export const PLACES: Place[] = [
   },
   {
     id: 'headstone',
+    name: 'Churchyard',
     no: 2,
     where: 'The churchyard, against the north wall',
     what: 'A slate headstone cut in 1798, with a second name added in 1811 by a different carver.',
@@ -48,6 +52,7 @@ export const PLACES: Place[] = [
   },
   {
     id: 'leaves',
+    name: 'Under the oak',
     no: 3,
     where: 'The bench under the oak',
     what: 'Three fallen leaves, face down on a sandstone flag: oak, field maple, and silver birch.',
@@ -59,6 +64,7 @@ export const PLACES: Place[] = [
   },
   {
     id: 'floor',
+    name: 'Attic floor',
     no: 4,
     where: 'The attic of the mill house',
     what: 'Pine floorboards, scrubbed for a century until the hard grain stands proud of the soft.',
@@ -70,6 +76,7 @@ export const PLACES: Place[] = [
   },
   {
     id: 'coin',
+    name: 'Armchair',
     no: 5,
     where: 'Found down the side of the armchair',
     what: 'A bronze penny of 1951, 31 mm across, with a heron in the reeds.',
@@ -81,6 +88,7 @@ export const PLACES: Place[] = [
   },
   {
     id: 'plate',
+    name: 'Canal bridge',
     no: 6,
     where: 'The parapet of the canal bridge',
     what: 'A cast-iron weight-limit notice, bolted to the brickwork when the bridge was strengthened in 1897.',
