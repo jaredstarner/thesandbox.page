@@ -157,8 +157,8 @@ function headstone({ n, mm, masks }: Ctx): Surface {
       let v = 0.8 * (1 - (fx / 0.45) ** 2) + 0.14 * cleave[i] - 0.28 * smoothstep(0.38, 0.62, pits[i]);
       v -= Math.min(4.2, cut[i] * mm * 1.05) * eroded;
       v -= Math.min(3.2, cut2[i] * mm * 1.25);
-      const lichen = smoothstep(0.32, 0.5, patch[i] + exposed * 0.45 - 0.2);
-      v += lichen * (0.5 + 0.5 * smoothstep(-0.2, 0.4, crust[i]));
+      const lichen = smoothstep(0.36, 0.52, patch[i] + exposed * 0.4 - 0.22);
+      v += lichen * (0.35 + 0.55 * smoothstep(-0.2, 0.4, crust[i]));
       h[i] = mix(-90, v, rise(stone[i]));
     }
   return {
@@ -167,22 +167,23 @@ function headstone({ n, mm, masks }: Ctx): Surface {
       const rgb = new Uint8Array(n * n * 3);
       const gloss = new Uint8Array(n * n);
       const tone = fbm(n, n, 30 / mm, 3, 46);
-      const leaf = fbm(n, n, 9 / mm, 3, 47);
+      const leaf = fbm(n, n, 30 / mm, 4, 47, { gain: 0.45 });
       const spot = fbm(n, n, 6 / mm, 2, 48);
       for (let y = 0; y < n; y++)
         for (let x = 0; x < n; x++) {
           const i = y * n + x;
           const s = stone[i];
           if (s < 0.5) {
-            // The yew behind: dark needles with a few lit sprays.
-            const lit = smoothstep(0.1, 0.5, leaf[i]);
-            put(rgb, i, 0.012 + lit * 0.03, 0.026 + lit * 0.05, 0.01 + lit * 0.018);
+            // The yew behind, out of focus: dark needles, a few lit sprays.
+            const lit = smoothstep(-0.1, 0.6, leaf[i]);
+            put(rgb, i, 0.008 + lit * 0.014, 0.017 + lit * 0.026, 0.007 + lit * 0.01);
             continue;
           }
           const fx = x / n - 0.5;
           const fy = y / n;
           const exposed = smoothstep(0.55, 0.15, fy) * 0.6 + smoothstep(0.3, 0.44, Math.abs(fx)) * 0.5;
-          const lichen = smoothstep(0.32, 0.5, patch[i] + exposed * 0.45 - 0.2);
+          const lichen =
+            smoothstep(0.36, 0.52, patch[i] + exposed * 0.4 - 0.22) * (0.55 + 0.45 * smoothstep(-0.3, 0.5, crust[i]));
           const inCut = smoothstep(0.3, 1.5, cut[i] * mm + cut2[i] * mm);
           let r = 0.058 + 0.012 * tone[i];
           let g = 0.068 + 0.012 * tone[i];
@@ -227,9 +228,9 @@ function leaves({ n, mm, masks }: Ctx): Surface {
     if (b > 0 || v1[i] > 0.02) {
       const net = 1 - smoothstep(cell * 0.04, cell * 0.16, areole[i]);
       v +=
-        b * (0.2 + 0.03 * wrinkle[i] + 0.05 * net + 0.13 * smoothstep(0.1, 0.9, v3[i])) +
-        0.5 * smoothstep(0.08, 0.9, v1[i]) +
-        b * 0.27 * smoothstep(0.1, 0.9, v2[i]);
+        b * (0.24 + 0.03 * wrinkle[i] + 0.03 * net + 0.05 * smoothstep(0.1, 0.9, v3[i])) +
+        0.22 * smoothstep(0.05, 0.95, v1[i]) +
+        b * 0.11 * smoothstep(0.05, 0.95, v2[i]);
     }
     h[i] = v;
   }
@@ -309,6 +310,15 @@ const BOARDS: Board[] = [
   { x0: 690, x1: 836, joints: [] },
 ];
 
+/** Smooth 1D noise in [-0.5, 0.5]. */
+function ringJitter(x: number, seed: number) {
+  const i = Math.floor(x);
+  const f = x - i;
+  const t = f * f * (3 - 2 * f);
+  const a = hash(i, seed) - 0.5;
+  return a + (hash(i + 1, seed) - 0.5 - a) * t;
+}
+
 function floor({ n, mm }: Ctx): Surface {
   const h = new Float32Array(n * n);
   const lateness = new Float32Array(n * n);
@@ -379,8 +389,12 @@ function floor({ n, mm }: Ctx): Surface {
         knot = smoothstep(kr, kr * 0.85, kd);
         if (knot > 0) rr = mix(rr, kd * 2.2, knot);
       }
-      const f = (((rr / spacing) % 1) + 1) % 1;
-      const late = smoothstep(0.55, 0.66, f) * (1 - smoothstep(0.9, 0.99, f));
+      // Years differ: some rings are wide, some crowded, and the latewood band varies too.
+      let ring = rr / spacing;
+      ring += 0.5 * ringJitter(ring * 0.45, seed + 9);
+      const f = ((ring % 1) + 1) % 1;
+      const start = 0.5 + 0.16 * hash(Math.floor(ring), seed + 10);
+      const late = smoothstep(start, start + 0.1, f) * (1 - smoothstep(0.9, 0.99, f));
       const arris = smoothstep(0, 3.5, Math.min(u, w - u)) * smoothstep(0, 3, nearJoint);
       const cup = 0.18 * ((u / w - 0.5) * 2) ** 2;
       let v = 0.24 * late + 0.025 * fine[i] + cup + knot * 0.15;
@@ -457,10 +471,11 @@ function coin({ n, mm, masks }: Ctx): Surface {
       const i = y * n + x;
       const r = Math.hypot(x + 0.5 - half, y + 0.5 - half);
       const edge = smoothstep(R, R - 0.25 / mm, r);
-      const dome = 0.19 * Math.sqrt(1 - (1 - Math.min(1, (figure[i] * mm) / 0.85)) ** 2);
+      // Struck relief rises gently from the field and rounds over.
+      const dome = 0.19 * Math.pow(smoothstep(0, 0.7, figure[i] * mm), 0.8);
       let top = 1.6 + 0.03 * (1 - (r / R) ** 2);
       top += 0.17 * Math.sqrt(rise(rim[i])) + 0.09 * rise(beads[i]) + 0.1 * rise(letters[i]);
-      top += dome + 0.075 * rise(thin[i]) - 0.05 * rise(incise[i]) * (figure[i] > 0 ? 1 : 0);
+      top += dome + 0.075 * smoothstep(0.3, 0.98, thin[i]) - 0.05 * rise(incise[i]) * (figure[i] > 0 ? 1 : 0);
       top -= 0.015 * smoothstep(0.2, 0.6, wear[i]);
       const desk = 0.03 * smoothstep(0, 0.15 * (0.5 / mm), pebble[i]);
       h[i] = mix(desk, top, edge);
@@ -505,6 +520,15 @@ function coin({ n, mm, masks }: Ctx): Surface {
   };
 }
 
+const BRICK = [
+  [0.3, 0.085, 0.045],
+  [0.26, 0.075, 0.045],
+  [0.34, 0.12, 0.06],
+  [0.22, 0.08, 0.055],
+  [0.29, 0.1, 0.06],
+  [0.14, 0.055, 0.045],
+];
+
 // 6. A cast-iron notice on brickwork.
 function plate({ n, mm, masks }: Ctx): Surface {
   const h = new Float32Array(n * n);
@@ -540,12 +564,12 @@ function plate({ n, mm, masks }: Ctx): Surface {
           const col = Math.floor((x / unit + 269 - (row % 2) * 134.5) / 269);
           const t = hash(row, col);
           const brick = rise(bricks[i]);
-          let r = mix(0.36, 0.42, brick) * 1;
-          let g = mix(0.33, 0.12, brick);
-          let b = mix(0.28, 0.06, brick);
-          r *= mix(1, 0.7 + 0.5 * t, brick);
-          g *= mix(1, 0.75 + 0.45 * t, brick);
-          b *= mix(1, 0.7 + 0.4 * t, brick);
+          // Stock bricks fired unevenly: reds, browns, and a few dark overburnt ones.
+          const kiln = BRICK[Math.floor(t * BRICK.length)];
+          const blot = 0.85 + 0.3 * flake[i] + 0.12 * grit[i];
+          let r = mix(0.3 + 0.03 * grit[i], kiln[0] * blot, brick);
+          let g = mix(0.28 + 0.03 * grit[i], kiln[1] * blot, brick);
+          let b = mix(0.23 + 0.025 * grit[i], kiln[2] * blot, brick);
           const dark = smoothstep(-0.2, 0.6, soot[i]) * 0.45;
           r *= 1 - dark;
           g *= 1 - dark;

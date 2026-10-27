@@ -140,7 +140,7 @@ export function start(root: HTMLElement) {
     const wax = kept && kept.wax.length === built.pw * built.ph ? kept.wax : new Float32Array(built.pw * built.ph);
     current = { place, built, wax };
     sheets.set(built.id, current);
-    if (debug) console.info(`rubbings: built ${built.id} at ${n}px in ${Math.round(built.ms)} ms`);
+    if (debug) console.info(`rubbings: built ${built.id} at ${n}px in ${Math.round(built.ms)} ms (${built.marks})`);
 
     ground.width = ground.height = built.n;
     gg.putImageData(new ImageData(built.scene as Uint8ClampedArray<ArrayBuffer>, built.n, built.n), 0, 0);
@@ -244,7 +244,7 @@ export function start(root: HTMLElement) {
 
   function rub(ax: number, ay: number, bx: number, by: number, axis: number, pressure: number) {
     if (!current) return;
-    const { pw, ph, gap, tooth } = current.built;
+    const { pw, ph, gap, tooth, press } = current.built;
     const { wax, place } = current;
     const [L, T] = crayonSize();
     const len = Math.hypot(bx - ax, by - ay);
@@ -259,8 +259,6 @@ export function start(root: HTMLElement) {
     const db = dx * vx + dy * vy;
     const crossing = Math.min(Math.abs(da) > 1e-4 ? L / Math.abs(da) : Infinity, Math.abs(db) > 1e-4 ? T / Math.abs(db) : Infinity);
     const reach = place.reach[0] + (place.reach[1] - place.reach[0]) * pressure;
-    const rate = 0.16 + 0.2 * pressure;
-    const thr = 0.6 - 0.3 * pressure;
     const hl = L / 2;
     const ht = T / 2;
     const ex = Math.abs(ux) * hl + Math.abs(vx) * ht;
@@ -296,12 +294,16 @@ export function start(root: HTMLElement) {
         const ends = smoothstep(1, 0.82, Math.abs(along));
         if (ends <= 0) continue;
         const k = y * pw + x;
-        const contact = 1 - smoothstep(reach * 0.1, reach, gap[k]);
+        const contact = 1 - smoothstep(reach * 0.1, reach * 1.4, gap[k]);
         if (contact <= 0) continue;
+        // Proud points bear more of the weight, so they take wax sooner and
+        // fill more of the paper's tooth.
+        const weight = clamp(0.2 + 0.5 * pressure + 0.45 * (press[k] / 127));
         const have = wax[k];
-        const lo = thr - 0.2 - 0.3 * have;
-        const gate = smoothstep(lo, lo + 0.3, tooth[k] / 255);
+        const lo = 0.6 - 0.62 * weight - 0.25 * have;
+        const gate = smoothstep(lo, lo + 0.48, tooth[k] / 255);
         const edge = EDGE[Math.max(0, Math.min(255, ((along + 1) * 127.5) | 0))];
+        const rate = 0.05 + 0.3 * weight;
         wax[k] = have + rate * exposure * contact * gate * edge * ends * (1 - have);
       }
     markDirty(x0, y0, x1, y1);
@@ -626,6 +628,14 @@ export function start(root: HTMLElement) {
           out.push(`${x}:${gap[k].toFixed(3)}/${tooth[k]}/${current.wax[k].toFixed(2)}`);
         }
         return out.join(' ');
+      },
+      /** A region of the paper, as a PNG data URL, for detail checks. */
+      crop(x: number, y: number, w: number, h: number) {
+        const c = document.createElement('canvas');
+        c.width = w;
+        c.height = h;
+        c.getContext('2d')!.drawImage(paperCanvas, x, y, w, h, 0, 0, w, h);
+        return c.toDataURL('image/png');
       },
       lift: (on: boolean) => setLift(on, true),
       liftTo(v: number) {

@@ -29,9 +29,13 @@ export interface Built {
   drape: Int8Array;
   /** In paper pixels: the paper's tooth, 0 (valley) to 255 (peak). */
   tooth: Uint8Array;
+  /** In paper pixels: how far a point stands proud of its surroundings, -127 to 127; proud points take more of the crayon's weight. */
+  press: Int8Array;
   /** In paper pixels: the scene's colour under the sheet, for thin paper. */
   under: Uint8Array;
   ms: number;
+  /** Milliseconds spent in each stage, for ?debug. */
+  marks: string;
 }
 
 const post = (m: Built, transfer: Transferable[]) =>
@@ -59,11 +63,19 @@ const EXAGGERATE: Record<PlaceId, number> = {
 
 function build(req: Request) {
   const t0 = performance.now();
+  let tm = t0;
+  const marks: string[] = [];
+  const mark = (name: string) => {
+    const now = performance.now();
+    marks.push(`${name} ${Math.round(now - tm)}`);
+    tm = now;
+  };
   const place = placeById(req.id);
   const { n } = req;
   const mm = (place.sceneCm * 10) / n;
   const surface = compose(req.id, { n, mm, masks: req.masks });
   const { h } = surface;
+  mark('surface');
 
   // The crayon rides the high spots: lift the surface to the highest point
   // within its bridging reach, then soften that riding plane.
@@ -76,7 +88,15 @@ function build(req: Request) {
   const deep = place.reach[1] * 4;
   for (let i = 0; i < cav.length; i++) cav[i] = clamp((broad[i] - h[i]) / deep);
 
+  // Proud points carry more of the crayon's weight than broad flats, at the
+  // scale of a detail and at the scale of the crayon itself.
+  const near = blur(h, n, n, Math.max(2, reach * 1.6), 2);
+  const far = blur(h, n, n, n * 0.07, 2);
+  const proud = place.reach[1];
+  mark('ride');
+
   const { rgb, gloss } = surface.paint(cav);
+  mark('paint');
 
   // Light the scene.
   const ex = EXAGGERATE[req.id];
@@ -95,13 +115,20 @@ function build(req: Request) {
       const x1 = Math.min(n - 1, x + 1);
       const dx = ((h[y * n + x1] - h[y * n + x0]) / (2 * mm)) * ex;
       const dy = ((h[y1 + x] - h[y0 + x]) / (2 * mm)) * ex;
-      const nl = Math.hypot(dx, dy, 1);
-      const nx = -dx / nl;
-      const ny = -dy / nl;
-      const nz = 1 / nl;
+      const nl = 1 / Math.sqrt(dx * dx + dy * dy + 1);
+      const nx = -dx * nl;
+      const ny = -dy * nl;
+      const nz = nl;
       const diff = Math.max(0, nx * lx + ny * ly + nz * lz);
       const amb = 0.42 * (1 - 0.75 * cav[i]);
-      const spec = Math.pow(Math.max(0, (nx * hx + ny * hy + nz * hz) / hl), 40) * (gloss[i] / 255) * 0.6;
+      let spec = 0;
+      if (gloss[i]) {
+        // A tight highlight: the half-vector cosine to the 40th.
+        const c = Math.max(0, (nx * hx + ny * hy + nz * hz) / hl);
+        const c2 = c * c;
+        const c8 = c2 * c2 * c2 * c2;
+        spec = c8 * c8 * c8 * c8 * c8 * (gloss[i] / 255) * 0.6;
+      }
       const k = amb + 0.9 * diff;
       scene[i * 4] = toSrgb(toLin[rgb[i * 3]] * k + spec);
       scene[i * 4 + 1] = toSrgb(toLin[rgb[i * 3 + 1]] * k + spec);
@@ -120,7 +147,9 @@ function build(req: Request) {
   const ca = Math.cos(a);
   const sa = Math.sin(a);
   const sheet = blur(ride, n, n, 1.2 / mm, 2);
+  mark('light');
   const gap = new Float32Array(pw * ph);
+  const press = new Int8Array(pw * ph);
   const drape = new Int8Array(pw * ph);
   const under = new Uint8Array(pw * ph * 3);
   const drapeEx = ex * 0.6;
@@ -131,7 +160,10 @@ function build(req: Request) {
       const sx = cx + ox * ca - oy * sa - 0.5;
       const sy = cy + ox * sa + oy * ca - 0.5;
       const k = j * pw + i;
-      gap[k] = Math.max(0, sample(ride, n, n, sx, sy) - sample(h, n, n, sx, sy));
+      const hh = sample(h, n, n, sx, sy);
+      gap[k] = Math.max(0, sample(ride, n, n, sx, sy) - hh);
+      const lift = 0.35 * (hh - sample(near, n, n, sx, sy)) + 0.65 * (hh - sample(far, n, n, sx, sy));
+      press[k] = Math.round(127 * clamp(lift / proud, -1, 1));
       const dx = ((sample(sheet, n, n, sx + 1, sy) - sample(sheet, n, n, sx - 1, sy)) / (2 * mm)) * drapeEx;
       const dy = ((sample(sheet, n, n, sx, sy + 1) - sample(sheet, n, n, sx, sy - 1)) / (2 * mm)) * drapeEx;
       const nl = Math.hypot(dx, dy, 1);
@@ -143,15 +175,18 @@ function build(req: Request) {
       under[k * 3 + 2] = scene[p + 2];
     }
 
+  mark('sheet');
+
   // The paper's tooth: fine fibre, a little longer one way than the other.
-  const fine = fbm(pw, ph, 2.2, 2, 91);
-  const fibre = fbm(pw, ph, 5, 3, 92, { stretch: 0.45 });
+  const fine = fbm(pw, ph, 1.3, 2, 91);
+  const fibre = fbm(pw, ph, 4, 2, 92, { stretch: 0.45 });
   const cloud = fbm(pw, ph, 60, 3, 93);
   const tooth = new Uint8Array(pw * ph);
   for (let k = 0; k < tooth.length; k++) {
-    const v = 0.5 + 0.62 * fine[k] + 0.5 * fibre[k] + 0.18 * cloud[k];
+    const v = 0.5 + 0.46 * fine[k] + 0.32 * fibre[k] + 0.12 * cloud[k];
     tooth[k] = Math.round(255 * clamp(v));
   }
+  mark('tooth');
 
   post(
     {
@@ -164,10 +199,12 @@ function build(req: Request) {
       gap,
       drape,
       tooth,
+      press,
       under,
       ms: performance.now() - t0,
+      marks: marks.join(', '),
     },
-    [scene.buffer, gap.buffer, drape.buffer, tooth.buffer, under.buffer],
+    [scene.buffer, gap.buffer, drape.buffer, tooth.buffer, press.buffer, under.buffer],
   );
 }
 

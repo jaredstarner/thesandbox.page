@@ -187,6 +187,16 @@ export function fbm(
     for (let i = 0; i < lat.length; i++) lat[i] = rand() * 2 - 1;
     const ox = rand() * cx;
     const oy = rand() * cy;
+    // Columns repeat on every row, so work them out once.
+    const ixs = new Int32Array(w);
+    const txs = new Float32Array(w);
+    for (let x = 0; x < w; x++) {
+      const fx = (x + ox) / cx;
+      const ix = Math.floor(fx);
+      const tx = fx - ix;
+      ixs[x] = ix;
+      txs[x] = tx * tx * (3 - 2 * tx);
+    }
     for (let y = 0; y < h; y++) {
       const fy = (y + oy) / cy;
       const iy = Math.floor(fy);
@@ -196,12 +206,12 @@ export function fbm(
       const r1 = r0 + gw;
       const row = y * w;
       for (let x = 0; x < w; x++) {
-        const fx = (x + ox) / cx;
-        const ix = Math.floor(fx);
-        let tx = fx - ix;
-        tx = tx * tx * (3 - 2 * tx);
-        const a = lat[r0 + ix] + (lat[r0 + ix + 1] - lat[r0 + ix]) * tx;
-        const b = lat[r1 + ix] + (lat[r1 + ix + 1] - lat[r1 + ix]) * tx;
+        const ix = ixs[x];
+        const tx = txs[x];
+        const p = r0 + ix;
+        const q = r1 + ix;
+        const a = lat[p] + (lat[p + 1] - lat[p]) * tx;
+        const b = lat[q] + (lat[q + 1] - lat[q]) * tx;
         out[row + x] += amp * (a + (b - a) * ty);
       }
     }
