@@ -92,9 +92,9 @@ export function signedDistance(mask: Uint8Array, w: number, h: number): Float32A
 /** A separable box blur of radius r, repeated `passes` times (three passes is close to a Gaussian). */
 export function blur(src: Float32Array, w: number, h: number, r: number, passes = 3): Float32Array {
   const rad = Math.max(0, Math.round(r));
-  let a = Float32Array.from(src);
+  const a = Float32Array.from(src);
   if (rad === 0) return a;
-  let b = new Float32Array(w * h);
+  const b = new Float32Array(w * h);
   const span = 2 * rad + 1;
   for (let p = 0; p < passes; p++) {
     for (let y = 0; y < h; y++) {

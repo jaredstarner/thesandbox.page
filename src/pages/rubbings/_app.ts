@@ -257,7 +257,10 @@ export function start(root: HTMLElement) {
     const vy = ux;
     const da = dx * ux + dy * uy;
     const db = dx * vx + dy * vy;
-    const crossing = Math.min(Math.abs(da) > 1e-4 ? L / Math.abs(da) : Infinity, Math.abs(db) > 1e-4 ? T / Math.abs(db) : Infinity);
+    const crossing = Math.min(
+      Math.abs(da) > 1e-4 ? L / Math.abs(da) : Infinity,
+      Math.abs(db) > 1e-4 ? T / Math.abs(db) : Infinity,
+    );
     const reach = place.reach[0] + (place.reach[1] - place.reach[0]) * pressure;
     const hl = L / 2;
     const ht = T / 2;
@@ -377,7 +380,10 @@ export function start(root: HTMLElement) {
       const [L] = crayonSize();
       const k = 1 - Math.exp(-len / (L * 0.5));
       const want = Math.atan2(dy, dx) + Math.PI / 2;
-      axisVec = [axisVec[0] + (Math.cos(2 * want) - axisVec[0]) * k, axisVec[1] + (Math.sin(2 * want) - axisVec[1]) * k];
+      axisVec = [
+        axisVec[0] + (Math.cos(2 * want) - axisVec[0]) * k,
+        axisVec[1] + (Math.sin(2 * want) - axisVec[1]) * k,
+      ];
       axis = Math.atan2(axisVec[1], axisVec[0]) / 2;
       rub(drawing.x, drawing.y, x, y, axis, pressureOf(ev));
       drawing.x = x;

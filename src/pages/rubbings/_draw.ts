@@ -193,7 +193,7 @@ function cover(L: Layers, fonts: Fonts): Masks {
     for (let row = -1; row < 10; row++) {
       const y = row * rowH + 6;
       const shift = (row % 2) * 100 + rand() * 30;
-      for (let x = -220 + shift; x < 1100; ) {
+      for (let x = -220 + shift; x < 1100;) {
         const w = 180 + rand() * 50;
         const jx = (rand() - 0.5) * 6;
         const jy = (rand() - 0.5) * 6;
@@ -495,7 +495,12 @@ function pinnate(kind: 'oak' | 'birch', base: Pt, angle: number, len: number, se
       }
       if (kind === 'oak') {
         const tm = (crests[side][k] + crests[side][k + 1]) / 2;
-        const pts = quad(at(tm - 0.03, 0), at(tm - 0.01, sgn * width(tm, side) * 0.4), at(tm, sgn * width(tm, side) * 0.86), 8);
+        const pts = quad(
+          at(tm - 0.03, 0),
+          at(tm - 0.01, sgn * width(tm, side) * 0.4),
+          at(tm, sgn * width(tm, side) * 0.86),
+          8,
+        );
         order3.push([pts, taper(pts, 1.4, 0.9)]);
       }
     }
@@ -549,10 +554,7 @@ function palmate(centre: Pt, turn: number, r: number, seed: number): Leaf {
   for (const l of lobes) {
     const tip = l.s * r * 0.93;
     const end: Pt = [centre[0] + Math.cos(l.a) * tip, centre[1] + Math.sin(l.a) * tip];
-    const ctl: Pt = [
-      centre[0] + Math.cos(l.a + 0.06) * tip * 0.5,
-      centre[1] + Math.sin(l.a + 0.06) * tip * 0.5,
-    ];
+    const ctl: Pt = [centre[0] + Math.cos(l.a + 0.06) * tip * 0.5, centre[1] + Math.sin(l.a + 0.06) * tip * 0.5];
     const pts = quad(centre, ctl, end).map(rot);
     order1.push([pts, taper(pts, 3.4 * l.s + 1, 1)]);
     // Secondaries off each primary, out to the lobe's shoulders.

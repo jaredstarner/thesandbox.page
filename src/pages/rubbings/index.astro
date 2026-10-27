@@ -30,17 +30,22 @@ const papers = [
       <div class="stage" data-stage>
         <canvas class="ground" data-ground aria-hidden="true"></canvas>
         <div class="sheet" data-sheet>
-          <canvas class="paper" data-paper role="img" aria-label="A sheet of paper taped down over something"
-          ></canvas>
+          <canvas class="paper" data-paper role="img" aria-label="A sheet of paper taped down over something"></canvas>
           <div class="flap" data-flap aria-hidden="true" hidden>
             <canvas data-flap-canvas></canvas>
           </div>
           <i class="tape left" aria-hidden="true"></i>
           <i class="tape right" aria-hidden="true"></i>
         </div>
-        <div class="crayon" data-crayon aria-hidden="true" hidden><i></i></div>
-        <p class="hint" data-hint>Rub across the paper</p>
-        <p class="loading" data-loading>Taping down the paper</p>
+        <div class="crayon" data-crayon aria-hidden="true" hidden>
+          <i></i>
+        </div>
+        <p class="hint" data-hint>
+          Rub across the paper
+        </p>
+        <p class="loading" data-loading>
+          Taping down the paper
+        </p>
         <p class="unsupported" data-unsupported hidden>
           This browser can't lay the paper down: the page needs web workers and canvas.
         </p>
@@ -52,29 +57,31 @@ const papers = [
 
     <aside class="kit">
       <header class="head">
-        <a class="home" href="/">thesandbox.page</a>
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
         <h1>Rubbings</h1>
         <p class="lede">
-          Six sheets of paper, each taped down over something. Rub across one with the crayon and whatever is under
-          it comes up through the paper.
+          Six sheets of paper, each taped down over something. Rub across one with the crayon and whatever is under it
+          comes up through the paper.
         </p>
       </header>
 
       <ol class="places" aria-label="Sheets">
-        {
-          PLACES.map((p) => (
-            <li>
-              <button type="button" data-go={p.id} aria-pressed={p.id === 'cover' ? 'true' : 'false'}>
-                <span class="no">{p.no}</span>
-                <span class="where">{p.name}</span>
-              </button>
-            </li>
-          ))
-        }
+        {PLACES.map((p) => (
+          <li>
+            <button type="button" data-go={p.id} aria-pressed={p.id === 'cover' ? 'true' : 'false'}>
+              <span class="no">{p.no}</span>
+              <span class="where">{p.name}</span>
+            </button>
+          </li>
+        ))}
       </ol>
 
       <section class="note" aria-live="polite">
-        <p class="what" data-what>Lift the sheet to see what is under it.</p>
+        <p class="what" data-what>
+          Lift the sheet to see what is under it.
+        </p>
         <div class="scale" aria-hidden="true">
           <i data-scale-bar></i>
           <span data-scale-label>10 cm</span>
@@ -84,44 +91,58 @@ const papers = [
       <div class="tools">
         <fieldset class="swatches">
           <legend>Wax</legend>
-          {
-            waxes.map((w, i) => (
-              <label title={w.name}>
-                <input type="radio" name="wax" value={w.id} checked={i === 0} />
-                <span class="stick" style={`--c: ${w.color}`} />
-                <span class="name">{w.name}</span>
-              </label>
-            ))
-          }
+          {waxes.map((w, i) => (
+            <label title={w.name}>
+              <input type="radio" name="wax" value={w.id} checked={i === 0} />
+              <span class="stick" style={`--c: ${w.color}`} />
+              <span class="name">{w.name}</span>
+            </label>
+          ))}
         </fieldset>
         <fieldset class="swatches">
           <legend>Paper</legend>
-          {
-            papers.map((p, i) => (
-              <label title={p.name}>
-                <input type="radio" name="paper" value={p.id} checked={i === 0} />
-                <span class="leaf" style={`--c: ${p.color}`} />
-                <span class="name">{p.name}</span>
-              </label>
-            ))
-          }
+          {papers.map((p, i) => (
+            <label title={p.name}>
+              <input type="radio" name="paper" value={p.id} checked={i === 0} />
+              <span class="leaf" style={`--c: ${p.color}`} />
+              <span class="name">{p.name}</span>
+            </label>
+          ))}
         </fieldset>
         <fieldset class="toggle">
           <legend>Pressure</legend>
-          <label><input type="radio" name="pressure" value="light" /><span>Light</span></label>
-          <label><input type="radio" name="pressure" value="firm" checked /><span>Firm</span></label>
+          <label>
+            <input type="radio" name="pressure" value="light" />
+            <span>Light</span>
+          </label>
+          <label>
+            <input type="radio" name="pressure" value="firm" checked />
+            <span>Firm</span>
+          </label>
         </fieldset>
         <fieldset class="toggle">
           <legend>Crayon</legend>
-          <label><input type="radio" name="edge" value="side" checked /><span>Side</span></label>
-          <label><input type="radio" name="edge" value="tip" /><span>Tip</span></label>
+          <label>
+            <input type="radio" name="edge" value="side" checked />
+            <span>Side</span>
+          </label>
+          <label>
+            <input type="radio" name="edge" value="tip" />
+            <span>Tip</span>
+          </label>
         </fieldset>
       </div>
 
       <div class="actions">
-        <button type="button" data-lift aria-pressed="false">Lift the sheet</button>
-        <button type="button" data-fresh>New sheet</button>
-        <button type="button" data-save>Save rubbing</button>
+        <button type="button" data-lift aria-pressed="false">
+          Lift the sheet
+        </button>
+        <button type="button" data-fresh>
+          New sheet
+        </button>
+        <button type="button" data-save>
+          Save rubbing
+        </button>
       </div>
     </aside>
   </main>
@@ -377,9 +398,7 @@ const papers = [
     flex-direction: column;
     gap: 14px;
     padding: 18px 20px 20px;
-    background:
-      linear-gradient(180deg, rgb(255 255 255 / 0.25), rgb(255 255 255 / 0) 30%),
-      var(--card);
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.25), rgb(255 255 255 / 0) 30%), var(--card);
     border-radius: 2px;
     box-shadow:
       0 1px 0 rgb(255 255 255 / 0.4) inset,
@@ -518,9 +537,9 @@ const papers = [
 
   legend {
     float: left;
-    width: 5.6em;
+    width: 6.4em;
     padding: 0;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -540,16 +559,20 @@ const papers = [
     pointer-events: none;
   }
 
+  .swatches {
+    gap: 2px;
+  }
+
   .swatches label {
     display: grid;
     justify-items: center;
     gap: 2px;
-    padding: 4px 3px 2px;
+    padding: 4px 2px 2px;
     border-radius: 3px;
   }
 
   .swatches .name {
-    font-size: 10.5px;
+    font-size: 10px;
     color: var(--ink-soft);
   }
 
@@ -570,12 +593,10 @@ const papers = [
 
   .stick {
     display: block;
-    width: 36px;
+    width: 34px;
     height: 13px;
     border-radius: 2px;
-    background:
-      linear-gradient(180deg, rgb(255 255 255 / 0.32), rgb(255 255 255 / 0) 40%, rgb(0 0 0 / 0.32)),
-      var(--c);
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.32), rgb(255 255 255 / 0) 40%, rgb(0 0 0 / 0.32)), var(--c);
     box-shadow:
       1px 2px 3px rgb(0 0 0 / 0.25),
       inset 0 0 0 1px rgb(0 0 0 / 0.2);
@@ -669,6 +690,29 @@ const papers = [
 
     h1 {
       font-size: 36px;
+    }
+
+    /* On a phone the stage fills the screen, so the sheet's own controls come first. */
+    .actions {
+      order: 1;
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .places {
+      order: 2;
+    }
+
+    .note {
+      order: 3;
+    }
+
+    .tools {
+      order: 4;
+    }
+
+    .lede {
+      font-size: 14px;
     }
 
     .places button {

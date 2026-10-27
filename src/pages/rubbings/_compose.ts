@@ -108,11 +108,12 @@ function cover({ n, mm, masks }: Ctx): Surface {
           const fy = (y - half) / n;
           const iron = lid[i] > 0.5 || frame[i] > 0.5;
           if (iron) {
-            const rust = smoothstep(0.4, 0.9, c + 0.3 * tone[i] + 0.12 * grit[i]);
+            // Black iron, rust and road grit settled in the deepest places, tops polished by tyres.
+            const rust = smoothstep(0.62, 1, c + 0.22 * tone[i] + 0.1 * grit[i]) * 0.75;
             const worn = 1 - smoothstep(0.02, 0.18, c);
-            let r = mix(0.042, 0.13, rust);
-            let g = mix(0.04, 0.06, rust);
-            let b = mix(0.04, 0.03, rust);
+            let r = mix(0.04, 0.12, rust);
+            let g = mix(0.038, 0.055, rust);
+            let b = mix(0.037, 0.028, rust);
             r = mix(r, 0.14, worn * 0.8);
             g = mix(g, 0.14, worn * 0.8);
             b = mix(b, 0.145, worn * 0.8);
@@ -333,8 +334,15 @@ function floor({ n, mm }: Ctx): Surface {
   const nails: [number, number, number][] = [];
   for (const b of BOARDS)
     for (const y of [...joists, ...b.joints.map((j) => j - 18), ...b.joints.map((j) => j + 18)])
-      for (const u of [26, b.x1 - b.x0 - 26]) nails.push([b.x0 + u, y + (hash(b.x0, y) - 0.5) * 6, hash(y, b.x0) * 0.4 - 0.2]);
+      for (const u of [26, b.x1 - b.x0 - 26])
+        nails.push([b.x0 + u, y + (hash(b.x0, y) - 0.5) * 6, hash(y, b.x0) * 0.4 - 0.2]);
+  // Nails sit on a few lines across the floor; skip the search everywhere else.
+  const nailRow = new Uint8Array(n);
+  for (const [, ny] of nails)
+    for (let y = Math.max(0, Math.floor((ny - 8) / mm)); y <= Math.min(n - 1, Math.ceil((ny + 8) / mm)); y++)
+      nailRow[y] = 1;
   const nailAt = (x: number, y: number) => {
+    if (!nailRow[Math.min(n - 1, Math.round(y / mm))]) return 9;
     for (const [nx, ny, rot] of nails) {
       const dx = x - nx;
       const dy = y - ny;
@@ -612,4 +620,3 @@ export function compose(id: PlaceId, ctx: Ctx): Surface {
       return plate(ctx);
   }
 }
-
