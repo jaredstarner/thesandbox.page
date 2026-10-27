@@ -87,7 +87,7 @@ export function start(root: HTMLElement) {
 
   // One resolution for the visit, from the stage's size on this screen.
   const dpr = Math.min(3, window.devicePixelRatio || 1);
-  const n = Math.round(clamp(stage.clientWidth * dpr, 1024, 1800) / 2) * 2;
+  const n = Math.round(clamp(stage.clientWidth * dpr, 1024, 1600) / 2) * 2;
 
   const sheets = new Map<PlaceId, Sheet>();
   const lifted = new Set<PlaceId>();
@@ -170,7 +170,7 @@ export function start(root: HTMLElement) {
     const dark = p.dark;
     for (let k = 0; k < pw * ph; k++) {
       const fibre = (tooth[k] / 255 - 0.5) * (dark ? 0.16 : 0.07);
-      let light = 1 + (drape[k] / 127) * (dark ? 0.9 : 0.55) + fibre;
+      let light = 1 + (drape[k] / 127) * (dark ? 0.3 : 0.2) + fibre;
       if (p.thin) {
         const u = 0.2126 * toLin[under[k * 3]] + 0.7152 * toLin[under[k * 3 + 1]] + 0.0722 * toLin[under[k * 3 + 2]];
         light *= 1 - p.thin + p.thin * clamp(0.3 + u * 2.4, 0, 1.15);
@@ -426,18 +426,40 @@ export function start(root: HTMLElement) {
     else liftFrame = 0;
   }
 
+  // The back of the sheet, with the wax showing faintly through; it is
+  // mirrored by the fold itself.
+  const flapBack = document.createElement('canvas');
   function drawFlap() {
     if (!current) return;
     const p = PAPER[paperId];
     const w = Math.round(current.built.pw / 2);
     const h = Math.round(current.built.ph / 2);
-    flapCanvas.width = w;
-    flapCanvas.height = h;
-    fg.fillStyle = p.back;
+    flapBack.width = flapCanvas.width = w;
+    flapBack.height = flapCanvas.height = h;
+    const bg = flapBack.getContext('2d')!;
+    bg.fillStyle = p.back;
+    bg.fillRect(0, 0, w, h);
+    bg.globalAlpha = p.ghost;
+    bg.drawImage(paperCanvas, 0, 0, w, h);
+    bg.globalAlpha = 1;
+  }
+
+  /** Light on the folded part: bright along the crease, falling away toward the free edge. */
+  function shadeFlap(nx: number, ny: number, c: number, W: number, H: number) {
+    const w = flapCanvas.width;
+    const h = flapCanvas.height;
+    fg.drawImage(flapBack, 0, 0);
+    const px = W / 2;
+    const py = (c - nx * px) / ny;
+    const sx = w / W;
+    const sy = h / H;
+    const reach = Math.max(40, H - py);
+    const grad = fg.createLinearGradient(px * sx, py * sy, (px + nx * reach) * sx, (py + ny * reach) * sy);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 0.28)');
+    grad.addColorStop(0.18, 'rgba(255, 255, 255, 0.06)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
+    fg.fillStyle = grad;
     fg.fillRect(0, 0, w, h);
-    fg.globalAlpha = p.ghost;
-    fg.drawImage(paperCanvas, 0, 0, w, h);
-    fg.globalAlpha = 1;
   }
 
   /** Clip a polygon to the half-plane where nx * x + ny * y <= c. */
@@ -498,7 +520,7 @@ export function start(root: HTMLElement) {
     const b = -2 * nx * ny;
     const d = 1 - 2 * ny * ny;
     flap.style.transform = `matrix(${a}, ${b}, ${b}, ${d}, ${2 * c * nx}, ${2 * c * ny})`;
-    flap.style.setProperty('--fold', String(e));
+    if (!flap.hidden) shadeFlap(nx, ny, c, W, H);
   }
 
   liftButton.addEventListener('click', () => setLift(liftTarget === 0));
@@ -572,6 +594,7 @@ export function start(root: HTMLElement) {
       /** Rub the whole sheet in zigzags: `passes` times over, at a pressure from 0 to 1. */
       rubAll(passes = 2, pressure = 1, cover = 1) {
         if (!current) return false;
+        root.dataset.touched = '';
         const { pw, ph } = current.built;
         const [L] = crayonSize();
         const step = L * 0.55;
@@ -591,6 +614,18 @@ export function start(root: HTMLElement) {
         }
         paintAll();
         return true;
+      },
+      /** The paper's fields along a row through the middle, every `step` pixels. */
+      probe(step = 16) {
+        if (!current) return null;
+        const { pw, ph, gap, tooth } = current.built;
+        const y = Math.round(ph / 2);
+        const out: string[] = [];
+        for (let x = 0; x < pw; x += step) {
+          const k = y * pw + x;
+          out.push(`${x}:${gap[k].toFixed(3)}/${tooth[k]}/${current.wax[k].toFixed(2)}`);
+        }
+        return out.join(' ');
       },
       lift: (on: boolean) => setLift(on, true),
       liftTo(v: number) {

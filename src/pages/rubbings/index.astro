@@ -55,8 +55,8 @@ const papers = [
         <a class="home" href="/">thesandbox.page</a>
         <h1>Rubbings</h1>
         <p class="lede">
-          Six sheets of paper, each taped down over something with a surface. Rub across one with the crayon and
-          whatever is under it comes up through the paper.
+          Six sheets of paper, each taped down over something. Rub across one with the crayon and whatever is under
+          it comes up through the paper.
         </p>
       </header>
 
@@ -65,8 +65,8 @@ const papers = [
           PLACES.map((p) => (
             <li>
               <button type="button" data-go={p.id} aria-pressed={p.id === 'cover' ? 'true' : 'false'}>
-                <span class="no">No. {p.no}</span>
-                <span class="where">{p.where}</span>
+                <span class="no">{p.no}</span>
+                <span class="where">{p.name}</span>
               </button>
             </li>
           ))
@@ -175,10 +175,12 @@ const papers = [
   }
 
   .bench {
+    position: sticky;
+    top: 16px;
+    align-self: start;
     display: grid;
     place-items: center;
     min-width: 0;
-    min-height: 0;
   }
 
   .stage {
@@ -375,8 +377,8 @@ const papers = [
     align-self: start;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: 20px 22px 22px;
+    gap: 14px;
+    padding: 18px 20px 20px;
     background:
       linear-gradient(180deg, rgb(255 255 255 / 0.25), rgb(255 255 255 / 0) 30%),
       var(--card);
@@ -427,15 +429,16 @@ const papers = [
     margin: 0;
     padding: 0;
     display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 4px;
   }
 
   .places button {
     width: 100%;
     display: grid;
-    grid-template-columns: 4.2em 1fr;
+    grid-template-columns: 1.6em 1fr;
     align-items: baseline;
-    gap: 6px;
+    gap: 4px;
     padding: 6px 8px;
     border: 0;
     border-radius: 2px;
@@ -569,7 +572,7 @@ const papers = [
 
   .stick {
     display: block;
-    width: 42px;
+    width: 36px;
     height: 14px;
     border-radius: 7px / 6px;
     background:
@@ -676,13 +679,7 @@ const papers = [
       font-size: 36px;
     }
 
-    .places {
-      grid-template-columns: 1fr 1fr;
-    }
-
     .places button {
-      grid-template-columns: 1fr;
-      gap: 0;
       font-size: 13px;
     }
   }
