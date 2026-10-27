@@ -241,7 +241,7 @@ function leaves({ n, mm, masks }: Ctx): Surface {
       const rgb = new Uint8Array(n * n * 3);
       const gloss = new Uint8Array(n * n);
       const tone = fbm(n, n, 12 / mm, 3, 55);
-      const blot = fbm(n, n, 4 / mm, 3, 56);
+      const blot = fbm(n, n, 10 / mm, 4, 56);
       const speck = fbm(n, n, 0.6 / mm, 2, 57);
       for (let i = 0; i < h.length; i++) {
         // Sandstone: buff, with darker grains and a gritty joint.
@@ -256,14 +256,15 @@ function leaves({ n, mm, masks }: Ctx): Surface {
         const kind = oak[i] >= maple[i] && oak[i] >= birch[i] ? 0 : maple[i] >= birch[i] ? 1 : 2;
         const bl = blade[i];
         if (bl > 0) {
-          const brown = smoothstep(0.1, 0.5, blot[i]);
+          const brown = smoothstep(-0.25, 0.55, blot[i]);
           let lr: number;
           let lg: number;
           let lb: number;
           if (kind === 0) {
-            lr = mix(0.27, 0.2, brown);
-            lg = mix(0.22, 0.1, brown);
-            lb = mix(0.09, 0.035, brown);
+            // An oak leaf gone over: dull tan, browning from the edges in.
+            lr = mix(0.33, 0.2, brown);
+            lg = mix(0.25, 0.11, brown);
+            lb = mix(0.1, 0.04, brown);
           } else if (kind === 1) {
             lr = mix(0.6, 0.42, brown * 0.6);
             lg = mix(0.44, 0.22, brown * 0.6);
@@ -328,6 +329,7 @@ function floor({ n, mm }: Ctx): Surface {
   const stain = new Float32Array(n * n);
   const which = new Uint8Array(n * n);
   const warp = fbm(n, n, 90 / mm, 3, 71, { stretch: 4 });
+  const wander = fbm(n, n, 24 / mm, 3, 74, { stretch: 2.5 });
   const fine = fbm(n, n, 0.6 / mm, 2, 72, { stretch: 6 });
   const dirt = fbm(n, n, 20 / mm, 3, 73);
   const joists = [92, 492];
@@ -384,7 +386,7 @@ function floor({ n, mm }: Ctx): Surface {
       const pith = (r1 - 0.5) * 2 * (60 + r2 * 160);
       const depth = 14 + r3 * 50 + (ym - seg * 300) * (0.03 + r2 * 0.04);
       const spacing = 2.6 + hash(seed, 4) * 1.8;
-      let rr = Math.hypot(u - w / 2 - pith, depth) + warp[i] * (4 + r3 * 5);
+      let rr = Math.hypot(u - w / 2 - pith, depth) + warp[i] * (5 + r3 * 7) + wander[i] * 1.6;
       // A knot, with the grain swirling round it.
       const kx = w * (0.25 + hash(seed, 5) * 0.5);
       const ky = 60 + hash(seed, 6) * 560;
