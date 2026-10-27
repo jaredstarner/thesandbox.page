@@ -505,6 +505,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   psychophysics: { label: 'Psychophysics' },
   raymarching: { label: 'Ray marching' },
   translucency: { label: 'Translucency' },
+  frottage: { label: 'Frottage' },
+  'distance-transform': { label: 'Distance transform' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

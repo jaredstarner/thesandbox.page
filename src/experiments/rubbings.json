@@ -1,0 +1,8 @@
+{
+  "title": "Rubbings",
+  "summary": "Six sheets of paper taped down over things around a mill village, blank until you rub them: the crayon brings up a drain cover, a headstone, fallen leaves, scrubbed floorboards, a penny, and a bridge notice, and you can lift each sheet to see what was under it.",
+  "date": "2026-10-27",
+  "tags": ["canvas", "web-workers", "pointer-events", "frottage", "distance-transform"],
+  "requires": ["canvas", "web-workers"],
+  "plot": 26
+}
