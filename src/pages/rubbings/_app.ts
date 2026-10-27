@@ -13,7 +13,7 @@ type PaperId = 'cartridge' | 'detail' | 'black';
 const WAX: Record<WaxId, { color: string; sheen: number }> = {
   black: { color: '#1b1714', sheen: 0.12 },
   graphite: { color: '#4d4f53', sheen: 0.55 },
-  gold: { color: '#caa24f', sheen: 0.7 },
+  gold: { color: '#d4ad5a', sheen: 0.8 },
   silver: { color: '#c4c7ca', sheen: 0.6 },
   red: { color: '#8e2c25', sheen: 0.15 },
 };
@@ -21,7 +21,7 @@ const WAX: Record<WaxId, { color: string; sheen: number }> = {
 /** Paper colours; `thin` is how much of what is under it shows through. */
 const PAPER: Record<PaperId, { color: string; back: string; thin: number; dark: boolean; ghost: number }> = {
   cartridge: { color: '#eee8da', back: '#e6dfcf', thin: 0, dark: false, ghost: 0.1 },
-  detail: { color: '#e9e6de', back: '#dfdcd3', thin: 0.34, dark: false, ghost: 0.32 },
+  detail: { color: '#e9e6de', back: '#dfdcd3', thin: 0.22, dark: false, ghost: 0.32 },
   black: { color: '#1c1b1a', back: '#242322', thin: 0, dark: true, ghost: 0.04 },
 };
 
@@ -170,7 +170,7 @@ export function start(root: HTMLElement) {
     const dark = p.dark;
     for (let k = 0; k < pw * ph; k++) {
       const fibre = (tooth[k] / 255 - 0.5) * (dark ? 0.16 : 0.07);
-      let light = 1 + (drape[k] / 127) * (dark ? 0.3 : 0.2) + fibre;
+      let light = 1 + (drape[k] / 127) * (dark ? 0.26 : 0.16) + fibre;
       if (p.thin) {
         const u = 0.2126 * toLin[under[k * 3]] + 0.7152 * toLin[under[k * 3 + 1]] + 0.0722 * toLin[under[k * 3 + 2]];
         light *= 1 - p.thin + p.thin * clamp(0.3 + u * 2.4, 0, 1.15);
@@ -296,15 +296,17 @@ export function start(root: HTMLElement) {
         const k = y * pw + x;
         const contact = 1 - smoothstep(reach * 0.1, reach * 1.4, gap[k]);
         if (contact <= 0) continue;
-        // Proud points bear more of the weight, so they take wax sooner and
-        // fill more of the paper's tooth.
+        // Proud points bear more of the weight, so they reach further down
+        // into the paper's tooth. One pass marks most of what a weight can
+        // reach; more passes burnish the wax in slowly.
         const weight = clamp(0.2 + 0.5 * pressure + 0.45 * (press[k] / 127));
-        const have = wax[k];
-        const lo = 0.6 - 0.62 * weight - 0.25 * have;
-        const gate = smoothstep(lo, lo + 0.48, tooth[k] / 255);
+        const lo = 0.56 - 0.72 * weight;
+        const gate = smoothstep(lo, lo + 0.45, tooth[k] / 255);
         const edge = EDGE[Math.max(0, Math.min(255, ((along + 1) * 127.5) | 0))];
-        const rate = 0.05 + 0.3 * weight;
-        wax[k] = have + rate * exposure * contact * gate * edge * ends * (1 - have);
+        const target = contact * gate * edge * ends;
+        let have = wax[k];
+        if (have < target) have += Math.min(1, exposure * 3) * (target - have);
+        wax[k] = have + 0.035 * exposure * contact * weight * ends * (1 - have);
       }
     markDirty(x0, y0, x1, y1);
   }
