@@ -372,5 +372,35 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Trebuchet MS', 'sans-serif'],
     },
+    // /rubbings/: a Caslon for the headings and the letters cut in slate, a typewriter face for the
+    // tickets, and a fat slab for the letters cast in iron.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Libre Caslon Text',
+      cssVariable: '--font-rubbings',
+      // No 700 italic on Fontsource's CDN, so 400 only.
+      weights: [400],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Courier Prime',
+      cssVariable: '--font-rubbings-type',
+      weights: [400, 700],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Courier New', 'monospace'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Alfa Slab One',
+      cssVariable: '--font-rubbings-cast',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Rockwell', 'Georgia', 'serif'],
+    },
   ],
 });

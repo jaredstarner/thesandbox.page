@@ -1,0 +1,688 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { PLACES } from './_places';
+
+const waxes = [
+  { id: 'black', name: 'Heelball', color: '#1d1916' },
+  { id: 'graphite', name: 'Graphite', color: '#4a4c50' },
+  { id: 'gold', name: 'Gold', color: '#c9a14c' },
+  { id: 'silver', name: 'Silver', color: '#b8bbbe' },
+  { id: 'red', name: 'Red', color: '#93302a' },
+];
+const papers = [
+  { id: 'cartridge', name: 'Cartridge', color: '#eee8da' },
+  { id: 'detail', name: 'Thin', color: '#e4e2db' },
+  { id: 'black', name: 'Black', color: '#1b1a19' },
+];
+---
+
+<Bare
+  title="Rubbings"
+  description="Six sheets of paper taped over things around a mill village, blank until you rub them with a crayon: a drain cover, a headstone, leaves, floorboards, a penny, and a bridge notice."
+>
+  <Font cssVariable="--font-rubbings" slot="head" />
+  <Font cssVariable="--font-rubbings-type" slot="head" />
+  <Font cssVariable="--font-rubbings-cast" slot="head" />
+
+  <main class="rubbings" data-rubbings data-place="cover" data-state="loading">
+    <div class="bench">
+      <div class="stage" data-stage>
+        <canvas class="ground" data-ground aria-hidden="true"></canvas>
+        <div class="sheet" data-sheet>
+          <canvas class="paper" data-paper role="img" aria-label="A sheet of paper taped down over something"
+          ></canvas>
+          <div class="flap" data-flap aria-hidden="true" hidden>
+            <canvas data-flap-canvas></canvas>
+          </div>
+          <i class="tape left" aria-hidden="true"></i>
+          <i class="tape right" aria-hidden="true"></i>
+        </div>
+        <div class="crayon" data-crayon aria-hidden="true" hidden><i></i></div>
+        <p class="hint" data-hint>Rub across the paper</p>
+        <p class="loading" data-loading>Taping down the paper</p>
+        <p class="unsupported" data-unsupported hidden>
+          This browser can't lay the paper down: the page needs web workers and canvas.
+        </p>
+        <noscript>
+          <p class="unsupported">The rubbing is done with JavaScript, which is off.</p>
+        </noscript>
+      </div>
+    </div>
+
+    <aside class="kit">
+      <header class="head">
+        <a class="home" href="/">thesandbox.page</a>
+        <h1>Rubbings</h1>
+        <p class="lede">
+          Six sheets of paper, each taped down over something with a surface. Rub across one with the crayon and
+          whatever is under it comes up through the paper.
+        </p>
+      </header>
+
+      <ol class="places" aria-label="Sheets">
+        {
+          PLACES.map((p) => (
+            <li>
+              <button type="button" data-go={p.id} aria-pressed={p.id === 'cover' ? 'true' : 'false'}>
+                <span class="no">No. {p.no}</span>
+                <span class="where">{p.where}</span>
+              </button>
+            </li>
+          ))
+        }
+      </ol>
+
+      <section class="note" aria-live="polite">
+        <p class="what" data-what>Lift the sheet to see what is under it.</p>
+        <div class="scale" aria-hidden="true">
+          <i data-scale-bar></i>
+          <span data-scale-label>10 cm</span>
+        </div>
+      </section>
+
+      <div class="tools">
+        <fieldset class="swatches">
+          <legend>Wax</legend>
+          {
+            waxes.map((w, i) => (
+              <label title={w.name}>
+                <input type="radio" name="wax" value={w.id} checked={i === 0} />
+                <span class="stick" style={`--c: ${w.color}`} />
+                <span class="name">{w.name}</span>
+              </label>
+            ))
+          }
+        </fieldset>
+        <fieldset class="swatches">
+          <legend>Paper</legend>
+          {
+            papers.map((p, i) => (
+              <label title={p.name}>
+                <input type="radio" name="paper" value={p.id} checked={i === 0} />
+                <span class="leaf" style={`--c: ${p.color}`} />
+                <span class="name">{p.name}</span>
+              </label>
+            ))
+          }
+        </fieldset>
+        <fieldset class="toggle">
+          <legend>Pressure</legend>
+          <label><input type="radio" name="pressure" value="light" /><span>Light</span></label>
+          <label><input type="radio" name="pressure" value="firm" checked /><span>Firm</span></label>
+        </fieldset>
+        <fieldset class="toggle">
+          <legend>Crayon</legend>
+          <label><input type="radio" name="edge" value="side" checked /><span>Side</span></label>
+          <label><input type="radio" name="edge" value="tip" /><span>Tip</span></label>
+        </fieldset>
+      </div>
+
+      <div class="actions">
+        <button type="button" data-lift aria-pressed="false">Lift the sheet</button>
+        <button type="button" data-fresh>New sheet</button>
+        <button type="button" data-save>Save rubbing</button>
+      </div>
+    </aside>
+  </main>
+</Bare>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-rubbings]');
+  if (root) start(root);
+</script>
+
+<style>
+  :global(body:has(.rubbings)) {
+    margin: 0;
+    background: #1b1a18;
+  }
+
+  .rubbings {
+    --ink: #2b251e;
+    --ink-soft: #6a5f50;
+    --card: #eee6d4;
+    --card-deep: #e2d7c0;
+    --rule: #c7b99d;
+    --accent: #8d3a20;
+    --ground: #55524d;
+    box-sizing: border-box;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 372px;
+    gap: 18px;
+    padding: 16px;
+    background:
+      radial-gradient(120% 90% at 30% 20%, #2a2825 0%, #1b1a18 60%, #141312 100%) fixed,
+      #1b1a18;
+    color: var(--ink);
+    font-family: var(--font-rubbings-type);
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .rubbings *,
+  .rubbings *::before,
+  .rubbings *::after {
+    box-sizing: border-box;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  .bench {
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .stage {
+    position: relative;
+    width: min(100%, calc(100dvh - 32px));
+    aspect-ratio: 1;
+    overflow: clip;
+    background: var(--ground);
+    border-radius: 3px;
+    box-shadow:
+      0 0 0 1px rgb(0 0 0 / 0.5),
+      0 18px 50px rgb(0 0 0 / 0.45);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .ground {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .sheet {
+    position: absolute;
+    left: 10%;
+    top: 10%;
+    width: 80%;
+    height: 80%;
+  }
+
+  .paper {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: none;
+    filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.35)) drop-shadow(0 5px 10px rgb(0 0 0 / 0.22));
+  }
+
+  .rubbings[data-state='loading'] .paper,
+  .rubbings[data-state='loading'] .tape {
+    opacity: 0;
+  }
+
+  .flap {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.35));
+  }
+
+  .flap canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .tape {
+    position: absolute;
+    top: -2.2%;
+    width: 15%;
+    height: 4.6%;
+    background:
+      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.05) 0 2px, transparent 2px 5px),
+      linear-gradient(180deg, rgb(236 222 182 / 0.9), rgb(222 205 160 / 0.88));
+    box-shadow: 0 1px 1px rgb(0 0 0 / 0.18);
+    clip-path: polygon(
+      0% 6%,
+      3% 0%,
+      97% 3%,
+      100% 14%,
+      98% 30%,
+      100% 52%,
+      97% 74%,
+      100% 92%,
+      96% 100%,
+      2% 97%,
+      0% 80%,
+      2% 58%,
+      0% 38%,
+      3% 20%
+    );
+    pointer-events: none;
+  }
+
+  .tape.left {
+    left: 4%;
+    transform: rotate(-3deg);
+  }
+
+  .tape.right {
+    right: 4%;
+    transform: rotate(2.5deg);
+  }
+
+  .crayon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .crayon i {
+    position: absolute;
+    left: calc(var(--cl) * -0.5);
+    top: calc(var(--ct) * -0.5);
+    width: var(--cl);
+    height: var(--ct);
+    border-radius: calc(var(--ct) * 0.5) / calc(var(--ct) * 0.42);
+    background:
+      linear-gradient(
+        180deg,
+        rgb(255 255 255 / 0.32) 0%,
+        rgb(255 255 255 / 0.08) 28%,
+        rgb(0 0 0 / 0) 50%,
+        rgb(0 0 0 / 0.38) 100%
+      ),
+      var(--wax, #1d1916);
+    box-shadow:
+      0 calc(var(--ct) * 0.35) calc(var(--ct) * 0.5) rgb(0 0 0 / 0.35),
+      inset 0 0 0 1px rgb(0 0 0 / 0.25);
+  }
+
+  .crayon i::after {
+    content: '';
+    position: absolute;
+    left: 30%;
+    width: 40%;
+    top: 0;
+    bottom: 0;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.35), rgb(0 0 0 / 0.25)),
+      repeating-linear-gradient(90deg, #d8cdb2 0 6px, #cdbf9f 6px 7px);
+    opacity: 0.92;
+  }
+
+  .hint,
+  .loading,
+  .unsupported {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    margin: 0;
+    padding: 0.5em 0.9em;
+    pointer-events: none;
+    font-family: var(--font-rubbings);
+    font-style: italic;
+    font-size: clamp(17px, 2.2vw, 24px);
+    white-space: nowrap;
+    color: rgb(60 52 42 / 0.75);
+    transition: opacity 0.6s ease;
+  }
+
+  .rubbings[data-paper-tone='dark'] .hint {
+    color: rgb(230 220 200 / 0.7);
+  }
+
+  .loading {
+    color: rgb(240 232 216 / 0.8);
+  }
+
+  .rubbings:not([data-state='loading']) .loading {
+    opacity: 0;
+  }
+
+  .rubbings[data-state='loading'] .hint,
+  .rubbings[data-touched] .hint,
+  .rubbings[data-lifted] .hint {
+    opacity: 0;
+  }
+
+  .unsupported {
+    white-space: normal;
+    width: min(90%, 30em);
+    text-align: center;
+    color: #efe6d4;
+    background: rgb(0 0 0 / 0.5);
+  }
+
+  /* The kit: a card of tickets and controls. */
+
+  .kit {
+    position: relative;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 22px 22px;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.25), rgb(255 255 255 / 0) 30%),
+      var(--card);
+    border-radius: 2px;
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.4) inset,
+      0 12px 30px rgb(0 0 0 / 0.35);
+  }
+
+  .head {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 14px;
+  }
+
+  .home {
+    color: var(--ink-soft);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+
+  .home:hover,
+  .home:focus-visible {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  h1 {
+    margin: 4px 0 6px;
+    font-family: var(--font-rubbings);
+    font-weight: 400;
+    font-style: italic;
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .lede {
+    margin: 0;
+    font-family: var(--font-rubbings);
+    font-size: 15px;
+    line-height: 1.5;
+    color: #3e362c;
+  }
+
+  .places {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .places button {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 4.2em 1fr;
+    align-items: baseline;
+    gap: 6px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .places button:hover {
+    background: rgb(0 0 0 / 0.05);
+  }
+
+  .places button[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--card);
+  }
+
+  .places .no {
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .note {
+    min-height: 4.6em;
+    padding: 10px 12px;
+    background: var(--card-deep);
+    border-left: 3px solid var(--accent);
+  }
+
+  .what {
+    margin: 0 0 8px;
+    font-family: var(--font-rubbings);
+    font-size: 14.5px;
+    line-height: 1.45;
+  }
+
+  .what.hushed {
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  .scale {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .scale i {
+    display: block;
+    height: 6px;
+    width: 60px;
+    border: 1px solid var(--ink);
+    border-top: 0;
+    background: linear-gradient(90deg, var(--ink) 0 50%, transparent 50%);
+    background-size: 50% 100%;
+  }
+
+  .tools {
+    display: grid;
+    gap: 12px;
+  }
+
+  fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  legend {
+    float: left;
+    width: 5.6em;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  fieldset label {
+    position: relative;
+    cursor: pointer;
+  }
+
+  fieldset input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
+  .swatches label {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    padding: 4px 3px 2px;
+    border-radius: 3px;
+  }
+
+  .swatches .name {
+    font-size: 10.5px;
+    color: var(--ink-soft);
+  }
+
+  .swatches label:has(input:checked) {
+    background: rgb(0 0 0 / 0.08);
+  }
+
+  .swatches label:has(input:checked) .name {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .swatches label:has(input:focus-visible),
+  .toggle label:has(input:focus-visible) span {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .stick {
+    display: block;
+    width: 42px;
+    height: 14px;
+    border-radius: 7px / 6px;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.35), rgb(255 255 255 / 0) 40%, rgb(0 0 0 / 0.3)),
+      var(--c);
+    box-shadow: 0 2px 3px rgb(0 0 0 / 0.25);
+    position: relative;
+  }
+
+  .stick::after {
+    content: '';
+    position: absolute;
+    inset: 0 32%;
+    background: linear-gradient(180deg, #e3d9c2, #c8b993);
+  }
+
+  .leaf {
+    display: block;
+    width: 30px;
+    height: 22px;
+    background: var(--c);
+    box-shadow:
+      0 0 0 1px rgb(0 0 0 / 0.18),
+      0 2px 3px rgb(0 0 0 / 0.2);
+    transform: rotate(-3deg);
+  }
+
+  .toggle {
+    gap: 0;
+  }
+
+  .toggle span {
+    display: block;
+    padding: 4px 12px;
+    border: 1px solid var(--ink);
+    font-size: 13px;
+  }
+
+  .toggle label + label span {
+    border-left: 0;
+  }
+
+  .toggle label:has(input:checked) span {
+    background: var(--ink);
+    color: var(--card);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .actions button {
+    padding: 8px 12px;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 13.5px;
+    cursor: pointer;
+  }
+
+  .actions button:hover {
+    background: rgb(0 0 0 / 0.06);
+  }
+
+  .actions [data-lift] {
+    background: var(--ink);
+    color: var(--card);
+  }
+
+  .actions [data-lift][aria-pressed='true'] {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .places button:focus-visible,
+  .actions button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 860px) {
+    .rubbings {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+      padding: 10px 10px 24px;
+    }
+
+    .stage {
+      width: 100%;
+    }
+
+    .kit {
+      padding: 16px;
+      gap: 14px;
+    }
+
+    h1 {
+      font-size: 36px;
+    }
+
+    .places {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .places button {
+      grid-template-columns: 1fr;
+      gap: 0;
+      font-size: 13px;
+    }
+  }
+</style>
