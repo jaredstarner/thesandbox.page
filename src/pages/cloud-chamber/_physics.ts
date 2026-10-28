@@ -17,8 +17,8 @@
 
 import type { Kind } from './_guide';
 
-export const W = 30;
-export const D = 20;
+/** The tank inside the glass, cm: 30 by 20, turned lengthways on a portrait screen. */
+export const G = { W: 30, D: 20 };
 export const H = 14;
 
 /** Air near the plate, g/cm³: cold, and thick with alcohol vapour. */
@@ -91,7 +91,7 @@ function inside(o: Objects, x: number, y: number, z: number): boolean {
 /** How readily vapour condenses on an ion at a point, 0 to 1. */
 export function sensitivity(x: number, y: number, z: number): number {
   const layer = smooth(0.05, 0.32, z) * (1 - smooth(0.85, 1.75, z));
-  const wall = smooth(0.25, 1.9, Math.min(x, W - x, y, D - y));
+  const wall = smooth(0.25, 1.9, Math.min(x, G.W - x, y, G.D - y));
   return layer * wall;
 }
 
@@ -123,7 +123,7 @@ interface Style {
 
 const MUON_STYLE: Style = { size: 0.7, w0: 0.012, diff: 0.03, life: 2.1 };
 const ELECTRON_STYLE: Style = { size: 0.8, w0: 0.014, diff: 0.035, life: 2.3 };
-const ALPHA_STYLE: Style = { size: 1, w0: 0.03, diff: 0.05, life: 3.1 };
+const ALPHA_STYLE: Style = { size: 1, w0: 0.045, diff: 0.075, life: 3.1 };
 
 /** Lays droplets along one particle's path and keeps the visible runs. */
 class Path {
@@ -229,7 +229,7 @@ function clipLine(
     hi = Math.min(hi, t1);
     return true;
   };
-  if (!slab(px, dx, 0, W) || !slab(py, dy, 0, D) || !slab(pz, dz, z0, z1)) return null;
+  if (!slab(px, dx, 0, G.W) || !slab(py, dy, 0, G.D) || !slab(pz, dz, z0, z1)) return null;
   return lo < hi ? [lo, hi] : null;
 }
 
@@ -355,7 +355,7 @@ function alpha(
     const nx = x + dx * ds;
     const ny = y + dy * ds;
     const nz = z + dz * ds;
-    if (nz < 0 || nx < 0 || nx > W || ny < 0 || ny > D) break;
+    if (nz < 0 || nx < 0 || nx > G.W || ny < 0 || ny > G.D) break;
     path.step(x, y, z, nx, ny, nz, dens(left), ALPHA_STYLE, delay, thick(left));
     x = nx;
     y = ny;
@@ -455,7 +455,7 @@ function electron(
     const nx = x + dx * ds;
     const ny = y + dy * ds;
     const nz = z + dz * ds;
-    if (nz < 0.01 || nz > H || nx < 0 || nx > W || ny < 0 || ny > D || inside(o, nx, ny, nz)) break;
+    if (nz < 0.01 || nz > H || nx < 0 || nx > G.W || ny < 0 || ny > G.D || inside(o, nx, ny, nz)) break;
     const loss = t > 2.5 ? MIP : stopping(t);
     const dens = Math.min(240, 34 * Math.pow(loss / MIP, 0.75));
     path.step(x, y, z, nx, ny, nz, dens, ELECTRON_STYLE, delay, 1 + Math.min(0.5, (loss / MIP - 1) * 0.02));
@@ -527,8 +527,8 @@ export interface Ctx {
 }
 
 const inLayer = (r: Rng): [number, number, number] => [
-  1 + (W - 2) * r(),
-  1 + (D - 2) * r(),
+  1 + (G.W - 2) * r(),
+  1 + (G.D - 2) * r(),
   0.25 + 0.95 * r(),
 ];
 
@@ -572,8 +572,8 @@ export function shower(c: Ctx): Track {
   const h = Math.hypot(d[0], d[1]);
   const px = -d[1] / h;
   const py = d[0] / h;
-  const cx = 5 + (W - 10) * c.r();
-  const cy = 4 + (D - 8) * c.r();
+  const cx = 5 + (G.W - 10) * c.r();
+  const cy = 4 + (G.D - 8) * c.r();
   for (let i = 0; i < n; i++) {
     const off = (i - (n - 1) / 2) * (1.2 + c.r() * 1.8) + gauss(c.r) * 0.4;
     muonLine(path, cx + px * off, cy + py * off, 0.5 + 0.5 * c.r(), d, c.r() * 0.01);
@@ -587,8 +587,8 @@ export function muonDecay(c: Ctx): Track {
   const az = 2 * Math.PI * c.r();
   const dip = 0.05 + 0.08 * c.r();
   const d: [number, number, number] = [Math.cos(az) * Math.cos(dip), Math.sin(az) * Math.cos(dip), -Math.sin(dip)];
-  const sx = 6 + (W - 12) * c.r();
-  const sy = 5 + (D - 10) * c.r();
+  const sx = 6 + (G.W - 12) * c.r();
+  const sy = 5 + (G.D - 10) * c.r();
   const sz = 0.45 + 0.25 * c.r();
   const len = 5 + 4 * c.r();
   // Walk back from the stopping point; dE/dx climbs over the last few cm.
@@ -746,7 +746,7 @@ export function rodThoron(c: Ctx): Track | null {
   const t = c.r();
   const x = ax + (bx - ax) * t + gauss(c.r) * 2;
   const y = ay + (by - ay) * t + gauss(c.r) * 2;
-  if (x < 1 || x > W - 1 || y < 1 || y > D - 1) return null;
+  if (x < 1 || x > G.W - 1 || y < 1 || y > G.D - 1) return null;
   return thoronPair(c, [x, y, 0.35 + 0.7 * c.r()]);
 }
 
