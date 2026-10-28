@@ -682,8 +682,11 @@ export function thoronPair(c: Ctx, at?: [number, number, number]): Track {
   };
   const d1 = flatten(isotropic(c.r));
   let d2 = flatten(isotropic(c.r));
-  // Keep the two legs apart enough to read as a V.
-  for (let k = 0; k < 6 && d1[0] * d2[0] + d1[1] * d2[1] > 0.6; k++) d2 = flatten(isotropic(c.r));
+  // A V, not a straight line: the legs between about 40 and 125 degrees apart. Pairs at other
+  // angles happen too, but they read as one alpha or two unrelated ones.
+  const cos = (u: number[], v: number[]) =>
+    (u[0] * v[0] + u[1] * v[1]) / Math.hypot(u[0], u[1]) / Math.hypot(v[0], v[1]);
+  for (let k = 0; k < 24 && (cos(d1, d2) > 0.75 || cos(d1, d2) < -0.55); k++) d2 = flatten(isotropic(c.r));
   // Po-216: half-life 0.145 s.
   const wait = Math.min(0.9, 0.08 + (-Math.log(1 - c.r()) * 0.145) / Math.LN2);
   alpha(path, c.r, 6.29, px, py, pz, d1);
