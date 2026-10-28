@@ -253,7 +253,18 @@ function straight(
     const a = t0 + ((t1 - t0) * i) / n;
     const b = t0 + ((t1 - t0) * (i + 1)) / n;
     const m = (a + b) / 2;
-    path.step(px + dx * a, py + dy * a, pz + dz * a, px + dx * b, py + dy * b, pz + dz * b, density(m), style, delay, thick(m));
+    path.step(
+      px + dx * a,
+      py + dy * a,
+      pz + dz * a,
+      px + dx * b,
+      py + dy * b,
+      pz + dz * b,
+      density(m),
+      style,
+      delay,
+      thick(m),
+    );
   }
   path.endRun();
 }
@@ -355,7 +366,21 @@ function alpha(
       const rd = tilt(r, before, -(0.9 + 0.5 * r()));
       const stub = 0.08 + 0.08 * r();
       const beforeStub = path.length;
-      straight(path, x, y, z, rd[0], rd[1], rd[2] * 0.4, 0, stub, () => 900, ALPHA_STYLE, delay, () => 1.25);
+      straight(
+        path,
+        x,
+        y,
+        z,
+        rd[0],
+        rd[1],
+        rd[2] * 0.4,
+        0,
+        stub,
+        () => 900,
+        ALPHA_STYLE,
+        delay,
+        () => 1.25,
+      );
       stubLen = path.length - beforeStub;
     }
     const nx = x + dx * ds;
@@ -383,8 +408,7 @@ function outward(r: Rng, n: [number, number, number]): [number, number, number] 
 
 /** CSDA range of an electron in the chamber's air, cm. */
 export function electronRange(t: number): number {
-  const g =
-    t <= 2.5 ? 0.412 * Math.pow(t, 1.265 - 0.0954 * Math.log(Math.max(t, 0.002))) : 0.53 * t - 0.106;
+  const g = t <= 2.5 ? 0.412 * Math.pow(t, 1.265 - 0.0954 * Math.log(Math.max(t, 0.002))) : 0.53 * t - 0.106;
   return g / RHO;
 }
 
@@ -532,11 +556,7 @@ export interface Ctx {
   ready: number;
 }
 
-const inLayer = (r: Rng): [number, number, number] => [
-  1 + (G.W - 2) * r(),
-  1 + (G.D - 2) * r(),
-  0.25 + 0.95 * r(),
-];
+const inLayer = (r: Rng): [number, number, number] => [1 + (G.W - 2) * r(), 1 + (G.D - 2) * r(), 0.25 + 0.95 * r()];
 
 function done(path: Path, kind: Kind, facts: string): Track {
   path.finish();
@@ -631,7 +651,8 @@ export function muonDecay(c: Ctx): Track {
   const n = Math.hypot(...ed);
   const before = path.length;
   electron(path, c.r, c.o, te, sx, sy, sz, [ed[0] / n, ed[1] / n, ed[2] / n], 0.004);
-  if (path.length - before < 1) return done(path, 'muon', `Slow muon that stopped here; its decay electron left the layer`);
+  if (path.length - before < 1)
+    return done(path, 'muon', `Slow muon that stopped here; its decay electron left the layer`);
   return done(path, 'decay', `Muon stopped here and decayed / electron about ${fmtE(te)}`);
 }
 
@@ -670,11 +691,7 @@ export function thoronPair(c: Ctx, at?: [number, number, number]): Track {
   if (first < 1 || path.length - first < 1) {
     return done(path, 'alpha', `Thoron (radon-220) in the air / 6.3 MeV; the second alpha left the layer`);
   }
-  return done(
-    path,
-    'thoron',
-    `Radon-220, 6.3 MeV, then polonium-216, 6.8 MeV, ${(wait * 1000).toFixed(0)} ms later`,
-  );
+  return done(path, 'thoron', `Radon-220, 6.3 MeV, then polonium-216, 6.8 MeV, ${(wait * 1000).toFixed(0)} ms later`);
 }
 
 export function background(c: Ctx): Track {
@@ -721,7 +738,10 @@ function rodPoint(r: Rng, o: Objects): { p: [number, number, number]; n: [number
   const sy = (bx - ax) / len;
   const a = Math.PI * (0.05 + 0.9 * r());
   const n: [number, number, number] = [sx * Math.cos(a), sy * Math.cos(a), Math.sin(a)];
-  return { p: [ax + (bx - ax) * t + n[0] * rr * 1.05, ay + (by - ay) * t + n[1] * rr * 1.05, rr + n[2] * rr * 1.05], n };
+  return {
+    p: [ax + (bx - ax) * t + n[0] * rr * 1.05, ay + (by - ay) * t + n[1] * rr * 1.05, rr + n[2] * rr * 1.05],
+    n,
+  };
 }
 
 export function rodAlpha(c: Ctx): Track | null {
@@ -736,7 +756,11 @@ export function rodAlpha(c: Ctx): Track | null {
   const n = Math.hypot(...f);
   alpha(path, c.r, e, at.p[0], at.p[1], at.p[2], [f[0] / n, f[1] / n, f[2] / n], {});
   const long = e0 > 8 && path.length > 5.5;
-  return done(path, long ? 'long-alpha' : 'alpha', `${name} in the welding rod / ${e.toFixed(1)} MeV leaving the metal`);
+  return done(
+    path,
+    long ? 'long-alpha' : 'alpha',
+    `${name} in the welding rod / ${e.toFixed(1)} MeV leaving the metal`,
+  );
 }
 
 export function rodBeta(c: Ctx): Track | null {

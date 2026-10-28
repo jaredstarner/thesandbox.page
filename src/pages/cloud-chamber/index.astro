@@ -20,48 +20,53 @@ import { ENTRIES, SOURCES } from './_guide';
     ></canvas>
 
     <header class="masthead">
-      <a class="home" href="/">thesandbox.page</a>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
       <h1>Cloud chamber</h1>
       <p class="readout" aria-live="polite">
         <span class="dot" aria-hidden="true"></span>
-        Plate <b data-temp>+19</b> °C <span class="sep" aria-hidden="true">/</span>
+        Plate <b data-temp>+19</b> °C{' '}
+        <span class="sep" aria-hidden="true">
+          /
+        </span>
         <span data-state>Cooling</span>
       </p>
     </header>
 
-    <p class="hint" data-hint>Tracks appear once the mist settles into a layer over the plate</p>
+    <p class="hint" data-hint>
+      Tracks appear once the mist settles into a layer over the plate
+    </p>
 
     <div class="tray" data-tray>
       <div class="sources" role="group" aria-label="Put something in the chamber">
-        {
-          SOURCES.map((s) => (
-            <button type="button" class="source" data-source={s.id} aria-pressed="false" title={s.note}>
-              <svg viewBox="0 0 40 40" aria-hidden="true">
-                {s.id === 'rod' && (
-                  <g>
-                    <rect class="g-rod" x="4" y="18" width="26" height="4" rx="2" />
-                    <rect class="g-rod-tip" x="30" y="18" width="6" height="4" rx="2" />
-                  </g>
-                )}
-                {s.id === 'marble' && (
-                  <g>
-                    <circle class="g-marble" cx="20" cy="20" r="11" />
-                    <path class="g-marble-swirl" d="M12 23c4-7 10 2 16-5" />
-                    <circle class="g-marble-hi" cx="16" cy="15" r="2.6" />
-                  </g>
-                )}
-                {s.id === 'salt' && (
-                  <g>
-                    <path class="g-dish" d="M5 22c3 8 27 8 30 0" />
-                    <path class="g-salt" d="M9 23c3-7 19-7 22 0z" />
-                  </g>
-                )}
-              </svg>
-              <span class="long">{s.name}</span>
-              <span class="short">{s.short}</span>
-            </button>
-          ))
-        }
+        {SOURCES.map((s) => (
+          <button type="button" class="source" data-source={s.id} aria-pressed="false" title={s.note}>
+            <svg viewBox="0 0 40 40" aria-hidden="true">
+              {s.id === 'rod' && (
+                <g>
+                  <rect class="g-rod" x="4" y="18" width="26" height="4" rx="2" />
+                  <rect class="g-rod-tip" x="30" y="18" width="6" height="4" rx="2" />
+                </g>
+              )}
+              {s.id === 'marble' && (
+                <g>
+                  <circle class="g-marble" cx="20" cy="20" r="11" />
+                  <path class="g-marble-swirl" d="M12 23c4-7 10 2 16-5" />
+                  <circle class="g-marble-hi" cx="16" cy="15" r="2.6" />
+                </g>
+              )}
+              {s.id === 'salt' && (
+                <g>
+                  <path class="g-dish" d="M5 22c3 8 27 8 30 0" />
+                  <path class="g-salt" d="M9 23c3-7 19-7 22 0z" />
+                </g>
+              )}
+            </svg>
+            <span class="long">{s.name}</span>
+            <span class="short">{s.short}</span>
+          </button>
+        ))}
       </div>
       <div class="switches">
         <button type="button" class="switch" data-magnet aria-pressed="false">
@@ -88,27 +93,27 @@ import { ENTRIES, SOURCES } from './_guide';
       <div class="log-body" data-log-body>
         <h2>Seen</h2>
         <ol class="specimens">
-          {
-            ENTRIES.map((e) => (
-              <li data-entry={e.kind}>
-                <button type="button" disabled>
-                  <svg viewBox="0 0 100 64" aria-hidden="true">
-                    <rect class="frame" x="1" y="1" width="98" height="62" rx="3" />
-                    <g data-spec />
-                  </svg>
-                  <span class="name">{e.name}</span>
-                  <span class="look">{e.look}</span>
-                </button>
-              </li>
-            ))
-          }
+          {ENTRIES.map((e) => (
+            <li data-entry={e.kind}>
+              <button type="button" disabled>
+                <svg viewBox="0 0 100 64" aria-hidden="true">
+                  <rect class="frame" x="1" y="1" width="98" height="62" rx="3" />
+                  <g data-spec />
+                </svg>
+                <span class="name">{e.name}</span>
+                <span class="look">{e.look}</span>
+              </button>
+            </li>
+          ))}
         </ol>
       </div>
     </aside>
 
     <section class="card" data-card hidden aria-live="polite">
       <button type="button" class="close" data-card-close aria-label="Close">
-        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"></path></svg>
+        <svg viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M5 5l10 10M15 5 5 15"></path>
+        </svg>
       </button>
       <svg class="card-spec" viewBox="0 0 160 100" aria-hidden="true">
         <g data-card-spec></g>

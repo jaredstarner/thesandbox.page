@@ -2,16 +2,7 @@
 // way a track can look, not a particle: a muon that knocks an electron loose
 // is logged as a delta ray, and one that stops and decays as a muon decay.
 
-export type Kind =
-  | 'muon'
-  | 'alpha'
-  | 'electron'
-  | 'delta'
-  | 'decay'
-  | 'thoron'
-  | 'shower'
-  | 'long-alpha'
-  | 'scatter';
+export type Kind = 'muon' | 'alpha' | 'electron' | 'delta' | 'decay' | 'thoron' | 'shower' | 'long-alpha' | 'scatter';
 
 export interface Entry {
   kind: Kind;

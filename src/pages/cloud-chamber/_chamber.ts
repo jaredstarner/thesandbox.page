@@ -176,23 +176,23 @@ export class Chamber {
     if (ready > 0.02) {
       const k = (rate: number) => poisson(r, rate * ready * dt);
       const later = () => this.time + r() * dt;
-      for (let i = k(RATES.muon); i-- > 0; ) this.spawn((c) => P.muon(c), later());
-      for (let i = k(RATES.electron); i-- > 0; ) this.spawn((c) => P.background(c), later());
-      for (let i = k(RATES.radon); i-- > 0; ) this.spawn((c) => P.radonAlpha(c), later());
-      for (let i = k(RATES.thoron); i-- > 0; ) this.spawn((c) => P.thoronPair(c), later());
-      for (let i = k(RATES.decay); i-- > 0; ) this.spawn((c) => P.muonDecay(c), later());
-      for (let i = k(RATES.shower); i-- > 0; ) this.spawn((c) => P.shower(c), later());
+      for (let i = k(RATES.muon); i-- > 0;) this.spawn((c) => P.muon(c), later());
+      for (let i = k(RATES.electron); i-- > 0;) this.spawn((c) => P.background(c), later());
+      for (let i = k(RATES.radon); i-- > 0;) this.spawn((c) => P.radonAlpha(c), later());
+      for (let i = k(RATES.thoron); i-- > 0;) this.spawn((c) => P.thoronPair(c), later());
+      for (let i = k(RATES.decay); i-- > 0;) this.spawn((c) => P.muonDecay(c), later());
+      for (let i = k(RATES.shower); i-- > 0;) this.spawn((c) => P.shower(c), later());
       if (o.rod) {
-        for (let i = k(RATES.rodAlpha); i-- > 0; ) this.spawn((c) => P.rodAlpha(c), later());
-        for (let i = k(RATES.rodBeta); i-- > 0; ) this.spawn((c) => P.rodBeta(c), later());
-        for (let i = k(RATES.rodThoron); i-- > 0; ) this.spawn((c) => P.rodThoron(c), later());
+        for (let i = k(RATES.rodAlpha); i-- > 0;) this.spawn((c) => P.rodAlpha(c), later());
+        for (let i = k(RATES.rodBeta); i-- > 0;) this.spawn((c) => P.rodBeta(c), later());
+        for (let i = k(RATES.rodThoron); i-- > 0;) this.spawn((c) => P.rodThoron(c), later());
       }
       if (o.marble) {
-        for (let i = k(RATES.marbleAlpha); i-- > 0; ) this.spawn((c) => P.marbleAlpha(c), later());
-        for (let i = k(RATES.marbleBeta); i-- > 0; ) this.spawn((c) => P.marbleBeta(c), later());
+        for (let i = k(RATES.marbleAlpha); i-- > 0;) this.spawn((c) => P.marbleAlpha(c), later());
+        for (let i = k(RATES.marbleBeta); i-- > 0;) this.spawn((c) => P.marbleBeta(c), later());
       }
       if (o.salt) {
-        for (let i = k(RATES.saltBeta); i-- > 0; ) this.spawn((c) => P.saltBeta(c), later());
+        for (let i = k(RATES.saltBeta); i-- > 0;) this.spawn((c) => P.saltBeta(c), later());
       }
     }
     // Forget tracks that have faded.
@@ -206,7 +206,8 @@ export class Chamber {
   presence(t: LiveTrack): number {
     const age = this.time - t.birth;
     if (age < 0.05) return 0;
-    const life = t.kind === 'alpha' || t.kind === 'long-alpha' || t.kind === 'thoron' || t.kind === 'scatter' ? 3.1 : 2.2;
+    const life =
+      t.kind === 'alpha' || t.kind === 'long-alpha' || t.kind === 'thoron' || t.kind === 'scatter' ? 3.1 : 2.2;
     return Math.max(0, 1 - Math.max(0, age - t.span - life * 0.5) / (life * 0.5));
   }
 }

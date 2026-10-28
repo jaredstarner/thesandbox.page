@@ -1078,7 +1078,12 @@ export class Renderer {
     gl.drawArrays(gl.POINTS, 0, RING);
   }
 
-  private pass(prog: WebGLProgram, src: WebGLTexture, dst: Target | null, setup?: (u: (n: string) => WebGLUniformLocation | null) => void): void {
+  private pass(
+    prog: WebGLProgram,
+    src: WebGLTexture,
+    dst: Target | null,
+    setup?: (u: (n: string) => WebGLUniformLocation | null) => void,
+  ): void {
     const gl = this.gl;
     gl.bindFramebuffer(gl.FRAMEBUFFER, dst ? dst.fb : null);
     gl.viewport(0, 0, dst ? dst.w : this.w, dst ? dst.h : this.h);

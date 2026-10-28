@@ -127,7 +127,7 @@ export function start(root: HTMLElement): void {
 
   const params = new URLSearchParams(location.search);
   const debug = params.has('debug');
-  const seed = Number(params.get('seed')) || (Date.now() & 0x7fffffff);
+  const seed = Number(params.get('seed')) || Date.now() & 0x7fffffff;
   const ch = new Chamber(seed);
 
   const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
@@ -257,7 +257,11 @@ export function start(root: HTMLElement): void {
       const item = log[kind];
       if (!item) return;
       const e = ENTRY[kind];
-      const first = new Date(item.first).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+      const first = new Date(item.first).toLocaleDateString(undefined, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      });
       highlight = -1;
       showCard(
         'From your log',
@@ -342,8 +346,7 @@ export function start(root: HTMLElement): void {
     return null;
   }
 
-  let drag: { id: Handle; x: number; y: number; du: number; dv: number; moved: boolean; pointer: number } | null =
-    null;
+  let drag: { id: Handle; x: number; y: number; du: number; dv: number; moved: boolean; pointer: number } | null = null;
   let down: { x: number; y: number; touch: boolean } | null = null;
 
   canvas.addEventListener('pointerdown', (e) => {
