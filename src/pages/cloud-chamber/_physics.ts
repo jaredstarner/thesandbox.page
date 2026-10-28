@@ -57,9 +57,9 @@ export interface Objects {
 
 export const ROD_R = 0.12;
 export const MARBLE_R = 0.85;
-export const SALT_R = 2.1;
-export const SALT_H = 0.55;
-export const DISH_R = 2.6;
+export const SALT_R = 1.45;
+export const SALT_H = 0.85;
+export const DISH_R = 2.1;
 
 /** Vertical field, tesla, from a disc magnet under the plate. */
 export function field(o: Objects, x: number, y: number, z: number): number {
@@ -123,7 +123,7 @@ interface Style {
 
 const MUON_STYLE: Style = { size: 0.7, w0: 0.012, diff: 0.03, life: 2.1 };
 const ELECTRON_STYLE: Style = { size: 0.8, w0: 0.014, diff: 0.035, life: 2.3 };
-const ALPHA_STYLE: Style = { size: 1, w0: 0.045, diff: 0.075, life: 3.1 };
+const ALPHA_STYLE: Style = { size: 0.72, w0: 0.045, diff: 0.075, life: 3.1 };
 
 /** Lays droplets along one particle's path and keeps the visible runs. */
 class Path {
@@ -309,7 +309,7 @@ interface AlphaOpts {
   delay?: number;
 }
 
-/** Returns true if the alpha scattered visibly. */
+/** Returns true if the alpha scattered and both sides of the bend show. */
 function alpha(
   path: Path,
   r: Rng,
@@ -322,8 +322,8 @@ function alpha(
 ): boolean {
   const range = alphaRange(e);
   const delay = opts.delay ?? 0;
-  const dens = (left: number) => 260 * Math.pow(Math.max(0.12, left) / range, -1 / 3);
-  const thick = (left: number) => 1 + 0.6 * smooth(0.9, 0.05, left);
+  const dens = (left: number) => 520 * Math.min(2, Math.pow(Math.max(0.12, left) / range, -1 / 3));
+  const thick = (left: number) => 1 + 0.25 * smooth(0.9, 0.05, left);
   const scatterAt = opts.scatter || r() < 0.06 ? range * (0.55 + 0.35 * r()) : -1;
   let [dx, dy, dz] = d;
   let x = px;
@@ -331,6 +331,9 @@ function alpha(
   let z = pz;
   let s = 0;
   let scattered = false;
+  const start = path.length;
+  let atBend = -1;
+  let stubLen = 0;
   const ds = 0.05;
   while (s < range) {
     const left = range - s;
@@ -338,6 +341,7 @@ function alpha(
     if (left < 0.6) [dx, dy, dz] = tilt(r, [dx, dy, dz], 0.02 * r());
     if (scatterAt > 0 && !scattered && s >= scatterAt) {
       scattered = true;
+      atBend = path.length;
       const before: [number, number, number] = [dx, dy, dz];
       // Turn away, staying fairly flat so the bend shows.
       for (let k = 0; k < 8; k++) {
@@ -350,7 +354,9 @@ function alpha(
       // The recoiling nucleus: a short, dense stub the other way.
       const rd = tilt(r, before, -(0.9 + 0.5 * r()));
       const stub = 0.08 + 0.08 * r();
-      straight(path, x, y, z, rd[0], rd[1], rd[2] * 0.4, 0, stub, () => 900, ALPHA_STYLE, delay, () => 1.6);
+      const beforeStub = path.length;
+      straight(path, x, y, z, rd[0], rd[1], rd[2] * 0.4, 0, stub, () => 900, ALPHA_STYLE, delay, () => 1.25);
+      stubLen = path.length - beforeStub;
     }
     const nx = x + dx * ds;
     const ny = y + dy * ds;
@@ -363,7 +369,7 @@ function alpha(
     s += ds;
   }
   path.endRun();
-  return scattered;
+  return scattered && atBend - start > 0.6 && path.length - atBend - stubLen > 0.6;
 }
 
 /** Isotropic over the half facing away from a surface with outward normal n. */
@@ -574,11 +580,15 @@ export function shower(c: Ctx): Track {
   const py = d[0] / h;
   const cx = 5 + (G.W - 10) * c.r();
   const cy = 4 + (G.D - 8) * c.r();
+  let shown = 0;
   for (let i = 0; i < n; i++) {
     const off = (i - (n - 1) / 2) * (1.2 + c.r() * 1.8) + gauss(c.r) * 0.4;
+    const before = path.length;
     muonLine(path, cx + px * off, cy + py * off, 0.5 + 0.5 * c.r(), d, c.r() * 0.01);
+    if (path.length - before > 1) shown++;
   }
-  return done(path, 'shower', `${n} particles from one cosmic-ray shower, arriving together`);
+  if (shown < 2) return done(path, 'muon', `Muon from a cosmic-ray shower whose other particles missed the layer`);
+  return done(path, 'shower', `${shown} particles from one cosmic-ray shower, arriving together`);
 }
 
 export function muonDecay(c: Ctx): Track {
@@ -619,7 +629,9 @@ export function muonDecay(c: Ctx): Track {
   let ed = tilt(c.r, d, 0.7 + 1.3 * c.r());
   if (Math.abs(ed[2]) > 0.2) ed = [ed[0], ed[1], Math.sign(ed[2]) * 0.2];
   const n = Math.hypot(...ed);
+  const before = path.length;
   electron(path, c.r, c.o, te, sx, sy, sz, [ed[0] / n, ed[1] / n, ed[2] / n], 0.004);
+  if (path.length - before < 1) return done(path, 'muon', `Slow muon that stopped here; its decay electron left the layer`);
   return done(path, 'decay', `Muon stopped here and decayed / electron about ${fmtE(te)}`);
 }
 
@@ -627,7 +639,7 @@ export function radonAlpha(c: Ctx, scatter = false): Track {
   const path = new Path(c.r, c.sink, c.o, c.ready);
   const [px, py, pz] = inLayer(c.r);
   const d = isotropic(c.r);
-  const flat: [number, number, number] = [d[0], d[1], d[2] * 0.45];
+  const flat: [number, number, number] = [d[0], d[1], d[2] * (scatter ? 0.12 : 0.45)];
   const n = Math.hypot(...flat);
   const bounced = alpha(path, c.r, 5.49, px, py, pz, [flat[0] / n, flat[1] / n, flat[2] / n], { scatter });
   return done(
@@ -640,9 +652,9 @@ export function radonAlpha(c: Ctx, scatter = false): Track {
 /** Two alphas from one point: Rn-220, then Po-216 after a fraction of a second. */
 export function thoronPair(c: Ctx, at?: [number, number, number]): Track {
   const path = new Path(c.r, c.sink, c.o, c.ready);
-  const [px, py, pz] = at ?? inLayer(c.r);
+  const [px, py, pz] = at ?? [1 + (G.W - 2) * c.r(), 1 + (G.D - 2) * c.r(), 0.4 + 0.5 * c.r()];
   const flatten = (d: [number, number, number]): [number, number, number] => {
-    const f: [number, number, number] = [d[0], d[1], d[2] * 0.35];
+    const f: [number, number, number] = [d[0], d[1], d[2] * 0.25];
     const n = Math.hypot(...f);
     return [f[0] / n, f[1] / n, f[2] / n];
   };
@@ -653,7 +665,11 @@ export function thoronPair(c: Ctx, at?: [number, number, number]): Track {
   // Po-216: half-life 0.145 s.
   const wait = Math.min(0.9, 0.08 + (-Math.log(1 - c.r()) * 0.145) / Math.LN2);
   alpha(path, c.r, 6.29, px, py, pz, d1);
+  const first = path.length;
   alpha(path, c.r, 6.78, px, py, pz, d2, { delay: wait });
+  if (first < 1 || path.length - first < 1) {
+    return done(path, 'alpha', `Thoron (radon-220) in the air / 6.3 MeV; the second alpha left the layer`);
+  }
   return done(
     path,
     'thoron',

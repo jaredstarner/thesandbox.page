@@ -268,7 +268,7 @@ void main() {
   float size = max(1.7, rad * 2.0);
   gl_PointSize = size;
   gl_Position = clip;
-  float energy = r * r * fade * light * inside * uGain * (aT.y > 0.0 ? 0.45 : 1.0);
+  float energy = r * r * fade * light * inside * uGain * (aT.y > 0.0 ? 0.8 : 1.0);
   vec3 tint = abs(aT.x - uHighlight) < 0.5 ? vec3(1.0, 0.62, 0.22) * 1.8 : vec3(0.9, 0.95, 1.0);
   vCol = tint * energy * (3.4 / (size * size));
 }`;
@@ -303,6 +303,9 @@ uniform float uMargin;
 uniform vec3 uMagnet;
 uniform sampler2D uScale;
 uniform float uScaleLen;
+/** How far the plate has frosted over, and how far the sensitive layer has formed, 0 to 1. */
+uniform float uFrost;
+uniform float uLayer;
 out vec4 o;
 ${COMMON}
 
@@ -364,8 +367,11 @@ float capsule(vec3 ro, vec3 rd, vec3 pa, vec3 pb, float r) {
 float mound(vec2 q) {
   float qr = length(q - uSalt.xy) / uSalt.z;
   if (qr >= 1.0) return -1.0;
-  float grain = noise(q * 22.0) * 0.03 + noise(q * 7.0) * 0.05;
-  return uSalt.w * pow(1.0 - qr * qr, 0.8) * (0.9 + grain * 2.0) + 0.1;
+  // A heap at its angle of repose, rounded on top and lumpy.
+  float grain = noise(q * 26.0) * 0.06 + noise(q * 9.0) * 0.12;
+  float cone = 1.0 - qr;
+  float h = cone * cone * (3.0 - 2.0 * cone);
+  return uSalt.w * mix(h, cone, 0.5) * (0.82 + grain * 1.5) + 0.1;
 }
 
 // The strip, seen along a ray: a glowing bar with an LED every 0.6 cm.
@@ -392,9 +398,12 @@ vec3 strip(vec3 ro, vec3 rd, float tmax) {
 
 vec3 frost(vec2 q, float lit) {
   float f = fbm(q * 3.1);
-  float spark = pow(noise(q * 70.0), 46.0) * 14.0 * lit;
+  // Bare metal until the plate is cold enough, then a crust that whitens it all over, thicker in patches.
+  float cover = clamp(uFrost * 1.3 - 0.3 + (f - 0.5) * 0.5, 0.0, 1.0);
+  float spark = pow(noise(q * 70.0), 46.0) * 14.0 * lit * cover;
   vec3 col = vec3(0.74, 0.78, 0.82) * (0.35 + 0.55 * f);
-  return col * (AMBIENT * 3.0 + vec3(lit)) + vec3(spark);
+  vec3 bare = vec3(0.03, 0.033, 0.036) * (AMBIENT * 20.0 + vec3(lit * 0.5));
+  return mix(bare, col * (AMBIENT * 3.0 + vec3(lit)) + vec3(spark), cover);
 }
 
 void main() {
@@ -483,7 +492,7 @@ void main() {
   } else if (id == 2) {
     float spill = lampAt(vec3(W + 1.0, clamp(p.y, 0.5, D - 0.5), 0.3)) * smoothstep(W, W + M, p.x) * max(0.0, n.x) * 0.6;
     float top = step(0.5, n.z) * lampAt(vec3(W + 1.0, clamp(p.y, 0.5, D - 0.5), 0.2)) * smoothstep(W + M, W + M + BOX, p.x) * 0.2;
-    col = vec3(0.86, 0.87, 0.85) * (AMBIENT * 1.1 + vec3(spill + top) * 0.5) * (0.9 + 0.2 * noise(p.xz * 3.0 + p.y));
+    col = vec3(0.86, 0.87, 0.85) * (AMBIENT * 0.8 + vec3(spill + top) * 0.5) * (0.9 + 0.2 * noise(p.xz * 3.0 + p.y));
   } else if (id == 3) {
     if (n.z < 0.5) {
       // Plate edge: frosted metal.
@@ -496,7 +505,7 @@ void main() {
       col = vec3(0.012, 0.013, 0.015) * (AMBIENT * 6.0 + vec3(lit)) * 6.0;
       // The strip, reflected in the film.
       vec3 rr = vec3(rd.xy, -rd.z);
-      col += strip(p, rr, 80.0) * (0.05 + 0.08 * puddle);
+      col += strip(p, rr, 80.0) * (0.025 + 0.04 * puddle);
       refl = 0.14 + 0.22 * puddle;
       // Frost creeping in along the foot of the glass.
       float rim = 1.0 - smoothstep(0.08, 0.45 + 0.25 * noise(p.xy * 4.0), wall);
@@ -504,7 +513,7 @@ void main() {
       refl *= 1.0 - rim;
       // A scale painted along the front, in cm.
       if (p.y > 0.55 && p.y < 1.45 && p.x > 1.0 && p.x < 1.0 + uScaleLen) {
-        float paint = texture(uScale, vec2((p.x - 1.0) / uScaleLen, (p.y - 0.55) / 0.9)).a;
+        float paint = texture(uScale, vec2((p.x - 1.0) / uScaleLen, 1.0 - (p.y - 0.55) / 0.9)).a;
         col = mix(col, vec3(0.8, 0.8, 0.76) * (AMBIENT * 8.0 + vec3(lampAt(vec3(p.xy, 0.1)) * 0.2)), paint);
         refl *= 1.0 - paint;
       }
@@ -513,7 +522,7 @@ void main() {
         float d = abs(length(p.xy - uMagnet.xy) - 2.6);
         float dash = step(0.5, fract(atan(p.y - uMagnet.y, p.x - uMagnet.x) * 24.0 / 6.2832));
         float ring = (1.0 - smoothstep(0.02, 0.05, d)) * dash;
-        col = mix(col, vec3(0.75, 0.6, 0.35) * (AMBIENT * 10.0 + vec3(lampAt(vec3(p.xy, 0.1)) * 0.25)), ring * 0.85);
+        col = mix(col, vec3(0.8, 0.8, 0.76) * (AMBIENT * 8.0 + vec3(lampAt(vec3(p.xy, 0.1)) * 0.2)), ring * 0.8);
       }
     } else {
       // Outside the glass the plate grows a crust of frost from the room's air.
@@ -553,7 +562,23 @@ void main() {
     vec3 ldir = normalize(vec3(-1.0, 0.0, 0.18));
     float dif = max(0.0, dot(n, ldir)) * 0.8 + 0.2;
     float spark = pow(noise(p.xy * 90.0 + p.z * 40.0), 44.0) * 8.0;
-    col = vec3(0.9, 0.9, 0.88) * (AMBIENT * 5.0 + vec3(dif * lit * 0.45)) + vec3(spark * lit);
+    float grains = 0.62 + 0.38 * noise(p.xy * 44.0 + p.z * 24.0);
+    float fill = lampAt(p) * 0.1;
+    col = vec3(0.92, 0.92, 0.9) * grains * (AMBIENT * 8.0 + vec3(dif * lit * 0.7 + fill)) + vec3(spark * lit);
+  }
+
+  // The watch glass under the salt: a glint round its rim and a faint glassy floor.
+  if (uSalt.z > 0.0 && rd.z < 0.0) {
+    float tz = (0.32 - ro.z) / rd.z;
+    if (tz > 0.0 && tz < t) {
+      vec3 q = ro + rd * tz;
+      float r = length(q.xy - uSalt.xy);
+      float d = r - ${DISH_R.toFixed(3)};
+      float lit = lampAt(q);
+      float side = 0.4 + 0.6 * max(0.0, -(q.x - uSalt.x) / max(r, 0.01));
+      col += vec3(0.85, 0.9, 1.0) * exp(-d * d / 0.0015) * (0.02 + lit * 0.5 * side);
+      col += vec3(0.6, 0.7, 0.8) * step(r, ${DISH_R.toFixed(3)}) * 0.006;
+    }
   }
 
   // Glass walls: faint sheen, lit condensation at their feet, felt round the top, bright edges.
@@ -599,7 +624,7 @@ void main() {
     float acc = 0.0;
     for (int i = 0; i < 14; i++) {
       vec3 q = ro + rd * (t0 + dt * (float(i) + 0.5));
-      float dens = 0.002 + 0.035 * exp(-q.z * 1.6) + 0.02 * exp(-pow(q.z - 0.7, 2.0) * 3.0) * fbm(q.xy * 0.6);
+      float dens = 0.002 + (0.008 + 0.03 * uLayer) * exp(-q.z * 1.6) + 0.02 * uLayer * exp(-pow(q.z - 0.7, 2.0) * 3.0) * fbm(q.xy * 0.6);
       acc += lampAt(q) * shade(q) * dens * dt;
     }
     col += LED * acc * 0.3;
@@ -741,6 +766,8 @@ export class Renderer {
   private pxScale = 1;
   dims: [number, number] = [30, 20];
   exposure = 1;
+  private frost = 0;
+  private layer = 0;
 
   constructor(private canvas: HTMLCanvasElement) {
     const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, preserveDrawingBuffer: false });
@@ -783,13 +810,13 @@ export class Renderer {
     for (let mm = 0; mm <= cm * 10; mm++) {
       const x = 1 + (mm * pxPerCm) / 10;
       const len = mm % 10 === 0 ? 34 : mm % 5 === 0 ? 22 : 12;
-      g.fillRect(x - (mm % 10 === 0 ? 2 : 1.2), c.height - len, mm % 10 === 0 ? 4 : 2.4, len);
+      g.fillRect(x - (mm % 10 === 0 ? 2 : 1.2), 0, mm % 10 === 0 ? 4 : 2.4, len);
     }
     g.font = `500 26px ${font}`;
-    g.textBaseline = 'top';
+    g.textBaseline = 'bottom';
     for (let i = 0; i <= cm; i += 1) {
       const label = i === cm ? `${i} cm` : String(i);
-      g.fillText(label, 1 + i * pxPerCm + 5, 4);
+      g.fillText(label, 1 + i * pxPerCm + 5, c.height - 2);
     }
     gl.bindTexture(gl.TEXTURE_2D, this.scaleTex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
@@ -878,7 +905,7 @@ export class Renderer {
     const pts: number[][] = [];
     const m = MARGIN;
     for (const x of [-m, W + m]) for (const y of [-m, D + m]) pts.push([x, y, 0]);
-    pts.push([0, D, H - 0.5], [W, D, H - 0.5]);
+    pts.push([0, D, portrait ? 6 : 3], [W, D, portrait ? 6 : 3]);
     const safeW = (2 * (this.cssW - ins.left - ins.right)) / this.cssW;
     const safeH = (2 * (this.cssH - ins.top - ins.bottom)) / this.cssH;
     const bbox = (dist: number) => {
@@ -917,6 +944,16 @@ export class Renderer {
     this.invVp = invert(this.vp);
     this.cam = b.eye;
     this.pxScale = (proj[5] * this.h) / 2;
+  }
+
+  /** Frost and the mist sheet, which change as the plate cools; redraws the room when they move. */
+  setCooling(frost: number, layer: number): void {
+    if (frost === this.frost && layer === this.layer) return;
+    const small = Math.abs(frost - this.frost) < 0.02 && Math.abs(layer - this.layer) < 0.02;
+    if (small && frost < 1 && layer < 1) return;
+    this.frost = frost;
+    this.layer = layer;
+    this.dirty = true;
   }
 
   setObjects(o: Objects): void {
@@ -987,6 +1024,8 @@ export class Renderer {
     const mg = this.objects.magnet;
     gl.uniform3f(u('uMagnet'), mg?.x ?? 0, mg?.y ?? 0, mg ? 1 : 0);
     gl.uniform1f(u('uScaleLen'), this.scaleLen);
+    gl.uniform1f(u('uFrost'), this.frost);
+    gl.uniform1f(u('uLayer'), this.layer);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.scaleTex);
     gl.uniform1i(u('uScale'), 0);

@@ -159,8 +159,8 @@ export class Chamber {
       const x = 0.4 + (P.G.W - 0.8) * r();
       const y = 0.4 + (P.G.D - 0.8) * r();
       // Fine mist condensing high in the tank and settling through the light.
-      const z = 1.4 + 7 * r() * r();
-      this.write(x, y, z, this.time + r() * dt, 0.3 + 0.35 * r(), 0, 0.02, 1.2 + 1.6 * r(), 0, 1.4 + 2.6 * r());
+      const z = 1.2 + 5 * r() * r();
+      this.write(x, y, z, this.time + r() * dt, 0.45 + 0.4 * r(), 0, 0.02, 1.2 + 1.6 * r(), 0, 1.2 + 2.2 * r());
     }
   }
 

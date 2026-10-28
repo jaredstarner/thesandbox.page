@@ -475,9 +475,12 @@ export function start(root: HTMLElement): void {
 
   let last = performance.now();
   function tick(now: number): void {
-    const dt = Math.min(0.05, (now - last) / 1000);
+    // The first frame's timestamp can come before `last`; never step backwards.
+    const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
     last = now;
     ch.step(dt, held);
+    const frost = Math.min(1, Math.max(0, (19 - ch.temperature) / 48));
+    renderer.setCooling(frost * frost * (3 - 2 * frost), ch.ready);
     readout();
     renderer.render(ch, highlight);
     requestAnimationFrame(tick);

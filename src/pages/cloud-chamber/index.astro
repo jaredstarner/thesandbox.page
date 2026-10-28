@@ -57,7 +57,8 @@ import { ENTRIES, SOURCES } from './_guide';
                   </g>
                 )}
               </svg>
-              <span>{s.name}</span>
+              <span class="long">{s.name}</span>
+              <span class="short">{s.short}</span>
             </button>
           ))
         }
@@ -439,13 +440,15 @@ import { ENTRIES, SOURCES } from './_guide';
 
   .card {
     position: absolute;
-    left: 26px;
-    bottom: 92px;
+    top: 312px;
+    right: 20px;
     display: grid;
-    grid-template-columns: 160px minmax(0, 1fr);
-    gap: 16px;
-    width: min(560px, calc(100% - 52px));
-    padding: 16px 18px 16px 16px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    width: 286px;
+    max-height: calc(100% - 332px);
+    overflow: auto;
+    padding: 14px;
     border: 1px solid var(--faint);
     border-radius: 12px;
     background: var(--panel);
@@ -453,8 +456,9 @@ import { ENTRIES, SOURCES } from './_guide';
   }
 
   .card-spec {
-    width: 160px;
-    height: 100px;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
     border-radius: 6px;
     background: #08090b;
   }
@@ -513,6 +517,129 @@ import { ENTRIES, SOURCES } from './_guide';
 
     &:hover {
       color: var(--ink);
+    }
+  }
+
+  .short {
+    display: none;
+  }
+
+  @media (max-width: 1099px) {
+    .source .long {
+      display: none;
+    }
+
+    .source .short {
+      display: inline;
+    }
+  }
+
+  @media (max-width: 719px) {
+    .masthead {
+      top: 14px;
+      left: 14px;
+    }
+
+    h1 {
+      margin: 8px 0 5px;
+      font-size: 23px;
+    }
+
+    .hint {
+      top: auto;
+      bottom: 130px;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    .tray {
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      flex-direction: column;
+      gap: 6px;
+      transform: none;
+    }
+
+    .sources,
+    .switches {
+      justify-content: stretch;
+
+      > button {
+        flex: 1 1 0;
+        justify-content: center;
+        padding: 0 10px 0 6px;
+      }
+    }
+
+    .log {
+      top: 14px;
+      right: 14px;
+      left: 14px;
+      width: auto;
+      pointer-events: none;
+    }
+
+    .log-toggle {
+      display: block;
+      margin-left: auto;
+      height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--faint);
+      border-radius: 17px;
+      color: var(--muted);
+      background: var(--panel);
+      font: 500 12px/1 var(--font-chamber-mono);
+      pointer-events: auto;
+      cursor: pointer;
+
+      b {
+        color: var(--ink);
+        font-weight: 500;
+      }
+    }
+
+    .log-body {
+      display: none;
+      margin-top: 8px;
+      pointer-events: auto;
+      background: rgb(10 12 15 / 0.92);
+    }
+
+    .chamber[data-log='open'] .log-body {
+      display: block;
+    }
+
+    .card {
+      top: auto;
+      left: 10px;
+      right: 10px;
+      bottom: 118px;
+      width: auto;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 12px;
+      max-height: 46dvh;
+      overflow: auto;
+      padding: 12px 14px 12px 12px;
+    }
+
+    .card-spec {
+      width: 96px;
+      height: 60px;
+      aspect-ratio: auto;
+    }
+
+    .card-text h2 {
+      font-size: 18px;
+    }
+
+    .card {
+      max-height: 40dvh;
+    }
+
+    .card-story {
+      font-size: 13px;
+      line-height: 1.45;
     }
   }
 

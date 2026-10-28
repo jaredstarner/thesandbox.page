@@ -63,7 +63,7 @@ export const ENTRIES: Entry[] = [
     name: 'Thoron pair',
     look: 'Two alphas from one point, a moment apart',
     story:
-      'A thoron atom (radon-220) drifting in the air decayed, and the polonium-216 it became decayed again a fraction of a second later, from the same spot; its half-life is 0.145 seconds. Two alphas leave the point one after the other.',
+      'A thoron atom (radon-220) drifting in the air decayed into polonium-216, which decayed in turn a fraction of a second later from the same spot; its half-life is 0.145 seconds. Two alphas leave the point one after the other.',
   },
   {
     kind: 'shower',
@@ -95,6 +95,8 @@ export type SourceId = 'rod' | 'marble' | 'salt';
 export interface SourceInfo {
   id: SourceId;
   name: string;
+  /** For narrow screens. */
+  short: string;
   /** What is radioactive in it. */
   note: string;
 }
@@ -103,16 +105,19 @@ export const SOURCES: SourceInfo[] = [
   {
     id: 'rod',
     name: 'Welding rod',
+    short: 'Rod',
     note: 'A thoriated tungsten electrode, red-tipped for 2% thorium. Alphas fan out along it, some very long.',
   },
   {
     id: 'marble',
     name: 'Uranium glass marble',
+    short: 'Marble',
     note: 'Glass coloured with uranium. Short alphas from its surface and fast, wandering electrons.',
   },
   {
     id: 'salt',
     name: 'Salt substitute',
+    short: 'Salt',
     note: 'Potassium chloride. About one potassium atom in ten thousand is radioactive potassium-40, which gives off electrons.',
   },
 ];
