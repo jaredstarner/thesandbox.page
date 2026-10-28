@@ -611,6 +611,14 @@ export function shower(c: Ctx): Track {
   return done(path, 'shower', `${shown} particles from one cosmic-ray shower, arriving together`);
 }
 
+/** A decay electron's energy, MeV, from Michel's spectrum x²(3 - 2x). */
+function michel(r: Rng): number {
+  for (;;) {
+    const x = r();
+    if (r() < x * x * (3 - 2 * x)) return 52.8 * x;
+  }
+}
+
 export function muonDecay(c: Ctx): Track {
   const path = new Path(c.r, c.sink, c.o, c.ready);
   // A slow muon entering at a shallow angle so it shows before it stops.
@@ -638,14 +646,7 @@ export function muonDecay(c: Ctx): Track {
     (t) => 1 + 0.8 * smooth(1.6, 0, t),
   );
   // Michel electron: up to 52.8 MeV, fast, nearly straight.
-  let te = 0;
-  for (;;) {
-    const x = c.r();
-    if (c.r() < x * x * (3 - 2 * x)) {
-      te = 52.8 * x;
-      break;
-    }
-  }
+  const te = michel(c.r);
   let ed = tilt(c.r, d, 0.7 + 1.3 * c.r());
   if (Math.abs(ed[2]) > 0.2) ed = [ed[0], ed[1], Math.sign(ed[2]) * 0.2];
   const n = Math.hypot(...ed);
