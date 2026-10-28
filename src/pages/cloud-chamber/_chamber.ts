@@ -22,11 +22,11 @@ export const COOL_TIME = 16;
 const RATES = {
   muon: 1.7,
   electron: 0.9,
-  radon: 0.13,
+  radon: 0.2,
   thoron: 1 / 70,
   decay: 1 / 55,
   shower: 1 / 75,
-  rodAlpha: 1.1,
+  rodAlpha: 1.6,
   rodBeta: 0.7,
   rodThoron: 1 / 18,
   marbleAlpha: 0.4,

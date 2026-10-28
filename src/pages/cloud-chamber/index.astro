@@ -29,7 +29,7 @@ import { ENTRIES, SOURCES } from './_guide';
       </p>
     </header>
 
-    <p class="hint" data-hint hidden>Tap a track to see what made it</p>
+    <p class="hint" data-hint>Tracks appear once the mist settles into a layer over the plate</p>
 
     <div class="tray" data-tray>
       <div class="sources" role="group" aria-label="Put something in the chamber">
@@ -242,6 +242,7 @@ import { ENTRIES, SOURCES } from './_guide';
     top: 22px;
     margin: 0;
     transform: translateX(-50%);
+    white-space: nowrap;
     color: var(--muted);
     font: 400 13px/1 var(--font-chamber-mono);
     letter-spacing: 0.02em;
@@ -547,9 +548,15 @@ import { ENTRIES, SOURCES } from './_guide';
 
     .hint {
       top: auto;
-      bottom: 130px;
-      white-space: nowrap;
+      bottom: 128px;
+      width: calc(100% - 40px);
       font-size: 12px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .chamber[data-log='open'] .masthead {
+      visibility: hidden;
     }
 
     .tray {

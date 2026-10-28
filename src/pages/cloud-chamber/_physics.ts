@@ -121,7 +121,7 @@ interface Style {
   life: number;
 }
 
-const MUON_STYLE: Style = { size: 0.7, w0: 0.012, diff: 0.03, life: 2.1 };
+const MUON_STYLE: Style = { size: 0.95, w0: 0.012, diff: 0.03, life: 2.1 };
 const ELECTRON_STYLE: Style = { size: 0.8, w0: 0.014, diff: 0.035, life: 2.3 };
 const ALPHA_STYLE: Style = { size: 0.72, w0: 0.045, diff: 0.075, life: 3.1 };
 
@@ -506,7 +506,7 @@ function muonDirection(r: Rng, minTheta = 0): [number, number, number] {
   }
 }
 
-const muonDens = () => 34;
+const muonDens = () => 42;
 
 function muonLine(
   path: Path,

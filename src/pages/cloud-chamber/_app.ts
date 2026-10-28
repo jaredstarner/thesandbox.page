@@ -91,8 +91,8 @@ function specimen(t: LiveTrack, w: number, h: number, pad: number): string {
       y0 = Math.min(y0, run[i + 1]);
       y1 = Math.max(y1, run[i + 1]);
     }
-  // Keep the true scale for small tracks so a short alpha looks short.
-  const span = Math.max(x1 - x0, ((y1 - y0) * w) / h, 6);
+  // Below 2 cm keep the true scale, so a short track still looks short next to a long one.
+  const span = Math.max(x1 - x0, ((y1 - y0) * w) / h, 2);
   const k = (w - 2 * pad) / span;
   const cx = (x0 + x1) / 2;
   const cy = (y0 + y1) / 2;
@@ -284,7 +284,7 @@ export function start(root: HTMLElement): void {
     let bestScore = touch ? 26 : 16;
     for (const t of ch.tracks) {
       const pres = ch.presence(t);
-      if (pres < 0.12) continue;
+      if (pres < 0.12 || t.length < 0.4) continue;
       const age = Math.max(0, ch.time - t.birth);
       let dmin = Infinity;
       for (const run of t.runs) {
@@ -469,7 +469,10 @@ export function start(root: HTMLElement): void {
     if (next !== phase) {
       phase = next;
       root.dataset.phase = next;
-      if (next === 'ready' && !picked) hint.hidden = false;
+      if (next === 'ready') {
+        hint.textContent = 'Tap a track to see what made it';
+        hint.hidden = picked;
+      }
     }
   }
 

@@ -177,7 +177,7 @@ float shade(vec3 p) {
     vec3 q = mix(p, l, t);
     float qr = length(q.xy - uSalt.xy) / uSalt.z;
     float top = qr < 1.0 ? uSalt.w * pow(1.0 - qr * qr, 0.8) + 0.12 : (qr < ${(DISH_R / SALT_R).toFixed(3)} ? 0.1 + 0.25 * (qr - 1.0) : 0.0);
-    s *= p.x > uSalt.x ? smoothstep(-0.06, 0.12, q.z - top) : 1.0;
+    s *= p.x > uSalt.x ? smoothstep(-0.25, 0.2, q.z - top) : 1.0;
   }
   return s;
 }
@@ -505,8 +505,8 @@ void main() {
       col = vec3(0.012, 0.013, 0.015) * (AMBIENT * 6.0 + vec3(lit)) * 6.0;
       // The strip, reflected in the film.
       vec3 rr = vec3(rd.xy, -rd.z);
-      col += strip(p, rr, 80.0) * (0.025 + 0.04 * puddle);
-      refl = 0.14 + 0.22 * puddle;
+      col += strip(p, rr, 80.0) * (0.012 + 0.02 * puddle);
+      refl = 0.05 + 0.08 * puddle;
       // Frost creeping in along the foot of the glass.
       float rim = 1.0 - smoothstep(0.08, 0.45 + 0.25 * noise(p.xy * 4.0), wall);
       col = mix(col, frost(p.xy, lampAt(vec3(p.xy, 0.15)) * 0.4), rim * 0.9);
@@ -563,7 +563,7 @@ void main() {
     float dif = max(0.0, dot(n, ldir)) * 0.8 + 0.2;
     float spark = pow(noise(p.xy * 90.0 + p.z * 40.0), 44.0) * 8.0;
     float grains = 0.62 + 0.38 * noise(p.xy * 44.0 + p.z * 24.0);
-    float fill = lampAt(p) * 0.1;
+    float fill = lampAt(p) * 0.22;
     col = vec3(0.92, 0.92, 0.9) * grains * (AMBIENT * 8.0 + vec3(dif * lit * 0.7 + fill)) + vec3(spark * lit);
   }
 
@@ -607,7 +607,8 @@ void main() {
     float mist = (1.0 - smoothstep(0.0, 1.4, q.z)) * (0.35 + 0.65 * noise(vec2(along, q.z) * 14.0));
     col += vec3(0.85, 0.9, 1.0) * mist * lit * 0.35;
     float edge = min(along, span - along);
-    float glint = exp(-edge * edge / 0.004) + exp(-pow(uH - q.z, 2.0) / 0.004);
+    // The near wall's top edge would cross the whole plate, so only its corners catch the light.
+    float glint = exp(-edge * edge / 0.004) + (k == 2 ? 0.0 : exp(-pow(uH - q.z, 2.0) / 0.004));
     col += vec3(0.8, 0.88, 1.0) * glint * (k == 2 ? 0.012 : 0.025 + lit * 0.6);
     col += vec3(0.6, 0.7, 0.8) * 0.003;
   }

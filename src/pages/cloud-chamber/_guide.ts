@@ -35,7 +35,7 @@ export const ENTRIES: Entry[] = [
     name: 'Alpha',
     look: 'Short, thick, straight',
     story:
-      "Two protons and two neutrons thrown out of a radon atom in the room's air. It is heavy and slow, ionises tens of thousands of molecules per centimetre, and stops within about four centimetres. The track thickens toward the end, where it loses energy fastest.",
+      "Two protons and two neutrons thrown out of a decaying nucleus: radon in the room's air, or thorium or uranium in something on the plate. It is heavy and slow, ionises tens of thousands of molecules per centimetre, and stops within a few centimetres. The track thickens toward the end, where it loses energy fastest.",
   },
   {
     kind: 'electron',
