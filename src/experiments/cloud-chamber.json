@@ -1,0 +1,8 @@
+{
+  "title": "Cloud chamber",
+  "summary": "A tank of alcohol mist over a plate of dry ice where cosmic-ray muons, radon alphas, and stray electrons leave trails as they pass: put a welding rod, a uranium glass marble, or salt substitute inside, slide a magnet under the plate, and tap any track to find out what made it.",
+  "date": "2026-10-28",
+  "tags": ["webgl2", "pointer-events", "physics", "cloud-chamber", "monte-carlo"],
+  "requires": ["webgl2"],
+  "plot": 27
+}

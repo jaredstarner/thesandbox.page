@@ -402,5 +402,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Rockwell', 'Georgia', 'serif'],
     },
+    // The labels and readouts on /cloud-chamber/: a grotesk and its monospace.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Chivo',
+      cssVariable: '--font-chamber',
+      weights: ['100 900'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Chivo Mono',
+      cssVariable: '--font-chamber-mono',
+      weights: ['100 900'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });

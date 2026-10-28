@@ -1,0 +1,536 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { ENTRIES, SOURCES } from './_guide';
+---
+
+<Bare
+  title="Cloud chamber"
+  description="A diffusion cloud chamber on a plate of dry ice: watch cosmic-ray muons, radon alphas, and stray electrons streak through the alcohol mist, put a welding rod, a uranium glass marble, or salt substitute inside, and tap a track to find out what made it."
+>
+  <Font cssVariable="--font-chamber" slot="head" />
+  <Font cssVariable="--font-chamber-mono" slot="head" />
+
+  <main class="chamber" data-chamber data-phase="cooling">
+    <canvas
+      class="scene"
+      data-canvas
+      role="img"
+      aria-label="A glass tank on a black plate, lit from one side, with a layer of alcohol mist above the plate"
+    ></canvas>
+
+    <header class="masthead">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Cloud chamber</h1>
+      <p class="readout" aria-live="polite">
+        <span class="dot" aria-hidden="true"></span>
+        Plate <b data-temp>+19</b> °C <span class="sep" aria-hidden="true">/</span>
+        <span data-state>Cooling</span>
+      </p>
+    </header>
+
+    <p class="hint" data-hint hidden>Tap a track to see what made it</p>
+
+    <div class="tray" data-tray>
+      <div class="sources" role="group" aria-label="Put something in the chamber">
+        {
+          SOURCES.map((s) => (
+            <button type="button" class="source" data-source={s.id} aria-pressed="false" title={s.note}>
+              <svg viewBox="0 0 40 40" aria-hidden="true">
+                {s.id === 'rod' && (
+                  <g>
+                    <rect class="g-rod" x="4" y="18" width="26" height="4" rx="2" />
+                    <rect class="g-rod-tip" x="30" y="18" width="6" height="4" rx="2" />
+                  </g>
+                )}
+                {s.id === 'marble' && (
+                  <g>
+                    <circle class="g-marble" cx="20" cy="20" r="11" />
+                    <path class="g-marble-swirl" d="M12 23c4-7 10 2 16-5" />
+                    <circle class="g-marble-hi" cx="16" cy="15" r="2.6" />
+                  </g>
+                )}
+                {s.id === 'salt' && (
+                  <g>
+                    <path class="g-dish" d="M5 22c3 8 27 8 30 0" />
+                    <path class="g-salt" d="M9 23c3-7 19-7 22 0z" />
+                  </g>
+                )}
+              </svg>
+              <span>{s.name}</span>
+            </button>
+          ))
+        }
+      </div>
+      <div class="switches">
+        <button type="button" class="switch" data-magnet aria-pressed="false">
+          <svg viewBox="0 0 40 40" aria-hidden="true">
+            <circle class="g-magnet" cx="20" cy="20" r="11" />
+            <circle class="g-magnet-core" cx="20" cy="20" r="4" />
+          </svg>
+          <span>Magnet</span>
+        </button>
+        <button type="button" class="switch" data-hold aria-pressed="false">
+          <svg viewBox="0 0 40 40" aria-hidden="true">
+            <rect class="g-hold" x="13" y="11" width="5" height="18" rx="1" />
+            <rect class="g-hold" x="22" y="11" width="5" height="18" rx="1" />
+          </svg>
+          <span>Hold</span>
+        </button>
+      </div>
+    </div>
+
+    <aside class="log" data-log>
+      <button type="button" class="log-toggle" data-log-toggle aria-expanded="false">
+        Seen <b data-log-count>0</b>/{ENTRIES.length}
+      </button>
+      <div class="log-body" data-log-body>
+        <h2>Seen</h2>
+        <ol class="specimens">
+          {
+            ENTRIES.map((e) => (
+              <li data-entry={e.kind}>
+                <button type="button" disabled>
+                  <svg viewBox="0 0 100 64" aria-hidden="true">
+                    <rect class="frame" x="1" y="1" width="98" height="62" rx="3" />
+                    <g data-spec />
+                  </svg>
+                  <span class="name">{e.name}</span>
+                  <span class="look">{e.look}</span>
+                </button>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </aside>
+
+    <section class="card" data-card hidden aria-live="polite">
+      <button type="button" class="close" data-card-close aria-label="Close">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"></path></svg>
+      </button>
+      <svg class="card-spec" viewBox="0 0 160 100" aria-hidden="true">
+        <g data-card-spec></g>
+      </svg>
+      <div class="card-text">
+        <p class="card-kicker" data-card-kicker></p>
+        <h2 data-card-name></h2>
+        <p class="card-facts" data-card-facts></p>
+        <p class="card-story" data-card-story></p>
+      </div>
+    </section>
+
+    <p class="unsupported" data-unsupported hidden>
+      This browser can't open a WebGL 2 context, which the chamber is drawn with.
+    </p>
+    <noscript>
+      <p class="unsupported">The chamber runs on JavaScript, which is off.</p>
+    </noscript>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.chamber)) {
+    margin: 0;
+    background: #050608;
+  }
+
+  .chamber,
+  .chamber :global(*) {
+    box-sizing: border-box;
+  }
+
+  .chamber {
+    --ink: #e9ecef;
+    --muted: #8c949c;
+    --faint: rgb(233 236 239 / 0.14);
+    --amber: #ffb547;
+    --panel: rgb(10 12 15 / 0.72);
+
+    position: relative;
+    height: 100dvh;
+    min-height: 480px;
+    overflow: hidden;
+    color: var(--ink);
+    background: #050608;
+    font:
+      400 15px/1.45 var(--font-chamber),
+      'Helvetica Neue',
+      Arial,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .masthead {
+    position: absolute;
+    top: 22px;
+    left: 26px;
+    pointer-events: none;
+
+    a,
+    button {
+      pointer-events: auto;
+    }
+  }
+
+  .home {
+    color: var(--muted);
+    font: 500 12px/1 var(--font-chamber-mono);
+    letter-spacing: 0.04em;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--ink);
+    }
+  }
+
+  h1 {
+    margin: 10px 0 6px;
+    font-size: 30px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .readout {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: var(--muted);
+    font: 400 12px/1 var(--font-chamber-mono);
+    letter-spacing: 0.02em;
+
+    b {
+      color: var(--ink);
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sep {
+      opacity: 0.4;
+    }
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #5fa8ff;
+    box-shadow: 0 0 8px #5fa8ff;
+  }
+
+  .chamber[data-phase='ready'] .dot {
+    background: var(--amber);
+    box-shadow: 0 0 8px var(--amber);
+  }
+
+  .hint {
+    position: absolute;
+    left: 50%;
+    top: 22px;
+    margin: 0;
+    transform: translateX(-50%);
+    color: var(--muted);
+    font: 400 13px/1 var(--font-chamber-mono);
+    letter-spacing: 0.02em;
+    pointer-events: none;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  .tray {
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    transform: translateX(-50%);
+  }
+
+  .sources,
+  .switches {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--faint);
+    border-radius: 12px;
+    background: var(--panel);
+    backdrop-filter: blur(10px);
+  }
+
+  .source,
+  .switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 14px 0 8px;
+    border: 0;
+    border-radius: 8px;
+    color: var(--muted);
+    background: transparent;
+    font: 500 13px/1 var(--font-chamber);
+    white-space: nowrap;
+    cursor: pointer;
+
+    svg {
+      width: 30px;
+      height: 30px;
+      flex: none;
+    }
+
+    &:hover {
+      color: var(--ink);
+      background: rgb(255 255 255 / 0.05);
+    }
+
+    &[aria-pressed='true'] {
+      color: var(--ink);
+      background: rgb(255 255 255 / 0.1);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 1px;
+    }
+  }
+
+  .g-rod {
+    fill: #9aa1a8;
+  }
+  .g-rod-tip {
+    fill: #d23b2f;
+  }
+  .g-marble {
+    fill: #b9e34a;
+    fill-opacity: 0.75;
+  }
+  .g-marble-swirl {
+    fill: none;
+    stroke: #e8ff9a;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    opacity: 0.8;
+  }
+  .g-marble-hi {
+    fill: #fff;
+    opacity: 0.8;
+  }
+  .g-dish {
+    fill: none;
+    stroke: #aeb6bd;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+  .g-salt {
+    fill: #eef0f2;
+  }
+  .g-magnet {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+  }
+  .g-magnet-core {
+    fill: currentColor;
+  }
+  .g-hold {
+    fill: currentColor;
+  }
+
+  .log {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 286px;
+  }
+
+  .log-toggle {
+    display: none;
+  }
+
+  .log-body {
+    padding: 14px 14px 12px;
+    border: 1px solid var(--faint);
+    border-radius: 12px;
+    background: var(--panel);
+    backdrop-filter: blur(10px);
+
+    h2 {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font: 500 11px/1 var(--font-chamber-mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+  }
+
+  .specimens {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    button {
+      display: grid;
+      gap: 3px;
+      width: 100%;
+      padding: 0;
+      border: 0;
+      color: var(--ink);
+      background: none;
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+
+      &:disabled {
+        cursor: default;
+        color: var(--muted);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--amber);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .frame {
+      fill: #08090b;
+      stroke: var(--faint);
+      stroke-dasharray: 2 3;
+    }
+
+    li[data-seen] .frame {
+      stroke-dasharray: none;
+    }
+
+    .name {
+      font-size: 11.5px;
+      font-weight: 500;
+      line-height: 1.15;
+    }
+
+    .look {
+      display: none;
+    }
+  }
+
+  .card {
+    position: absolute;
+    left: 26px;
+    bottom: 92px;
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 16px;
+    width: min(560px, calc(100% - 52px));
+    padding: 16px 18px 16px 16px;
+    border: 1px solid var(--faint);
+    border-radius: 12px;
+    background: var(--panel);
+    backdrop-filter: blur(10px);
+  }
+
+  .card-spec {
+    width: 160px;
+    height: 100px;
+    border-radius: 6px;
+    background: #08090b;
+  }
+
+  .card-text {
+    min-width: 0;
+
+    h2 {
+      margin: 2px 0 4px;
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 1.1;
+    }
+  }
+
+  .card-kicker {
+    margin: 0;
+    color: var(--amber);
+    font: 500 11px/1 var(--font-chamber-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .card-facts {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font: 400 12px/1.4 var(--font-chamber-mono);
+  }
+
+  .card-story {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+    border: 0;
+    border-radius: 6px;
+    color: var(--muted);
+    background: none;
+    cursor: pointer;
+
+    svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+    }
+
+    &:hover {
+      color: var(--ink);
+    }
+  }
+
+  .unsupported {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    max-width: 360px;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    color: var(--muted);
+    text-align: center;
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-chamber]');
+  if (root) start(root);
+</script>
