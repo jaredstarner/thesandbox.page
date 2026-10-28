@@ -507,6 +507,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   translucency: { label: 'Translucency' },
   frottage: { label: 'Frottage' },
   'distance-transform': { label: 'Distance transform' },
+  'cloud-chamber': { label: 'Cloud chamber' },
+  'monte-carlo': { label: 'Monte Carlo transport' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
