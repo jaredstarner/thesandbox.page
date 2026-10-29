@@ -171,7 +171,10 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
     <article class="sheet" data-sheet aria-busy="true">
       <div class="frame">
         <header class="mast">
-          <p class="kicker"><span>A specimen of</span><span class="kicker-rule"></span><span>cut by pen</span></p>
+          <p class="kicker">
+            <span class="kicker-rule"></span><span>A specimen of type cut with a pen</span><span class="kicker-rule"
+            ></span>
+          </p>
           <h1
             class="face-name"
             data-name
@@ -779,7 +782,7 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
   }
 
   .kicker-rule {
-    width: 46px;
+    flex: 0 0 46px;
     height: 1px;
     background: var(--red);
   }
@@ -791,6 +794,7 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
     font-weight: 400;
     line-height: 1.04;
     overflow-wrap: anywhere;
+    text-wrap: balance;
     cursor: text;
   }
 
@@ -800,6 +804,7 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
     font-size: 12px;
     letter-spacing: 0.04em;
     color: #5d564b;
+    text-wrap: balance;
   }
 
   .nojs {
@@ -823,6 +828,7 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
     font-size: clamp(34px, 5.4vw, 74px);
     line-height: 1.22;
     overflow-wrap: anywhere;
+    text-wrap: balance;
   }
 
   .show-fig {
@@ -952,6 +958,8 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
   }
 
   .write {
+    flex: none;
+    white-space: nowrap;
     padding: 7px 12px;
     font: inherit;
     color: var(--red);
@@ -994,7 +1002,7 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
 
   .proof :global(.ghost) {
     fill: none;
-    stroke: rgba(179, 52, 31, 0.4);
+    stroke: rgba(243, 238, 227, 0.42);
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
   }
@@ -1163,7 +1171,7 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
       inset: auto 0 0 0;
       z-index: 5;
       height: auto;
-      max-height: 64vh;
+      max-height: 58vh;
       overflow: hidden;
       display: grid;
       grid-template-rows: auto minmax(0, 1fr);
@@ -1177,8 +1185,14 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
       padding: 10px 16px;
     }
 
-    .bench-title {
+    .bench-title,
+    .kicker-rule {
       display: none;
+    }
+
+    .kicker {
+      text-wrap: balance;
+      line-height: 1.6;
     }
 
     .drawer {

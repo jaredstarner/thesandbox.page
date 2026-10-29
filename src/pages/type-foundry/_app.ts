@@ -474,7 +474,7 @@ export function start(root: HTMLElement): void {
     const vy = -(ASC + 110);
     proofSvg.setAttribute('viewBox', `${vx.toFixed(1)} ${vy} ${w.toFixed(1)} ${h}`);
     proofSvg.replaceChildren();
-    const fs = h * 0.024;
+    const fs = h * 0.036;
 
     proofSvg.appendChild(svg('rect', { class: 'advance', x: 0, y: -ASC, width: c.advance, height: ASC - DESC }));
     const lines: [string, number][] = [
@@ -517,7 +517,6 @@ export function start(root: HTMLElement): void {
     for (const d of c.dots) ghosts.push(dotNib(pen).map(([x, y]) => [d[0] + x, d[1] + y] as Pt));
 
     const done = progress === Infinity;
-    if (done) proofSvg.appendChild(svg('path', { class: 'ghost', d: pathOf(ghosts) }));
 
     // The ink so far.
     const ink: Pt[][] = [];
@@ -543,6 +542,8 @@ export function start(root: HTMLElement): void {
       left -= DOT_LEN;
     }
     proofSvg.appendChild(svg('path', { class: 'ink', d: pathOf(ink), 'fill-rule': 'nonzero' }));
+    // Pressed into the finished ink: where the nib sat, every so often.
+    if (done) proofSvg.appendChild(svg('path', { class: 'ghost', d: pathOf(ghosts) }));
 
     // The skeleton on top, the way the hand would follow it.
     for (const s of c.strokes)
@@ -631,6 +632,14 @@ export function start(root: HTMLElement): void {
       console.warn('Type foundry: could not cast', err);
       metaEl.textContent = prev;
     }
+  });
+
+  // A link pasted into the address bar, or the back button, brings its face with it.
+  addEventListener('hashchange', () => {
+    nameEdited = false;
+    readHash();
+    syncName();
+    changed();
   });
 
   // ---- Go ----

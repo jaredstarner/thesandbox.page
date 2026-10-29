@@ -51,7 +51,7 @@ export const PRESETS: Preset[] = [
     params: {
       pen: 'broad',
       nib: 112,
-      contrast: 0.06,
+      contrast: 0.1,
       angle: 0,
       slant: 0,
       width: 1.04,
@@ -67,8 +67,8 @@ export const PRESETS: Preset[] = [
     note: 'The edge stood nearly upright: thin stems, heavy crossbars',
     params: {
       pen: 'broad',
-      nib: 70,
-      contrast: 0.12,
+      nib: 96,
+      contrast: 0.22,
       angle: 80,
       slant: 0,
       width: 1.22,

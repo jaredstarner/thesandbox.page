@@ -838,7 +838,7 @@ const PUNCT: Record<string, Def> = {
     comma(g, m, 0, m.C - 0.1 * (m.C - m.B));
     comma(g, m, 0.3 * m.nw + m.ex * 1.6, m.C - 0.1 * (m.C - m.B));
   }),
-  '-': d([0.6, 0.6], (g, m) => g.line(0, m.xh * 0.46, 0.42 * m.nw, m.xh * 0.46)),
+  '-': d([0.6, 0.6], (g, m) => g.line(0, m.xh * 0.46, 0.5 * m.nw, m.xh * 0.46)),
   '–': d([0.4, 0.4], (g, m) => g.line(0, m.xh * 0.46, 1.1 * m.nw, m.xh * 0.46)),
   '(': d([0.9, 0.5], (g, m) => {
     const rx = 0.5 * m.nw;
@@ -866,20 +866,20 @@ const PUNCT: Record<string, Def> = {
   '\\': d([0.3, 0.3], (g, m) => g.line(0, m.A, 0.62 * m.nw, m.D)),
   '|': d([1, 1], (g, m) => g.line(0, m.A, 0, m.D)),
   '+': d([0.6, 0.6], (g, m) => {
-    const w = 0.7 * m.nw;
-    const y = m.xh * 0.42;
+    const w = mathW(m);
+    const y = AXIS;
     g.line(0, y, w, y);
     g.line(w / 2, y + w / 2, w / 2, y - w / 2);
   }),
   '=': d([0.6, 0.6], (g, m) => {
-    const w = 0.7 * m.nw;
-    const y = m.xh * 0.42;
-    const gap = 0.12 * m.xh + m.ey;
+    const w = mathW(m);
+    const y = AXIS;
+    const gap = 0.1 * CAP + m.ey * 0.6;
     g.line(0, y + gap, w, y + gap);
     g.line(0, y - gap, w, y - gap);
   }),
   '*': d([0.6, 0.6], (g, m) => {
-    const r = 0.26 * m.nw;
+    const r = 0.2 * CAP;
     const cy = m.C - r;
     for (let i = 0; i < 3; i++) {
       const a = (Math.PI / 2) + (i * Math.PI) / 3;
@@ -887,14 +887,14 @@ const PUNCT: Record<string, Def> = {
     }
   }),
   '<': d([0.5, 0.6], (g, m) => {
-    const w = 0.6 * m.nw;
-    const y = m.xh * 0.42;
-    g.path(w, y + w * 0.6).to(0, y).to(w, y - w * 0.6).end();
+    const w = mathW(m) * 0.9;
+    const y = AXIS;
+    g.path(w, y + w * 0.5).to(0, y).to(w, y - w * 0.5).end();
   }),
   '>': d([0.6, 0.5], (g, m) => {
-    const w = 0.6 * m.nw;
-    const y = m.xh * 0.42;
-    g.path(0, y + w * 0.6).to(w, y).to(0, y - w * 0.6).end();
+    const w = mathW(m) * 0.9;
+    const y = AXIS;
+    g.path(0, y + w * 0.5).to(w, y).to(0, y - w * 0.5).end();
   }),
   '#': d([0.5, 0.5], (g, m) => {
     const w = 0.84 * m.nw;
@@ -960,14 +960,14 @@ const PUNCT: Record<string, Def> = {
       .end();
   }),
   '^': d([0.5, 0.5], (g, m) => {
-    const w = 0.6 * m.nw;
+    const w = mathW(m);
     g.path(0, m.C - 0.36 * (m.C - m.B)).to(w / 2, m.C).to(w, m.C - 0.36 * (m.C - m.B)).end();
   }),
   _: d([0.2, 0.2], (g, m) => g.line(0, m.D * 0.5, 0.9 * m.nw, m.D * 0.5)),
   '`': d([0.6, 0.6], (g, m) => g.line(0, m.C, 0.18 * m.nw, m.C - 0.16 * (m.C - m.B))),
   '~': d([0.5, 0.5], (g, m) => {
-    const w = 0.8 * m.nw;
-    const y = m.xh * 0.46;
+    const w = mathW(m);
+    const y = AXIS;
     const a = 0.08 * m.xh;
     const p = g.path(0, y - a * 0.6);
     for (let i = 1; i <= 20; i++) {
@@ -1003,6 +1003,12 @@ const PUNCT: Record<string, Def> = {
       .end();
   }),
 };
+
+/** Width of the arithmetic signs, and the height they centre on. */
+function mathW(m: Metrics): number {
+  return 0.36 * CAP * m.p.width + 0.6 * m.ex;
+}
+const AXIS = CAP * 0.36;
 
 function comma(g: Glyph, m: Metrics, x: number, y: number): void {
   g.dot(x, y);
