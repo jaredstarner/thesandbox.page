@@ -179,6 +179,28 @@ export function start(root: HTMLElement): void {
   let busy = false;
   let pending = false;
 
+  /** Set each showing line to fill the measure exactly, as a specimen's display lines are. */
+  const showLines = $$<HTMLElement>('.show-line');
+  function fitLines(): void {
+    for (const el of showLines) {
+      el.style.whiteSpace = 'nowrap';
+      el.style.fontSize = '100px';
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const natural = range.getBoundingClientRect().width;
+      const room = el.clientWidth;
+      const size = natural > 0 ? (100 * room) / natural : 100;
+      const max = Math.min(150, room / 4);
+      const min = Math.min(34, room / 14);
+      if (size < min) {
+        el.style.whiteSpace = '';
+        el.style.fontSize = `${min}px`;
+      } else el.style.fontSize = `${Math.min(size * 0.995, max).toFixed(2)}px`;
+    }
+  }
+  addEventListener('resize', fitLines);
+  for (const el of showLines) el.addEventListener('input', fitLines);
+
   async function swapIn(buffer: ArrayBuffer): Promise<void> {
     const family = flip++ % 2 ? 'Foundry Live B' : 'Foundry Live A';
     const face = new FontFace(family, buffer);
@@ -187,6 +209,7 @@ export function start(root: HTMLElement): void {
     root.style.setProperty('--face', `'${family}'`);
     if (live) document.fonts.delete(live);
     live = face;
+    fitLines();
     metaEl.textContent = `${CHARSET.length} characters, ${(buffer.byteLength / 1024).toFixed(0)} KB, OpenType with PostScript outlines`;
     if (root.dataset.state !== 'ready') {
       root.dataset.state = 'ready';
@@ -236,10 +259,9 @@ export function start(root: HTMLElement): void {
       const out = outputs.get(key);
       if (out) out.textContent = fmt[key](params[key]);
     }
-    const contrastInput = sliders.find((s) => s.dataset.param === 'contrast');
-    if (contrastInput) contrastInput.disabled = params.pen === 'round';
-    const contrastOut = outputs.get('contrast');
-    if (contrastOut && params.pen === 'round') contrastOut.textContent = 'none';
+    // A round pen has no edge to set.
+    const contrastRow = sliders.find((s) => s.dataset.param === 'contrast')?.closest('label');
+    if (contrastRow) contrastRow.hidden = params.pen === 'round';
     const nibLabel = root.querySelector('[data-label="nib"]');
     const edgeLabel = root.querySelector('[data-label="contrast"]');
     if (nibLabel) nibLabel.textContent = params.pen === 'broad' ? 'Nib' : params.pen === 'round' ? 'Diameter' : 'Swell';
