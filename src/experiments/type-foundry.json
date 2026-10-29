@@ -1,0 +1,8 @@
+{
+  "title": "Type foundry",
+  "summary": "A typeface you cut with a pen: choose a broad nib, a round one, or a pointed one, set its width and angle, slant and stretch the skeleton, and the whole specimen sheet re-sets itself in your face as you go, then cast it and take home a working font file.",
+  "date": "2026-10-29",
+  "tags": ["font-loading", "web-workers", "opentype", "svg", "typography", "pointer-events"],
+  "requires": ["font-loading"],
+  "plot": 28
+}

@@ -415,6 +415,16 @@ export const TECHNIQUES: Record<string, Technique> = {
     handling: 'Talks to its own copies in your other tabs, and nowhere else.',
     test: () => present(typeof BroadcastChannel === 'function', 'BroadcastChannel present', 'BroadcastChannel missing'),
   },
+  'font-loading': {
+    label: 'CSS Font Loading',
+    webFeature: 'font-loading',
+    test: () =>
+      present(
+        typeof FontFace === 'function' && 'fonts' in document,
+        'FontFace and document.fonts present',
+        'FontFace or document.fonts missing',
+      ),
+  },
   'compression-streams': {
     label: 'Compression streams',
     webFeature: 'compression-streams',
@@ -509,6 +519,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   'distance-transform': { label: 'Distance transform' },
   'cloud-chamber': { label: 'Cloud chamber' },
   'monte-carlo': { label: 'Monte Carlo transport' },
+  opentype: { label: 'OpenType font writing' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
