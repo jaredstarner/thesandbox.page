@@ -187,7 +187,9 @@ export function start(root: HTMLElement): void {
       el.style.fontSize = '100px';
       const range = document.createRange();
       range.selectNodeContents(el);
-      const natural = range.getBoundingClientRect().width;
+      // A slanted face's last letter leans out past its advance by about the cap height's lean.
+      const lean = 70 * Math.max(0, Math.tan((params.slant * Math.PI) / 180));
+      const natural = range.getBoundingClientRect().width + lean;
       const room = el.clientWidth;
       const size = natural > 0 ? (100 * room) / natural : 100;
       const max = Math.min(150, room / 4);
