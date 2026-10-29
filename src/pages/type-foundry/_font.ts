@@ -40,7 +40,12 @@ function union(contours: Pt[][]): Pt[][] {
     .map((c) => c.map(([x, y]) => ({ X: Math.round(x * Q), Y: Math.round(y * Q) })));
   clipper.AddPaths(paths, ClipperLib.PolyType.ptSubject, true);
   const out: { X: number; Y: number }[][] = [];
-  clipper.Execute(ClipperLib.ClipType.ctUnion, out, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
+  clipper.Execute(
+    ClipperLib.ClipType.ctUnion,
+    out,
+    ClipperLib.PolyFillType.pftNonZero,
+    ClipperLib.PolyFillType.pftNonZero,
+  );
   return out.map((c) => c.map(({ X, Y }) => [X / Q, Y / Q] as Pt));
 }
 
@@ -62,9 +67,7 @@ export function cast(p: Params, family: string, cuts: Cut[] = cutAll(p)): ArrayB
       for (let i = 1; i < pts.length; i++) path.lineTo(pts[i][0], pts[i][1]);
       path.close();
     }
-    glyphs.push(
-      new OTGlyph({ name: glyphName(c.ch), unicode: c.ch.codePointAt(0)!, advanceWidth: c.advance, path }),
-    );
+    glyphs.push(new OTGlyph({ name: glyphName(c.ch), unicode: c.ch.codePointAt(0)!, advanceWidth: c.advance, path }));
   }
   const font = new Font({
     familyName: family,
@@ -96,4 +99,3 @@ function notdef(): OTPath {
   p.close();
   return p;
 }
-

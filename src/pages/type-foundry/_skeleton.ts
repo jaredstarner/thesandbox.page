@@ -296,7 +296,10 @@ const LOWER: Record<string, Def> = {
     const e = 2 / m.n;
     const xr = w / 2 + (w / 2) * spow(Math.cos((a * Math.PI) / 180), e);
     const xl = w - xr;
-    g.path(xl, yb).to(xr, yb).arc(w / 2, cy, w / 2, ry, a, 322).end();
+    g.path(xl, yb)
+      .to(xr, yb)
+      .arc(w / 2, cy, w / 2, ry, a, 322)
+      .end();
   }),
   f: d([0.9, 0.25], (g, m) => {
     const sx = 0.28 * m.nw;
@@ -504,7 +507,11 @@ const UPPER: Record<string, Def> = {
   E: d([1.15, 0.5], (g, m) => {
     const w = 0.74 * m.cw;
     const mid = m.B + 0.52 * (m.C - m.B);
-    g.path(w, m.C).to(0, m.C).to(0, m.B).to(w * 1.03, m.B).end();
+    g.path(w, m.C)
+      .to(0, m.C)
+      .to(0, m.B)
+      .to(w * 1.03, m.B)
+      .end();
     g.line(0, mid, w * 0.86, mid);
     if (m.p.serif === 'slab') {
       g.line(0, m.C, -m.s, m.C);
@@ -772,7 +779,10 @@ const FIGURES: Record<string, Def> = {
   }),
   '7': d([0.6, 0.5], (g, m) => {
     const w = 0.74 * m.cw;
-    g.path(0, m.C).to(w, m.C).to(w * 0.3, m.B).end();
+    g.path(0, m.C)
+      .to(w, m.C)
+      .to(w * 0.3, m.B)
+      .end();
   }),
   '8': d([0.75, 0.75], (g, m) => {
     const w = 0.78 * m.cw;
@@ -882,19 +892,25 @@ const PUNCT: Record<string, Def> = {
     const r = 0.2 * CAP;
     const cy = m.C - r;
     for (let i = 0; i < 3; i++) {
-      const a = (Math.PI / 2) + (i * Math.PI) / 3;
+      const a = Math.PI / 2 + (i * Math.PI) / 3;
       g.line(r - Math.cos(a) * r, cy - Math.sin(a) * r, r + Math.cos(a) * r, cy + Math.sin(a) * r);
     }
   }),
   '<': d([0.5, 0.6], (g, m) => {
     const w = mathW(m) * 0.9;
     const y = AXIS;
-    g.path(w, y + w * 0.5).to(0, y).to(w, y - w * 0.5).end();
+    g.path(w, y + w * 0.5)
+      .to(0, y)
+      .to(w, y - w * 0.5)
+      .end();
   }),
   '>': d([0.6, 0.5], (g, m) => {
     const w = mathW(m) * 0.9;
     const y = AXIS;
-    g.path(0, y + w * 0.5).to(w, y).to(0, y - w * 0.5).end();
+    g.path(0, y + w * 0.5)
+      .to(w, y)
+      .to(0, y - w * 0.5)
+      .end();
   }),
   '#': d([0.5, 0.5], (g, m) => {
     const w = 0.84 * m.nw;
@@ -961,7 +977,10 @@ const PUNCT: Record<string, Def> = {
   }),
   '^': d([0.5, 0.5], (g, m) => {
     const w = mathW(m);
-    g.path(0, m.C - 0.36 * (m.C - m.B)).to(w / 2, m.C).to(w, m.C - 0.36 * (m.C - m.B)).end();
+    g.path(0, m.C - 0.36 * (m.C - m.B))
+      .to(w / 2, m.C)
+      .to(w, m.C - 0.36 * (m.C - m.B))
+      .end();
   }),
   _: d([0.2, 0.2], (g, m) => g.line(0, m.D * 0.5, 0.9 * m.nw, m.D * 0.5)),
   '`': d([0.6, 0.6], (g, m) => g.line(0, m.C, 0.18 * m.nw, m.C - 0.16 * (m.C - m.B))),

@@ -377,9 +377,7 @@ export function start(root: HTMLElement): void {
     dialNib.appendChild(poly);
     if (params.pen === 'pointed') {
       const hair = Math.max(params.nib * params.contrast, 4) / 2;
-      dialNib.appendChild(
-        svg('circle', { r: (hair * scale).toFixed(2), fill: 'var(--red)' }),
-      );
+      dialNib.appendChild(svg('circle', { r: (hair * scale).toFixed(2), fill: 'var(--red)' }));
     }
     const t = (params.angle * Math.PI) / 180;
     const x = Math.cos(t) * 86;

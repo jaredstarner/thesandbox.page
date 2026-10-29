@@ -32,7 +32,8 @@ export function cut(ch: string, p: Params, m: Metrics = metrics(p)): Cut {
   for (const dt of dots) contours.push(sweep([dt], m.pen));
 
   const unit = sideUnit(m);
-  if (ch === ' ') return { ch, strokes: [], dots: [], contours: [], advance: Math.round(0.5 * m.nw + 1.1 * unit + m.ex) };
+  if (ch === ' ')
+    return { ch, strokes: [], dots: [], contours: [], advance: Math.round(0.5 * m.nw + 1.1 * unit + m.ex) };
 
   // Space the letter by its bare form, measured along the slant so italics are spaced by
   // their upright extent; serifs and hooks then hang out into the sidebearings, as in type.
@@ -71,8 +72,7 @@ export function cutAll(p: Params): Cut[] {
 const PEN_NAMES = { broad: 'a broad nib', round: 'a round pen', pointed: 'a pointed pen' } as const;
 
 export function describe(p: Params): string {
-  const pen =
-    p.pen === 'broad' ? `${PEN_NAMES.broad} held at ${Math.round(p.angle)}°` : PEN_NAMES[p.pen];
+  const pen = p.pen === 'broad' ? `${PEN_NAMES.broad} held at ${Math.round(p.angle)}°` : PEN_NAMES[p.pen];
   const slant = Math.abs(p.slant) < 0.5 ? 'upright' : `leaning ${Math.abs(Math.round(p.slant))}°`;
   return `Cut with ${pen}, ${slant}.`;
 }

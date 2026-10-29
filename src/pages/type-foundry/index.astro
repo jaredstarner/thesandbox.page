@@ -54,7 +54,9 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
   <main class="foundry" data-foundry data-pen="broad" data-state="casting">
     <aside class="bench" data-bench data-open="false" aria-label="The pen and the skeleton">
       <header class="bench-head">
-        <a class="home" href="/">thesandbox.page</a>
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
         <span class="bench-title">Type foundry</span>
         <button type="button" class="drawer" data-drawer aria-expanded="false" aria-controls="bench-body">
           <span class="drawer-open">Pen &amp; skeleton</span>
@@ -114,55 +116,64 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
               </svg>
             </div>
             <div class="dial-read">
-              <span class="label" data-dial-label>Nib angle</span>
-              <output class="big" data-angle-out>35°</output>
-              <p class="dial-note" data-dial-note>Drag the red knob to turn the edge</p>
+              <span class="label" data-dial-label>
+                Nib angle
+              </span>
+              <output class="big" data-angle-out>
+                35°
+              </output>
+              <p class="dial-note" data-dial-note>
+                Drag the red knob to turn the edge
+              </p>
             </div>
           </div>
 
-          {
-            penSliders.map((s) => (
-              <label class="slider">
-                <span class="label" data-label={s.key}>
-                  {s.label}
-                </span>
-                <input type="range" min={s.min} max={s.max} step={s.step} data-param={s.key} />
-                <output data-out={s.key} />
-              </label>
-            ))
-          }
+          {penSliders.map((s) => (
+            <label class="slider">
+              <span class="label" data-label={s.key}>
+                {s.label}
+              </span>
+              <input type="range" min={s.min} max={s.max} step={s.step} data-param={s.key} />
+              <output data-out={s.key} />
+            </label>
+          ))}
         </section>
 
         <section class="tool" aria-labelledby="h-skel">
           <h2 id="h-skel">The skeleton</h2>
-          {
-            skeletonSliders.map((s) => (
-              <label class="slider">
-                <span class="label">{s.label}</span>
-                <input type="range" min={s.min} max={s.max} step={s.step} data-param={s.key} />
-                <output data-out={s.key} />
-              </label>
-            ))
-          }
+          {skeletonSliders.map((s) => (
+            <label class="slider">
+              <span class="label">{s.label}</span>
+              <input type="range" min={s.min} max={s.max} step={s.step} data-param={s.key} />
+              <output data-out={s.key} />
+            </label>
+          ))}
           <div class="serifs" role="radiogroup" aria-label="Serifs">
             <span class="label">Ends</span>
-            <label><input type="radio" name="serif" value="none" /><span>Plain</span></label>
-            <label><input type="radio" name="serif" value="hook" checked /><span>Hooked</span></label>
-            <label><input type="radio" name="serif" value="slab" /><span>Slab</span></label>
+            <label>
+              <input type="radio" name="serif" value="none" />
+              <span>Plain</span>
+            </label>
+            <label>
+              <input type="radio" name="serif" value="hook" checked />
+              <span>Hooked</span>
+            </label>
+            <label>
+              <input type="radio" name="serif" value="slab" />
+              <span>Slab</span>
+            </label>
           </div>
         </section>
 
         <section class="tool" aria-labelledby="h-cuts">
           <h2 id="h-cuts">Start from a cut</h2>
           <div class="cuts">
-            {
-              PRESETS.map((p) => (
-                <button type="button" class="cut" data-preset={p.id} aria-pressed="false" title={p.note}>
-                  <span class="cut-name">{p.name}</span>
-                  <span class="cut-note">{p.note}</span>
-                </button>
-              ))
-            }
+            {PRESETS.map((p) => (
+              <button type="button" class="cut" data-preset={p.id} aria-pressed="false" title={p.note}>
+                <span class="cut-name">{p.name}</span>
+                <span class="cut-note">{p.note}</span>
+              </button>
+            ))}
           </div>
         </section>
       </div>
@@ -172,52 +183,66 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
       <div class="frame">
         <header class="mast">
           <p class="kicker">
-            <span class="kicker-rule"></span><span>A specimen of type cut with a pen</span><span class="kicker-rule"
-            ></span>
+            <span class="kicker-rule"></span>
+            <span>A specimen of type cut with a pen</span>
+            <span class="kicker-rule"></span>
           </p>
           <h1
             class="face-name"
             data-name
             contenteditable="plaintext-only"
             spellcheck="false"
-            aria-label="Name of your typeface">Chancery</h1>
-          <p class="byline" data-describe>Cut with a broad nib held at 35°, leaning 8°.</p>
+            aria-label="Name of your typeface"
+          >
+            Chancery
+          </h1>
+          <p class="byline" data-describe>
+            Cut with a broad nib held at 35°, leaning 8°.
+          </p>
           <p class="nojs">The foundry cuts its type in your browser, which needs JavaScript.</p>
         </header>
 
         <section class="showing" aria-label="The alphabet">
-          <p class="show-line show-lower" contenteditable="plaintext-only" spellcheck="false">{lower.join('')}</p>
-          <p class="show-line show-upper" contenteditable="plaintext-only" spellcheck="false">{upper.join('')}</p>
+          <p class="show-line show-lower" contenteditable="plaintext-only" spellcheck="false">
+            {lower.join('')}
+          </p>
+          <p class="show-line show-upper" contenteditable="plaintext-only" spellcheck="false">
+            {upper.join('')}
+          </p>
           <p class="show-line show-fig" contenteditable="plaintext-only" spellcheck="false">
             {figures.join('')} &amp; ?!
           </p>
         </section>
 
         <section class="waterfall" aria-labelledby="h-sizes">
-          <h2 class="sec" id="h-sizes"><span>Sizes</span><span class="sec-note">Every line can be typed over</span></h2>
-          {
-            SIZES.map(([name, pt]) => (
-              <div class="drop">
-                <span class="drop-label">
-                  {name}
-                  <b>{pt} pt</b>
-                </span>
-                <p class="drop-line" style={`font-size: ${pt}pt`} contenteditable="plaintext-only" spellcheck="false">
-                  {CICERO}
-                </p>
-              </div>
-            ))
-          }
+          <h2 class="sec" id="h-sizes">
+            <span>Sizes</span>
+            <span class="sec-note">Every line can be typed over</span>
+          </h2>
+          {SIZES.map(([name, pt]) => (
+            <div class="drop">
+              <span class="drop-label">
+                {name}
+                <b>{pt} pt</b>
+              </span>
+              <p class="drop-line" style={`font-size: ${pt}pt`} contenteditable="plaintext-only" spellcheck="false">
+                {CICERO}
+              </p>
+            </div>
+          ))}
         </section>
 
         <section class="setting" aria-labelledby="h-setting">
-          <h2 class="sec" id="h-setting"><span>Set as text</span><span class="sec-note">Pica, 12 pt, leaded</span></h2>
+          <h2 class="sec" id="h-setting">
+            <span>Set as text</span>
+            <span class="sec-note">Pica, 12 pt, leaded</span>
+          </h2>
           <div class="columns" contenteditable="plaintext-only" spellcheck="false">
             <p>
-              Every letter on this sheet was written before it was set. Running through each one is a skeleton, the
-              line a hand would follow, and a pen was drawn along it. An edged nib keeps its angle the whole way, so a
-              stroke is heaviest where it crosses that angle and finest where it runs along it: turn the nib, and the
-              weight travels round the bowls.
+              Every letter on this sheet was written before it was set. Running through each one is a skeleton, the line
+              a hand would follow, and a pen was drawn along it. An edged nib keeps its angle the whole way, so a stroke
+              is heaviest where it crosses that angle and finest where it runs along it: turn the nib, and the weight
+              travels round the bowls.
             </p>
             <p>
               A round pen leaves one weight everywhere. A pointed pen is flexible and spreads under pressure on the
@@ -233,45 +258,58 @@ const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
         </section>
 
         <section class="bench-proof" aria-labelledby="h-proof">
-          <h2 class="sec" id="h-proof"><span>The pen at work</span><span class="sec-note">Choose any letter</span></h2>
+          <h2 class="sec" id="h-proof">
+            <span>The pen at work</span>
+            <span class="sec-note">Choose any letter</span>
+          </h2>
           <div class="proof">
             <figure class="proof-fig">
-              <svg class="proof-svg" data-proof role="img" aria-label="The selected letter with its skeleton and pen">
-              </svg>
+              <svg
+                class="proof-svg"
+                data-proof
+                role="img"
+                aria-label="The selected letter with its skeleton and pen"
+              ></svg>
               <figcaption>
-                <span class="proof-char" data-proof-label>a</span>
-                <button type="button" class="write" data-write>Write it again</button>
+                <span class="proof-char" data-proof-label>
+                  a
+                </span>
+                <button type="button" class="write" data-write>
+                  Write it again
+                </button>
               </figcaption>
             </figure>
             <div class="charset">
-              {
-                GROUPS.map(([name, chars]) => (
-                  <div class="char-group">
-                    <h3>{name}</h3>
-                    <div class="chars">
-                      {chars.map((c) => (
-                        <button type="button" class="char" data-char={c} aria-label={`${c} ${hex(c)}`}>
-                          {c}
-                        </button>
-                      ))}
-                    </div>
+              {GROUPS.map(([name, chars]) => (
+                <div class="char-group">
+                  <h3>{name}</h3>
+                  <div class="chars">
+                    {chars.map((c) => (
+                      <button type="button" class="char" data-char={c} aria-label={`${c} ${hex(c)}`}>
+                        {c}
+                      </button>
+                    ))}
                   </div>
-                ))
-              }
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
         <section class="casting" aria-labelledby="h-cast">
-          <h2 class="sec" id="h-cast"><span>Cast it</span></h2>
+          <h2 class="sec" id="h-cast">
+            <span>Cast it</span>
+          </h2>
           <div class="cast-row">
             <p class="cast-copy">
-              The type on this sheet is a real OpenType font, rebuilt every time the pen changes. Cast it to take it home:
-              install the file and set anything in <span data-name-echo>Chancery</span>, anywhere.
+              The type on this sheet is a real OpenType font, rebuilt every time the pen changes. Cast it to take it
+              home: install the file and set anything in <span data-name-echo>Chancery</span>, anywhere.
             </p>
             <button type="button" class="cast-btn" data-cast>
               <span class="cast-word">Cast</span>
-              <span class="cast-file" data-file>Chancery.otf</span>
+              <span class="cast-file" data-file>
+                Chancery.otf
+              </span>
             </button>
           </div>
           <p class="cast-meta" data-meta></p>
