@@ -46,7 +46,7 @@ const pathOf = (contours: Pt[][], flip = true) =>
 
 function cleanName(s: string): string {
   const out = s
-    .replace(/[^A-Za-z0-9 \-]/g, '')
+    .replace(/[^A-Za-z0-9 -]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, 40);

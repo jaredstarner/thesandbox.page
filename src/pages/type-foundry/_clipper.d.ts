@@ -5,12 +5,12 @@ declare module 'clipper-lib' {
     Y: number;
   }
   type Paths = IntPoint[][];
-  class Clipper {
+  interface Clipper {
     AddPaths(paths: Paths, polyType: number, closed: boolean): boolean;
     Execute(clipType: number, solution: Paths, subjFill: number, clipFill: number): boolean;
   }
   const ClipperLib: {
-    Clipper: typeof Clipper;
+    Clipper: new () => Clipper;
     PolyType: { ptSubject: number; ptClip: number };
     ClipType: { ctUnion: number };
     PolyFillType: { pftNonZero: number };
