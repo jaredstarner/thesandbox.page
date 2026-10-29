@@ -1,18 +1,1262 @@
 ---
+import { Font } from 'astro:assets';
 import Bare from '../../layouts/Bare.astro';
+import { PRESETS } from './_cuts';
+import { CHARSET } from './_skeleton';
+
+const SIZES: [string, number][] = [
+  ['French Canon', 48],
+  ['Two-line English', 28],
+  ['Double Pica', 22],
+  ['Great Primer', 18],
+  ['English', 14],
+  ['Pica', 12],
+  ['Small Pica', 11],
+  ['Long Primer', 10],
+  ['Bourgeois', 9],
+  ['Brevier', 8],
+  ['Nonpareil', 6],
+];
+const CICERO =
+  'Quousque tandem abutere, Catilina, patientia nostra? quam diu etiam furor iste tuus nos eludet? quem ad finem sese effrenata iactabit audacia?';
+
+const lower = CHARSET.filter((c) => /[a-z]/.test(c));
+const upper = CHARSET.filter((c) => /[A-Z]/.test(c));
+const figures = CHARSET.filter((c) => /[0-9]/.test(c));
+const points = CHARSET.filter((c) => !/[A-Za-z0-9 ]/.test(c));
+const GROUPS: [string, string[]][] = [
+  ['Lowercase', lower],
+  ['Capitals', upper],
+  ['Figures', figures],
+  ['Points', points],
+];
+const hex = (c: string) => 'U+' + c.codePointAt(0)!.toString(16).toUpperCase().padStart(4, '0');
+
+const sliders = [
+  { key: 'nib', label: 'Nib', min: 24, max: 170, step: 1, group: 'pen' },
+  { key: 'contrast', label: 'Edge', min: 0.04, max: 0.6, step: 0.01, group: 'pen' },
+  { key: 'slant', label: 'Slant', min: -6, max: 22, step: 0.5, group: 'skeleton' },
+  { key: 'width', label: 'Width', min: 0.68, max: 1.4, step: 0.01, group: 'skeleton' },
+  { key: 'xheight', label: 'x-height', min: 0.5, max: 0.82, step: 0.01, group: 'skeleton' },
+  { key: 'round', label: 'Bowls', min: 1.7, max: 4.5, step: 0.05, group: 'skeleton' },
+  { key: 'branch', label: 'Arches', min: 0, max: 1, step: 0.01, group: 'skeleton' },
+];
+const penSliders = sliders.filter((s) => s.group === 'pen');
+const skeletonSliders = sliders.filter((s) => s.group === 'skeleton');
 ---
 
 <Bare
   title="Type foundry"
   description="Cut a typeface with a pen: set the nib, slant and stretch the skeleton, watch the specimen sheet re-set itself in your face, then cast it and download a working font."
 >
-  <main class="foundry" data-foundry>
-    <h1>Type foundry</h1>
+  <Font cssVariable="--font-foundry" slot="head" />
+
+  <main class="foundry" data-foundry data-pen="broad" data-state="casting">
+    <aside class="bench" data-bench data-open="false" aria-label="The pen and the skeleton">
+      <header class="bench-head">
+        <a class="home" href="/">thesandbox.page</a>
+        <span class="bench-title">Type foundry</span>
+        <button type="button" class="drawer" data-drawer aria-expanded="false" aria-controls="bench-body">
+          <span class="drawer-open">Pen &amp; skeleton</span>
+          <span class="drawer-close">Close</span>
+        </button>
+      </header>
+
+      <div class="bench-body" id="bench-body">
+        <section class="tool" aria-labelledby="h-pen">
+          <h2 id="h-pen">The pen</h2>
+          <div class="pens" role="radiogroup" aria-label="Pen">
+            <label class="pen-choice">
+              <input type="radio" name="pen" value="broad" checked />
+              <svg viewBox="0 0 48 48" aria-hidden="true">
+                <path class="pen-body" d="M18 4h12l2 24-6 14h-4l-6-14z"></path>
+                <path class="pen-edge" d="M20 42h8"></path>
+                <path class="pen-slit" d="M24 26v16"></path>
+              </svg>
+              <span>Broad nib</span>
+            </label>
+            <label class="pen-choice">
+              <input type="radio" name="pen" value="round" />
+              <svg viewBox="0 0 48 48" aria-hidden="true">
+                <path class="pen-body" d="M18 4h12l2 24-5 12h-6l-5-12z"></path>
+                <circle class="pen-tip" cx="24" cy="41" r="3.2"></circle>
+              </svg>
+              <span>Round pen</span>
+            </label>
+            <label class="pen-choice">
+              <input type="radio" name="pen" value="pointed" />
+              <svg viewBox="0 0 48 48" aria-hidden="true">
+                <path class="pen-body" d="M18 4h12l2 22-8 20-8-20z"></path>
+                <path class="pen-slit" d="M24 22v24"></path>
+                <circle class="pen-hole" cx="24" cy="22" r="2"></circle>
+              </svg>
+              <span>Pointed pen</span>
+            </label>
+          </div>
+
+          <div class="dial-row">
+            <div
+              class="dial"
+              data-dial
+              role="slider"
+              tabindex="0"
+              aria-label="Nib angle"
+              aria-valuemin="-10"
+              aria-valuemax="90"
+              aria-valuenow="35"
+              aria-valuetext="35 degrees"
+            >
+              <svg viewBox="-110 -110 220 220" aria-hidden="true">
+                <g class="dial-ticks" data-ticks></g>
+                <g data-nib></g>
+                <line class="dial-arm" data-arm x1="0" y1="0" x2="86" y2="0"></line>
+                <circle class="dial-knob" data-knob cx="86" cy="0" r="8"></circle>
+              </svg>
+            </div>
+            <div class="dial-read">
+              <span class="label" data-dial-label>Nib angle</span>
+              <output class="big" data-angle-out>35°</output>
+              <p class="dial-note" data-dial-note>Drag the red knob to turn the edge</p>
+            </div>
+          </div>
+
+          {
+            penSliders.map((s) => (
+              <label class="slider">
+                <span class="label" data-label={s.key}>
+                  {s.label}
+                </span>
+                <input type="range" min={s.min} max={s.max} step={s.step} data-param={s.key} />
+                <output data-out={s.key} />
+              </label>
+            ))
+          }
+        </section>
+
+        <section class="tool" aria-labelledby="h-skel">
+          <h2 id="h-skel">The skeleton</h2>
+          {
+            skeletonSliders.map((s) => (
+              <label class="slider">
+                <span class="label">{s.label}</span>
+                <input type="range" min={s.min} max={s.max} step={s.step} data-param={s.key} />
+                <output data-out={s.key} />
+              </label>
+            ))
+          }
+          <div class="serifs" role="radiogroup" aria-label="Serifs">
+            <span class="label">Ends</span>
+            <label><input type="radio" name="serif" value="none" /><span>Plain</span></label>
+            <label><input type="radio" name="serif" value="hook" checked /><span>Hooked</span></label>
+            <label><input type="radio" name="serif" value="slab" /><span>Slab</span></label>
+          </div>
+        </section>
+
+        <section class="tool" aria-labelledby="h-cuts">
+          <h2 id="h-cuts">Start from a cut</h2>
+          <div class="cuts">
+            {
+              PRESETS.map((p) => (
+                <button type="button" class="cut" data-preset={p.id} aria-pressed="false" title={p.note}>
+                  <span class="cut-name">{p.name}</span>
+                  <span class="cut-note">{p.note}</span>
+                </button>
+              ))
+            }
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <article class="sheet" data-sheet aria-busy="true">
+      <div class="frame">
+        <header class="mast">
+          <p class="kicker"><span>A specimen of</span><span class="kicker-rule"></span><span>cut by pen</span></p>
+          <h1
+            class="face-name"
+            data-name
+            contenteditable="plaintext-only"
+            spellcheck="false"
+            aria-label="Name of your typeface">Chancery</h1>
+          <p class="byline" data-describe>Cut with a broad nib held at 35°, leaning 8°.</p>
+          <p class="nojs">The foundry cuts its type in your browser, which needs JavaScript.</p>
+        </header>
+
+        <section class="showing" aria-label="The alphabet">
+          <p class="show-line show-lower" contenteditable="plaintext-only" spellcheck="false">{lower.join('')}</p>
+          <p class="show-line show-upper" contenteditable="plaintext-only" spellcheck="false">{upper.join('')}</p>
+          <p class="show-line show-fig" contenteditable="plaintext-only" spellcheck="false">
+            {figures.join('')} &amp; ?!
+          </p>
+        </section>
+
+        <section class="waterfall" aria-labelledby="h-sizes">
+          <h2 class="sec" id="h-sizes"><span>Sizes</span><span class="sec-note">Every line can be typed over</span></h2>
+          {
+            SIZES.map(([name, pt]) => (
+              <div class="drop">
+                <span class="drop-label">
+                  {name}
+                  <b>{pt} pt</b>
+                </span>
+                <p class="drop-line" style={`font-size: ${pt}pt`} contenteditable="plaintext-only" spellcheck="false">
+                  {CICERO}
+                </p>
+              </div>
+            ))
+          }
+        </section>
+
+        <section class="setting" aria-labelledby="h-setting">
+          <h2 class="sec" id="h-setting"><span>Set as text</span><span class="sec-note">Pica, 12 pt, leaded</span></h2>
+          <div class="columns" contenteditable="plaintext-only" spellcheck="false">
+            <p>
+              Every letter on this sheet was written before it was set. Running through each one is a skeleton, the
+              line a hand would follow, and a pen was drawn along it. An edged nib keeps its angle the whole way, so a
+              stroke is heaviest where it crosses that angle and finest where it runs along it: turn the nib, and the
+              weight travels round the bowls.
+            </p>
+            <p>
+              A round pen leaves one weight everywhere. A pointed pen is flexible and spreads under pressure on the
+              downstrokes, so the shading follows the hand rather than the edge. Lean the skeleton and the face becomes
+              an italic; stand the nib on end and the stems go thin while the crossbars thicken.
+            </p>
+            <p>
+              Nothing here was drawn as an outline. Each outline is only what the pen left behind, and each letter is
+              spaced by the room its strokes take up. Sphinx of black quartz, judge my vow. How vexingly quick daft
+              zebras jump!
+            </p>
+          </div>
+        </section>
+
+        <section class="bench-proof" aria-labelledby="h-proof">
+          <h2 class="sec" id="h-proof"><span>The pen at work</span><span class="sec-note">Choose any letter</span></h2>
+          <div class="proof">
+            <figure class="proof-fig">
+              <svg class="proof-svg" data-proof role="img" aria-label="The selected letter with its skeleton and pen">
+              </svg>
+              <figcaption>
+                <span class="proof-char" data-proof-label>a</span>
+                <button type="button" class="write" data-write>Write it again</button>
+              </figcaption>
+            </figure>
+            <div class="charset">
+              {
+                GROUPS.map(([name, chars]) => (
+                  <div class="char-group">
+                    <h3>{name}</h3>
+                    <div class="chars">
+                      {chars.map((c) => (
+                        <button type="button" class="char" data-char={c} aria-label={`${c} ${hex(c)}`}>
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </section>
+
+        <section class="casting" aria-labelledby="h-cast">
+          <h2 class="sec" id="h-cast"><span>Cast it</span></h2>
+          <div class="cast-row">
+            <p class="cast-copy">
+              The type on this sheet is a real OpenType font, rebuilt every time the pen changes. Cast it to take it home:
+              install the file and set anything in <span data-name-echo>Chancery</span>, anywhere.
+            </p>
+            <button type="button" class="cast-btn" data-cast>
+              <span class="cast-word">Cast</span>
+              <span class="cast-file" data-file>Chancery.otf</span>
+            </button>
+          </div>
+          <p class="cast-meta" data-meta></p>
+        </section>
+      </div>
+    </article>
   </main>
 </Bare>
 
 <style>
+  :global(body:has(.foundry)) {
+    margin: 0;
+    background: #1b1916;
+  }
+
   .foundry {
+    --ink: #1c1915;
+    --paper: #f3eee3;
+    --paper-2: #e9e2d2;
+    --red: #b3341f;
+    --bench: #1b1916;
+    --bench-2: #26231f;
+    --bench-ink: #ece5d5;
+    --bench-dim: #9e9688;
+    --brass: #c9a25a;
+    --face: serif;
+    --mono: var(--font-foundry), ui-monospace, monospace;
+    display: grid;
+    grid-template-columns: 340px minmax(0, 1fr);
     min-height: 100vh;
+    background: var(--bench);
+    color: var(--ink);
+    font-family: var(--mono);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .foundry *,
+  .foundry *::before,
+  .foundry *::after {
+    box-sizing: border-box;
+  }
+
+  /* ---- The bench ---- */
+
+  .bench {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: auto;
+    color: var(--bench-ink);
+    background: var(--bench);
+    border-right: 1px solid #000;
+    scrollbar-width: thin;
+    scrollbar-color: #4a453d transparent;
+  }
+
+  .bench-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid #34302a;
+  }
+
+  .home {
+    color: var(--bench-dim);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+
+  .home:hover,
+  .home:focus-visible {
+    color: var(--bench-ink);
+  }
+
+  .bench-title {
+    margin-left: auto;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  .drawer {
+    display: none;
+  }
+
+  .bench-body {
+    padding: 4px 22px 28px;
+  }
+
+  .tool {
+    padding: 18px 0 20px;
+    border-bottom: 1px solid #34302a;
+  }
+
+  .tool:last-child {
+    border-bottom: 0;
+  }
+
+  .tool h2 {
+    margin: 0 0 14px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--bench-dim);
+  }
+
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--bench-dim);
+  }
+
+  .pens {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .pen-choice {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    padding: 8px 4px 9px;
+    border: 1px solid #3a352e;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--bench-dim);
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      color 0.15s,
+      background 0.15s;
+  }
+
+  .pen-choice input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .pen-choice svg {
+    width: 34px;
+    height: 34px;
+  }
+
+  .pen-body {
+    fill: #3a352e;
+    stroke: var(--bench-dim);
+    stroke-width: 1.2;
+    stroke-linejoin: round;
+  }
+
+  .pen-edge,
+  .pen-slit {
+    stroke: var(--bench-dim);
+    stroke-width: 1.2;
+    fill: none;
+  }
+
+  .pen-tip,
+  .pen-hole {
+    fill: var(--bench-dim);
+  }
+
+  .pen-choice:has(input:checked) {
+    border-color: var(--brass);
+    color: var(--bench-ink);
+    background: var(--bench-2);
+  }
+
+  .pen-choice:has(input:checked) .pen-body {
+    fill: #6b5530;
+    stroke: var(--brass);
+  }
+
+  .pen-choice:has(input:checked) :is(.pen-edge, .pen-slit) {
+    stroke: var(--brass);
+  }
+
+  .pen-choice:has(input:checked) :is(.pen-tip, .pen-hole) {
+    fill: var(--brass);
+  }
+
+  .pen-choice:has(input:focus-visible) {
+    outline: 2px solid var(--brass);
+    outline-offset: 2px;
+  }
+
+  .dial-row {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    align-items: center;
+    gap: 14px;
+    margin: 16px 0 10px;
+  }
+
+  .dial {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    touch-action: none;
+    cursor: grab;
+    outline: none;
+  }
+
+  .dial:focus-visible {
+    box-shadow: 0 0 0 2px var(--brass);
+  }
+
+  .dial svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .dial :global(.tick) {
+    stroke: #5b5449;
+    stroke-width: 1.2;
+  }
+
+  .dial :global(.tick-major) {
+    stroke: var(--bench-dim);
+    stroke-width: 1.6;
+  }
+
+  .dial :global(.tick-label) {
+    fill: var(--bench-dim);
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+
+  .dial :global(.nib-shape) {
+    fill: var(--bench-ink);
+  }
+
+  .dial :global(.nib-ring) {
+    fill: none;
+    stroke: #3a352e;
+    stroke-width: 1;
+  }
+
+  .dial-arm {
+    stroke: var(--red);
+    stroke-width: 1.4;
+    stroke-dasharray: 3 3;
+  }
+
+  .dial-knob {
+    fill: var(--red);
+    stroke: var(--bench);
+    stroke-width: 2;
+  }
+
+  .foundry:not([data-pen='broad']) :is(.dial-arm, .dial-knob) {
+    display: none;
+  }
+
+  .foundry:not([data-pen='broad']) .dial {
+    cursor: default;
+  }
+
+  .dial-read {
+    display: grid;
+    gap: 4px;
+  }
+
+  .big {
+    font-size: 28px;
+    color: var(--bench-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dial-note {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.45;
+    color: var(--bench-dim);
+  }
+
+  .slider {
+    display: grid;
+    grid-template-columns: 74px 1fr 46px;
+    align-items: center;
+    gap: 10px;
+    min-height: 34px;
+  }
+
+  .slider output {
+    font-size: 12px;
+    text-align: right;
+    color: var(--bench-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .slider input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 24px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .slider input::-webkit-slider-runnable-track {
+    height: 2px;
+    background: linear-gradient(to right, var(--brass) var(--fill, 50%), #4a453d var(--fill, 50%));
+  }
+
+  .slider input::-moz-range-track {
+    height: 2px;
+    background: #4a453d;
+  }
+
+  .slider input::-moz-range-progress {
+    height: 2px;
+    background: var(--brass);
+  }
+
+  .slider input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px;
+    height: 20px;
+    margin-top: -9px;
+    border-radius: 1px;
+    background: var(--bench-ink);
+    border: 1px solid #000;
+  }
+
+  .slider input::-moz-range-thumb {
+    width: 10px;
+    height: 20px;
+    border-radius: 1px;
+    background: var(--bench-ink);
+    border: 1px solid #000;
+  }
+
+  .slider input:focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 2px;
+  }
+
+  .serifs {
+    display: grid;
+    grid-template-columns: 74px repeat(3, 1fr);
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .serifs label {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 30px;
+    border: 1px solid #3a352e;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--bench-dim);
+    cursor: pointer;
+  }
+
+  .serifs input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .serifs label:has(input:checked) {
+    border-color: var(--brass);
+    color: var(--bench-ink);
+    background: var(--bench-2);
+  }
+
+  .serifs label:has(input:focus-visible) {
+    outline: 2px solid var(--brass);
+    outline-offset: 2px;
+  }
+
+  .cuts {
+    display: grid;
+    gap: 6px;
+  }
+
+  .cut {
+    display: grid;
+    gap: 2px;
+    padding: 9px 12px 10px;
+    text-align: left;
+    font: inherit;
+    color: var(--bench-ink);
+    background: transparent;
+    border: 1px solid #3a352e;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .cut:hover {
+    border-color: #6b6253;
+  }
+
+  .cut:focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 2px;
+  }
+
+  .cut[aria-pressed='true'] {
+    border-color: var(--brass);
+    background: var(--bench-2);
+  }
+
+  .cut-name {
+    font-family: var(--face), Georgia, serif;
+    font-size: 22px;
+    line-height: 1.1;
+  }
+
+  .cut-note {
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--bench-dim);
+  }
+
+  /* ---- The specimen sheet ---- */
+
+  .sheet {
+    min-width: 0;
+    padding: 28px 28px 40px;
+  }
+
+  .frame {
+    position: relative;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 56px 64px 64px;
+    background-color: var(--paper);
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.5), transparent 60%),
+      radial-gradient(circle at 90% 80%, rgba(120, 96, 60, 0.07), transparent 55%);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 20px 60px rgba(0, 0, 0, 0.45),
+      0 2px 6px rgba(0, 0, 0, 0.4);
+    outline: 1px solid var(--ink);
+    outline-offset: -22px;
+  }
+
+  .frame::before {
+    content: '';
+    position: absolute;
+    inset: 26px;
+    border: 3px solid var(--ink);
+    pointer-events: none;
+  }
+
+  .sheet [contenteditable] {
+    outline: none;
+    border-radius: 2px;
+    transition: background-color 0.2s;
+  }
+
+  .sheet [contenteditable]:hover {
+    background-color: rgba(179, 52, 31, 0.05);
+  }
+
+  .sheet [contenteditable]:focus {
+    background-color: rgba(179, 52, 31, 0.08);
+  }
+
+  .mast,
+  .showing,
+  .waterfall,
+  .setting,
+  .bench-proof,
+  .casting {
+    font-family: var(--face), Georgia, serif;
+    transition: opacity 0.35s;
+  }
+
+  .foundry[data-state='casting'] :is(.mast h1, .byline, .showing, .waterfall, .setting, .proof, .cast-copy) {
+    opacity: 0;
+  }
+
+  .mast {
+    padding: 18px 0 30px;
+    text-align: center;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .kicker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 0 0 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+
+  .kicker-rule {
+    width: 46px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .face-name {
+    margin: 0 auto;
+    max-width: 100%;
+    font-size: clamp(56px, 9.6vw, 150px);
+    font-weight: 400;
+    line-height: 1.04;
+    overflow-wrap: anywhere;
+    cursor: text;
+  }
+
+  .byline {
+    margin: 12px 0 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: #5d564b;
+  }
+
+  .nojs {
+    margin: 16px 0 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--red);
+  }
+
+  .foundry[data-js] .nojs {
+    display: none;
+  }
+
+  .showing {
+    padding: 26px 0 30px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .show-line {
+    margin: 0;
+    font-size: clamp(34px, 5.4vw, 74px);
+    line-height: 1.22;
+    overflow-wrap: anywhere;
+  }
+
+  .show-fig {
+    color: var(--red);
+  }
+
+  .sec {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 18px;
+    padding-top: 26px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+
+  .sec-note {
+    letter-spacing: 0.06em;
+    text-transform: none;
+    color: #7a7266;
+    font-weight: 400;
+  }
+
+  .waterfall {
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .drop {
+    display: grid;
+    grid-template-columns: 128px minmax(0, 1fr);
+    align-items: baseline;
+    gap: 16px;
+    padding: 3px 0;
+  }
+
+  .drop-label {
+    display: grid;
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1.35;
+    letter-spacing: 0.04em;
+    color: #7a7266;
+  }
+
+  .drop-label b {
+    font-weight: 400;
+    color: var(--red);
+  }
+
+  .drop-line {
+    margin: 0;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+  }
+
+  .setting {
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .columns {
+    columns: 2;
+    column-gap: 44px;
+    column-rule: 1px solid rgba(28, 25, 21, 0.25);
+    font-size: 12pt;
+    line-height: 1.5;
+    hyphens: auto;
+    text-align: justify;
+  }
+
+  .columns p {
+    margin: 0 0 0.9em;
+    text-indent: 1.4em;
+  }
+
+  .columns p:first-child {
+    text-indent: 0;
+  }
+
+  .bench-proof {
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .proof {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  .proof-fig {
+    margin: 0;
+    position: sticky;
+    top: 20px;
+  }
+
+  .proof-svg {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #f8f4ec;
+    border: 1px solid rgba(28, 25, 21, 0.35);
+  }
+
+  .proof-fig figcaption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #5d564b;
+  }
+
+  .proof-char {
+    letter-spacing: 0.04em;
+  }
+
+  .write {
+    padding: 7px 12px;
+    font: inherit;
+    color: var(--red);
+    background: transparent;
+    border: 1px solid var(--red);
+    border-radius: 2px;
+    cursor: pointer;
+  }
+
+  .write:hover,
+  .write:focus-visible {
+    color: var(--paper);
+    background: var(--red);
+    outline: none;
+  }
+
+  .proof :global(.metric) {
+    stroke: rgba(28, 25, 21, 0.22);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .proof :global(.metric-base) {
+    stroke: rgba(28, 25, 21, 0.5);
+  }
+
+  .proof :global(.metric-label) {
+    fill: #8a8174;
+    font-family: var(--mono);
+    font-size: 15px;
+  }
+
+  .proof :global(.advance) {
+    fill: rgba(179, 52, 31, 0.045);
+  }
+
+  .proof :global(.ink) {
+    fill: var(--ink);
+  }
+
+  .proof :global(.ghost) {
+    fill: none;
+    stroke: rgba(179, 52, 31, 0.4);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .proof :global(.bone) {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .proof :global(.bone-dot) {
+    fill: var(--red);
+  }
+
+  .proof :global(.nib-now) {
+    fill: rgba(179, 52, 31, 0.85);
+    stroke: var(--paper);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .charset {
+    display: grid;
+    gap: 14px;
+  }
+
+  .char-group h3 {
+    margin: 0 0 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #7a7266;
+  }
+
+  .chars {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    border-top: 1px solid rgba(28, 25, 21, 0.2);
+    border-left: 1px solid rgba(28, 25, 21, 0.2);
+  }
+
+  .char {
+    display: grid;
+    place-items: center;
+    height: 50px;
+    padding: 0;
+    font-family: var(--face), Georgia, serif;
+    font-size: 30px;
+    line-height: 1;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    border-right: 1px solid rgba(28, 25, 21, 0.2);
+    border-bottom: 1px solid rgba(28, 25, 21, 0.2);
+    cursor: pointer;
+  }
+
+  .char:hover {
+    background: rgba(179, 52, 31, 0.07);
+  }
+
+  .char:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: -2px;
+  }
+
+  .char[aria-pressed='true'] {
+    color: var(--paper);
+    background: var(--red);
+  }
+
+  .casting {
+    padding-bottom: 6px;
+  }
+
+  .cast-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 32px;
+    align-items: center;
+  }
+
+  .cast-copy {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.45;
+  }
+
+  .cast-btn {
+    display: grid;
+    justify-items: start;
+    gap: 2px;
+    min-width: 220px;
+    padding: 14px 22px 15px;
+    color: var(--paper);
+    background: var(--ink);
+    border: 0;
+    border-radius: 2px;
+    box-shadow:
+      0 0 0 1px var(--ink),
+      0 0 0 4px var(--paper),
+      0 0 0 5px var(--ink);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .cast-btn:hover,
+  .cast-btn:focus-visible {
+    background: var(--red);
+    outline: none;
+  }
+
+  .cast-word {
+    font-family: var(--face), Georgia, serif;
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  .cast-file {
+    font-family: var(--mono);
+    font-size: 12px;
+    opacity: 0.8;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cast-meta {
+    min-height: 1.4em;
+    margin: 14px 0 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #7a7266;
+  }
+
+  @media (max-width: 1180px) {
+    .frame {
+      padding: 48px 46px 54px;
+    }
+
+    .proof {
+      grid-template-columns: 1fr;
+    }
+
+    .proof-fig {
+      position: static;
+      max-width: 520px;
+    }
+  }
+
+  /* ---- Phones and narrow windows: the bench becomes a drawer ---- */
+
+  @media (max-width: 900px) {
+    .foundry {
+      display: block;
+    }
+
+    .bench {
+      position: fixed;
+      inset: auto 0 0 0;
+      z-index: 5;
+      height: auto;
+      max-height: 64vh;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      border-right: 0;
+      border-top: 1px solid #000;
+      box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .bench-head {
+      align-items: center;
+      padding: 10px 16px;
+    }
+
+    .bench-title {
+      display: none;
+    }
+
+    .drawer {
+      display: inline-flex;
+      margin-left: auto;
+      padding: 8px 14px;
+      font: inherit;
+      font-size: 12px;
+      color: var(--bench);
+      background: var(--brass);
+      border: 0;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .drawer-close,
+    .bench[data-open='true'] .drawer-open {
+      display: none;
+    }
+
+    .bench[data-open='true'] .drawer-close {
+      display: inline;
+    }
+
+    .bench-body {
+      display: none;
+      overflow: auto;
+      padding: 0 16px 20px;
+    }
+
+    .bench[data-open='true'] .bench-body {
+      display: block;
+    }
+
+    .sheet {
+      padding: 0 0 96px;
+    }
+
+    .frame {
+      padding: 40px 26px 44px;
+      outline-offset: -12px;
+      box-shadow: none;
+    }
+
+    .frame::before {
+      inset: 15px;
+      border-width: 2px;
+    }
+
+    .drop {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding: 6px 0;
+    }
+
+    .drop-label {
+      display: flex;
+      gap: 8px;
+    }
+
+    .columns {
+      columns: 1;
+    }
+
+    .cast-row {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .cast-btn {
+      width: 100%;
+    }
   }
 </style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-foundry]');
+  if (root) start(root);
+</script>

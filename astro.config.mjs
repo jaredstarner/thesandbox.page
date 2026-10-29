@@ -421,5 +421,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    {
+      // The bench and the specimen's labels on /type-foundry/; everything else there is set in the visitor's own face.
+      provider: fontProviders.fontsource(),
+      name: 'DM Mono',
+      cssVariable: '--font-foundry',
+      weights: [400, 500],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });
