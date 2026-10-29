@@ -157,7 +157,7 @@ export function dotNib(pen: Pen): Nib {
     return broadNib(pen.width, Math.max(pen.width * 0.72, pen.width * pen.contrast), pen.angle);
   }
   if (pen.kind === 'round') return roundNib(pen.width / 2);
-  return roundNib(Math.max(pen.width * 0.42, pen.width * pen.contrast * 0.5));
+  return roundNib(Math.max(pen.width * 0.34, pen.width * pen.contrast * 0.5));
 }
 
 /** Prepare a stroke for sweeping: the points the nib visits and the nib at each. */
