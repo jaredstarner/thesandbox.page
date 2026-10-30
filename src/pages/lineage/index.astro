@@ -161,6 +161,11 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
     display: none !important;
   }
 
+  /* Without WebGL 2 there is nothing to pick, so only the notice stays. */
+  .lineage[data-view='none'] :is(.gen, .hint, .controls, .litter, .line) {
+    visibility: hidden;
+  }
+
   /* Header */
 
   .bar {
