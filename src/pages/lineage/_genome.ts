@@ -100,7 +100,8 @@ export function founder(seed: number): Genome {
   const g = blank();
   const spatial = [IN.bias, IN.x, IN.y, IN.r];
   const wire = (from: number, to: number, sd: number) => {
-    if (!g.links.some((l) => l.from === from && l.to === to)) g.links.push({ from, to, w: clampW(gauss(r) * sd), on: true });
+    if (!g.links.some((l) => l.from === from && l.to === to))
+      g.links.push({ from, to, w: clampW(gauss(r) * sd), on: true });
   };
   const layer = (count: number, depth: number, acts: readonly Act[]) =>
     Array.from({ length: count }, () => {

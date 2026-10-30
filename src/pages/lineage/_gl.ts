@@ -206,7 +206,14 @@ export class Renderer {
   }
 
   /** Renders one picture off screen and returns its pixels, top row first. Blocks until compiled. */
-  pixels(p: Program, w: number, h: number, view: [number, number, number], t: number, ss = 2): Uint8ClampedArray<ArrayBuffer> {
+  pixels(
+    p: Program,
+    w: number,
+    h: number,
+    view: [number, number, number],
+    t: number,
+    ss = 2,
+  ): Uint8ClampedArray<ArrayBuffer> {
     const gl = this.gl;
     this.finish(p);
     const out = new Uint8ClampedArray(w * h * 4);

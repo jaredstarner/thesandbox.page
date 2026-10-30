@@ -14,29 +14,51 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
   <main class="lineage" data-lineage data-view="litter">
     <header class="bar">
       <div class="title">
-        <a class="home" href="/">thesandbox.page</a>
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
         <h1>Lineage</h1>
       </div>
 
       <p class="gen" aria-live="polite">
         <span data-gen-label>Founders</span>
-        <b data-gen hidden>0</b>
+        <b data-gen hidden>
+          0
+        </b>
         <span class="size" data-size hidden></span>
       </p>
 
-      <p class="hint" data-hint>Pick the one you like. Twelve children grow out of it.</p>
+      <p class="hint" data-hint>
+        Pick the one you like. Twelve children grow out of it.
+      </p>
 
       <div class="controls">
         <fieldset class="variation">
           <legend>Variation</legend>
-          <label><input type="radio" name="variation" value="0.5" /><span>Slight</span></label>
-          <label><input type="radio" name="variation" value="1" checked /><span>Some</span></label>
-          <label><input type="radio" name="variation" value="2" /><span>Wild</span></label>
+          <label>
+            <input type="radio" name="variation" value="0.5" />
+            <span>Slight</span>
+          </label>
+          <label>
+            <input type="radio" name="variation" value="1" checked />
+            <span>Some</span>
+          </label>
+          <label>
+            <input type="radio" name="variation" value="2" />
+            <span>Wild</span>
+          </label>
         </fieldset>
-        <button type="button" class="btn" data-reroll>New litter</button>
-        <button type="button" class="btn" data-tree-toggle aria-pressed="false">Tree</button>
+        <button type="button" class="btn" data-reroll>
+          New litter
+        </button>
+        <button type="button" class="btn" data-tree-toggle aria-pressed="false">
+          Tree
+        </button>
         <button type="button" class="btn quiet about-btn" popovertarget="lineage-about" aria-label="About">
-          <span class="long">About</span><span class="short" aria-hidden="true">?</span>
+          <span class="long">About</span>
+          <span class="short" aria-hidden="true">
+            ?
+          </span>
         </button>
       </div>
     </header>
@@ -45,34 +67,44 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
       <canvas class="canvas" data-canvas aria-hidden="true"></canvas>
 
       <div class="litter" data-litter role="group" aria-label="Twelve pictures to choose from">
-        {
-          TILES.map((i) => (
-            <div class="tile" data-tile={i}>
-              <button type="button" class="pick" data-pick={i} aria-label={`Pick picture ${i + 1}`}>
-                <span class="no">{String(i + 1).padStart(2, '0')}</span>
-                <span class="moving" data-moving hidden>
-                  Moving
-                </span>
-              </button>
-              <button type="button" class="look" data-look={i} aria-label={`Look closer at picture ${i + 1}`}>
-                <svg viewBox="0 0 20 20" aria-hidden="true">
-                  <path d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5" />
-                </svg>
-              </button>
-            </div>
-          ))
-        }
+        {TILES.map((i) => (
+          <div class="tile" data-tile={i}>
+            <button type="button" class="pick" data-pick={i} aria-label={`Pick picture ${i + 1}`}>
+              <span class="no">{String(i + 1).padStart(2, '0')}</span>
+              <span class="moving" data-moving hidden>
+                Moving
+              </span>
+            </button>
+            <button type="button" class="look" data-look={i} aria-label={`Look closer at picture ${i + 1}`}>
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5" />
+              </svg>
+            </button>
+          </div>
+        ))}
       </div>
 
       <div class="closer" data-closer hidden>
         <p class="closer-hint">Drag to look around. Scroll or pinch to zoom.</p>
         <div class="closer-bar">
-          <button type="button" class="btn" data-closer-back>Back</button>
-          <span class="zoom" data-zoom>1×</span>
-          <button type="button" class="btn quiet" data-closer-reset>Reframe</button>
-          <button type="button" class="btn quiet" data-save>Save image</button>
-          <button type="button" class="btn quiet" data-share>Copy link</button>
-          <button type="button" class="btn strong" data-closer-pick>Breed from this</button>
+          <button type="button" class="btn" data-closer-back>
+            Back
+          </button>
+          <span class="zoom" data-zoom>
+            1×
+          </span>
+          <button type="button" class="btn quiet" data-closer-reset>
+            Reframe
+          </button>
+          <button type="button" class="btn quiet" data-save>
+            Save image
+          </button>
+          <button type="button" class="btn quiet" data-share>
+            Copy link
+          </button>
+          <button type="button" class="btn strong" data-closer-pick>
+            Breed from this
+          </button>
         </div>
       </div>
 
@@ -80,7 +112,9 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
         <div class="tree-head">
           <h2>Every picture you picked</h2>
           <p>Choose any of them to go back and breed from it again.</p>
-          <button type="button" class="btn" data-tree-close>Close</button>
+          <button type="button" class="btn" data-tree-close>
+            Close
+          </button>
         </div>
         <div class="tree-scroll" data-tree-scroll>
           <div class="tree-plot" data-tree-plot>
@@ -90,13 +124,17 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
       </div>
 
       <p class="notice" data-notice hidden></p>
-      <noscript><p class="notice">Lineage grows its pictures with JavaScript and WebGL 2.</p></noscript>
+      <noscript>
+        <p class="notice">Lineage grows its pictures with JavaScript and WebGL 2.</p>
+      </noscript>
     </section>
 
     <footer class="line">
       <span class="line-label">Line</span>
       <ol class="ancestors" data-ancestors aria-label="This picture's ancestors"></ol>
-      <button type="button" class="btn quiet" data-new-line>Start a new line</button>
+      <button type="button" class="btn quiet" data-new-line>
+        Start a new line
+      </button>
     </footer>
 
     <div popover id="lineage-about" class="about">
@@ -107,19 +145,21 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
         network into a shader of its own and runs it for every pixel.
       </p>
       <p>
-        A child is its parent with a few changes: a wire made stronger or weaker, a new wire, a new function spliced into
-        a wire, or a function swapped for another. As the litter arrives, each child is drawn partway between its parent
-        and itself, so you watch it change into what it is.
+        A child is its parent with a few changes: a wire made stronger or weaker, a new wire, a new function spliced
+        into a wire, or a function swapped for another. As the litter arrives, each child is drawn partway between its
+        parent and itself, so you watch it change into what it is.
       </p>
       <p>
         Some networks wire in a slow clock as well as position, and those pictures move. There is no goal and no score:
         what you pick is the only thing that decides where a line goes.
       </p>
       <p class="credit">
-        After Kenneth Stanley's compositional pattern-producing networks (2007) and the Picbreeder project that grew from
-        them.
+        After Kenneth Stanley's compositional pattern-producing networks (2007) and the Picbreeder project that grew
+        from them.
       </p>
-      <button type="button" class="btn" popovertarget="lineage-about" popovertargetaction="hide">Close</button>
+      <button type="button" class="btn" popovertarget="lineage-about" popovertargetaction="hide">
+        Close
+      </button>
     </div>
   </main>
 </Bare>

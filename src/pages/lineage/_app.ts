@@ -1,20 +1,7 @@
 // Wires the page: the litter, picking, the line of ancestors, the tree, and looking closer.
 
 import { compile } from './_compile';
-import {
-  blank,
-  child,
-  decode,
-  encode,
-  founders,
-  key,
-  mix32,
-  moves,
-  pack,
-  size,
-  unpack,
-  type Genome,
-} from './_genome';
+import { blank, child, decode, encode, founders, key, mix32, moves, pack, size, unpack, type Genome } from './_genome';
 import { Renderer, type Draw, type Program } from './_gl';
 
 const STORE = 'lineage:v1';
@@ -530,7 +517,11 @@ export function start(root: HTMLElement): void {
       if (before > 0 && after > 0) zoomAt((now.x + other.x) / 2, (now.y + other.y) / 2, before / after);
     } else {
       const unit = closer.view[2] / (box.height / 2);
-      closer.view = [closer.view[0] - (now.x - last.x) * unit, closer.view[1] + (now.y - last.y) * unit, closer.view[2]];
+      closer.view = [
+        closer.view[0] - (now.x - last.x) * unit,
+        closer.view[1] + (now.y - last.y) * unit,
+        closer.view[2],
+      ];
       kick();
     }
     pointers.set(e.pointerId, now);
