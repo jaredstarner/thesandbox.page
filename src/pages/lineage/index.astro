@@ -21,6 +21,7 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
       <p class="gen" aria-live="polite">
         <span data-gen-label>Founders</span>
         <b data-gen hidden>0</b>
+        <span class="size" data-size hidden></span>
       </p>
 
       <p class="hint" data-hint>Pick the one you like. Twelve children grow out of it.</p>
@@ -211,6 +212,13 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       letter-spacing: 0;
+    }
+
+    .size {
+      margin-left: 6px;
+      font-size: 13px;
+      letter-spacing: 0;
+      text-transform: none;
     }
   }
 
@@ -743,6 +751,10 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
 
     .title {
       gap: 10px;
+    }
+
+    .gen .size {
+      display: none;
     }
 
     .controls {

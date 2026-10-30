@@ -67,6 +67,7 @@ export function start(root: HTMLElement): void {
   const tiles = [...root.querySelectorAll<HTMLElement>('[data-tile]')];
   const genLabel = $<HTMLElement>('[data-gen-label]');
   const genNumber = $<HTMLElement>('[data-gen]');
+  const sizeEl = $<HTMLElement>('[data-size]');
   const hint = $<HTMLElement>('[data-hint]');
   const ancestors = $<HTMLOListElement>('[data-ancestors]');
   const treeEl = $<HTMLElement>('[data-tree]');
@@ -205,6 +206,11 @@ export function start(root: HTMLElement): void {
     genLabel.textContent = p ? 'Generation' : 'Founders';
     genNumber.textContent = String(gen);
     genNumber.hidden = !p;
+    if (p) {
+      const { nodes, links } = size(p.genome);
+      sizeEl.textContent = `${nodes} ${nodes === 1 ? 'function' : 'functions'}, ${links} ${links === 1 ? 'wire' : 'wires'}`;
+    }
+    sizeEl.hidden = !p;
     hint.hidden = picked;
     renderLine();
     if (!treeEl.hidden) renderTree();
@@ -718,6 +724,16 @@ export function start(root: HTMLElement): void {
         view: closer?.view ?? null,
       }),
       source: (i: number) => compile(slots[i].genome, parentGenome),
+      // Times a full-size off-screen render, as Save image makes, without downloading anything.
+      render: (w: number, h: number) => {
+        const r = renderer;
+        if (!r || !closer) return null;
+        const t0 = performance.now();
+        const d = r.pixels(closer.program, w, h, closer.view, 0.9, 2);
+        let lit = 0;
+        for (let k = 0; k < d.length; k += 4 * 997) if (d[k] + d[k + 1] + d[k + 2] > 0) lit++;
+        return { ms: Math.round(performance.now() - t0), samples: Math.ceil(d.length / (4 * 997)), lit };
+      },
     };
   }
 }
