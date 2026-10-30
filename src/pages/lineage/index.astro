@@ -1,0 +1,793 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+
+const TILES = Array.from({ length: 12 }, (_, i) => i);
+---
+
+<Bare
+  title="Lineage"
+  description="Breed pictures by eye: twelve images, each drawn by a tiny network of functions. Pick the one you like and twelve children grow out of it, then keep picking to grow a line of your own."
+>
+  <Font cssVariable="--font-lineage" slot="head" />
+
+  <main class="lineage" data-lineage data-view="litter">
+    <header class="bar">
+      <div class="title">
+        <a class="home" href="/">thesandbox.page</a>
+        <h1>Lineage</h1>
+      </div>
+
+      <p class="gen" aria-live="polite">
+        <span data-gen-label>Founders</span>
+        <b data-gen hidden>0</b>
+      </p>
+
+      <p class="hint" data-hint>Pick the one you like. Twelve children grow out of it.</p>
+
+      <div class="controls">
+        <fieldset class="variation">
+          <legend>Variation</legend>
+          <label><input type="radio" name="variation" value="0.5" /><span>Slight</span></label>
+          <label><input type="radio" name="variation" value="1" checked /><span>Some</span></label>
+          <label><input type="radio" name="variation" value="2" /><span>Wild</span></label>
+        </fieldset>
+        <button type="button" class="btn" data-reroll>New litter</button>
+        <button type="button" class="btn" data-tree-toggle aria-pressed="false">Tree</button>
+        <button type="button" class="btn quiet" popovertarget="lineage-about">About</button>
+      </div>
+    </header>
+
+    <section class="stage" data-stage>
+      <canvas class="canvas" data-canvas aria-hidden="true"></canvas>
+
+      <div class="litter" data-litter role="group" aria-label="Twelve pictures to choose from">
+        {
+          TILES.map((i) => (
+            <div class="tile" data-tile={i}>
+              <button type="button" class="pick" data-pick={i} aria-label={`Pick picture ${i + 1}`}>
+                <span class="no">{String(i + 1).padStart(2, '0')}</span>
+                <span class="moving" data-moving hidden>
+                  Moving
+                </span>
+              </button>
+              <button type="button" class="look" data-look={i} aria-label={`Look closer at picture ${i + 1}`}>
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5" />
+                </svg>
+              </button>
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="closer" data-closer hidden>
+        <p class="closer-hint">Drag to look around. Scroll or pinch to zoom.</p>
+        <div class="closer-bar">
+          <button type="button" class="btn" data-closer-back>Back</button>
+          <span class="zoom" data-zoom>1×</span>
+          <button type="button" class="btn quiet" data-closer-reset>Reframe</button>
+          <button type="button" class="btn quiet" data-save>Save image</button>
+          <button type="button" class="btn quiet" data-share>Copy link</button>
+          <button type="button" class="btn strong" data-closer-pick>Breed from this</button>
+        </div>
+      </div>
+
+      <div class="tree" data-tree hidden>
+        <div class="tree-head">
+          <h2>Every picture you picked</h2>
+          <p>Choose any of them to go back and breed from it again.</p>
+          <button type="button" class="btn" data-tree-close>Close</button>
+        </div>
+        <div class="tree-scroll" data-tree-scroll>
+          <div class="tree-plot" data-tree-plot>
+            <svg class="tree-links" data-tree-links aria-hidden="true"></svg>
+          </div>
+        </div>
+      </div>
+
+      <p class="notice" data-notice hidden></p>
+      <noscript><p class="notice">Lineage grows its pictures with JavaScript and WebGL 2.</p></noscript>
+    </section>
+
+    <footer class="line">
+      <span class="line-label">Line</span>
+      <ol class="ancestors" data-ancestors aria-label="This picture's ancestors"></ol>
+      <button type="button" class="btn quiet" data-new-line>Start a new line</button>
+    </footer>
+
+    <div popover id="lineage-about" class="about">
+      <h2>How the pictures grow</h2>
+      <p>
+        Each picture is a small network of functions: sines, bells, folds, and ramps wired together. Every point in the
+        frame goes in as its position and distance from the centre, and comes out as a colour. Your browser turns each
+        network into a shader of its own and runs it for every pixel.
+      </p>
+      <p>
+        A child is its parent with a few changes: a wire made stronger or weaker, a new wire, a new function spliced into
+        a wire, or a function swapped for another. As the litter arrives, each child is drawn partway between its parent
+        and itself, so you watch it change into what it is.
+      </p>
+      <p>
+        Some networks wire in a slow clock as well as position, and those pictures move. There is no goal and no score:
+        what you pick is the only thing that decides where a line goes.
+      </p>
+      <p class="credit">
+        After Kenneth Stanley's compositional pattern-producing networks (2007) and the Picbreeder project that grew from
+        them.
+      </p>
+      <button type="button" class="btn" popovertarget="lineage-about" popovertargetaction="hide">Close</button>
+    </div>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.lineage)) {
+    margin: 0;
+    background: #0f0f10;
+  }
+
+  .lineage,
+  .lineage :global(*) {
+    box-sizing: border-box;
+  }
+
+  .lineage {
+    --ground: #0f0f10;
+    --ink: #edebe6;
+    --muted: #8f8c86;
+    --faint: rgb(237 235 230 / 0.12);
+    --rule: rgb(237 235 230 / 0.2);
+    --gap: 3px;
+
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: 100dvh;
+    min-height: 520px;
+    color: var(--ink);
+    background: var(--ground);
+    font:
+      450 14px/1.4 var(--font-lineage),
+      'Helvetica Neue',
+      Arial,
+      sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  /* Header */
+
+  .bar {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+    gap: 6px 28px;
+    padding: 12px 18px 11px;
+  }
+
+  .title {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+
+  .home {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--ink);
+    }
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .gen {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    b {
+      color: var(--ink);
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+  }
+
+  .hint {
+    margin: 0;
+    color: var(--muted);
+    transition: opacity 0.6s ease;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn {
+    appearance: none;
+    height: 32px;
+    padding: 0 13px;
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    color: var(--ink);
+    background: transparent;
+    font: inherit;
+    font-weight: 550;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease;
+
+    &:hover {
+      border-color: rgb(237 235 230 / 0.5);
+      background: var(--faint);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    &[aria-pressed='true'] {
+      border-color: var(--ink);
+      color: var(--ground);
+      background: var(--ink);
+    }
+
+    &.quiet {
+      border-color: transparent;
+      color: var(--muted);
+
+      &:hover {
+        color: var(--ink);
+      }
+    }
+
+    &.strong {
+      border-color: var(--ink);
+      color: var(--ground);
+      background: var(--ink);
+
+      &:hover {
+        background: #fff;
+      }
+    }
+  }
+
+  .variation {
+    display: flex;
+    align-items: center;
+    margin: 0 8px 0 0;
+    padding: 0;
+    border: 0;
+
+    legend {
+      float: left;
+      margin-right: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    label {
+      position: relative;
+      cursor: pointer;
+    }
+
+    input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    span {
+      display: block;
+      padding: 6px 10px;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-weight: 550;
+    }
+
+    label:hover span {
+      color: var(--ink);
+    }
+
+    input:checked + span {
+      border-color: var(--ink);
+      color: var(--ink);
+    }
+
+    input:focus-visible + span {
+      outline: 2px solid var(--ink);
+      outline-offset: 1px;
+    }
+  }
+
+  /* Stage */
+
+  .stage {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .litter {
+    position: absolute;
+    inset: 0 var(--gap);
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    gap: var(--gap);
+  }
+
+  .tile {
+    position: relative;
+  }
+
+  .pick {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 2px solid rgb(255 255 255 / 0);
+      transition: border-color 0.15s ease;
+    }
+
+    &:hover::after,
+    &:focus-visible::after {
+      border-color: rgb(255 255 255 / 0.85);
+    }
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  .no,
+  .moving {
+    position: absolute;
+    bottom: 8px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: #fff;
+    background: rgb(0 0 0 / 0.45);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .no {
+    left: 8px;
+  }
+
+  .moving {
+    right: 8px;
+    text-transform: uppercase;
+  }
+
+  .tile:hover :is(.no, .moving),
+  .pick:focus-visible :is(.no, .moving) {
+    opacity: 1;
+  }
+
+  .look {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 15px;
+    color: #fff;
+    background: rgb(0 0 0 / 0.45);
+    cursor: zoom-in;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #fff;
+      opacity: 1;
+    }
+  }
+
+  .tile:hover .look {
+    opacity: 1;
+  }
+
+  .lineage[data-busy] .litter {
+    pointer-events: none;
+  }
+
+  /* Looking closer */
+
+  .lineage[data-view='closer'] .litter {
+    display: none;
+  }
+
+  .lineage[data-view='closer'] .canvas {
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .lineage[data-view='closer'][data-dragging] .canvas {
+    cursor: grabbing;
+  }
+
+  .closer {
+    position: absolute;
+    inset: auto 0 0;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    padding: 16px;
+    pointer-events: none;
+  }
+
+  .closer-hint {
+    margin: 0;
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: #fff;
+    background: rgb(0 0 0 / 0.5);
+    font-size: 12px;
+  }
+
+  .closer-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 22px;
+    background: rgb(15 15 16 / 0.86);
+    backdrop-filter: blur(8px);
+    pointer-events: auto;
+  }
+
+  .zoom {
+    min-width: 46px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* Tree */
+
+  .tree {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    background: rgb(15 15 16 / 0.96);
+  }
+
+  .tree-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 16px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--faint);
+
+    h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    p {
+      flex: 1;
+      margin: 0;
+      color: var(--muted);
+    }
+  }
+
+  .tree-scroll {
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  .tree-plot {
+    position: relative;
+  }
+
+  .tree-links {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+    fill: none;
+    stroke: var(--rule);
+    stroke-width: 1.5;
+  }
+
+  .tree-plot :global(.node) {
+    position: absolute;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .tree-plot :global(.node canvas) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 3px;
+  }
+
+  .tree-plot :global(.node:hover canvas),
+  .tree-plot :global(.node:focus-visible canvas) {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .tree-plot :global(.node[aria-current='true'] canvas) {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  .tree-plot :global(.node .g) {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .notice {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    margin: 0;
+    padding: 24px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* Footer: the line of ancestors */
+
+  .line {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    height: 68px;
+    padding: 0 18px;
+  }
+
+  .line-label {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .ancestors {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 0;
+    padding: 4px 2px;
+    overflow-x: auto;
+    list-style: none;
+    scrollbar-width: none;
+  }
+
+  .ancestors :global(li) {
+    display: flex;
+    flex: none;
+    align-items: center;
+  }
+
+  .ancestors :global(li + li::before) {
+    content: '';
+    width: 14px;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .ancestors :global(button) {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    background: #222;
+    cursor: pointer;
+  }
+
+  .ancestors :global(button canvas) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 3px;
+  }
+
+  .ancestors :global(button:hover),
+  .ancestors :global(button:focus-visible) {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .ancestors :global(li:last-child button) {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .ancestors :global(.empty) {
+    color: var(--muted);
+  }
+
+  /* About */
+
+  .about {
+    width: min(520px, calc(100% - 32px));
+    max-height: calc(100dvh - 48px);
+    overflow: auto;
+    padding: 22px 24px 20px;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    color: var(--ink);
+    background: #18181a;
+    font: inherit;
+
+    &::backdrop {
+      background: rgb(0 0 0 / 0.45);
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      font-weight: 750;
+    }
+
+    p {
+      margin: 0 0 12px;
+      color: #cfccc6;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .credit {
+      color: var(--muted);
+      font-size: 13px;
+    }
+  }
+
+  /* Phones and narrow windows */
+
+  @media (max-aspect-ratio: 1/1) {
+    .litter {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .bar {
+      grid-template-columns: auto 1fr auto;
+    }
+
+    .hint {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .bar {
+      grid-template-columns: 1fr auto;
+      gap: 8px 12px;
+      padding: 10px 12px;
+    }
+
+    .title {
+      gap: 10px;
+    }
+
+    .controls {
+      grid-column: 1 / -1;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .variation {
+      margin-right: auto;
+
+      legend {
+        display: none;
+      }
+
+      span {
+        padding: 6px 8px;
+      }
+    }
+
+    .btn {
+      height: 30px;
+      padding: 0 11px;
+    }
+
+    .hint {
+      font-size: 13px;
+    }
+
+    .line {
+      gap: 10px;
+      height: 60px;
+      padding: 0 12px;
+    }
+
+    .line-label {
+      display: none;
+    }
+
+    .look {
+      opacity: 1;
+      width: 26px;
+      height: 26px;
+      background: rgb(0 0 0 / 0.35);
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-lineage]');
+  if (root) start(root);
+</script>

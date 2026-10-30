@@ -1,0 +1,8 @@
+{
+  "title": "Lineage",
+  "summary": "Twelve pictures, each drawn by a tiny network of functions: pick the one you like and twelve children grow out of it on screen, then keep picking to breed a line of your own, branch off from any ancestor, and look past the edge of the frame.",
+  "date": "2026-10-30",
+  "tags": ["webgl2", "neuroevolution", "cppn", "compression-streams", "pointer-events", "popover"],
+  "requires": ["webgl2"],
+  "plot": 29
+}
