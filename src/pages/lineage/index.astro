@@ -151,7 +151,6 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
       'Helvetica Neue',
       Arial,
       sans-serif;
-    font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -208,6 +207,7 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
       color: var(--ink);
       font-size: 21px;
       font-weight: 700;
+      font-variant-numeric: tabular-nums;
       letter-spacing: 0;
     }
   }
@@ -219,6 +219,8 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
   }
 
   .controls {
+    grid-column: -2 / -1;
+    justify-self: end;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -445,10 +447,6 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
     opacity: 1;
   }
 
-  .lineage[data-busy] .litter {
-    pointer-events: none;
-  }
-
   /* Looking closer */
 
   .lineage[data-view='closer'] .litter {
@@ -498,6 +496,7 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
 
   .zoom {
     min-width: 46px;
+    font-variant-numeric: tabular-nums;
     color: var(--muted);
     text-align: center;
   }
