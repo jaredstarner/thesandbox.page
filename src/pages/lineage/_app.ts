@@ -229,6 +229,8 @@ export function start(root: HTMLElement): void {
     if (!r) return;
     r.resize();
     r.clear(GROUND);
+    // The tree covers the stage; nothing behind it needs drawing.
+    if (!treeEl.hidden) return;
     const list: Draw[] = [];
     let again = false;
     if (closer) {
@@ -325,10 +327,10 @@ export function start(root: HTMLElement): void {
   };
 
   // The tree of everything picked.
-  const NODE = 44;
-  const COL = 70;
-  const ROW = 60;
-  const PAD = 22;
+  const NODE = 60;
+  const COL = 92;
+  const ROW = 76;
+  const PAD = 28;
 
   const renderTree = () => {
     const kids = new Map<string | null, Pic[]>();
@@ -406,6 +408,7 @@ export function start(root: HTMLElement): void {
       b.style.top = `${y}px`;
       b.style.width = b.style.height = `${NODE}px`;
       b.setAttribute('aria-label', p.parent ? `Picked from generation ${p.gen}` : 'A founder');
+      b.title = p.parent ? `Generation ${p.gen}` : 'Founder';
       if (p.id === current) b.setAttribute('aria-current', 'true');
       b.append(thumb(p, thumbPx(NODE)));
       treePlot.append(b);
@@ -425,6 +428,7 @@ export function start(root: HTMLElement): void {
     treeEl.hidden = !open;
     treeToggle.setAttribute('aria-pressed', String(open));
     if (open) renderTree();
+    kick();
   };
 
   // Moving through the lineage.

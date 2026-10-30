@@ -34,7 +34,9 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
         </fieldset>
         <button type="button" class="btn" data-reroll>New litter</button>
         <button type="button" class="btn" data-tree-toggle aria-pressed="false">Tree</button>
-        <button type="button" class="btn quiet" popovertarget="lineage-about">About</button>
+        <button type="button" class="btn quiet about-btn" popovertarget="lineage-about" aria-label="About">
+          <span class="long">About</span><span class="short" aria-hidden="true">?</span>
+        </button>
       </div>
     </header>
 
@@ -278,6 +280,10 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
     }
   }
 
+  .about-btn .short {
+    display: none;
+  }
+
   .variation {
     display: flex;
     align-items: center;
@@ -496,7 +502,6 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
 
   .zoom {
     min-width: 46px;
-    font-variant-numeric: tabular-nums;
     color: var(--muted);
     text-align: center;
   }
@@ -508,7 +513,7 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
     inset: 0;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
-    background: rgb(15 15 16 / 0.96);
+    background: var(--ground);
   }
 
   .tree-head {
@@ -548,6 +553,11 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
     fill: none;
     stroke: var(--rule);
     stroke-width: 1.5;
+
+    :global(.on) {
+      stroke: var(--ink);
+      stroke-width: 2;
+    }
   }
 
   .tree-plot :global(.node) {
@@ -576,13 +586,10 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
     outline-offset: 3px;
   }
 
-  .tree-plot :global(.node .g) {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    margin-top: 4px;
+  .tree-plot :global(.tree-empty) {
+    margin: 0;
+    padding: 28px;
     color: var(--muted);
-    font-size: 11px;
   }
 
   .notice {
@@ -619,7 +626,7 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
     align-items: center;
     gap: 0;
     margin: 0;
-    padding: 4px 2px;
+    padding: 6px 4px;
     overflow-x: auto;
     list-style: none;
     scrollbar-width: none;
@@ -740,7 +747,7 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
 
     .controls {
       grid-column: 1 / -1;
-      flex-wrap: wrap;
+      justify-self: stretch;
       gap: 6px;
     }
 
@@ -752,7 +759,34 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
       }
 
       span {
-        padding: 6px 8px;
+        padding: 6px 7px;
+      }
+    }
+
+    .controls .btn.about-btn {
+      width: 30px;
+      padding: 0;
+      border-color: var(--rule);
+      color: var(--ink);
+
+      .long {
+        display: none;
+      }
+
+      .short {
+        display: inline;
+      }
+    }
+
+    .tree-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      padding: 12px;
+
+      p {
+        grid-column: 1 / -1;
+        grid-row: 2;
       }
     }
 
@@ -766,9 +800,10 @@ const TILES = Array.from({ length: 12 }, (_, i) => i);
     }
 
     .line {
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
       height: 60px;
-      padding: 0 12px;
+      padding: 0 8px 0 10px;
     }
 
     .line-label {
