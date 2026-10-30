@@ -431,5 +431,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    {
+      // The labels and counters on /lineage/: a newspaper grotesk with tabular figures.
+      provider: fontProviders.fontsource(),
+      name: 'Schibsted Grotesk',
+      cssVariable: '--font-lineage',
+      weights: ['400 900'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
+    },
   ],
 });
