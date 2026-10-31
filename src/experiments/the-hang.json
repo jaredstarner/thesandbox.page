@@ -1,0 +1,8 @@
+{
+  "title": "The hang",
+  "summary": "An empty gallery wall and the Art Institute of Chicago's public-domain collection: bring up anything from a five-centimetre miniature to a four-metre altarpiece at its true size, hang it to the museum's centre line, switch the room to a dimensioned hanging plan, light it, and share the show as a link.",
+  "date": "2026-10-31",
+  "tags": ["canvas", "live-data", "iiif", "pointer-events", "popover"],
+  "requires": ["canvas"],
+  "plot": 30
+}
