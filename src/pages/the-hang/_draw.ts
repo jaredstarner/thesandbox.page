@@ -47,6 +47,12 @@ function visible(v: View, b: Box, pad = 60): boolean {
   return toX(v, b.x1) > -pad && toX(v, b.x0) < v.w + pad && toY(v, b.y0) > -pad && toY(v, b.y1) < v.h + pad;
 }
 
+/** The selected work last, so it draws over any neighbour it is dragged across. */
+function onTop(items: Hung[], selected: number | null): Hung[] {
+  if (selected === null) return items;
+  return [...items.filter((i) => i.id !== selected), ...items.filter((i) => i.id === selected)];
+}
+
 /** Items whose outer boxes overlap another's. */
 export function clashes(scene: Scene, works: Map<number, Work>): Set<number> {
   const out = new Set<number>();
@@ -581,7 +587,7 @@ export function drawRoom(ctx: CanvasRenderingContext2D, lm: CanvasRenderingConte
     }
   }
 
-  const items = scene.items.filter((i) => works.has(i.id));
+  const items = onTop(scene.items.filter((i) => works.has(i.id)), st.selected);
   for (const item of items) {
     const work = works.get(item.id)!;
     if (visible(v, boxOf(item, work))) drawWorkRoom(ctx, v, item, work, st);
@@ -893,8 +899,9 @@ export function drawPlan(ctx: CanvasRenderingContext2D, v: View, st: DrawState) 
   const items = scene.items.filter((i) => works.has(i.id));
   const bad = clashes(scene, works);
 
-  // Works.
-  items.forEach((item, idx) => {
+  // Works, numbered in the order they went up.
+  const number = new Map(items.map((i, n) => [i.id, n + 1]));
+  onTop(items, st.selected).forEach((item) => {
     const work = works.get(item.id)!;
     const b = boxOf(item, work);
     if (!visible(v, b, 120)) return;
@@ -960,7 +967,7 @@ export function drawPlan(ctx: CanvasRenderingContext2D, v: View, st: DrawState) 
     ctx.font = `700 9.5px ${fonts.text}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(String(idx + 1), nx, ny + 0.5);
+    ctx.fillText(String(number.get(item.id)), nx, ny + 0.5);
     ctx.textAlign = 'left';
 
     if (item.id === st.selected) {

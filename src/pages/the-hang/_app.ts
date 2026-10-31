@@ -331,7 +331,9 @@ export function start(root: HTMLElement) {
       const snapped = snap(work.id, work, at.x, at.y, scene, works, 10 / view.s);
       pos = clampItem(snapped.x, snapped.y, work);
     } else {
-      pos = placeFor(work, scene, works, view.cx);
+      const place = placeFor(work, scene, works, view.cx);
+      pos = { x: place.x, y: place.y };
+      if (!place.free) toast("There's no clear space for it, so it hangs over its neighbours until you make room.");
     }
     const item = { id: work.id, ...pos };
     scene.items.push(item);
@@ -612,8 +614,9 @@ export function start(root: HTMLElement) {
   function hit(px: number, py: number): Drag['kind'] | number | null {
     const x = fromX(view, px);
     const y = fromY(view, py);
-    for (let i = scene.items.length - 1; i >= 0; i--) {
-      const item = scene.items[i];
+    // The selected work draws on top, so it is tried first.
+    const order = [...scene.items].reverse().sort((a, b) => Number(b.id === selected) - Number(a.id === selected));
+    for (const item of order) {
       const work = works.get(item.id);
       if (!work) continue;
       const b = boxOf(item, work);
@@ -629,7 +632,9 @@ export function start(root: HTMLElement) {
     if (e.button !== 0 && e.pointerType === 'mouse') return;
     const p = local(e);
     pointers.set(e.pointerId, p);
-    stage.setPointerCapture?.(e.pointerId);
+    try {
+      stage.setPointerCapture(e.pointerId);
+    } catch {}
     if (scene.light === 'torch') {
       torch = { x: fromX(view, p.x), y: fromY(view, p.y) };
       requestDraw();

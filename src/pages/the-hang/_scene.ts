@@ -153,7 +153,12 @@ export function snap(
  * A free place for a new work near `near`: on the line first, then above or below it salon-style, keeping a
  * clear space around neighbours. Falls back to `near` itself.
  */
-export function placeFor(work: Work, scene: Scene, works: Map<number, Work>, near: number): { x: number; y: number } {
+export function placeFor(
+  work: Work,
+  scene: Scene,
+  works: Map<number, Work>,
+  near: number,
+): { x: number; y: number; free: boolean } {
   const boxes = scene.items.filter((i) => works.has(i.id)).map((i) => boxOf(i, works.get(i.id)!));
   const hw = work.mount.w / 2;
   const hh = work.mount.h / 2;
@@ -171,9 +176,9 @@ export function placeFor(work: Work, scene: Scene, works: Map<number, Work>, nea
     for (let x = hw + 4; x <= WALL.w - hw - 4; x += 5) {
       if (fits(x, y) && (best === null || Math.abs(x - near) < Math.abs(best - near))) best = x;
     }
-    if (best !== null) return { x: best, y };
+    if (best !== null) return { x: best, y, free: true };
   }
-  return clampItem(near, lineY(work), work);
+  return { ...clampItem(near, lineY(work), work), free: false };
 }
 
 // Share links: "#h=" then the title, paint, light, person, bench, and each work as id.x.y, joined with "~".
