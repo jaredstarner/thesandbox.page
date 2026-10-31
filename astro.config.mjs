@@ -441,5 +441,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
     },
+    // /the-hang/: a grotesk for the wall labels and plan, and a display serif for the show's title in vinyl.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Hanken Grotesk',
+      cssVariable: '--font-hang',
+      weights: ['100 900'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'DM Serif Display',
+      cssVariable: '--font-hang-display',
+      weights: [400],
+      styles: ['normal', 'italic'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['Georgia', 'serif'],
+    },
   ],
 });

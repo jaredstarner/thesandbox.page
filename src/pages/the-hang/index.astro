@@ -1,0 +1,1350 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { PAINTS } from './_scene';
+import { KINDS } from './_works';
+
+const rgb = (c: [number, number, number]) => `rgb(${c.join(' ')})`;
+---
+
+<Bare
+  title="The hang"
+  description="An empty gallery wall and a museum's public-domain collection: hang anything from a five-centimetre miniature to a four-metre altarpiece at its true size, draw up the hanging plan, light the room, and share the show."
+>
+  <Font cssVariable="--font-hang" slot="head" />
+  <Font cssVariable="--font-hang-display" slot="head" />
+
+  <main class="hang" data-hang data-view="room" data-stores="closed" data-light="spots" data-paint="white">
+    <header class="bar">
+      <div class="name">
+        <a class="home" href="/">thesandbox.page</a>
+        <h1>The hang</h1>
+      </div>
+      <label class="show">
+        <span class="sr">Name of the show</span>
+        <input data-title type="text" maxlength="80" placeholder="Name the show" autocomplete="off" spellcheck="false" />
+      </label>
+      <div class="tools">
+        <fieldset class="seg">
+          <legend class="sr">View</legend>
+          <label><input type="radio" name="view" value="room" checked /><span>Room</span></label>
+          <label><input type="radio" name="view" value="plan" /><span>Plan</span></label>
+        </fieldset>
+        <fieldset class="seg lights">
+          <legend class="sr">Lights</legend>
+          <label title="Spotlights from the track"><input type="radio" name="light" value="spots" checked /><span>Spots</span></label>
+          <label title="An even wash of light"><input type="radio" name="light" value="wash" /><span>Wash</span></label>
+          <label title="After hours, with a torch"><input type="radio" name="light" value="torch" /><span>Torch</span></label>
+        </fieldset>
+        <fieldset class="paints">
+          <legend class="sr">Wall colour</legend>
+          {
+            PAINTS.map((p, i) => (
+              <label title={p.label} style={`--swatch: ${rgb(p.rgb)}`}>
+                <input type="radio" name="paint" value={p.id} checked={i === 0} />
+                <span class="sr">{p.label}</span>
+              </label>
+            ))
+          }
+        </fieldset>
+        <div class="acts">
+          <button type="button" class="btn icon" data-undo disabled aria-label="Undo" title="Undo">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5 3 9l4 4M3.5 9H12a5 5 0 0 1 0 10h-2"></path></svg>
+          </button>
+          <button type="button" class="btn icon" data-redo disabled aria-label="Redo" title="Redo">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m13 5 4 4-4 4M16.5 9H8a5 5 0 0 0 0 10h2"></path></svg>
+          </button>
+          <button type="button" class="btn" data-share>Share</button>
+          <button type="button" class="btn quiet" popovertarget="hang-about">About</button>
+          <button type="button" class="btn strong" data-stores-toggle aria-controls="hang-stores" aria-expanded="false">
+            The stores
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="body">
+      <div class="wall">
+        <div
+          class="stage"
+          data-stage
+          tabindex="0"
+          role="application"
+          aria-label="The gallery wall. Drag a work to move it, drag the wall to look along it, scroll or pinch to zoom, double-click a work to step up to it."
+        >
+          <canvas data-room aria-hidden="true"></canvas>
+          <canvas data-plan aria-hidden="true"></canvas>
+        </div>
+
+        <aside class="card" data-card hidden aria-live="polite">
+          <button type="button" class="x" data-card-close aria-label="Close">×</button>
+          <p class="artist" data-card-artist></p>
+          <p class="life" data-card-life></p>
+          <p class="title" data-card-title></p>
+          <p class="date" data-card-date></p>
+          <p class="medium" data-card-medium></p>
+          <p class="size" data-card-size></p>
+          <p class="centre" data-card-centre></p>
+          <p class="credit" data-card-credit></p>
+          <div class="card-acts">
+            <button type="button" class="btn" data-card-look>Step up</button>
+            <button type="button" class="btn" data-card-line>On the line</button>
+            <button type="button" class="btn" data-card-down>Take down</button>
+          </div>
+          <a class="more-link" data-card-link href="https://www.artic.edu/collection" target="_blank" rel="noopener">
+            At the Art Institute of Chicago ↗
+          </a>
+        </aside>
+
+        <section class="block" aria-label="Title block">
+          <div class="block-head">
+            <p class="kicker">Hanging plan · North wall</p>
+            <p class="block-title" data-block-title>Opening hang</p>
+          </div>
+          <dl class="block-meta">
+            <div><dt>Scale</dt><dd data-block-scale>1:40</dd></div>
+            <div><dt>Drawn</dt><dd data-block-date></dd></div>
+            <div><dt>Wall</dt><dd>16 × 5.4 m</dd></div>
+          </dl>
+          <ol class="checklist" data-checklist></ol>
+        </section>
+
+        <div class="zoom">
+          <div class="scale" aria-hidden="true">
+            <span class="scale-bar" data-scale-bar></span>
+            <span data-scale>1 m</span>
+          </div>
+          <button type="button" class="btn icon" data-zoom-out aria-label="Zoom out">−</button>
+          <button type="button" class="btn" data-fit>Whole wall</button>
+          <button type="button" class="btn icon" data-zoom-in aria-label="Zoom in">+</button>
+        </div>
+
+        <p class="toast" data-toast hidden role="status"></p>
+        <p class="empty-note">The wall is bare. Bring something up from the stores.</p>
+        <noscript><p class="fallback">The hang draws its gallery with JavaScript, which is off in this browser.</p></noscript>
+        <p class="fallback unsupported">This browser can't draw the gallery: it has no 2D canvas.</p>
+      </div>
+
+      <aside class="stores" id="hang-stores" aria-label="The stores">
+        <header class="stores-head">
+          <h2>The stores</h2>
+          <button type="button" class="btn quiet" data-stores-close>Close</button>
+        </header>
+        <form class="search" data-search role="search">
+          <label class="sr" for="hang-q">Search the collection</label>
+          <input id="hang-q" data-q type="search" placeholder="Monet, kimono, storm, cats…" autocomplete="off" />
+          <button type="submit" class="btn strong">Search</button>
+        </form>
+        <fieldset class="kinds">
+          <legend class="sr">Kind of work</legend>
+          {
+            Object.entries(KINDS).map(([id, k], i) => (
+              <label>
+                <input type="radio" name="kind" value={id} checked={i === 0} />
+                <span>{k.label}</span>
+              </label>
+            ))
+          }
+        </fieldset>
+        <p class="status" data-status>The opening crate. Search to bring up anything in the public domain.</p>
+        <ol class="results" data-results></ol>
+        <button type="button" class="btn more" data-more hidden>Bring up more</button>
+        <footer class="stores-foot">
+          <div class="foot-acts">
+            <button type="button" class="btn" data-opening>Opening hang</button>
+            <button type="button" class="btn" data-clear>Clear the wall</button>
+          </div>
+          <p>
+            Works, measurements, and images from the <a href="https://www.artic.edu/open-access/public-api"
+              >Art Institute of Chicago</a
+            >, released into the public domain (CC0).
+          </p>
+        </footer>
+      </aside>
+    </div>
+
+    <div popover id="hang-about" class="about">
+      <h2>The hang</h2>
+      <p>
+        Every work comes up from the Art Institute of Chicago's collection at its true size, so a portrait miniature you
+        could cover with a thumb hangs beside a street scene nearly three metres wide. The visitor and the bench are there
+        to measure against.
+      </p>
+      <p>
+        Drag works along the wall. They pull toward the centre line most museums hang to, 145 cm from the floor, toward
+        their neighbours' edges, and to the point halfway between two neighbours. Hold Alt to place one freely. Tall
+        works settle with their bottom edge 40 cm up instead.
+      </p>
+      <p>
+        Paintings come in the frame size the museum measured where it has one; works on paper get a mat and a slim
+        frame. Plan turns the room into a hanging plan with a checklist and running dimensions, the drawing a crew hangs
+        from.
+      </p>
+      <p>Arrow keys nudge the selected work by a centimetre, Shift for ten. Share copies a link to the whole hang.</p>
+      <button type="button" class="btn" popovertarget="hang-about" popovertargetaction="hide">Close</button>
+    </div>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.hang)) {
+    margin: 0;
+    background: #141413;
+    overflow: hidden;
+  }
+
+  .hang {
+    --hang-text: var(--font-hang);
+    --hang-display: var(--font-hang-display);
+    --ink: #1c1b19;
+    --paper: #f5f3ee;
+    --rule: rgb(28 27 25 / 0.14);
+    --bar: #171716;
+    --bar-ink: #ebe8e1;
+    --bar-dim: rgb(235 232 225 / 0.6);
+    --accent: #c0532f;
+    --blue: #2a63c9;
+    position: fixed;
+    inset: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    font-family: var(--hang-text);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .hang :global(*),
+  .hang :global(*::before),
+  .hang :global(*::after) {
+    box-sizing: border-box;
+  }
+
+  .hang [hidden] {
+    display: none !important;
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* ---- Bar */
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 16px;
+    background: var(--bar);
+    color: var(--bar-ink);
+    border-bottom: 1px solid rgb(255 255 255 / 0.06);
+    min-width: 0;
+  }
+
+  .name {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: none;
+  }
+
+  .home {
+    color: var(--bar-dim);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+
+  .home:hover {
+    color: var(--bar-ink);
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--hang-display);
+    font-weight: 400;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: 0.005em;
+  }
+
+  .show {
+    flex: 1 1 160px;
+    min-width: 120px;
+    max-width: 320px;
+  }
+
+  .show input {
+    width: 100%;
+    font: italic 400 17px/1.2 var(--hang-display);
+    color: var(--bar-ink);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgb(255 255 255 / 0.18);
+    padding: 6px 2px;
+  }
+
+  .show input:hover {
+    border-bottom-color: rgb(255 255 255 / 0.35);
+  }
+
+  .show input:focus {
+    outline: none;
+    border-bottom-color: var(--bar-ink);
+  }
+
+  .show input::placeholder {
+    color: var(--bar-dim);
+  }
+
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: auto;
+    min-width: 0;
+  }
+
+  fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .seg {
+    display: flex;
+    padding: 2px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.08);
+  }
+
+  .seg label {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .seg input,
+  .paints input,
+  .kinds input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .seg span {
+    display: block;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--bar-dim);
+    transition:
+      background 0.15s,
+      color 0.15s;
+  }
+
+  .seg label:hover span {
+    color: var(--bar-ink);
+  }
+
+  .seg input:checked + span {
+    background: var(--bar-ink);
+    color: var(--bar);
+  }
+
+  .seg input:focus-visible + span {
+    outline: 2px solid var(--bar-ink);
+    outline-offset: 2px;
+  }
+
+  .hang[data-view='plan'] .lights,
+  .hang[data-view='plan'] .paints {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .paints {
+    display: flex;
+    gap: 6px;
+  }
+
+  .paints label {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--swatch);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.2),
+      0 0 0 0 transparent;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+  }
+
+  .paints label:has(input:checked) {
+    box-shadow:
+      inset 0 0 0 1px rgb(0 0 0 / 0.2),
+      0 0 0 2px var(--bar),
+      0 0 0 3.5px var(--bar-ink);
+  }
+
+  .paints label:has(input:focus-visible) {
+    outline: 2px solid var(--bar-ink);
+    outline-offset: 4px;
+  }
+
+  .acts {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn {
+    font: 500 13px/1 var(--hang-text);
+    color: inherit;
+    background: rgb(255 255 255 / 0.08);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 8px 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      background 0.15s,
+      opacity 0.15s;
+  }
+
+  .btn:hover {
+    background: rgb(255 255 255 / 0.16);
+  }
+
+  .btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+    background: rgb(255 255 255 / 0.08);
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  .btn.quiet {
+    background: transparent;
+  }
+
+  .btn.quiet:hover {
+    background: rgb(255 255 255 / 0.1);
+  }
+
+  .btn.strong {
+    background: var(--bar-ink);
+    color: var(--bar);
+  }
+
+  .btn.strong:hover {
+    background: #fff;
+  }
+
+  .btn.icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: 17px;
+  }
+
+  .btn.icon svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ---- Body: the wall, with the stores beside it */
+
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 0;
+  }
+
+  .wall {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: #121212;
+  }
+
+  .stage {
+    position: absolute;
+    inset: 0;
+    touch-action: none;
+    cursor: grab;
+    outline: none;
+  }
+
+  .stage[data-hover='true'] {
+    cursor: pointer;
+  }
+
+  .hang[data-dragging='pan'] .stage {
+    cursor: grabbing;
+  }
+
+  .hang[data-dragging='work'] .stage,
+  .hang[data-dragging='person'] .stage,
+  .hang[data-dragging='bench'] .stage {
+    cursor: move;
+  }
+
+  .hang[data-light='torch'][data-view='room'] .stage {
+    cursor: crosshair;
+  }
+
+  .stage:focus-visible {
+    box-shadow: inset 0 0 0 2px rgb(127 179 255 / 0.8);
+  }
+
+  .stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    transition: opacity 0.42s ease;
+  }
+
+  [data-plan] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .hang[data-view='plan'] [data-plan] {
+    opacity: 1;
+  }
+
+  .hang[data-view='plan'] [data-room] {
+    opacity: 0;
+  }
+
+  /* ---- The label card */
+
+  .card {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    width: min(330px, calc(100% - 32px));
+    padding: 18px 20px 16px;
+    background: #fbfaf7;
+    color: var(--ink);
+    border-radius: 3px;
+    box-shadow:
+      0 1px 0 rgb(0 0 0 / 0.04),
+      0 12px 32px rgb(0 0 0 / 0.35);
+    font-size: 13px;
+    line-height: 1.38;
+  }
+
+  .card p {
+    margin: 0;
+  }
+
+  .card .x {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border: 0;
+    background: none;
+    font-size: 20px;
+    line-height: 1;
+    color: rgb(28 27 25 / 0.5);
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  .card .x:hover {
+    color: var(--ink);
+    background: rgb(0 0 0 / 0.05);
+  }
+
+  .card .artist {
+    font-weight: 700;
+    padding-right: 24px;
+  }
+
+  .card .life {
+    font-size: 12px;
+    color: rgb(28 27 25 / 0.7);
+  }
+
+  .card .title {
+    margin-top: 8px;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .card .date {
+    margin-bottom: 6px;
+  }
+
+  .card .medium,
+  .card .size,
+  .card .centre {
+    font-size: 12px;
+    color: rgb(28 27 25 / 0.82);
+  }
+
+  .card .centre {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card .credit {
+    margin-top: 6px;
+    font-size: 11px;
+    color: rgb(28 27 25 / 0.6);
+  }
+
+  .card-acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .card .btn {
+    background: rgb(28 27 25 / 0.07);
+    font-size: 12px;
+    padding: 7px 11px;
+  }
+
+  .card .btn:hover {
+    background: rgb(28 27 25 / 0.14);
+  }
+
+  .more-link {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .more-link:hover {
+    text-decoration: underline;
+  }
+
+  /* ---- The plan's title block */
+
+  .block {
+    position: absolute;
+    right: 16px;
+    bottom: 64px;
+    width: 300px;
+    max-height: calc(100% - 96px);
+    display: flex;
+    flex-direction: column;
+    background: #fbfcf9;
+    color: #1f2b33;
+    border: 1.5px solid #1f2b33;
+    font-size: 11px;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.3s,
+      visibility 0.3s;
+  }
+
+  .hang[data-view='plan'] .block {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .block-head {
+    padding: 9px 12px 8px;
+    border-bottom: 1px solid #1f2b33;
+  }
+
+  .kicker {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 9.5px;
+    font-weight: 600;
+  }
+
+  .block-title {
+    margin: 3px 0 0;
+    font: 400 19px/1.15 var(--hang-display);
+  }
+
+  .block-meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 0;
+    border-bottom: 1px solid #1f2b33;
+  }
+
+  .block-meta div {
+    padding: 6px 12px;
+  }
+
+  .block-meta div + div {
+    border-left: 1px solid #1f2b33;
+  }
+
+  .block-meta dt {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 8.5px;
+    font-weight: 600;
+    opacity: 0.7;
+  }
+
+  .block-meta dd {
+    margin: 2px 0 0;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  [data-block-scale] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .checklist {
+    margin: 0;
+    padding: 6px 0;
+    list-style: none;
+    counter-reset: work;
+    overflow: auto;
+    min-height: 0;
+  }
+
+  .checklist :global(li) {
+    counter-increment: work;
+  }
+
+  .checklist :global(button) {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    width: 100%;
+    padding: 4px 12px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    line-height: 1.35;
+  }
+
+  .checklist :global(button::before) {
+    content: counter(work);
+    font-weight: 700;
+    grid-row: span 3;
+  }
+
+  .checklist :global(button:hover) {
+    background: rgb(42 99 201 / 0.08);
+  }
+
+  .checklist :global(.who) {
+    font-weight: 600;
+  }
+
+  .checklist :global(.dim) {
+    display: block;
+    grid-column: 2;
+    opacity: 0.7;
+  }
+
+  .checklist :global(li.clash) {
+    color: #c33d25;
+  }
+
+  /* ---- Zoom, scale bar, toasts */
+
+  .zoom {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--bar-ink);
+  }
+
+  .zoom .btn {
+    background: rgb(20 20 19 / 0.72);
+    backdrop-filter: blur(6px);
+  }
+
+  .zoom .btn:hover {
+    background: rgb(20 20 19 / 0.9);
+  }
+
+  .scale {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    margin-right: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+  }
+
+  .scale-bar {
+    display: block;
+    height: 6px;
+    border: 1.5px solid currentColor;
+    border-top: 0;
+    filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.5));
+  }
+
+  .hang[data-view='plan'] .zoom {
+    color: #1f2b33;
+  }
+
+  .hang[data-view='plan'] .scale {
+    text-shadow: none;
+  }
+
+  .hang[data-view='plan'] .scale-bar {
+    filter: none;
+  }
+
+  .hang[data-view='plan'] .zoom .btn {
+    background: rgb(255 255 255 / 0.85);
+    border-color: rgb(31 43 51 / 0.3);
+  }
+
+  .toast {
+    position: absolute;
+    left: 50%;
+    top: 16px;
+    translate: -50% 0;
+    margin: 0;
+    padding: 9px 16px;
+    max-width: calc(100% - 32px);
+    background: rgb(20 20 19 / 0.88);
+    color: var(--bar-ink);
+    border-radius: 999px;
+    font-size: 13px;
+    backdrop-filter: blur(6px);
+  }
+
+  .empty-note {
+    position: absolute;
+    left: 50%;
+    top: 38%;
+    translate: -50% -50%;
+    margin: 0;
+    padding: 0 16px;
+    font: italic 400 20px/1.3 var(--hang-display);
+    color: rgb(28 27 25 / 0.55);
+    text-align: center;
+    pointer-events: none;
+    display: none;
+  }
+
+  .hang[data-empty='true'] .empty-note {
+    display: block;
+  }
+
+  .hang[data-empty='true'][data-paint='red'] .empty-note,
+  .hang[data-empty='true'][data-paint='green'] .empty-note,
+  .hang[data-empty='true'][data-paint='blue'] .empty-note,
+  .hang[data-empty='true'][data-paint='black'] .empty-note,
+  .hang[data-empty='true'][data-light='torch'] .empty-note {
+    color: rgb(240 236 228 / 0.6);
+  }
+
+  .hang[data-empty='true'][data-view='plan'] .empty-note {
+    color: rgb(31 43 51 / 0.55);
+  }
+
+  .fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 24px;
+    color: var(--bar-ink);
+    font-size: 15px;
+    text-align: center;
+    background: #121212;
+  }
+
+  .unsupported {
+    display: none;
+  }
+
+  .hang[data-state='unsupported'] .unsupported {
+    display: grid;
+  }
+
+  /* ---- The stores */
+
+  .stores {
+    width: 372px;
+    display: none;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--paper);
+    color: var(--ink);
+    border-left: 1px solid rgb(0 0 0 / 0.4);
+  }
+
+  .hang[data-stores='open'] .stores {
+    display: flex;
+  }
+
+  .stores-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 16px 18px 4px;
+  }
+
+  .stores h2 {
+    margin: 0;
+    font: 400 24px/1 var(--hang-display);
+  }
+
+  .stores .btn {
+    background: rgb(28 27 25 / 0.07);
+  }
+
+  .stores .btn:hover {
+    background: rgb(28 27 25 / 0.14);
+  }
+
+  .stores .btn.quiet {
+    background: transparent;
+  }
+
+  .stores .btn.strong {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .stores .btn.strong:hover {
+    background: #000;
+  }
+
+  .search {
+    display: flex;
+    gap: 8px;
+    padding: 12px 18px 10px;
+  }
+
+  .search input {
+    flex: 1;
+    min-width: 0;
+    font: 400 14px/1.2 var(--hang-text);
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 8px 14px;
+  }
+
+  .search input:focus {
+    outline: 2px solid var(--ink);
+    outline-offset: 1px;
+  }
+
+  .kinds {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 0 18px 10px;
+  }
+
+  .kinds label {
+    position: relative;
+  }
+
+  .kinds span {
+    display: block;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--rule);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .kinds label:hover span {
+    border-color: rgb(28 27 25 / 0.4);
+  }
+
+  .kinds input:checked + span {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .kinds input:focus-visible + span {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .status {
+    margin: 0;
+    padding: 4px 18px 10px;
+    font-size: 12px;
+    color: rgb(28 27 25 / 0.7);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .hang[data-searching='true'] .status {
+    animation: hang-wait 1.2s ease-in-out infinite alternate;
+  }
+
+  @keyframes hang-wait {
+    to {
+      color: rgb(28 27 25 / 0.35);
+    }
+  }
+
+  .results {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    margin: 0;
+    padding: 6px 0;
+    list-style: none;
+    overscroll-behavior: contain;
+  }
+
+  .results :global(.work) {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    padding: 8px 18px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .results :global(.work:hover) {
+    background: rgb(28 27 25 / 0.05);
+  }
+
+  .results :global(.work:focus-visible) {
+    outline: 2px solid var(--ink);
+    outline-offset: -2px;
+  }
+
+  .results :global(.work img) {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    background: rgb(28 27 25 / 0.05);
+    pointer-events: none;
+  }
+
+  .results :global(.meta) {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+
+  .results :global(.meta .who) {
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .results :global(.meta .what) {
+    font-style: italic;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .results :global(.meta .when),
+  .results :global(.meta .size) {
+    color: rgb(28 27 25 / 0.65);
+    font-size: 11px;
+  }
+
+  .results :global(.meta b) {
+    margin-left: 4px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .results :global(.glyph) {
+    flex: none;
+    overflow: visible;
+  }
+
+  .results :global(.glyph .who) {
+    fill: rgb(28 27 25 / 0.55);
+  }
+
+  .results :global(.glyph rect) {
+    fill: rgb(192 83 47 / 0.22);
+    stroke: var(--accent);
+    stroke-width: 0.8;
+  }
+
+  .results :global(.glyph line) {
+    stroke: rgb(28 27 25 / 0.3);
+    stroke-width: 1;
+  }
+
+  .more {
+    margin: 4px 18px 10px;
+  }
+
+  .stores-foot {
+    padding: 12px 18px 16px;
+    border-top: 1px solid var(--rule);
+    font-size: 11px;
+    line-height: 1.4;
+    color: rgb(28 27 25 / 0.65);
+  }
+
+  .stores-foot p {
+    margin: 10px 0 0;
+  }
+
+  .stores-foot a {
+    color: inherit;
+  }
+
+  .foot-acts {
+    display: flex;
+    gap: 6px;
+  }
+
+  .hang :global(.ghost) {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 10;
+    translate: -100vw 0;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    background: center / 100% 100% no-repeat #8a847a;
+    box-shadow:
+      0 0 0 2px rgb(255 255 255 / 0.8),
+      0 10px 30px rgb(0 0 0 / 0.4);
+    pointer-events: none;
+    opacity: 0.88;
+  }
+
+  .hang[data-carrying='true'],
+  .hang[data-carrying='true'] * {
+    cursor: grabbing !important;
+  }
+
+  /* ---- About */
+
+  .about {
+    width: min(520px, calc(100vw - 32px));
+    max-height: calc(100dvh - 48px);
+    overflow: auto;
+    padding: 24px 26px 20px;
+    border: 0;
+    border-radius: 4px;
+    background: #fbfaf7;
+    color: var(--ink);
+    box-shadow: 0 24px 64px rgb(0 0 0 / 0.5);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .about::backdrop {
+    background: rgb(0 0 0 / 0.45);
+  }
+
+  .about h2 {
+    margin: 0 0 10px;
+    font: 400 28px/1 var(--hang-display);
+  }
+
+  .about p {
+    margin: 0 0 12px;
+  }
+
+  .about .btn {
+    background: rgb(28 27 25 / 0.08);
+  }
+
+  /* ---- Narrower screens */
+
+  @media (max-width: 1240px) {
+    .paints label {
+      width: 18px;
+      height: 18px;
+    }
+
+    .tools {
+      gap: 10px;
+    }
+
+    .show {
+      max-width: 220px;
+    }
+  }
+
+  @media (max-width: 1099px) {
+    .bar {
+      flex-wrap: wrap;
+      row-gap: 8px;
+    }
+
+    .tools {
+      order: 3;
+      flex-basis: 100%;
+      margin-left: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .acts {
+      margin-left: auto;
+    }
+
+    .show {
+      max-width: none;
+    }
+
+    .stores {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 5;
+      box-shadow: -12px 0 32px rgb(0 0 0 / 0.35);
+    }
+
+    .body {
+      position: relative;
+    }
+  }
+
+  @media (max-width: 719px) {
+    .bar {
+      padding: 8px 12px;
+      gap: 10px;
+    }
+
+    h1 {
+      font-size: 22px;
+    }
+
+    .show input {
+      font-size: 15px;
+    }
+
+    .tools {
+      gap: 8px;
+    }
+
+    .seg span {
+      padding: 5px 9px;
+      font-size: 12px;
+    }
+
+    .paints {
+      gap: 5px;
+    }
+
+    .acts .quiet,
+    [data-redo] {
+      display: none;
+    }
+
+    .btn {
+      padding: 7px 11px;
+    }
+
+    .stores {
+      top: auto;
+      left: 0;
+      width: auto;
+      height: min(78%, 620px);
+      border-left: 0;
+      border-top: 1px solid rgb(0 0 0 / 0.4);
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -12px 32px rgb(0 0 0 / 0.4);
+    }
+
+    .card {
+      left: 12px;
+      right: 12px;
+      bottom: 64px;
+      width: auto;
+      padding: 14px 16px 12px;
+    }
+
+    .card .title {
+      font-size: 14px;
+    }
+
+    .card .medium,
+    .card .credit,
+    .card .centre {
+      display: none;
+    }
+
+    .block {
+      left: 12px;
+      right: 12px;
+      bottom: 62px;
+      width: auto;
+      max-height: 38%;
+    }
+
+    .zoom {
+      right: 12px;
+      bottom: 12px;
+    }
+
+    .zoom [data-fit] {
+      padding: 7px 10px;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-hang]');
+  if (root) start(root);
+</script>

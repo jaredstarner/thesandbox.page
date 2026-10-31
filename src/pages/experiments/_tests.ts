@@ -520,6 +520,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   'cloud-chamber': { label: 'Cloud chamber' },
   'monte-carlo': { label: 'Monte Carlo transport' },
   opentype: { label: 'OpenType font writing' },
+  iiif: { label: 'IIIF Image API' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
