@@ -557,7 +557,11 @@ export function start(root: HTMLElement) {
       const h = Math.max(6, carry.work.mount.h * view.s);
       g.style.width = `${w}px`;
       g.style.height = `${h}px`;
-      g.style.backgroundImage = `url("${imageUrl(carry.work, 400)}")`;
+      // The blurred placeholder underneath shows until the picture arrives, or if it doesn't.
+      g.style.backgroundImage = [imageUrl(carry.work, 400), carry.work.lqip]
+        .filter(Boolean)
+        .map((u) => `url("${u}")`)
+        .join(', ');
       root.append(g);
       carry.ghost = g;
       root.dataset.carrying = 'true';

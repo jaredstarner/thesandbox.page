@@ -220,8 +220,8 @@ function drawWorkRoom(ctx: CanvasRenderingContext2D, v: View, item: Hung, work: 
 /** The wall label's place: to the right of the work, at the height labels are read. */
 export function labelBox(item: Hung, work: Work): Box {
   const b = boxOf(item, work);
-  const w = 11.5;
-  const h = 8.5;
+  const w = 12;
+  const h = 9;
   const cy = b.y0 > 140 ? b.y0 + h / 2 : Math.min(b.y1 - h / 2, 128);
   return { x0: b.x1 + 9, x1: b.x1 + 9 + w, y0: cy - h / 2, y1: cy + h / 2 };
 }
@@ -268,8 +268,9 @@ function drawLabel(ctx: CanvasRenderingContext2D, v: View, item: Hung, work: Wor
   ctx.fillRect(x, y, w, h);
   ctx.restore();
 
-  const pad = 0.75 * s;
-  const size = 0.4 * s;
+  // About 15 pt artist and title lines on a 12 × 9 cm card, as gallery labels are set to be read at arm's length.
+  const pad = 0.8 * s;
+  const size = 0.52 * s;
   const inner = w - 2 * pad;
   if (size * v.dpr < 4.5) {
     // Too small to read: the label's lines of type as grey rules.
@@ -322,14 +323,17 @@ function drawLabel(ctx: CanvasRenderingContext2D, v: View, item: Hung, work: Wor
       yy += size * 0.98;
     }
   }
-  if (work.credit && yy < y + h - size * 1.6) {
-    ctx.fillStyle = 'rgb(28 27 26 / 0.7)';
+  if (work.credit) {
     ctx.font = `400 ${size * 0.62}px ${fonts.text}`;
     const lines = wrap(ctx, work.credit, inner, 2);
     let cy = y + h - pad - size * 0.8 * lines.length;
-    for (const line of lines) {
-      ctx.fillText(line, x + pad, cy);
-      cy += size * 0.8;
+    // The credit line sits at the foot of the card, and only when the text above leaves it room.
+    if (yy + size * 0.3 < cy) {
+      ctx.fillStyle = 'rgb(28 27 26 / 0.7)';
+      for (const line of lines) {
+        ctx.fillText(line, x + pad, cy);
+        cy += size * 0.8;
+      }
     }
   }
   ctx.restore();
