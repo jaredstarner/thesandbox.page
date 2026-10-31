@@ -199,7 +199,7 @@ export function decode(text: string): Scene | null {
   const parts = text.split('~');
   if (parts.length !== 6) return null;
   const [title, paint, light, person, bench, items] = parts;
-  let name = '';
+  let name: string;
   try {
     name = decodeURIComponent(title).slice(0, 80);
   } catch {
