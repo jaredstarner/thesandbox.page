@@ -18,7 +18,8 @@ export interface Dims {
   framed: Size | null;
 }
 
-const PART = /(?:([A-Za-z][A-Za-z /,.()'-]*?)\s*:\s*)?(\d+(?:\.\d+)?)\s*×\s*(\d+(?:\.\d+)?)(?:\s*×\s*(\d+(?:\.\d+)?))?\s*cm/g;
+const PART =
+  /(?:([A-Za-z][A-Za-z /,.()'-]*?)\s*:\s*)?(\d+(?:\.\d+)?)\s*×\s*(\d+(?:\.\d+)?)(?:\s*×\s*(\d+(?:\.\d+)?))?\s*cm/g;
 
 type Kind = 'image' | 'sheet' | 'framed' | 'skip';
 

@@ -185,7 +185,14 @@ function drawWorkRoom(ctx: CanvasRenderingContext2D, v: View, item: Hung, work: 
   else ctx.fillRect(X, Y, W, H);
   ctx.restore();
 
-  drawPicture(ctx, st.images.get(work, Math.max(pw, ph * (work.pw && work.ph ? work.pw / work.ph : 1)) * v.dpr), px, py, pw, ph);
+  drawPicture(
+    ctx,
+    st.images.get(work, Math.max(pw, ph * (work.pw && work.ph ? work.pw / work.ph : 1)) * v.dpr),
+    px,
+    py,
+    pw,
+    ph,
+  );
 
   if (m.finish === 'rod') {
     drawRod(ctx, px, Y + 2 * s, pw, 2.8 * s);
@@ -591,7 +598,10 @@ export function drawRoom(ctx: CanvasRenderingContext2D, lm: CanvasRenderingConte
     }
   }
 
-  const items = onTop(scene.items.filter((i) => works.has(i.id)), st.selected);
+  const items = onTop(
+    scene.items.filter((i) => works.has(i.id)),
+    st.selected,
+  );
   for (const item of items) {
     const work = works.get(item.id)!;
     if (visible(v, boxOf(item, work))) drawWorkRoom(ctx, v, item, work, st);
@@ -762,7 +772,15 @@ function dimH(
   }
 }
 
-function dimV(ctx: CanvasRenderingContext2D, x: number, y0: number, y1: number, text: string, fonts: Fonts, color = INK) {
+function dimV(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y0: number,
+  y1: number,
+  text: string,
+  fonts: Fonts,
+  color = INK,
+) {
   if (Math.abs(y1 - y0) < 2) return;
   ctx.strokeStyle = color;
   ctx.fillStyle = color;

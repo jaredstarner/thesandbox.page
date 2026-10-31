@@ -205,8 +205,14 @@ export function start(root: HTMLElement) {
     view.s = Math.min(MAX_S, Math.max(Math.min(MIN_S, fitS * 0.8), view.s));
     const mx = view.w / 2 / view.s;
     const my = view.h / 2 / view.s;
-    view.cx = Math.min(WALL.w + 120 - Math.min(mx, WALL.w / 2 + 120), Math.max(-120 + Math.min(mx, WALL.w / 2 + 120), view.cx));
-    view.cy = Math.min(WALL.h + 80 - Math.min(my, WALL.h / 2 + 80), Math.max(-110 + Math.min(my, WALL.h / 2 + 110), view.cy));
+    view.cx = Math.min(
+      WALL.w + 120 - Math.min(mx, WALL.w / 2 + 120),
+      Math.max(-120 + Math.min(mx, WALL.w / 2 + 120), view.cx),
+    );
+    view.cy = Math.min(
+      WALL.h + 80 - Math.min(my, WALL.h / 2 + 80),
+      Math.max(-110 + Math.min(my, WALL.h / 2 + 110), view.cy),
+    );
   }
 
   let queued = false;
@@ -360,7 +366,10 @@ export function start(root: HTMLElement) {
     if (close) {
       // On a phone the label card covers the bottom of the view, so the work sits in the upper part.
       const narrow = view.w < 720;
-      const s = Math.min(MAX_S, Math.min((view.w * 0.55) / work.mount.w, (view.h * (narrow ? 0.42 : 0.6)) / work.mount.h));
+      const s = Math.min(
+        MAX_S,
+        Math.min((view.w * 0.55) / work.mount.w, (view.h * (narrow ? 0.42 : 0.6)) / work.mount.h),
+      );
       go({ cx: item.x + 6, cy: item.y - (narrow ? (view.h * 0.17) / s : 0), s });
       return;
     }
@@ -662,7 +671,14 @@ export function start(root: HTMLElement) {
     if (typeof h === 'number') {
       const item = scene.items.find((i) => i.id === h)!;
       select(h);
-      drag = { kind: 'work', id: h, ox: fromX(view, p.x) - item.x, oy: fromY(view, p.y) - item.y, moved: false, before };
+      drag = {
+        kind: 'work',
+        id: h,
+        ox: fromX(view, p.x) - item.x,
+        oy: fromY(view, p.y) - item.y,
+        moved: false,
+        before,
+      };
     } else if (h === 'person' || h === 'bench') {
       const x = h === 'person' ? scene.person : scene.bench;
       drag = { kind: h, id: -1, ox: fromX(view, p.x) - x, oy: 0, moved: false, before };
@@ -728,9 +744,7 @@ export function start(root: HTMLElement) {
     const y = fromY(view, p.y) - drag.oy;
     if (!drag.moved && Math.hypot(x - item.x, y - item.y) * view.s < 3) return;
     drag.moved = true;
-    const snapped = e.altKey
-      ? { x, y, guides: [] }
-      : snap(item.id, work, x, y, scene, works, 8 / view.s);
+    const snapped = e.altKey ? { x, y, guides: [] } : snap(item.id, work, x, y, scene, works, 8 / view.s);
     const c = clampItem(snapped.x, snapped.y, work);
     item.x = c.x;
     item.y = c.y;
@@ -806,7 +820,9 @@ export function start(root: HTMLElement) {
   }
 
   q<HTMLButtonElement>(root, '[data-zoom-in]').addEventListener('click', () => zoomAt(view.w / 2, view.h / 2, 1.6));
-  q<HTMLButtonElement>(root, '[data-zoom-out]').addEventListener('click', () => zoomAt(view.w / 2, view.h / 2, 1 / 1.6));
+  q<HTMLButtonElement>(root, '[data-zoom-out]').addEventListener('click', () =>
+    zoomAt(view.w / 2, view.h / 2, 1 / 1.6),
+  );
   q<HTMLButtonElement>(root, '[data-fit]').addEventListener('click', () => fit());
 
   stage.addEventListener('keydown', (e) => {

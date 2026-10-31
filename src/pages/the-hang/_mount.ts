@@ -92,7 +92,8 @@ export function mountFor({ type, year, origin, pic, dims }: MountInput): Mount {
   const f = dims.framed;
   if (f) {
     // The framed size is given the same way round as the picture's own measurement.
-    const turned = dims.image !== null && Math.abs(dims.image.w - pic.h) < 0.01 && Math.abs(dims.image.h - pic.w) < 0.01;
+    const turned =
+      dims.image !== null && Math.abs(dims.image.w - pic.h) < 0.01 && Math.abs(dims.image.h - pic.w) < 0.01;
     const fw = turned ? f.h : f.w;
     const fh = turned ? f.w : f.h;
     const mx = (fw - pic.w) / 2;

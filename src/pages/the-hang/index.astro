@@ -17,46 +17,77 @@ const rgb = (c: [number, number, number]) => `rgb(${c.join(' ')})`;
   <main class="hang" data-hang data-view="room" data-stores="closed" data-light="spots" data-paint="white">
     <header class="bar">
       <div class="name">
-        <a class="home" href="/">thesandbox.page</a>
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
         <h1>The hang</h1>
       </div>
       <label class="show">
         <span class="sr">Name of the show</span>
-        <input data-title type="text" maxlength="80" placeholder="Name the show" autocomplete="off" spellcheck="false" />
+        <input
+          data-title
+          type="text"
+          maxlength="80"
+          placeholder="Name the show"
+          autocomplete="off"
+          spellcheck="false"
+        />
       </label>
       <div class="tools">
         <fieldset class="seg">
           <legend class="sr">View</legend>
-          <label><input type="radio" name="view" value="room" checked /><span>Room</span></label>
-          <label><input type="radio" name="view" value="plan" /><span>Plan</span></label>
+          <label>
+            <input type="radio" name="view" value="room" checked />
+            <span>Room</span>
+          </label>
+          <label>
+            <input type="radio" name="view" value="plan" />
+            <span>Plan</span>
+          </label>
         </fieldset>
         <fieldset class="seg lights">
           <legend class="sr">Lights</legend>
-          <label title="Spotlights from the track"><input type="radio" name="light" value="spots" checked /><span>Spots</span></label>
-          <label title="An even wash of light"><input type="radio" name="light" value="wash" /><span>Wash</span></label>
-          <label title="After hours, with a torch"><input type="radio" name="light" value="torch" /><span>Torch</span></label>
+          <label title="Spotlights from the track">
+            <input type="radio" name="light" value="spots" checked />
+            <span>Spots</span>
+          </label>
+          <label title="An even wash of light">
+            <input type="radio" name="light" value="wash" />
+            <span>Wash</span>
+          </label>
+          <label title="After hours, with a torch">
+            <input type="radio" name="light" value="torch" />
+            <span>Torch</span>
+          </label>
         </fieldset>
         <fieldset class="paints">
           <legend class="sr">Wall colour</legend>
-          {
-            PAINTS.map((p, i) => (
-              <label title={p.label} style={`--swatch: ${rgb(p.rgb)}`}>
-                <input type="radio" name="paint" value={p.id} checked={i === 0} />
-                <span class="sr">{p.label}</span>
-              </label>
-            ))
-          }
+          {PAINTS.map((p, i) => (
+            <label title={p.label} style={`--swatch: ${rgb(p.rgb)}`}>
+              <input type="radio" name="paint" value={p.id} checked={i === 0} />
+              <span class="sr">{p.label}</span>
+            </label>
+          ))}
         </fieldset>
         <div class="acts">
           <button type="button" class="btn icon" data-undo disabled aria-label="Undo" title="Undo">
-            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5 3 9l4 4M3.5 9H12a5 5 0 0 1 0 10h-2"></path></svg>
+            <svg viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M7 5 3 9l4 4M3.5 9H12a5 5 0 0 1 0 10h-2"></path>
+            </svg>
           </button>
           <button type="button" class="btn icon" data-redo disabled aria-label="Redo" title="Redo">
-            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m13 5 4 4-4 4M16.5 9H8a5 5 0 0 0 0 10h2"></path></svg>
+            <svg viewBox="0 0 20 20" aria-hidden="true">
+              <path d="m13 5 4 4-4 4M16.5 9H8a5 5 0 0 0 0 10h2"></path>
+            </svg>
           </button>
-          <button type="button" class="btn" data-share>Share</button>
+          <button type="button" class="btn" data-share>
+            Share
+          </button>
           <button type="button" class="btn quiet about-btn" popovertarget="hang-about" aria-label="About">
-            <span class="long">About</span><span class="short" aria-hidden="true">?</span>
+            <span class="long">About</span>
+            <span class="short" aria-hidden="true">
+              ?
+            </span>
           </button>
           <button type="button" class="btn strong" data-stores-toggle aria-controls="hang-stores" aria-expanded="false">
             The stores
@@ -79,7 +110,9 @@ const rgb = (c: [number, number, number]) => `rgb(${c.join(' ')})`;
         </div>
 
         <aside class="card" data-card hidden aria-live="polite">
-          <button type="button" class="x" data-card-close aria-label="Close">×</button>
+          <button type="button" class="x" data-card-close aria-label="Close">
+            ×
+          </button>
           <p class="artist" data-card-artist></p>
           <p class="life" data-card-life></p>
           <p class="title" data-card-title></p>
@@ -89,9 +122,15 @@ const rgb = (c: [number, number, number]) => `rgb(${c.join(' ')})`;
           <p class="centre" data-card-centre></p>
           <p class="credit" data-card-credit></p>
           <div class="card-acts">
-            <button type="button" class="btn" data-card-look>Step up</button>
-            <button type="button" class="btn" data-card-line>On the line</button>
-            <button type="button" class="btn" data-card-down>Take down</button>
+            <button type="button" class="btn" data-card-look>
+              Step up
+            </button>
+            <button type="button" class="btn" data-card-line>
+              On the line
+            </button>
+            <button type="button" class="btn" data-card-down>
+              Take down
+            </button>
           </div>
           <a class="more-link" data-card-link href="https://www.artic.edu/collection" target="_blank" rel="noopener">
             At the Art Institute of Chicago ↗
@@ -101,12 +140,23 @@ const rgb = (c: [number, number, number]) => `rgb(${c.join(' ')})`;
         <section class="block" aria-label="Title block">
           <div class="block-head">
             <p class="kicker">Hanging plan · North wall</p>
-            <p class="block-title" data-block-title>Opening hang</p>
+            <p class="block-title" data-block-title>
+              Opening hang
+            </p>
           </div>
           <dl class="block-meta">
-            <div><dt>Scale</dt><dd data-block-scale>1:40</dd></div>
-            <div><dt>Drawn</dt><dd data-block-date></dd></div>
-            <div><dt>Wall</dt><dd>16 × 5.4 m</dd></div>
+            <div>
+              <dt>Scale</dt>
+              <dd data-block-scale>1:40</dd>
+            </div>
+            <div>
+              <dt>Drawn</dt>
+              <dd data-block-date></dd>
+            </div>
+            <div>
+              <dt>Wall</dt>
+              <dd>16 × 5.4 m</dd>
+            </div>
           </dl>
           <ol class="checklist" data-checklist></ol>
         </section>
@@ -116,50 +166,70 @@ const rgb = (c: [number, number, number]) => `rgb(${c.join(' ')})`;
             <span class="scale-bar" data-scale-bar></span>
             <span data-scale>1 m</span>
           </div>
-          <button type="button" class="btn icon" data-zoom-out aria-label="Zoom out">−</button>
-          <button type="button" class="btn" data-fit>Whole wall</button>
-          <button type="button" class="btn icon" data-zoom-in aria-label="Zoom in">+</button>
+          <button type="button" class="btn icon" data-zoom-out aria-label="Zoom out">
+            −
+          </button>
+          <button type="button" class="btn" data-fit>
+            Whole wall
+          </button>
+          <button type="button" class="btn icon" data-zoom-in aria-label="Zoom in">
+            +
+          </button>
         </div>
 
         <p class="toast" data-toast hidden role="status"></p>
         <p class="empty-note">The wall is bare. Bring something up from the stores.</p>
-        <noscript><p class="fallback">The hang draws its gallery with JavaScript, which is off in this browser.</p></noscript>
+        <noscript>
+          <p class="fallback">The hang draws its gallery with JavaScript, which is off in this browser.</p>
+        </noscript>
         <p class="fallback unsupported">This browser can't draw the gallery: it has no 2D canvas.</p>
       </div>
 
       <aside class="stores" id="hang-stores" aria-label="The stores">
         <header class="stores-head">
           <h2>The stores</h2>
-          <button type="button" class="btn quiet" data-stores-close>Close</button>
+          <button type="button" class="btn quiet" data-stores-close>
+            Close
+          </button>
         </header>
         <form class="search" data-search role="search">
-          <label class="sr" for="hang-q">Search the collection</label>
+          <label class="sr" for="hang-q">
+            Search the collection
+          </label>
           <input id="hang-q" data-q type="search" placeholder="Monet, kimono, storm, cats…" autocomplete="off" />
-          <button type="submit" class="btn strong">Search</button>
+          <button type="submit" class="btn strong">
+            Search
+          </button>
         </form>
         <fieldset class="kinds">
           <legend class="sr">Kind of work</legend>
-          {
-            Object.entries(KINDS).map(([id, k], i) => (
-              <label>
-                <input type="radio" name="kind" value={id} checked={i === 0} />
-                <span>{k.label}</span>
-              </label>
-            ))
-          }
+          {Object.entries(KINDS).map(([id, k], i) => (
+            <label>
+              <input type="radio" name="kind" value={id} checked={i === 0} />
+              <span>{k.label}</span>
+            </label>
+          ))}
         </fieldset>
-        <p class="status" data-status>The opening crate. Search to bring up anything in the public domain.</p>
+        <p class="status" data-status>
+          The opening crate. Search to bring up anything in the public domain.
+        </p>
         <ol class="results" data-results></ol>
-        <button type="button" class="btn more" data-more hidden>Bring up more</button>
+        <button type="button" class="btn more" data-more hidden>
+          Bring up more
+        </button>
         <footer class="stores-foot">
           <div class="foot-acts">
-            <button type="button" class="btn" data-opening>Opening hang</button>
-            <button type="button" class="btn" data-clear>Clear the wall</button>
+            <button type="button" class="btn" data-opening>
+              Opening hang
+            </button>
+            <button type="button" class="btn" data-clear>
+              Clear the wall
+            </button>
           </div>
           <p>
-            Works, measurements, and images from the <a href="https://www.artic.edu/open-access/public-api"
-              >Art Institute of Chicago</a
-            >, released into the public domain (CC0).
+            Works, measurements, and images from the{' '}
+            <a href="https://www.artic.edu/open-access/public-api">Art Institute of Chicago</a>, released into the
+            public domain (CC0).
           </p>
         </footer>
       </aside>
@@ -169,8 +239,8 @@ const rgb = (c: [number, number, number]) => `rgb(${c.join(' ')})`;
       <h2>The hang</h2>
       <p>
         Every work comes up from the Art Institute of Chicago's collection at its true size, so a portrait miniature you
-        could cover with a thumb hangs beside a street scene nearly three metres wide. The visitor and the bench are there
-        to measure against.
+        could cover with a thumb hangs beside a street scene nearly three metres wide. The visitor and the bench are
+        there to measure against.
       </p>
       <p>
         Drag works along the wall. They pull toward the centre line most museums hang to, 145 cm from the floor, toward
@@ -183,7 +253,9 @@ const rgb = (c: [number, number, number]) => `rgb(${c.join(' ')})`;
         from.
       </p>
       <p>Arrow keys nudge the selected work by a centimetre, Shift for ten. Share copies a link to the whole hang.</p>
-      <button type="button" class="btn" popovertarget="hang-about" popovertargetaction="hide">Close</button>
+      <button type="button" class="btn" popovertarget="hang-about" popovertargetaction="hide">
+        Close
+      </button>
     </div>
   </main>
 </Bare>
