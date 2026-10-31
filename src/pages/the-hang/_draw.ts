@@ -103,7 +103,13 @@ const FIGURE: [number, number][] = (() => {
     [1.4, 55.2],
   ];
   const left = right.map(([x, y]) => [-x, y] as [number, number]).reverse();
-  return [...right, [0, 55.6], ...left];
+  // The head, from the left of the neck over the crown to the right, so the outline is one line.
+  const head: [number, number][] = [];
+  for (let a = 236; a >= -56; a -= 14) {
+    const t = (a * Math.PI) / 180;
+    head.push([9.2 * Math.cos(t), 161 + 11.6 * Math.sin(t)]);
+  }
+  return [...right, [0, 55.6], ...left, ...head];
 })();
 
 function smoothPath(ctx: CanvasRenderingContext2D, pts: [number, number][]) {
@@ -121,11 +127,10 @@ function smoothPath(ctx: CanvasRenderingContext2D, pts: [number, number][]) {
 }
 
 function figurePath(ctx: CanvasRenderingContext2D, v: View, x: number) {
-  const pts = FIGURE.map(([fx, fy]) => [toX(v, x + fx), toY(v, fy)] as [number, number]);
-  smoothPath(ctx, pts);
-  ctx.moveTo(toX(v, x + 9.2), toY(v, 161));
-  ctx.ellipse(toX(v, x), toY(v, 161), 9.2 * v.s, 11.6 * v.s, 0, 0, Math.PI * 2);
-  ctx.rect(toX(v, x - 4.6), toY(v, 153), 9.2 * v.s, 4 * v.s);
+  smoothPath(
+    ctx,
+    FIGURE.map(([fx, fy]) => [toX(v, x + fx), toY(v, fy)] as [number, number]),
+  );
 }
 
 export const FIGURE_HALF = 25;
@@ -392,20 +397,34 @@ function drawFigureRoom(ctx: CanvasRenderingContext2D, v: View, x: number, light
   g.addColorStop(1, rgb([20, 20, 24], 0.6 + 0.4 * light));
   ctx.fillStyle = g;
   figurePath(ctx, v, x);
-  ctx.fill('nonzero');
+  ctx.fill();
 }
 
 function fillLightMap(lm: CanvasRenderingContext2D, v: View, k: number, st: DrawState) {
-  const { scene, works } = st;
+  const { scene } = st;
   const w = lm.canvas.width;
   const h = lm.canvas.height;
   lm.setTransform(1, 0, 0, 1, 0, 0);
   lm.globalCompositeOperation = 'source-over';
-  const amb = scene.light === 'spots' ? 0.42 : scene.light === 'wash' ? 0.86 : 0.075;
-  const a = Math.round(amb * 255);
-  lm.fillStyle = `rgb(${a} ${a} ${a})`;
+  const amb = scene.light === 'spots' ? 0.55 : scene.light === 'wash' ? 0.86 : 0.075;
+  // Ceiling, floor, and returns keep one level of their own; only the wall takes the pools.
+  const room = Math.round((scene.light === 'torch' ? 0.1 : scene.light === 'wash' ? 0.9 : 0.72) * 255);
+  lm.fillStyle = `rgb(${room} ${room} ${room})`;
   lm.fillRect(0, 0, w, h);
   lm.setTransform(k, 0, 0, k, 0, 0);
+  const a = Math.round(amb * 255);
+  lm.fillStyle = `rgb(${a} ${a} ${a})`;
+  lm.fillRect(toX(v, 0), toY(v, WALL.h), WALL.w * v.s, WALL.h * v.s);
+  lm.save();
+  lm.beginPath();
+  lm.rect(toX(v, 0), toY(v, WALL.h), WALL.w * v.s, WALL.h * v.s);
+  lm.clip();
+  fillPools(lm, v, st, amb);
+  lm.restore();
+}
+
+function fillPools(lm: CanvasRenderingContext2D, v: View, st: DrawState, amb: number) {
+  const { scene, works } = st;
   if (scene.light === 'wash') {
     const g = lm.createLinearGradient(0, toY(v, WALL.h), 0, toY(v, 0));
     g.addColorStop(0, 'rgb(36 36 36)');
@@ -446,12 +465,13 @@ function fillLightMap(lm: CanvasRenderingContext2D, v: View, k: number, st: Draw
     const work = works.get(item.id);
     if (!work) continue;
     const m = work.mount;
-    const rx = Math.max(m.w * 0.64, 24) + 26;
-    const ry = Math.max(m.h * 0.68, 28) + 30;
-    pool(item.x, item.y + m.h * 0.04, rx, ry, 1 - amb);
+    // A spot is focused a little wider than the frame, and never tighter than its beam allows.
+    const rx = Math.max(m.w * 0.72, 44) + 40;
+    const ry = Math.max(m.h * 0.78, 48) + 46;
+    pool(item.x, item.y + m.h * 0.04, rx, ry, (1 - amb) * 0.88, 0.5);
     // The beam's upper edge on the wall, rising to the track: the scallop.
     const top = WALL.h;
-    pool(item.x, top, rx * 0.62, (top - item.y) * 0.95, 0.14, 0.3);
+    pool(item.x, top, rx * 0.7, (top - item.y) * 0.9, 0.07, 0.25);
   }
 }
 
@@ -475,33 +495,37 @@ export function drawRoom(ctx: CanvasRenderingContext2D, lm: CanvasRenderingConte
   lg.addColorStop(0, rgb(paint, 0.36));
   lg.addColorStop(1, rgb(paint, 0.62));
   ctx.fillStyle = lg;
-  ctx.fillRect(L - ret, T, ret, B - T);
+  ctx.fillRect(Math.min(0, L - ret), T, Math.max(ret, L), B - T);
   const rg = ctx.createLinearGradient(R, 0, R + ret, 0);
   rg.addColorStop(0, rgb(paint, 0.66));
   rg.addColorStop(1, rgb(paint, 0.4));
   ctx.fillStyle = rg;
-  ctx.fillRect(R, T, ret, B - T);
-  const cg = ctx.createLinearGradient(0, T - 80 * s, 0, T);
-  cg.addColorStop(0, 'rgb(150 150 148)');
-  cg.addColorStop(1, 'rgb(208 207 203)');
+  ctx.fillRect(R, T, Math.max(ret, v.w - R), B - T);
+  // A dark open ceiling, running up out of view, so the lit wall carries the room.
+  const ceilTop = Math.min(0, T - 80 * s);
+  const cg = ctx.createLinearGradient(0, ceilTop, 0, T);
+  cg.addColorStop(0, 'rgb(26 26 27)');
+  cg.addColorStop(Math.max(0, Math.min(0.99, 1 - (70 * s) / Math.max(1, T - ceilTop))), 'rgb(40 40 41)');
+  cg.addColorStop(1, 'rgb(62 61 60)');
   ctx.fillStyle = cg;
-  ctx.fillRect(L - ret, T - 80 * s, R - L + 2 * ret, 80 * s);
+  ctx.fillRect(0, ceilTop, v.w, T - ceilTop);
 
-  // Floor: oak boards running along the wall, closer boards wider.
-  const floorH = 110 * s;
-  const fg = ctx.createLinearGradient(0, B, 0, B + floorH);
-  fg.addColorStop(0, 'rgb(122 92 64)');
-  fg.addColorStop(1, 'rgb(150 112 76)');
+  // Floor: oak boards running along the wall, each nearer board a little wider, out to the bottom of the view.
+  const floorBot = Math.max(v.h, B + 110 * s);
+  const fg = ctx.createLinearGradient(0, B, 0, floorBot);
+  fg.addColorStop(0, 'rgb(104 78 54)');
+  fg.addColorStop(Math.min(1, (90 * s) / Math.max(1, floorBot - B)), 'rgb(132 98 66)');
+  fg.addColorStop(1, 'rgb(96 72 50)');
   ctx.fillStyle = fg;
-  ctx.fillRect(L - ret, B, R - L + 2 * ret, floorH);
-  ctx.strokeStyle = 'rgb(60 40 24 / 0.35)';
+  ctx.fillRect(0, B, v.w, floorBot - B);
+  ctx.strokeStyle = 'rgb(60 40 24 / 0.3)';
   ctx.lineWidth = Math.max(0.5, 0.2 * s);
-  for (let i = 1, yy = B; i < 14; i++) {
+  for (let i = 1, yy = B; i < 60; i++) {
     yy += (2 + i * 1.6) * s;
-    if (yy > B + floorH) break;
+    if (yy > floorBot) break;
     ctx.beginPath();
-    ctx.moveTo(L - ret, yy);
-    ctx.lineTo(R + ret, yy);
+    ctx.moveTo(0, Math.round(yy) + 0.5);
+    ctx.lineTo(v.w, Math.round(yy) + 0.5);
     ctx.stroke();
   }
 
@@ -522,13 +546,21 @@ export function drawRoom(ctx: CanvasRenderingContext2D, lm: CanvasRenderingConte
   beyond.addColorStop(1, 'rgb(112 84 58)');
   ctx.fillStyle = beyond;
   ctx.fillRect(dx, dt, dw, B - dt);
-  // A lit painting glimpsed on the far wall.
-  ctx.fillStyle = 'rgb(255 236 200 / 0.18)';
+  // The next room: a pool of light on its far wall and the edge of a gilt frame, cut off by the opening.
+  ctx.save();
   ctx.beginPath();
-  ctx.ellipse(dx + dw * 0.62, toY(v, 140), dw * 0.34, 60 * s, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = 'rgb(60 50 40 / 0.85)';
-  ctx.fillRect(dx + dw * 0.5, toY(v, 158), dw * 0.26, 34 * s);
+  ctx.rect(dx, dt, dw, B - dt);
+  ctx.clip();
+  const glow = ctx.createRadialGradient(dx + dw * 0.95, toY(v, 150), 0, dx + dw * 0.95, toY(v, 150), 110 * s);
+  glow.addColorStop(0, 'rgb(255 240 214 / 0.28)');
+  glow.addColorStop(1, 'rgb(255 240 214 / 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(dx, dt, dw, B - dt);
+  ctx.fillStyle = 'rgb(150 116 60 / 0.8)';
+  ctx.fillRect(dx + dw * 0.72, toY(v, 196), dw * 0.6, 92 * s);
+  ctx.fillStyle = 'rgb(70 62 52 / 0.9)';
+  ctx.fillRect(dx + dw * 0.72 + 5 * s, toY(v, 191), dw * 0.6, 82 * s);
+  ctx.restore();
   // Reveal: the wall's thickness shading the opening's left side.
   const jg = ctx.createLinearGradient(dx, 0, dx + 22 * s, 0);
   jg.addColorStop(0, rgb(paint, 0.62));
@@ -562,7 +594,7 @@ export function drawRoom(ctx: CanvasRenderingContext2D, lm: CanvasRenderingConte
 
   // Lights: the track and a fitting aimed at each work.
   ctx.fillStyle = 'rgb(24 24 24)';
-  ctx.fillRect(L - ret, T - 34 * s, R - L + 2 * ret, Math.max(1, 3 * s));
+  ctx.fillRect(0, T - 34 * s, v.w, Math.max(1, 3 * s));
   if (scene.light === 'spots') {
     for (const item of items) {
       const fx = toX(v, item.x + 18);
@@ -855,27 +887,11 @@ export function drawPlan(ctx: CanvasRenderingContext2D, v: View, st: DrawState) 
   ctx.fillStyle = BLUE;
   ctx.font = `600 10px ${fonts.text}`;
   ctx.textBaseline = 'bottom';
-  const tagX = Math.max(L + 4, 8);
-  ctx.fillText('CL +145', tagX, toY(v, CL) - 3);
+  // Tagged just past the opening, or at the view's edge once the wall's start is out of sight.
+  ctx.fillText('CL +145', Math.max(toX(v, DOOR.x + DOOR.w) + 6, 8), toY(v, CL) - 3);
 
   const items = scene.items.filter((i) => works.has(i.id));
   const bad = clashes(scene, works);
-
-  // The bench and visitor, as an architect's scale figure.
-  ctx.strokeStyle = INK;
-  ctx.fillStyle = '#ffffff';
-  ctx.lineWidth = 0.9;
-  const bx = toX(v, scene.bench - BENCH.w / 2);
-  ctx.fillRect(bx, toY(v, BENCH.h), BENCH.w * s, (BENCH.h - 34) * s);
-  ctx.strokeRect(bx, toY(v, BENCH.h), BENCH.w * s, (BENCH.h - 34) * s);
-  for (const lx of [scene.bench - BENCH.w / 2 + 16, scene.bench + BENCH.w / 2 - 20]) {
-    ctx.strokeRect(toX(v, lx), toY(v, 34), 4 * s, 34 * s);
-  }
-  figurePath(ctx, v, scene.person);
-  ctx.fillStyle = 'rgb(255 255 255 / 0.85)';
-  ctx.fill('nonzero');
-  ctx.stroke();
-  if (s > 0.55) dimV(ctx, toX(v, scene.person + 34), toY(v, 0), toY(v, 172), '172', fonts, 'rgb(31 43 51 / 0.7)');
 
   // Works.
   items.forEach((item, idx) => {
@@ -958,6 +974,22 @@ export function drawPlan(ctx: CanvasRenderingContext2D, v: View, st: DrawState) 
       ctx.fillText(`⌖ ${fmt(item.y)}`, X + W + 6, toY(v, item.y));
     }
   });
+
+  // The bench and visitor stand in front of the wall, drawn as an architect's scale figure.
+  ctx.strokeStyle = INK;
+  ctx.fillStyle = '#ffffff';
+  ctx.lineWidth = 0.9;
+  const bx = toX(v, scene.bench - BENCH.w / 2);
+  ctx.fillRect(bx, toY(v, BENCH.h), BENCH.w * s, (BENCH.h - 34) * s);
+  ctx.strokeRect(bx, toY(v, BENCH.h), BENCH.w * s, (BENCH.h - 34) * s);
+  for (const lx of [scene.bench - BENCH.w / 2 + 16, scene.bench + BENCH.w / 2 - 20]) {
+    ctx.fillRect(toX(v, lx), toY(v, 34), 4 * s, 34 * s);
+    ctx.strokeRect(toX(v, lx), toY(v, 34), 4 * s, 34 * s);
+  }
+  figurePath(ctx, v, scene.person);
+  ctx.fill();
+  ctx.stroke();
+  if (s > 0.55) dimV(ctx, toX(v, scene.person + 34), toY(v, 0), toY(v, 172), '172', fonts, 'rgb(31 43 51 / 0.7)');
 
   // Running dimensions along the floor: wall end, each group of works, wall end.
   const spans = items

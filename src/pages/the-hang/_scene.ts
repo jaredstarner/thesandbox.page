@@ -5,8 +5,8 @@ import type { Work } from './_works';
 export const WALL = { w: 1600, h: 540 };
 /** The centre line most museums hang to: 145 cm, about 57 inches, from the floor. */
 export const CL = 145;
-/** The lowest a frame's bottom edge snaps to, for works too tall for the centre line. */
-export const LOW = 40;
+/** The lowest a frame's bottom edge snaps to, for works too tall for the centre line: clear of a bench seat. */
+export const LOW = 50;
 export const DOOR = { x: 70, w: 160, h: 300 };
 export const BENCH = { w: 180, h: 46 };
 
@@ -115,7 +115,7 @@ export function snap(
     if (d <= tol && (!bestY || d < bestY.d)) bestY = { d, y: target, g };
   };
   tryY(CL, { axis: 'y', at: CL, from: 0, to: WALL.w, label: 'CL 145' });
-  tryY(LOW + hh, { axis: 'y', at: LOW, from: 0, to: WALL.w, label: '+40' });
+  tryY(LOW + hh, { axis: 'y', at: LOW, from: 0, to: WALL.w, label: `+${LOW}` });
   for (const { item, box } of others) {
     tryY(item.y, { axis: 'y', at: item.y, from: Math.min(box.x0, x - hw), to: Math.max(box.x1, x + hw) });
     tryY(box.y1 - hh, { axis: 'y', at: box.y1, from: Math.min(box.x0, x - hw), to: Math.max(box.x1, x + hw) });
@@ -220,13 +220,13 @@ export const OPENING: Scene = {
   title: 'Opening hang',
   paint: 'white',
   light: 'spots',
-  person: 1236,
+  person: 1085,
   bench: 900,
   items: [
     { id: 111442, x: 380, y: 145 },
     { id: 80607, x: 506, y: 145 },
     { id: 28560, x: 642, y: 145 },
-    { id: 20684, x: 900, y: 161 },
+    { id: 20684, x: 900, y: 171 },
     { id: 64818, x: 1160, y: 145 },
     { id: 24645, x: 1306, y: 170 },
     { id: 69816, x: 1306, y: 105 },

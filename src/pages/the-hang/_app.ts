@@ -153,8 +153,9 @@ export function start(root: HTMLElement) {
       c.width = Math.round(view.w * view.dpr);
       c.height = Math.round(view.h * view.dpr);
     }
-    lightCanvas.width = Math.ceil(view.w / 4);
-    lightCanvas.height = Math.ceil(view.h / 4);
+    // The light map at one sample per CSS pixel; coarser maps showed their grid in broad pools when zoomed in.
+    lightCanvas.width = Math.ceil(view.w);
+    lightCanvas.height = Math.ceil(view.h);
     fitS = fitScale();
     requestDraw();
   }
@@ -169,7 +170,8 @@ export function start(root: HTMLElement) {
   function fit(animate = true) {
     const s = fitScale();
     const narrow = view.w < 720;
-    const to = { cx: narrow ? 900 : WALL.w / 2, cy: WALL.h / 2 - 30, s };
+    // A narrow screen opens on the street scene with the visitor beside it, rather than a sliver of everything.
+    const to = { cx: narrow ? 935 : WALL.w / 2, cy: WALL.h / 2 - 30, s };
     go(to, animate);
   }
 
@@ -354,8 +356,10 @@ export function start(root: HTMLElement) {
   /** Brings a work into view: closer when `close`, otherwise only far enough to show it. */
   function lookAt(item: Hung, work: Work, close = true) {
     if (close) {
-      const s = Math.min(MAX_S, Math.min((view.w * 0.55) / work.mount.w, (view.h * 0.6) / work.mount.h));
-      go({ cx: item.x + 6, cy: item.y, s });
+      // On a phone the label card covers the bottom of the view, so the work sits in the upper part.
+      const narrow = view.w < 720;
+      const s = Math.min(MAX_S, Math.min((view.w * 0.55) / work.mount.w, (view.h * (narrow ? 0.42 : 0.6)) / work.mount.h));
+      go({ cx: item.x + 6, cy: item.y - (narrow ? (view.h * 0.17) / s : 0), s });
       return;
     }
     const b = boxOf(item, work);
@@ -417,7 +421,7 @@ export function start(root: HTMLElement) {
       .filter((i) => works.has(i.id))
       .map((i) => {
         const w = works.get(i.id)!;
-        return `<li${bad.has(i.id) ? ' class="clash"' : ''}><button type="button" data-goto="${w.id}"><span class="who">${esc(w.artist ?? 'Unknown maker')}</span> <i>${esc(w.title)}</i>${w.date ? `, ${esc(w.date)}` : ''} <span class="dim">${esc(sizeText(w))}</span></button></li>`;
+        return `<li${bad.has(i.id) ? ' class="clash"' : ''}><button type="button" data-goto="${w.id}"><span class="line"><span class="who">${esc(w.artist ?? 'Unknown maker')}</span>, <i>${esc(w.title)}</i></span><span class="dim">${esc(sizeText(w))}${bad.has(i.id) ? ' · overlaps a neighbour' : ''}</span></button></li>`;
       })
       .join('');
     root.dataset.empty = scene.items.length ? 'false' : 'true';
@@ -460,7 +464,7 @@ export function start(root: HTMLElement) {
     results.innerHTML = shown
       .map(
         (w) => `<li><button type="button" class="work${onWall.has(w.id) ? ' hung' : ''}" data-work="${w.id}">
-          <img src="${imageUrl(w, 200)}" alt="" loading="lazy" decoding="async" width="72" height="72" crossorigin="anonymous" />
+          <span class="thumb"${w.lqip ? ` style="background-image:url('${esc(w.lqip)}')"` : ''}><img src="${imageUrl(w, 200)}" alt="" loading="lazy" decoding="async" width="64" height="64" /></span>
           <span class="meta"><span class="who">${esc(w.artist ?? 'Unknown maker')}</span><span class="what">${esc(w.title)}</span><span class="when">${esc(w.date ?? '')}</span><span class="size">${esc(sizeText(w))}${onWall.has(w.id) ? ' <b>On the wall</b>' : ''}</span></span>
           ${scaleGlyph(w)}
         </button></li>`,
@@ -524,6 +528,14 @@ export function start(root: HTMLElement) {
     });
   }
   more.addEventListener('click', () => runSearch(true));
+  // A thumbnail that fails leaves its blurred placeholder showing rather than a broken image.
+  results.addEventListener(
+    'error',
+    (e) => {
+      if (e.target instanceof HTMLImageElement) e.target.hidden = true;
+    },
+    true,
+  );
 
   // Tap a work to hang it; drag one (mouse or pen) to hang it where it's dropped.
   let carry: { work: Work; id: number; x0: number; y0: number; ghost: HTMLElement | null } | null = null;
