@@ -42,12 +42,15 @@ export const clampWeather = (w: Weather): Weather => ({
   v: clamp01(w.v),
 });
 
-/** A crystal blown about inside the cloud: every few seconds it heads for a new spot and
- * eases toward it. Measured in seconds on screen, since the page paces growth to look even. */
+/** A crystal blown about inside the cloud: every few seconds it heads for a new spot, carried
+ * there on a damped spring with a little turbulence, so its path curves and wanders. Measured
+ * in seconds on screen, since the page paces growth to look even. */
 export class Drift {
   private target: Weather;
   private wait = 0;
   private s: number;
+  private vt = 0;
+  private vv = 0;
 
   constructor(seed: number, from: Weather) {
     this.s = seed >>> 0 || 1;
@@ -75,7 +78,13 @@ export class Drift {
       });
       this.wait = 3.5 + this.rand() * 5;
     }
-    const k = 1 - Math.exp(-seconds / 1.6);
-    return { t: lerp(w.t, this.target.t, k), v: lerp(w.v, this.target.v, k) };
+    const dt = Math.min(seconds, 0.1);
+    const kick = Math.sqrt(dt);
+    this.vt += ((this.target.t - w.t) * 1.4 - this.vt * 2) * dt + (this.rand() - 0.5) * 7 * kick;
+    this.vv += ((this.target.v - w.v) * 1.4 - this.vv * 2) * dt + (this.rand() - 0.5) * 0.7 * kick;
+    const next = clampWeather({ t: w.t + this.vt * dt, v: w.v + this.vv * dt });
+    if (next.t !== w.t + this.vt * dt) this.vt = 0;
+    if (next.v !== w.v + this.vv * dt) this.vv = 0;
+    return next;
   }
 }

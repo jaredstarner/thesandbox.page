@@ -125,34 +125,33 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
       >
       <h2>How it grows</h2>
       <p>
-        The crystal is grown with Janko Gravner and David Griffeath's lattice model of snow crystal growth, published in
-        <i>Physica D</i> in 2008. Each cell of a hexagonal lattice, a few microns across, holds four amounts: whether it is
-        ice, the quasi-liquid layer on its surface, ice not yet attached, and water vapour. Each update, the vapour spreads
-        to neighbouring cells, freezes where it touches the crystal, and a cell joins the crystal once it holds enough mass.
+        The crystal is grown with the lattice model of snow crystal growth that Janko Gravner and David Griffeath published
+        in <i>Physica D</i> in 2008. Each cell of a hexagonal lattice, a few microns across, holds four things: whether it
+        belongs to the crystal yet, a film of quasi-liquid, ice, and water vapour. Each update, the vapour spreads to
+        neighbouring cells, freezes where it touches the crystal, and a cell joins the crystal once it holds enough.
       </p>
       <p>
-        The rule that makes snow crystals is in the thresholds. A cell at a tip or on a flat face, with one or two ice
-        neighbours, needs more mass to join than a cell in a hollow with three. Tips reach further into the vapour and grow
-        faster, which makes branches; the higher threshold at flat faces keeps edges straight, which makes plates. Where the
-        vapour runs thin between arms, a thin sheet can still spread, and that fills in plates long after the arms have run
-        ahead.
+        The thresholds make the shapes. A cell at a tip or on a flat face, with one or two crystal neighbours, needs more
+        to join than a cell in a hollow with three. Tips reach further into the vapour and grow faster, which makes
+        branches; the higher threshold on flat faces keeps edges straight, which makes plates. Where the vapour runs thin
+        between arms, a thin sheet can still spread, and that fills in plates long after the arms have run ahead.
       </p>
       <p>
-        The cloud chart covers −10 to −20 °C, where snow grows as thin plates. Following the Nakaya diagram, the wettest air
-        near −15 °C grows the most branched crystals and the fastest, while drier air and the edges of the range grow
+        The cloud chart covers −10 to −20 °C, where snow grows as thin plates. Following the Nakaya diagram, the wettest
+        air near −15 °C grows the most branched crystals and the fastest, while drier air and the edges of the range grow
         faceted plates. Moving through the chart changes the vapour around the crystal and the rates at which its edge
         freezes and melts. Where each habit sits on the chart is this page's placement of the paper's parameters, not a
         measurement.
       </p>
       <p>
         <b>Rheinberg</b> light has a blue stop in the middle and an amber ring around it: flat ice passes the blue, and
-        slopes in the ice bend the ring's light into view. <b>Dark field</b> shows only the light the crystal scatters, and
-        <b>bright field</b> only what it bends away. <b>Vapour</b> shows the air the arms have drawn thin, and
-        <b>timeline</b> colours the ice by when it froze, in the same colours as the path on the chart.
+        slopes in the ice bend the ring's light into view. <b>Dark field</b> shows only the light the crystal scatters,
+        and <b>bright field</b> only what it bends away. <b>Vapour</b> shows the air the arms have drawn thin,
+        and <b>timeline</b> colours the ice by when it froze, in the same colours as the path on the chart.
       </p>
       <p class="small">
-        A cell stands for 5 µm and an update for 0.03 s, the paper's order of magnitude. The microscope speeds growth up so
-        each crystal takes about a minute to watch.
+        A cell stands for 5 µm and an update for 0.03 s, the paper's order of magnitude. The microscope speeds growth up
+        so each crystal takes about a minute to watch.
       </p>
     </div>
 
@@ -382,10 +381,9 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
     width: var(--d, 100%);
     max-width: 100%;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px 20px;
+    gap: 14px;
   }
 
   .status {
@@ -434,6 +432,7 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
     border: 0;
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 6px;
   }
 
@@ -941,14 +940,6 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
 
     .stage {
       --d: min(calc(100vw - 52px), 560px);
-    }
-
-    .under {
-      justify-content: center;
-    }
-
-    .lights {
-      justify-content: center;
     }
 
     .bench {
