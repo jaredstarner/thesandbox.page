@@ -172,7 +172,7 @@ export function start(root: HTMLElement): void {
   /** Updates a second that keep the crystal's visible growth even: faster for slow plates,
    * slower for racing dendrites. */
   const pace = () => {
-    const goal = 0.05 * (fast ? 2.6 : 1) * (lattice.radius + 40);
+    const goal = 0.055 * (fast ? 2.6 : 1) * (lattice.radius + 60);
     return Math.max(200, Math.min(fast ? 20000 : 7000, goal / Math.max(rate, 1e-5)));
   };
 
@@ -229,9 +229,10 @@ export function start(root: HTMLElement): void {
     if (phase === 'falling') {
       // Hunt for the most updates a frame the GPU keeps up with, judged on smoothed frame
       // times so one slow frame doesn't throw it back.
+      // Slow frames only count against it while it is running flat out.
       avg += (dt - avg) * 0.15;
-      if (atCapacity && avg <= period * 1.3) capacity = Math.min(600, Math.ceil(capacity * 1.12));
-      else if (avg > period * 1.7) capacity = Math.max(1, Math.floor(capacity * 0.85));
+      if (atCapacity && avg <= period * 1.4) capacity = Math.min(600, Math.ceil(capacity * 1.12));
+      else if (atCapacity && avg > period * 1.8) capacity = Math.max(1, Math.floor(capacity * 0.85));
       owed += (pace() * dt) / 1000;
       let n = Math.floor(owed);
       atCapacity = n >= capacity;

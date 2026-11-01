@@ -5,10 +5,12 @@
 // freezing, attachment, melting, and noise, in two fragment passes.
 //
 // The lattice is stored as a square texture in axial coordinates, with neighbours at
-// (±1, 0), (0, ±1), (1, 1), and (-1, -1): the paper's graph T' on Z². Only a square around
+// (±1, 0), (0, ±1), (1, 1), and (-1, -1): the paper's graph T' on Z². Only a disc around
 // the crystal is computed; everything outside it is far-field vapour at the cloud's
 // current density, so the cloud behaves as an unbounded field and growth costs little
-// while the crystal is small.
+// while the crystal is small. The edge is a true circle: a square in axial coordinates is a
+// rhombus on the plane, which put some faces nearer the cloud than others and grew
+// lopsided plates.
 
 export interface Params {
   /** Vapour density of the surrounding cloud. */
@@ -46,11 +48,18 @@ precision highp sampler2D;
 uniform sampler2D u_state;
 uniform ivec2 u_lo;
 uniform ivec2 u_hi;
+uniform float u_r2;
 uniform float u_rho;
 out vec4 o;
-// Cells outside the computed square are untouched far-field vapour.
+const ivec2 MID = ivec2(${CENTER}, ${CENTER});
+// Inside the computed disc: squared distance from the centre on the plane, in cells.
+bool live(ivec2 p) {
+  ivec2 q = p - MID;
+  return float(q.x * q.x - q.x * q.y + q.y * q.y) <= u_r2;
+}
+// Cells outside the computed disc are untouched far-field vapour.
 vec4 cell(ivec2 p) {
-  if (p.x < u_lo.x || p.y < u_lo.y || p.x > u_hi.x || p.y > u_hi.y) return vec4(u_rho, 0.0, 0.0, 0.0);
+  if (!live(p)) return vec4(u_rho, 0.0, 0.0, 0.0);
   return texelFetch(u_state, p, 0);
 }
 const ivec2 E0 = ivec2(1, 0);
@@ -177,7 +186,7 @@ void main() {
   for (int y = 0; y < 16; y++) {
     for (int x = 0; x < 16; x++) {
       ivec2 p = base + ivec2(x, y);
-      if (p.x < u_lo.x || p.y < u_lo.y || p.x > u_hi.x || p.y > u_hi.y) continue;
+      if (!live(p)) continue;
       if (texelFetch(u_state, p, 0).a <= 0.0) continue;
       ivec2 u = p - u_center;
       int dist = u.x * u.y >= 0 ? max(abs(u.x), abs(u.y)) : abs(u.x) + abs(u.y);
@@ -196,6 +205,8 @@ interface Pass {
 }
 
 const BLOCK = 16;
+/** A disc of radius r on the plane spans r * 2 / sqrt(3) cells along each axial axis. */
+const BOX = 2 / Math.sqrt(3);
 const MEASURE_SIDE = N / BLOCK;
 
 export function compile(gl: WebGL2RenderingContext, vs: string, fs: string): WebGLProgram {
@@ -219,7 +230,7 @@ export function compile(gl: WebGL2RenderingContext, vs: string, fs: string): Web
 function pass(gl: WebGL2RenderingContext, fs: string, names: string[]): Pass {
   const prog = compile(gl, VERTEX, fs);
   const u: Uniforms = {};
-  for (const n of ['u_state', 'u_lo', 'u_hi', 'u_rho', ...names]) u[n] = gl.getUniformLocation(prog, n);
+  for (const n of ['u_state', 'u_lo', 'u_hi', 'u_r2', 'u_rho', ...names]) u[n] = gl.getUniformLocation(prog, n);
   return { prog, u };
 }
 
@@ -260,8 +271,8 @@ export class Lattice {
   time = 0;
   /** Vapour density of the far field right now. */
   rho = 0.4;
-  /** Half-side of the computed square, in cells. */
-  half = 24;
+  /** Radius of the computed disc, in cells. */
+  reach = 48;
   /** Farthest ice from the centre at the last reading, in cells (hex distance). */
   radius = 0;
   /** Update the last reading was taken at. */
@@ -304,27 +315,40 @@ export class Lattice {
     return this.state[this.cur].tex;
   }
 
-  /** The computed square: cells from lo to hi on both axes, inclusive. */
+  /** Half-side of the texture square that holds a disc of radius `reach`. */
+  static box(reach: number): number {
+    return Math.min(CENTER - 1, Math.ceil(reach * BOX) + 1);
+  }
+
+  /** The square holding the computed disc: cells from lo to hi on both axes, inclusive. */
   get lo(): number {
-    return CENTER - this.half;
+    return CENTER - Lattice.box(this.reach);
   }
   get hi(): number {
-    return CENTER + this.half;
+    return CENTER + Lattice.box(this.reach);
+  }
+  get r2(): number {
+    return this.reach * this.reach;
   }
 
   /** Margin of vapour kept around the crystal: the paper grows dendrites in a box half again
    * as wide as the crystal, and slow plates in one twice as wide. */
   static margin(radius: number): number {
-    return Math.max(48, Math.ceil(radius * 0.6));
+    return Math.max(48, Math.ceil(radius * 0.5));
   }
 
-  /** Largest crystal that keeps that margin inside the texture. */
-  static readonly MAX_RADIUS = Math.floor((CENTER - 2) / 1.6);
+  /** Widest disc the texture holds. */
+  static readonly MAX_REACH = Math.floor((CENTER - 2) / BOX);
 
-  private bounds(p: Pass, half: number) {
+  /** Largest crystal that keeps its margin inside the texture. */
+  static readonly MAX_RADIUS = Math.floor(Lattice.MAX_REACH / 1.5);
+
+  private bounds(p: Pass, reach: number) {
     const gl = this.gl;
-    gl.uniform2i(p.u.u_lo, CENTER - half, CENTER - half);
-    gl.uniform2i(p.u.u_hi, CENTER + half, CENTER + half);
+    const box = Lattice.box(reach);
+    gl.uniform2i(p.u.u_lo, CENTER - box, CENTER - box);
+    gl.uniform2i(p.u.u_hi, CENTER + box, CENTER + box);
+    gl.uniform1f(p.u.u_r2, reach * reach);
     gl.uniform1f(p.u.u_rho, this.rho);
   }
 
@@ -336,10 +360,11 @@ export class Lattice {
     gl.uniform1i(p.u.u_state, 0);
   }
 
-  private draw(fbo: WebGLFramebuffer, half: number) {
+  private draw(fbo: WebGLFramebuffer, reach: number) {
     const gl = this.gl;
+    const box = Lattice.box(reach);
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-    gl.viewport(CENTER - half, CENTER - half, half * 2 + 1, half * 2 + 1);
+    gl.viewport(CENTER - box, CENTER - box, box * 2 + 1, box * 2 + 1);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
@@ -349,7 +374,7 @@ export class Lattice {
     gl.disable(gl.BLEND);
     this.time = 0;
     this.rho = rho;
-    this.half = 48;
+    this.reach = 48;
     this.radius = 0;
     this.radiusAt = 0;
     this.cells = 1;
@@ -358,16 +383,16 @@ export class Lattice {
     this.pending = null;
     this.cur = 0;
     this.use(this.init, 1);
-    this.bounds(this.init, this.half);
+    this.bounds(this.init, this.reach);
     gl.uniform2i(this.init.u.u_center, CENTER, CENTER);
-    this.draw(this.state[0].fbo, this.half);
+    this.draw(this.state[0].fbo, this.reach);
   }
 
-  /** Grow the computed square to keep the margin around the crystal, allowing for tips that
+  /** Grow the computed disc to keep the margin around the crystal, allowing for tips that
    * may have run on since the last reading. */
   private fit(): number {
     const ahead = this.radius + (this.time - this.radiusAt) * 0.12 + 2;
-    return Math.min(CENTER - 2, Math.max(this.half, Math.ceil(ahead + Lattice.margin(ahead))));
+    return Math.min(Lattice.MAX_REACH, Math.max(this.reach, Math.ceil(ahead + Lattice.margin(ahead))));
   }
 
   /** Run `count` updates under `p`, with the far-field vapour changing by `grow` per update. */
@@ -376,18 +401,18 @@ export class Lattice {
     gl.bindVertexArray(this.vao);
     gl.disable(gl.BLEND);
     for (let i = 0; i < count; i++) {
-      const before = this.half;
-      const half = this.fit();
-      this.half = half;
+      const before = this.reach;
+      const reach = this.fit();
+      this.reach = reach;
       // Diffusion and freezing: read the old square, write the new one.
       this.use(this.diffuse, this.cur);
       this.bounds(this.diffuse, before);
       gl.uniform1f(this.diffuse.u.u_kappa, p.kappa);
-      this.draw(this.state[1 - this.cur].fbo, half);
+      this.draw(this.state[1 - this.cur].fbo, reach);
       // Attachment, melting, noise.
       this.time++;
       this.use(this.settle, 1 - this.cur);
-      this.bounds(this.settle, half);
+      this.bounds(this.settle, reach);
       gl.uniform1f(this.settle.u.u_beta, p.beta);
       gl.uniform1f(this.settle.u.u_alpha, p.alpha);
       gl.uniform1f(this.settle.u.u_theta, p.theta);
@@ -397,7 +422,7 @@ export class Lattice {
       gl.uniform1f(this.settle.u.u_grow, grow);
       gl.uniform1f(this.settle.u.u_time, this.time + 1);
       gl.uniform1ui(this.settle.u.u_seed, (this.seed + this.time * 2654435761) >>> 0);
-      this.draw(this.state[this.cur].fbo, half);
+      this.draw(this.state[this.cur].fbo, reach);
       this.rho *= 1 + grow;
     }
   }
@@ -408,9 +433,9 @@ export class Lattice {
     gl.bindVertexArray(this.vao);
     gl.disable(gl.BLEND);
     this.use(this.prepPass, this.cur);
-    this.bounds(this.prepPass, this.half);
+    this.bounds(this.prepPass, this.reach);
     gl.uniform1f(this.prepPass.u.u_time, this.time + 1);
-    this.draw(this.prep.fbo, this.half);
+    this.draw(this.prep.fbo, this.reach);
   }
 
   /** Start a reading of the crystal's size, or collect one that has finished. Readings come
@@ -446,7 +471,7 @@ export class Lattice {
     const x1 = Math.floor(this.hi / BLOCK);
     const w = x1 - x0 + 1;
     this.use(this.measure, this.cur);
-    this.bounds(this.measure, this.half);
+    this.bounds(this.measure, this.reach);
     gl.uniform2i(this.measure.u.u_center, CENTER, CENTER);
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.meas.fbo);
     gl.viewport(x0, x0, w, w);

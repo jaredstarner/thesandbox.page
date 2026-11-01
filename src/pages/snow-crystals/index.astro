@@ -250,7 +250,10 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
   .stage {
     --d: min(74vh, calc(100vw - 540px));
     grid-area: stage;
-    min-height: 100vh;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
     box-sizing: border-box;
     display: grid;
     place-content: center;
@@ -933,7 +936,8 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
     }
 
     .stage {
-      min-height: 0;
+      position: static;
+      height: auto;
       padding: 30px 16px 0;
       gap: 22px;
     }

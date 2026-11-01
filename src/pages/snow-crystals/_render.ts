@@ -23,6 +23,7 @@ uniform sampler2D u_state;
 uniform sampler2D u_prep;
 uniform ivec2 u_lo;
 uniform ivec2 u_hi;
+uniform float u_r2;
 uniform float u_rho;
 // Centre of the view in cells, and cells per device pixel.
 uniform vec3 u_view;
@@ -36,7 +37,9 @@ const float NN = ${N.toFixed(1)};
 const float S3 = 1.7320508;
 
 bool inside(ivec2 p) {
-  return p.x >= u_lo.x && p.y >= u_lo.y && p.x <= u_hi.x && p.y <= u_hi.y;
+  ivec2 q = p - ivec2(${CENTER}, ${CENTER});
+  return p.x >= u_lo.x && p.y >= u_lo.y && p.x <= u_hi.x && p.y <= u_hi.y
+    && float(q.x * q.x - q.x * q.y + q.y * q.y) <= u_r2;
 }
 float ice(ivec2 p) {
   return inside(p) && texelFetch(u_state, p, 0).a > 0.0 ? 1.0 : 0.0;
@@ -154,7 +157,7 @@ export class Microscope {
     readonly lattice: Lattice,
   ) {
     this.prog = compile(gl, VERTEX, FRAGMENT);
-    for (const n of ['u_state', 'u_prep', 'u_lo', 'u_hi', 'u_rho', 'u_view', 'u_res', 'u_mode', 'u_flip']) {
+    for (const n of ['u_state', 'u_prep', 'u_lo', 'u_hi', 'u_r2', 'u_rho', 'u_view', 'u_res', 'u_mode', 'u_flip']) {
       this.u[n] = gl.getUniformLocation(this.prog, n);
     }
   }
@@ -174,6 +177,7 @@ export class Microscope {
     gl.uniform1i(this.u.u_prep, 1);
     gl.uniform2i(this.u.u_lo, l.lo, l.lo);
     gl.uniform2i(this.u.u_hi, l.hi, l.hi);
+    gl.uniform1f(this.u.u_r2, l.r2);
     gl.uniform1f(this.u.u_rho, l.rho);
     gl.uniform3f(this.u.u_view, 0, 0, cells);
     gl.uniform2f(this.u.u_res, w, h);
