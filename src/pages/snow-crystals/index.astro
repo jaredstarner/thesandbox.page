@@ -15,6 +15,7 @@ import Bare from '../../layouts/Bare.astro';
       <div class="eyepiece">
         <canvas class="view" data-view aria-label="The growing snow crystal under the microscope"></canvas>
       </div>
+      <p class="notice" data-notice hidden>This microscope needs WebGL 2 with float render targets.</p>
     </section>
 
     <aside class="bench">
@@ -36,5 +37,33 @@ import Bare from '../../layouts/Bare.astro';
     min-height: 100vh;
     color: #dfe7f1;
     font-family: var(--font-snow);
+    display: grid;
+    grid-template-columns: 1fr 380px;
+  }
+
+  .stage {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+  }
+
+  .eyepiece {
+    width: min(86vh, 58vw);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .view {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 </style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-snow]');
+  if (root) start(root);
+</script>
