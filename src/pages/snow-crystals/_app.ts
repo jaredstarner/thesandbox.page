@@ -117,6 +117,7 @@ export function start(root: HTMLElement): void {
   let turbo = 0;
   let last = 0;
   let period = 1000 / 60;
+  const recent: number[] = [];
   let rate = 0.02;
   let lastReading = { r: 0, t: 0 };
   let slides = load();
@@ -211,7 +212,13 @@ export function start(root: HTMLElement): void {
     requestAnimationFrame(frame);
     const dt = last ? Math.min(100, now - last) : period;
     last = now;
-    if (dt > 0) period = Math.min(period * 1.002, dt);
+    // The display's frame interval: a low percentile of recent frames, so one quick frame
+    // after a stall doesn't set it.
+    if (dt > 0) {
+      recent.push(dt);
+      if (recent.length > 90) recent.shift();
+      if (recent.length >= 10) period = recent.slice().sort((a, b) => a - b)[Math.floor(recent.length * 0.25)];
+    }
     resize();
     lattice.poll();
     if (lattice.radiusAt > lastReading.t + 300) {

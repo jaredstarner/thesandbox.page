@@ -70,18 +70,17 @@ export class Drift {
   step(w: Weather, seconds: number): Weather {
     this.wait -= seconds;
     if (this.wait <= 0) {
-      // A new layer of the cloud: mostly a modest move, now and then a long one.
-      const reach = this.rand() < 0.25 ? 1 : 0.45;
-      this.target = clampWeather({
-        t: w.t + (this.rand() * 2 - 1) * 10 * reach,
-        v: w.v + (this.rand() * 2 - 1) * reach,
-      });
+      // A new layer of the cloud: mostly a modest move, now and then a long one, toward a
+      // spot inside the chart that leans to the wetter, more branched air near -15 °C.
+      const reach = this.rand() < 0.25 ? 0.9 : 0.4;
+      const spot = { t: -15 + (this.rand() - 0.5) * 8.6, v: 0.06 + 0.9 * Math.pow(this.rand(), 0.7) };
+      this.target = clampWeather({ t: lerp(w.t, spot.t, reach), v: lerp(w.v, spot.v, reach) });
       this.wait = 3.5 + this.rand() * 5;
     }
     const dt = Math.min(seconds, 0.1);
     const kick = Math.sqrt(dt);
-    this.vt += ((this.target.t - w.t) * 1.4 - this.vt * 2) * dt + (this.rand() - 0.5) * 7 * kick;
-    this.vv += ((this.target.v - w.v) * 1.4 - this.vv * 2) * dt + (this.rand() - 0.5) * 0.7 * kick;
+    this.vt += ((this.target.t - w.t) * 1.4 - this.vt * 2) * dt + (this.rand() - 0.5) * 2.5 * kick;
+    this.vv += ((this.target.v - w.v) * 1.4 - this.vv * 2) * dt + (this.rand() - 0.5) * 0.25 * kick;
     const next = clampWeather({ t: w.t + this.vt * dt, v: w.v + this.vv * dt });
     if (next.t !== w.t + this.vt * dt) this.vt = 0;
     if (next.v !== w.v + this.vv * dt) this.vv = 0;

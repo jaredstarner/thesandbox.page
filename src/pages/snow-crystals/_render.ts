@@ -46,10 +46,16 @@ vec2 lattice(vec2 w) {
   float v = w.y * 2.0 / S3;
   return vec2(w.x + v * 0.5, v) + C;
 }
+vec4 pf(ivec2 p) {
+  return inside(p) ? texelFetch(u_prep, p, 0) : vec4(0.0, 1.0, u_rho, 0.0);
+}
+// Linear across the lattice's own triangles, so no direction is favoured.
 vec4 prep(vec2 w) {
   vec2 t = lattice(w);
-  if (!inside(ivec2(floor(t + 0.5)))) return vec4(0.0, 1.0, u_rho, 0.0);
-  return texture(u_prep, (t + 0.5) / NN);
+  ivec2 b = ivec2(floor(t));
+  vec2 f = t - vec2(b);
+  if (f.x >= f.y) return (1.0 - f.x) * pf(b) + (f.x - f.y) * pf(b + ivec2(1, 0)) + f.y * pf(b + ivec2(1, 1));
+  return (1.0 - f.y) * pf(b) + (f.y - f.x) * pf(b + ivec2(0, 1)) + f.x * pf(b + ivec2(1, 1));
 }
 float cover(vec2 w) {
   vec2 t = lattice(w);
@@ -79,20 +85,25 @@ void main() {
 
   // The ice edge: crisp from the lattice when cells are larger than a pixel, from the
   // smoothed coverage when they are not.
-  float bary = cover(w);
-  float aa = max(fwidth(bary), 1e-4) * 0.75;
-  float crisp = smoothstep(0.5 - aa, 0.5 + aa, bary);
   vec4 here = prep(w);
-  float soft = smoothstep(0.32, 0.68, here.a);
-  float ice = mix(crisp, soft, clamp((px - 0.6) / 0.6, 0.0, 1.0));
+  float edge = mix(cover(w), here.a, clamp((px - 0.6) / 0.6, 0.0, 1.0));
+  float fw = max(fwidth(edge), 1e-4);
+  float ice = smoothstep(0.5 - fw * 0.75, 0.5 + fw * 0.75, edge);
+  // Pixels inside the edge, from how fast the coverage changes across the screen.
+  float inward = (edge - 0.5) / fw;
 
   float h = here.r;
-  float e = max(0.75, px);
+  float e = max(1.0, px);
   float gx = prep(w + vec2(e, 0.0)).r - prep(w - vec2(e, 0.0)).r;
   float gy = prep(w + vec2(0.0, e)).r - prep(w - vec2(0.0, e)).r;
   vec2 g = vec2(gx, gy) / (2.0 * e);
+  // Slopes inside the plate come from its thickness; the edge itself is drawn as a line a
+  // couple of pixels wide at any zoom, brighter where the edge is thick.
+  float interior = smoothstep(0.8, 0.97, here.a);
+  g *= interior;
   float slope = length(g);
-  float bend = 1.0 - exp(-slope * 2.6);
+  float rim = inward > -1.0 ? exp(-max(inward, 0.0) / 1.5) * clamp(0.4 + 0.45 * h, 0.0, 1.0) : 0.0;
+  float bend = max(1.0 - exp(-slope * 2.6), rim);
   vec3 n = normalize(vec3(-g * 1.4, 1.0));
   vec3 L = normalize(vec3(-0.45, 0.55, 0.7));
   float lit = dot(n, L) - L.z;
