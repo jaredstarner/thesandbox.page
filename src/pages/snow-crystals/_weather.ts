@@ -30,7 +30,7 @@ export function paramsAt(w: Weather): Params {
     beta: lerp(1.3, 1.55, f),
     alpha: 0.08,
     theta: 0.025,
-    kappa: lerp(0.003, 0.003 + 0.03 * v, 1 - f),
+    kappa: 0.003 + 0.014 * v * (1 - f) * (1 - f),
     mu: lerp(0.04, 0.1, f),
     gamma: 0.00005,
     sigma: 0.00001,
@@ -42,17 +42,16 @@ export const clampWeather = (w: Weather): Weather => ({
   v: clamp01(w.v),
 });
 
-/** A crystal blown about inside the cloud: it eases toward a new spot every few minutes of
- * its fall. Deterministic for a seed, and measured in updates, not wall time. */
+/** A crystal blown about inside the cloud: every few seconds it heads for a new spot and
+ * eases toward it. Measured in seconds on screen, since the page paces growth to look even. */
 export class Drift {
   private target: Weather;
-  private next: number;
+  private wait = 0;
   private s: number;
 
   constructor(seed: number, from: Weather) {
     this.s = seed >>> 0 || 1;
     this.target = from;
-    this.next = 0;
   }
 
   private rand(): number {
@@ -64,19 +63,19 @@ export class Drift {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   }
 
-  /** Advance `steps` updates from `w` at update `time`. */
-  step(w: Weather, time: number, steps: number): Weather {
-    if (time >= this.next) {
+  /** Advance `seconds` from `w`. */
+  step(w: Weather, seconds: number): Weather {
+    this.wait -= seconds;
+    if (this.wait <= 0) {
       // A new layer of the cloud: mostly a modest move, now and then a long one.
-      const far = this.rand() < 0.25;
-      const reach = far ? 1 : 0.45;
+      const reach = this.rand() < 0.25 ? 1 : 0.45;
       this.target = clampWeather({
         t: w.t + (this.rand() * 2 - 1) * 10 * reach,
         v: w.v + (this.rand() * 2 - 1) * reach,
       });
-      this.next = time + 2500 + this.rand() * 4500;
+      this.wait = 3.5 + this.rand() * 5;
     }
-    const k = 1 - Math.exp(-steps / 1600);
+    const k = 1 - Math.exp(-seconds / 1.6);
     return { t: lerp(w.t, this.target.t, k), v: lerp(w.v, this.target.v, k) };
   }
 }

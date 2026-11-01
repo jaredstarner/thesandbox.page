@@ -366,7 +366,7 @@ export class Lattice {
   /** Grow the computed square to keep the margin around the crystal, allowing for tips that
    * may have run on since the last reading. */
   private fit(): number {
-    const ahead = this.radius + (this.time - this.radiusAt) * 0.05 + 2;
+    const ahead = this.radius + (this.time - this.radiusAt) * 0.12 + 2;
     return Math.min(CENTER - 2, Math.max(this.half, Math.ceil(ahead + Lattice.margin(ahead))));
   }
 

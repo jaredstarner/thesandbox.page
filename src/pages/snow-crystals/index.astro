@@ -1,6 +1,15 @@
 ---
 import { Font } from 'astro:assets';
 import Bare from '../../layouts/Bare.astro';
+
+const LIGHTS = [
+  { value: 'rheinberg', label: 'Rheinberg' },
+  { value: 'dark', label: 'Dark field' },
+  { value: 'bright', label: 'Bright field' },
+  { value: 'vapour', label: 'Vapour' },
+  { value: 'timeline', label: 'Timeline' },
+];
+const TICKS = Array.from({ length: 72 }, (_, i) => i);
 ---
 
 <Bare
@@ -10,54 +19,960 @@ import Bare from '../../layouts/Bare.astro';
   <Font cssVariable="--font-snow" slot="head" />
   <Font cssVariable="--font-snow-mono" slot="head" />
 
-  <main class="snow" data-snow>
-    <section class="stage" data-stage>
-      <div class="eyepiece">
-        <canvas class="view" data-view aria-label="The growing snow crystal under the microscope"></canvas>
+  <main class="snow" data-snow data-light="rheinberg" data-phase="falling">
+    <header class="title">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Snow crystals</h1>
+      <p class="lede">
+        A snow crystal grows as it falls, and its six arms grow alike because they meet the same air at the same
+        moment. Steer it through the cloud, or let it drift, and every change of air is written into all six arms.
+      </p>
+    </header>
+
+    <section class="stage" aria-label="Microscope">
+      <div class="eyepiece" data-eyepiece>
+        <svg class="graticule" viewBox="-100 -100 200 200" aria-hidden="true">
+          {
+            TICKS.map((i) => {
+              const a = (i / 72) * Math.PI * 2;
+              const long = i % 6 === 0;
+              const r0 = long ? 101.4 : 102.2;
+              return (
+                <line
+                  x1={(Math.cos(a) * r0).toFixed(2)}
+                  y1={(Math.sin(a) * r0).toFixed(2)}
+                  x2={(Math.cos(a) * 104).toFixed(2)}
+                  y2={(Math.sin(a) * 104).toFixed(2)}
+                  class={long ? 'long' : undefined}
+                />
+              );
+            })
+          }
+        </svg>
+        <canvas class="view" data-view aria-label="The snow crystal under the microscope"></canvas>
+        <div class="scale" aria-hidden="true">
+          <span class="bar" data-bar></span>
+          <span class="bar-label" data-bar-label>100 µm</span>
+        </div>
+        <p class="notice" data-notice hidden>
+          This microscope needs WebGL 2 with float render targets, which this browser doesn't offer.
+        </p>
       </div>
-      <p class="notice" data-notice hidden>This microscope needs WebGL 2 with float render targets.</p>
+
+      <div class="under">
+        <p class="status" aria-live="polite"><span class="dot"></span><span data-status>Falling through the cloud</span></p>
+        <fieldset class="lights">
+          <legend>Light</legend>
+          {
+            LIGHTS.map((l, i) => (
+              <label class="light">
+                <input type="radio" name="light" value={l.value} checked={i === 0} />
+                <span class={`swatch ${l.value}`} aria-hidden="true" />
+                <span>{l.label}</span>
+              </label>
+            ))
+          }
+        </fieldset>
+      </div>
     </section>
 
     <aside class="bench">
-      <header class="title">
-        <a class="home" href="/">thesandbox.page</a>
-        <h1>Snow crystals</h1>
-      </header>
+      <section class="cloud" aria-labelledby="snow-cloud-h">
+        <div class="row">
+          <h2 id="snow-cloud-h">The cloud</h2>
+          <button type="button" class="toggle" data-drift aria-pressed="true">Drift</button>
+        </div>
+        <div
+          class="pad"
+          data-pad
+          tabindex="0"
+          role="group"
+          aria-label="Cloud chart. Drag, or use the arrow keys, to move the crystal into colder, warmer, wetter, or drier air."
+        >
+          <canvas data-pad-canvas aria-hidden="true"></canvas>
+        </div>
+        <dl class="readout">
+          <div><dt>Air</dt><dd data-out-temp>−14.0 °C</dd></div>
+          <div><dt>Vapour</dt><dd data-out-vapour>0.450</dd></div>
+          <div><dt>Falling for</dt><dd data-out-fall>0 s</dd></div>
+          <div><dt>Across</dt><dd data-out-size>a few µm</dd></div>
+        </dl>
+      </section>
+
+      <div class="actions">
+        <button type="button" class="btn primary" data-catch>Catch it</button>
+        <button type="button" class="btn" data-pause>Pause</button>
+        <button type="button" class="btn" data-new>New crystal</button>
+        <button type="button" class="btn quiet" data-fast aria-pressed="false">Faster</button>
+        <button type="button" class="btn quiet" data-save>Save picture</button>
+      </div>
+
+      <section class="box" aria-labelledby="snow-box-h">
+        <h2 id="snow-box-h">Slides</h2>
+        <ol class="slides" data-slides></ol>
+        <p class="empty" data-empty>Catch a crystal and it stays here, in this browser.</p>
+      </section>
+
+      <footer class="foot">
+        <button type="button" class="link" popovertarget="snow-notes">How it grows</button>
+        <span>After Gravner and Griffeath, 2008</span>
+      </footer>
     </aside>
+
+    <div class="notes" id="snow-notes" popover>
+      <button type="button" class="close" popovertarget="snow-notes" popovertargetaction="hide" aria-label="Close"
+        >×</button
+      >
+      <h2>How it grows</h2>
+      <p>
+        The crystal is grown with Janko Gravner and David Griffeath's lattice model of snow crystal growth, published in
+        <i>Physica D</i> in 2008. Each cell of a hexagonal lattice, a few microns across, holds four amounts: whether it is
+        ice, the quasi-liquid layer on its surface, ice not yet attached, and water vapour. Each update, the vapour spreads
+        to neighbouring cells, freezes where it touches the crystal, and a cell joins the crystal once it holds enough mass.
+      </p>
+      <p>
+        The rule that makes snow crystals is in the thresholds. A cell at a tip or on a flat face, with one or two ice
+        neighbours, needs more mass to join than a cell in a hollow with three. Tips reach further into the vapour and grow
+        faster, which makes branches; the higher threshold at flat faces keeps edges straight, which makes plates. Where the
+        vapour runs thin between arms, a thin sheet can still spread, and that fills in plates long after the arms have run
+        ahead.
+      </p>
+      <p>
+        The cloud chart covers −10 to −20 °C, where snow grows as thin plates. Following the Nakaya diagram, the wettest air
+        near −15 °C grows the most branched crystals and the fastest, while drier air and the edges of the range grow
+        faceted plates. Moving through the chart changes the vapour around the crystal and the rates at which its edge
+        freezes and melts. Where each habit sits on the chart is this page's placement of the paper's parameters, not a
+        measurement.
+      </p>
+      <p>
+        <b>Rheinberg</b> light has a blue stop in the middle and an amber ring around it: flat ice passes the blue, and
+        slopes in the ice bend the ring's light into view. <b>Dark field</b> shows only the light the crystal scatters, and
+        <b>bright field</b> only what it bends away. <b>Vapour</b> shows the air the arms have drawn thin, and
+        <b>timeline</b> colours the ice by when it froze, in the same colours as the path on the chart.
+      </p>
+      <p class="small">
+        A cell stands for 5 µm and an update for 0.03 s, the paper's order of magnitude. The microscope speeds growth up so
+        each crystal takes about a minute to watch.
+      </p>
+    </div>
+
+    <dialog class="slide-dialog" data-slide-dialog aria-labelledby="snow-slide-no">
+      <div class="slide-body">
+        <img class="slide-img" data-d-img alt="A snow crystal caught on a slide" width="640" height="640" />
+        <div class="slide-info">
+          <h2 id="snow-slide-no" data-d-no>Slide</h2>
+          <p data-d-meta></p>
+          <p class="path-label">Its path through the cloud</p>
+          <canvas class="slide-trail" data-d-trail aria-hidden="true"></canvas>
+          <div class="slide-actions">
+            <button type="button" class="btn" data-d-save>Save</button>
+            <button type="button" class="btn quiet" data-d-remove>Remove</button>
+            <button type="button" class="btn quiet" data-d-close>Close</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
   </main>
 </Bare>
 
 <style>
   :global(body:has(.snow)) {
     margin: 0;
-    background: #060a12;
+    background: #05080f;
   }
 
   .snow {
+    --ink: #dbe4ef;
+    --muted: #8e9bb0;
+    --hair: rgba(200, 215, 240, 0.14);
+    --ice: #d6ebff;
+    --amber: #f0b35e;
+    --night: #05080f;
+    --mono: var(--font-snow-mono);
+    --serif: var(--font-snow);
     min-height: 100vh;
-    color: #dfe7f1;
-    font-family: var(--font-snow);
+    box-sizing: border-box;
+    color: var(--ink);
+    font-family: var(--serif);
+    background: radial-gradient(ellipse 70% 80% at 36% 50%, #0b1424 0%, #070b15 55%, var(--night) 100%);
     display: grid;
-    grid-template-columns: 1fr 380px;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'stage title'
+      'stage bench';
+    column-gap: 24px;
   }
 
+  .snow :where(button) {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* ---- Title -------------------------------------------------------------------- */
+
+  .title {
+    grid-area: title;
+    padding: 40px 36px 0 8px;
+  }
+
+  .home {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .home:hover,
+  .home:focus-visible {
+    color: var(--ice);
+  }
+
+  h1 {
+    margin: 14px 0 12px;
+    font-weight: 300;
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.015em;
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 36ch;
+    font-size: 15px;
+    line-height: 1.55;
+    color: #b3c0d2;
+  }
+
+  /* ---- Stage -------------------------------------------------------------------- */
+
   .stage {
-    display: grid;
-    place-items: center;
+    grid-area: stage;
     min-height: 100vh;
+    box-sizing: border-box;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 26px;
+    padding: 32px 0 24px 32px;
   }
 
   .eyepiece {
-    width: min(86vh, 58vw);
+    --d: min(76vh, calc(100vw - 520px));
+    position: relative;
+    width: var(--d);
     aspect-ratio: 1;
     border-radius: 50%;
-    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(210, 225, 250, 0.2),
+      0 0 0 12px #080d17,
+      0 0 0 13px rgba(210, 225, 250, 0.08),
+      0 40px 140px rgba(0, 0, 0, 0.7);
+  }
+
+  .eyepiece::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: inset 0 0 70px 14px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
   }
 
   .view {
     display: block;
     width: 100%;
     height: 100%;
+    border-radius: 50%;
+  }
+
+  .graticule {
+    position: absolute;
+    inset: -6.5%;
+    width: 113%;
+    height: 113%;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .graticule line {
+    stroke: rgba(210, 225, 250, 0.22);
+    stroke-width: 0.25;
+  }
+
+  .graticule line.long {
+    stroke: rgba(210, 225, 250, 0.45);
+  }
+
+  .scale {
+    position: absolute;
+    left: 50%;
+    bottom: 7.5%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    color: rgba(235, 243, 255, 0.85);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .bar {
+    display: block;
+    height: 5px;
+    border: 1px solid currentColor;
+    border-top: 0;
+    transition: width 0.3s ease;
+  }
+
+  .bar-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
+
+  .snow[data-light='bright'] .scale {
+    color: rgba(18, 26, 38, 0.8);
+  }
+
+  .eyepiece.flash::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.85), rgba(220, 235, 255, 0.4) 70%);
+    animation: snow-crystals-flash 0.9s ease-out forwards;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  @keyframes snow-crystals-flash {
+    from {
+      opacity: 0.75;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  .notice {
+    position: absolute;
+    inset: 30% 18%;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .notice[hidden] {
+    display: none;
+  }
+
+  .snow[data-broken] .view {
+    background: radial-gradient(circle, #0d1830, #050912);
+  }
+
+  .under {
+    width: var(--d, 100%);
+    max-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 20px;
+  }
+
+  .status {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ice);
+    box-shadow: 0 0 10px rgba(190, 225, 255, 0.8);
+  }
+
+  .snow[data-phase='falling'] .dot {
+    animation: snow-crystals-pulse 1.8s ease-in-out infinite;
+  }
+
+  .snow[data-phase='paused'] .dot {
+    background: var(--amber);
+    box-shadow: none;
+  }
+
+  .snow[data-phase='landed'] .dot {
+    background: #fff;
+    box-shadow: none;
+  }
+
+  @keyframes snow-crystals-pulse {
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  .lights {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .lights legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .light {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 11px 6px 7px;
+    border: 1px solid var(--hair);
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      color 0.15s;
+  }
+
+  .light input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .light:hover {
+    color: var(--ink);
+  }
+
+  .light:has(input:checked) {
+    border-color: rgba(214, 235, 255, 0.6);
+    color: var(--ink);
+    background: rgba(214, 235, 255, 0.06);
+  }
+
+  .light:has(input:focus-visible) {
+    outline: 2px solid var(--ice);
+    outline-offset: 2px;
+  }
+
+  .swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .swatch.rheinberg {
+    background: radial-gradient(circle, #1b3f84 0 42%, #f0b35e 46% 62%, #0f2758 66%);
+  }
+
+  .swatch.dark {
+    background: radial-gradient(circle, #05070b 0 40%, #e9f2ff 44% 58%, #05070b 62%);
+  }
+
+  .swatch.bright {
+    background: radial-gradient(circle, #d8dfe7 0 40%, #4b5868 44% 58%, #c1cad4 62%);
+  }
+
+  .swatch.vapour {
+    background: radial-gradient(circle, #eef5ff 0 26%, #07102a 32%, #1b5a7d 64%, #8cc7d3 100%);
+  }
+
+  .swatch.timeline {
+    background: conic-gradient(#9edbff, #7a85ff, #e673d6, #ffba61, #9edbff);
+  }
+
+  /* ---- Bench -------------------------------------------------------------------- */
+
+  .bench {
+    grid-area: bench;
+    padding: 30px 36px 40px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  h2 {
+    margin: 0;
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 10px;
+    border: 1px solid var(--hair);
+    border-radius: 999px;
+    background: none;
+    font-family: var(--mono) !important;
+    font-size: 11px !important;
+    letter-spacing: 0.04em;
+    color: var(--muted) !important;
+    cursor: pointer;
+  }
+
+  .toggle::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+  }
+
+  .toggle[aria-pressed='true'] {
+    color: var(--ink) !important;
+    border-color: rgba(214, 235, 255, 0.45);
+  }
+
+  .toggle[aria-pressed='true']::before {
+    background: var(--ice);
+    border-color: var(--ice);
+  }
+
+  .pad {
+    position: relative;
+    height: 236px;
+    border-radius: 6px;
+    background: linear-gradient(180deg, rgba(110, 160, 240, 0.07), rgba(110, 160, 240, 0.015));
+    cursor: crosshair;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .pad:focus-visible {
+    outline: 2px solid var(--ice);
+    outline-offset: 3px;
+  }
+
+  .pad canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .readout {
+    margin: 16px 0 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+  }
+
+  .readout div {
+    border-top: 1px solid var(--hair);
+    padding-top: 8px;
+  }
+
+  .readout dt {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .readout dd {
+    margin: 3px 0 0;
+    font-family: var(--mono);
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+
+  .btn {
+    grid-column: span 3;
+    padding: 10px 12px;
+    border: 1px solid rgba(200, 215, 240, 0.24);
+    border-radius: 6px;
+    background: rgba(200, 215, 240, 0.04);
+    font-family: var(--mono) !important;
+    font-size: 12px !important;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition:
+      background 0.15s,
+      border-color 0.15s;
+  }
+
+  .btn:hover:not(:disabled) {
+    background: rgba(200, 215, 240, 0.1);
+    border-color: rgba(200, 215, 240, 0.4);
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--ice);
+    outline-offset: 2px;
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .btn.primary {
+    grid-column: span 6;
+    padding: 13px;
+    font-size: 13px !important;
+    background: var(--ice);
+    border-color: var(--ice);
+    color: #0a1424 !important;
+    font-weight: 500;
+  }
+
+  .btn.primary:hover:not(:disabled) {
+    background: #fff;
+    border-color: #fff;
+  }
+
+  .btn.quiet {
+    border-color: transparent;
+    background: none;
+    color: var(--muted) !important;
+  }
+
+  .btn.quiet:hover:not(:disabled) {
+    color: var(--ink) !important;
+  }
+
+  .btn[aria-pressed='true'] {
+    color: var(--ink) !important;
+    border-color: rgba(214, 235, 255, 0.45);
+  }
+
+  .snow[data-phase='landed'] .btn[data-new] {
+    background: rgba(214, 235, 255, 0.14);
+    border-color: rgba(214, 235, 255, 0.55);
+  }
+
+  .slides {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .slides:empty {
+    display: none;
+  }
+
+  .slides :global(.slide) {
+    position: relative;
+    display: block;
+    width: 58px;
+    height: 58px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #000;
+    cursor: pointer;
+    box-shadow: 0 0 0 1px var(--hair);
+  }
+
+  .slides :global(.slide img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .slides :global(.slide span) {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: #0b1220;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+  }
+
+  .slides :global(.slide:hover),
+  .slides :global(.slide:focus-visible) {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ice);
+  }
+
+  .empty {
+    margin: 10px 0 0;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  .foot {
+    margin-top: auto;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+
+  .link {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: var(--mono) !important;
+    font-size: 11px !important;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ice) !important;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(214, 235, 255, 0.35);
+  }
+
+  /* ---- Notes and slides ------------------------------------------------------- */
+
+  .notes {
+    max-width: min(600px, calc(100vw - 32px));
+    max-height: calc(100vh - 48px);
+    box-sizing: border-box;
+    overflow: auto;
+    padding: 30px 34px 26px;
+    border: 1px solid var(--hair);
+    border-radius: 10px;
+    background: #0a101c;
+    color: var(--ink);
+    font-family: var(--serif);
+    box-shadow: 0 30px 100px rgba(0, 0, 0, 0.6);
+  }
+
+  .notes::backdrop {
+    background: rgba(2, 4, 8, 0.6);
+  }
+
+  .notes h2 {
+    margin-bottom: 14px;
+  }
+
+  .notes p {
+    margin: 0 0 13px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #c3cedc;
+  }
+
+  .notes b {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .notes .small {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    font-size: 20px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .close:hover {
+    color: var(--ink);
+  }
+
+  .slide-dialog {
+    max-width: min(900px, calc(100vw - 32px));
+    padding: 0;
+    border: 1px solid var(--hair);
+    border-radius: 12px;
+    background: #080d17;
+    color: var(--ink);
+    box-shadow: 0 30px 120px rgba(0, 0, 0, 0.7);
+  }
+
+  .slide-dialog::backdrop {
+    background: rgba(2, 4, 8, 0.72);
+  }
+
+  .slide-body {
+    display: grid;
+    grid-template-columns: auto 280px;
+    gap: 28px;
+    padding: 28px;
+    align-items: center;
+  }
+
+  .slide-img {
+    display: block;
+    width: min(460px, 60vh);
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(210, 225, 250, 0.2);
+  }
+
+  .slide-info h2 {
+    font-size: 12px;
+  }
+
+  .slide-info p {
+    margin: 10px 0 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #c3cedc;
+  }
+
+  .slide-info .path-label {
+    margin-top: 22px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .slide-trail {
+    display: block;
+    width: 100%;
+    height: 190px;
+    margin-top: 8px;
+    border-radius: 6px;
+    background: linear-gradient(180deg, rgba(110, 160, 240, 0.07), rgba(110, 160, 240, 0.015));
+  }
+
+  .slide-actions {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+
+  .slide-actions .btn {
+    grid-column: span 2;
+  }
+
+  /* ---- Narrow screens ----------------------------------------------------------- */
+
+  @media (max-width: 900px) {
+    .snow {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto auto;
+      grid-template-areas:
+        'title'
+        'stage'
+        'bench';
+      column-gap: 0;
+      background: radial-gradient(ellipse 120% 50% at 50% 30%, #0b1424 0%, #070b15 60%, var(--night) 100%);
+    }
+
+    .title {
+      padding: 22px 16px 0;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin: 10px 0 10px;
+    }
+
+    .lede {
+      font-size: 14.5px;
+    }
+
+    .stage {
+      min-height: 0;
+      padding: 30px 16px 0;
+      gap: 22px;
+    }
+
+    .eyepiece {
+      --d: min(calc(100vw - 44px), 560px);
+    }
+
+    .under {
+      justify-content: center;
+    }
+
+    .lights {
+      justify-content: center;
+    }
+
+    .bench {
+      padding: 26px 16px 32px;
+    }
+
+    .slide-body {
+      grid-template-columns: 1fr;
+      padding: 18px;
+      gap: 16px;
+      justify-items: center;
+    }
+
+    .slide-img {
+      width: min(100%, 52vh);
+    }
+
+    .slide-info {
+      width: 100%;
+    }
+
+    .slide-trail {
+      height: 150px;
+    }
   }
 </style>
 
