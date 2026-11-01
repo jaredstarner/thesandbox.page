@@ -1,0 +1,40 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Snow crystals"
+  description="Grow a snow crystal under the microscope while it falls through a cloud you steer, then catch it on a slide and keep it."
+>
+  <Font cssVariable="--font-snow" slot="head" />
+  <Font cssVariable="--font-snow-mono" slot="head" />
+
+  <main class="snow" data-snow>
+    <section class="stage" data-stage>
+      <div class="eyepiece">
+        <canvas class="view" data-view aria-label="The growing snow crystal under the microscope"></canvas>
+      </div>
+    </section>
+
+    <aside class="bench">
+      <header class="title">
+        <a class="home" href="/">thesandbox.page</a>
+        <h1>Snow crystals</h1>
+      </header>
+    </aside>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.snow)) {
+    margin: 0;
+    background: #060a12;
+  }
+
+  .snow {
+    min-height: 100vh;
+    color: #dfe7f1;
+    font-family: var(--font-snow);
+  }
+</style>

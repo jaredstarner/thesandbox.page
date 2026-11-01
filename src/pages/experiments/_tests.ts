@@ -250,6 +250,18 @@ export const TECHNIQUES: Record<string, Technique> = {
     },
     context: display,
   },
+  'color-buffer-float': {
+    label: 'Float render targets',
+    handling: 'Keeps its working numbers in GPU memory.',
+    test: () => {
+      const gl = context('webgl2') as WebGL2RenderingContext | null;
+      if (!gl) return { state: 'absent', detail: 'no WebGL 2 context' };
+      const ok = gl.getExtension('EXT_color_buffer_float') !== null;
+      releaseGl(gl);
+      return present(ok, 'EXT_color_buffer_float present', 'EXT_color_buffer_float missing');
+    },
+    context: display,
+  },
   webgpu: {
     label: 'WebGPU',
     webFeature: 'webgpu',
@@ -521,6 +533,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   'monte-carlo': { label: 'Monte Carlo transport' },
   opentype: { label: 'OpenType font writing' },
   iiif: { label: 'IIIF Image API' },
+  'crystal-growth': { label: 'Crystal growth' },
+  'coupled-lattice-map': { label: 'Coupled lattice map' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
