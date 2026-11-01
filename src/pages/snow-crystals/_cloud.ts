@@ -9,15 +9,59 @@ export type Trail = [number, number, number][];
 /** Plot margins in CSS pixels. */
 const M = { l: 30, r: 10, t: 10, b: 26 };
 
-const REGIONS: { label: string; t: number; v: number; rt: number; rv: number; tint: string }[] = [
-  { label: 'fernlike', t: -15, v: 0.87, rt: 1.5, rv: 0.15, tint: '120, 175, 255' },
-  { label: 'stellar dendrites', t: -15, v: 0.5, rt: 2.3, rv: 0.27, tint: '120, 165, 245' },
-  { label: 'sectored', t: -15, v: 0.1, rt: 2.1, rv: 0.12, tint: '160, 195, 245' },
-  { label: 'stellar plates', t: -12.5, v: 0.74, rt: 1.15, rv: 0.24, tint: '170, 205, 250' },
-  { label: 'stellar plates', t: -17.5, v: 0.74, rt: 1.15, rv: 0.24, tint: '170, 205, 250' },
-  { label: 'plates', t: -10.9, v: 0.3, rt: 1.0, rv: 0.32, tint: '210, 228, 250' },
-  { label: 'plates', t: -19.1, v: 0.3, rt: 1.0, rv: 0.32, tint: '210, 228, 250' },
+type Habit = 'fern' | 'dendrite' | 'sectored' | 'stellarPlate' | 'plate';
+
+/** Where this page's crystals take each habit, marked as on a Nakaya diagram. */
+const HABITS: { label: string; kind: Habit; t: number; v: number }[] = [
+  { label: 'fernlike', kind: 'fern', t: -15, v: 0.86 },
+  { label: 'stellar dendrites', kind: 'dendrite', t: -15, v: 0.52 },
+  { label: 'sectored plates', kind: 'sectored', t: -15, v: 0.17 },
+  { label: 'stellar plates', kind: 'stellarPlate', t: -12.4, v: 0.72 },
+  { label: 'stellar plates', kind: 'stellarPlate', t: -17.6, v: 0.72 },
+  { label: 'plates', kind: 'plate', t: -10.9, v: 0.3 },
+  { label: 'plates', kind: 'plate', t: -19.1, v: 0.3 },
 ];
+
+/** A small line drawing of a habit, `r` across its arms. */
+function glyph(ctx: CanvasRenderingContext2D, kind: Habit, cx: number, cy: number, r: number) {
+  const at = (a: number, d: number): [number, number] => [cx + Math.cos(a) * d, cy + Math.sin(a) * d];
+  const line = (p: [number, number], q: [number, number]) => {
+    ctx.moveTo(p[0], p[1]);
+    ctx.lineTo(q[0], q[1]);
+  };
+  const hex = (x: number, y: number, rr: number, turn: number) => {
+    for (let k = 0; k <= 6; k++) {
+      const a = turn + (k * Math.PI) / 3;
+      if (k === 0) ctx.moveTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+      else ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+    }
+  };
+  ctx.beginPath();
+  for (let k = 0; k < 6; k++) {
+    const a = -Math.PI / 2 + (k * Math.PI) / 3;
+    if (kind === 'plate' || kind === 'sectored') {
+      if (k === 0) hex(cx, cy, r, -Math.PI / 2);
+      if (kind === 'sectored') line([cx, cy], at(a, r));
+      continue;
+    }
+    line([cx, cy], at(a, r));
+    if (kind === 'stellarPlate') {
+      const [x, y] = at(a, r * 0.78);
+      hex(x, y, r * 0.24, -Math.PI / 2);
+      continue;
+    }
+    const twigs = kind === 'fern' ? [0.3, 0.45, 0.6, 0.75, 0.88] : [0.45, 0.72];
+    for (const f of twigs) {
+      const base = at(a, r * f);
+      const len = r * (kind === 'fern' ? 0.22 : 0.3) * (1.1 - f * 0.5);
+      for (const side of [-1, 1]) {
+        const b = a + (side * Math.PI) / 3;
+        line(base, [base[0] + Math.cos(b) * len, base[1] + Math.sin(b) * len]);
+      }
+    }
+  }
+  ctx.stroke();
+}
 
 const STOPS: [number, number, number][] = [
   [0.62, 0.86, 1.0],
@@ -64,31 +108,6 @@ export function drawCloud(
   const y1 = h - M.b * s;
   ctx.clearRect(0, 0, w, h);
 
-  // The habits, as soft patches.
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(x0, y0, x1 - x0, y1 - y0);
-  ctx.clip();
-  for (const r of REGIONS) {
-    const cx = xOf(r.t, x0, x1);
-    const cy = yOf(r.v, y0, y1);
-    const rx = (Math.abs(r.rt) / (T_WARM - T_COLD)) * (x1 - x0);
-    const ry = r.rv * (y1 - y0);
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.scale(rx, ry);
-    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-    g.addColorStop(0, `rgba(${r.tint}, 0.16)`);
-    g.addColorStop(0.7, `rgba(${r.tint}, 0.07)`);
-    g.addColorStop(1, `rgba(${r.tint}, 0)`);
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(0, 0, 1, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-  ctx.restore();
-
   // Grid and frame.
   ctx.lineWidth = s;
   ctx.strokeStyle = 'rgba(200, 215, 240, 0.08)';
@@ -104,12 +123,20 @@ export function drawCloud(
   ctx.strokeStyle = 'rgba(200, 215, 240, 0.22)';
   ctx.strokeRect(x0 + 0.5, y0 + 0.5, x1 - x0 - 1, y1 - y0 - 1);
 
-  // Labels.
-  ctx.textBaseline = 'middle';
+  // The habits.
+  ctx.textBaseline = 'top';
   ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(205, 222, 245, 0.62)';
-  ctx.font = `italic 300 ${11 * s}px Literata, Georgia, serif`;
-  for (const r of REGIONS) ctx.fillText(r.label, xOf(r.t, x0, x1), yOf(r.v, y0, y1));
+  ctx.font = `italic 300 ${10.5 * s}px Literata, Georgia, serif`;
+  ctx.lineWidth = 0.9 * s;
+  ctx.lineCap = 'round';
+  for (const h of HABITS) {
+    const x = xOf(h.t, x0, x1);
+    const y = yOf(h.v, y0, y1);
+    ctx.strokeStyle = 'rgba(205, 222, 245, 0.5)';
+    glyph(ctx, h.kind, x, y - 5 * s, 7.5 * s);
+    ctx.fillStyle = 'rgba(205, 222, 245, 0.6)';
+    ctx.fillText(h.label, x, y + 6 * s);
+  }
   ctx.font = `400 ${9.5 * s}px "Spline Sans Mono", ui-monospace, monospace`;
   ctx.fillStyle = 'rgba(160, 176, 198, 0.9)';
   ctx.textBaseline = 'top';

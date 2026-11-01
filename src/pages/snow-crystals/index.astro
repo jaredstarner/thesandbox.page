@@ -25,7 +25,7 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
       <h1>Snow crystals</h1>
       <p class="lede">
         A snow crystal grows as it falls, and its six arms grow alike because they meet the same air at the same
-        moment. Steer it through the cloud, or let it drift, and every change of air is written into all six arms.
+        moment. Steer it through the cloud, or let it drift, and watch each change of air show up in all six arms.
       </p>
     </header>
 
@@ -93,7 +93,7 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
         </div>
         <dl class="readout">
           <div><dt>Air</dt><dd data-out-temp>−14.0 °C</dd></div>
-          <div><dt>Vapour</dt><dd data-out-vapour>0.450</dd></div>
+          <div><dt>Vapour density</dt><dd data-out-vapour>0.45</dd></div>
           <div><dt>Falling for</dt><dd data-out-fall>0 s</dd></div>
           <div><dt>Across</dt><dd data-out-size>a few µm</dd></div>
         </dl>
@@ -249,18 +249,18 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
   /* ---- Stage -------------------------------------------------------------------- */
 
   .stage {
+    --d: min(74vh, calc(100vw - 540px));
     grid-area: stage;
     min-height: 100vh;
     box-sizing: border-box;
     display: grid;
     place-content: center;
     justify-items: center;
-    gap: 26px;
+    gap: calc(var(--d) * 0.07 + 14px);
     padding: 32px 0 24px 32px;
   }
 
   .eyepiece {
-    --d: min(76vh, calc(100vw - 520px));
     position: relative;
     width: var(--d);
     aspect-ratio: 1;
@@ -939,8 +939,8 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
       gap: 22px;
     }
 
-    .eyepiece {
-      --d: min(calc(100vw - 44px), 560px);
+    .stage {
+      --d: min(calc(100vw - 52px), 560px);
     }
 
     .under {

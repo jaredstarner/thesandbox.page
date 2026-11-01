@@ -108,8 +108,9 @@ export function start(root: HTMLElement): void {
   let params: Params = paramsAt(weather);
   let phase: Phase = 'falling';
   let path: Trail = [];
-  let view = 26;
-  let capacity = 8;
+  let view = 64;
+  let capacity = 24;
+  let avg = 1000 / 60;
   let atCapacity = false;
   let owed = 0;
   let fast = false;
@@ -142,7 +143,7 @@ export function start(root: HTMLElement): void {
     params = paramsAt(weather);
     lattice.reset(params.rho, seed32());
     path = [[weather.t, weather.v, 0]];
-    view = 26;
+    view = 64;
     rate = 0.02;
     lastReading = { r: 0, t: 0 };
     owed = 0;
@@ -219,9 +220,11 @@ export function start(root: HTMLElement): void {
       lastReading = { r: lattice.radius, t: lattice.radiusAt };
     }
     if (phase === 'falling') {
-      // Hunt for the most updates a frame the GPU keeps up with.
-      if (atCapacity && dt <= period * 1.3) capacity = Math.min(600, Math.ceil(capacity * 1.08));
-      else if (dt > period * 1.7) capacity = Math.max(1, Math.floor(capacity * 0.8));
+      // Hunt for the most updates a frame the GPU keeps up with, judged on smoothed frame
+      // times so one slow frame doesn't throw it back.
+      avg += (dt - avg) * 0.15;
+      if (atCapacity && avg <= period * 1.3) capacity = Math.min(600, Math.ceil(capacity * 1.12));
+      else if (avg > period * 1.7) capacity = Math.max(1, Math.floor(capacity * 0.85));
       owed += (pace() * dt) / 1000;
       let n = Math.floor(owed);
       atCapacity = n >= capacity;
@@ -234,7 +237,7 @@ export function start(root: HTMLElement): void {
       // Let the chart answer even while the crystal is held.
       params = paramsAt(weather);
     }
-    const goal = Math.max(26, lattice.radius * 1.18 + 6);
+    const goal = Math.max(64, lattice.radius * 1.18 + 6);
     view += (goal - view) * Math.min(1, dt / 400);
     lattice.prepare();
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
