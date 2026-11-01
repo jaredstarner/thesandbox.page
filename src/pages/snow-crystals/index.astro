@@ -21,38 +21,40 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
 
   <main class="snow" data-snow data-light="rheinberg" data-phase="falling">
     <header class="title">
-      <a class="home" href="/">thesandbox.page</a>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
       <h1>Snow crystals</h1>
       <p class="lede">
-        A snow crystal grows as it falls, and its six arms grow alike because they meet the same air at the same
-        moment. Steer it through the cloud, or let it drift, and watch each change of air show up in all six arms.
+        A snow crystal grows as it falls, and its six arms grow alike because they meet the same air at the same moment.
+        Steer it through the cloud, or let it drift, and watch each change of air show up in all six arms.
       </p>
     </header>
 
     <section class="stage" aria-label="Microscope">
       <div class="eyepiece" data-eyepiece>
         <svg class="graticule" viewBox="-100 -100 200 200" aria-hidden="true">
-          {
-            TICKS.map((i) => {
-              const a = (i / 72) * Math.PI * 2;
-              const long = i % 6 === 0;
-              const r0 = long ? 101.4 : 102.2;
-              return (
-                <line
-                  x1={(Math.cos(a) * r0).toFixed(2)}
-                  y1={(Math.sin(a) * r0).toFixed(2)}
-                  x2={(Math.cos(a) * 104).toFixed(2)}
-                  y2={(Math.sin(a) * 104).toFixed(2)}
-                  class={long ? 'long' : undefined}
-                />
-              );
-            })
-          }
+          {TICKS.map((i) => {
+            const a = (i / 72) * Math.PI * 2;
+            const long = i % 6 === 0;
+            const r0 = long ? 101.4 : 102.2;
+            return (
+              <line
+                x1={(Math.cos(a) * r0).toFixed(2)}
+                y1={(Math.sin(a) * r0).toFixed(2)}
+                x2={(Math.cos(a) * 104).toFixed(2)}
+                y2={(Math.sin(a) * 104).toFixed(2)}
+                class={long ? 'long' : undefined}
+              />
+            );
+          })}
         </svg>
         <canvas class="view" data-view aria-label="The snow crystal under the microscope"></canvas>
         <div class="scale" aria-hidden="true">
           <span class="bar" data-bar></span>
-          <span class="bar-label" data-bar-label>100 µm</span>
+          <span class="bar-label" data-bar-label>
+            100 µm
+          </span>
         </div>
         <p class="notice" data-notice hidden>
           This microscope needs WebGL 2 with float render targets, which this browser doesn't offer.
@@ -60,18 +62,19 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
       </div>
 
       <div class="under">
-        <p class="status" aria-live="polite"><span class="dot"></span><span data-status>Falling through the cloud</span></p>
+        <p class="status" aria-live="polite">
+          <span class="dot"></span>
+          <span data-status>Falling through the cloud</span>
+        </p>
         <fieldset class="lights">
           <legend>Light</legend>
-          {
-            LIGHTS.map((l, i) => (
-              <label class="light">
-                <input type="radio" name="light" value={l.value} checked={i === 0} />
-                <span class={`swatch ${l.value}`} aria-hidden="true" />
-                <span>{l.label}</span>
-              </label>
-            ))
-          }
+          {LIGHTS.map((l, i) => (
+            <label class="light">
+              <input type="radio" name="light" value={l.value} checked={i === 0} />
+              <span class={`swatch ${l.value}`} aria-hidden="true" />
+              <span>{l.label}</span>
+            </label>
+          ))}
         </fieldset>
       </div>
     </section>
@@ -80,7 +83,9 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
       <section class="cloud" aria-labelledby="snow-cloud-h">
         <div class="row">
           <h2 id="snow-cloud-h">The cloud</h2>
-          <button type="button" class="toggle" data-drift aria-pressed="true">Drift</button>
+          <button type="button" class="toggle" data-drift aria-pressed="true">
+            Drift
+          </button>
         </div>
         <div
           class="pad"
@@ -92,62 +97,89 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
           <canvas data-pad-canvas aria-hidden="true"></canvas>
         </div>
         <dl class="readout">
-          <div><dt>Air</dt><dd data-out-temp>−14.0 °C</dd></div>
-          <div><dt>Vapour density</dt><dd data-out-vapour>0.45</dd></div>
-          <div><dt>Falling for</dt><dd data-out-fall>0 s</dd></div>
-          <div><dt>Across</dt><dd data-out-size>a few µm</dd></div>
+          <div>
+            <dt>Air</dt>
+            <dd data-out-temp>−14.0 °C</dd>
+          </div>
+          <div>
+            <dt>Vapour density</dt>
+            <dd data-out-vapour>0.45</dd>
+          </div>
+          <div>
+            <dt>Falling for</dt>
+            <dd data-out-fall>0 s</dd>
+          </div>
+          <div>
+            <dt>Across</dt>
+            <dd data-out-size>a few µm</dd>
+          </div>
         </dl>
       </section>
 
       <div class="actions">
-        <button type="button" class="btn primary" data-catch>Catch it</button>
-        <button type="button" class="btn" data-pause>Pause</button>
-        <button type="button" class="btn" data-new>New crystal</button>
-        <button type="button" class="btn quiet" data-fast aria-pressed="false">Faster</button>
-        <button type="button" class="btn quiet" data-save>Save picture</button>
+        <button type="button" class="btn primary" data-catch>
+          Catch it
+        </button>
+        <button type="button" class="btn" data-pause>
+          Pause
+        </button>
+        <button type="button" class="btn" data-new>
+          New crystal
+        </button>
+        <button type="button" class="btn quiet" data-fast aria-pressed="false">
+          Faster
+        </button>
+        <button type="button" class="btn quiet" data-save>
+          Save picture
+        </button>
       </div>
 
       <section class="box" aria-labelledby="snow-box-h">
         <h2 id="snow-box-h">Slides</h2>
         <ol class="slides" data-slides></ol>
-        <p class="empty" data-empty>Catch a crystal and it stays here, in this browser.</p>
+        <p class="empty" data-empty>
+          Catch a crystal and it stays here, in this browser.
+        </p>
       </section>
 
       <footer class="foot">
-        <button type="button" class="link" popovertarget="snow-notes">How it grows</button>
+        <button type="button" class="link" popovertarget="snow-notes">
+          How it grows
+        </button>
         <span>After Gravner and Griffeath, 2008</span>
       </footer>
     </aside>
 
     <div class="notes" id="snow-notes" popover>
-      <button type="button" class="close" popovertarget="snow-notes" popovertargetaction="hide" aria-label="Close"
-        >×</button
-      >
+      <button type="button" class="close" popovertarget="snow-notes" popovertargetaction="hide" aria-label="Close">
+        ×
+      </button>
       <h2>How it grows</h2>
       <p>
-        The crystal is grown with the lattice model of snow crystal growth that Janko Gravner and David Griffeath published
-        in <i>Physica D</i> in 2008. Each cell of a hexagonal lattice, a few microns across, holds four things: whether it
-        belongs to the crystal yet, a film of quasi-liquid, ice, and water vapour. Each update, the vapour spreads to
-        neighbouring cells, freezes where it touches the crystal, and a cell joins the crystal once it holds enough.
+        The crystal is grown with the lattice model of snow crystal growth that Janko Gravner and David Griffeath
+        published in <i>Physica D</i> in 2008. Each cell of a hexagonal lattice, a few microns across, holds four
+        things: whether it belongs to the crystal yet, a film of quasi-liquid, ice, and water vapour. Each update, the
+        vapour spreads to neighbouring cells, freezes where it touches the crystal, and a cell joins the crystal once it
+        holds enough.
       </p>
       <p>
-        The thresholds make the shapes. A cell at a tip or on a flat face, with one or two crystal neighbours, needs more
-        to join than a cell in a hollow with three. Tips reach further into the vapour and grow faster, which makes
-        branches; the higher threshold on flat faces keeps edges straight, which makes plates. Where the vapour runs thin
-        between arms, a thin sheet can still spread, and that fills in plates long after the arms have run ahead.
+        The thresholds make the shapes. A cell at a tip or on a flat face, with one or two crystal neighbours, needs
+        more to join than a cell in a hollow with three. Tips reach further into the vapour and grow faster, which makes
+        branches; the higher threshold on flat faces keeps edges straight, which makes plates. Where the vapour runs
+        thin between arms, a thin sheet can still spread, and that fills in plates long after the arms have run ahead.
       </p>
       <p>
         The cloud chart covers −10 to −20 °C, where snow grows as thin plates. Following the Nakaya diagram, the wettest
-        air near −15 °C grows the most branched crystals and the fastest, while drier air and the edges of the range grow
-        faceted plates. Moving through the chart changes the vapour around the crystal and the rates at which its edge
-        freezes and melts. Where each habit sits on the chart is this page's placement of the paper's parameters, not a
-        measurement.
+        air near −15 °C grows the most branched crystals and the fastest, while drier air and the edges of the range
+        grow faceted plates. Moving through the chart changes the vapour around the crystal and the rates at which its
+        edge freezes and melts. Where each habit sits on the chart is this page's placement of the paper's parameters,
+        not a measurement.
       </p>
       <p>
         <b>Rheinberg</b> light has a blue stop in the middle and an amber ring around it: flat ice passes the blue, and
         slopes in the ice bend the ring's light into view. <b>Dark field</b> shows only the light the crystal scatters,
-        and <b>bright field</b> only what it bends away. <b>Vapour</b> shows the air the arms have drawn thin,
-        and <b>timeline</b> colours the ice by when it froze, in the same colours as the path on the chart.
+        and <b>bright field</b> only what it bends away. <b>Vapour</b> shows the air the arms have drawn thin, and{' '}
+        <b>timeline</b> colours the ice by when it froze, in the same colours as the path on the chart.
       </p>
       <p class="small">
         A cell stands for 5 µm and an update for 0.03 s, the paper's order of magnitude. The microscope speeds growth up
@@ -159,14 +191,22 @@ const TICKS = Array.from({ length: 72 }, (_, i) => i);
       <div class="slide-body">
         <img class="slide-img" data-d-img alt="A snow crystal caught on a slide" width="640" height="640" />
         <div class="slide-info">
-          <h2 id="snow-slide-no" data-d-no>Slide</h2>
+          <h2 id="snow-slide-no" data-d-no>
+            Slide
+          </h2>
           <p data-d-meta></p>
           <p class="path-label">Its path through the cloud</p>
           <canvas class="slide-trail" data-d-trail aria-hidden="true"></canvas>
           <div class="slide-actions">
-            <button type="button" class="btn" data-d-save>Save</button>
-            <button type="button" class="btn quiet" data-d-remove>Remove</button>
-            <button type="button" class="btn quiet" data-d-close>Close</button>
+            <button type="button" class="btn" data-d-save>
+              Save
+            </button>
+            <button type="button" class="btn quiet" data-d-remove>
+              Remove
+            </button>
+            <button type="button" class="btn quiet" data-d-close>
+              Close
+            </button>
           </div>
         </div>
       </div>

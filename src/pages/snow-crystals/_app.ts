@@ -62,7 +62,7 @@ export const formatFall = (seconds: number): string => {
 };
 
 export const formatSize = (mm: number): string =>
-  mm < 1 ? `${Math.round(mm * 1000 / 10) * 10} µm` : `${mm.toFixed(mm < 10 ? 2 : 1)} mm`;
+  mm < 1 ? `${Math.round((mm * 1000) / 10) * 10} µm` : `${mm.toFixed(mm < 10 ? 2 : 1)} mm`;
 
 const formatTemp = (t: number) => `${t < 0 ? '−' : ''}${Math.abs(t).toFixed(1)} °C`;
 
@@ -390,8 +390,7 @@ export function start(root: HTMLElement): void {
     else if (t.closest('[data-d-save]') && open) {
       const ext = open.img.startsWith('data:image/webp') ? 'webp' : 'jpg';
       download(open.img, `snow-crystal-${stamp(open.at)}.${ext}`);
-    }
-    else if (t.closest('[data-d-remove]') && open) {
+    } else if (t.closest('[data-d-remove]') && open) {
       const id = open.id;
       slides = slides.filter((s) => s.id !== id);
       save(slides);
