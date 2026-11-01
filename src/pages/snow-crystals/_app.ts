@@ -129,7 +129,8 @@ export function start(root: HTMLElement): void {
     root.dataset.phase = p;
     pauseBtn.textContent = p === 'paused' ? 'Resume' : 'Pause';
     pauseBtn.disabled = p === 'landed';
-    catchBtn.disabled = p === 'landed';
+    // Once it has landed, the main button grows the next one.
+    catchBtn.textContent = p === 'landed' ? 'Grow another' : 'Catch it';
     status.textContent =
       p === 'falling' ? 'Falling through the cloud' : p === 'paused' ? 'Held in the air' : 'Landed on the slide';
   };
@@ -386,7 +387,10 @@ export function start(root: HTMLElement): void {
   dialog.addEventListener('click', (e) => {
     const t = e.target as Element;
     if (t === dialog || t.closest('[data-d-close]')) dialog.close();
-    else if (t.closest('[data-d-save]') && open) download(open.img, `snow-crystal-${stamp(open.at)}.webp`);
+    else if (t.closest('[data-d-save]') && open) {
+      const ext = open.img.startsWith('data:image/webp') ? 'webp' : 'jpg';
+      download(open.img, `snow-crystal-${stamp(open.at)}.${ext}`);
+    }
     else if (t.closest('[data-d-remove]') && open) {
       const id = open.id;
       slides = slides.filter((s) => s.id !== id);
@@ -403,7 +407,7 @@ export function start(root: HTMLElement): void {
     if (phase === 'falling') setPhase('paused');
     else if (phase === 'paused') setPhase('falling');
   });
-  catchBtn.addEventListener('click', () => land());
+  catchBtn.addEventListener('click', () => (phase === 'landed' ? begin() : land()));
   newBtn.addEventListener('click', () => begin());
   fastBtn.addEventListener('click', () => {
     fast = !fast;
