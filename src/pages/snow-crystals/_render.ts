@@ -102,10 +102,10 @@ void main() {
   vec2 g = vec2(gx, gy) / (2.0 * e);
   // Slopes inside the plate come from its thickness; the edge itself is drawn as a line a
   // couple of pixels wide at any zoom, brighter where the edge is thick.
-  float interior = smoothstep(0.8, 0.97, here.a);
+  float interior = smoothstep(0.62, 0.95, here.a);
   g *= interior;
   float slope = length(g);
-  float rim = inward > -1.0 ? exp(-max(inward, 0.0) / 1.5) * clamp(0.4 + 0.45 * h, 0.0, 1.0) : 0.0;
+  float rim = inward > -1.0 ? exp(-max(inward, 0.0) / 2.2) * clamp(0.4 + 0.45 * h, 0.0, 1.0) : 0.0;
   float bend = max(1.0 - exp(-slope * 2.6), rim);
   vec3 n = normalize(vec3(-g * 1.4, 1.0));
   vec3 L = normalize(vec3(-0.45, 0.55, 0.7));
