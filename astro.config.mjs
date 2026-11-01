@@ -460,5 +460,24 @@ export default defineConfig({
       subsets: ['latin', 'latin-ext'],
       fallbacks: ['Georgia', 'serif'],
     },
+    // /snow-crystals/: a book face for the slide labels and notes, and a monospace for the stage readouts.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Literata',
+      cssVariable: '--font-snow',
+      weights: ['200 900'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Spline Sans Mono',
+      cssVariable: '--font-snow-mono',
+      weights: ['300 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });

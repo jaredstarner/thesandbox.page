@@ -1,0 +1,8 @@
+{
+  "title": "Snow crystals",
+  "summary": "A snow crystal growing under a microscope as it falls through a cloud you steer: send it into wetter or colder air and all six arms branch, facet, or spread into plates together, then catch it on a slide and keep it.",
+  "date": "2026-11-01",
+  "tags": ["webgl2", "color-buffer-float", "crystal-growth", "coupled-lattice-map", "svg", "pointer-events", "popover"],
+  "requires": ["webgl2", "color-buffer-float"],
+  "plot": 31
+}
