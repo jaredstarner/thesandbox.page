@@ -32,113 +32,128 @@ const LOOKS = [
     <div class="scrim bottom" aria-hidden="true"></div>
 
     <header class="title">
-      <a class="home" href="/">thesandbox.page</a>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
       <h1>Cupola</h1>
       <p class="lede">The view down from the International Space Station, wherever it is right now.</p>
     </header>
 
     <section class="clock" aria-label="Time on board">
-      <p class="utc"><span data-time>--:--:--</span><span class="unit">UTC</span></p>
-      <p class="date"><span class="lapse">Time-lapse · </span><span data-date></span></p>
-      <p class="next" data-next>Finding the station</p>
-    </section>
-
-    <section class="where" aria-live="polite">
-      <p class="over"><span class="label">Over</span> <span data-over>…</span></p>
-      <p class="fix">
-        <span data-latlon></span><span class="sep">·</span><span data-alt></span><span class="sep">·</span><span
-          data-speedo></span>
+      <p class="utc">
+        <span data-time>--:--:--</span>
+        <span class="unit">UTC</span>
       </p>
-      <p class="notice" data-notice hidden></p>
+      <p class="date">
+        <span class="lapse">Time-lapse · </span>
+        <span data-date></span>
+      </p>
+      <p class="next" data-next>
+        Finding the station
+      </p>
     </section>
 
-    <figure class="map" aria-label="Ground track for the next orbit">
-      <svg viewBox="-180 -90 360 180" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-          <path id="cupola-land" data-land d={land}></path>
-        </defs>
-        <rect class="sea" x="-180" y="-90" width="360" height="180"></rect>
-        <g class="land">
-          <use href="#cupola-land" x="-360"></use>
-          <use href="#cupola-land"></use>
-          <use href="#cupola-land" x="360"></use>
-        </g>
-        <path class="night" data-night></path>
-        <path class="track past" data-past></path>
-        <path class="track ahead" data-ahead></path>
-        <circle class="station-halo" data-station-halo r="7"></circle>
-        <circle class="station" data-station r="3.2"></circle>
-      </svg>
-      <figcaption>Ground track · next orbit</figcaption>
-    </figure>
+    <div class="deck">
+      <section class="where" aria-live="polite">
+        <p class="over">
+          <span class="label">Over</span> <span data-over>…</span>
+        </p>
+        <p class="fix">
+          <span data-latlon></span>
+          <span class="sep">·</span>
+          <span data-alt></span>
+          <span class="sep">·</span>
+          <span data-speedo></span>
+        </p>
+        <p class="notice" data-notice hidden></p>
+      </section>
 
-    <nav class="controls" aria-label="View">
-      <div class="group" role="group" aria-label="Lens">
-        {
-          LENSES.map((mm) => (
+      <figure class="map" aria-label="Ground track for the next orbit">
+        <svg viewBox="-180 -90 360 180" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <path id="cupola-land" data-land d={land}></path>
+          </defs>
+          <rect class="sea" x="-180" y="-90" width="360" height="180"></rect>
+          <g class="land">
+            <use href="#cupola-land" x="-360"></use>
+            <use href="#cupola-land"></use>
+            <use href="#cupola-land" x="360"></use>
+          </g>
+          <path class="night" data-night></path>
+          <path class="track past" data-past></path>
+          <path class="track ahead" data-ahead></path>
+          <circle class="station-halo" data-station-halo r="7"></circle>
+          <circle class="station" data-station r="3.2"></circle>
+        </svg>
+        <figcaption>Ground track · next orbit</figcaption>
+      </figure>
+
+      <nav class="controls" aria-label="View">
+        <div class="group" role="group" aria-label="Lens">
+          {LENSES.map((mm) => (
             <button type="button" data-lens={mm} aria-pressed={mm === 28 ? 'true' : 'false'}>
               {mm}
               <small>mm</small>
             </button>
-          ))
-        }
-      </div>
-      <div class="group" role="group" aria-label="Speed">
-        {
-          SPEEDS.map((s) => (
+          ))}
+        </div>
+        <div class="group" role="group" aria-label="Speed">
+          {SPEEDS.map((s) => (
             <button type="button" data-speed={s.value} aria-pressed={s.value === 1 ? 'true' : 'false'}>
               {s.label}
             </button>
-          ))
-        }
-      </div>
-      <div class="group" role="group" aria-label="Look">
-        {
-          LOOKS.map((l) => (
+          ))}
+        </div>
+        <div class="group" role="group" aria-label="Look">
+          {LOOKS.map((l) => (
             <button type="button" data-look={l.value}>
               {l.label}
             </button>
-          ))
-        }
-      </div>
-      <button type="button" class="about-button" popovertarget="cupola-about">About</button>
-    </nav>
+          ))}
+        </div>
+        <button type="button" class="about-button" popovertarget="cupola-about">
+          About
+        </button>
+      </nav>
+    </div>
 
     <div class="about" id="cupola-about" popover>
       <h2>The view from the cupola</h2>
       <p>
         The cupola is the station’s bay window: seven panes on the side that always faces the Earth, 420 km up. From
-        there the planet slides past at about 28,000 km an hour, one orbit every hour and a half, sixteen sunrises a day.
-        Drag to look around; scroll or pinch to change the lens.
+        there the planet slides past at about 28,000 km an hour, one orbit every hour and a half, sixteen sunrises a
+        day. Drag to look around; scroll or pinch to change the lens.
       </p>
       <p>
-        The station is where its latest orbital elements put it, flown forward with SGP4, the model the trackers use. This
-        page is using <span data-source>the latest element set</span>.
+        The station is where its latest orbital elements put it, flown forward with SGP4, the model the trackers use.
+        This page is using <span data-source>the latest element set</span>.
       </p>
       <p>
-        The ground is a mosaic of pictures NASA’s weather satellites took on <span data-day>yesterday</span>. Their VIIRS
-        cameras sweep the whole sunlit Earth each day around half past one in the afternoon, local time, so the clouds are a
-        day old, lit by today’s sun. Where a day’s swaths miss, the gap is filled from the Blue Marble.
+        The ground is a mosaic of pictures NASA’s weather satellites took on <span data-day>yesterday</span>. Their
+        VIIRS cameras sweep the whole sunlit Earth each day around half past one in the afternoon, local time, so the
+        clouds are a day old, lit by today’s sun. Where a day’s swaths miss, the gap is filled from the Blue Marble.
       </p>
       <p>
-        On the night side, the city lights are NASA’s Black Marble, the auroras follow NOAA’s OVATION forecast for the next
-        half hour, and a thin green line of airglow sits 95 km up, as it does in the crew’s night photographs. The air
-        itself is computed: sunlight scattered by molecules and haze, with ozone taking out some orange, which turns the
-        limb blue and the terminator red.
+        On the night side, the city lights are NASA’s Black Marble, the auroras follow NOAA’s OVATION forecast for the
+        next half hour, and a thin green line of airglow sits 95 km up, as it does in the crew’s night photographs. The
+        air itself is computed: sunlight scattered by molecules and haze, with ozone taking out some orange, which turns
+        the limb blue and the terminator red.
       </p>
       <h3>Credits</h3>
       <ul>
         <li>
           Imagery from NASA’s Global Imagery Browse Services (GIBS), part of NASA’s Earth Science Data and Information
-          System (ESDIS): VIIRS Corrected Reflectance (NASA LANCE), Blue Marble Next Generation and Black Marble (NASA Earth
-          Observatory)
+          System (ESDIS): VIIRS Corrected Reflectance (NASA LANCE), Blue Marble Next Generation and Black Marble (NASA
+          Earth Observatory)
         </li>
         <li>Coastline water mask © OpenStreetMap contributors, through GIBS</li>
         <li>Orbital elements from CelesTrak; orbit propagation by satellite.js</li>
         <li>Aurora forecast from NOAA’s Space Weather Prediction Center</li>
         <li>Land and borders from Natural Earth</li>
       </ul>
-      <button type="button" class="close" popovertarget="cupola-about" popovertargetaction="hide">Close</button>
+      <button type="button" class="close" popovertarget="cupola-about" popovertargetaction="hide">
+        Close
+      </button>
     </div>
 
     <script is:inline type="application/json" data-where set:html={where} />
@@ -286,11 +301,27 @@ const LOOKS = [
     letter-spacing: 0.04em;
   }
 
-  .where {
+  .deck {
     position: absolute;
     left: 32px;
-    bottom: 92px;
-    max-width: min(46rem, calc(100% - 380px));
+    right: 32px;
+    bottom: 26px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-areas:
+      'where map'
+      'controls controls';
+    gap: 22px 32px;
+    align-items: end;
+    pointer-events: none;
+  }
+
+  .deck > * {
+    pointer-events: auto;
+  }
+
+  .where {
+    grid-area: where;
     text-shadow: 0 1px 14px rgb(0 0 0 / 0.6);
   }
 
@@ -332,10 +363,7 @@ const LOOKS = [
   }
 
   .map {
-    position: absolute;
-    right: 32px;
-    bottom: 92px;
-    width: 300px;
+    grid-area: map;
     margin: 0;
   }
 
@@ -396,10 +424,7 @@ const LOOKS = [
   }
 
   .controls {
-    position: absolute;
-    left: 32px;
-    right: 32px;
-    bottom: 26px;
+    grid-area: controls;
     display: flex;
     flex-wrap: wrap;
     gap: 10px 18px;
@@ -525,7 +550,7 @@ const LOOKS = [
     .title {
       top: 16px;
       left: 16px;
-      max-width: calc(100% - 150px);
+      max-width: calc(100% - 160px);
     }
 
     h1 {
@@ -549,16 +574,25 @@ const LOOKS = [
       font-size: 10px;
     }
 
-    .date,
+    .date {
+      display: none;
+    }
+
     .next {
+      margin-top: 6px;
       font-size: 11.5px;
     }
 
-    .where {
+    .deck {
       left: 16px;
       right: 16px;
-      bottom: 214px;
-      max-width: none;
+      bottom: 16px;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'where'
+        'map'
+        'controls';
+      gap: 12px;
     }
 
     .over {
@@ -574,26 +608,15 @@ const LOOKS = [
       margin: 0 0.45em;
     }
 
-    .map {
-      left: 16px;
-      right: auto;
-      bottom: 108px;
-      width: 168px;
-    }
-
     .map svg {
-      height: 84px;
+      height: 76px;
     }
 
     .map figcaption {
-      text-align: left;
-      font-size: 9.5px;
+      display: none;
     }
 
     .controls {
-      left: 16px;
-      right: 16px;
-      bottom: 16px;
       gap: 8px;
     }
 
