@@ -111,10 +111,11 @@ async function day(job: TileJob): Promise<TileDone> {
     'VIIRS_NOAA20_CorrectedReflectance_TrueColor',
     'VIIRS_NOAA21_CorrectedReflectance_TrueColor',
   ];
+  // Every zoom fills gaps by the same rule, so the levels agree where they overlap.
   for (const layer of viirs) {
     const px = await tile(layer, job.date, '250m', 8, 'jpg', job.z, job.row, job.col);
     if (px) left = fill(px);
-    if (left < rows * SIZE * 0.002) break;
+    if (!left) break;
   }
   const fresh = rows ? 1 - left / (rows * SIZE) : 0;
   if (left) {
