@@ -458,7 +458,7 @@ export function start(root: HTMLElement) {
         tanY,
         sun,
         moon: moonE,
-        moonLight: 0.012 * phase ** 1.5,
+        moonLight: 0.007 * phase ** 1.5,
         exposure,
         time: (t / 1000) % 100000,
         gmst: g,

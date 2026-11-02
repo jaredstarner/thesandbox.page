@@ -59,10 +59,11 @@ const vec3 MAG = vec3(0.0478, -0.1543, 0.9869);
 const vec3 GNP = vec3(-0.8677, -0.1981, 0.4560);
 const vec3 GC = vec3(-0.0549, -0.8734, -0.4838);
 
+// Dave Hoskins' hash without sine: no rows or diagonals between neighbouring cells.
 float hash(vec2 p) {
-  p = fract(p * vec2(123.34, 456.21));
-  p += dot(p, p + 45.32);
-  return fract(p.x * p.y);
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
 }
 
 float noise(vec2 p) {
@@ -135,36 +136,39 @@ void ground(vec2 ll, vec2 dx, vec2 dy, out vec3 day, out vec4 aux) {
   if ((u_gDayMask & (1 << gbit)) == 0 && day == vec3(0.0)) day = vec3(0.02, 0.05, 0.12);
 }
 
-// Auroral emission along a stretch of the ray between 95 and 260 km.
+// Auroral emission along a stretch of the ray between 95 and 260 km: where OVATION puts the oval,
+// curtains folded along lines of magnetic latitude, ribbed with vertical rays.
 vec3 aurora(vec3 o, vec3 d, float t0, float t1) {
   vec3 sum = vec3(0.0);
-  const int N = 18;
+  const int N = 28;
   float dt = (t1 - t0) / float(N);
+  // Interleaved gradient noise spreads the sample offsets more evenly than white noise.
+  float jitter = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+  vec3 e1 = normalize(cross(MAG, vec3(0.0, 0.0, 1.0)));
+  vec3 e2 = cross(MAG, e1);
   for (int i = 0; i < N; i++) {
-    vec3 p = o + d * (t0 + (float(i) + hash(gl_FragCoord.xy + float(i))) * dt);
+    vec3 p = o + d * (t0 + (float(i) + jitter) * dt);
     float r = length(p);
     float h = r - R;
     vec3 n = p / r;
     float lat = degrees(asin(n.z));
     float lon = degrees(atan(n.y, n.x));
     float prob = texture(u_aurora, vec2(fract(lon / 360.0 + 1.0), (lat + 90.5) / 181.0)).r * 255.0;
-    if (prob < 3.0) continue;
-    // Curtains: thin folded bands along lines of magnetic latitude, drifting slowly.
+    if (prob < 4.0) continue;
     float mlat = degrees(asin(dot(n, MAG)));
-    vec3 e1 = normalize(cross(MAG, vec3(0.0, 0.0, 1.0)));
-    vec3 e2 = cross(MAG, e1);
     float mlon = atan(dot(n, e2), dot(n, e1));
-    float fold = noise(vec2(mlon * 9.0, u_time * 0.02)) * 3.0 + noise(vec2(mlon * 40.0, u_time * 0.05)) * 0.6;
-    float band = pow(0.5 + 0.5 * sin((mlat + fold) * 3.2), 6.0);
-    float rays = 0.55 + 0.45 * noise(vec2(mlon * 260.0, u_time * 0.4));
-    float strength = smoothstep(3.0, 40.0, prob) * band * rays;
-    // Green oxygen light low down, a dim red crown above, a violet hem at the bottom.
-    vec3 c = vec3(0.12, 1.0, 0.38) * exp(-pow((h - 112.0) / 18.0, 2.0));
-    c += vec3(0.9, 0.12, 0.25) * 0.28 * smoothstep(150.0, 210.0, h) * exp(-(h - 210.0) / 40.0);
-    c += vec3(0.45, 0.2, 0.95) * 0.35 * exp(-pow((h - 98.0) / 4.0, 2.0));
+    float fold = 2.4 * noise(vec2(mlon * 7.0, u_time * 0.01)) + 0.7 * noise(vec2(mlon * 31.0, u_time * 0.03 + 5.0));
+    float arcs = smoothstep(0.45, 0.95, 0.5 + 0.5 * sin((abs(mlat) + fold) * 1.7));
+    float rays = 0.35 + 0.65 * noise(vec2(mlon * 420.0, u_time * 0.25));
+    float strength = smoothstep(4.0, 45.0, prob) * arcs * rays;
+    // Green oxygen light from a sharp lower edge near 100 km fading upward, a faint red crown far
+    // above it, and a thin pink hem of nitrogen at the very bottom.
+    vec3 c = vec3(0.16, 1.0, 0.42) * smoothstep(97.0, 106.0, h) * exp(-max(h - 106.0, 0.0) / 24.0);
+    c += vec3(0.9, 0.08, 0.32) * 0.04 * smoothstep(165.0, 215.0, h) * exp(-max(h - 215.0, 0.0) / 45.0);
+    c += vec3(0.8, 0.25, 0.7) * 0.15 * exp(-pow((h - 99.0) / 3.0, 2.0));
     sum += c * strength * dt;
   }
-  return sum * 0.0009;
+  return sum * 5e-5;
 }
 
 // A stand-in sky: stars scattered thickest along the galactic plane, which lies where the real one does.
@@ -204,7 +208,7 @@ vec3 starfield(vec3 d) {
     }
   }
   float l = atan(dot(d, cross(GNP, GC)), dot(d, GC));
-  float band = exp(-b * b / 0.012) * (0.55 + 0.9 * noise(vec2(l * 9.0, b * 40.0)) * noise(vec2(l * 23.0, b * 90.0 + 4.0)));
+  float band = exp(-b * b / 0.012) * (0.5 + 0.8 * noise(vec2(l * 6.0, b * 18.0)) * noise(vec2(l * 13.0 + 2.0, b * 30.0 + 4.0)));
   sum += vec3(0.62, 0.66, 0.8) * 0.00035 * band * (1.0 + 2.0 * pow(max(dot(d, GC), 0.0), 3.0));
   return sum;
 }
