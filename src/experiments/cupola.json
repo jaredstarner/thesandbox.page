@@ -1,0 +1,8 @@
+{
+  "title": "Cupola",
+  "summary": "The view down from the space station, wherever it is right now: the Earth turns under you at seven and a half kilometres a second, under yesterday's real clouds, with city lights and auroras on the night side and a sunrise every hour and a half.",
+  "date": "2026-11-02",
+  "tags": ["webgl2", "live-data", "sgp4", "atmospheric-scattering", "satellite-imagery", "web-workers", "pointer-events", "svg", "popover"],
+  "requires": ["webgl2"],
+  "plot": 32
+}

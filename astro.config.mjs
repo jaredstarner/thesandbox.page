@@ -479,5 +479,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    // /cupola/: a geometric sans for the place names and controls, and a monospace for the readouts.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Sora',
+      cssVariable: '--font-cupola',
+      weights: ['200 700'],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Azeret Mono',
+      cssVariable: '--font-cupola-mono',
+      weights: ['300 600'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });

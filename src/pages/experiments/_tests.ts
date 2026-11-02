@@ -535,6 +535,9 @@ export const TECHNIQUES: Record<string, Technique> = {
   iiif: { label: 'IIIF Image API' },
   'crystal-growth': { label: 'Crystal growth' },
   'coupled-lattice-map': { label: 'Coupled lattice map' },
+  sgp4: { label: 'SGP4 orbit propagation' },
+  'atmospheric-scattering': { label: 'Atmospheric scattering' },
+  'satellite-imagery': { label: 'Satellite imagery' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
