@@ -83,29 +83,46 @@ function holes(px: Uint8ClampedArray, rows: number): Uint8Array {
   return miss;
 }
 
+interface Source {
+  /** True where this source has a picture. */
+  has: (i: number) => boolean;
+  value: (k: number, c: number) => number;
+}
+
+/** Two-pass chamfer distance, in pixels, from the pixels `seed` marks. */
+function chamfer(seed: (i: number) => boolean, rows: number): Float32Array {
+  const dist = new Float32Array(SIZE * SIZE).fill(1e9);
+  for (let i = 0; i < rows * SIZE; i++) if (seed(i)) dist[i] = 0;
+  for (let y = 0; y < rows; y++)
+    for (let x = 0; x < SIZE; x++) {
+      const i = y * SIZE + x;
+      if (x > 0) dist[i] = Math.min(dist[i], dist[i - 1] + 1);
+      if (y > 0) dist[i] = Math.min(dist[i], dist[i - SIZE] + 1);
+    }
+  for (let y = rows - 1; y >= 0; y--)
+    for (let x = SIZE - 1; x >= 0; x--) {
+      const i = y * SIZE + x;
+      if (x < SIZE - 1) dist[i] = Math.min(dist[i], dist[i + 1] + 1);
+      if (y < rows - 1) dist[i] = Math.min(dist[i], dist[i + SIZE] + 1);
+    }
+  return dist;
+}
+
 async function day(job: TileJob): Promise<TileDone> {
   const rows = globeRows(job.z, job.row);
-  const out = new Uint8Array(SIZE * SIZE * 4);
-  const miss = new Uint8Array(SIZE * SIZE).fill(1);
-  const fill = (px: Uint8ClampedArray) => {
-    const own = holes(px, rows);
-    let left = 0;
-    for (let i = 0; i < rows * SIZE; i++) {
-      if (!miss[i]) continue;
-      if (own[i]) {
-        left++;
-        continue;
-      }
-      const k = i * 4;
-      out[k] = px[k];
-      out[k + 1] = px[k + 1];
-      out[k + 2] = px[k + 2];
-      out[k + 3] = 255;
-      miss[i] = 0;
+  const n = rows * SIZE;
+  const owner = new Int8Array(SIZE * SIZE).fill(-1);
+  const sources: Source[] = [];
+  let left = n;
+  const take = (src: Source) => {
+    const id = sources.push(src) - 1;
+    left = 0;
+    for (let i = 0; i < n; i++) {
+      if (owner[i] >= 0) continue;
+      if (src.has(i)) owner[i] = id;
+      else left++;
     }
-    return left;
   };
-  let left = rows * SIZE;
   const viirs = [
     'VIIRS_SNPP_CorrectedReflectance_TrueColor',
     'VIIRS_NOAA20_CorrectedReflectance_TrueColor',
@@ -114,26 +131,48 @@ async function day(job: TileJob): Promise<TileDone> {
   // Every zoom fills gaps by the same rule, so the levels agree where they overlap.
   for (const layer of viirs) {
     const px = await tile(layer, job.date, '250m', 8, 'jpg', job.z, job.row, job.col);
-    if (px) left = fill(px);
+    if (px) {
+      const miss = holes(px, rows);
+      take({ has: (i) => !miss[i], value: (k, c) => px[k + c] });
+    }
     if (!left) break;
   }
-  const fresh = rows ? 1 - left / (rows * SIZE) : 0;
+  const fresh = n ? 1 - left / n : 0;
   if (left) {
     const px = await tile('BlueMarble_NextGeneration', 'default', '500m', 7, 'jpg', job.z, job.row, job.col);
-    if (px) {
-      for (let i = 0; i < rows * SIZE; i++) {
-        if (!miss[i]) continue;
-        const k = i * 4;
-        out[k] = px[k];
-        out[k + 1] = px[k + 1];
-        out[k + 2] = px[k + 2];
-        out[k + 3] = 255;
-        miss[i] = 0;
-        left--;
-      }
+    // What's left is mostly polar night, seen only by moonlight: the Blue Marble's summer greens go to grey.
+    if (px)
+      take({
+        has: () => true,
+        value: (k, c) => {
+          const y = 0.3 * px[k] + 0.59 * px[k + 1] + 0.11 * px[k + 2];
+          return y + (px[k + c] - y) * 0.3;
+        },
+      });
+  }
+  if (left >= n) return { id: job.id, ok: false };
+
+  const out = new Uint8Array(SIZE * SIZE * 4);
+  for (let i = 0; i < n; i++) {
+    const k = i * 4;
+    const src = sources[owner[i]];
+    if (src) for (let c = 0; c < 3; c++) out[k + c] = src.value(k, c);
+    out[k + 3] = 255;
+  }
+  // Feather each filler's edge back into the pictures before it, where it has a picture too, over
+  // about a hundred kilometres (fewer pixels at the coarse zooms, so a tile's edge doesn't show).
+  const F = Math.min(48, 8 * 2 ** (job.z - 2));
+  for (let s = 1; s < sources.length; s++) {
+    const dist = chamfer((i) => owner[i] === s, rows);
+    const src = sources[s];
+    for (let i = 0; i < n; i++) {
+      const d = dist[i];
+      if (owner[i] < 0 || owner[i] >= s || d >= F || !src.has(i)) continue;
+      const w = d / F;
+      const k = i * 4;
+      for (let c = 0; c < 3; c++) out[k + c] = src.value(k, c) + (out[k + c] - src.value(k, c)) * w;
     }
   }
-  if (left >= rows * SIZE) return { id: job.id, ok: false };
   return { id: job.id, ok: true, data: out, fresh };
 }
 
