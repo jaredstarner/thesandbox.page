@@ -45,7 +45,11 @@ function transmittanceTable(w: number, h: number): Float32Array {
     const ray = Math.exp(-alt / 8);
     const mie = Math.exp(-alt / 1.2) * 4.4e-3;
     const oz = Math.max(0, 1 - Math.abs(alt - 25) / 15);
-    return [5.802e-3 * ray + mie + 0.65e-3 * oz, 13.558e-3 * ray + mie + 1.881e-3 * oz, 33.1e-3 * ray + mie + 0.085e-3 * oz];
+    return [
+      5.802e-3 * ray + mie + 0.65e-3 * oz,
+      13.558e-3 * ray + mie + 1.881e-3 * oz,
+      33.1e-3 * ray + mie + 0.085e-3 * oz,
+    ];
   };
   for (let j = 0; j < h; j++) {
     const v = (j + 0.5) / h;
@@ -214,7 +218,19 @@ export class Renderer {
     const tex = kind === 'day' ? this.dayW : this.auxW;
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, tex);
-    gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, slotC * TILE, slotR * TILE, layer, TILE, TILE, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
+    gl.texSubImage3D(
+      gl.TEXTURE_2D_ARRAY,
+      0,
+      slotC * TILE,
+      slotR * TILE,
+      layer,
+      TILE,
+      TILE,
+      1,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      data,
+    );
     this.dirty.add(tex);
   }
 

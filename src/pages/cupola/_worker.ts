@@ -43,7 +43,16 @@ async function pixels(url: string, crop?: { x: number; y: number; s: number }): 
 }
 
 /** A layer's tile, or the matching quarter of its parent when the layer stops a zoom short. */
-function tile(layer: string, time: string, set: '250m' | '500m', max: number, ext: string, z: number, row: number, col: number) {
+function tile(
+  layer: string,
+  time: string,
+  set: '250m' | '500m',
+  max: number,
+  ext: string,
+  z: number,
+  row: number,
+  col: number,
+) {
   if (z <= max) return pixels(`${GIBS}${layer}/default/${time}/${set}/${z}/${row}/${col}.${ext}`);
   const up = z - max;
   const k = 1 << up;
@@ -75,7 +84,12 @@ function holes(px: Uint8ClampedArray, rows: number): Uint8Array {
       for (let x = 0; x < SIZE; x++) {
         const i = y * SIZE + x;
         if (prev[i]) continue;
-        if ((x > 0 && prev[i - 1]) || (x < SIZE - 1 && prev[i + 1]) || (y > 0 && prev[i - SIZE]) || (y < rows - 1 && prev[i + SIZE]))
+        if (
+          (x > 0 && prev[i - 1]) ||
+          (x < SIZE - 1 && prev[i + 1]) ||
+          (y > 0 && prev[i - SIZE]) ||
+          (y < rows - 1 && prev[i + SIZE])
+        )
           miss[i] = 1;
       }
     }
