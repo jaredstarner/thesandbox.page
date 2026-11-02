@@ -202,6 +202,36 @@ export function start(root: HTMLElement) {
     return t > 0 ? add(pos, scale(d, t)) : null;
   };
 
+  /** Share of the frame, 0 to 1, that is sunlit ground, lit sky, or the sun itself, from a coarse grid of rays. */
+  const daylightInView = (f: Fix, b: { fwd: Vec3; up: Vec3; right: Vec3 }, sun: Vec3, tanX: number, tanY: number) => {
+    let sum = 0;
+    let weight = 0;
+    for (let j = 0; j < 5; j++)
+      for (let i = 0; i < 7; i++) {
+        const x = -1 + (2 * (i + 0.5)) / 7;
+        const y = -1 + (2 * (j + 0.5)) / 5;
+        const d = norm(add(add(b.fwd, scale(b.right, x * tanX)), scale(b.up, y * tanY)));
+        const hit = groundUnder(f.pos, d);
+        if (hit) {
+          sum += smooth(-0.12, 0.08, dot(norm(hit), sun));
+          weight += 1;
+          continue;
+        }
+        // Sky: lit only where the ray grazes sunlit air.
+        const tc = -dot(f.pos, d);
+        const p = add(f.pos, scale(d, tc));
+        const h = Math.hypot(...p) - R_EARTH;
+        if (tc > 0 && h < 100) {
+          sum += 0.8 * smooth(-0.2, 0.05, dot(norm(p), sun));
+          weight += 1;
+        } else weight += 0.35;
+      }
+    let lit = weight ? sum / weight : 0;
+    const toSun = Math.acos(clamp(dot(b.fwd, sun), -1, 1));
+    if (toSun < Math.atan(Math.hypot(tanX, tanY)) && !groundUnder(f.pos, sun)) lit = Math.max(lit, 0.85);
+    return lit;
+  };
+
   // Focus of each window level: where the eye is looking, held within reach of the level's detail.
   const REACH = [1900, 650, 320];
   const focusPoints = (f: Fix, fwd: Vec3) => {
@@ -393,13 +423,13 @@ export function start(root: HTMLElement) {
     const sun = norm(toEarth(sunDir(t), g));
     const m = moonDir(t);
     const moonE = norm(toEarth(m.dir, g));
-    const lit = (1 - dot(sunDir(t), m.dir)) / 2;
+    const phase = (1 - dot(sunDir(t), m.dir)) / 2;
     const b = basis(f);
     const { tanX, tanY } = aspectTans();
 
-    // Exposure follows the light under the station, as an eye (or a camera's meter) would.
-    const below = dot(f.up, sun);
-    const target = Math.exp(Math.log(NIGHT_EXPOSURE) + (Math.log(DAY_EXPOSURE) - Math.log(NIGHT_EXPOSURE)) * smooth(-0.16, 0.06, below));
+    // Exposure follows how much daylight is in the frame, as a camera's meter would.
+    const lit = daylightInView(f, b, sun, tanX, tanY);
+    const target = Math.exp(Math.log(NIGHT_EXPOSURE) + (Math.log(DAY_EXPOSURE) - Math.log(NIGHT_EXPOSURE)) * lit ** 0.6);
     exposure = Math.exp(Math.log(exposure) + (Math.log(target) - Math.log(exposure)) * (1 - Math.exp(-dt / 1.2)));
 
     if (now - focusAt > 700) {
@@ -428,9 +458,11 @@ export function start(root: HTMLElement) {
         tanY,
         sun,
         moon: moonE,
-        moonLight: 0.0035 * lit ** 1.5,
+        moonLight: 0.012 * phase ** 1.5,
         exposure,
         time: (t / 1000) % 100000,
+        gmst: g,
+        pix: (2 * tanY) / canvas.height,
       },
       tiles.residency(),
       now,
@@ -494,6 +526,9 @@ export function start(root: HTMLElement) {
       speed: setSpeed,
       look: (yaw: number, pitch: number) => Object.assign(look, { yaw, pitch }),
       lens: setLens,
+      finest: (k: number) => {
+        tiles.finest = k;
+      },
       fix: () => fix,
       state: () => ({ source, plainOnly, busy: tiles.busy, loaded: tiles.loaded, fresh: tiles.freshShare, exposure, renderScale }),
     };

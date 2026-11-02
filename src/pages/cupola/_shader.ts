@@ -29,6 +29,8 @@ uniform float u_moonLight;
 uniform float u_exposure;
 uniform float u_time;
 uniform float u_auroraOn;
+uniform float u_gmst;
+uniform float u_pix;
 
 uniform sampler2D u_trans;
 uniform sampler2D u_aurora;
@@ -53,6 +55,9 @@ const float BME = 4.40e-3;
 const vec3 BO = vec3(0.650e-3, 1.881e-3, 0.085e-3);
 // The geomagnetic north pole (IGRF, about 2025), for the auroras' curtains.
 const vec3 MAG = vec3(0.0478, -0.1543, 0.9869);
+// The galactic north pole and centre (J2000), for where the Milky Way lies.
+const vec3 GNP = vec3(-0.8677, -0.1981, 0.4560);
+const vec3 GC = vec3(-0.0549, -0.8734, -0.4838);
 
 float hash(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
@@ -162,6 +167,48 @@ vec3 aurora(vec3 o, vec3 d, float t0, float t1) {
   return sum * 0.0009;
 }
 
+// A stand-in sky: stars scattered thickest along the galactic plane, which lies where the real one does.
+// Positions are not a catalogue; the night side only needs a sky that behaves like one.
+vec3 starfield(vec3 d) {
+  vec3 a = abs(d);
+  vec2 uv;
+  float face;
+  if (a.x >= a.y && a.x >= a.z) {
+    uv = d.yz / a.x;
+    face = d.x > 0.0 ? 0.0 : 1.0;
+  } else if (a.y >= a.z) {
+    uv = d.xz / a.y;
+    face = d.y > 0.0 ? 2.0 : 3.0;
+  } else {
+    uv = d.xy / a.z;
+    face = d.z > 0.0 ? 4.0 : 5.0;
+  }
+  const float N = 220.0;
+  vec2 g = (uv * 0.5 + 0.5) * N;
+  vec2 cell = floor(g);
+  float b = dot(d, GNP);
+  float dens = 0.13 + 0.6 * exp(-b * b / 0.025);
+  float px = max(u_pix, 0.0004) * N * 0.5;
+  vec3 sum = vec3(0.0);
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      vec2 c = cell + vec2(x, y);
+      vec2 seed = c + face * 431.7;
+      if (hash(seed) > dens) continue;
+      vec2 pos = c + vec2(hash(seed * 1.31 + 7.1), hash(seed * 2.17 + 3.3));
+      float r = length(g - pos) / px;
+      float m = hash(seed * 3.7 + 1.9);
+      float bright = 0.0006 + 0.05 * pow(m, 14.0);
+      vec3 tint = mix(vec3(0.72, 0.82, 1.0), vec3(1.0, 0.86, 0.68), hash(seed * 5.3 + 2.2));
+      sum += tint * bright * exp(-r * r * 1.4);
+    }
+  }
+  float l = atan(dot(d, cross(GNP, GC)), dot(d, GC));
+  float band = exp(-b * b / 0.012) * (0.55 + 0.9 * noise(vec2(l * 9.0, b * 40.0)) * noise(vec2(l * 23.0, b * 90.0 + 4.0)));
+  sum += vec3(0.62, 0.66, 0.8) * 0.00035 * band * (1.0 + 2.0 * pow(max(dot(d, GC), 0.0), 3.0));
+  return sum;
+}
+
 // Path length through the spherical shell between radii r0 and r1.
 float shellPath(vec3 o, vec3 d, float r0, float r1, float tMax) {
   vec2 a = sphere(o, d, r1);
@@ -240,9 +287,10 @@ void main() {
     }
   }
 
-  // Airglow: a thin shell of green oxygen light at about 95 km, seen best edge-on.
-  float glow = shellPath(o, d, R + 91.0, R + 99.0, tEnd);
-  L += vec3(0.18, 0.9, 0.32) * glow * 1.6e-7 * T;
+  // Airglow: a thin shell of green oxygen light at about 95 km, faint looking down through it and a
+  // bright line edge-on, with a dimmer skirt either side.
+  float glow = shellPath(o, d, R + 93.5, R + 96.5, tEnd) + 0.3 * shellPath(o, d, R + 89.0, R + 101.0, tEnd);
+  L += vec3(0.2, 0.92, 0.36) * glow * 1.5e-6 * T;
 
   if (u_auroraOn > 0.5) {
     vec2 outer = sphere(o, d, R + 260.0);
@@ -275,7 +323,8 @@ void main() {
     float muS = dot(N, u_sun);
     vec3 Ts = transmittance(0.0, muS);
     vec3 Esun = Ts * max(muS, 0.0);
-    vec3 Esky = vec3(0.07, 0.1, 0.17) * smoothstep(-0.2, 0.45, muS);
+    // Skylight by day; by night a trace of starlight and airglow, enough to show the clouds faintly.
+    vec3 Esky = vec3(0.07, 0.1, 0.17) * smoothstep(-0.2, 0.45, muS) + vec3(0.0005, 0.0007, 0.0012);
     float muM = dot(N, u_moon);
     vec3 Emoon = transmittance(0.0, muM) * max(muM, 0.0) * u_moonLight;
     vec3 Lg = albedo * (Esun + Esky + Emoon) / PI;
@@ -297,10 +346,15 @@ void main() {
     color = Lg * T + L;
   } else {
     color = L;
+    // Stars and the Milky Way, in the stars' frame (the Earth turns under them), only once eyes have adjusted to the dark.
+    float cg = cos(u_gmst);
+    float sg = sin(u_gmst);
+    vec3 dI = vec3(cg * d.x - sg * d.y, sg * d.x + cg * d.y, d.z);
+    color += T * starfield(dI) * smoothstep(30.0, 120.0, u_exposure);
     // The sun's disc, reddened by whatever air lies in front of it, and its glare.
     float c = dot(d, u_sun);
     float disc = smoothstep(0.999989, 0.9999905, c);
-    color += T * (disc * 60.0 + 0.04 * pow(max(c, 0.0), 900.0) + 0.004 * pow(max(c, 0.0), 40.0));
+    color += T * (disc * 60.0 + 0.04 * pow(max(c, 0.0), 900.0) + 0.0015 * pow(max(c, 0.0), 60.0));
     // The moon: a lit sphere 0.26 degrees across.
     float cm = dot(d, u_moon);
     if (cm > 0.99998) {

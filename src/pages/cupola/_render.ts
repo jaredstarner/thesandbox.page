@@ -20,6 +20,10 @@ export interface View {
   moonLight: number;
   exposure: number;
   time: number;
+  /** Sidereal angle, radians, to turn the sky. */
+  gmst: number;
+  /** Angle one pixel spans, radians. */
+  pix: number;
 }
 
 export interface Residency {
@@ -262,6 +266,8 @@ export class Renderer {
     gl.uniform1f(this.u('u_moonLight'), v.moonLight);
     gl.uniform1f(this.u('u_exposure'), v.exposure);
     gl.uniform1f(this.u('u_time'), v.time);
+    gl.uniform1f(this.u('u_gmst'), v.gmst);
+    gl.uniform1f(this.u('u_pix'), v.pix);
     gl.uniform1f(this.u('u_auroraOn'), this.auroraOn ? 1 : 0);
     gl.uniform4fv(this.u('u_win'), res.win);
     gl.uniform1i(this.u('u_winN'), this.n);
