@@ -28,8 +28,31 @@ const timed = async (url: string, ms: number) => {
 const valid = (l1?: string, l2?: string): l1 is string =>
   !!l1 && !!l2 && l1.startsWith('1 25544') && l2.startsWith('2 25544') && l1.length >= 69 && l2.length >= 69;
 
-/** CelesTrak first, then a second keyless mirror, then the baked set. */
+const STORE = 'cupola:tle';
+/** CelesTrak asks that a set be fetched no more than every couple of hours, so each visitor keeps theirs a while. */
+const KEEP = 3 * 3600000;
+
+/** A recent set kept from an earlier visit, then CelesTrak, then a second keyless mirror, then the baked set. */
 export async function loadTle(): Promise<{ lines: [string, string]; source: TleSource }> {
+  try {
+    const kept = JSON.parse(localStorage.getItem(STORE) ?? 'null') as {
+      lines?: [string, string];
+      source?: TleSource;
+      at?: number;
+    } | null;
+    if (kept?.lines && kept.source && kept.at && Date.now() - kept.at < KEEP && valid(kept.lines[0], kept.lines[1]))
+      return { lines: kept.lines, source: kept.source };
+  } catch {
+    // Nothing kept, or no storage.
+  }
+  const keep = (lines: [string, string], source: TleSource) => {
+    try {
+      localStorage.setItem(STORE, JSON.stringify({ lines, source, at: Date.now() }));
+    } catch {
+      // Storage is a convenience here.
+    }
+    return { lines, source };
+  };
   try {
     const text = await (await timed('https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=TLE', 6000)).text();
     const rows = text
@@ -38,7 +61,7 @@ export async function loadTle(): Promise<{ lines: [string, string]; source: TleS
       .filter(Boolean);
     const l1 = rows.find((r) => r.startsWith('1 '));
     const l2 = rows.find((r) => r.startsWith('2 '));
-    if (valid(l1, l2)) return { lines: [l1, l2!], source: 'celestrak' };
+    if (valid(l1, l2)) return keep([l1, l2!], 'celestrak');
   } catch {
     // Fall through to the mirror.
   }
@@ -47,7 +70,7 @@ export async function loadTle(): Promise<{ lines: [string, string]; source: TleS
       line1?: string;
       line2?: string;
     };
-    if (valid(j.line1, j.line2)) return { lines: [j.line1, j.line2!], source: 'tle-api' };
+    if (valid(j.line1, j.line2)) return keep([j.line1, j.line2!], 'tle-api');
   } catch {
     // Fall through to the baked set.
   }
