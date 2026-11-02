@@ -283,7 +283,7 @@ void main() {
       vec3 sR = BR * exp(-h / 8.0);
       float sM = BM * exp(-h / 1.2);
       // A crude stand-in for light scattered more than once: an even glow from the lit sky.
-      vec3 ms = (sR + sM) * 0.06 * vec3(0.55, 0.7, 1.0) * smoothstep(-0.25, 0.35, mu);
+      vec3 ms = (sR + sM) * 0.045 * vec3(0.55, 0.7, 1.0) * smoothstep(-0.25, 0.35, mu);
       vec3 S = Ts * (sR * phR + sM * phM) + ms;
       vec3 Tseg = exp(-ext * dt);
       L += T * (S - S * Tseg) / max(ext, vec3(1e-7));
@@ -323,7 +323,11 @@ void main() {
     vec4 aux;
     ground(ll, dx, dy, dayS, aux);
     float cloud = smoothstep(0.34, 0.62, min(min(dayS.r, dayS.g), dayS.b));
+    // The pictures come with their own haze taken out; a little more colour holds the land's greens
+    // and browns once this page's haze goes back on top.
     vec3 albedo = toLinear(dayS);
+    float grey = dot(albedo, vec3(0.2126, 0.7152, 0.0722));
+    albedo = max(mix(vec3(grey), albedo, 1.0 + 0.25 * (1.0 - cloud)), 0.0);
     float muS = dot(N, u_sun);
     vec3 Ts = transmittance(0.0, muS);
     vec3 Esun = Ts * max(muS, 0.0);
