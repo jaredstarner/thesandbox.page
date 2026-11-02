@@ -116,7 +116,10 @@ export function start(root: HTMLElement) {
   renderer.globalImage('day', plain.day);
   renderer.globalImage('aux', plain.aux);
 
-  const whereData = JSON.parse(root.querySelector('[data-where]')?.textContent ?? '{}') as { names: string[]; rows: string };
+  const whereData = JSON.parse(root.querySelector('[data-where]')?.textContent ?? '{}') as {
+    names: string[];
+    rows: string;
+  };
   const where = new Where(whereData.names, whereData.rows);
 
   const date = pictureDay(Date.now());
@@ -260,6 +263,7 @@ export function start(root: HTMLElement) {
     over: $('[data-over]'),
     latlon: $('[data-latlon]'),
     alt: $('[data-alt]'),
+    horizon: $('[data-horizon]'),
     speed: $('[data-speedo]'),
     station: $<SVGCircleElement>('[data-station]'),
     ahead: $<SVGPathElement>('[data-ahead]'),
@@ -310,6 +314,8 @@ export function start(root: HTMLElement) {
     el.over.textContent = where.at(f.lat, f.lon);
     el.latlon.textContent = `${fmtLat(f.lat)}  ${fmtLon(f.lon)}`;
     el.alt.textContent = `${Math.round(f.height)} km up`;
+    const horizon = R_EARTH * Math.acos(R_EARTH / (R_EARTH + f.alt));
+    el.horizon.textContent = `horizon ${(Math.round(horizon / 10) * 10).toLocaleString('en-GB')} km`;
     el.speed.textContent = `${Math.round(f.speed * 3600).toLocaleString('en-GB')} km/h`;
     if (!next || t > next.at || Math.abs(t - nextChecked) > 30000 * speed) {
       next = orbit!.nextChange(t);
@@ -359,8 +365,8 @@ export function start(root: HTMLElement) {
       syncLens();
       return;
     }
-    const k = (fov / Math.max(canvas.clientWidth, canvas.clientHeight)) / D;
-    look.yaw = (((look.yaw - (e.clientX - p.x) * k + 540) % 360) + 360) % 360 - 180;
+    const k = fov / Math.max(canvas.clientWidth, canvas.clientHeight) / D;
+    look.yaw = ((((look.yaw - (e.clientX - p.x) * k + 540) % 360) + 360) % 360) - 180;
     look.pitch = clamp(look.pitch + (e.clientY - p.y) * k, -90, 30);
     p.x = e.clientX;
     p.y = e.clientY;
@@ -392,17 +398,17 @@ export function start(root: HTMLElement) {
     e.preventDefault();
   });
 
-  root.querySelectorAll<HTMLButtonElement>('[data-lens]').forEach((b) =>
-    b.addEventListener('click', () => setLens(Number(b.dataset.lens))),
-  );
-  root.querySelectorAll<HTMLButtonElement>('[data-speed]').forEach((b) =>
-    b.addEventListener('click', () => setSpeed(Number(b.dataset.speed))),
-  );
+  root
+    .querySelectorAll<HTMLButtonElement>('[data-lens]')
+    .forEach((b) => b.addEventListener('click', () => setLens(Number(b.dataset.lens))));
+  root
+    .querySelectorAll<HTMLButtonElement>('[data-speed]')
+    .forEach((b) => b.addEventListener('click', () => setSpeed(Number(b.dataset.speed))));
   root.querySelectorAll<HTMLButtonElement>('[data-look]').forEach((b) =>
     b.addEventListener('click', () => {
       if (b.dataset.look === 'down') Object.assign(look, { yaw: 0, pitch: -90 });
       else if (b.dataset.look === 'ahead') Object.assign(look, DEFAULT_LOOK);
-      else Object.assign(look, { yaw: 180, pitch: -18 });
+      else Object.assign(look, { yaw: 180, pitch: -30 });
     }),
   );
 
@@ -429,7 +435,9 @@ export function start(root: HTMLElement) {
 
     // Exposure follows how much daylight is in the frame, as a camera's meter would.
     const lit = daylightInView(f, b, sun, tanX, tanY);
-    const target = Math.exp(Math.log(NIGHT_EXPOSURE) + (Math.log(DAY_EXPOSURE) - Math.log(NIGHT_EXPOSURE)) * lit ** 0.6);
+    const target = Math.exp(
+      Math.log(NIGHT_EXPOSURE) + (Math.log(DAY_EXPOSURE) - Math.log(NIGHT_EXPOSURE)) * lit ** 0.6,
+    );
     exposure = Math.exp(Math.log(exposure) + (Math.log(target) - Math.log(exposure)) * (1 - Math.exp(-dt / 1.2)));
 
     if (now - focusAt > 700) {
@@ -491,7 +499,7 @@ export function start(root: HTMLElement) {
     el.source.textContent =
       src === 'baked'
         ? `an element set from ${fmtDay(new Date(orbit.epoch).toISOString().slice(0, 10))}`
-        : `CelesTrak’s latest element set, ${age < 1 ? `${Math.max(1, Math.round(age * 24))} hours` : `${Math.round(age)} days`} old`;
+        : `${src === 'celestrak' ? 'CelesTrak’s' : 'a mirror’s copy of the'} latest element set, ${age < 1 ? `${Math.max(1, Math.round(age * 24))} hours` : `${Math.round(age)} days`} old`;
     if (src === 'baked' && age > 2)
       say(
         `The orbit services didn’t answer, so the station flies on an element set ${Math.round(age)} days old and may be some way off where it really is.`,
@@ -530,7 +538,15 @@ export function start(root: HTMLElement) {
         tiles.finest = k;
       },
       fix: () => fix,
-      state: () => ({ source, plainOnly, busy: tiles.busy, loaded: tiles.loaded, fresh: tiles.freshShare, exposure, renderScale }),
+      state: () => ({
+        source,
+        plainOnly,
+        busy: tiles.busy,
+        loaded: tiles.loaded,
+        fresh: tiles.freshShare,
+        exposure,
+        renderScale,
+      }),
     };
   }
 }

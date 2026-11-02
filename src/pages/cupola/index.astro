@@ -36,7 +36,10 @@ const LOOKS = [
         thesandbox.page
       </a>
       <h1>Cupola</h1>
-      <p class="lede">The view down from the International Space Station, wherever it is right now.</p>
+      <p class="lede">
+        The view down from the International Space Station, wherever it is right now.
+        <span class="hint">Drag to look around.</span>
+      </p>
     </header>
 
     <section class="clock" aria-label="Time on board">
@@ -63,6 +66,8 @@ const LOOKS = [
           <span class="sep">·</span>
           <span data-alt></span>
           <span class="sep">·</span>
+          <span data-horizon></span>
+          <span class="sep">·</span>
           <span data-speedo></span>
         </p>
         <p class="notice" data-notice hidden></p>
@@ -82,7 +87,6 @@ const LOOKS = [
           <path class="night" data-night></path>
           <path class="track past" data-past></path>
           <path class="track ahead" data-ahead></path>
-          <circle class="station-halo" data-station-halo r="7"></circle>
           <circle class="station" data-station r="3.2"></circle>
         </svg>
         <figcaption>Ground track · next orbit</figcaption>
@@ -224,7 +228,7 @@ const LOOKS = [
     position: absolute;
     top: 26px;
     left: 32px;
-    max-width: 30rem;
+    max-width: 36rem;
     text-shadow: 0 1px 12px rgb(0 0 0 / 0.5);
   }
 
@@ -252,6 +256,12 @@ const LOOKS = [
     font-size: 14px;
     font-weight: 300;
     line-height: 1.5;
+  }
+
+  .hint {
+    display: block;
+    color: var(--sun);
+    opacity: 0.85;
   }
 
   .clock {
@@ -417,10 +427,6 @@ const LOOKS = [
     stroke: #000;
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
-  }
-
-  .station-halo {
-    display: none;
   }
 
   .controls {
