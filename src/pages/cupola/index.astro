@@ -1,0 +1,652 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { landPath } from './_map';
+import { whereGrid } from './_where';
+
+const land = landPath();
+const where = JSON.stringify(whereGrid());
+const LENSES = [14, 28, 50];
+const SPEEDS = [
+  { value: 1, label: 'Live' },
+  { value: 10, label: '×10' },
+  { value: 60, label: '×60' },
+];
+const LOOKS = [
+  { value: 'ahead', label: 'Ahead' },
+  { value: 'down', label: 'Down' },
+  { value: 'behind', label: 'Behind' },
+];
+---
+
+<Bare
+  title="Cupola"
+  description="The view down from the International Space Station, wherever it is right now, under yesterday's real clouds."
+>
+  <Font cssVariable="--font-cupola" slot="head" />
+  <Font cssVariable="--font-cupola-mono" slot="head" />
+
+  <main class="cupola" data-cupola data-state="loading" data-live="true">
+    <canvas class="view" data-view aria-label="The Earth seen from the space station"></canvas>
+    <div class="scrim top" aria-hidden="true"></div>
+    <div class="scrim bottom" aria-hidden="true"></div>
+
+    <header class="title">
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
+      <h1>Cupola</h1>
+      <p class="lede">
+        The view down from the International Space Station, wherever it is right now.
+        <span class="hint">Drag to look around.</span>
+      </p>
+    </header>
+
+    <section class="clock" aria-label="Time on board">
+      <p class="utc">
+        <span data-time>--:--:--</span>
+        <span class="unit">UTC</span>
+      </p>
+      <p class="date">
+        <span class="lapse">Time-lapse · </span>
+        <span data-date></span>
+      </p>
+      <p class="next" data-next>
+        Finding the station
+      </p>
+    </section>
+
+    <div class="deck">
+      <section class="where" aria-live="polite">
+        <p class="over">
+          <span class="label">Over</span> <span data-over>…</span>
+        </p>
+        <p class="fix">
+          <span data-latlon></span>
+          <span class="sep">·</span>
+          <span data-alt></span>
+          <span class="sep">·</span>
+          <span data-horizon></span>
+          <span class="sep">·</span>
+          <span data-speedo></span>
+        </p>
+        <p class="notice" data-notice hidden></p>
+      </section>
+
+      <figure class="map" aria-label="Ground track for the next orbit">
+        <svg viewBox="-180 -90 360 180" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <path id="cupola-land" data-land d={land}></path>
+          </defs>
+          <rect class="sea" x="-180" y="-90" width="360" height="180"></rect>
+          <g class="land">
+            <use href="#cupola-land" x="-360"></use>
+            <use href="#cupola-land"></use>
+            <use href="#cupola-land" x="360"></use>
+          </g>
+          <path class="night" data-night></path>
+          <path class="track past" data-past></path>
+          <path class="track ahead" data-ahead></path>
+          <circle class="station" data-station r="3.2"></circle>
+        </svg>
+        <figcaption>Ground track · next orbit</figcaption>
+      </figure>
+
+      <nav class="controls" aria-label="View">
+        <div class="group" role="group" aria-label="Lens">
+          {LENSES.map((mm) => (
+            <button type="button" data-lens={mm} aria-pressed={mm === 28 ? 'true' : 'false'}>
+              {mm}
+              <small>mm</small>
+            </button>
+          ))}
+        </div>
+        <div class="group" role="group" aria-label="Speed">
+          {SPEEDS.map((s) => (
+            <button type="button" data-speed={s.value} aria-pressed={s.value === 1 ? 'true' : 'false'}>
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <div class="group" role="group" aria-label="Look">
+          {LOOKS.map((l) => (
+            <button type="button" data-look={l.value}>
+              {l.label}
+            </button>
+          ))}
+        </div>
+        <button type="button" class="about-button" popovertarget="cupola-about">
+          About
+        </button>
+      </nav>
+    </div>
+
+    <div class="about" id="cupola-about" popover>
+      <h2>The view from the cupola</h2>
+      <p>
+        The cupola is the station’s bay window: seven panes on the side that always faces the Earth, 420 km up. From
+        there the planet slides past at about 28,000 km an hour, one orbit every hour and a half, sixteen sunrises a
+        day. Drag to look around; scroll or pinch to change the lens.
+      </p>
+      <p>
+        The station is where its latest orbital elements put it, flown forward with SGP4, the model the trackers use.
+        This page is using <span data-source>the latest element set</span>.
+      </p>
+      <p>
+        The ground is a mosaic of pictures NASA’s weather satellites took on <span data-day>yesterday</span>. Their
+        VIIRS cameras sweep the whole sunlit Earth each day around half past one in the afternoon, local time, so the
+        clouds are a day old, lit by today’s sun. Where a day’s swaths miss, the gap is filled from the Blue Marble.
+      </p>
+      <p>
+        On the night side, the city lights are NASA’s Black Marble, the auroras follow NOAA’s OVATION forecast for the
+        next half hour, and a thin green line of airglow sits 95 km up, as it does in the crew’s night photographs. The
+        air itself is computed: sunlight scattered by molecules and haze, with ozone taking out some orange, which turns
+        the limb blue and the terminator red.
+      </p>
+      <h3>Credits</h3>
+      <ul>
+        <li>
+          Imagery from NASA’s Global Imagery Browse Services (GIBS), part of NASA’s Earth Science Data and Information
+          System (ESDIS): VIIRS Corrected Reflectance (NASA LANCE), Blue Marble Next Generation and Black Marble (NASA
+          Earth Observatory)
+        </li>
+        <li>Coastline water mask © OpenStreetMap contributors, through GIBS</li>
+        <li>Orbital elements from CelesTrak; orbit propagation by satellite.js</li>
+        <li>Aurora forecast from NOAA’s Space Weather Prediction Center</li>
+        <li>Land and borders from Natural Earth</li>
+      </ul>
+      <button type="button" class="close" popovertarget="cupola-about" popovertargetaction="hide">
+        Close
+      </button>
+    </div>
+
+    <script is:inline type="application/json" data-where set:html={where} />
+  </main>
+</Bare>
+
+<style>
+  .cupola {
+    --ink: #f3f5f8;
+    --dim: rgb(243 245 248 / 0.62);
+    --faint: rgb(243 245 248 / 0.18);
+    --sun: #ffd08a;
+    --sans: var(--font-cupola), 'Helvetica Neue', Arial, sans-serif;
+    --mono: var(--font-cupola-mono), ui-monospace, monospace;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: #000;
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :global(body:has(.cupola)) {
+    margin: 0;
+    background: #000;
+  }
+
+  .view {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .cupola[data-dragging] .view {
+    cursor: grabbing;
+  }
+
+  .scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+  }
+
+  .scrim.top {
+    top: 0;
+    height: 190px;
+    background: linear-gradient(rgb(0 0 0 / 0.55), rgb(0 0 0 / 0));
+  }
+
+  .scrim.bottom {
+    bottom: 0;
+    height: 260px;
+    background: linear-gradient(rgb(0 0 0 / 0), rgb(0 0 0 / 0.6));
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .title {
+    position: absolute;
+    top: 26px;
+    left: 32px;
+    max-width: 36rem;
+    text-shadow: 0 1px 12px rgb(0 0 0 / 0.5);
+  }
+
+  .home {
+    color: var(--dim);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+
+  .home:hover,
+  .home:focus-visible {
+    color: var(--ink);
+  }
+
+  h1 {
+    margin: 6px 0 4px;
+    font-size: 34px;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  .lede {
+    color: var(--dim);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  .hint {
+    display: block;
+    color: var(--sun);
+    opacity: 0.85;
+  }
+
+  .clock {
+    position: absolute;
+    top: 26px;
+    right: 32px;
+    text-align: right;
+    text-shadow: 0 1px 12px rgb(0 0 0 / 0.5);
+  }
+
+  .utc {
+    font-family: var(--mono);
+    font-size: 30px;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  .unit {
+    margin-left: 0.5em;
+    color: var(--dim);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+
+  .date {
+    margin-top: 2px;
+    color: var(--dim);
+    font-size: 13px;
+  }
+
+  .lapse {
+    display: none;
+    color: var(--sun);
+  }
+
+  .cupola[data-live='false'] .lapse {
+    display: inline;
+  }
+
+  .next {
+    margin-top: 10px;
+    color: var(--sun);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+
+  .deck {
+    position: absolute;
+    left: 32px;
+    right: 32px;
+    bottom: 26px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-areas:
+      'where map'
+      'controls controls';
+    gap: 22px 32px;
+    align-items: end;
+    pointer-events: none;
+  }
+
+  .deck > * {
+    pointer-events: auto;
+  }
+
+  .where {
+    grid-area: where;
+    text-shadow: 0 1px 14px rgb(0 0 0 / 0.6);
+  }
+
+  .over {
+    font-size: 28px;
+    font-weight: 300;
+    line-height: 1.2;
+  }
+
+  .label {
+    color: var(--dim);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    vertical-align: 0.45em;
+    margin-right: 0.35em;
+  }
+
+  .fix {
+    margin-top: 8px;
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fix span {
+    white-space: pre;
+  }
+
+  .sep {
+    margin: 0 0.8em;
+    opacity: 0.6;
+  }
+
+  .notice {
+    margin-top: 12px;
+    max-width: 34rem;
+    color: var(--sun);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .map {
+    grid-area: map;
+    margin: 0;
+  }
+
+  .map svg {
+    display: block;
+    width: 100%;
+    height: 150px;
+    border: 1px solid var(--faint);
+    border-radius: 4px;
+    background: rgb(4 10 20 / 0.55);
+  }
+
+  .map figcaption {
+    margin-top: 6px;
+    color: var(--dim);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: right;
+  }
+
+  .sea {
+    fill: rgb(20 52 92 / 0.55);
+  }
+
+  .land {
+    fill: rgb(196 204 188 / 0.55);
+  }
+
+  .night {
+    fill: rgb(0 0 0 / 0.5);
+  }
+
+  .track {
+    fill: none;
+    stroke-width: 1.2;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .track.ahead {
+    stroke: var(--sun);
+  }
+
+  .track.past {
+    stroke: rgb(243 245 248 / 0.45);
+    stroke-dasharray: 2 3;
+  }
+
+  .station {
+    fill: var(--sun);
+    stroke: #000;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .controls {
+    grid-area: controls;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    align-items: center;
+  }
+
+  .group {
+    display: flex;
+    border: 1px solid var(--faint);
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgb(0 0 0 / 0.35);
+  }
+
+  button {
+    font: inherit;
+    color: var(--dim);
+    background: none;
+    border: 0;
+    padding: 8px 15px;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+  }
+
+  .group button + button {
+    border-left: 1px solid var(--faint);
+  }
+
+  button small {
+    margin-left: 0.2em;
+    font-size: 10px;
+    opacity: 0.75;
+  }
+
+  button:hover,
+  button:focus-visible {
+    color: var(--ink);
+  }
+
+  button:focus-visible {
+    outline: 2px solid var(--sun);
+    outline-offset: -2px;
+  }
+
+  button[aria-pressed='true'] {
+    color: #111;
+    background: var(--ink);
+  }
+
+  .about-button {
+    margin-left: auto;
+    border: 1px solid var(--faint);
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.35);
+  }
+
+  .about {
+    width: min(36rem, calc(100% - 32px));
+    max-height: calc(100% - 64px);
+    overflow: auto;
+    padding: 28px 30px 24px;
+    border: 1px solid var(--faint);
+    border-radius: 8px;
+    background: rgb(8 12 18 / 0.92);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    backdrop-filter: blur(10px);
+  }
+
+  .about::backdrop {
+    background: rgb(0 0 0 / 0.35);
+  }
+
+  .about h2 {
+    margin: 0 0 12px;
+    font-size: 20px;
+    font-weight: 400;
+  }
+
+  .about h3 {
+    margin: 18px 0 6px;
+    color: var(--dim);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .about p + p {
+    margin-top: 10px;
+  }
+
+  .about p {
+    color: rgb(243 245 248 / 0.84);
+  }
+
+  .about ul {
+    margin: 0;
+    padding-left: 1.1em;
+    color: var(--dim);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+
+  .about .close {
+    margin-top: 18px;
+    border: 1px solid var(--faint);
+    border-radius: 999px;
+  }
+
+  .cupola[data-state='unsupported'] :is(.controls, .map, .clock) {
+    display: none;
+  }
+
+  @media (max-width: 760px) {
+    .cupola {
+      font-size: 14px;
+    }
+
+    .title {
+      top: 16px;
+      left: 16px;
+      max-width: calc(100% - 160px);
+    }
+
+    h1 {
+      font-size: 26px;
+    }
+
+    .lede {
+      font-size: 12.5px;
+    }
+
+    .clock {
+      top: 16px;
+      right: 16px;
+    }
+
+    .utc {
+      font-size: 20px;
+    }
+
+    .unit {
+      font-size: 10px;
+    }
+
+    .date {
+      display: none;
+    }
+
+    .next {
+      margin-top: 6px;
+      font-size: 11.5px;
+    }
+
+    .deck {
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'where'
+        'map'
+        'controls';
+      gap: 12px;
+    }
+
+    .over {
+      font-size: 21px;
+    }
+
+    .fix {
+      font-size: 11px;
+      white-space: normal;
+    }
+
+    .sep {
+      margin: 0 0.45em;
+    }
+
+    .map svg {
+      height: 76px;
+    }
+
+    .map figcaption {
+      display: none;
+    }
+
+    .controls {
+      gap: 8px;
+    }
+
+    button {
+      padding: 7px 11px;
+      font-size: 12px;
+    }
+
+    .about-button {
+      margin-left: 0;
+    }
+
+    .scrim.bottom {
+      height: 340px;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-cupola]');
+  if (root) start(root);
+</script>
