@@ -498,5 +498,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    // /loom/: a sturdy book face for the pattern book and notes, and its small capitals for the draft's labels.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Vollkorn',
+      cssVariable: '--font-loom',
+      weights: ['400 900'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Vollkorn SC',
+      cssVariable: '--font-loom-sc',
+      weights: [400, 600],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
   ],
 });
