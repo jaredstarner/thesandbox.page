@@ -37,7 +37,8 @@ export class LoomSound {
   }
 
   private get live() {
-    return this.enabled && this.ctx && this.out && this.ctx.state === 'running' ? this.ctx : null;
+    // A context still resuming from the first gesture queues the sound rather than dropping it.
+    return this.enabled && this.ctx && this.out && this.ctx.state !== 'closed' ? this.ctx : null;
   }
 
   /** A struck piece of wood: a few inharmonic modes dying away fast. */
