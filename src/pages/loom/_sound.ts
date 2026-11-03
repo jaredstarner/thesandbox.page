@@ -13,7 +13,8 @@ export class LoomSound {
   wake() {
     if (!this.enabled) return;
     if (!this.ctx) {
-      const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      const Ctx =
+        window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!Ctx) return;
       this.ctx = new Ctx();
       const comp = this.ctx.createDynamicsCompressor();
@@ -88,7 +89,12 @@ export class LoomSound {
     this.knock(t, [128, 341, 612], 0.22, 0.14);
     // The heddles on the rising shafts chink against each other.
     for (let i = 0; i < 4; i++) {
-      this.knock(t + 0.03 + Math.random() * 0.08, [2900 + Math.random() * 1800, 5200 + Math.random() * 900], 0.012, 0.06);
+      this.knock(
+        t + 0.03 + Math.random() * 0.08,
+        [2900 + Math.random() * 1800, 5200 + Math.random() * 900],
+        0.012,
+        0.06,
+      );
     }
   }
 

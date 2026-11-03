@@ -174,7 +174,12 @@ export class ClothPainter {
         const v = s * (0.1 + a * 0.8);
         g.beginPath();
         g.moveTo(side, v);
-        g.quadraticCurveTo(side + out * s * 0.16, v + s * 0.08, side + out * s * 0.06 + (b - 0.5) * s * 0.2, v + s * 0.26);
+        g.quadraticCurveTo(
+          side + out * s * 0.16,
+          v + s * 0.08,
+          side + out * s * 0.06 + (b - 0.5) * s * 0.2,
+          v + s * 0.26,
+        );
         g.stroke();
       }
     }
@@ -382,7 +387,15 @@ export function renderPiece(warp: Warp, picks: Pick[], s: number): HTMLCanvasEle
 }
 
 /** Warp ends twisted in fours and knotted, hanging from one edge of the cloth. */
-function drawFringe(g: CanvasRenderingContext2D, x0: number, y: number, warp: Warp, s: number, dir: 1 | -1, len: number) {
+function drawFringe(
+  g: CanvasRenderingContext2D,
+  x0: number,
+  y: number,
+  warp: Warp,
+  s: number,
+  dir: 1 | -1,
+  len: number,
+) {
   const ends = warp.threading.length;
   const group = 4;
   for (let k = 0; k < ends; k += group) {

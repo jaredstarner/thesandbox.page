@@ -13,7 +13,9 @@ import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
 
   <main class="loom" data-loom>
     <header class="mast">
-      <a class="home" href="/">thesandbox.page</a>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
       <h1>Loom</h1>
       <p class="dek">Thread a draft, tie up the treadles, and weave</p>
     </header>
@@ -29,13 +31,11 @@ import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
 
       <div class="floor">
         <div class="treadles" role="group" aria-label="Treadles">
-          {
-            Array.from({ length: TREADLES }, (_, t) => (
-              <button class="treadle" type="button" data-treadle={t} aria-label={`Treadle ${t + 1}`}>
-                <span>{t + 1}</span>
-              </button>
-            ))
-          }
+          {Array.from({ length: TREADLES }, (_, t) => (
+            <button class="treadle" type="button" data-treadle={t} aria-label={`Treadle ${t + 1}`}>
+              <span>{t + 1}</span>
+            </button>
+          ))}
         </div>
         <div class="deck">
           <button class="weave" type="button" data-weave>
@@ -43,8 +43,12 @@ import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
           </button>
           <p class="tally" data-tally aria-live="polite"></p>
           <div class="small">
-            <button type="button" data-cut>Cut off</button>
-            <button type="button" data-sound aria-pressed="true">Sound</button>
+            <button type="button" data-cut>
+              Cut off
+            </button>
+            <button type="button" data-sound aria-pressed="true">
+              Sound
+            </button>
           </div>
         </div>
       </div>
@@ -65,48 +69,56 @@ import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
         </div>
         <div class="cardfoot">
           <div class="repeat" role="group" aria-label="Treadling repeat">
-            <button type="button" data-repeat="-1" aria-label="Shorten the repeat">−</button>
+            <button type="button" data-repeat="-1" aria-label="Shorten the repeat">
+              −
+            </button>
             <span data-repeat-label></span>
-            <button type="button" data-repeat="1" aria-label="Lengthen the repeat">+</button>
+            <button type="button" data-repeat="1" aria-label="Lengthen the repeat">
+              +
+            </button>
           </div>
           <div class="inkmode" role="group" aria-label="Drawdown">
-            <button type="button" data-ink="ink" aria-pressed="true">Ink</button>
-            <button type="button" data-ink="colour" aria-pressed="false">Colour</button>
+            <button type="button" data-ink="ink" aria-pressed="true">
+              Ink
+            </button>
+            <button type="button" data-ink="colour" aria-pressed="false">
+              Colour
+            </button>
           </div>
         </div>
         <p class="locked" data-locked hidden>
-          The warp is on the loom. <button type="button" data-cut>Cut off the cloth</button> to rethread it.
+          The warp is on the loom.{' '}
+          <button type="button" data-cut>
+            Cut off the cloth
+          </button>{' '}
+          to rethread it.
         </p>
       </div>
 
       <fieldset class="yarns">
         <legend>Yarn for the colour orders</legend>
         <div class="skeins">
-          {
-            YARNS.map((y, i) => (
-              <label class="skein" title={y.name} style={`--c: ${hex(y.rgb)}`}>
-                <input type="radio" name="loom-yarn" value={i} checked={i === 4} />
-                <span class="ball" aria-hidden="true" />
-                <span class="vh">{y.name}</span>
-              </label>
-            ))
-          }
+          {YARNS.map((y, i) => (
+            <label class="skein" title={y.name} style={`--c: ${hex(y.rgb)}`}>
+              <input type="radio" name="loom-yarn" value={i} checked={i === 4} />
+              <span class="ball" aria-hidden="true" />
+              <span class="vh">{y.name}</span>
+            </label>
+          ))}
         </div>
       </fieldset>
 
       <div class="book">
         <h2>Pattern book</h2>
         <ol class="leaves">
-          {
-            PRESETS.map((p) => (
-              <li>
-                <button type="button" class="leaf" data-preset={p.id} aria-pressed="false" title={p.note}>
-                  <canvas class="swatch" width="72" height="72" data-swatch={p.id} aria-hidden="true" />
-                  <span class="leafname">{p.name}</span>
-                </button>
-              </li>
-            ))
-          }
+          {PRESETS.map((p) => (
+            <li>
+              <button type="button" class="leaf" data-preset={p.id} aria-pressed="false" title={p.note}>
+                <canvas class="swatch" width="72" height="72" data-swatch={p.id} aria-hidden="true" />
+                <span class="leafname">{p.name}</span>
+              </button>
+            </li>
+          ))}
         </ol>
       </div>
     </section>
@@ -114,7 +126,9 @@ import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
     <section class="shelf" aria-label="Cloth off the loom">
       <h2>Off the loom</h2>
       <ol class="pieces" data-pieces></ol>
-      <p class="empty" data-empty>Cut off a length of cloth and it hangs here.</p>
+      <p class="empty" data-empty>
+        Cut off a length of cloth and it hangs here.
+      </p>
     </section>
 
     <section class="notes" aria-label="Reading the draft">
@@ -129,8 +143,8 @@ import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
           on those shafts rises, opening the shed for the shuttle.
         </p>
         <p>
-          <b>Treadling</b>, down the right: the treadle for each pick, in order. Beside it, the colour of each pick; above
-          the threading, the colour of each end.
+          <b>Treadling</b>, down the right: the treadle for each pick, in order. Beside it, the colour of each pick;
+          above the threading, the colour of each end.
         </p>
         <p>
           <b>Drawdown</b>, the big grid: the cloth worked out on paper. A square is filled where the warp lies on top.
@@ -144,8 +158,12 @@ import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
       <canvas class="pieceview" data-piece-view></canvas>
       <p class="piececap" data-piece-cap></p>
       <div class="piecebar">
-        <button type="button" data-piece-save>Download image</button>
-        <button type="button" data-piece-close>Close</button>
+        <button type="button" data-piece-save>
+          Download image
+        </button>
+        <button type="button" data-piece-close>
+          Close
+        </button>
       </div>
     </dialog>
   </main>
@@ -587,8 +605,7 @@ import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
         transparent 5px 7px
       ),
       radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.35), transparent 55%),
-      radial-gradient(circle at 60% 70%, rgb(0 0 0 / 0.25), transparent 70%),
-      var(--c);
+      radial-gradient(circle at 60% 70%, rgb(0 0 0 / 0.25), transparent 70%), var(--c);
     box-shadow: 0 2px 4px rgb(60 40 20 / 0.3);
     transition: transform 120ms;
   }

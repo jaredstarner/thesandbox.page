@@ -97,7 +97,7 @@ export function startLoom(root: HTMLElement) {
 
   function makePick(treadle: number, yarn: number, header = false): Pick {
     const mask = header ? TABBY[treadle] : liftMask(draft.tieup, treadle);
-    const pick: Pick = { mask, yarn, turn: (-shuttleSide) as -1 | 1, n: serial++, header };
+    const pick: Pick = { mask, yarn, turn: -shuttleSide as -1 | 1, n: serial++, header };
     return pick;
   }
 
@@ -127,7 +127,8 @@ export function startLoom(root: HTMLElement) {
     tally.textContent = `${ENDS / SETT} cm wide · ${cm} cm woven · ${n} ${n === 1 ? 'pick' : 'picks'}`;
     const preset = presetId ? presetById(presetId) : null;
     named.textContent = preset ? preset.name : 'Your own draft';
-    for (const b of $$<HTMLButtonElement>('[data-preset]')) b.setAttribute('aria-pressed', String(b.dataset.preset === presetId));
+    for (const b of $$<HTMLButtonElement>('[data-preset]'))
+      b.setAttribute('aria-pressed', String(b.dataset.preset === presetId));
     repeatLabel.textContent = `${repeat()} picks a repeat`;
     if (n === 0) lockedNote.hidden = true;
     sheet.cursor = cursor;

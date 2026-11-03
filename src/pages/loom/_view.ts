@@ -71,7 +71,9 @@ function woodTexture(w: number, h: number, base: [number, number, number], seed:
   for (let i = 0; i < h * 0.9; i++) {
     const y0 = hash(i, seed) * h;
     const dark = hash(i, seed + 1) < 0.6;
-    g.strokeStyle = dark ? `rgba(60, 34, 14, ${0.05 + hash(i, seed + 2) * 0.12})` : `rgba(255, 228, 190, ${0.04 + hash(i, seed + 3) * 0.06})`;
+    g.strokeStyle = dark
+      ? `rgba(60, 34, 14, ${0.05 + hash(i, seed + 2) * 0.12})`
+      : `rgba(255, 228, 190, ${0.04 + hash(i, seed + 3) * 0.06})`;
     g.lineWidth = 0.6 + hash(i, seed + 4) * 1.6;
     g.beginPath();
     const amp = 1 + hash(i, seed + 5) * 4;
@@ -254,7 +256,7 @@ export class LoomView {
       fire('fly', THROW[0], a.hooks.fly);
       fire('land', THROW[1], a.hooks.land);
       if (fire('impact', BEAT[1], a.hooks.impact)) {
-        this.shuttleSide = (-a.from) as -1 | 1;
+        this.shuttleSide = -a.from as -1 | 1;
         this.scrollIn();
       }
       if (t >= 1) {
@@ -285,7 +287,15 @@ export class LoomView {
         this.painter.paintTieOn(g, margin, i * s, this.warp, this.buffer.height - i * s);
         break;
       }
-      this.painter.paintRow(g, margin, i * s, this.warp, this.picks[k], this.picks[k + 1] ?? null, this.picks[k - 1] ?? null);
+      this.painter.paintRow(
+        g,
+        margin,
+        i * s,
+        this.warp,
+        this.picks[k],
+        this.picks[k + 1] ?? null,
+        this.picks[k - 1] ?? null,
+      );
     }
     for (let i = 1; i < rows; i++) {
       const k = n - 1 - i;
@@ -300,11 +310,22 @@ export class LoomView {
     const s = this.painter.s;
     const g = this.bg;
     const margin = Math.ceil(s * 3);
-    g.drawImage(this.buffer, 0, 0, this.buffer.width, this.buffer.height - s, 0, s, this.buffer.width, this.buffer.height - s);
+    g.drawImage(
+      this.buffer,
+      0,
+      0,
+      this.buffer.width,
+      this.buffer.height - s,
+      0,
+      s,
+      this.buffer.width,
+      this.buffer.height - s,
+    );
     const n = this.picks.length;
     const ends = this.warp.threading.length;
     if (n === 0) return;
-    if (n > 1) this.painter.paintRow(g, margin, s, this.warp, this.picks[n - 2], this.picks[n - 1], this.picks[n - 3] ?? null);
+    if (n > 1)
+      this.painter.paintRow(g, margin, s, this.warp, this.picks[n - 2], this.picks[n - 1], this.picks[n - 3] ?? null);
     else this.painter.paintTieOn(g, margin, s, this.warp, this.buffer.height - s);
     this.painter.paintRow(g, margin, 0, this.warp, this.picks[n - 1], null, this.picks[n - 2] ?? null);
     if (n > 1) this.painter.paintTurn(g, margin, s, ends, this.picks[n - 2], this.picks[n - 1]);
@@ -476,7 +497,10 @@ export class LoomView {
       const endX = a.from < 0 ? clothX + clothW + L.shuttleL * 0.3 : clothX - L.shuttleL * 0.3;
       const sx = startX + (endX - startX) * fly;
       const entry = a.from < 0 ? clothX - p * 0.3 : clothX + clothW + p * 0.3;
-      const tail = a.from < 0 ? Math.min(sx - L.shuttleL * 0.5, clothX + clothW + p * 0.3) : Math.max(sx + L.shuttleL * 0.5, clothX - p * 0.3);
+      const tail =
+        a.from < 0
+          ? Math.min(sx - L.shuttleL * 0.5, clothX + clothW + p * 0.3)
+          : Math.max(sx + L.shuttleL * 0.5, clothX - p * 0.3);
       if (!struck && t > THROW[0]) {
         const wy = t < BEAT[0] ? shY : reedFace - p * 0.5;
         g.lineWidth = p * 0.72;
@@ -592,7 +616,10 @@ export class LoomView {
     const margin = Math.ceil(s * 3);
     const bw = this.buffer.width / dpr;
     const bx = clothX - margin / dpr;
-    const give = this.active && !this.active.fired.has('impact') ? easeIn(span(this.progress() ?? 0, BEAT[0], BEAT[1])) * this.L.p : 0;
+    const give =
+      this.active && !this.active.fired.has('impact')
+        ? easeIn(span(this.progress() ?? 0, BEAT[0], BEAT[1])) * this.L.p
+        : 0;
 
     // The beam's own wood, out past the cloth.
     const top = beamY - beamR * 0.12;
@@ -724,7 +751,8 @@ export class LoomView {
     const key = `${lp}:${j0}:${i0}:${n}`;
     if (key !== this.loupeKey) {
       this.loupeKey = key;
-      if (!this.loupePainter || this.loupePainter.s !== Math.round(lp * dpr)) this.loupePainter = new ClothPainter(lp * dpr);
+      if (!this.loupePainter || this.loupePainter.s !== Math.round(lp * dpr))
+        this.loupePainter = new ClothPainter(lp * dpr);
       const lpS = this.loupePainter.s;
       this.loupe.width = cells * lpS;
       this.loupe.height = cells * lpS;
@@ -733,7 +761,15 @@ export class LoomView {
       lg.fillRect(0, 0, this.loupe.width, this.loupe.height);
       for (let r = 0; r < cells; r++) {
         const k = n - 1 - (i0 + r);
-        this.loupePainter.paintRow(lg, -j0 * lpS, r * lpS, this.warp, this.picks[k], this.picks[k + 1] ?? null, this.picks[k - 1] ?? null);
+        this.loupePainter.paintRow(
+          lg,
+          -j0 * lpS,
+          r * lpS,
+          this.warp,
+          this.picks[k],
+          this.picks[k + 1] ?? null,
+          this.picks[k - 1] ?? null,
+        );
       }
     }
 

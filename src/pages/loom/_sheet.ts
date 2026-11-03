@@ -157,7 +157,8 @@ export class DraftSheet {
     for (let r = 0; r < MAX_REPEAT; r++) this.swatch(B.weft.x, B.weft.y + r * c, d.weft[r % L], r < L ? 1 : 0.5);
 
     // Threading and tie-up.
-    for (let j = 0; j < ends; j++) this.ink(B.threading.x + j * c, B.threading.y + (SHAFTS - 1 - d.threading[j]) * c, 1, j);
+    for (let j = 0; j < ends; j++)
+      this.ink(B.threading.x + j * c, B.threading.y + (SHAFTS - 1 - d.threading[j]) * c, 1, j);
     for (let t = 0; t < TREADLES; t++) {
       for (let s = 0; s < SHAFTS; s++) {
         if (d.tieup[t][s]) this.ink(B.tieup.x + t * c, B.tieup.y + (SHAFTS - 1 - s) * c, 1, t * 7 + s);

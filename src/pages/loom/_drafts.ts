@@ -86,9 +86,23 @@ const tie = (lifts: number[][]) =>
 const from1 = (seq: number[]) => seq.map((n) => n - 1);
 
 // Treadles 1 to 4 weave a 2/2 twill, 5 and 6 the two tabby sheds.
-const TWILL_TIEUP = tie([[1, 2], [2, 3], [3, 4], [4, 1], [1, 3], [2, 4]]);
+const TWILL_TIEUP = tie([
+  [1, 2],
+  [2, 3],
+  [3, 4],
+  [4, 1],
+  [1, 3],
+  [2, 4],
+]);
 // A 3/1 twill: three shafts up on every twill treadle, so the warp shows on the face.
-const WARP_FACED_TIEUP = tie([[1, 2, 3], [2, 3, 4], [3, 4, 1], [4, 1, 2], [1, 3], [2, 4]]);
+const WARP_FACED_TIEUP = tie([
+  [1, 2, 3],
+  [2, 3, 4],
+  [3, 4, 1],
+  [4, 1, 2],
+  [1, 3],
+  [2, 4],
+]);
 
 const STRAIGHT = from1([1, 2, 3, 4]);
 const POINT = from1([1, 2, 3, 4, 3, 2]);
@@ -106,7 +120,23 @@ export interface Preset {
   draft: Draft;
 }
 
-const glen = [...runs([[Y.charcoal, 4], [Y.undyed, 4]]), ...runs([[Y.charcoal, 4], [Y.undyed, 4]]), ...tile(runs([[Y.charcoal, 2], [Y.undyed, 2]]), 16)];
+const glen = [
+  ...runs([
+    [Y.charcoal, 4],
+    [Y.undyed, 4],
+  ]),
+  ...runs([
+    [Y.charcoal, 4],
+    [Y.undyed, 4],
+  ]),
+  ...tile(
+    runs([
+      [Y.charcoal, 2],
+      [Y.undyed, 2],
+    ]),
+    16,
+  ),
+];
 
 const tartanHalf = runs([
   [Y.madder, 1],
@@ -127,10 +157,19 @@ export const PRESETS: Preset[] = [
     note: 'Plain weave in centimetre checks',
     draft: {
       threading: tile(STRAIGHT, ENDS),
-      warp: tile(runs([[Y.madder, 8], [Y.undyed, 8]]), ENDS),
+      warp: tile(
+        runs([
+          [Y.madder, 8],
+          [Y.undyed, 8],
+        ]),
+        ENDS,
+      ),
       tieup: TWILL_TIEUP,
       treadling: tile(from1([5, 6]), 16),
-      weft: runs([[Y.madder, 8], [Y.undyed, 8]]),
+      weft: runs([
+        [Y.madder, 8],
+        [Y.undyed, 8],
+      ]),
     },
   },
   {
@@ -190,7 +229,11 @@ export const PRESETS: Preset[] = [
       warp: tile([Y.undyed], ENDS),
       tieup: TWILL_TIEUP,
       treadling: tile(from1([1, 2, 3, 4, 1, 4, 3, 2]), 24),
-      weft: runs([[Y.madder, 8], [Y.weld, 8], [Y.indigo, 8]]),
+      weft: runs([
+        [Y.madder, 8],
+        [Y.weld, 8],
+        [Y.indigo, 8],
+      ]),
     },
   },
   {
@@ -211,10 +254,19 @@ export const PRESETS: Preset[] = [
     note: 'A plain 2/2 twill in fours of dark and light',
     draft: {
       threading: tile(STRAIGHT, ENDS),
-      warp: tile(runs([[Y.charcoal, 4], [Y.undyed, 4]]), ENDS),
+      warp: tile(
+        runs([
+          [Y.charcoal, 4],
+          [Y.undyed, 4],
+        ]),
+        ENDS,
+      ),
       tieup: TWILL_TIEUP,
       treadling: tile(from1([1, 2, 3, 4]), 8),
-      weft: runs([[Y.charcoal, 4], [Y.undyed, 4]]),
+      weft: runs([
+        [Y.charcoal, 4],
+        [Y.undyed, 4],
+      ]),
     },
   },
   {
