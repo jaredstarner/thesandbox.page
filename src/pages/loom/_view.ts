@@ -270,7 +270,7 @@ export class LoomView {
 
   /** Paint every visible row of cloth into the buffer, newest at the top. */
   private rebuild() {
-    const { p, dpr, clothW, fellY, beamY, beamR } = this.L;
+    const { dpr, clothW, fellY, beamY, beamR } = this.L;
     const s = this.painter.s;
     const margin = Math.ceil(s * 3);
     const visible = (beamY - fellY + beamR * 1.7) * dpr;
@@ -302,7 +302,6 @@ export class LoomView {
       if (k < 0) break;
       this.painter.paintTurn(g, margin, i * s, this.warp.threading.length, this.picks[k], this.picks[k + 1]);
     }
-    void p;
   }
 
   /** The newest pick has been beaten in: move the cloth down a row and paint it. */
@@ -417,7 +416,7 @@ export class LoomView {
   private draw() {
     const g = this.g;
     const L = this.L;
-    const { W, H, dpr, p, clothX, clothW, rail, fellY, beamY, beamR } = L;
+    const { W, H, dpr, p, clothX, clothW, rail, fellY } = L;
     const now = performance.now();
     const a = this.active;
     const t = a ? clamp01((now - a.t0) / a.dur) : 0;
@@ -559,8 +558,6 @@ export class LoomView {
 
     // The linen tester.
     if (this.pointer) this.drawLoupe(g, give);
-    void beamY;
-    void beamR;
   }
 
   /** The yarn on the shuttle while it waits. */
@@ -591,7 +588,7 @@ export class LoomView {
   }
 
   private drawCloth(g: CanvasRenderingContext2D, give: number) {
-    const { dpr, clothX, fellY, beamY, beamR } = this.L;
+    const { dpr, clothX, fellY, beamY } = this.L;
     const s = this.painter.s;
     const margin = Math.ceil(s * 3);
     const bw = this.buffer.width / dpr;
@@ -607,7 +604,6 @@ export class LoomView {
     fall.addColorStop(1, 'rgba(0, 0, 0, 0.16)');
     g.fillStyle = fall;
     g.fillRect(bx, fellY + give, bw, Math.max(0, flatH));
-    void beamR;
   }
 
   private drawBeam(g: CanvasRenderingContext2D) {
