@@ -1,0 +1,8 @@
+{
+  "title": "Loom",
+  "summary": "A four-shaft floor loom and the draft it weaves from: thread the heddles, tie up the treadles, and weave cloth pick by pick, then change only the colour order and watch the same twill turn into houndstooth.",
+  "date": "2026-11-03",
+  "tags": ["canvas", "pointer-events", "web-audio", "weaving-drafts"],
+  "requires": ["canvas"],
+  "plot": 33
+}

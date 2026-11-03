@@ -538,6 +538,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   sgp4: { label: 'SGP4 orbit propagation' },
   'atmospheric-scattering': { label: 'Atmospheric scattering' },
   'satellite-imagery': { label: 'Satellite imagery' },
+  'weaving-drafts': { label: 'Weaving drafts' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

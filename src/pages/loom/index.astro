@@ -1,0 +1,888 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
+---
+
+<Bare
+  title="Loom"
+  description="A four-shaft floor loom and its draft: thread the heddles, tie up the treadles, and weave cloth pick by pick."
+>
+  <Font cssVariable="--font-loom" slot="head" />
+  <Font cssVariable="--font-loom-sc" slot="head" />
+
+  <main class="loom" data-loom>
+    <header class="mast">
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
+      <h1>Loom</h1>
+      <p class="dek">Thread a draft, tie up the treadles, and weave</p>
+    </header>
+
+    <section class="bench" aria-label="The loom">
+      <div class="frame" data-frame>
+        <canvas
+          class="view"
+          data-view
+          aria-label="Looking down at a floor loom: warp threads run through the heddles and the reed to the cloth, which rolls over the breast beam."
+        ></canvas>
+      </div>
+
+      <div class="floor">
+        <div class="treadles" role="group" aria-label="Treadles">
+          {Array.from({ length: TREADLES }, (_, t) => (
+            <button class="treadle" type="button" data-treadle={t} aria-label={`Treadle ${t + 1}`}>
+              <span>{t + 1}</span>
+            </button>
+          ))}
+        </div>
+        <div class="deck">
+          <button class="weave" type="button" data-weave>
+            Weave <kbd>Space</kbd>
+          </button>
+          <p class="tally" data-tally aria-live="polite"></p>
+          <div class="small">
+            <button type="button" data-cut>
+              Cut off
+            </button>
+            <button type="button" data-sound aria-pressed="true">
+              Sound
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="draft" aria-label="The draft">
+      <div class="card">
+        <div class="cardhead">
+          <h2>The draft</h2>
+          <p class="named" data-named></p>
+        </div>
+        <div class="paper" data-paper>
+          <canvas
+            class="sheet"
+            data-sheet
+            aria-label="The weaving draft on squared paper: threading, tie-up, treadling, and drawdown. Click squares to change them."
+          ></canvas>
+        </div>
+        <div class="cardfoot">
+          <div class="repeat" role="group" aria-label="Treadling repeat">
+            <button type="button" data-repeat="-1" aria-label="Shorten the repeat">
+              −
+            </button>
+            <span data-repeat-label></span>
+            <button type="button" data-repeat="1" aria-label="Lengthen the repeat">
+              +
+            </button>
+          </div>
+          <div class="inkmode" role="group" aria-label="Drawdown">
+            <button type="button" data-ink="ink" aria-pressed="true">
+              Ink
+            </button>
+            <button type="button" data-ink="colour" aria-pressed="false">
+              Colour
+            </button>
+          </div>
+        </div>
+        <p class="locked" data-locked hidden>
+          The warp is on the loom.{' '}
+          <button type="button" data-cut>
+            Cut off the cloth
+          </button>{' '}
+          to rethread it.
+        </p>
+      </div>
+
+      <fieldset class="yarns">
+        <legend>Yarn for the colour orders</legend>
+        <div class="skeins">
+          {YARNS.map((y, i) => (
+            <label class="skein" title={y.name} style={`--c: ${hex(y.rgb)}`}>
+              <input type="radio" name="loom-yarn" value={i} checked={i === 4} />
+              <span class="ball" aria-hidden="true" />
+              <span class="vh">{y.name}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <div class="book">
+        <h2>Pattern book</h2>
+        <ol class="leaves">
+          {PRESETS.map((p) => (
+            <li>
+              <button type="button" class="leaf" data-preset={p.id} aria-pressed="false" title={p.note}>
+                <canvas class="swatch" width="72" height="72" data-swatch={p.id} aria-hidden="true" />
+                <span class="leafname">{p.name}</span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+
+    <section class="shelf" aria-label="Cloth off the loom">
+      <h2>Off the loom</h2>
+      <ol class="pieces" data-pieces></ol>
+      <p class="empty" data-empty>
+        Cut off a length of cloth and it hangs here.
+      </p>
+    </section>
+
+    <section class="notes" aria-label="Reading the draft">
+      <h2>Reading the draft</h2>
+      <div class="cols">
+        <p>
+          <b>Threading</b>, across the top: every warp end passes through the eye of a heddle on one of the four shafts.
+          A square marks which.
+        </p>
+        <p>
+          <b>Tie-up</b>, top right: each treadle is tied to the shafts it lifts. Press a treadle and every end threaded
+          on those shafts rises, opening the shed for the shuttle.
+        </p>
+        <p>
+          <b>Treadling</b>, down the right: the treadle for each pick, in order. Beside it, the colour of each pick;
+          above the threading, the colour of each end.
+        </p>
+        <p>
+          <b>Drawdown</b>, the big grid: the cloth worked out on paper. A square is filled where the warp lies on top.
+          Weavers used to fill these in by hand, cell by cell; it is the threading, the tie-up, and the treadling
+          multiplied together.
+        </p>
+      </div>
+    </section>
+
+    <dialog class="piece" data-piece aria-label="A length of cloth">
+      <canvas class="pieceview" data-piece-view></canvas>
+      <p class="piececap" data-piece-cap></p>
+      <div class="piecebar">
+        <button type="button" data-piece-save>
+          Download image
+        </button>
+        <button type="button" data-piece-close>
+          Close
+        </button>
+      </div>
+    </dialog>
+  </main>
+</Bare>
+
+<script>
+  import { startLoom } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-loom]');
+  if (root) startLoom(root);
+</script>
+
+<style is:global>
+  body:has(.loom) {
+    margin: 0;
+    background: #e3dbc9;
+    color: #26221d;
+  }
+
+  .loom {
+    --ink: #26221d;
+    --soft: #6c6253;
+    --rule: #c7bba4;
+    --paper: #f7f2e6;
+    --madder: #a4362a;
+    --wood: #b48a5c;
+    --wood-deep: #6e4c2f;
+    --wall: #e3dbc9;
+
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 600px;
+    gap: 22px 28px;
+    max-width: 1500px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 18px 28px 56px;
+    font-family: var(--font-loom), Georgia, serif;
+    font-size: 16px;
+    line-height: 1.45;
+    background-color: var(--wall);
+    /* A faint plain weave in the wall's linen. */
+    background-image:
+      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.07) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(0deg, rgb(70 50 30 / 0.04) 0 1px, transparent 1px 3px);
+  }
+
+  .loom *,
+  .loom *::before,
+  .loom *::after {
+    box-sizing: border-box;
+  }
+
+  .loom [hidden] {
+    display: none !important;
+  }
+
+  .loom .vh {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .loom button {
+    font: inherit;
+    color: inherit;
+  }
+
+  .loom h2 {
+    margin: 0;
+    font-family: var(--font-loom-sc), Georgia, serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+  }
+
+  .loom .mast {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+  }
+
+  .loom .home {
+    order: 3;
+    margin-left: auto;
+    font-family: var(--font-loom-sc), Georgia, serif;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    color: var(--soft);
+    text-decoration: none;
+  }
+
+  .loom .home:hover,
+  .loom .home:focus-visible {
+    color: var(--madder);
+  }
+
+  .loom h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 46px;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .loom .dek {
+    margin: 0;
+    font-style: italic;
+    font-size: 19px;
+    color: var(--soft);
+  }
+
+  /* The loom. */
+
+  .loom .bench {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .loom .frame {
+    position: relative;
+    height: clamp(420px, calc(100vh - 250px), 700px);
+    border-radius: 6px 6px 0 0;
+    overflow: hidden;
+    background: #16110d;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.4) inset;
+  }
+
+  .loom .view {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .loom .floor {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 18px 16px;
+    border-radius: 0 0 6px 6px;
+    background: linear-gradient(#3a2a1d, #2b1f15);
+    color: #efe5d2;
+  }
+
+  .loom .treadles {
+    display: flex;
+    gap: 7px;
+  }
+
+  .loom .treadle {
+    position: relative;
+    width: 34px;
+    height: 58px;
+    padding: 0;
+    border: 0;
+    border-radius: 3px 3px 5px 5px;
+    cursor: pointer;
+    background:
+      repeating-linear-gradient(
+        93deg,
+        rgb(80 50 25 / 0.18) 0 1px,
+        transparent 1px 5px,
+        rgb(255 230 190 / 0.08) 5px 6px,
+        transparent 6px 9px
+      ),
+      linear-gradient(#c79d6b, #a47647 70%, #8a5f37);
+    box-shadow:
+      0 5px 0 #5b3d23,
+      0 7px 8px rgb(0 0 0 / 0.45);
+    transition:
+      transform 70ms ease-out,
+      box-shadow 70ms ease-out,
+      filter 70ms;
+  }
+
+  .loom .treadle span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 7px;
+    font-family: var(--font-loom-sc), Georgia, serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: rgb(60 35 15 / 0.9);
+    text-shadow: 0 1px 0 rgb(255 235 200 / 0.35);
+  }
+
+  .loom .treadle[data-down],
+  .loom .treadle:active {
+    transform: translateY(5px);
+    box-shadow:
+      0 0 0 #5b3d23,
+      0 2px 3px rgb(0 0 0 / 0.5);
+    filter: brightness(0.92);
+  }
+
+  .loom .treadle:focus-visible,
+  .loom .floor button:focus-visible {
+    outline: 2px solid #f0c27a;
+    outline-offset: 3px;
+  }
+
+  .loom .deck {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    min-width: 0;
+  }
+
+  .loom .weave {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border: 1px solid #e8c48e;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 17px;
+    color: #2b1f15;
+    background: linear-gradient(#f4d9a8, #e2b877);
+    box-shadow: 0 2px 0 #7a5530;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+
+  .loom .weave[data-down] {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 #7a5530;
+  }
+
+  .loom kbd {
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    background: rgb(60 35 15 / 0.12);
+  }
+
+  .loom .tally {
+    flex: 1;
+    min-width: 12ch;
+    margin: 0;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    color: #d9cbb2;
+  }
+
+  .loom .small {
+    display: flex;
+    gap: 8px;
+  }
+
+  .loom .small button {
+    padding: 6px 12px;
+    border: 1px solid rgb(239 229 210 / 0.35);
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #efe5d2;
+    background: transparent;
+  }
+
+  .loom .small button:hover {
+    border-color: rgb(239 229 210 / 0.7);
+  }
+
+  .loom [data-sound][aria-pressed='false'] {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  /* The draft. */
+
+  .loom .draft {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .loom .card {
+    padding: 14px 16px 12px;
+    border-radius: 3px;
+    background: var(--paper);
+    box-shadow:
+      0 1px 2px rgb(60 40 20 / 0.18),
+      0 8px 24px -10px rgb(60 40 20 / 0.35);
+  }
+
+  .loom .cardhead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .loom .named {
+    margin: 0;
+    font-style: italic;
+    color: var(--soft);
+  }
+
+  .loom .paper {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    /* Shadows at an edge with more draft past it. */
+    background:
+      linear-gradient(to right, var(--paper) 40%, rgb(247 242 230 / 0)) left / 28px 100% no-repeat local,
+      linear-gradient(to left, var(--paper) 40%, rgb(247 242 230 / 0)) right / 28px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, rgb(60 40 20 / 0.28), transparent) left / 12px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, rgb(60 40 20 / 0.28), transparent) right / 12px 100% no-repeat scroll;
+  }
+
+  .loom .sheet {
+    display: block;
+    touch-action: none;
+    cursor: pointer;
+  }
+
+  .loom .cardfoot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 15px;
+  }
+
+  .loom .repeat,
+  .loom .inkmode {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .loom .repeat span {
+    min-width: 11ch;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .loom .cardfoot button {
+    min-width: 30px;
+    padding: 3px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    cursor: pointer;
+    background: transparent;
+  }
+
+  .loom .cardfoot button:hover {
+    border-color: var(--soft);
+  }
+
+  .loom .inkmode button[aria-pressed='true'] {
+    border-color: var(--ink);
+    color: var(--paper);
+    background: var(--ink);
+  }
+
+  .loom .locked {
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    border-left: 3px solid var(--madder);
+    font-size: 15px;
+    background: rgb(164 54 42 / 0.07);
+  }
+
+  .loom .locked button {
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    color: var(--madder);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    background: none;
+  }
+
+  .loom .yarns {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .loom .yarns legend {
+    padding: 0;
+    margin-bottom: 8px;
+    font-family: var(--font-loom-sc), Georgia, serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+  }
+
+  .loom .skeins {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .loom .skein {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .loom .skein input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .loom .ball {
+    display: block;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background:
+      repeating-linear-gradient(
+        -38deg,
+        rgb(255 255 255 / 0.16) 0 2px,
+        transparent 2px 4px,
+        rgb(0 0 0 / 0.12) 4px 5px,
+        transparent 5px 7px
+      ),
+      radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.35), transparent 55%),
+      radial-gradient(circle at 60% 70%, rgb(0 0 0 / 0.25), transparent 70%), var(--c);
+    box-shadow: 0 2px 4px rgb(60 40 20 / 0.3);
+    transition: transform 120ms;
+  }
+
+  .loom .skein input:checked + .ball {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  .loom .skein input:focus-visible + .ball {
+    outline: 2px solid var(--madder);
+    outline-offset: 3px;
+  }
+
+  .loom .skein:hover .ball {
+    transform: translateY(-2px);
+  }
+
+  .loom .book h2 {
+    margin-bottom: 8px;
+  }
+
+  .loom .leaves {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .loom .leaf {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    padding: 7px 4px 6px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    cursor: pointer;
+    background: var(--paper);
+    box-shadow: 0 1px 2px rgb(60 40 20 / 0.18);
+  }
+
+  .loom .leaf:hover {
+    border-color: var(--rule);
+  }
+
+  .loom .leaf[aria-pressed='true'] {
+    border-color: var(--ink);
+  }
+
+  .loom .swatch {
+    width: 72px;
+    height: 72px;
+    max-width: 100%;
+    border-radius: 1px;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08);
+  }
+
+  .loom .leafname {
+    font-size: 14px;
+    line-height: 1.15;
+  }
+
+  /* Off the loom. */
+
+  .loom .shelf {
+    grid-column: 1 / -1;
+  }
+
+  .loom .pieces {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 18px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .loom .pieces:empty {
+    display: none;
+  }
+
+  .loom .pieces button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    cursor: zoom-in;
+    background: none;
+  }
+
+  .loom .pieces canvas {
+    display: block;
+    filter: drop-shadow(0 4px 5px rgb(60 40 20 / 0.35));
+  }
+
+  .loom .pieces small {
+    font-size: 13px;
+    color: var(--soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .loom .empty {
+    margin: 6px 0 0;
+    font-style: italic;
+    color: var(--soft);
+  }
+
+  .loom .notes {
+    grid-column: 1 / -1;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .loom .cols {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 8px;
+  }
+
+  .loom .cols p {
+    margin: 0;
+    font-size: 15px;
+    color: #3d362d;
+  }
+
+  .loom .cols b {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .loom .piece {
+    max-width: min(92vw, 900px);
+    max-height: 92vh;
+    padding: 18px;
+    border: 0;
+    border-radius: 4px;
+    color: var(--ink);
+    background: var(--wall);
+    box-shadow: 0 20px 60px rgb(0 0 0 / 0.5);
+  }
+
+  .loom .piece::backdrop {
+    background: rgb(22 17 13 / 0.7);
+  }
+
+  .loom .pieceview {
+    display: block;
+    max-width: 100%;
+    max-height: calc(92vh - 120px);
+    margin: 0 auto;
+  }
+
+  .loom .piececap {
+    margin: 10px 0 0;
+    text-align: center;
+    font-style: italic;
+    color: var(--soft);
+  }
+
+  .loom .piecebar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .loom .piecebar button {
+    padding: 6px 16px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    cursor: pointer;
+    background: transparent;
+  }
+
+  .loom .piecebar button:first-child {
+    color: var(--paper);
+    background: var(--ink);
+  }
+
+  @media (hover: none) {
+    .loom kbd {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1180px) {
+    .loom {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .loom .draft {
+      display: grid;
+      grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .loom .card {
+      grid-row: span 2;
+    }
+
+    .loom .leaves {
+      grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+    }
+  }
+
+  @media (max-width: 860px) {
+    .loom {
+      gap: 16px;
+      padding: 12px 16px 40px;
+    }
+
+    .loom h1 {
+      font-size: 38px;
+    }
+
+    .loom .dek {
+      font-size: 17px;
+    }
+
+    .loom .frame {
+      height: clamp(380px, 62vh, 520px);
+    }
+
+    .loom .floor {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+      padding: 12px 12px 14px;
+    }
+
+    .loom .treadles {
+      justify-content: center;
+    }
+
+    .loom .treadle {
+      width: 40px;
+      height: 52px;
+    }
+
+    .loom .deck {
+      justify-content: space-between;
+    }
+
+    .loom .draft {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .loom .card {
+      min-width: 0;
+    }
+
+    .loom .leaves {
+      grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+      gap: 8px;
+    }
+
+    .loom .skeins {
+      gap: 8px;
+    }
+
+    .loom .ball {
+      width: 34px;
+      height: 34px;
+    }
+
+    .loom .cols {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+  }
+</style>
