@@ -339,7 +339,7 @@ import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
     font-family: var(--font-loom-sc), Georgia, serif;
     font-weight: 600;
     font-size: 15px;
-    color: rgb(60 35 15 / 0.75);
+    color: rgb(60 35 15 / 0.9);
     text-shadow: 0 1px 0 rgb(255 235 200 / 0.35);
   }
 
@@ -467,6 +467,12 @@ import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
   .loom .paper {
     overflow-x: auto;
     overscroll-behavior-x: contain;
+    /* Shadows at an edge with more draft past it. */
+    background:
+      linear-gradient(to right, var(--paper) 40%, rgb(247 242 230 / 0)) left / 28px 100% no-repeat local,
+      linear-gradient(to left, var(--paper) 40%, rgb(247 242 230 / 0)) right / 28px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, rgb(60 40 20 / 0.28), transparent) left / 12px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, rgb(60 40 20 / 0.28), transparent) right / 12px 100% no-repeat scroll;
   }
 
   .loom .sheet {
@@ -770,6 +776,12 @@ import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
     background: var(--ink);
   }
 
+  @media (hover: none) {
+    .loom kbd {
+      display: none;
+    }
+  }
+
   @media (max-width: 1180px) {
     .loom {
       grid-template-columns: minmax(0, 1fr);
@@ -830,6 +842,30 @@ import { PRESETS, TREADLES, YARNS, hex } from './_drafts';
 
     .loom .draft {
       display: flex;
+      align-items: stretch;
+    }
+
+    .loom .card {
+      min-width: 0;
+    }
+
+    .loom .leaves {
+      grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+      gap: 8px;
+    }
+
+    .loom .leafname {
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .loom .skeins {
+      gap: 8px;
+    }
+
+    .loom .ball {
+      width: 34px;
+      height: 34px;
     }
 
     .loom .cols {
