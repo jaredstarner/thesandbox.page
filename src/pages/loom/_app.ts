@@ -19,7 +19,7 @@ import { LoomView } from './_view';
 
 const OPENING = 'houndstooth';
 /** Picks already woven when the page opens, so there is cloth to look at. */
-const OPENING_PICKS = 24;
+const OPENING_PICKS = 44;
 const MAX_PIECES = 10;
 
 interface Piece {

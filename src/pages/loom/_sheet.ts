@@ -154,7 +154,7 @@ export class DraftSheet {
 
     // Colour orders.
     for (let j = 0; j < ends; j++) this.swatch(B.warp.x + j * c, B.warp.y, d.warp[j], 1);
-    for (let r = 0; r < MAX_REPEAT; r++) this.swatch(B.weft.x, B.weft.y + r * c, d.weft[r % L], r < L ? 1 : 0.35);
+    for (let r = 0; r < MAX_REPEAT; r++) this.swatch(B.weft.x, B.weft.y + r * c, d.weft[r % L], r < L ? 1 : 0.5);
 
     // Threading and tie-up.
     for (let j = 0; j < ends; j++) this.ink(B.threading.x + j * c, B.threading.y + (SHAFTS - 1 - d.threading[j]) * c, 1, j);
@@ -166,7 +166,7 @@ export class DraftSheet {
 
     // Treadling, and the drawdown it makes; past the repeat, both carry on faintly.
     for (let r = 0; r < MAX_REPEAT; r++) {
-      const alpha = r < L ? 1 : 0.3;
+      const alpha = r < L ? 1 : 0.42;
       const t = d.treadling[r % L];
       this.ink(B.treadling.x + t * c, B.treadling.y + r * c, alpha, r * 31 + t);
       const m = liftMask(d.tieup, t);

@@ -140,8 +140,11 @@ export class LoomView {
     this.canvas.height = Math.round(H * dpr);
 
     const ends = Math.max(1, this.warp.threading.length || 64);
-    const rail = Math.round(Math.min(30, Math.max(12, W * 0.035)));
-    const room = W - rail * 2 - Math.max(14, W * 0.06);
+    const rail = Math.round(Math.min(22, Math.max(10, W * 0.025)));
+    // The race runs well past the warp on both sides, where the shuttle rests between picks.
+    const shuttleL = Math.round(Math.max(50, Math.min(96, W * 0.11)));
+    // On a phone the cloth gets the width, and the resting shuttle tucks under the frame.
+    const room = W - rail * 2 - shuttleL * (W < 560 ? 0.9 : 1.64);
     // Whole device pixels per crossing, so the cloth never blurs.
     const sDev = Math.max(4, Math.min(13 * dpr, Math.floor((room / ends) * dpr)));
     const p = sDev / dpr;
@@ -157,8 +160,7 @@ export class LoomView {
     const reedH = Math.max(7, Math.round(H * 0.014));
     const raceH = Math.max(18, Math.round(H * 0.045));
     const reedFaceRest = fellY - raceH - Math.max(14, Math.round(H * 0.035));
-    const shuttleL = Math.max(64, Math.min(150, clothW * 0.2));
-    const shuttleW = raceH * 0.72;
+    const shuttleW = Math.min(raceH * 0.72, shuttleL * 0.22);
 
     this.L = {
       W,
@@ -470,8 +472,8 @@ export class LoomView {
     if (a) {
       const rgb = YARNS[a.pick.yarn].rgb;
       const fly = ease(span(t, THROW[0], THROW[1]));
-      const startX = a.from < 0 ? clothX - L.shuttleL * 0.42 : clothX + clothW + L.shuttleL * 0.42;
-      const endX = a.from < 0 ? clothX + clothW + L.shuttleL * 0.42 : clothX - L.shuttleL * 0.42;
+      const startX = a.from < 0 ? clothX - L.shuttleL * 0.3 : clothX + clothW + L.shuttleL * 0.3;
+      const endX = a.from < 0 ? clothX + clothW + L.shuttleL * 0.3 : clothX - L.shuttleL * 0.3;
       const sx = startX + (endX - startX) * fly;
       const entry = a.from < 0 ? clothX - p * 0.3 : clothX + clothW + p * 0.3;
       const tail = a.from < 0 ? Math.min(sx - L.shuttleL * 0.5, clothX + clothW + p * 0.3) : Math.max(sx + L.shuttleL * 0.5, clothX - p * 0.3);
@@ -493,23 +495,23 @@ export class LoomView {
       const shX = t < THROW[0] ? startX : t > THROW[1] ? endX : sx;
       this.drawShuttle(g, a.pick.yarn, shX, raceY + (L.raceH - L.shuttleW) / 2);
     } else {
-      const parked = this.shuttleSide < 0 ? clothX - L.shuttleL * 0.42 : clothX + clothW + L.shuttleL * 0.42;
+      const parked = this.shuttleSide < 0 ? clothX - L.shuttleL * 0.3 : clothX + clothW + L.shuttleL * 0.3;
       const next = this.nextYarn ?? 0;
       this.drawShuttle(g, next, parked, raceY + (L.raceH - L.shuttleW) / 2);
     }
 
     drawEnds(true);
 
-    // The heddles: four shafts, each end through an eye on its own shaft.
-    this.drawHeddles(g, lifted, liftAmt, xAt);
-
     // Distance: the back of the loom falls into shadow.
     const fog = g.createLinearGradient(0, 0, 0, reedFace - L.reedH - L.handH);
-    fog.addColorStop(0, 'rgba(8, 5, 3, 0.86)');
-    fog.addColorStop(0.55, 'rgba(8, 5, 3, 0.35)');
+    fog.addColorStop(0, 'rgba(8, 5, 3, 0.62)');
+    fog.addColorStop(0.4, 'rgba(8, 5, 3, 0.3)');
     fog.addColorStop(1, 'rgba(8, 5, 3, 0)');
     g.fillStyle = fog;
     g.fillRect(0, 0, W, reedFace - L.reedH - L.handH);
+
+    // The heddles: four shafts, each end through an eye on its own shaft.
+    this.drawHeddles(g, lifted, liftAmt, xAt);
 
     // The beater: the reed, and the handtree above it.
     this.drawBeater(g, reedFace);
@@ -615,16 +617,17 @@ export class LoomView {
       if (src1 > this.buffer.height) break;
       g.drawImage(this.buffer, 0, src0, this.buffer.width, Math.max(0.5, src1 - src0), bx, y0, bw, 1.02);
     }
+    // Light catches the cloth where it bends over the top of the beam.
     const wrap = g.createLinearGradient(0, beamY, 0, beamY + beamR);
-    wrap.addColorStop(0, 'rgba(0, 0, 0, 0.08)');
-    wrap.addColorStop(0.12, 'rgba(255, 240, 220, 0.1)');
-    wrap.addColorStop(0.45, 'rgba(0, 0, 0, 0.2)');
-    wrap.addColorStop(1, 'rgba(0, 0, 0, 0.85)');
+    wrap.addColorStop(0, 'rgba(255, 240, 220, 0)');
+    wrap.addColorStop(0.09, 'rgba(255, 240, 220, 0.17)');
+    wrap.addColorStop(0.22, 'rgba(255, 240, 220, 0)');
+    wrap.addColorStop(0.5, 'rgba(0, 0, 0, 0.25)');
+    wrap.addColorStop(1, 'rgba(0, 0, 0, 0.82)');
     g.fillStyle = wrap;
     g.fillRect(bx, beamY, bw, beamR);
     g.fillStyle = '#0b0806';
     g.fillRect(rail * 0.5, beamY + beamR * 0.98, W - rail, H);
-    void slices;
   }
 
   private drawHeddles(
@@ -639,20 +642,20 @@ export class LoomView {
     const up = new Array(SHAFTS).fill(false);
     if (lifted) for (let j = 0; j < ends; j++) if (lifted[j]) up[this.warp.threading[j]] = true;
     for (let s = SHAFTS - 1; s >= 0; s--) {
-      const rise = up[s] ? amt * Math.max(2, shaftGap * 0.28) : 0;
+      const rise = up[s] ? amt * Math.max(3, shaftGap * 0.45) : 0;
       // Shaft 1 is nearest the weaver.
       const y = heddleTop + (SHAFTS - 1 - s) * shaftGap - rise;
       const k = up[s] ? 1 + amt * 0.5 : 1;
       // The heddle bar.
-      g.fillStyle = shade([92, 94, 98], 0.75 * k);
+      g.fillStyle = shade([128, 132, 138], 0.75 * k);
       g.fillRect(0, y - 1.5, W, 3);
-      g.fillStyle = `rgba(230, 235, 240, ${0.18 * k})`;
+      g.fillStyle = `rgba(230, 235, 240, ${0.3 * k})`;
       g.fillRect(0, y - 1.5, W, 1);
       // An eye for every end threaded on this shaft.
       for (let j = 0; j < ends; j++) {
         if (this.warp.threading[j] !== s) continue;
         const x = xAt(j, y);
-        g.strokeStyle = `rgba(200, 206, 212, ${0.55 * k})`;
+        g.strokeStyle = `rgba(206, 212, 218, ${Math.min(1, 0.62 * k)})`;
         g.lineWidth = Math.max(0.7, p * 0.1);
         g.beginPath();
         g.moveTo(x, y - shaftGap * 0.42);
