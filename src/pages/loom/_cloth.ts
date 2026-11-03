@@ -76,7 +76,7 @@ export class ClothPainter {
   private underColour(yarn: number): string {
     let c = this.under.get(yarn);
     if (!c) {
-      c = shade(YARNS[yarn].rgb, 0.4);
+      c = shade(YARNS[yarn].rgb, 0.55);
       this.under.set(yarn, c);
     }
     return c;
@@ -100,22 +100,23 @@ export class ClothPainter {
     // Local axes: u across the thread, v along it.
     if (weft) g.setTransform(0, 1, 1, 0, 0, 0);
 
-    const w = s * 0.86;
+    // Wool blooms to fill the sett, so the threads nearly close up.
+    const w = s * 0.92;
     const u0 = (s - w) / 2;
     const u1 = u0 + w;
-    const inset = s * 0.06;
+    const inset = s * 0.04;
     const v0 = capA ? inset : -1;
     const v1 = capB ? s - inset : s + 1;
-    const r = w * 0.44;
+    const r = w * 0.4;
 
     g.beginPath();
     g.roundRect(u0, v0, w, v1 - v0, [capA ? r : 0, capA ? r : 0, capB ? r : 0, capB ? r : 0]);
     const across = g.createLinearGradient(u0, 0, u1, 0);
-    across.addColorStop(0, shade(rgb, 0.56));
+    across.addColorStop(0, shade(rgb, 0.7));
     across.addColorStop(0.2, shade(rgb, 0.98));
-    across.addColorStop(0.36, shade(rgb, 1.14));
-    across.addColorStop(0.62, shade(rgb, 0.98));
-    across.addColorStop(1, shade(rgb, 0.5));
+    across.addColorStop(0.38, shade(rgb, 1.1));
+    across.addColorStop(0.66, shade(rgb, 0.98));
+    across.addColorStop(1, shade(rgb, 0.68));
     g.fillStyle = across;
     g.fill();
 
@@ -123,49 +124,57 @@ export class ClothPainter {
     g.clip();
     // Where the thread dives under, it turns away from the light.
     if (capA) {
-      const end = g.createLinearGradient(0, v0, 0, v0 + s * 0.4);
-      end.addColorStop(0, 'rgba(0, 0, 0, 0.42)');
+      const end = g.createLinearGradient(0, v0, 0, v0 + s * 0.36);
+      end.addColorStop(0, 'rgba(0, 0, 0, 0.3)');
       end.addColorStop(1, 'rgba(0, 0, 0, 0)');
       g.fillStyle = end;
-      g.fillRect(u0, v0, w, s * 0.4);
+      g.fillRect(u0, v0, w, s * 0.36);
     }
     if (capB) {
-      const end = g.createLinearGradient(0, v1, 0, v1 - s * 0.4);
-      end.addColorStop(0, 'rgba(0, 0, 0, 0.42)');
+      const end = g.createLinearGradient(0, v1, 0, v1 - s * 0.36);
+      end.addColorStop(0, 'rgba(0, 0, 0, 0.3)');
       end.addColorStop(1, 'rgba(0, 0, 0, 0)');
       g.fillStyle = end;
-      g.fillRect(u0, v1 - s * 0.4, w, s * 0.4);
+      g.fillRect(u0, v1 - s * 0.36, w, s * 0.36);
     }
-    // The twist of the plies: a slant that repeats twice a cell, so floats join up.
+    // The twist: two plies wound round each other, each a rounded ridge lit on
+    // its upper side with a groove where it meets the next. The slant repeats
+    // twice a cell, so floats join up without a seam.
     const period = s / 2;
-    g.lineWidth = Math.max(0.6, s * 0.08);
-    for (let k = -2; k <= 4; k++) {
+    const slant = w * 0.42;
+    const uc = (u0 + u1) / 2;
+    for (let k = -3; k <= 4; k++) {
       const v = k * period;
-      g.strokeStyle = lift(rgb, 0.5, 0.16);
+      const ply = g.createLinearGradient(uc, v, uc + 0.4925 * period, v + 0.587 * period);
+      ply.addColorStop(0, 'rgba(0, 0, 0, 0.2)');
+      ply.addColorStop(0.22, lift(rgb, 0.45, 0.2));
+      ply.addColorStop(0.55, 'rgba(0, 0, 0, 0)');
+      ply.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
+      g.fillStyle = ply;
       g.beginPath();
-      g.moveTo(u0 - 1, v + w * 0.42);
-      g.lineTo(u1 + 1, v - w * 0.42);
-      g.stroke();
-      g.strokeStyle = 'rgba(0, 0, 0, 0.13)';
-      g.beginPath();
-      g.moveTo(u0 - 1, v + period / 2 + w * 0.42);
-      g.lineTo(u1 + 1, v + period / 2 - w * 0.42);
-      g.stroke();
+      g.moveTo(u0 - 1, v + slant);
+      g.lineTo(u1 + 1, v - slant);
+      g.lineTo(u1 + 1, v - slant + period);
+      g.lineTo(u0 - 1, v + slant + period);
+      g.closePath();
+      g.fill();
     }
     g.restore();
 
-    // A few stray fibres catching the light.
+    // Stray fibres catching the light, more of them the closer you look.
     if (s >= 6) {
-      g.lineWidth = Math.max(0.5, s * 0.035);
-      g.strokeStyle = lift(rgb, 0.55, 0.22);
-      for (let k = 0; k < 2; k++) {
+      const count = s >= 20 ? 7 : 2;
+      g.lineWidth = Math.max(0.5, s * (s >= 20 ? 0.02 : 0.035));
+      g.strokeStyle = lift(rgb, 0.55, s >= 20 ? 0.32 : 0.22);
+      for (let k = 0; k < count; k++) {
         const a = hash(variant * 7 + k, yarn * 13 + (weft ? 5 : 0));
         const b = hash(variant * 3 + k, yarn * 29 + 1);
-        const side = k % 2 === 0 ? u0 + w * 0.15 : u1 - w * 0.15;
-        const v = s * (0.15 + a * 0.7);
+        const out = k % 2 === 0 ? -1 : 1;
+        const side = out < 0 ? u0 + w * 0.12 : u1 - w * 0.12;
+        const v = s * (0.1 + a * 0.8);
         g.beginPath();
         g.moveTo(side, v);
-        g.quadraticCurveTo(side + (k % 2 === 0 ? -1 : 1) * s * 0.18, v + s * 0.1, side + (b - 0.5) * s * 0.3, v + s * 0.28);
+        g.quadraticCurveTo(side + out * s * 0.16, v + s * 0.08, side + out * s * 0.06 + (b - 0.5) * s * 0.2, v + s * 0.26);
         g.stroke();
       }
     }
@@ -197,9 +206,9 @@ export class ClothPainter {
     g.fillStyle = GAP;
     g.fillRect(x0 - s * 1.5, y, ends * s + s * 3, s);
 
-    const band = s * 0.76;
+    const band = s * 0.84;
     const off = (s - band) / 2;
-    const body = s * 0.86;
+    const body = s * 0.92;
     const bodyOff = (s - body) / 2;
     const vPick = pickVariation(pick.n);
 
@@ -242,21 +251,19 @@ export class ClothPainter {
     const dir = pick.turn;
     const yc = y + s / 2;
     const ya = yc - s;
-    const reach = edge + dir * s * 0.62;
-    g.lineCap = 'round';
-    g.lineWidth = s * 0.74;
-    g.strokeStyle = shade(rgb, 0.62);
+    const reach = edge + dir * s * 0.42;
+    g.lineWidth = s * 0.6;
+    g.strokeStyle = shade(rgb, 0.7);
     g.beginPath();
     g.moveTo(edge - dir * s * 0.05, yc);
     g.bezierCurveTo(reach, yc, reach, ya, edge - dir * s * 0.05, ya);
     g.stroke();
-    g.lineWidth = s * 0.24;
-    g.strokeStyle = shade(rgb, 1.08);
+    g.lineWidth = s * 0.18;
+    g.strokeStyle = shade(rgb, 1.02);
     g.beginPath();
-    g.moveTo(edge, yc - s * 0.16);
-    g.bezierCurveTo(reach - dir * s * 0.12, yc - s * 0.16, reach - dir * s * 0.12, ya - s * 0.12, edge, ya - s * 0.12);
+    g.moveTo(edge, yc - s * 0.12);
+    g.bezierCurveTo(reach - dir * s * 0.1, yc - s * 0.12, reach - dir * s * 0.1, ya - s * 0.1, edge, ya - s * 0.1);
     g.stroke();
-    g.lineCap = 'butt';
   }
 
   /**
