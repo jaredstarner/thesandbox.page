@@ -531,7 +531,15 @@ const STAMP_LABEL: Record<string, string> = {
     text-transform: uppercase;
   }
 
+  .slug span {
+    overflow: hidden;
+    min-width: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
   .slug .hover {
+    flex: none;
     color: var(--ink);
     text-align: right;
   }
