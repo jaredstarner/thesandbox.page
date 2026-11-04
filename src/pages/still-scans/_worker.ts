@@ -34,7 +34,16 @@ self.onmessage = (e: MessageEvent<Request>) => {
       let best = 0;
       let bestScore = Infinity;
       for (let mask = 0; mask < 8; mask++) {
-        const out = solve({ version: req.version, level: req.level, mask, text: req.text, target, weight, spend: 0, seed: req.seed });
+        const out = solve({
+          version: req.version,
+          level: req.level,
+          mask,
+          text: req.text,
+          target,
+          weight,
+          spend: 0,
+          seed: req.seed,
+        });
         const score = penalty(out.modules, size);
         if (score < bestScore) {
           bestScore = score;

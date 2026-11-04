@@ -22,7 +22,9 @@ const STAMP_LABEL: Record<string, string> = {
 
   <main class="scans" data-scans>
     <header class="mast">
-      <a class="home" href="/">thesandbox.page</a>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
       <div class="title">
         <h1 data-text="Still scans">Still scans</h1>
         <p class="dek">
@@ -35,25 +37,35 @@ const STAMP_LABEL: Record<string, string> = {
     <div class="studio">
       <section class="sheet" aria-label="The code">
         <div class="card">
-          <span class="crop tl"></span><span class="crop tr"></span><span class="crop bl"></span><span class="crop br"
-          ></span>
+          <span class="crop tl"></span>
+          <span class="crop tr"></span>
+          <span class="crop bl"></span>
+          <span class="crop br"></span>
           <svg class="reg" viewBox="0 0 20 20" aria-hidden="true">
             <circle cx="10" cy="10" r="5.5"></circle>
             <path d="M10 0v20M0 10h20"></path>
           </svg>
           <div class="stage" data-stage>
-            <canvas class="code" data-code aria-label="A QR code you can draw on. It encodes the message shown below it."
+            <canvas
+              class="code"
+              data-code
+              aria-label="A QR code you can draw on. It encodes the message shown below it."
             ></canvas>
             <canvas class="marks" data-marks aria-hidden="true"></canvas>
           </div>
-          <p class="slug"><span data-slug></span><span class="hover" data-hover></span></p>
+          <p class="slug">
+            <span data-slug></span>
+            <span class="hover" data-hover></span>
+          </p>
         </div>
         <video data-video playsinline muted hidden></video>
       </section>
 
       <section class="verdict" aria-label="What a scanner reads">
         <div class="readout" aria-live="polite">
-          <span class="stamp" data-stamp data-ok="true">Scans</span>
+          <span class="stamp" data-stamp data-ok="true">
+            Scans
+          </span>
           <div class="reads">
             <span class="label">Reads</span>
             <output data-reads></output>
@@ -67,59 +79,93 @@ const STAMP_LABEL: Record<string, string> = {
 
       <aside class="panel" aria-label="Tools">
         <div class="group">
-          <label class="label" for="scans-msg">It says</label>
+          <label class="label" for="scans-msg">
+            It says
+          </label>
           <input id="scans-msg" data-msg type="text" spellcheck="false" autocomplete="off" />
           <p class="hint" data-bytes></p>
         </div>
 
         <div class="group pair">
           <div>
-            <label class="label" for="scans-size">Size <output data-version-out></output></label>
+            <label class="label" for="scans-size">
+              Size <output data-version-out></output>
+            </label>
             <input id="scans-size" data-version type="range" min="2" max="20" step="1" />
           </div>
           <div>
-            <span class="label" id="scans-level">Repairs</span>
+            <span class="label" id="scans-level">
+              Repairs
+            </span>
             <div class="seg" role="radiogroup" aria-labelledby="scans-level">
-              <button type="button" role="radio" data-level="L">L<small>7%</small></button>
-              <button type="button" role="radio" data-level="M">M<small>15%</small></button>
-              <button type="button" role="radio" data-level="Q">Q<small>25%</small></button>
-              <button type="button" role="radio" data-level="H">H<small>30%</small></button>
+              <button type="button" role="radio" data-level="L">
+                L<small>7%</small>
+              </button>
+              <button type="button" role="radio" data-level="M">
+                M<small>15%</small>
+              </button>
+              <button type="button" role="radio" data-level="Q">
+                Q<small>25%</small>
+              </button>
+              <button type="button" role="radio" data-level="H">
+                H<small>30%</small>
+              </button>
             </div>
           </div>
         </div>
 
         <div class="tabs" role="tablist" aria-label="Mode">
-          <button type="button" role="tab" data-mode="draw">Draw</button>
-          <button type="button" role="tab" data-mode="photo">Photo</button>
-          <button type="button" role="tab" data-mode="deface">Deface</button>
+          <button type="button" role="tab" data-mode="draw">
+            Draw
+          </button>
+          <button type="button" role="tab" data-mode="photo">
+            Photo
+          </button>
+          <button type="button" role="tab" data-mode="deface">
+            Deface
+          </button>
         </div>
 
         <div class="pane" data-pane="draw" role="tabpanel">
           <div class="tools three">
-            <button type="button" data-draw-tool="ink"><span class="sw ink"></span>Ink</button>
-            <button type="button" data-draw-tool="paper"><span class="sw paper"></span>Paper</button>
-            <button type="button" data-draw-tool="rub"><span class="sw rub"></span>Rub out</button>
+            <button type="button" data-draw-tool="ink">
+              <span class="sw ink"></span>Ink
+            </button>
+            <button type="button" data-draw-tool="paper">
+              <span class="sw paper"></span>Paper
+            </button>
+            <button type="button" data-draw-tool="rub">
+              <span class="sw rub"></span>Rub out
+            </button>
           </div>
           <span class="label">Stamps</span>
           <div class="stamps">
-            {
-              STAMPS.map((s) => (
-                <button type="button" data-stamp-name={s} aria-label={STAMP_LABEL[s]} title={STAMP_LABEL[s]}>
-                  <canvas aria-hidden="true" />
-                </button>
-              ))
-            }
+            {STAMPS.map((s) => (
+              <button type="button" data-stamp-name={s} aria-label={STAMP_LABEL[s]} title={STAMP_LABEL[s]}>
+                <canvas aria-hidden="true" />
+              </button>
+            ))}
           </div>
           <div class="letters">
             <input data-letters type="text" maxlength="24" placeholder="Words to stamp" aria-label="Words to stamp" />
-            <button type="button" data-letters-stamp>Stamp</button>
+            <button type="button" data-letters-stamp>
+              Stamp
+            </button>
           </div>
           <div class="brushes">
             <span class="label">Size</span>
-            <button type="button" data-brush="1" aria-label="Small">S</button>
-            <button type="button" data-brush="2" aria-label="Medium">M</button>
-            <button type="button" data-brush="3" aria-label="Large">L</button>
-            <button type="button" class="quiet" data-clear>Clear the drawing</button>
+            <button type="button" data-brush="1" aria-label="Small">
+              S
+            </button>
+            <button type="button" data-brush="2" aria-label="Medium">
+              M
+            </button>
+            <button type="button" data-brush="3" aria-label="Large">
+              L
+            </button>
+            <button type="button" class="quiet" data-clear>
+              Clear the drawing
+            </button>
           </div>
         </div>
 
@@ -129,26 +175,48 @@ const STAMP_LABEL: Record<string, string> = {
               <input type="file" accept="image/*" data-file />
               Choose a photo
             </label>
-            <button type="button" data-camera aria-pressed="false">Use your camera</button>
+            <button type="button" data-camera aria-pressed="false">
+              Use your camera
+            </button>
           </div>
-          <label class="label" for="scans-exposure">Exposure</label>
+          <label class="label" for="scans-exposure">
+            Exposure
+          </label>
           <input id="scans-exposure" data-exposure type="range" min="-1" max="1" step="0.02" value="0" />
-          <p class="hint" data-photo-note>Faces need a big code: try size 81 or more.</p>
+          <p class="hint" data-photo-note>
+            Faces need a big code: try size 81 or more.
+          </p>
         </div>
 
         <div class="pane" data-pane="deface" role="tabpanel" hidden>
           <div class="tools four">
-            <button type="button" data-deface-tool="marker">Marker</button>
-            <button type="button" data-deface-tool="whiteout">Correction pen</button>
-            <button type="button" data-deface-tool="coffee">Coffee</button>
-            <button type="button" data-deface-tool="tear">Tear</button>
+            <button type="button" data-deface-tool="marker">
+              Marker
+            </button>
+            <button type="button" data-deface-tool="whiteout">
+              Correction pen
+            </button>
+            <button type="button" data-deface-tool="coffee">
+              Coffee
+            </button>
+            <button type="button" data-deface-tool="tear">
+              Tear
+            </button>
           </div>
           <div class="brushes">
             <span class="label">Size</span>
-            <button type="button" data-brush="1" aria-label="Small">S</button>
-            <button type="button" data-brush="2" aria-label="Medium">M</button>
-            <button type="button" data-brush="3" aria-label="Large">L</button>
-            <button type="button" class="quiet" data-clean>Clean it up</button>
+            <button type="button" data-brush="1" aria-label="Small">
+              S
+            </button>
+            <button type="button" data-brush="2" aria-label="Medium">
+              M
+            </button>
+            <button type="button" data-brush="3" aria-label="Large">
+              L
+            </button>
+            <button type="button" class="quiet" data-clean>
+              Clean it up
+            </button>
           </div>
         </div>
 
@@ -160,17 +228,45 @@ const STAMP_LABEL: Record<string, string> = {
         </div>
 
         <div class="group actions">
-          <button type="button" data-anatomy aria-pressed="false">Anatomy</button>
-          <button type="button" data-undo>Undo</button>
-          <button type="button" data-png>PNG</button>
-          <button type="button" data-svg>SVG</button>
+          <button type="button" data-anatomy aria-pressed="false">
+            Anatomy
+          </button>
+          <button type="button" data-undo>
+            Undo
+          </button>
+          <button type="button" data-png>
+            PNG
+          </button>
+          <button type="button" data-svg>
+            SVG
+          </button>
         </div>
 
         <dl class="legend" data-legend hidden>
-          <div><dt><i class="fixed"></i>Fixed patterns</dt><dd data-n="fixed"></dd></div>
-          <div><dt><i class="message"></i>Your message</dt><dd data-n="message"></dd></div>
-          <div><dt><i class="check"></i>Check bits</dt><dd data-n="check"></dd></div>
-          <div><dt><i class="free"></i>Spare bits</dt><dd data-n="free"></dd></div>
+          <div>
+            <dt>
+              <i class="fixed"></i>Fixed patterns
+            </dt>
+            <dd data-n="fixed"></dd>
+          </div>
+          <div>
+            <dt>
+              <i class="message"></i>Your message
+            </dt>
+            <dd data-n="message"></dd>
+          </div>
+          <div>
+            <dt>
+              <i class="check"></i>Check bits
+            </dt>
+            <dd data-n="check"></dd>
+          </div>
+          <div>
+            <dt>
+              <i class="free"></i>Spare bits
+            </dt>
+            <dd data-n="free"></dd>
+          </div>
         </dl>
       </aside>
     </div>
@@ -183,13 +279,13 @@ const STAMP_LABEL: Record<string, string> = {
           after it can be anything at all. Those are the spare bits.
         </li>
         <li>
-          The rest are check bytes from Reed-Solomon coding, which let a reader repair damage. Every check bit is a fixed
-          XOR of data bits, so asking for a check module to be dark is one equation over the spare bits.
+          The rest are check bytes from Reed-Solomon coding, which let a reader repair damage. Every check bit is a
+          fixed XOR of data bits, so asking for a check module to be dark is one equation over the spare bits.
         </li>
         <li>
           Each stroke adds equations in order of importance, and the page solves them by Gauss-Jordan elimination, block
-          by block. A wish that contradicts the ones before it is skipped and gets a pink dot. The spare bits nobody asked
-          about take whatever values make the rest true, which is why the noise shuffles while you draw.
+          by block. A wish that contradicts the ones before it is skipped and gets a pink dot. The spare bits nobody
+          asked about take whatever values make the rest true, which is why the noise shuffles while you draw.
         </li>
         <li>
           Your message is spread through the code. Its bytes fill the first block, and the blocks are woven together a
@@ -201,9 +297,9 @@ const STAMP_LABEL: Record<string, string> = {
           damage.
         </li>
         <li>
-          The scanner on this page renders the code, samples the middle of every module, and decodes what it sees: format
-          strip, mask, repair, then the bytes. A real camera also has to find the three corner squares, so covering one
-          fails even when the data would still check out.
+          The scanner on this page renders the code, samples the middle of every module, and decodes what it sees:
+          format strip, mask, repair, then the bytes. A real camera also has to find the three corner squares, so
+          covering one fails even when the data would still check out.
         </li>
       </ol>
       <p class="credit">Solving for a picture this way follows Russ Cox's QArt codes (2012).</p>

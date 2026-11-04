@@ -87,7 +87,14 @@ export function startScans(root: HTMLElement) {
     if (needMask) {
       needMask = false;
       busy = true;
-      const req: Request = { id: ++reqId, kind: 'mask', version: state.version, level: state.level, text: state.text, seed: state.seed };
+      const req: Request = {
+        id: ++reqId,
+        kind: 'mask',
+        version: state.version,
+        level: state.level,
+        text: state.text,
+        seed: state.seed,
+      };
       worker.postMessage(req);
     } else if (needSolve) {
       needSolve = false;
@@ -359,12 +366,16 @@ export function startScans(root: HTMLElement) {
     let why = '';
     const corner = ['top left', 'top right', 'bottom left'];
     if (!r.ok) {
-      if (r.reason.startsWith('block')) why = `Too much is wrong in ${r.reason.replace(' has more errors than it can fix', '')}: more than the code can repair.`;
-      else if (r.reason.startsWith('format')) why = 'Both copies of the format strip are spoiled, so a reader can’t tell the mask or level.';
+      if (r.reason.startsWith('block'))
+        why = `Too much is wrong in ${r.reason.replace(' has more errors than it can fix', '')}: more than the code can repair.`;
+      else if (r.reason.startsWith('format'))
+        why = 'Both copies of the format strip are spoiled, so a reader can’t tell the mask or level.';
       else if (r.reason.startsWith('version')) why = 'Both copies of the version block are spoiled.';
       else why = 'The data doesn’t make sense once repaired.';
-    } else if (lostFinder >= 0) why = `The data still checks out, but the ${corner[lostFinder]} square is covered, and cameras look for all three corner squares first.`;
-    else if (timingBad) why = 'The data still checks out, but the dotted timing lines are too broken for a camera to count the rows.';
+    } else if (lostFinder >= 0)
+      why = `The data still checks out, but the ${corner[lostFinder]} square is covered, and cameras look for all three corner squares first.`;
+    else if (timingBad)
+      why = 'The data still checks out, but the dotted timing lines are too broken for a camera to count the rows.';
     whyEl.textContent = why;
     whyEl.hidden = !why;
 
@@ -466,7 +477,12 @@ export function startScans(root: HTMLElement) {
 
   // ---- edits ----
   function snapshot() {
-    undo.push({ target: state.target.slice(), weight: state.weight.slice(), marks: state.marks.length, version: state.version });
+    undo.push({
+      target: state.target.slice(),
+      weight: state.weight.slice(),
+      marks: state.marks.length,
+      version: state.version,
+    });
     if (undo.length > 60) undo.shift();
   }
   function restore() {
@@ -490,7 +506,11 @@ export function startScans(root: HTMLElement) {
     for (let y = Math.floor(my - r); y <= Math.ceil(my + r); y++)
       for (let x = Math.floor(mx - r); x <= Math.ceil(mx + r); x++) {
         if (x < 0 || y < 0 || x >= s || y >= s) continue;
-        if (Math.hypot(x + 0.5 - mx, y + 0.5 - my) > r + 0.01 && !(r <= 0.5 && x === Math.floor(mx) && y === Math.floor(my))) continue;
+        if (
+          Math.hypot(x + 0.5 - mx, y + 0.5 - my) > r + 0.01 &&
+          !(r <= 0.5 && x === Math.floor(mx) && y === Math.floor(my))
+        )
+          continue;
         const c = y * s + x;
         const role = lay.role[c];
         if (role !== ROLE.data && role !== ROLE.check && role !== ROLE.remainder) continue;
@@ -552,7 +572,13 @@ export function startScans(root: HTMLElement) {
       snapshot();
       const t = state.defaceTool;
       if (t === 'coffee') {
-        state.marks.push({ kind: 'coffee', x: mx, y: my, r: COFFEE_R[state.brush], seed: (Math.random() * 2 ** 31) | 0 });
+        state.marks.push({
+          kind: 'coffee',
+          x: mx,
+          y: my,
+          r: COFFEE_R[state.brush],
+          seed: (Math.random() * 2 ** 31) | 0,
+        });
         drawMarks();
         scheduleScan(0);
       } else if (t === 'tear') {
@@ -578,7 +604,8 @@ export function startScans(root: HTMLElement) {
     if (state.mode === 'draw' && last) {
       const [lx, ly] = last;
       const steps = Math.max(1, Math.ceil(Math.hypot(mx - lx, my - ly) * 2));
-      for (let i = 1; i <= steps; i++) paintAt(lx + ((mx - lx) * i) / steps, ly + ((my - ly) * i) / steps, state.drawTool);
+      for (let i = 1; i <= steps; i++)
+        paintAt(lx + ((mx - lx) * i) / steps, ly + ((my - ly) * i) / steps, state.drawTool);
       last = [mx, my];
       requestSolve();
     } else if (liveMark && 'pts' in liveMark) {
@@ -751,7 +778,9 @@ export function startScans(root: HTMLElement) {
   const drawTools = $$<HTMLButtonElement>('[data-draw-tool]');
   const defaceTools = $$<HTMLButtonElement>('[data-deface-tool]');
   function syncTools() {
-    drawTools.forEach((b) => b.setAttribute('aria-pressed', String(!state.placing && b.dataset.drawTool === state.drawTool)));
+    drawTools.forEach((b) =>
+      b.setAttribute('aria-pressed', String(!state.placing && b.dataset.drawTool === state.drawTool)),
+    );
     defaceTools.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.defaceTool === state.defaceTool)));
   }
   drawTools.forEach((b) =>
@@ -775,7 +804,10 @@ export function startScans(root: HTMLElement) {
       state.brush = Number(b.dataset.brush);
       brushButtons.forEach((o) => o.setAttribute('aria-pressed', String(o.dataset.brush === b.dataset.brush)));
       if (state.placing && placingName) {
-        state.placing = placingName === 'letters' ? lettering(lettersInput.value, state.brush >= 3 ? 2 : 1) : makeStamp(placingName, state.brush);
+        state.placing =
+          placingName === 'letters'
+            ? lettering(lettersInput.value, state.brush >= 3 ? 2 : 1)
+            : makeStamp(placingName, state.brush);
         drawCode();
       }
     }),
@@ -894,18 +926,21 @@ export function startScans(root: HTMLElement) {
     pctx.drawImage(src, (s - iw * k) / 2, (s - ih * k) / 2, iw * k, ih * k);
     const data = pctx.getImageData(0, 0, s, s).data;
     const g = new Float32Array(s * s);
-    for (let i = 0; i < s * s; i++) g[i] = (0.2126 * data[i * 4] + 0.7152 * data[i * 4 + 1] + 0.0722 * data[i * 4 + 2]) / 255;
+    for (let i = 0; i < s * s; i++)
+      g[i] = (0.2126 * data[i * 4] + 0.7152 * data[i * 4 + 1] + 0.0722 * data[i * 4 + 2]) / 255;
     // Stretch to the 4th and 96th percentiles, then the exposure slider.
     const sorted = Array.from(g).sort((a, b) => a - b);
     const lo = sorted[Math.floor(s * s * 0.04)];
     const hi = sorted[Math.floor(s * s * 0.96)];
     const gamma = Math.pow(2, -state.exposure * 1.6);
-    for (let i = 0; i < s * s; i++) g[i] = Math.pow(Math.min(1, Math.max(0, (g[i] - lo) / Math.max(0.05, hi - lo))), gamma);
+    for (let i = 0; i < s * s; i++)
+      g[i] = Math.pow(Math.min(1, Math.max(0, (g[i] - lo) / Math.max(0.05, hi - lo))), gamma);
     // Edge strength for priority, before dithering.
     const edge = new Float32Array(s * s);
     for (let y = 0; y < s; y++)
       for (let x = 0; x < s; x++) {
-        const at = (xx: number, yy: number) => g[Math.min(s - 1, Math.max(0, yy)) * s + Math.min(s - 1, Math.max(0, xx))];
+        const at = (xx: number, yy: number) =>
+          g[Math.min(s - 1, Math.max(0, yy)) * s + Math.min(s - 1, Math.max(0, xx))];
         edge[y * s + x] = Math.hypot(at(x + 1, y) - at(x - 1, y), at(x, y + 1) - at(x, y - 1));
       }
     // Floyd-Steinberg to ink and paper.
@@ -970,7 +1005,10 @@ export function startScans(root: HTMLElement) {
       return;
     }
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 640 } }, audio: false });
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 640 } },
+        audio: false,
+      });
     } catch {
       photoNote.textContent = 'No camera, or permission was refused.';
       return;
