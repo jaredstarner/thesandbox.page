@@ -517,5 +517,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Georgia', 'serif'],
     },
+    // /still-scans/: a wide display grotesk for the riso-printed headings, and a monospace for the slug lines and readouts.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Anybody',
+      cssVariable: '--font-scans',
+      weights: ['100 900'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Arial Black', 'Arial', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Geist Mono',
+      cssVariable: '--font-scans-mono',
+      weights: ['100 900'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });

@@ -1,0 +1,1089 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { STAMPS } from './_pictures';
+
+const STAMP_LABEL: Record<string, string> = {
+  heart: 'Heart',
+  star: 'Star',
+  smile: 'Smile',
+  cat: 'Cat',
+  moon: 'Moon',
+  bolt: 'Bolt',
+};
+---
+
+<Bare
+  title="Still scans"
+  description="Paint a picture into a QR code and it rearranges its own spare bits to keep it, then deface it and watch the error correction hold."
+>
+  <Font cssVariable="--font-scans" slot="head" />
+  <Font cssVariable="--font-scans-mono" slot="head" />
+
+  <main class="scans" data-scans>
+    <header class="mast">
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
+      <div class="title">
+        <h1 data-text="Still scans">Still scans</h1>
+        <p class="dek">
+          Draw on this QR code and it rearranges its spare bits to keep your picture. Scan it with your phone: it still
+          works.
+        </p>
+      </div>
+    </header>
+
+    <div class="studio">
+      <section class="sheet" aria-label="The code">
+        <div class="card">
+          <span class="crop tl"></span>
+          <span class="crop tr"></span>
+          <span class="crop bl"></span>
+          <span class="crop br"></span>
+          <svg class="reg" viewBox="0 0 20 20" aria-hidden="true">
+            <circle cx="10" cy="10" r="5.5"></circle>
+            <path d="M10 0v20M0 10h20"></path>
+          </svg>
+          <div class="stage" data-stage>
+            <canvas
+              class="code"
+              data-code
+              aria-label="A QR code you can draw on. It encodes the message shown below it."
+            ></canvas>
+            <canvas class="marks" data-marks aria-hidden="true"></canvas>
+          </div>
+          <p class="slug">
+            <span data-slug></span>
+            <span class="hover" data-hover></span>
+          </p>
+        </div>
+        <video data-video playsinline muted hidden></video>
+      </section>
+
+      <section class="verdict" aria-label="What a scanner reads">
+        <div class="readout" aria-live="polite">
+          <span class="stamp" data-stamp data-ok="true">
+            Scans
+          </span>
+          <div class="reads">
+            <span class="label">Reads</span>
+            <output data-reads></output>
+            <p class="why" data-why hidden></p>
+          </div>
+        </div>
+        <div class="meter" data-meter role="img" aria-label="Repair budget used in each block"></div>
+        <p class="note" data-meter-note></p>
+        <p class="note kept" data-kept></p>
+      </section>
+
+      <aside class="panel" aria-label="Tools">
+        <div class="group">
+          <label class="label" for="scans-msg">
+            It says
+          </label>
+          <input id="scans-msg" data-msg type="text" spellcheck="false" autocomplete="off" />
+          <p class="hint" data-bytes></p>
+        </div>
+
+        <div class="group pair">
+          <div>
+            <label class="label" for="scans-size">
+              Size <output data-version-out></output>
+            </label>
+            <input id="scans-size" data-version type="range" min="2" max="20" step="1" />
+          </div>
+          <div>
+            <span class="label" id="scans-level">
+              Repairs
+            </span>
+            <div class="seg" role="radiogroup" aria-labelledby="scans-level">
+              <button type="button" role="radio" data-level="L">
+                L<small>7%</small>
+              </button>
+              <button type="button" role="radio" data-level="M">
+                M<small>15%</small>
+              </button>
+              <button type="button" role="radio" data-level="Q">
+                Q<small>25%</small>
+              </button>
+              <button type="button" role="radio" data-level="H">
+                H<small>30%</small>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Mode">
+          <button type="button" role="tab" data-mode="draw">
+            Draw
+          </button>
+          <button type="button" role="tab" data-mode="photo">
+            Photo
+          </button>
+          <button type="button" role="tab" data-mode="deface">
+            Deface
+          </button>
+        </div>
+
+        <div class="pane" data-pane="draw" role="tabpanel">
+          <div class="tools three">
+            <button type="button" data-draw-tool="ink">
+              <span class="sw ink"></span>Ink
+            </button>
+            <button type="button" data-draw-tool="paper">
+              <span class="sw paper"></span>Paper
+            </button>
+            <button type="button" data-draw-tool="rub">
+              <span class="sw rub"></span>Rub out
+            </button>
+          </div>
+          <span class="label">Stamps</span>
+          <div class="stamps">
+            {STAMPS.map((s) => (
+              <button type="button" data-stamp-name={s} aria-label={STAMP_LABEL[s]} title={STAMP_LABEL[s]}>
+                <canvas aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+          <div class="letters">
+            <input data-letters type="text" maxlength="24" placeholder="Words to stamp" aria-label="Words to stamp" />
+            <button type="button" data-letters-stamp>
+              Stamp
+            </button>
+          </div>
+          <div class="brushes">
+            <span class="label">Size</span>
+            <button type="button" data-brush="1" aria-label="Small">
+              S
+            </button>
+            <button type="button" data-brush="2" aria-label="Medium">
+              M
+            </button>
+            <button type="button" data-brush="3" aria-label="Large">
+              L
+            </button>
+            <button type="button" class="quiet" data-clear>
+              Clear the drawing
+            </button>
+          </div>
+        </div>
+
+        <div class="pane" data-pane="photo" role="tabpanel" hidden>
+          <div class="tools two">
+            <label class="file">
+              <input type="file" accept="image/*" data-file />
+              Choose a photo
+            </label>
+            <button type="button" data-camera aria-pressed="false">
+              Use your camera
+            </button>
+          </div>
+          <label class="label" for="scans-exposure">
+            Exposure
+          </label>
+          <input id="scans-exposure" data-exposure type="range" min="-1" max="1" step="0.02" value="0" />
+          <p class="hint" data-photo-note>
+            Faces need a big code: try size 81 or more.
+          </p>
+        </div>
+
+        <div class="pane" data-pane="deface" role="tabpanel" hidden>
+          <div class="tools four">
+            <button type="button" data-deface-tool="marker">
+              Marker
+            </button>
+            <button type="button" data-deface-tool="whiteout">
+              Correction pen
+            </button>
+            <button type="button" data-deface-tool="coffee">
+              Coffee
+            </button>
+            <button type="button" data-deface-tool="tear">
+              Tear
+            </button>
+          </div>
+          <div class="brushes">
+            <span class="label">Size</span>
+            <button type="button" data-brush="1" aria-label="Small">
+              S
+            </button>
+            <button type="button" data-brush="2" aria-label="Medium">
+              M
+            </button>
+            <button type="button" data-brush="3" aria-label="Large">
+              L
+            </button>
+            <button type="button" class="quiet" data-clean>
+              Clean it up
+            </button>
+          </div>
+        </div>
+
+        <div class="group">
+          <label class="label" for="scans-spend">
+            Repair budget spent on the picture <output data-spend-out></output>
+          </label>
+          <input id="scans-spend" data-spend type="range" min="0" max="100" step="5" />
+        </div>
+
+        <div class="group actions">
+          <button type="button" data-anatomy aria-pressed="false">
+            Anatomy
+          </button>
+          <button type="button" data-undo>
+            Undo
+          </button>
+          <button type="button" data-png>
+            PNG
+          </button>
+          <button type="button" data-svg>
+            SVG
+          </button>
+        </div>
+
+        <dl class="legend" data-legend hidden>
+          <div>
+            <dt>
+              <i class="fixed"></i>Fixed patterns
+            </dt>
+            <dd data-n="fixed"></dd>
+          </div>
+          <div>
+            <dt>
+              <i class="message"></i>Your message
+            </dt>
+            <dd data-n="message"></dd>
+          </div>
+          <div>
+            <dt>
+              <i class="check"></i>Check bits
+            </dt>
+            <dd data-n="check"></dd>
+          </div>
+          <div>
+            <dt>
+              <i class="free"></i>Spare bits
+            </dt>
+            <dd data-n="free"></dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+
+    <section class="notes" aria-label="How it works">
+      <h2>How it keeps your picture</h2>
+      <ol>
+        <li>
+          A QR code is mostly bytes. Your message comes first, then a four-bit stop. Readers stop there, so every byte
+          after it can be anything at all. Those are the spare bits.
+        </li>
+        <li>
+          The rest are check bytes from Reed-Solomon coding, which let a reader repair damage. Every check bit is a
+          fixed XOR of data bits, so asking for a check module to be dark is one equation over the spare bits.
+        </li>
+        <li>
+          Each stroke adds equations in order of importance, and the page solves them by Gauss-Jordan elimination, block
+          by block. A wish that contradicts the ones before it is skipped and gets a pink dot. The spare bits nobody
+          asked about take whatever values make the rest true, which is why the noise shuffles while you draw.
+        </li>
+        <li>
+          Your message is spread through the code. Its bytes fill the first block, and the blocks are woven together a
+          byte at a time, so every few bytes across most of the code belong to it. Turn on Anatomy to see them in blue.
+        </li>
+        <li>
+          Spending the repair budget flips whole bytes to match your picture anyway. The reader fixes them, but that
+          budget is then gone when someone spills coffee on it. The meter shows both: blue for what you spent, pink for
+          damage.
+        </li>
+        <li>
+          The scanner on this page renders the code, samples the middle of every module, and decodes what it sees:
+          format strip, mask, repair, then the bytes. A real camera also has to find the three corner squares, so
+          covering one fails even when the data would still check out.
+        </li>
+      </ol>
+      <p class="credit">Solving for a picture this way follows Russ Cox's QArt codes (2012).</p>
+    </section>
+  </main>
+</Bare>
+
+<script>
+  import { startScans } from './_app';
+  const root = document.querySelector<HTMLElement>('[data-scans]');
+  if (root) startScans(root);
+</script>
+
+<style>
+  :global(body:has(.scans)) {
+    margin: 0;
+    background: #ece6da;
+  }
+
+  .scans {
+    --ink: #17151c;
+    --paper: #fdfcf8;
+    --stock: #ece6da;
+    --muted: #6d655d;
+    --rule: rgba(23, 21, 28, 0.22);
+    --pink: #ff48b0;
+    --blue: #0078bf;
+    --orange: #ff6c2f;
+    --yellow: #ffe800;
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .26 0 0 0 0 .2 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.38'/%3E%3C/svg%3E");
+    box-sizing: border-box;
+    min-height: 100svh;
+    padding: 18px 32px 56px;
+    color: var(--ink);
+    font-family: var(--font-scans-mono);
+    background: var(--stock) var(--grain);
+  }
+
+  .scans :global(*),
+  .scans :global(*::before),
+  .scans :global(*::after) {
+    box-sizing: border-box;
+  }
+
+  /* ---- masthead ---- */
+  .mast {
+    max-width: 1320px;
+    margin: 0 auto 18px;
+  }
+
+  .home {
+    display: inline-block;
+    margin-bottom: 6px;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+  }
+
+  .home:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  .title {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 28px;
+    align-items: flex-end;
+  }
+
+  h1 {
+    position: relative;
+    isolation: isolate;
+    margin: 0;
+    color: var(--blue);
+    font-family: var(--font-scans);
+    font-size: clamp(44px, 6.4vw, 84px);
+    font-weight: 860;
+    font-stretch: 118%;
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+  }
+
+  h1::before {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    color: var(--pink);
+    mix-blend-mode: multiply;
+    transform: translate(0.04em, 0.035em);
+    pointer-events: none;
+  }
+
+  .dek {
+    max-width: 46ch;
+    margin: 0 0 4px;
+    font-family: var(--font-scans);
+    font-size: 16px;
+    font-stretch: 100%;
+    line-height: 1.4;
+  }
+
+  /* ---- layout ---- */
+  .studio {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 372px;
+    grid-template-areas:
+      'sheet verdict'
+      'sheet panel';
+    grid-template-rows: auto 1fr;
+    gap: 18px 40px;
+    max-width: 1320px;
+    margin: 0 auto;
+  }
+
+  .sheet {
+    grid-area: sheet;
+  }
+
+  .verdict {
+    grid-area: verdict;
+  }
+
+  .panel {
+    grid-area: panel;
+  }
+
+  /* ---- the printed sheet ---- */
+  .card {
+    position: relative;
+    width: min(100%, 680px, calc(100svh - 170px));
+    min-width: 280px;
+    margin-inline: auto;
+    padding: 26px 26px 12px;
+    background: var(--paper);
+    box-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.04),
+      0 22px 44px -24px rgba(70, 46, 20, 0.45);
+  }
+
+  .crop {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 0 solid var(--ink);
+    opacity: 0.7;
+  }
+
+  .crop.tl {
+    top: 8px;
+    left: 8px;
+    border-top-width: 1px;
+    border-left-width: 1px;
+  }
+
+  .crop.tr {
+    top: 8px;
+    right: 8px;
+    border-top-width: 1px;
+    border-right-width: 1px;
+  }
+
+  .crop.bl {
+    bottom: 8px;
+    left: 8px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+  }
+
+  .crop.br {
+    right: 8px;
+    bottom: 8px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+  }
+
+  .reg {
+    position: absolute;
+    top: 5px;
+    left: calc(50% - 8px);
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1;
+    opacity: 0.6;
+  }
+
+  .stage {
+    position: relative;
+    aspect-ratio: 1;
+    touch-action: none;
+  }
+
+  .stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .code {
+    cursor: crosshair;
+  }
+
+  .scans[data-mode='photo'] .code {
+    cursor: default;
+  }
+
+  .scans[data-placing='true'] .code {
+    cursor: copy;
+  }
+
+  .marks {
+    pointer-events: none;
+  }
+
+  .slug {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    min-height: 1.4em;
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .slug span {
+    overflow: hidden;
+    min-width: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .slug .hover {
+    flex: none;
+    color: var(--ink);
+    text-align: right;
+  }
+
+  /* ---- what the scanner reads ---- */
+  .readout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    justify-items: start;
+  }
+
+  .stamp {
+    --c: var(--blue);
+    display: inline-block;
+    padding: 6px 12px 5px;
+    border: 3px solid var(--c);
+    border-radius: 6px;
+    color: var(--c);
+    font-family: var(--font-scans);
+    font-size: 24px;
+    font-weight: 820;
+    font-stretch: 126%;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transform: rotate(-4deg);
+    mix-blend-mode: multiply;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+    mask-size: 120px 120px;
+  }
+
+  .stamp[data-ok='false'] {
+    --c: var(--pink);
+    transform: rotate(3deg);
+  }
+
+  .reads {
+    min-width: 0;
+  }
+
+  .reads output {
+    display: block;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  .why {
+    margin: 4px 0 0;
+    font-family: var(--font-scans);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .meter {
+    display: flex;
+    gap: 3px;
+    align-items: stretch;
+    height: 56px;
+    margin-top: 16px;
+  }
+
+  .meter :global(.bar) {
+    position: relative;
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column-reverse;
+    gap: 1px;
+    max-width: 24px;
+  }
+
+  .meter :global(.bar i) {
+    flex: 1 1 0;
+    background: rgba(23, 21, 28, 0.09);
+  }
+
+  .meter :global(.bar i.spent) {
+    background: var(--blue);
+  }
+
+  .meter :global(.bar i.hurt) {
+    background: var(--pink);
+  }
+
+  .meter :global(.bar[data-over='true'] i) {
+    background: var(--pink);
+  }
+
+  .meter :global(.bar b) {
+    position: absolute;
+    top: -9px;
+    left: calc(50% - 5px);
+    display: none;
+    border: 5px solid transparent;
+    border-top: 6px solid var(--ink);
+  }
+
+  .meter :global(.bar[data-over='true'] b) {
+    display: block;
+  }
+
+  .note {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .note.kept {
+    color: var(--ink);
+  }
+
+  /* ---- tools ---- */
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .group,
+  .pane {
+    padding-top: 14px;
+    border-top: 1.5px dashed var(--rule);
+  }
+
+  .pane[hidden],
+  .legend[hidden] {
+    display: none;
+  }
+
+  .label {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .label output {
+    color: var(--ink);
+    text-transform: none;
+    letter-spacing: 0.02em;
+  }
+
+  .hint {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .hint[data-over='true'] {
+    color: #c4006f;
+  }
+
+  input[type='text'] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    corner-shape: squircle;
+    color: var(--ink);
+    font: 500 14px/1.2 var(--font-scans-mono);
+    background: var(--paper);
+  }
+
+  input[type='text']:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--pink);
+  }
+
+  input[type='range'] {
+    width: 100%;
+    margin: 0;
+    accent-color: var(--blue);
+  }
+
+  .scans button,
+  .file {
+    display: inline-flex;
+    gap: 7px;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 8px 11px;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    corner-shape: squircle;
+    color: var(--ink);
+    font-family: var(--font-scans);
+    font-size: 14px;
+    font-weight: 640;
+    font-stretch: 108%;
+    line-height: 1;
+    background: var(--paper);
+    cursor: pointer;
+    transition:
+      transform 80ms,
+      box-shadow 80ms,
+      background 120ms;
+  }
+
+  .scans button:hover,
+  .file:hover {
+    box-shadow: 2px 2px 0 var(--ink);
+    transform: translate(-1px, -1px);
+  }
+
+  .scans button:active {
+    box-shadow: none;
+    transform: none;
+  }
+
+  .scans button:focus-visible,
+  .file:focus-within {
+    outline: 3px solid var(--pink);
+    outline-offset: 2px;
+  }
+
+  .scans button[aria-pressed='true'],
+  .scans button[aria-checked='true'] {
+    color: var(--paper);
+    background: var(--ink);
+  }
+
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .seg {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+  }
+
+  .seg button {
+    flex-direction: column;
+    gap: 3px;
+    min-height: 40px;
+    padding: 5px 0;
+    font-weight: 760;
+  }
+
+  .seg small {
+    font-family: var(--font-scans-mono);
+    font-size: 9.5px;
+    font-weight: 400;
+    opacity: 0.75;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .tabs button {
+    min-height: 44px;
+    font-size: 16px;
+    font-weight: 780;
+    font-stretch: 116%;
+  }
+
+  .tabs button[aria-selected='true'] {
+    background: var(--pink);
+    box-shadow: 3px 3px 0 var(--ink);
+    transform: translate(-1px, -1px);
+  }
+
+  .pane {
+    margin-top: -4px;
+  }
+
+  .tools {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .tools.two {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tools.three {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .tools.four {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sw {
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid currentColor;
+  }
+
+  .sw.ink {
+    background: var(--ink);
+  }
+
+  [aria-pressed='true'] .sw.ink {
+    background: var(--paper);
+  }
+
+  .sw.paper {
+    background: var(--paper);
+  }
+
+  .sw.rub {
+    border-style: dashed;
+  }
+
+  .stamps {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .stamps button {
+    min-height: 46px;
+    padding: 6px;
+  }
+
+  .stamps canvas {
+    width: auto;
+    max-width: 100%;
+    height: 28px;
+    image-rendering: pixelated;
+  }
+
+  .stamps button[aria-pressed='true'] canvas {
+    filter: invert(1);
+  }
+
+  .letters {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .brushes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .brushes .label {
+    margin: 0 4px 0 0;
+  }
+
+  .brushes button {
+    min-width: 38px;
+    font-weight: 760;
+  }
+
+  .brushes .quiet {
+    margin-left: auto;
+    border-style: dashed;
+  }
+
+  .file {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .file input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 0.8fr 0.8fr;
+    gap: 6px;
+  }
+
+  .actions [data-anatomy][aria-pressed='true'] {
+    background: var(--orange);
+    color: var(--ink);
+  }
+
+  .legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 14px;
+    margin: -4px 0 0;
+    font-size: 12px;
+  }
+
+  .legend div {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .legend dt {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+  }
+
+  .legend dd {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .legend i {
+    width: 11px;
+    height: 11px;
+  }
+
+  .legend .fixed {
+    background: var(--orange);
+  }
+
+  .legend .message {
+    background: var(--blue);
+  }
+
+  .legend .check {
+    background: var(--pink);
+  }
+
+  .legend .free {
+    background: var(--ink);
+  }
+
+  /* ---- notes ---- */
+  .notes {
+    max-width: 1320px;
+    margin: 56px auto 0;
+    padding-top: 22px;
+    border-top: 2px solid var(--ink);
+  }
+
+  .notes h2 {
+    margin: 0 0 16px;
+    font-family: var(--font-scans);
+    font-size: 28px;
+    font-weight: 820;
+    font-stretch: 118%;
+    letter-spacing: -0.01em;
+  }
+
+  .notes ol {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px 36px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: note;
+  }
+
+  .notes li {
+    position: relative;
+    padding-top: 30px;
+    font-family: var(--font-scans);
+    font-size: 15px;
+    line-height: 1.5;
+    counter-increment: note;
+  }
+
+  .notes li::before {
+    content: counter(note, decimal-leading-zero);
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--pink);
+    font-family: var(--font-scans-mono);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .credit {
+    margin: 22px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  @media (max-width: 960px) {
+    .scans {
+      padding: 14px 16px 40px;
+    }
+
+    .studio {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'sheet'
+        'verdict'
+        'panel';
+      grid-template-rows: auto;
+    }
+
+    .card {
+      width: 100%;
+      min-width: 0;
+      padding: 20px 14px 18px;
+    }
+
+    .crop.tl,
+    .crop.tr {
+      top: 5px;
+    }
+
+    .crop.bl,
+    .crop.br {
+      bottom: 5px;
+    }
+
+    .crop.tl,
+    .crop.bl {
+      left: 5px;
+    }
+
+    .crop.tr,
+    .crop.br {
+      right: 5px;
+    }
+
+    .slug {
+      padding: 0 8px;
+      font-size: 9.5px;
+    }
+
+    .slug .hover {
+      display: none;
+    }
+
+    .notes ol {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
