@@ -1,0 +1,8 @@
+{
+  "title": "Still scans",
+  "summary": "A QR code you can paint into, put your photo in, or deface: draw on it and the code rearranges its own spare bits to keep every stroke and still scan, then scribble, spill, and tear it and watch the error correction hold until it can't.",
+  "date": "2026-11-04",
+  "tags": ["canvas", "web-workers", "pointer-events", "camera", "qr-code", "reed-solomon"],
+  "requires": ["canvas", "web-workers"],
+  "plot": 34
+}

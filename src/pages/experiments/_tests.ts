@@ -539,6 +539,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   'atmospheric-scattering': { label: 'Atmospheric scattering' },
   'satellite-imagery': { label: 'Satellite imagery' },
   'weaving-drafts': { label: 'Weaving drafts' },
+  'qr-code': { label: 'QR Code' },
+  'reed-solomon': { label: 'Reed-Solomon codes' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

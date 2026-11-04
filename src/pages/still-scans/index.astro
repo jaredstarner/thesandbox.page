@@ -1,0 +1,34 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Still scans"
+  description="Paint a picture into a QR code and it rearranges its own spare bits to keep it, then deface it and watch the error correction hold."
+>
+  <Font cssVariable="--font-scans" slot="head" />
+  <Font cssVariable="--font-scans-mono" slot="head" />
+
+  <main class="scans" data-scans>
+    <header class="mast">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Still scans</h1>
+    </header>
+    <section class="sheet">
+      <canvas class="code" data-code aria-label="A QR code"></canvas>
+    </section>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.scans)) {
+    margin: 0;
+    background: #efe9dd;
+  }
+
+  .scans {
+    font-family: var(--font-scans-mono);
+    color: #1e1c22;
+  }
+</style>
