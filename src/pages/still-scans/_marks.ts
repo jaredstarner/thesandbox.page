@@ -63,13 +63,10 @@ export function drawMark(ctx: CanvasRenderingContext2D, m: Mark, pxPerModule: nu
   switch (m.kind) {
     case 'marker': {
       ctx.globalCompositeOperation = 'multiply';
+      // Flat felt-tip ink: overlaps darken, as marker does.
       polyline(ctx, m.pts);
-      ctx.strokeStyle = 'rgba(22, 18, 40, 0.86)';
+      ctx.strokeStyle = 'rgba(24, 20, 44, 0.9)';
       ctx.lineWidth = m.w;
-      ctx.stroke();
-      // A darker core where the felt presses hardest.
-      ctx.strokeStyle = 'rgba(22, 18, 40, 0.35)';
-      ctx.lineWidth = m.w * 0.55;
       ctx.stroke();
       break;
     }

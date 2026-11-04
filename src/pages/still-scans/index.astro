@@ -443,9 +443,9 @@ const STAMP_LABEL: Record<string, string> = {
   /* ---- what the scanner reads ---- */
   .readout {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 16px;
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    justify-items: start;
   }
 
   .stamp {
@@ -480,7 +480,7 @@ const STAMP_LABEL: Record<string, string> = {
   .reads output {
     display: block;
     overflow-wrap: anywhere;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     line-height: 1.35;
   }
@@ -946,7 +946,36 @@ const STAMP_LABEL: Record<string, string> = {
     .card {
       width: 100%;
       min-width: 0;
-      padding: 20px 14px 10px;
+      padding: 20px 14px 18px;
+    }
+
+    .crop.tl,
+    .crop.tr {
+      top: 5px;
+    }
+
+    .crop.bl,
+    .crop.br {
+      bottom: 5px;
+    }
+
+    .crop.tl,
+    .crop.bl {
+      left: 5px;
+    }
+
+    .crop.tr,
+    .crop.br {
+      right: 5px;
+    }
+
+    .slug {
+      padding: 0 8px;
+      font-size: 9.5px;
+    }
+
+    .slug .hover {
+      display: none;
     }
 
     .notes ol {

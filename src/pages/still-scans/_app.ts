@@ -42,7 +42,7 @@ export function startScans(root: HTMLElement) {
   // ---- state ----
   const state = {
     text: DEFAULT_TEXT,
-    version: 10,
+    version: 11,
     level: 'M' as Level,
     mask: 0,
     spend: 0.3,
@@ -52,8 +52,8 @@ export function startScans(root: HTMLElement) {
     defaceTool: 'marker' as DefaceTool,
     brush: 2,
     anatomy: false,
-    target: new Int8Array(sizeOf(10) ** 2).fill(-1) as Int8Array,
-    weight: new Float32Array(sizeOf(10) ** 2) as Float32Array,
+    target: new Int8Array(sizeOf(11) ** 2).fill(-1) as Int8Array,
+    weight: new Float32Array(sizeOf(11) ** 2) as Float32Array,
     marks: [] as Mark[],
     placing: null as Stamp | null,
     photo: null as CanvasImageSource | null,
@@ -127,12 +127,11 @@ export function startScans(root: HTMLElement) {
     if (solved && shownKey === sent.key && !reduceMotion && !sent.live) {
       const now = performance.now();
       if (flash.length !== s * s) flash = new Float32Array(s * s);
-      let any = false;
-      for (let c = 0; c < s * s; c++)
-        if (solved.modules[c] !== out.modules[c]) {
-          flash[c] = now;
-          any = true;
-        }
+      let changed = 0;
+      for (let c = 0; c < s * s; c++) if (solved.modules[c] !== out.modules[c]) changed++;
+      // A new photo changes most of the code; flashing all of it hides the picture.
+      const any = changed > 0 && changed < s * s * 0.2;
+      if (any) for (let c = 0; c < s * s; c++) if (solved.modules[c] !== out.modules[c]) flash[c] = now;
       if (any && !flashing) {
         flashing = true;
         requestAnimationFrame(tick);
@@ -144,7 +143,12 @@ export function startScans(root: HTMLElement) {
     drawCode();
     scheduleScan();
     updateReadouts();
+    if (opening) {
+      opening();
+      opening = null;
+    }
   }
+  let opening: (() => void) | null = null;
 
   function tick() {
     drawCode();
@@ -381,27 +385,38 @@ export function startScans(root: HTMLElement) {
       );
       meter.dataset.cap = String(cap);
     }
-    let worst = 0;
+    let spentAll = 0;
+    let worstDmg = 0;
     let worstB = 0;
+    let past = -1;
     r.blocks.forEach((blk, b) => {
       const bar = meter.children[b] as HTMLElement;
       const sp = Math.min(spent[b] ?? 0, blk.errors);
       const dmg = Math.max(0, blk.errors - sp);
+      spentAll += sp;
       const slots = bar.querySelectorAll('i');
       slots.forEach((slot, i) => {
         slot.className = i < sp ? 'spent' : i < sp + dmg ? 'hurt' : '';
       });
       bar.dataset.over = String(!blk.ok);
-      if (blk.errors > worst) {
-        worst = blk.errors;
+      if (!blk.ok && past < 0) past = b;
+      if (dmg > worstDmg) {
+        worstDmg = dmg;
         worstB = b;
       }
     });
-    if (!r.blocks.length) meterNote.textContent = 'No blocks could be read.';
-    else if (worst === 0) meterNote.textContent = `${r.blocks.length} blocks, each able to repair ${cap} wrong bytes. Nothing to repair.`;
-    else if (worst > cap) meterNote.textContent = `Block ${worstB + 1} is past repair.`;
-    else
-      meterNote.textContent = `${r.blocks.length} blocks, each able to repair ${cap} wrong bytes. The worst, block ${worstB + 1}, has ${worst}.`;
+    const n = r.blocks.length;
+    if (!n) meterNote.textContent = 'Nothing could be read far enough to count.';
+    else {
+      let line = `Each of the ${n} blocks can repair ${cap} bytes.`;
+      line += spentAll ? ` ${spentAll} spent on the picture.` : '';
+      if (past >= 0) line += ` Block ${past + 1} is past repair.`;
+      else if (worstDmg) {
+        const left = cap - r.blocks[worstB].errors;
+        line += ` Worst damage: block ${worstB + 1}, ${worstDmg} bytes, ${left} left to spare.`;
+      } else line += ' No damage.';
+      meterNote.textContent = line;
+    }
   }
 
   // ---- readouts ----
@@ -423,8 +438,9 @@ export function startScans(root: HTMLElement) {
       slug.textContent = `Version ${state.version} · ${s}×${s} · level ${state.level} · mask ${state.mask} · ${solved.free.toLocaleString('en')} spare bits`;
       if (solved.wishes) {
         const missed = solved.wishes - solved.granted;
+        const dots = state.mode === 'draw' ? ` The pink dots are the ${missed.toLocaleString('en')} it couldn’t.` : '';
         keptEl.textContent = missed
-          ? `Kept ${solved.granted.toLocaleString('en')} of ${solved.wishes.toLocaleString('en')} modules of your picture. The pink dots are the ${missed.toLocaleString('en')} it couldn’t.`
+          ? `Kept ${solved.granted.toLocaleString('en')} of ${solved.wishes.toLocaleString('en')} modules of your picture.${dots}`
           : `Kept all ${solved.wishes.toLocaleString('en')} modules of your picture.`;
       } else keptEl.textContent = 'Nothing drawn yet: every spare bit is noise.';
       const lay = layout(state.version, state.level);
@@ -726,8 +742,9 @@ export function startScans(root: HTMLElement) {
     tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.mode === m)));
     panes.forEach((p) => (p.hidden = p.dataset.pane !== m));
     root.dataset.mode = m;
-    if (m !== 'photo') stopCamera(false);
+    if (m !== 'photo') stopCamera(true);
     drawCode();
+    updateReadouts();
   }
   tabs.forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode as Mode)));
 
@@ -1036,8 +1053,15 @@ export function startScans(root: HTMLElement) {
   resize();
   new ResizeObserver(() => resize()).observe(stage);
 
-  // The opening picture: a cat, so the trick is visible before anyone draws.
-  placeStamp(makeStamp('cat', 2), size() * 0.42, size() * 0.5);
+  // The opening picture: a plain code first, then a cat stamped into it, so the
+  // spare bits visibly shuffle to make room before anyone draws.
+  const openCat = () => {
+    // Placed so the middle alignment mark falls on the cat's cheek, not its eye.
+    placeStamp(makeStamp('cat', 2), size() * 0.32, size() * 0.54);
+    requestSolve();
+  };
+  if (reduceMotion || debug) openCat();
+  else opening = () => setTimeout(openCat, 650);
   requestMask();
   updateReadouts();
 
