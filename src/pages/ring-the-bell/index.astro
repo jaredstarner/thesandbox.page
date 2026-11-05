@@ -1,0 +1,368 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { BALLS_PER_GAME, REPLAYS } from './_rules';
+
+const fmt = (n: number) => n.toLocaleString('en-US');
+---
+
+<Bare
+  title="Ring the bell"
+  description="A carnival pinball machine wired like a sixties electromechanical: score reels, chimes, a duck gallery, and a strength-test lane that rings the bell."
+>
+  <Font cssVariable="--font-ringbell" slot="head" />
+  <Font cssVariable="--font-ringbell-text" slot="head" />
+
+  <main class="ringbell" data-ringbell>
+    <a class="home" href="/">thesandbox.page</a>
+
+    <div class="machine" data-machine>
+      <section class="head" aria-label="Backglass">
+        <canvas
+          class="glass"
+          data-backglass
+          role="img"
+          aria-label="The backglass: Ring the Bell lettered over a big top at night, with five score reels and lamps for ball in play, credits, tilt, and game over."
+        ></canvas>
+        <p class="live" data-live aria-live="polite"></p>
+      </section>
+
+      <section class="cab" aria-label="Playfield">
+        <div class="rails" data-rails>
+          <canvas
+            class="field"
+            data-playfield
+            role="img"
+            aria-label="The playfield seen from above: three top lanes, three pop bumpers, a row of five ducks, a fortune teller's kick-out hole, a spinner in the left loop, a strength-test lane on the right, slingshots, and two flippers."
+          ></canvas>
+        </div>
+      </section>
+
+      <aside class="desk">
+        <div class="buttons">
+          <button type="button" class="coin" data-coin>Coin</button>
+          <button type="button" class="start" data-start>Start</button>
+          <button type="button" class="nudge" data-nudge>Nudge</button>
+          <button type="button" class="sound" data-sound aria-pressed="true">Sound</button>
+        </div>
+
+        <div class="card">
+          <h2>Ring the Bell</h2>
+          <p class="balls">{BALLS_PER_GAME} balls per game</p>
+          <ul>
+            <li>Top lanes light the pop bumpers for 100</li>
+            <li>Each duck scores 500 and 1 ticket. All five ducks light the fortune teller for an extra ball</li>
+            <li>Fortune teller scores 1,000 and 2 tickets</li>
+            <li>A hard enough shot up the strength test rings the bell: 5,000, 3 tickets, and lights special</li>
+            <li>Slingshots move the special from side to side</li>
+            <li>Special lit at the outlane scores 1 free game</li>
+            <li>Tickets score 1,000 each when the ball drains</li>
+            <li>Match the last two numbers on the backglass for 1 free game</li>
+            <li>Tilt loses the ball in play</li>
+          </ul>
+          <p class="replay">Free game at {REPLAYS.map(fmt).join(' · ')}</p>
+        </div>
+
+        <dl class="keys" data-keys>
+          <div><dt>Flippers</dt><dd><kbd>Z</kbd> <kbd>/</kbd> or <kbd>Shift</kbd> <kbd>Shift</kbd></dd></div>
+          <div><dt>Plunger</dt><dd>Hold <kbd>Space</kbd> or <kbd>Enter</kbd>, let go</dd></div>
+          <div><dt>Nudge</dt><dd><kbd>X</kbd> <kbd>.</kbd> <kbd>↑</kbd></dd></div>
+          <div><dt>Coin, start</dt><dd><kbd>5</kbd> <kbd>1</kbd></dd></div>
+        </dl>
+        <p class="touch" data-touchhelp>Touch the left or right half of the playfield to flip. Pull the plunger down and let go.</p>
+        <p class="best" data-best hidden></p>
+      </aside>
+    </div>
+  </main>
+</Bare>
+
+<script>
+  import { startMachine } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-ringbell]');
+  if (root) startMachine(root);
+</script>
+
+<style is:global>
+  body:has(.ringbell) {
+    margin: 0;
+    background: #120d0b;
+  }
+
+  .ringbell {
+    --rb-ink: #f3e7cc;
+    --rb-dim: #b9a98c;
+    --rb-red: #c8332b;
+    --rb-gold: #e8b23a;
+    --rb-navy: #1b2346;
+    --rb-room: #120d0b;
+    --rb-text: var(--font-ringbell-text), 'Arial Narrow', sans-serif;
+    --rb-display: var(--font-ringbell), Georgia, serif;
+    box-sizing: border-box;
+    position: relative;
+    min-height: 100dvh;
+    padding: 12px 16px 24px;
+    color: var(--rb-ink);
+    font-family: var(--rb-text);
+    background:
+      radial-gradient(ellipse 60% 55% at 50% 0%, rgba(255, 196, 120, 0.13), transparent 70%),
+      radial-gradient(ellipse 90% 60% at 50% 100%, rgba(80, 20, 16, 0.35), transparent 70%),
+      var(--rb-room);
+  }
+
+  .ringbell *,
+  .ringbell *::before,
+  .ringbell *::after {
+    box-sizing: border-box;
+  }
+
+  .ringbell [hidden] {
+    display: none !important;
+  }
+
+  .ringbell .home {
+    position: absolute;
+    top: 10px;
+    left: 16px;
+    z-index: 2;
+    color: var(--rb-dim);
+    font: 400 13px/1 var(--rb-text);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .ringbell .home:hover,
+  .ringbell .home:focus-visible {
+    color: var(--rb-ink);
+  }
+
+  .ringbell .machine {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+    justify-content: center;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding-top: 22px;
+  }
+
+  .ringbell .head {
+    justify-self: end;
+    width: 100%;
+    max-width: 460px;
+  }
+
+  .ringbell .glass {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1.08;
+  }
+
+  .ringbell .live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .ringbell .cab {
+    justify-self: center;
+  }
+
+  .ringbell .rails {
+    position: relative;
+    padding: 10px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #6c6a66, #d9d6cf 18%, #8d8a84 50%, #d9d6cf 82%, #6c6a66);
+    box-shadow:
+      0 0 0 3px #2a1a14,
+      0 30px 60px rgba(0, 0, 0, 0.6);
+  }
+
+  .ringbell .field {
+    display: block;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .ringbell .desk {
+    justify-self: start;
+    display: grid;
+    gap: 16px;
+    max-width: 320px;
+  }
+
+  .ringbell .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ringbell .buttons button {
+    min-width: 64px;
+    padding: 9px 14px;
+    border: 0;
+    border-radius: 999px;
+    color: #20140e;
+    font: 600 14px/1 var(--rb-text);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--rb-ink);
+    cursor: pointer;
+  }
+
+  .ringbell .buttons .start {
+    color: var(--rb-ink);
+    background: var(--rb-red);
+  }
+
+  .ringbell .buttons .sound[aria-pressed='false'] {
+    color: var(--rb-dim);
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--rb-dim);
+  }
+
+  .ringbell .buttons button:focus-visible {
+    outline: 2px solid var(--rb-gold);
+    outline-offset: 2px;
+  }
+
+  .ringbell .card {
+    padding: 16px 18px 14px;
+    color: #2a1d16;
+    background: #f1e6cc;
+    border: 3px double var(--rb-red);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  .ringbell .card h2 {
+    margin: 0;
+    color: var(--rb-red);
+    font: 400 24px/1.1 var(--rb-display);
+    text-align: center;
+  }
+
+  .ringbell .card .balls {
+    margin: 4px 0 10px;
+    font: 600 12px/1 var(--rb-text);
+    letter-spacing: 0.14em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .ringbell .card ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font: 400 14px/1.3 var(--rb-text);
+  }
+
+  .ringbell .card li {
+    padding: 4px 0;
+    border-top: 1px solid rgba(42, 29, 22, 0.18);
+  }
+
+  .ringbell .card .replay {
+    margin: 10px 0 0;
+    padding-top: 8px;
+    border-top: 2px solid var(--rb-red);
+    font: 600 13px/1.2 var(--rb-text);
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .ringbell .keys {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    font: 400 14px/1.3 var(--rb-text);
+  }
+
+  .ringbell .keys div {
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    gap: 8px;
+  }
+
+  .ringbell .keys dt {
+    color: var(--rb-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .ringbell .keys dd {
+    margin: 0;
+  }
+
+  .ringbell kbd {
+    display: inline-block;
+    min-width: 1.6em;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #20140e;
+    font: 600 12px/1.4 var(--rb-text);
+    text-align: center;
+    background: var(--rb-ink);
+  }
+
+  .ringbell .touch,
+  .ringbell .best {
+    margin: 0;
+    color: var(--rb-dim);
+    font: 400 14px/1.35 var(--rb-text);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .ringbell .touch {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1080px), (orientation: portrait) {
+    .ringbell {
+      padding: 8px 8px 24px;
+    }
+
+    .ringbell .home {
+      position: static;
+      display: inline-block;
+      margin: 0 0 6px 4px;
+    }
+
+    .ringbell .machine {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+      padding-top: 0;
+    }
+
+    .ringbell .head {
+      justify-self: center;
+      max-width: 560px;
+    }
+
+    .ringbell .glass {
+      aspect-ratio: 4 / 1;
+    }
+
+    .ringbell .rails {
+      padding: 6px;
+    }
+
+    .ringbell .desk {
+      justify-self: center;
+      max-width: 560px;
+      width: 100%;
+    }
+
+    .ringbell .buttons {
+      justify-content: center;
+    }
+  }
+</style>

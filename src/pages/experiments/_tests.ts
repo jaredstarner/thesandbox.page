@@ -541,6 +541,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   'weaving-drafts': { label: 'Weaving drafts' },
   'qr-code': { label: 'QR Code' },
   'reed-solomon': { label: 'Reed-Solomon codes' },
+  electromechanical: { label: 'Electromechanical scoring' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
