@@ -109,8 +109,6 @@ export const LAMPS = {
   lane2: { x: LANES[2], y: 162 },
   spinner: { x: 32, y: 610 },
   saucer: { x: 100, y: 452 },
-  inlaneL: { x: 70, y: 740 },
-  inlaneR: { x: 402, y: 740 },
   specialL: { x: 28, y: 862 },
   specialR: { x: 444, y: 862 },
   again: { x: 236, y: 884 },
