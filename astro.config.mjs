@@ -536,5 +536,25 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    // /ring-the-bell/: a Tuscan woodtype for the backglass and playfield lettering, and a condensed gothic for
+    // the score reels, lamps, and instruction card.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Rye',
+      cssVariable: '--font-ringbell',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Oswald',
+      cssVariable: '--font-ringbell-text',
+      weights: ['200 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Arial Narrow', 'Arial', 'sans-serif'],
+    },
   ],
 });

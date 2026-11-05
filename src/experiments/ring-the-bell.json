@@ -1,0 +1,8 @@
+{
+  "title": "Ring the bell",
+  "summary": "A carnival pinball machine wired the way they were in the sixties: score reels that turn, chimes that ring for every ten, hundred, and thousand, a gallery of ducks to knock down, and a strength-test lane that rings the bell only for a clean, hard shot.",
+  "date": "2026-11-05",
+  "tags": ["canvas", "web-audio", "physics", "game", "pointer-events", "gamepad", "electromechanical"],
+  "requires": ["canvas"],
+  "plot": 35
+}
