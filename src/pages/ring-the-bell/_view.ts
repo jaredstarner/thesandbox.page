@@ -91,7 +91,8 @@ export class FieldView {
     ctx.setTransform(this.scale, 0, 0, this.scale, sx * this.scale, sy * this.scale);
     ctx.drawImage(this.layer, 0, 0, W, H);
 
-    this.lamps(ctx, game, now);
+    if (!game.tilted) this.lamps(ctx, game, now);
+    this.shooterCue(ctx, game, now);
     this.bumpers(ctx, game);
     this.spinner(ctx, game);
     this.ducks(ctx, game);
@@ -144,7 +145,7 @@ export class FieldView {
 
   private bumpers(ctx: Ctx, game: Game): void {
     for (const [i, b] of BUMPERS.entries()) {
-      const lit = game.lanes[i];
+      const lit = game.lanes[i] && !game.tilted;
       const flash = game.bumperFlash[i];
       ctx.save();
       // Skirt: a red plastic ring that tips as the ball strikes it.
@@ -409,16 +410,58 @@ export class FieldView {
   private bellGlow(ctx: Ctx, game: Game): void {
     if (game.bellFlash <= 0) return;
     const p = lanePoint(STRIKER.len - 4, 2);
+    const f = game.bellFlash;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = game.bellFlash;
-    ctx.drawImage(glowSprite('#ffd36b'), p.x - 60, p.y - 64, 120, 120);
+    ctx.globalAlpha = Math.min(1, f * 1.4);
+    ctx.drawImage(glowSprite('#ffd36b'), p.x - 80, p.y - 84, 160, 160);
+    ctx.restore();
+    // Ringing lines, spreading out as the bell sounds.
+    ctx.save();
+    ctx.strokeStyle = hexA(C.goldLight, Math.min(1, f * 1.6));
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    const spread = (1 - f) * 10;
+    for (const side of [-1, 1]) {
+      for (let k = 0; k < 3; k++) {
+        const r = 20 + k * 7 + spread;
+        const a0 = side < 0 ? Math.PI * 0.82 : -Math.PI * 0.18;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y - 6, r, a0, a0 + Math.PI * 0.36);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
+  /** While the ball waits on the plunger, the shooter lane's chevrons light in turn, up the lane. */
+  private shooterCue(ctx: Ctx, game: Game, now: number): void {
+    const b = game.ball;
+    if (!b.live || b.x < DIVIDER_X || b.y < PLUNGER_REST - BALL_R - 6 || game.phase !== 'play') return;
+    const step = Math.floor(now * 5) % 4;
+    ctx.save();
+    ctx.lineWidth = 3.4;
+    ctx.lineJoin = 'miter';
+    for (const [i, y] of [930, 905, 880].entries()) {
+      if (i !== step && step !== 3) continue;
+      ctx.strokeStyle = C.goldLight;
+      ctx.beginPath();
+      ctx.moveTo(480, y + 8);
+      ctx.lineTo(490, y);
+      ctx.lineTo(500, y + 8);
+      ctx.stroke();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.5;
+      ctx.drawImage(glowSprite('#ffd36b'), 470, y - 16, 40, 40);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+    }
     ctx.restore();
   }
 
   private attract(ctx: Ctx, game: Game, now: number): void {
     const x = 236;
-    const y = 660;
+    const y = 800;
     ctx.save();
     ctx.globalAlpha = 0.85 + 0.15 * Math.sin(now * 3);
     ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';

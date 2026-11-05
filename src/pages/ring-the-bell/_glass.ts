@@ -466,7 +466,7 @@ export class GlassView {
       this.legend(g, 'TILT', 210, 212, 28, game.tilted, 'left');
       this.legend(g, 'SHOOT AGAIN', 280, 212, 28, game.extraBall, 'left');
       if (game.matchNumber !== null) {
-        this.legend(g, `MATCH ${game.matchNumber === 0 ? '00' : game.matchNumber}`, 430, 166, 26, true, 'left');
+        this.legend(g, `MATCH ${game.matchNumber === 0 ? '00' : game.matchNumber}`, 412, 166, 26, true, 'left');
       }
     }
   }

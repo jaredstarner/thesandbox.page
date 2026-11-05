@@ -321,7 +321,7 @@ function gallery(ctx: Ctx, fonts: Fonts): void {
   ctx.restore();
 }
 
-function ferrisWheel(ctx: Ctx, fonts: Fonts): void {
+function ferrisWheel(ctx: Ctx): void {
   const cx = 104;
   const cy = 556;
   const r = 36;
@@ -881,7 +881,7 @@ export function drawPlayfield(ctx: Ctx, fonts: Fonts, inserts: Record<string, In
   sky(ctx);
   valance(ctx);
   gallery(ctx, fonts);
-  ferrisWheel(ctx, fonts);
+  ferrisWheel(ctx);
   fortune(ctx, fonts);
   lowerField(ctx, fonts);
   strengthTest(ctx, fonts);

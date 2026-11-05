@@ -214,8 +214,10 @@ export function startMachine(root: HTMLElement): void {
     }
     const rect = fieldCanvas.getBoundingClientRect();
     const p = field.toField(e.clientX - rect.left, e.clientY - rect.top);
+    // With the ball on the plunger, the whole right-hand edge of the table works the plunger.
+    const waiting = game.ball.live && game.ball.x > DIVIDER_X;
     let a: Action;
-    if (p.x > DIVIDER_X - 6 && p.y > 820) a = 'plunger';
+    if ((p.x > DIVIDER_X - 6 && p.y > 820) || (waiting && p.x > 380)) a = 'plunger';
     else a = p.x < W / 2 - 21 ? 'L' : 'R';
     pointers.set(e.pointerId, a);
     try {
