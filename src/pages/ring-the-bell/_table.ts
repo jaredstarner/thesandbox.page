@@ -197,7 +197,10 @@ export function buildTable(): Table {
   const ducks = DUCK_X.map((x, i) => seg(`duck${i}`, x - DUCK_HALF, DUCK_Y, x + DUCK_HALF, DUCK_Y, 3, 0.35));
   add(...ducks);
   add(seg('galleryBack', GALLERY.left, GALLERY.back, GALLERY.right, GALLERY.back, 5, METAL));
-  add(disc('galleryPostL', GALLERY.left, DUCK_Y - 2, 6, POST), disc('galleryPostR', GALLERY.right, DUCK_Y - 2, 6, POST));
+  add(
+    disc('galleryPostL', GALLERY.left, DUCK_Y - 2, 6, POST),
+    disc('galleryPostR', GALLERY.right, DUCK_Y - 2, 6, POST),
+  );
 
   // The strength test: two walls and the bell cap at its head. The right wall runs on up to the divider and
   // the cap slopes down to the left, so a ball dropping onto it from the shooter gate rolls off into play.

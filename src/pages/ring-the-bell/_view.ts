@@ -76,7 +76,7 @@ export class FieldView {
 
   /** Playfield millimetres for a point in CSS pixels on the canvas. */
   toField(cssX: number, cssY: number): { x: number; y: number } {
-    const k = (this.scale / this.dpr) || 1;
+    const k = this.scale / this.dpr || 1;
     return { x: cssX / k, y: cssY / k };
   }
 
@@ -482,7 +482,12 @@ export class FieldView {
     ctx.fillText(this.touch ? 'Touch to play' : 'Press Start', x, y - 5);
     ctx.fillStyle = C.ink;
     ctx.font = `600 7.5px ${this.fonts.text}`;
-    const line = game.score > 0 ? `LAST GAME ${game.score.toLocaleString('en-US')}` : this.touch ? 'LEFT AND RIGHT HALVES FLIP' : 'OR PRESS SPACE';
+    const line =
+      game.score > 0
+        ? `LAST GAME ${game.score.toLocaleString('en-US')}`
+        : this.touch
+          ? 'LEFT AND RIGHT HALVES FLIP'
+          : 'OR PRESS SPACE';
     ctx.fillText(line, x, y + 13);
     ctx.restore();
   }

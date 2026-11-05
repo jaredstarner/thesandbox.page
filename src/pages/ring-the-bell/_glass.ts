@@ -371,7 +371,15 @@ export class GlassView {
     this.reel(g, x + 5 * (cell + gap), y, cell, hgt, null);
   }
 
-  private legend(g: Ctx, text: string, x: number, y: number, size: number, lit: boolean, align: CanvasTextAlign = 'center'): void {
+  private legend(
+    g: Ctx,
+    text: string,
+    x: number,
+    y: number,
+    size: number,
+    lit: boolean,
+    align: CanvasTextAlign = 'center',
+  ): void {
     g.save();
     g.font = `600 ${size}px ${this.fonts.text}`;
     g.textAlign = align;

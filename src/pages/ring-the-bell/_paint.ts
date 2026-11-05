@@ -37,7 +37,15 @@ export function seeded(seed: number): () => number {
   };
 }
 
-export function starPath(ctx: Ctx, x: number, y: number, r: number, points = 5, inner = 0.45, rot = -Math.PI / 2): void {
+export function starPath(
+  ctx: Ctx,
+  x: number,
+  y: number,
+  r: number,
+  points = 5,
+  inner = 0.45,
+  rot = -Math.PI / 2,
+): void {
   ctx.beginPath();
   for (let i = 0; i < points * 2; i++) {
     const a = rot + (i * Math.PI) / points;

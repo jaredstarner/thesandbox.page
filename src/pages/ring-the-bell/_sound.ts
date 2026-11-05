@@ -245,7 +245,15 @@ export class Sound {
         this.burst(600, 0.8, 0.05, 0.5);
         break;
       case 'coin':
-        this.modes(3150, [{ ratio: 1, amp: 0.5, decay: 0.08 }, { ratio: 1.48, amp: 0.3, decay: 0.05 }], 0.18, 0.002);
+        this.modes(
+          3150,
+          [
+            { ratio: 1, amp: 0.5, decay: 0.08 },
+            { ratio: 1.48, amp: 0.3, decay: 0.05 },
+          ],
+          0.18,
+          0.002,
+        );
         this.burst(5000, 3, 0.03, 0.08, 0.06);
         this.burst(4200, 3, 0.03, 0.06, 0.12);
         break;
