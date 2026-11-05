@@ -262,6 +262,8 @@ export class GlassView {
     this.night(g, w, h, 26);
     // Searchlights sweeping up behind the tent.
     g.save();
+    roundRect(g, 26, 26, w - 52, h - 52, 16);
+    g.clip();
     g.globalAlpha = 0.09;
     g.fillStyle = C.paper;
     for (const [x, dir] of [
@@ -295,7 +297,7 @@ export class GlassView {
     this.bulbs = [];
     for (let i = 0; i < 31; i++) {
       const a = -Math.PI / 2 - 0.42 + (i / 30) * 0.84;
-      this.bulbs.push({ x: 500 + Math.cos(a) * 1110, y: 1200 + Math.sin(a) * 1110 + 44 });
+      this.bulbs.push({ x: 500 + Math.cos(a) * 1090, y: 1200 + Math.sin(a) * 1090 });
     }
   }
 
@@ -437,15 +439,15 @@ export class GlassView {
       this.legend(g, 'TILT', 128, 886, 40, game.tilted);
       this.legend(g, 'SHOOT', 872, 868, 30, game.extraBall);
       this.legend(g, 'AGAIN', 872, 904, 30, game.extraBall);
-      this.legend(g, 'GAME OVER', 500, 988, 44, over);
-      this.legend(g, 'CREDITS', 852, 978, 22, true);
-      this.legend(g, String(game.credits), 852, 1012, 34, true);
-      this.legend(g, 'BALL IN PLAY', 72, 1030, 22, !over, 'left');
-      for (let n = 1; n <= BALLS_PER_GAME; n++) this.legend(g, String(n), 230 + n * 30, 1030, 26, ballLit(n));
-      this.legend(g, 'MATCH', 72, 978, 22, game.matchNumber !== null, 'left');
+      this.legend(g, 'GAME OVER', 500, 1004, 42, over);
+      this.legend(g, 'BALL IN PLAY', 160, 982, 22, !over);
+      for (let n = 1; n <= BALLS_PER_GAME; n++) this.legend(g, String(n), 160 + (n - 3) * 34, 1024, 28, ballLit(n));
+      this.legend(g, 'CREDITS', 320, 982, 22, true);
+      this.legend(g, String(game.credits), 320, 1024, 32, true);
+      this.legend(g, 'MATCH', 775, 982, 22, game.matchNumber !== null);
       for (let i = 0; i < 10; i++) {
         const v = i * 10;
-        this.legend(g, v === 0 ? '00' : String(v), 168 + i * 25, 978, 18, game.matchNumber === v);
+        this.legend(g, v === 0 ? '00' : String(v), 640 + i * 30, 1024, 19, game.matchNumber === v);
       }
       if (game.bellFlash > 0) {
         g.save();

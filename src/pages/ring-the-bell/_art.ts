@@ -66,7 +66,7 @@ export function buildInserts(): Record<string, Insert> {
     lane1: { ...LAMPS.lane1, shape: 'round', r: 7, color: C.goldLight },
     lane2: { ...LAMPS.lane2, shape: 'round', r: 7, color: C.goldLight },
     spinner: { ...LAMPS.spinner, shape: 'round', r: 7.5, color: C.red },
-    saucer: { ...LAMPS.saucer, shape: 'arrow', r: 9, color: C.teal, rot: -1.2 },
+    saucer: { ...LAMPS.saucer, shape: 'arrow', r: 9, color: C.teal },
     specialL: { ...LAMPS.specialL, shape: 'round', r: 8, color: C.red },
     specialR: { ...LAMPS.specialR, shape: 'round', r: 8, color: C.red },
     again: { ...LAMPS.again, shape: 'oval', r: 26, color: C.red },
@@ -75,7 +75,7 @@ export function buildInserts(): Record<string, Insert> {
     ins[`ticket${i}`] = { ...t, shape: 'ticket', r: 11.5, color: C.gold, label: String(i + 1) };
   }
   for (const [i, p] of LADDER.entries()) {
-    ins[`ladder${i}`] = { ...p, shape: 'round', r: 6, color: mixHex(C.goldLight, C.red, i / 9) };
+    ins[`ladder${i}`] = { ...p, shape: 'round', r: 7, color: mixHex(C.goldLight, C.red, i / 9) };
   }
   return ins;
 }
@@ -318,9 +318,6 @@ function gallery(ctx: Ctx, fonts: Fonts): void {
     ctx.lineWidth = 0.6;
     ctx.stroke();
   }
-  ctx.fillStyle = C.paper;
-  ctx.font = `600 7px ${fonts.text}`;
-  ctx.fillText('500 EACH  ·  ALL FIVE LIGHT EXTRA BALL', (x0 + x1) / 2, top + 14);
   ctx.restore();
 }
 
@@ -386,11 +383,6 @@ function ferrisWheel(ctx: Ctx, fonts: Fonts): void {
   ctx.beginPath();
   ctx.arc(cx, cy, 4, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = C.navy;
-  ctx.font = `600 7px ${fonts.text}`;
-  ctx.textAlign = 'center';
-  ctx.fillText('SPINNER 10 A TURN', cx, cy + 70);
-  ctx.fillText('100 WHEN LIT', cx, cy + 79);
   ctx.restore();
 }
 
@@ -425,10 +417,12 @@ function fortune(ctx: Ctx, fonts: Fonts): void {
   ctx.fillStyle = C.paper;
   ctx.font = `400 9px ${fonts.display}`;
   arcText(ctx, 'FORTUNE', x, y, 35, -Math.PI / 2, 0.6);
-  ctx.fillStyle = C.navy;
-  ctx.font = `600 7px ${fonts.text}`;
+  ctx.fillStyle = C.goldLight;
+  ctx.font = `700 8.5px ${fonts.text}`;
   ctx.textAlign = 'center';
-  ctx.fillText('EXTRA BALL WHEN LIT', x, LAMPS.saucer.y + 16);
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('EXTRA', x - 25, LAMPS.saucer.y - 1);
+  ctx.fillText('BALL', x - 25, LAMPS.saucer.y + 8);
   ctx.restore();
 }
 
@@ -465,35 +459,49 @@ function strengthTest(ctx: Ctx, fonts: Fonts): void {
     ctx.fillStyle = hexA(C.red, 0.9);
     ctx.fill();
   }
+  // The striker's track: a cream strip up the middle that the lamps sit in.
+  const s0 = corner(12, -11);
+  const s1 = corner(len - 14, -11);
+  const s2 = corner(len - 14, 11);
+  const s3 = corner(12, 11);
+  ctx.beginPath();
+  ctx.moveTo(s0.x, s0.y);
+  ctx.lineTo(s1.x, s1.y);
+  ctx.lineTo(s2.x, s2.y);
+  ctx.lineTo(s3.x, s3.y);
+  ctx.closePath();
+  ctx.fillStyle = C.paper;
+  ctx.fill();
+  ctx.strokeStyle = hexA(C.ink, 0.55);
+  ctx.lineWidth = 0.9;
+  ctx.stroke();
   ctx.restore();
 
-  // Tick marks and numbers up the right side of the scale.
+  // The alcove between the lane and the shooter lane: a panel of night sky carrying the lane's name.
   ctx.save();
-  ctx.fillStyle = C.ink;
-  ctx.font = `700 6px ${fonts.text}`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  for (const [i, p] of LADDER.entries()) {
-    const q = { x: p.x + STRIKER.nx * 16, y: p.y + STRIKER.ny * 16 };
-    ctx.save();
-    ctx.translate(q.x, q.y);
-    ctx.rotate(Math.atan2(STRIKER.uy, STRIKER.ux) + Math.PI / 2);
-    ctx.fillStyle = C.paper;
-    roundRect(ctx, -5, -4, 10, 8, 2);
+  const p0 = corner(-6, half + 4);
+  const p1 = corner(len, half + 4);
+  ctx.beginPath();
+  ctx.moveTo(p0.x, p0.y);
+  ctx.lineTo(p1.x, p1.y);
+  ctx.lineTo(DIVIDER_X, p1.y);
+  ctx.lineTo(DIVIDER_X, p0.y + 6);
+  ctx.closePath();
+  ctx.fillStyle = C.navy;
+  ctx.fill();
+  ctx.clip();
+  const rnd = seeded(12);
+  ctx.fillStyle = C.goldLight;
+  for (let i = 0; i < 16; i++) {
+    const q = corner(10 + rnd() * 200, half + 10 + rnd() * 40);
+    starPath(ctx, q.x, q.y, 1.4 + rnd() * 2.4, 5, 0.45);
     ctx.fill();
-    ctx.fillStyle = C.ink;
-    ctx.fillText(String((i + 1) * 100), 0, 0.3);
-    ctx.restore();
   }
-  ctx.restore();
-
-  // The lettering beside the lane, running up it.
-  ctx.save();
-  const m = lanePoint(104, -half - 15);
+  const m = corner(112, half + 21);
   ctx.translate(m.x, m.y);
   ctx.rotate(Math.atan2(STRIKER.uy, STRIKER.ux));
-  ctx.fillStyle = C.red;
-  ctx.font = `400 10px ${fonts.display}`;
+  ctx.fillStyle = C.goldLight;
+  ctx.font = `400 11px ${fonts.display}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('STRENGTH TEST', 0, 0);
@@ -573,21 +581,42 @@ function lowerField(ctx: Ctx, fonts: Fonts): void {
   ctx.restore();
 }
 
-function lanesText(ctx: Ctx, fonts: Fonts): void {
+function banner(ctx: Ctx, fonts: Fonts): void {
+  const cx = 236;
+  const cy = 612;
+  const w = 150;
   ctx.save();
-  ctx.font = `600 6.5px ${fonts.text}`;
-  ctx.textAlign = 'center';
-  ctx.fillStyle = C.navy;
-  ctx.fillText('500', ROLLOVERS.inlaneL.x, ROLLOVERS.inlaneL.y + 20);
-  ctx.fillText('500', ROLLOVERS.inlaneR.x, ROLLOVERS.inlaneR.y + 20);
-  for (const side of ['L', 'R'] as const) {
-    const p = side === 'L' ? LAMPS.specialL : LAMPS.specialR;
-    ctx.fillText('SPECIAL', p.x, p.y + 17);
-    ctx.fillText('WHEN LIT', p.x, p.y + 24);
+  shadow(ctx, 3, 1, 2.5, 0.3);
+  // Tails folded behind the ribbon's ends.
+  ctx.fillStyle = C.redDark;
+  for (const d of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(cx + d * (w / 2 - 6), cy - 4);
+    ctx.lineTo(cx + d * (w / 2 + 22), cy - 4);
+    ctx.lineTo(cx + d * (w / 2 + 12), cy + 9);
+    ctx.lineTo(cx + d * (w / 2 + 22), cy + 22);
+    ctx.lineTo(cx + d * (w / 2 - 6), cy + 22);
+    ctx.closePath();
+    ctx.fill();
   }
+  // The ribbon, bowed slightly.
+  ctx.fillStyle = C.red;
+  ctx.beginPath();
+  ctx.moveTo(cx - w / 2, cy - 13);
+  ctx.quadraticCurveTo(cx, cy - 21, cx + w / 2, cy - 13);
+  ctx.lineTo(cx + w / 2, cy + 13);
+  ctx.quadraticCurveTo(cx, cy + 5, cx - w / 2, cy + 13);
+  ctx.closePath();
+  ctx.fill();
+  noShadow(ctx);
+  ctx.strokeStyle = C.gold;
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
   ctx.fillStyle = C.paper;
-  ctx.font = `600 6.5px ${fonts.text}`;
-  ctx.fillText('LIGHTS BUMPER', 240, LANE_BOTTOM + 30);
+  ctx.font = `400 13px ${fonts.display}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('STEP RIGHT UP', cx, cy - 4);
   ctx.restore();
 }
 
@@ -639,14 +668,19 @@ function shooterLane(ctx: Ctx): void {
   ctx.save();
   ctx.fillStyle = '#e7d5ac';
   ctx.fillRect(DIVIDER_X, DIVIDER_TOP - 10, RIGHT_WALL_X - DIVIDER_X, APRON_Y - DIVIDER_TOP + 10);
-  ctx.fillStyle = hexA(C.red, 0.85);
-  for (let y = 300; y < 960; y += 70) {
+  // Red pinstripes down the lane, and three chevrons pointing the way up.
+  ctx.fillStyle = hexA(C.red, 0.8);
+  ctx.fillRect(DIVIDER_X + 6, DIVIDER_TOP, 1.4, APRON_Y - DIVIDER_TOP);
+  ctx.fillRect(RIGHT_WALL_X - 7.4, DIVIDER_TOP, 1.4, APRON_Y - DIVIDER_TOP);
+  ctx.strokeStyle = hexA(C.red, 0.85);
+  ctx.lineWidth = 3;
+  ctx.lineJoin = 'miter';
+  for (const y of [880, 905, 930]) {
     ctx.beginPath();
-    ctx.moveTo(490, y);
-    ctx.lineTo(500, y + 14);
-    ctx.lineTo(480, y + 14);
-    ctx.closePath();
-    ctx.fill();
+    ctx.moveTo(480, y + 8);
+    ctx.lineTo(490, y);
+    ctx.lineTo(500, y + 8);
+    ctx.stroke();
   }
   ctx.restore();
 }
@@ -852,7 +886,7 @@ export function drawPlayfield(ctx: Ctx, fonts: Fonts, inserts: Record<string, In
   lowerField(ctx, fonts);
   strengthTest(ctx, fonts);
   shooterLane(ctx);
-  lanesText(ctx, fonts);
+  banner(ctx, fonts);
 
   // The left loop's floor, a strip of night down the left wall.
   ctx.save();

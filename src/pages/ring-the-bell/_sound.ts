@@ -13,7 +13,7 @@ interface Mode {
 
 /** A free-free bar's first four bending modes. */
 const BAR: Mode[] = [
-  { ratio: 1, amp: 1, decay: 1.5 },
+  { ratio: 1, amp: 1, decay: 1.2 },
   { ratio: 2.756, amp: 0.42, decay: 0.55 },
   { ratio: 5.404, amp: 0.18, decay: 0.2 },
   { ratio: 8.933, amp: 0.08, decay: 0.08 },
@@ -21,11 +21,11 @@ const BAR: Mode[] = [
 
 /** A cast bell's partials, relative to its nominal: hum, prime, tierce, quint, nominal, and up. */
 const BELL: Mode[] = [
-  { ratio: 0.5, amp: 0.32, decay: 4.2 },
-  { ratio: 1, amp: 0.55, decay: 3 },
-  { ratio: 1.19, amp: 0.45, decay: 2.4 },
-  { ratio: 1.5, amp: 0.22, decay: 1.8 },
-  { ratio: 2, amp: 0.7, decay: 2 },
+  { ratio: 0.5, amp: 0.32, decay: 2.6 },
+  { ratio: 1, amp: 0.55, decay: 2 },
+  { ratio: 1.19, amp: 0.45, decay: 1.6 },
+  { ratio: 1.5, amp: 0.22, decay: 1.2 },
+  { ratio: 2, amp: 0.7, decay: 1.4 },
   { ratio: 2.51, amp: 0.26, decay: 1 },
   { ratio: 2.66, amp: 0.2, decay: 0.8 },
   { ratio: 3.01, amp: 0.14, decay: 0.6 },
@@ -98,11 +98,11 @@ export class Sound {
         const g = ctx.createGain();
         g.gain.setValueAtTime(0, t);
         g.gain.linearRampToValueAtTime(m.amp * 0.5, t + 0.002);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + m.decay * 4);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + m.decay * 3);
         o.connect(g);
         g.connect(bus);
         o.start(t);
-        o.stop(t + m.decay * 4 + 0.05);
+        o.stop(t + m.decay * 3 + 0.05);
       }
     }
   }
