@@ -21,8 +21,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       satellite.js:
-        specifier: 6.0.2
-        version: 6.0.2
+        specifier: 7.1.0
+        version: 7.1.0
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.12
@@ -2826,8 +2826,8 @@ packages:
     resolution: {integrity: sha512-Nf4eMGE2O5vnJG7KPCRyksWS9gVKSYoUWtPeMXRRxwZSPVQhSGtL602xVYS65LvMkHmkvKa7xpauF0+/5pPwrg==}
     hasBin: true
 
-  satellite.js@6.0.2:
-    resolution: {integrity: sha512-XWKxtqVF5xiJ1xAeiYeT/oSSzsukoCLWvk6nO/WFy4un0M3g4djAU9TAtOCqJLtYW9vxx9pkPJ1L9ITOc607GA==}
+  satellite.js@7.1.0:
+    resolution: {integrity: sha512-U6nRml9Nb7dV9LJPiMNPyna7U7ry+1nXYkOeCEG7K/YbojQQLHHmcjPisp03VNY+HLcbQHqbt7t4t1vQMaKCLQ==}
 
   satteri@0.10.5:
     resolution: {integrity: sha512-Ao1LKpAEa9Wdg0otgbVKViZHEq9ebdXe4DMrp3s9vQAU0HNIuHnFEuMuOcm0ZIXyV0Yzxj91NvhLpvXZJO/5ZQ==}
@@ -6177,7 +6177,7 @@ snapshots:
     dependencies:
       suf-log: 2.5.3
 
-  satellite.js@6.0.2: {}
+  satellite.js@7.1.0: {}
 
   satteri@0.10.5:
     dependencies:
