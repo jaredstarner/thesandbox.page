@@ -172,7 +172,7 @@ export function start(root: HTMLElement) {
     const cell = index(r, c);
     const { sheet } = page;
     const typed = entry.value;
-    if (typed === editOriginal) {
+    if (typed === sheet.source(cell)) {
       leaveEdit();
       canvas.focus();
       return;
