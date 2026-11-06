@@ -1,6 +1,6 @@
 // One worksheet: what each cell holds, how the cells are grouped, and the block of memory its values live in.
 
-import { CELLS, FormulaError, cellName, colOf, index, parseFormula, rowOf, unparse, type Node } from './_formula';
+import { CELLS, colOf, index, parseFormula, rowOf, unparse, type Node } from './_formula';
 
 /** Bytes of cell values in one calculation buffer. */
 export const BUFFER = CELLS * 8;
@@ -70,6 +70,8 @@ export interface Merge extends Area {
   show?: (v: number) => string;
   /** Wrap the text to the merged width. */
   wrap?: boolean;
+  /** Space above wrapped text, in CSS pixels at 100%. */
+  inset?: number;
 }
 
 let nextFormula = 1;
@@ -247,4 +249,3 @@ export function shortNumber(v: number, places?: number): string {
   return String(Number(v.toPrecision(5)));
 }
 
-export { FormulaError, cellName };

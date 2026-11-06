@@ -96,14 +96,14 @@ export const LIFE = ramp([
   [1, '#12241d'],
 ]);
 
-/** Snake runs from -1 (food) through 0 (paper) to 30 (the head of a long snake). */
+/** Snake runs from -1 (food) through 0 (paper) to 14 and up (the head). */
 export const SNAKE = ramp([
   [0, RED],
-  [0.024, RED],
-  [0.0245, '#ffffff', 0],
-  [0.038, '#ffffff', 0],
-  [0.04, '#a8bcd8'],
-  [0.35, '#4f73ad'],
+  [0.06, RED],
+  [0.0601, '#ffffff', 0],
+  [0.12, '#ffffff', 0],
+  [0.1201, '#a8bcd8'],
+  [0.5, '#4f73ad'],
   [1, '#13203c'],
 ]);
 

@@ -34,6 +34,8 @@ interface Control {
   show?: (v: number) => string;
   /** Read-only figure, not a box to type in. */
   readout?: boolean;
+  /** Show the label as typed: a working cell's own name, the word its formulas use. */
+  named?: boolean;
 }
 
 class Pad {
@@ -77,7 +79,8 @@ class Pad {
   /** A printed label over a box: the sheet's inputs, each one a named cell. */
   control(r: number, c: number, w: number, control: Control) {
     const { sheet } = this;
-    this.text(r, c, w, 14, control.label.toUpperCase(), { size: 9.5, weight: 600, color: GREEN });
+    if (control.named) this.text(r, c, w, 14, control.label, { size: 11.5, family: 'typed', color: GREEN });
+    else this.text(r, c, w, 14, control.label.toUpperCase(), { size: 9.5, weight: 600, color: GREEN });
     const at = r + this.span(15);
     const cell = index(at, c);
     sheet.merge({
@@ -108,11 +111,11 @@ class Pad {
     const controlW = wide ? 84 : Math.floor((width - 24) / 3) - 6;
     let bottom: number;
     if (wide) {
-      const row = Math.floor(8 / unit);
-      this.text(row, 1, 300, 42, title, { size: 31, weight: 800, align: 'left' });
+      const row = Math.round(8 / unit);
+      this.text(0, 1, 300, 56, title, { size: 31, weight: 800, align: 'left' });
       const noteC = this.span(320);
       const noteW = Math.max(280, Math.min(560, width - 330 - controls.length * (controlW + 8) - 24));
-      this.text(row, noteC, noteW, 58, note, { size: 13, wrap: true, weight: 400 });
+      this.text(0, noteC, noteW, 64, note, { size: 13, wrap: true, weight: 400, inset: 8 });
       let c = cols - this.span((controlW + 8) * controls.length + 8);
       for (const k of controls) {
         this.control(row, c, controlW, k);
@@ -146,14 +149,7 @@ class Pad {
           c = this.span(8);
           row += this.span(23);
         }
-        const merge = this.text(row, c, w, 20, link.label, {
-          size: 12.5,
-          weight: 600,
-          color: BLUE,
-          action: link.act,
-          align: 'left',
-        });
-        merge.action = link.act;
+        this.text(row, c, w, 20, link.label, { size: 12.5, weight: 600, color: BLUE, action: link.act });
         c += this.span(w + 4);
       }
       bottom = row + this.span(26);
@@ -178,7 +174,6 @@ function fire(ctx: BookContext) {
   const sheet = new Sheet('Fire');
   const unit = decide(ctx.room.w, Math.max(8, Math.ceil(ctx.room.w / 200)), 5);
   const pad = new Pad(sheet, unit, ctx.room);
-  let close = false;
   let middle = 0;
   const top = pad.head(
     'Fire',
@@ -191,16 +186,13 @@ function fire(ctx: BookContext) {
     [
       {
         label: 'Zoom in to the figures',
-        act: () => {
-          close = !close;
-          if (close) ctx.zoomTo(46, middle, Math.round(pad.cols / 2));
-          else ctx.zoomTo();
-        },
+        act: () => ctx.zoomTo(46, middle, Math.round(pad.cols / 2)),
       },
     ],
   );
   const area: Area = { r1: top, c1: 0, r2: Math.max(top + 20, pad.rows - 2), c2: pad.cols - 1 };
   middle = Math.round((area.r1 + area.r2 * 2) / 3);
+  sheet.lead = index(middle, Math.round(pad.cols / 2));
   // Heat rises: each cell averages last tick's three cells below it and the one under those, less a random loss.
   sheet.fill({ ...area, r2: area.r2 - 1 }, cellFormula(area.r1, '=MAX(0,AVERAGE(PREV(A#1:C#1),PREV(B#2))-cooling*RAND())'), 1);
   // The grate along the bottom: patches of heat that drift, so tongues form above them.
@@ -336,7 +328,7 @@ function registers(pad: Pad, r: number, c: number, items: Control[], perRow: num
   const px = width * pad.unit - 6;
   items.forEach((item, i) => {
     const row = r + Math.floor(i / perRow) * pad.span(46);
-    pad.control(row, c + (i % perRow) * width, px, { ...item, readout: true });
+    pad.control(row, c + (i % perRow) * width, px, { ...item, label: item.name, named: true, readout: true });
   });
 }
 
@@ -373,7 +365,7 @@ function snake(ctx: BookContext) {
     area,
     `=IF(reset,0,${here},IF(AND(x=headx,y=heady,alive),len,IF(AND(x=foodx,y=foody),-1,IF(AND(step,alive),MAX(0,${self}-1),${self})))))`,
   );
-  block(sheet, area, SNAKE, -1, 30, { places: 0, frame: true });
+  block(sheet, area, SNAKE, -1, 14, { places: 0, frame: true });
 
   const rc = wide ? area.c2 + 2 : 1;
   const rr = wide ? top : area.r2 + 2;
@@ -386,7 +378,7 @@ function snake(ctx: BookContext) {
     color: RED,
   });
   status.show = (v) =>
-    v >= 2 ? 'On autopilot. Press an arrow key to take over.' : v >= 1 ? '' : 'Hit. Press Space to go again.';
+    v >= 2 ? 'Autopilot. Press an arrow key.' : v >= 1 ? '' : 'Hit. Press Space to go again.';
   sheet.texts.delete(index(rr, rc));
   sheet.setFormula(index(rr, rc), makeFormula('=alive+auto*2', rr, rc));
   registers(
@@ -402,16 +394,16 @@ function snake(ctx: BookContext) {
         label: 'Heading across',
         name: 'dirx',
         formula:
-          '=IF(reset,1,IF(auto,IF(foodx<>headx,SIGN(foodx-headx),0),IF(AND(keyx<>0,keyx<>-lastx),keyx,IF(AND(keyy<>0,keyy<>-lasty),0,dirx))))',
+          '=IF(reset,IF(keyy<>0,0,IF(keyx<>0,keyx,1)),IF(auto,IF(foodx<>headx,SIGN(foodx-headx),0),IF(AND(keyx<>0,keyx<>-lastx),keyx,IF(AND(keyy<>0,keyy<>-lasty),0,dirx))))',
       },
       {
         label: 'Heading down',
         name: 'diry',
         formula:
-          '=IF(reset,0,IF(auto,IF(foodx<>headx,0,SIGN(foody-heady)),IF(AND(keyy<>0,keyy<>-lasty),keyy,IF(AND(keyx<>0,keyx<>-lastx),0,diry))))',
+          '=IF(reset,keyy,IF(auto,IF(foodx<>headx,0,SIGN(foody-heady)),IF(AND(keyy<>0,keyy<>-lasty),keyy,IF(AND(keyx<>0,keyx<>-lastx),0,diry))))',
       },
-      { label: 'Last across', name: 'lastx', formula: '=IF(step,dirx,lastx)' },
-      { label: 'Last down', name: 'lasty', formula: '=IF(step,diry,lasty)' },
+      { label: 'Last across', name: 'lastx', formula: '=IF(OR(step,reset),dirx,lastx)' },
+      { label: 'Last down', name: 'lasty', formula: '=IF(OR(step,reset),diry,lasty)' },
       { label: 'Next across', name: 'nextx', formula: '=headx+dirx' },
       { label: 'Next down', name: 'nexty', formula: '=heady+diry' },
       {
@@ -442,8 +434,11 @@ function snake(ctx: BookContext) {
   sheet.begin = () => {
     set('auto', 1);
     set('alive', 1);
+    // The loop goes round through next, so that must hold the start as well.
     set('headx', Math.floor(boardCols / 2));
     set('heady', Math.floor(boardRows / 2));
+    set('nextx', Math.floor(boardCols / 2) + 1);
+    set('nexty', Math.floor(boardRows / 2));
     set('len', 5);
     set('dirx', 1);
     set('foodx', Math.floor(boardCols / 4));
@@ -596,7 +591,7 @@ function maze(ctx: BookContext) {
     `=LET(u,${a1(hitX)}-INT(${a1(hitX)}),v,${a1(hitY)}-INT(${a1(hitY)}),IF(ABS(u-0.5)>ABS(v-0.5),v,u+1))`,
   );
   fillRow(tall, `=${sh}*1.05/(B$${last + 1}*COS(${a1(angle)}-pa)+0.01)`);
-  fillRow(shadeRow, `=0.1+MIN(0.85,(B$${last + 1}-0.5)/12)*0.8+IF(${a1(across)}>=1,0.08,0)`);
+  fillRow(shadeRow, `=0.04+MIN(0.85,(B$${last + 1}-0.5)/14)*0.85+IF(${a1(across)}>=1,0.07,0)`);
   const mid = Math.floor(sw / 2);
   const aheadCell = sheet.names.get('ahead');
   if (aheadCell) {
@@ -687,7 +682,7 @@ function accounts(ctx: BookContext) {
         c1: c,
         r2: r + pad.span(22) - 1,
         c2: c + pad.span(colW) - 1,
-        size: 15,
+        size: pad.wide ? 15 : 11,
         weight: 400,
         family: 'typed',
         align: i ? 'right' : 'left',
@@ -698,7 +693,7 @@ function accounts(ctx: BookContext) {
       else if (text) sheet.setText(index(r, c), text);
     };
     const name = (i: number, k: number) => cellOf(firstRow + k * rowH, colAt(i));
-    put(0, null, 0, `Q${(q % 4) + 1} year ${Math.floor(q / 4) + 1}`);
+    put(0, null, 0, `Y${Math.floor(q / 4) + 1} Q${(q % 4) + 1}`);
     put(1, q ? `=${name(4, q - 1)}` : '=open', 0);
     put(2, `=(${name(1, q)}+${name(4, q)})/2*yearly/4`, 2);
     put(3, '=repay', 0);
@@ -713,7 +708,7 @@ function accounts(ctx: BookContext) {
     c1: totalC,
     r2: totalR + pad.span(22) - 1,
     c2: totalC + pad.span(colW) - 1,
-    size: 15,
+    size: pad.wide ? 15 : 11,
     weight: 700,
     family: 'typed',
     align: 'right',

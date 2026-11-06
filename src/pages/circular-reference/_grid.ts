@@ -3,7 +3,7 @@
 
 import { COLS, ROWS, columnName, colOf, index, rowOf } from './_formula';
 import { GREEN, INK, LUT, PAPER } from './_palette';
-import { areaHas, shortNumber, type Area, type Block, type Merge, type Sheet } from './_sheet';
+import { shortNumber, type Area, type Block, type Merge, type Sheet } from './_sheet';
 
 const RULE_MINOR = 'rgba(44,106,79,0.13)';
 const RULE_MAJOR = 'rgba(44,106,79,0.27)';
@@ -40,7 +40,6 @@ export class Grid {
   sheet: Sheet | null = null;
   selection: Selection = { r: 0, c: 0, r1: 0, c1: 0, r2: 0, c2: 0 };
   precedents: Area[] = [];
-  /** Cells on a loop, shown with a small mark. */
   private rowHead = 34;
   private colHead = 18;
 
@@ -327,7 +326,8 @@ export class Grid {
         ctx.textAlign = 'left';
         const lines = this.wrap(m, text, w - pad * 2, size);
         const lead = size * 1.42;
-        lines.forEach((line, i) => ctx.fillText(line, x + pad, y + lead * (i + 0.5)));
+        const top = y + (m.inset ?? 0) * scale * dpr;
+        lines.forEach((line, i) => ctx.fillText(line, x + pad, top + lead * (i + 0.5)));
         continue;
       }
       ctx.textAlign = m.align;
@@ -479,14 +479,5 @@ export class Grid {
       }
     }
     ctx.restore();
-  }
-
-  blockAtSelection(): Block | undefined {
-    const { sheet, selection: s } = this;
-    return sheet?.blockAt(s.r, s.c);
-  }
-
-  inSelection(r: number, c: number) {
-    return areaHas(this.selection, r, c);
   }
 }

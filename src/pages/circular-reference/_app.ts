@@ -232,6 +232,10 @@ export function start(root: HTMLElement) {
 
   async function openSheet(i: number, fresh = false) {
     if (fresh) pages[i] = null;
+    leaveEdit();
+    for (const key of held) page.engine.key(KEYS.indexOf(key), false);
+    held.clear();
+    releasing.clear();
     let p = pages[i];
     const first = !p?.engine.ready;
     if (!p) {
@@ -244,8 +248,6 @@ export function start(root: HTMLElement) {
     const lead = pickLead(p.sheet);
     grid.selection = { r: lead.r, c: lead.c, r1: lead.r, c1: lead.c, r2: lead.r, c2: lead.c };
     pad.hidden = !p.sheet.pad || !matchMedia('(pointer: coarse)').matches;
-    for (const key of held) p.engine.key(KEYS.indexOf(key), false);
-    held.clear();
     setTabs();
     if (first) {
       p.engine.seed(Math.floor(Math.random() * 0xffffffff));
@@ -343,6 +345,13 @@ export function start(root: HTMLElement) {
     dirty = true;
   }
 
+  function startsErasing(r: number, c: number) {
+    const b = page.sheet.blockAt(r, c);
+    if (b?.poke?.erase === undefined) return false;
+    const target = b.poke.write ? b.poke.write(r, c) : index(r, c);
+    return page.sheet.values[target] !== 0;
+  }
+
   function pokeLine(a: { r: number; c: number }, b: { r: number; c: number }, erase: boolean) {
     const n = Math.max(Math.abs(a.r - b.r), Math.abs(a.c - b.c), 1);
     for (let i = 0; i <= n; i++) {
@@ -407,7 +416,8 @@ export function start(root: HTMLElement) {
       press.y = p.y;
       dirty = true;
     } else if (press.mode === 'poke' && at) {
-      if (firstMove) press.erase = e.altKey;
+      // A stroke that starts on something drawn rubs out; one that starts on bare paper draws.
+      if (firstMove) press.erase = startsErasing(press.r, press.c);
       pokeLine(press.last ?? at, at, press.erase);
       press.last = at;
     } else if (press.mode === 'range' && at) {
@@ -578,8 +588,7 @@ export function start(root: HTMLElement) {
         updateZoom();
         break;
       case 'fit':
-        grid.fit();
-        updateZoom();
+        easeZoom();
         break;
       case 'compiled':
         listing.hidden = !listing.hidden;

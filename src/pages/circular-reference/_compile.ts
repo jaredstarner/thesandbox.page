@@ -200,7 +200,6 @@ export function areasRead(sheet: Sheet, cell: number): Area[] {
 class Emit {
   readonly scope = new Map<string, number>();
   private readonly tempA: number;
-  private readonly tempB: number;
 
   constructor(
     readonly b: Body,
@@ -208,7 +207,6 @@ class Emit {
     readonly flags: Flags,
   ) {
     this.tempA = b.local(F64);
-    this.tempB = b.local(F64);
   }
 
   /** Pushes a base address for a reference and returns the static offset to add to it. */

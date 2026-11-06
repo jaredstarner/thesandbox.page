@@ -83,7 +83,7 @@ import { FUNCTION_NAMES } from './_functions';
       <ul>
         <li>Enter or double-click edits a cell. Editing one cell of a filled block rewrites the block.</li>
         <li>Shift+Enter changes only the selected cell.</li>
-        <li>Drag through a live block to write into it. Shift+drag selects cells instead.</li>
+        <li>Drag through Fire, Life, or the Maze plan to write into them. Shift+drag selects cells instead.</li>
         <li>Ctrl+wheel or pinch zooms. Zoom in far enough and the figures appear.</li>
         <li>Ctrl+Z undoes an edit. Reset puts the sheet back as it was.</li>
       </ul>
@@ -504,16 +504,31 @@ import { FUNCTION_NAMES } from './_functions';
 
     h1,
     [data-act='step'],
-    [data-act='fit'] {
+    [data-act='zoom-in'],
+    [data-act='zoom-out'] {
       display: none;
     }
 
+    .home {
+      font-size: 11.5px;
+    }
+
+    .actions {
+      gap: 1px;
+    }
+
     .actions button {
-      padding: 4px 7px;
+      padding: 4px 6px;
+      font-size: 12px;
     }
 
     .zoom {
       margin: 0;
+      border: 0;
+    }
+
+    .zoom [data-zoom] {
+      min-width: 0;
     }
 
     .bar {
