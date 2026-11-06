@@ -134,6 +134,7 @@ export const PLAN = ramp([
 
 export const HEAT = ramp([
   [0, '#f3f6ea'],
-  [0.5, '#e7c76d'],
-  [1, '#b5291f'],
+  [0.3, '#e7c76d'],
+  [0.65, '#c8481f'],
+  [1, '#3a0f0c'],
 ]);

@@ -567,7 +567,10 @@ function maze(ctx: BookContext) {
   // The ray table: one column per column of the screen, marched down the sheet.
   const STEPS = 22;
   const rayR = regR + regRows + 3 + pad.span(22);
-  labelled(rayR - pad.span(22), 'Rays: each column of the view, one cell for each grid line the ray crosses');
+  labelled(
+    rayR - pad.span(22),
+    'Rays: one column of cells for each column of the view. Top to bottom: angle, direction, the march, then what it hit.',
+  );
   const angle = rayR;
   const dirX = rayR + 1;
   const dirY = rayR + 2;
@@ -612,10 +615,20 @@ function maze(ctx: BookContext) {
   if (aheadCell) {
     sheet.setFormula(
       index(aheadCell.r1, aheadCell.c1),
-      makeFormula(`=${cellOf(last, screenC + mid)}`, aheadCell.r1, aheadCell.c1),
+      makeFormula(`=PREV(${cellOf(last, screenC + mid)})`, aheadCell.r1, aheadCell.c1),
     );
   }
-  block(sheet, rowArea(first, last), HEAT, 0, 18, { places: 1 });
+  // Every row of the table is a colour scale of its own, so the workings can be seen at any zoom.
+  block(sheet, rowArea(angle), HEAT, -3.2, 9.5, { places: 2 });
+  block(sheet, rowArea(dirX), INKWASH, -1, 1, { places: 2 });
+  block(sheet, rowArea(dirY), INKWASH, -1, 1, { places: 2 });
+  block(sheet, rowArea(first, last), HEAT, 0, 13, { places: 1 });
+  block(sheet, rowArea(hitX), INKWASH, 0, 24, { places: 1 });
+  block(sheet, rowArea(hitY), INKWASH, 0, 24, { places: 1 });
+  block(sheet, rowArea(wall), PLAN, 0, 4, { places: 0 });
+  block(sheet, rowArea(across), INKWASH, 0, 2, { places: 2 });
+  block(sheet, rowArea(tall), HEAT, 0, sh * 1.2, { places: 0 });
+  block(sheet, rowArea(shadeRow), INKWASH, 0, 1, { places: 2 });
 
   // The view. Walls by height, floor by casting each row back to the ground.
   const midRow = top + (sh - 1) / 2 + 1;
