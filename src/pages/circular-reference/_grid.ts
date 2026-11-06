@@ -247,8 +247,8 @@ export class Grid {
       if (r % 5) ctx.fillRect(x0, r * cell, w, thin);
     }
     ctx.fillStyle = RULE_MAJOR;
-    for (let c = c1 - c1 % 5; c <= c2 + 1; c += 5) ctx.fillRect(c * cell, y0, thin, h);
-    for (let r = r1 - r1 % 5; r <= r2 + 1; r += 5) ctx.fillRect(x0, r * cell, w, thin);
+    for (let c = c1 - (c1 % 5); c <= c2 + 1; c += 5) ctx.fillRect(c * cell, y0, thin, h);
+    for (let r = r1 - (r1 % 5); r <= r2 + 1; r += 5) ctx.fillRect(x0, r * cell, w, thin);
   }
 
   private drawFrames() {
@@ -452,7 +452,7 @@ export class Grid {
       ctx.fillStyle = 'rgba(39,72,140,0.22)';
       ctx.fillRect(xAt(s.c1), 0, (s.c2 - s.c1 + 1) * cell, headH);
     }
-    for (let c = c1 - c1 % everyC; c <= c2; c += everyC) {
+    for (let c = c1 - (c1 % everyC); c <= c2; c += everyC) {
       const mark = c % 5 === 0;
       ctx.fillStyle = 'rgba(44,106,79,0.6)';
       ctx.fillRect(xAt(c), headH - Math.round((mark ? 5 : 3) * dpr), 1, Math.round((mark ? 5 : 3) * dpr));
@@ -473,7 +473,7 @@ export class Grid {
       ctx.fillRect(0, yAt(s.r1), headW, (s.r2 - s.r1 + 1) * cell);
     }
     ctx.fillStyle = GREEN;
-    for (let r = r1 - r1 % everyR; r <= r2; r += everyR) {
+    for (let r = r1 - (r1 % everyR); r <= r2; r += everyR) {
       if (everyR === 1 || r % 10 === 0 || everyR === 5) {
         ctx.fillText(String(r + 1), headW - 5 * dpr, yAt(r) + cell / 2);
       }

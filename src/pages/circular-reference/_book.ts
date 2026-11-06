@@ -194,7 +194,11 @@ function fire(ctx: BookContext) {
   middle = Math.round((area.r1 + area.r2 * 2) / 3);
   sheet.lead = index(middle, Math.round(pad.cols / 2));
   // Heat rises: each cell averages last tick's three cells below it and the one under those, less a random loss.
-  sheet.fill({ ...area, r2: area.r2 - 1 }, cellFormula(area.r1, '=MAX(0,AVERAGE(PREV(A#1:C#1),PREV(B#2))-cooling*RAND())'), 1);
+  sheet.fill(
+    { ...area, r2: area.r2 - 1 },
+    cellFormula(area.r1, '=MAX(0,AVERAGE(PREV(A#1:C#1),PREV(B#2))-cooling*RAND())'),
+    1,
+  );
   // The grate along the bottom: patches of heat that drift, so tongues form above them.
   sheet.fill(
     { ...area, r1: area.r2 },
@@ -334,7 +338,11 @@ function registers(pad: Pad, r: number, c: number, items: Control[], perRow: num
 
 function snake(ctx: BookContext) {
   const sheet = new Sheet('Snake');
-  const unit = decide(ctx.room.w, Math.max(14, Math.min(26, Math.floor(Math.min((ctx.room.w - 340) / 40, (ctx.room.h - 110) / 27)))), 14);
+  const unit = decide(
+    ctx.room.w,
+    Math.max(14, Math.min(26, Math.floor(Math.min((ctx.room.w - 340) / 40, (ctx.room.h - 110) / 27)))),
+    14,
+  );
   const pad = new Pad(sheet, unit, ctx.room);
   sheet.pad = true;
   const top = pad.head(
@@ -377,8 +385,7 @@ function snake(ctx: BookContext) {
     family: 'label',
     color: RED,
   });
-  status.show = (v) =>
-    v >= 2 ? 'Autopilot. Press an arrow key.' : v >= 1 ? '' : 'Hit. Press Space to go again.';
+  status.show = (v) => (v >= 2 ? 'Autopilot. Press an arrow key.' : v >= 1 ? '' : 'Hit. Press Space to go again.');
   sheet.texts.delete(index(rr, rc));
   sheet.setFormula(index(rr, rc), makeFormula('=alive+auto*2', rr, rc));
   registers(
@@ -412,8 +419,16 @@ function snake(ctx: BookContext) {
         formula: `=AND(NOT(auto),OR(nextx<1,nextx>${boardCols},nexty<1,nexty>${boardRows},INDEX(board,nexty,nextx)>1))`,
       },
       { label: 'Eat', name: 'eat', formula: '=AND(step,alive,NOT(hit),nextx=foodx,nexty=foody)' },
-      { label: 'Head across', name: 'headx', formula: '=IF(reset,INT(BW/2),IF(AND(step,alive,NOT(hit)),nextx,headx))'.replace('BW', String(boardCols)) },
-      { label: 'Head down', name: 'heady', formula: '=IF(reset,INT(BH/2),IF(AND(step,alive,NOT(hit)),nexty,heady))'.replace('BH', String(boardRows)) },
+      {
+        label: 'Head across',
+        name: 'headx',
+        formula: '=IF(reset,INT(BW/2),IF(AND(step,alive,NOT(hit)),nextx,headx))'.replace('BW', String(boardCols)),
+      },
+      {
+        label: 'Head down',
+        name: 'heady',
+        formula: '=IF(reset,INT(BH/2),IF(AND(step,alive,NOT(hit)),nexty,heady))'.replace('BH', String(boardRows)),
+      },
       { label: 'Length', name: 'len', formula: '=IF(reset,5,MIN(IF(auto,26,9999),len+eat*3))' },
       { label: 'Food across', name: 'foodx', formula: `=IF(OR(eat,reset),1+INT(RAND()*${boardCols}),foodx)` },
       { label: 'Food down', name: 'foody', formula: `=IF(OR(eat,reset),1+INT(RAND()*${boardRows}),foody)` },

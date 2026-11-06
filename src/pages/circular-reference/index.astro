@@ -13,27 +13,50 @@ import { FUNCTION_NAMES } from './_functions';
 
   <main class="circular" data-circular>
     <header class="binding">
-      <a class="home" href="/">thesandbox.page</a>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
       <h1>Circular reference</h1>
       <div class="actions" role="toolbar" aria-label="Workbook">
-        <button type="button" data-act="pause">Pause</button>
-        <button type="button" data-act="step" title="Calculate one tick">Step</button>
-        <button type="button" data-act="reset" title="Put this sheet back as it was">Reset</button>
+        <button type="button" data-act="pause">
+          Pause
+        </button>
+        <button type="button" data-act="step" title="Calculate one tick">
+          Step
+        </button>
+        <button type="button" data-act="reset" title="Put this sheet back as it was">
+          Reset
+        </button>
         <span class="zoom">
-          <button type="button" data-act="zoom-out" aria-label="Zoom out">&minus;</button>
-          <button type="button" data-act="fit" data-zoom title="Back to 100%">100%</button>
-          <button type="button" data-act="zoom-in" aria-label="Zoom in">+</button>
+          <button type="button" data-act="zoom-out" aria-label="Zoom out">
+            &minus;
+          </button>
+          <button type="button" data-act="fit" data-zoom title="Back to 100%">
+            100%
+          </button>
+          <button type="button" data-act="zoom-in" aria-label="Zoom in">
+            +
+          </button>
         </span>
-        <button type="button" data-act="compiled" aria-pressed="false" title="Read the WebAssembly behind the selected cell"
-          >Compiled</button
+        <button
+          type="button"
+          data-act="compiled"
+          aria-pressed="false"
+          title="Read the WebAssembly behind the selected cell"
         >
-        <button type="button" popovertarget="circular-help">Help</button>
+          Compiled
+        </button>
+        <button type="button" popovertarget="circular-help">
+          Help
+        </button>
       </div>
     </header>
 
     <div class="bar">
       <input class="name" data-name aria-label="Cell or name" spellcheck="false" autocomplete="off" />
-      <span class="fx" aria-hidden="true">fx</span>
+      <span class="fx" aria-hidden="true">
+        fx
+      </span>
       <input class="entry" data-entry aria-label="Formula" spellcheck="false" autocomplete="off" autocapitalize="off" />
     </div>
     <p class="complaint" data-complaint role="alert" hidden></p>
@@ -50,11 +73,21 @@ import { FUNCTION_NAMES } from './_functions';
         <pre data-listing-body></pre>
       </aside>
       <div class="pad" data-pad hidden>
-        <button type="button" data-key="up" aria-label="Up">&#9650;</button>
-        <button type="button" data-key="left" aria-label="Left">&#9664;</button>
-        <button type="button" data-key="space" aria-label="Start">&#9679;</button>
-        <button type="button" data-key="right" aria-label="Right">&#9654;</button>
-        <button type="button" data-key="down" aria-label="Down">&#9660;</button>
+        <button type="button" data-key="up" aria-label="Up">
+          &#9650;
+        </button>
+        <button type="button" data-key="left" aria-label="Left">
+          &#9664;
+        </button>
+        <button type="button" data-key="space" aria-label="Start">
+          &#9679;
+        </button>
+        <button type="button" data-key="right" aria-label="Right">
+          &#9654;
+        </button>
+        <button type="button" data-key="down" aria-label="Down">
+          &#9660;
+        </button>
       </div>
     </div>
 
@@ -72,12 +105,13 @@ import { FUNCTION_NAMES } from './_functions';
       </p>
       <p>
         <code>PREV(A1)</code> reads last tick's value of any cell. <code>TICK()</code> and <code>TIME()</code> count
-        calculations and seconds. <code>KEY("left")</code> is 1 while a key is held. Everything is a number: a test gives
-        1 or 0, and text can sit in a cell but a formula can't produce it.
+        calculations and seconds. <code>KEY("left")</code> is 1 while a key is held. Everything is a number: a test
+        gives 1 or 0, and text can sit in a cell but a formula can't produce it.
       </p>
       <p>
-        When you press Enter, the whole sheet is sorted by what depends on what and compiled to a new WebAssembly module,
-        and cells that share a formula share one compiled function. Compiled shows the code behind the selected cell.
+        When you press Enter, the whole sheet is sorted by what depends on what and compiled to a new WebAssembly
+        module, and cells that share a formula share one compiled function. Compiled shows the code behind the selected
+        cell.
       </p>
       <h3>Keys</h3>
       <ul>
@@ -89,7 +123,9 @@ import { FUNCTION_NAMES } from './_functions';
       </ul>
       <h3>Functions</h3>
       <p class="functions">{FUNCTION_NAMES.join('  ')}</p>
-      <button type="button" popovertarget="circular-help" popovertargetaction="hide">Close</button>
+      <button type="button" popovertarget="circular-help" popovertargetaction="hide">
+        Close
+      </button>
     </div>
 
     <noscript>

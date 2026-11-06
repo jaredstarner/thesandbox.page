@@ -248,4 +248,3 @@ export function shortNumber(v: number, places?: number): string {
   if (a >= 1e7 || (a > 0 && a < 1e-3)) return v.toExponential(2);
   return String(Number(v.toPrecision(5)));
 }
-

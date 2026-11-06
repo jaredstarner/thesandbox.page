@@ -85,7 +85,8 @@ export function validate(n: Node, sheet: Sheet): void {
     case 'call': {
       const arity = ARITY[n.fn];
       if (!arity) throw new FormulaError(`There's no function called ${n.fn}`);
-      if (n.args.length < arity[0] || n.args.length > arity[1]) throw new FormulaError(`${n.fn} has the wrong arguments`);
+      if (n.args.length < arity[0] || n.args.length > arity[1])
+        throw new FormulaError(`${n.fn} has the wrong arguments`);
       if (n.fn === 'KEY') {
         const arg = n.args[0];
         if (arg.t !== 'str' || !KEYS.includes(arg.v.toLowerCase())) {
@@ -101,7 +102,8 @@ export function validate(n: Node, sheet: Sheet): void {
       }
       if (n.fn === 'PREV') {
         const arg = n.args[0];
-        if (arg.t !== 'ref' && arg.t !== 'range' && arg.t !== 'name') throw new FormulaError('PREV takes a cell or range');
+        if (arg.t !== 'ref' && arg.t !== 'range' && arg.t !== 'name')
+          throw new FormulaError('PREV takes a cell or range');
         return validate(arg, sheet);
       }
       if (n.fn === 'INDEX') {
@@ -279,7 +281,14 @@ class Emit {
     if (n.t === 'bin' && ['=', '<>', '<', '<=', '>', '>='].includes(n.op)) {
       this.expr(n.a);
       this.expr(n.b);
-      const ops = { '=': 'f64.eq', '<>': 'f64.ne', '<': 'f64.lt', '<=': 'f64.le', '>': 'f64.gt', '>=': 'f64.ge' } as const;
+      const ops = {
+        '=': 'f64.eq',
+        '<>': 'f64.ne',
+        '<': 'f64.lt',
+        '<=': 'f64.le',
+        '>': 'f64.gt',
+        '>=': 'f64.ge',
+      } as const;
       b.op(ops[n.op as keyof typeof ops]);
       return;
     }
@@ -560,10 +569,12 @@ class Emit {
         return;
       case 'AVERAGE': {
         this.fold(args, H_SUM, 'sum', 'f64.add');
-        b.f64(Math.max(
-          1,
-          args.reduce((sum, a) => sum + this.countOf(a), 0),
-        ));
+        b.f64(
+          Math.max(
+            1,
+            args.reduce((sum, a) => sum + this.countOf(a), 0),
+          ),
+        );
         b.op('f64.div');
         return;
       }
@@ -585,7 +596,11 @@ class Emit {
         b.truncSat().set(which);
         const choices = args.slice(1);
         choices.forEach((a, i) => {
-          b.get(which).i32(i + 1).op('i32.sub').op('i32.eqz').if(F64);
+          b.get(which)
+            .i32(i + 1)
+            .op('i32.sub')
+            .op('i32.eqz')
+            .if(F64);
           this.expr(a);
           b.else();
         });
@@ -614,7 +629,10 @@ class Emit {
       return;
     }
     const flag = this.rangeAddress(a);
-    b.i32(flag.rows).i32(flag.cols).f64(x).call(H_COUNT + op, `count${op}`);
+    b.i32(flag.rows)
+      .i32(flag.cols)
+      .f64(x)
+      .call(H_COUNT + op, `count${op}`);
   }
 
   private indexOf(args: Node[]) {
@@ -962,7 +980,11 @@ export class Engine {
     for (const cell of [...sheet.formulas.keys(), ...sheet.constants]) lastRow = Math.max(lastRow, rowOf(cell));
 
     const tick = new Body(0);
-    tick.i32(PREV).i32(0).i32((lastRow + 1) * ROW_BYTES).memoryCopy();
+    tick
+      .i32(PREV)
+      .i32(0)
+      .i32((lastRow + 1) * ROW_BYTES)
+      .memoryCopy();
     for (const run of runs) {
       tick
         .i32(run.cell * 8)

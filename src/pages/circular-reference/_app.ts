@@ -693,7 +693,12 @@ export function start(root: HTMLElement) {
   }
 
   const ready = async () => {
-    const fonts = [`800 30px ${faces.label}`, `600 12px ${faces.label}`, `400 13px ${faces.label}`, `400 15px ${faces.typed}`];
+    const fonts = [
+      `800 30px ${faces.label}`,
+      `600 12px ${faces.label}`,
+      `400 13px ${faces.label}`,
+      `400 15px ${faces.typed}`,
+    ];
     await Promise.all(fonts.map((f) => document.fonts.load(f))).catch(() => undefined);
     await openSheet(0);
     grid.draw();

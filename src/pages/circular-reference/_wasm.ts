@@ -219,7 +219,7 @@ export class Body {
   /** Finished body bytes: the local declarations, the code, and the closing end. */
   bytes(): number[] {
     const groups: number[][] = [];
-    for (let i = 0; i < this.locals.length; ) {
+    for (let i = 0; i < this.locals.length;) {
       let n = 1;
       while (this.locals[i + n] === this.locals[i]) n++;
       groups.push([...u32(n), this.locals[i]]);
