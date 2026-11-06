@@ -116,7 +116,7 @@ class Pad {
       const noteC = this.span(320);
       const noteW = Math.max(280, Math.min(560, width - 330 - controls.length * (controlW + 8) - 24));
       this.text(0, noteC, noteW, 64, note, { size: 13, wrap: true, weight: 400, inset: 8 });
-      let c = cols - this.span((controlW + 8) * controls.length + 8);
+      let c = cols - 1 - this.span((controlW + 8) * controls.length + 8);
       for (const k of controls) {
         this.control(row, c, controlW, k);
         c += this.span(controlW + 8);
