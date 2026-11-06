@@ -1,0 +1,32 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Circular reference"
+  description="A working spreadsheet where fire, Snake, and a walkable maze are ordinary cell formulas, compiled to WebAssembly as you type."
+>
+  <Font cssVariable="--font-circular" slot="head" />
+  <Font cssVariable="--font-rubbings-type" slot="head" />
+
+  <main class="circular" data-circular>
+    <h1>Circular reference</h1>
+    <noscript>This workbook calculates in the browser and needs JavaScript.</noscript>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.circular)) {
+    margin: 0;
+  }
+
+  .circular {
+    --paper: #e9f0de;
+    --ink: #1c2a38;
+    min-height: 100dvh;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-circular);
+  }
+</style>

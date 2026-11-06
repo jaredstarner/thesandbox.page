@@ -1,0 +1,8 @@
+{
+  "title": "Circular reference",
+  "summary": "A working spreadsheet where the error every spreadsheet warns you about is the engine: fire, a playable Snake, and a maze you walk in 3D are all ordinary cell formulas on an engineer's pad, compiled to WebAssembly as you type, and any of them can be read and rewritten one cell at a time.",
+  "date": "2026-11-06",
+  "tags": ["canvas", "wasm", "pointer-events", "spreadsheet", "dependency-graph"],
+  "requires": ["canvas", "wasm"],
+  "plot": 36
+}

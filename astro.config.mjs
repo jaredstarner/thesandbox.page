@@ -556,5 +556,16 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Arial Narrow', 'Arial', 'sans-serif'],
     },
+    // /circular-reference/: the gothic printed on office forms, for the pad's own lettering. The typed figures
+    // borrow /rubbings/' Courier Prime.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Libre Franklin',
+      cssVariable: '--font-circular',
+      weights: ['100 900'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Franklin Gothic Medium', 'Arial', 'sans-serif'],
+    },
   ],
 });
