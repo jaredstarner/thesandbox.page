@@ -43,6 +43,8 @@ export interface Block extends Area {
   max: number;
   /** Decimals shown when zoomed in far enough to read the figures. */
   places: number;
+  /** Rule a line round it, for blocks that read as a board or a screen. */
+  frame?: boolean;
   /** A drag through the block writes `value` in a disc of `radius` cells; Alt writes `erase`. */
   poke?: { value: number; radius: number; erase?: number; write?: (r: number, c: number) => number };
 }
@@ -58,6 +60,8 @@ export interface Merge extends Area {
   color: string;
   /** An input box: paper-white, ruled, and meant to be typed in. */
   box?: boolean;
+  /** A figure the sheet works out: ruled underneath, no box. */
+  readout?: boolean;
   /** A word that acts when clicked. */
   action?: () => void;
   /** Decimals for a number shown here. */
@@ -101,6 +105,8 @@ export class Sheet {
   unit = 8;
   /** Rows of plain heading above the ruled part of the sheet. */
   band = 0;
+  /** The cell selected when the sheet opens. */
+  lead: number | undefined;
 
   constructor(readonly title: string) {}
 

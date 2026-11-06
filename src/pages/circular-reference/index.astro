@@ -1,6 +1,7 @@
 ---
 import { Font } from 'astro:assets';
 import Bare from '../../layouts/Bare.astro';
+import { FUNCTION_NAMES } from './_functions';
 ---
 
 <Bare
@@ -11,22 +12,531 @@ import Bare from '../../layouts/Bare.astro';
   <Font cssVariable="--font-rubbings-type" slot="head" />
 
   <main class="circular" data-circular>
-    <h1>Circular reference</h1>
-    <noscript>This workbook calculates in the browser and needs JavaScript.</noscript>
+    <header class="binding">
+      <a class="home" href="/">thesandbox.page</a>
+      <h1>Circular reference</h1>
+      <div class="actions" role="toolbar" aria-label="Workbook">
+        <button type="button" data-act="pause">Pause</button>
+        <button type="button" data-act="step" title="Calculate one tick">Step</button>
+        <button type="button" data-act="reset" title="Put this sheet back as it was">Reset</button>
+        <span class="zoom">
+          <button type="button" data-act="zoom-out" aria-label="Zoom out">&minus;</button>
+          <button type="button" data-act="fit" data-zoom title="Back to 100%">100%</button>
+          <button type="button" data-act="zoom-in" aria-label="Zoom in">+</button>
+        </span>
+        <button type="button" data-act="compiled" aria-pressed="false" title="Read the WebAssembly behind the selected cell"
+          >Compiled</button
+        >
+        <button type="button" popovertarget="circular-help">Help</button>
+      </div>
+    </header>
+
+    <div class="bar">
+      <input class="name" data-name aria-label="Cell or name" spellcheck="false" autocomplete="off" />
+      <span class="fx" aria-hidden="true">fx</span>
+      <input class="entry" data-entry aria-label="Formula" spellcheck="false" autocomplete="off" autocapitalize="off" />
+    </div>
+    <p class="complaint" data-complaint role="alert" hidden></p>
+
+    <div class="work" data-work>
+      <canvas
+        data-grid
+        tabindex="0"
+        role="application"
+        aria-label="The worksheet. Arrow keys move between cells, Enter edits, and on Snake and Maze the arrow keys play."
+      ></canvas>
+      <aside class="listing" data-listing hidden>
+        <p data-listing-head></p>
+        <pre data-listing-body></pre>
+      </aside>
+      <div class="pad" data-pad hidden>
+        <button type="button" data-key="up" aria-label="Up">&#9650;</button>
+        <button type="button" data-key="left" aria-label="Left">&#9664;</button>
+        <button type="button" data-key="space" aria-label="Start">&#9679;</button>
+        <button type="button" data-key="right" aria-label="Right">&#9654;</button>
+        <button type="button" data-key="down" aria-label="Down">&#9660;</button>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <nav class="tabs" data-tabs role="tablist" aria-label="Sheets"></nav>
+      <p class="status" data-status aria-live="off"></p>
+    </footer>
+
+    <div id="circular-help" class="help" popover>
+      <h2>How this workbook calculates</h2>
+      <p>
+        Spreadsheets refuse a formula that depends on itself. This one allows it. A reference that stays inside its own
+        loop reads the value from the last tick, and every other reference reads this tick's value, so the cells on a
+        loop update together like registers in a circuit, and where they sit on the sheet makes no difference.
+      </p>
+      <p>
+        <code>PREV(A1)</code> reads last tick's value of any cell. <code>TICK()</code> and <code>TIME()</code> count
+        calculations and seconds. <code>KEY("left")</code> is 1 while a key is held. Everything is a number: a test gives
+        1 or 0, and text can sit in a cell but a formula can't produce it.
+      </p>
+      <p>
+        When you press Enter, the whole sheet is sorted by what depends on what and compiled to a new WebAssembly module,
+        and cells that share a formula share one compiled function. Compiled shows the code behind the selected cell.
+      </p>
+      <h3>Keys</h3>
+      <ul>
+        <li>Enter or double-click edits a cell. Editing one cell of a filled block rewrites the block.</li>
+        <li>Shift+Enter changes only the selected cell.</li>
+        <li>Drag through a live block to write into it. Shift+drag selects cells instead.</li>
+        <li>Ctrl+wheel or pinch zooms. Zoom in far enough and the figures appear.</li>
+        <li>Ctrl+Z undoes an edit. Reset puts the sheet back as it was.</li>
+      </ul>
+      <h3>Functions</h3>
+      <p class="functions">{FUNCTION_NAMES.join('  ')}</p>
+      <button type="button" popovertarget="circular-help" popovertargetaction="hide">Close</button>
+    </div>
+
+    <noscript>
+      <p class="noscript">This workbook calculates in the browser and needs JavaScript.</p>
+    </noscript>
   </main>
 </Bare>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-circular]');
+  if (root) start(root);
+</script>
 
 <style>
   :global(body:has(.circular)) {
     margin: 0;
+    background: #e8efdc;
   }
 
   .circular {
-    --paper: #e9f0de;
-    --ink: #1c2a38;
-    min-height: 100dvh;
+    --paper: #e8efdc;
+    --sheet: #f7f9f0;
+    --ink: #1b2a39;
+    --green: #2c6a4f;
+    --binding: #1f3f33;
+    --manila: #e6d9b4;
+    --red: #b5291f;
+    --blue: #27488c;
+    --type: var(--font-rubbings-type);
+    --label: var(--font-circular);
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
     background: var(--paper);
     color: var(--ink);
-    font-family: var(--font-circular);
+    font-family: var(--label);
+    font-size: 14px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .circular *,
+  .circular *::before,
+  .circular *::after {
+    box-sizing: border-box;
+  }
+
+  .circular button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  /* The gummed binding along the top of a pad. */
+  .binding {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: none;
+    min-height: 38px;
+    padding: 0 12px;
+    background: var(--binding);
+    color: #e8efdc;
+    box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.22);
+  }
+
+  .home {
+    color: #b7cdbb;
+    font-size: 12px;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+
+  .home:hover {
+    color: #fff;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+  }
+
+  .actions button {
+    padding: 4px 9px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: none;
+    color: #e8efdc;
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+
+  .actions button:hover {
+    background: rgb(255 255 255 / 0.12);
+  }
+
+  .actions button:focus-visible,
+  .tabs button:focus-visible {
+    outline: 2px solid #f9ae18;
+    outline-offset: 1px;
+  }
+
+  .actions button[aria-pressed='true'] {
+    background: #e8efdc;
+    color: var(--binding);
+  }
+
+  .zoom {
+    display: inline-flex;
+    margin: 0 4px;
+    border: 1px solid rgb(255 255 255 / 0.25);
+    border-radius: 2px;
+  }
+
+  .zoom [data-zoom] {
+    min-width: 52px;
+    font-family: var(--type);
+    font-size: 12.5px;
+  }
+
+  .bar {
+    display: grid;
+    grid-template-columns: 92px 34px 1fr;
+    align-items: stretch;
+    flex: none;
+    height: 34px;
+    background: var(--sheet);
+    border-bottom: 1px solid rgb(44 106 79 / 0.55);
+  }
+
+  .bar input {
+    min-width: 0;
+    padding: 0 9px;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font-family: var(--type);
+    font-size: 15px;
+    outline: none;
+  }
+
+  .bar input:focus {
+    background: #fffef6;
+    box-shadow: inset 0 0 0 2px var(--blue);
+  }
+
+  .name {
+    border-right: 1px solid rgb(44 106 79 / 0.35) !important;
+  }
+
+  .fx {
+    display: grid;
+    place-items: center;
+    color: var(--green);
+    font-size: 12px;
+    font-style: italic;
+    font-weight: 700;
+    border-right: 1px solid rgb(44 106 79 / 0.35);
+  }
+
+  .complaint {
+    flex: none;
+    margin: 0;
+    padding: 5px 12px;
+    background: var(--red);
+    color: #fff8ee;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .complaint[hidden] {
+    display: none;
+  }
+
+  .work {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    outline: none;
+    touch-action: none;
+    cursor: cell;
+  }
+
+  .listing {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    width: min(380px, 100%);
+    background: #17242e;
+    color: #cfe0d2;
+    box-shadow: -6px 0 18px rgb(0 0 0 / 0.22);
+  }
+
+  .listing[hidden] {
+    display: none;
+  }
+
+  .listing p {
+    flex: none;
+    margin: 0;
+    padding: 10px 14px;
+    background: #0f1a22;
+    color: #f9ae18;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .listing pre {
+    flex: 1;
+    margin: 0;
+    padding: 12px 14px;
+    overflow: auto;
+    font-family: var(--type);
+    font-size: 12.5px;
+    line-height: 1.34;
+  }
+
+  .pad {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    display: grid;
+    grid-template:
+      '. up .' 52px
+      'left space right' 52px
+      '. down .' 52px / 52px 52px 52px;
+    gap: 3px;
+    touch-action: none;
+  }
+
+  .pad[hidden] {
+    display: none;
+  }
+
+  .pad button {
+    border: 1px solid rgb(27 42 57 / 0.5);
+    border-radius: 3px;
+    background: rgb(247 249 240 / 0.86);
+    color: var(--ink);
+    font-size: 17px;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .pad button:active {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .pad [data-key='up'] {
+    grid-area: up;
+  }
+  .pad [data-key='left'] {
+    grid-area: left;
+  }
+  .pad [data-key='space'] {
+    grid-area: space;
+  }
+  .pad [data-key='right'] {
+    grid-area: right;
+  }
+  .pad [data-key='down'] {
+    grid-area: down;
+  }
+
+  .foot {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex: none;
+    height: 34px;
+    padding: 0 10px;
+    background: #d7e1ca;
+    border-top: 1px solid rgb(44 106 79 / 0.55);
+  }
+
+  /* Manila index tabs, hanging off the sheet. */
+  .tabs {
+    display: flex;
+    align-self: flex-start;
+    gap: 2px;
+    flex: none;
+    margin-top: -1px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tabs :global(button) {
+    height: 28px;
+    padding: 0 14px;
+    border: 1px solid rgb(44 106 79 / 0.4);
+    border-top: 0;
+    border-radius: 0 0 5px 5px;
+    background: #c9d5bb;
+    color: #3d5046;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .tabs :global(button[aria-selected='true']) {
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 2px 0 var(--green);
+  }
+
+  .status {
+    flex: 1;
+    align-self: center;
+    margin: 0;
+    overflow: hidden;
+    color: #3d5046;
+    font-family: var(--type);
+    font-size: 12.5px;
+    text-align: right;
+    white-space: pre;
+    text-overflow: ellipsis;
+  }
+
+  .help {
+    width: min(620px, calc(100vw - 32px));
+    max-height: calc(100dvh - 48px);
+    padding: 22px 26px;
+    border: 1px solid var(--green);
+    border-radius: 2px;
+    background: var(--sheet);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: 0 10px 40px rgb(10 30 20 / 0.35);
+  }
+
+  .help::backdrop {
+    background: rgb(20 40 30 / 0.3);
+  }
+
+  .help h2 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .help h3 {
+    margin: 16px 0 4px;
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .help p {
+    margin: 0 0 10px;
+  }
+
+  .help ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  .help code,
+  .functions {
+    font-family: var(--type);
+  }
+
+  .functions {
+    word-spacing: 0.25em;
+    color: #3d5046;
+    font-size: 13px;
+  }
+
+  .help button {
+    margin-top: 8px;
+    padding: 6px 14px;
+    border: 1px solid var(--green);
+    background: none;
+    border-radius: 2px;
+    font-weight: 600;
+  }
+
+  .noscript {
+    padding: 20px;
+  }
+
+  @media (max-width: 759px) {
+    .binding {
+      gap: 10px;
+      min-height: 36px;
+      padding: 0 8px;
+    }
+
+    h1,
+    [data-act='step'],
+    [data-act='fit'] {
+      display: none;
+    }
+
+    .actions button {
+      padding: 4px 7px;
+    }
+
+    .zoom {
+      margin: 0;
+    }
+
+    .bar {
+      grid-template-columns: 64px 26px 1fr;
+    }
+
+    .bar input {
+      padding: 0 6px;
+      font-size: 14px;
+    }
+
+    .foot {
+      height: 30px;
+      padding: 0 4px;
+    }
+
+    .tabs :global(button) {
+      height: 26px;
+      padding: 0 9px;
+    }
+
+    .status {
+      display: none;
+    }
   }
 </style>
