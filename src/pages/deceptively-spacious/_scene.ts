@@ -369,13 +369,15 @@ float shadowAt(vec3 q, float hz) {
   float lit = 1.0;
   for (int j = 0; j < uPropN; j++) {
     if (uPropRad[j] <= 0.0 || uPropKind[j] == ${LAMP} || uPropAbove[j] == 1) continue;
-    float r = uPropRad[j] * (uPropKind[j] == ${FIGURE} ? 0.5 : 0.8);
+    int kind = uPropKind[j];
+    float r = uPropRad[j] * (kind == ${FIGURE} ? 0.46 : 0.72);
     float dc = SkInv(abs(dot(line, uPropC[j])));
     if (dc > r) continue;
     float t = gdist(q, uPropC[j]) / dh;
     if (t > 1.0) continue;
     float ray = hz + (uLampZ - hz) * t;
-    if (ray < uPropTall[j]) lit = min(lit, smoothstep(r * 0.65, r, dc));
+    float tall = uPropTall[j] * (kind == ${TABLE} ? 0.62 : 0.95);
+    lit = min(lit, 1.0 - (1.0 - smoothstep(r * 0.6, r, dc)) * smoothstep(tall, tall * 0.8, ray));
   }
   return lit;
 }
@@ -451,7 +453,12 @@ int roomLeg(int arrivedBy) {
     }
   }
   float sz = rM > 0.0 ? (uHeight - rZ) / rM : (rM < 0.0 ? -rZ / rM : INF);
-  float limit = min(best, sz);
+  vec3 q = walk(rP, rD, best);
+  float hz = rZ + rM * best;
+  float a = SkInv(dot(q.xy, uAlong[wall]));
+  bool door = abs(a) < uDoorW && hz < uDoorH && sz >= best;
+  // Through a door the ray runs on a little, so someone standing in the doorway isn't cut off by the wall's line.
+  float limit = door ? best + 0.8 / uUnit : min(best, sz);
   if (props(limit)) {
     endAt(7, index, limit);
     return -1;
@@ -460,10 +467,7 @@ int roomLeg(int arrivedBy) {
     endAt(rM < 0.0 ? 2 : 3, -1, sz);
     return -1;
   }
-  vec3 q = walk(rP, rD, best);
-  float hz = rZ + rM * best;
-  float a = SkInv(dot(q.xy, uAlong[wall]));
-  if (abs(a) < uDoorW && hz < uDoorH) {
+  if (door) {
     advance(best);
     return wall;
   }
@@ -584,6 +588,7 @@ void main() {
     vec3 base = uWallA;
     float pat = 0.0;
     float strength = 1.0;
+    float paperLines = 0.0;
     if (uPaper == 0) {
       float s = fract(a / 0.24);
       pat = smoothstep(0.25 - fa * 4.0, 0.25, s) * (1.0 - smoothstep(0.75, 0.75 + fa * 4.0, s));
@@ -599,8 +604,9 @@ void main() {
       strength = 1.0 - smoothstep(0.05, 0.14, fa);
     } else if (uPaper == 3) {
       float s = abs(fract(a / 0.9) - 0.5);
-      pat = smoothstep(0.41, 0.42, s);
+      pat = smoothstep(0.38, 0.39, s);
       strength = 1.0 - smoothstep(0.05, 0.14, fa);
+      paperLines = rule(s * 0.9, 0.342, 0.01, fa) * strength;
     } else {
       float x = a / 0.42, y = fz / 0.56;
       float w1 = abs(sin(PI * x) * 0.5 - fract(y) + 0.5);
@@ -611,13 +617,16 @@ void main() {
     base = mix(uWallA, uWallB, pat * strength + 0.25 * (1.0 - strength));
 
     // Zones of the wall, up from the skirting.
-    float lines = 0.0;
+    float lines = paperLines * 0.55;
     if (fz < 0.16) {
       base = uTrim;
+      lines = 0.0;
     } else if (fz < 0.92) {
       base = uDado;
+      lines = 0.0;
     } else if (fz > 2.34) {
       base = mix(uDado, uTrim, 0.5);
+      lines = 0.0;
     }
     lines = max(lines, rule(fz, 0.16, 0.012, ff));
     lines = max(lines, rule(fz, 0.92, 0.012, ff));
@@ -634,6 +643,7 @@ void main() {
         vec2 clamped = clamp(uv, 0.0, 1.0);
         vec4 t = textureLod(uAtlas, uDecalUV[i].xy + clamped * uDecalUV[i].zw, 0.0);
         base = mix(base, t.rgb, t.a);
+        if (t.a > 0.5) pictureEdge = 1.0;
         if (uDecalClock[i] == 1) {
           vec2 pt = (clamped - 0.5) * 2.0;
           vec2 h = vec2(sin(uHour), cos(uHour));
@@ -644,7 +654,6 @@ void main() {
           float hand = max(step(th, 0.48) * step(-0.08, th) * step(dh, 0.034), step(tm, 0.74) * step(-0.08, tm) * step(dm, 0.02));
           base = mix(base, ink, hand);
         }
-        pictureEdge = 1.0;
       } else {
         vec2 o = abs(uv - 0.5) * box.zw - box.zw * 0.5;
         float gap = length(max(o - vec2(0.0, 0.0), 0.0));
@@ -687,7 +696,7 @@ void main() {
     float dv = uLampZ - hitZ;
     float cosine = abs(dot(uWall[k], uLamp)) / max(sqrt(dh * dh + dv * dv), 1e-3);
     float v = lightAt(hitQ, hitZ, cosine);
-    if (hitZ < uLampZ) v *= mix(0.45, 1.0, shadowAt(hitQ, hitZ));
+    if (hitZ < uLampZ) v *= mix(0.6, 1.0, shadowAt(hitQ, hitZ));
     // Corners and the top and bottom of the wall go a little darker.
     float wd = INF;
     for (int j = 0; j < uN; j++) {
@@ -805,6 +814,7 @@ void main() {
     }
     v *= 0.62 + 0.38 * nearby;
     v = v * 1.42;
+    if (ceiling && uFloor != 2) v = 0.52 + 0.42 * v;
     vec2 st = vec2(bu, bv);
     col = wash(base, v, st);
     col = mix(col, ink, 0.3 * hatch(st, v, fu));

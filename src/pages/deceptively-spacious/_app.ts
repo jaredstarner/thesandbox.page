@@ -105,6 +105,7 @@ export function start(root: HTMLElement) {
     mini.setRoom(room);
     clearMarks();
     drawingRoom = null;
+    if (!renderer?.ready(room.kappa)) delete root.dataset.drawn;
     hintEl.classList.remove('gone');
     showSheet();
     if (!history.replaceState) return;
@@ -337,6 +338,8 @@ export function start(root: HTMLElement) {
           drawingRoom = room;
           root.dataset.drawn = '';
           marksDirty = true;
+          // The other curvatures, so that changing property doesn't wait.
+          for (const r of rooms) renderer.prepare(r.kappa);
         }
         if (marksDirty && performance.now() - lastUpload > 90) {
           renderer.uploadMarks(marks);

@@ -141,7 +141,8 @@ export function buildDecals(): Decals {
   clock(g, 0, 512, 360);
   chart(g, 512, 512, 512, 384);
 
-  const LETTERS = ['A', 'B', 'C', 'D'];
+  // Numbers, not letters: an A looks the same in a mirror.
+  const LETTERS = ['1', '2', '3', '4'];
   const letters: [number, number, number, number][] = [];
   LETTERS.forEach((l, i) => {
     const x = 368 + i * 34;

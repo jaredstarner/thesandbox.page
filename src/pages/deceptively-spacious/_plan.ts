@@ -121,11 +121,7 @@ export class Plan {
       };
       this.doorEnds.push([end(-w), end(w), Math.min(i, room.pair[i]!)]);
     }
-    if (k === 0) {
-      this.scale = 0.5 / (r * 2.5);
-    } else {
-      this.scale = 0.46;
-    }
+    this.scale = k === 0 ? 0.5 / (r * 2.5) : k > 0 ? 0.46 : 0.24;
   }
 
   /** Canvas position of a model point, in units of the canvas's size, from its centre. */
