@@ -1,0 +1,8 @@
+{
+  "title": "Deceptively spacious",
+  "summary": "An estate agent's particulars for five one-room properties where every door opens back into the room you just left: walk through them in first person, drawn live in pen and wash, and find yourself waiting in each doorway, sometimes mirror-reversed, sometimes standing on the ceiling, sometimes on a floor that bends.",
+  "date": "2026-11-07",
+  "tags": ["webgl2", "pointer-events", "canvas", "ray-tracing", "non-euclidean", "surfaces"],
+  "requires": ["webgl2"],
+  "plot": 37
+}

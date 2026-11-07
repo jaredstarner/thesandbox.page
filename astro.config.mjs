@@ -567,5 +567,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Franklin Gothic Medium', 'Arial', 'sans-serif'],
     },
+    // /deceptively-spacious/: a Clarendon for the agent's headings and a Bembo revival for the particulars.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Besley',
+      cssVariable: '--font-spacious',
+      weights: ['400 900'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Rockwell', 'Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Cardo',
+      cssVariable: '--font-spacious-text',
+      weights: [400],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
   ],
 });
