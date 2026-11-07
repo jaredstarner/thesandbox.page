@@ -1,0 +1,33 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Deceptively spacious"
+  description="Five one-room properties where every door opens back into the room you just left. Walk through them in first person, drawn live in pen and wash."
+>
+  <Font cssVariable="--font-spacious" slot="head" />
+  <Font cssVariable="--font-spacious-text" slot="head" />
+
+  <main class="spacious" data-spacious>
+    <canvas class="plate" data-plate></canvas>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.spacious)) {
+    margin: 0;
+    background: #f1e9d8;
+  }
+
+  .spacious {
+    min-height: 100vh;
+  }
+
+  .plate {
+    display: block;
+    width: 100%;
+    height: 100vh;
+  }
+</style>
