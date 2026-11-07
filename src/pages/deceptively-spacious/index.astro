@@ -15,6 +15,13 @@ import Bare from '../../layouts/Bare.astro';
   </main>
 </Bare>
 
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('[data-spacious]');
+  if (root) start(root);
+</script>
+
 <style>
   :global(body:has(.spacious)) {
     margin: 0;

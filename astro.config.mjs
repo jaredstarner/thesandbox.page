@@ -581,7 +581,7 @@ export default defineConfig({
       provider: fontProviders.fontsource(),
       name: 'Cardo',
       cssVariable: '--font-spacious-text',
-      weights: [400, 700],
+      weights: [400],
       styles: ['normal', 'italic'],
       subsets: ['latin'],
       fallbacks: ['Georgia', 'serif'],
