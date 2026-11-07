@@ -1,6 +1,7 @@
 ---
 import { Font } from 'astro:assets';
 import Bare from '../../layouts/Bare.astro';
+import { ROOMS } from './_rooms';
 ---
 
 <Bare
@@ -10,8 +11,110 @@ import Bare from '../../layouts/Bare.astro';
   <Font cssVariable="--font-spacious" slot="head" />
   <Font cssVariable="--font-spacious-text" slot="head" />
 
-  <main class="spacious" data-spacious>
-    <canvas class="plate" data-plate></canvas>
+  <main class="spacious" data-spacious data-mode="sheet">
+    <header class="letterhead">
+      <p class="firm">Gauss, Bonnet <i>&amp;</i> Co.</p>
+      <p class="trade">Estate agents, surveyors, and valuers</p>
+      <a class="home" href="/">thesandbox.page</a>
+    </header>
+
+    <div class="title">
+      <h1>Deceptively spacious</h1>
+      <p class="standfirst">Five one-room properties, offered with vacant possession.</p>
+    </div>
+
+    <nav class="lots" aria-label="Properties">
+      {
+        ROOMS.map((r, i) => (
+          <button type="button" data-lot={i} aria-current={i === 0 ? 'true' : 'false'}>
+            <b>{i + 1}</b>
+            {r.sheet.name.replace(/^The /, '')}
+          </button>
+        ))
+      }
+    </nav>
+
+    <div class="spread">
+      <div class="left">
+        <div class="stage" data-stage>
+          <canvas
+            class="plate"
+            data-plate
+            tabindex="0"
+            role="img"
+            aria-label="A live drawing of the room, looking through a doorway at the back of someone standing in the same room"
+          ></canvas>
+          <p class="drawing" aria-hidden="true">Drawing the room</p>
+
+          <div class="hud">
+            <div class="bar">
+              <button type="button" class="tag" data-leave>Back to the particulars</button>
+              <p class="viewname" data-view-name></p>
+              <button type="button" class="tag" data-next>Next property</button>
+            </div>
+            <aside class="mini">
+              <canvas data-plan-mini aria-hidden="true"></canvas>
+              <p data-hand></p>
+              <p data-doors></p>
+              <button type="button" class="tag tiny" data-chalk aria-pressed="true">Chalk line</button>
+            </aside>
+            <p class="hint" data-hint></p>
+            <p class="keys">
+              <span class="for-keys">W A S D or arrows to walk. Drag to look.</span>
+              <span class="for-touch">Drag to look. Tap the floor, or hold, to walk.</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="call">
+          <button type="button" class="view" data-view>View this property</button>
+          <p class="for-keys">Click the picture to step in. W A S D or the arrow keys walk, dragging looks round.</p>
+          <p class="for-touch">Tap the picture to step in. Drag to look; tap the floor, or hold, to walk.</p>
+        </div>
+        <p class="nogl">The viewings need WebGL 2, which this browser did not offer. The plans still work.</p>
+      </div>
+
+      <div class="right">
+        {
+          ROOMS.map((r, i) => (
+            <article data-sheet hidden={i !== 0}>
+              <p class="lot">Lot {i + 1}</p>
+              <h2>{r.sheet.name}</h2>
+              <p class="blurb">{r.sheet.blurb}</p>
+              <dl>
+                {r.sheet.facts.map(([k, v]) => (
+                  <div>
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </article>
+          ))
+        }
+        <figure class="plan">
+          <canvas data-plan role="img" aria-label="Plan of the floor, unrolled: the room repeated around itself"></canvas>
+          <figcaption>
+            <b>Plan of the premises</b>
+            <span data-plan-note></span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <footer class="small">
+      <p>
+        <b>Surveyor's note.</b> Each floor is a polygon whose edges are joined in pairs. Every closed surface can be made
+        that way, and these five cover the three kinds of floor there are: flat, curved like a sphere, and curved like a
+        saddle. The walls stand straight up from it, so gravity behaves. Everything in the drawings is found by following
+        a line of sight along the floor and through the doors, one pixel at a time, so nothing has been faked with
+        mirrors.
+      </p>
+      <p>
+        These particulars are believed to be correct but do not form part of any contract. All distances are measured
+        along the floor.
+      </p>
+    </footer>
   </main>
 </Bare>
 
@@ -25,16 +128,487 @@ import Bare from '../../layouts/Bare.astro';
 <style>
   :global(body:has(.spacious)) {
     margin: 0;
-    background: #f1e9d8;
+    background: #efe7d6;
   }
 
   .spacious {
-    min-height: 100vh;
+    --paper: #efe7d6;
+    --ink: #2b2622;
+    --red: #a23a26;
+    --soft: #6b6155;
+    box-sizing: border-box;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 18px 40px 44px;
+    color: var(--ink);
+    font-family: var(--font-spacious-text);
+    font-size: 17px;
+    line-height: 1.45;
+  }
+
+  .spacious *,
+  .spacious *::before,
+  .spacious *::after {
+    box-sizing: border-box;
+  }
+
+  p,
+  h1,
+  h2,
+  dl,
+  dd,
+  figure {
+    margin: 0;
+  }
+
+  .letterhead {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: baseline;
+    gap: 16px;
+    padding-bottom: 8px;
+    border-bottom: 3px double var(--ink);
+  }
+
+  .firm {
+    font-family: var(--font-spacious);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .firm i {
+    color: var(--red);
+    font-style: normal;
+  }
+
+  .trade {
+    font-size: 15px;
+    font-style: italic;
+  }
+
+  .home {
+    justify-self: end;
+    color: inherit;
+    font-size: 15px;
+  }
+
+  .title {
+    padding: 10px 0 9px;
+  }
+
+  h1 {
+    font-family: var(--font-spacious);
+    font-size: clamp(38px, 6.2vw, 84px);
+    font-weight: 800;
+    line-height: 1.16;
+    letter-spacing: -0.015em;
+  }
+
+  .standfirst {
+    font-size: 19px;
+    font-style: italic;
+  }
+
+  .lots {
+    display: flex;
+    gap: 4px 26px;
+    padding: 7px 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .lots button {
+    flex: none;
+    padding: 2px 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .lots b {
+    display: inline-block;
+    margin-right: 5px;
+    font-family: var(--font-spacious);
+    font-weight: 700;
+  }
+
+  .lots button:hover {
+    color: var(--red);
+  }
+
+  .lots button[aria-current='true'] {
+    color: var(--red);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+  }
+
+  .spread {
+    display: grid;
+    grid-template-columns: minmax(0, 1.72fr) minmax(320px, 1fr);
+    gap: 32px;
+    padding-top: 20px;
+  }
+
+  .stage {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: #f1ebdc;
+    outline: 1px solid var(--ink);
+    outline-offset: 4px;
   }
 
   .plate {
     display: block;
     width: 100%;
-    height: 100vh;
+    height: 100%;
+    cursor: pointer;
+    touch-action: pan-y;
+  }
+
+  .plate:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: -2px;
+  }
+
+  .drawing {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-style: italic;
+    color: var(--soft);
+    pointer-events: none;
+  }
+
+  .spacious[data-drawn] .drawing {
+    display: none;
+  }
+
+  .call {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 18px;
+    padding-top: 18px;
+  }
+
+  .view {
+    padding: 9px 18px 10px;
+    border: 0;
+    background: var(--red);
+    color: #f8f1e2;
+    font-family: var(--font-spacious);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .view:hover {
+    background: var(--ink);
+  }
+
+  .call p {
+    flex: 1 1 280px;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--soft);
+  }
+
+  .for-touch {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    .for-keys {
+      display: none;
+    }
+
+    .for-touch {
+      display: block;
+    }
+  }
+
+  .nogl {
+    display: none;
+    padding-top: 12px;
+    color: var(--red);
+  }
+
+  .spacious[data-nogl] .nogl {
+    display: block;
+  }
+
+  .spacious[data-nogl] .call,
+  .spacious[data-nogl] .drawing {
+    display: none;
+  }
+
+  .lot {
+    color: var(--red);
+    font-family: var(--font-spacious);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-family: var(--font-spacious);
+    font-size: 33px;
+    font-weight: 700;
+    line-height: 1.12;
+    margin: 2px 0 10px;
+  }
+
+  dl {
+    margin-top: 14px;
+    border-top: 1px solid var(--ink);
+  }
+
+  dl div {
+    display: grid;
+    grid-template-columns: 116px 1fr;
+    gap: 10px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgb(43 38 34 / 28%);
+    font-size: 16px;
+  }
+
+  dt {
+    font-style: italic;
+    color: var(--soft);
+  }
+
+  .plan {
+    display: grid;
+    grid-template-columns: 196px 1fr;
+    gap: 16px;
+    align-items: start;
+    margin-top: 18px;
+  }
+
+  .plan canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+  }
+
+  figcaption {
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  figcaption b {
+    display: block;
+    margin-bottom: 3px;
+    font-family: var(--font-spacious);
+    font-size: 14px;
+  }
+
+  .small {
+    display: grid;
+    grid-template-columns: minmax(0, 1.72fr) minmax(320px, 1fr);
+    gap: 32px;
+    margin-top: 30px;
+    padding-top: 10px;
+    border-top: 3px double var(--ink);
+    font-size: 15px;
+  }
+
+  .small b {
+    font-family: var(--font-spacious);
+    font-size: 14px;
+  }
+
+  .hud {
+    display: none;
+  }
+
+  /* The viewing: the plate grows to fill the window and the sheet goes behind it. */
+  .spacious[data-mode='viewing'] .stage {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    aspect-ratio: auto;
+    outline: 0;
+  }
+
+  .spacious[data-mode='viewing'] .plate {
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .spacious[data-mode='viewing'] .plate:active {
+    cursor: grabbing;
+  }
+
+  .spacious[data-mode='viewing'] .hud {
+    display: block;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .hud button {
+    pointer-events: auto;
+  }
+
+  .bar {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    right: 226px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .viewname {
+    padding: 2px 8px;
+    background: rgb(244 237 222 / 88%);
+    font-family: var(--font-spacious);
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .tag {
+    padding: 6px 11px;
+    border: 1px solid var(--ink);
+    background: #f4edde;
+    color: var(--ink);
+    font-family: var(--font-spacious-text);
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .tag:hover {
+    background: var(--ink);
+    color: #f4edde;
+  }
+
+  .tag.tiny {
+    padding: 3px 8px;
+    font-size: 14px;
+  }
+
+  .tag[aria-pressed='false'] {
+    color: var(--soft);
+    text-decoration: line-through;
+  }
+
+  .mini {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 196px;
+    padding: 6px;
+    border: 1px solid var(--ink);
+    background: #f4edde;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .mini canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    margin-bottom: 5px;
+  }
+
+  .mini [data-left='true'] {
+    color: var(--red);
+  }
+
+  .mini .tag {
+    margin-top: 5px;
+  }
+
+  .hint {
+    position: absolute;
+    left: 50%;
+    bottom: 48px;
+    translate: -50% 0;
+    max-width: min(560px, calc(100% - 32px));
+    padding: 6px 13px;
+    border: 1px solid var(--ink);
+    background: #f4edde;
+    font-size: 17px;
+    font-style: italic;
+    text-align: center;
+    transition: opacity 0.7s;
+  }
+
+  .hint:global(.gone) {
+    opacity: 0;
+  }
+
+  .keys {
+    position: absolute;
+    left: 14px;
+    bottom: 12px;
+    padding: 1px 7px;
+    background: rgb(244 237 222 / 82%);
+    font-size: 14px;
+  }
+
+  @media (max-width: 980px) {
+    .spacious {
+      padding: 12px 16px 32px;
+    }
+
+    .letterhead {
+      grid-template-columns: 1fr auto;
+    }
+
+    .trade {
+      display: none;
+    }
+
+    .spread,
+    .small {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    .stage {
+      aspect-ratio: 4 / 3;
+    }
+
+    .plan {
+      grid-template-columns: minmax(0, 170px) 1fr;
+    }
+
+    .bar {
+      right: 14px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .viewname {
+      display: none;
+    }
+
+    .mini {
+      top: 58px;
+      width: 128px;
+      padding: 4px;
+      font-size: 12.5px;
+    }
+
+    .mini .tag {
+      display: none;
+    }
+
+    .hint {
+      bottom: 44px;
+      font-size: 16px;
+    }
   }
 </style>

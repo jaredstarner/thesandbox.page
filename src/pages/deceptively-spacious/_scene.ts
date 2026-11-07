@@ -332,11 +332,11 @@ float fbm(vec2 p) {
 
 // A wash of colour over paper: three flat tones with a dry, slightly uneven edge between them.
 vec3 wash(vec3 base, float v, vec2 st) {
-  float n = fbm(st * 5.0);
-  float lv = v + (n - 0.5) * 0.14;
-  float dark = smoothstep(0.39, 0.42, lv);
-  float light = smoothstep(0.76, 0.79, lv);
-  vec3 under = base * vec3(0.66, 0.66, 0.74);
+  float n = fbm(st * 2.6);
+  float lv = v + (n - 0.5) * 0.09;
+  float dark = smoothstep(0.34, 0.4, lv);
+  float light = smoothstep(0.72, 0.84, lv);
+  vec3 under = base * vec3(0.72, 0.71, 0.78);
   vec3 over = mix(base, vec3(1.0, 0.97, 0.9), 0.24);
   vec3 c = mix(under, base, dark);
   return mix(c, over, light) * (0.97 + 0.06 * n);
@@ -347,7 +347,7 @@ float hatch(vec2 st, float v, float fw) {
   float a = fract((st.x + st.y) / 0.055);
   float line = smoothstep(0.32, 0.18, abs(a - 0.5));
   float vis = 1.0 - smoothstep(0.008, 0.024, fw);
-  return line * vis * (1.0 - smoothstep(0.3, 0.41, v));
+  return line * vis * (1.0 - smoothstep(0.26, 0.37, v));
 }
 
 float rule(float v, float at, float w, float fw) {
@@ -384,7 +384,7 @@ float lightAt(vec3 q, float hz, float cosine) {
   float dh = Sk(gdist(q, uLamp));
   float dv = uLampZ - hz;
   float r2 = (dh * dh + dv * dv) * uUnit * uUnit;
-  return 1.0 / (1.0 + 0.052 * r2) * (0.42 + 0.58 * cosine);
+  return (0.3 + 0.7 / (1.0 + 0.05 * r2)) * (0.5 + 0.5 * cosine);
 }
 
 float nearestWall(vec3 q) {
@@ -687,7 +687,7 @@ void main() {
     float dv = uLampZ - hitZ;
     float cosine = abs(dot(uWall[k], uLamp)) / max(sqrt(dh * dh + dv * dv), 1e-3);
     float v = lightAt(hitQ, hitZ, cosine);
-    v *= mix(0.45, 1.0, shadowAt(hitQ, hitZ));
+    if (hitZ < uLampZ) v *= mix(0.45, 1.0, shadowAt(hitQ, hitZ));
     // Corners and the top and bottom of the wall go a little darker.
     float wd = INF;
     for (int j = 0; j < uN; j++) {
@@ -768,11 +768,18 @@ void main() {
       // The rug.
       float R = 1.5;
       if (r < R + 0.1 && uFloor != 2) {
-        float band = 0.5 + 0.5 * cos(r * 18.0);
-        vec3 rug = mix(uRugA, uRugB, step(0.72, band));
-        if (r < 0.34) rug = uRugB;
-        if (r > R - 0.14) rug = uRugB;
-        float fringe = smoothstep(R + 0.05, R + 0.02, r + 0.03 * sin(atan(q.y, q.x) * 90.0));
+        float ang = atan(q.y, q.x);
+        float petal = 0.55 + 0.09 * cos(ang * 8.0);
+        vec3 rug = uRugA;
+        if (r < petal) rug = uRugB;
+        if (r < petal - 0.1) rug = uRugA;
+        if (r < 0.2) rug = uRugB;
+        if (r > R - 0.3 && r < R - 0.26) rug = uRugB;
+        if (r > R - 0.2) {
+          float tooth = abs(fract(ang * 24.0 / PI) - 0.5) * 0.09;
+          rug = r - (R - 0.2) < tooth + 0.03 ? uRugA : uRugB;
+        }
+        float fringe = smoothstep(R + 0.05, R + 0.02, r + 0.03 * sin(ang * 90.0));
         base = mix(base, rug, fringe);
         lines *= 1.0 - fringe;
         id = 6.0;
@@ -785,7 +792,7 @@ void main() {
     float dv = abs(uLampZ - hitZ);
     float cosine = dv / max(sqrt(dh * dh + dv * dv), 1e-3);
     float v = lightAt(q, hitZ, cosine);
-    v *= mix(0.42, 1.0, shadowAt(q, hitZ));
+    if (!ceiling) v *= mix(0.42, 1.0, shadowAt(q, hitZ));
     float wd = nearestWall(q);
     v *= 0.74 + 0.26 * smoothstep(0.0, 0.7, wd);
     float nearby = 1.0;

@@ -257,7 +257,8 @@ export function buildRoom(spec: RoomSpec): Room {
     theta.push(th);
     outer.push(lineAt(k, rOuter, th));
     wall.push(lineAt(k, rInner, th));
-    const tan: V3 = [-Math.sin(th), Math.cos(th), 0];
+    // Along the wall, left to right as seen from inside the room.
+    const tan: V3 = [Math.sin(th), -Math.cos(th), 0];
     along.push([tan[0], tan[1]]);
 
     const footIn = polar(k, rInner, th);
@@ -487,7 +488,7 @@ export const ROOMS: RoomSpec[] = [
         ['Doors', 'Four, in two pairs'],
         ['Corners', 'Four, which are one corner'],
         ['Floors', 'Flat. 36 m² each, one above the other'],
-        ['Surface', 'Klein bottle, doubled'],
+        ['Surface', 'Torus, folded in two'],
       ],
       plan: 'Red openings lead to the other floor. Shaded squares are the room upside down.',
       hint: 'Look through the red opening at whoever is standing up there.',
@@ -520,7 +521,7 @@ export const ROOMS: RoomSpec[] = [
       doors: [INK.ochre, INK.oxblood, INK.prussian],
     },
     props: [
-      { kind: 'lamp', theta: 0, r: 0, yaw: 0 },
+      { kind: 'lamp', theta: 2.75, r: 2.2, yaw: 0 },
       { kind: 'chair', theta: 0.9, r: 2.3, yaw: 3.9 },
       { kind: 'table', theta: 4, r: 2.35, yaw: 0 },
     ],
@@ -528,16 +529,16 @@ export const ROOMS: RoomSpec[] = [
       { wall: 2, a: 1.8, z: 1.72, w: 0.74, h: 0.56, cell: 'landscape' },
       { wall: 4, a: 1.8, z: 1.7, w: 0.5, h: 0.5, cell: 'clock' },
     ],
-    lamp: [0, 0, 1.5],
+    lamp: [2.75, 2.2, 1.5],
     sheet: {
       name: 'The Rotunda',
       blurb:
-        'A circular room on a positively curved floor, ideal for entertaining. Straight lines drawn from where you stand spread apart, then close up again across the room, so the far side grows as you walk away from it. Every door opens into the one opposite, and you come back reversed.',
+        'A circular room on a positively curved floor, ideal for entertaining. It gives 36 m² where a flat circle of the same width would give 43. Lines of sight spread apart and then close up again, so the far side of the room grows as you walk away from it. Each door opens into the one opposite, and you come back reversed.',
       facts: [
         ['Accommodation', 'One room'],
         ['Doors', 'Six, in three pairs'],
-        ['Corners', 'None'],
-        ['Floor', 'Positively curved. 39 m²'],
+        ['Corners', 'None to speak of'],
+        ['Floor', 'Positively curved. 36 m²'],
         ['Surface', 'Real projective plane'],
       ],
       plan: 'The plan is half a globe; the rim is joined to itself straight across.',
@@ -572,7 +573,7 @@ export const ROOMS: RoomSpec[] = [
       doors: [INK.oxblood, INK.ochre, INK.prussian, INK.olive],
     },
     props: [
-      { kind: 'lamp', theta: 0, r: 0, yaw: 0 },
+      { kind: 'lamp', theta: (3 * Math.PI) / 8, r: 3.0, yaw: 0 },
       { kind: 'chair', theta: Math.PI / 8, r: 3.9, yaw: Math.PI + Math.PI / 8 },
       { kind: 'table', theta: Math.PI / 8 + Math.PI, r: 3.9, yaw: 0 },
     ],
@@ -580,19 +581,19 @@ export const ROOMS: RoomSpec[] = [
       { wall: 1, a: 2.1, z: 1.72, w: 0.74, h: 0.56, cell: 'landscape' },
       { wall: 3, a: 2.1, z: 1.72, w: 0.5, h: 0.5, cell: 'clock' },
     ],
-    lamp: [0, 0, 1.5],
+    lamp: [(3 * Math.PI) / 8, 3.0, 1.5],
     sheet: {
       name: 'The Octagon',
       blurb:
-        'A substantial eight-sided room on a negatively curved floor, with 69 m² where a flat octagon of the same width would give 52. Each door opens into the one opposite. The corners measure 45 degrees and all eight are the same corner, so eight rooms meet there, and all eight are this one.',
+        'A substantial eight-sided room on a negatively curved floor, giving 65 m² where a flat octagon of the same width would give 44. Each door opens into the one opposite. Measured to the centre of the walls, the corners are 45 degrees and all eight are the same corner, so eight rooms meet there, and all eight are this one.',
       facts: [
         ['Accommodation', 'One room'],
         ['Doors', 'Eight, in four pairs'],
         ['Corners', 'Eight, which are one corner'],
-        ['Floor', 'Negatively curved. 82 m²'],
+        ['Floor', 'Negatively curved. 65 m²'],
         ['Surface', 'Two-holed torus'],
       ],
-      plan: 'Each tile is this room, the same size as the others. The drawing has to shrink them to fit.',
+      plan: 'Each tile is this room, the same size as the others. The drawing has to shrink them to fit them in.',
       hint: 'Walk a square: four equal sides and four right turns. You will not end up where you began.',
     },
   },

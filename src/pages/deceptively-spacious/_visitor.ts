@@ -56,6 +56,7 @@ export class Visitor {
   /** Doors gone through since the room was entered. */
   crossings = 0;
   private lastCrumb: V3 = [0, 0, 1];
+  private startHand = 1;
   room: Room;
   /** Called when a door is crossed. */
   onCross: (() => void) | null = null;
@@ -90,6 +91,8 @@ export class Visitor {
     this.crumbs = [{ p: this.p, above: false, jump: true, q: this.p }];
     this.crossings = 0;
     this.lastCrumb = this.p;
+    this.startHand = 1;
+    this.startHand = this.handedness() > 0 ? 1 : -1;
   }
 
   turn(yaw: number, pitch: number) {
@@ -212,6 +215,14 @@ export class Visitor {
         this.onCross?.();
       }
     }
+  }
+
+  /** +1 if the visitor is as they came in, -1 if they are their own mirror image. */
+  handedness(): number {
+    const [a, b, c] = [this.p, this.f, this.r];
+    const det =
+      a[0] * (b[1] * c[2] - b[2] * c[1]) - a[1] * (b[0] * c[2] - b[2] * c[0]) + a[2] * (b[0] * c[1] - b[1] * c[0]);
+    return (det > 0 ? -1 : 1) * (this.above ? -1 : 1) * this.startHand;
   }
 
   private frame(): FigureView {

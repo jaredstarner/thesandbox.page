@@ -2,7 +2,7 @@
 // the ids and depth the pen follows), then inked up to the canvas.
 
 import { buildDecals, type Decals } from './_decals';
-import { Ck, Sk, mdot, polar, type Room, type V3 } from './_rooms';
+import { Ck, Sk, polar, type Room, type V3 } from './_rooms';
 import { CHAIR, FIGURE, LAMP, MAX_DECALS, MAX_PROPS, POST, TABLE, VERTEX, sceneFragment } from './_scene';
 
 export interface FigureView {
@@ -50,6 +50,8 @@ export class Renderer {
   private canvas: HTMLCanvasElement;
   private vao: WebGLVertexArrayObject;
   private programs = new Map<number, Program>();
+  private pending = new Map<number, WebGLProgram>();
+  private parallel: { COMPLETION_STATUS_KHR: number } | null;
   private post: Program;
   private fbo: WebGLFramebuffer;
   private colorTex: WebGLTexture;
@@ -66,6 +68,7 @@ export class Renderer {
   constructor(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
     this.canvas = canvas;
     this.gl = gl;
+    this.parallel = gl.getExtension('KHR_parallel_shader_compile') as { COMPLETION_STATUS_KHR: number } | null;
     this.vao = gl.createVertexArray()!;
     this.fbo = gl.createFramebuffer()!;
     this.colorTex = this.target();
@@ -73,7 +76,7 @@ export class Renderer {
     this.atlasTex = gl.createTexture()!;
     this.marksTex = gl.createTexture()!;
     this.decals = buildDecals();
-    this.post = this.compile(POST);
+    this.post = this.finish(this.begin(POST));
     this.uploadAtlas();
     gl.bindTexture(gl.TEXTURE_2D, this.marksTex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
@@ -112,23 +115,27 @@ export class Renderer {
     return t;
   }
 
-  private compile(fragment: string): Program {
+  /** Starts compiling; with KHR_parallel_shader_compile the page keeps running meanwhile. */
+  private begin(fragment: string): WebGLProgram {
     const gl = this.gl;
     const shader = (type: number, src: string) => {
       const s = gl.createShader(type)!;
       gl.shaderSource(s, src);
       gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-        console.error(gl.getShaderInfoLog(s));
-      }
       return s;
     };
     const program = gl.createProgram();
     gl.attachShader(program, shader(gl.VERTEX_SHADER, VERTEX));
     gl.attachShader(program, shader(gl.FRAGMENT_SHADER, fragment));
     gl.linkProgram(program);
+    return program;
+  }
+
+  private finish(program: WebGLProgram): Program {
+    const gl = this.gl;
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       console.error(gl.getProgramInfoLog(program));
+      for (const s of gl.getAttachedShaders(program) ?? []) console.error(gl.getShaderInfoLog(s));
     }
     const u: Uniforms = {};
     const count = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS) as number;
@@ -141,13 +148,25 @@ export class Renderer {
     return { program, u };
   }
 
+  /** Makes sure the program for a curvature is on its way. */
+  prepare(kappa: number) {
+    if (this.programs.has(kappa) || this.pending.has(kappa)) return;
+    this.pending.set(kappa, this.begin(sceneFragment(kappa)));
+  }
+
+  /** True once that curvature's program can be used without stalling the page. */
+  ready(kappa: number): boolean {
+    if (this.programs.has(kappa)) return true;
+    const program = this.pending.get(kappa);
+    if (!program) return false;
+    if (this.parallel && !this.gl.getProgramParameter(program, this.parallel.COMPLETION_STATUS_KHR)) return false;
+    this.programs.set(kappa, this.finish(program));
+    this.pending.delete(kappa);
+    return true;
+  }
+
   private sceneProgram(kappa: number): Program {
-    let p = this.programs.get(kappa);
-    if (!p) {
-      p = this.compile(sceneFragment(kappa));
-      this.programs.set(kappa, p);
-    }
-    return p;
+    return this.programs.get(kappa)!;
   }
 
   private bindTargets(w: number, h: number) {
@@ -380,6 +399,5 @@ function propFrame(room: Room, c: V3, yaw: number): { f: V3; r: V3 } {
     Math.sin(a) * radial[1] - Math.cos(a) * around[1],
     Math.sin(a) * radial[2] - Math.cos(a) * around[2],
   ];
-  void mdot;
   return { f, r: q };
 }
