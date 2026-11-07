@@ -13,9 +13,13 @@ import { ROOMS } from './_rooms';
 
   <main class="spacious" data-spacious data-mode="sheet">
     <header class="letterhead">
-      <p class="firm">Gauss, Bonnet <i>&amp;</i> Co.</p>
+      <p class="firm">
+        Gauss, Bonnet <i>&amp;</i> Co.
+      </p>
       <p class="trade">Estate agents, surveyors, and valuers</p>
-      <a class="home" href="/">thesandbox.page</a>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
     </header>
 
     <div class="title">
@@ -24,14 +28,12 @@ import { ROOMS } from './_rooms';
     </div>
 
     <nav class="lots" aria-label="Properties">
-      {
-        ROOMS.map((r, i) => (
-          <button type="button" data-lot={i} aria-current={i === 0 ? 'true' : 'false'}>
-            <b>{i + 1}</b>
-            {r.sheet.name.replace(/^The /, '')}
-          </button>
-        ))
-      }
+      {ROOMS.map((r, i) => (
+        <button type="button" data-lot={i} aria-current={i === 0 ? 'true' : 'false'}>
+          <b>{i + 1}</b>
+          {r.sheet.name.replace(/^The /, '')}
+        </button>
+      ))}
     </nav>
 
     <div class="spread">
@@ -44,19 +46,27 @@ import { ROOMS } from './_rooms';
             role="img"
             aria-label="A live drawing of the room, looking through a doorway at the back of someone standing in the same room"
           ></canvas>
-          <p class="drawing" aria-hidden="true">Drawing the room</p>
+          <p class="drawing" aria-hidden="true">
+            Drawing the room
+          </p>
 
           <div class="hud">
             <div class="bar">
-              <button type="button" class="tag" data-leave>Back to the particulars</button>
+              <button type="button" class="tag" data-leave>
+                Back to the particulars
+              </button>
               <p class="viewname" data-view-name></p>
-              <button type="button" class="tag" data-next>Next property</button>
+              <button type="button" class="tag" data-next>
+                Next property
+              </button>
             </div>
             <aside class="mini">
               <canvas data-plan-mini aria-hidden="true"></canvas>
               <p data-hand></p>
               <p data-doors></p>
-              <button type="button" class="tag tiny" data-chalk aria-pressed="true">Chalk line</button>
+              <button type="button" class="tag tiny" data-chalk aria-pressed="true">
+                Chalk line
+              </button>
             </aside>
             <p class="hint" data-hint></p>
             <p class="keys">
@@ -67,7 +77,9 @@ import { ROOMS } from './_rooms';
         </div>
 
         <div class="call">
-          <button type="button" class="view" data-view>View this property</button>
+          <button type="button" class="view" data-view>
+            View this property
+          </button>
           <p class="for-keys">Click the picture to step in. W A S D or the arrow keys walk, dragging looks round.</p>
           <p class="for-touch">Tap the picture to step in. Drag to look; tap the floor, or hold, to walk.</p>
         </div>
@@ -75,25 +87,27 @@ import { ROOMS } from './_rooms';
       </div>
 
       <div class="right">
-        {
-          ROOMS.map((r, i) => (
-            <article data-sheet hidden={i !== 0}>
-              <p class="lot">Lot {i + 1}</p>
-              <h2>{r.sheet.name}</h2>
-              <p class="blurb">{r.sheet.blurb}</p>
-              <dl>
-                {r.sheet.facts.map(([k, v]) => (
-                  <div>
-                    <dt>{k}</dt>
-                    <dd>{v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </article>
-          ))
-        }
+        {ROOMS.map((r, i) => (
+          <article data-sheet hidden={i !== 0}>
+            <p class="lot">Lot {i + 1}</p>
+            <h2>{r.sheet.name}</h2>
+            <p class="blurb">{r.sheet.blurb}</p>
+            <dl>
+              {r.sheet.facts.map(([k, v]) => (
+                <div>
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+        ))}
         <figure class="plan">
-          <canvas data-plan role="img" aria-label="Plan of the floor, unrolled: the room repeated around itself"></canvas>
+          <canvas
+            data-plan
+            role="img"
+            aria-label="Plan of the floor, unrolled: the room repeated around itself"
+          ></canvas>
           <figcaption>
             <b>Plan of the premises</b>
             <span data-plan-note></span>
@@ -104,11 +118,11 @@ import { ROOMS } from './_rooms';
 
     <footer class="small">
       <p>
-        <b>Surveyor's note.</b> Each floor is a polygon whose edges are joined in pairs. Every closed surface can be made
-        that way, and these five cover the three kinds of floor there are: flat, curved like a sphere, and curved like a
-        saddle. The walls stand straight up from it, so gravity behaves. Everything in the drawings is found by following
-        a line of sight along the floor and through the doors, one pixel at a time, so nothing has been faked with
-        mirrors.
+        <b>Surveyor's note.</b> Each floor is a polygon whose edges are joined in pairs. Every closed surface can be
+        made that way, and these five cover the three kinds of floor there are: flat, curved like a sphere, and curved
+        like a saddle. The walls stand straight up from it, so gravity behaves. Everything in the drawings is found by
+        following a line of sight along the floor and through the doors, one pixel at a time, so nothing has been faked
+        with mirrors.
       </p>
       <p>
         These particulars are believed to be correct but do not form part of any contract. All distances are measured
@@ -194,20 +208,27 @@ import { ROOMS } from './_rooms';
   }
 
   .title {
-    padding: 10px 0 9px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: end;
+    gap: 2px 40px;
+    padding: 6px 0 12px;
   }
 
   h1 {
     font-family: var(--font-spacious);
-    font-size: clamp(38px, 6.2vw, 84px);
+    font-size: clamp(38px, 5.9vw, 82px);
     font-weight: 800;
-    line-height: 1.16;
+    line-height: 1.12;
     letter-spacing: -0.015em;
   }
 
   .standfirst {
-    font-size: 19px;
+    padding-bottom: 12px;
+    font-size: 20px;
     font-style: italic;
+    line-height: 1.25;
+    text-align: right;
   }
 
   .lots {
@@ -571,6 +592,17 @@ import { ROOMS } from './_rooms';
 
     .trade {
       display: none;
+    }
+
+    .title {
+      grid-template-columns: minmax(0, 1fr);
+      padding-bottom: 8px;
+    }
+
+    .standfirst {
+      padding-bottom: 0;
+      font-size: 18px;
+      text-align: left;
     }
 
     .spread,

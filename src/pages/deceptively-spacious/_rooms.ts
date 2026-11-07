@@ -297,8 +297,7 @@ export function buildRoom(spec: RoomSpec): Room {
     corners.push(scale(c, 1 / w));
   }
 
-  const extent =
-    k > 0 ? 1 : Math.max(...corners.flatMap((c) => [Math.abs(c[0] / c[2]), Math.abs(c[1] / c[2])])) * 1.12;
+  const extent = k > 0 ? 1 : Math.max(...corners.flatMap((c) => [Math.abs(c[0] / c[2]), Math.abs(c[1] / c[2])])) * 1.12;
 
   return {
     spec,

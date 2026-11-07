@@ -386,7 +386,11 @@ function propFrame(room: Room, c: V3, yaw: number): { f: V3; r: V3 } {
   const r = Math.hypot(c[0], c[1]);
   const theta = Math.atan2(c[1], c[0]);
   const dist = k === 0 ? r : k > 0 ? Math.atan2(r, c[2]) : Math.asinh(r);
-  const radial: V3 = [Ck(k, dist) * Math.cos(theta), Ck(k, dist) * Math.sin(theta), k === 0 ? 0 : k > 0 ? -Sk(k, dist) : Sk(k, dist)];
+  const radial: V3 = [
+    Ck(k, dist) * Math.cos(theta),
+    Ck(k, dist) * Math.sin(theta),
+    k === 0 ? 0 : k > 0 ? -Sk(k, dist) : Sk(k, dist),
+  ];
   const around: V3 = [-Math.sin(theta), Math.cos(theta), 0];
   const a = yaw - theta;
   const f: V3 = [

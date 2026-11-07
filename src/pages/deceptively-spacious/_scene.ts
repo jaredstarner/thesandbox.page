@@ -654,7 +654,7 @@ void main() {
           float hand = max(step(th, 0.48) * step(-0.08, th) * step(dh, 0.034), step(tm, 0.74) * step(-0.08, tm) * step(dm, 0.02));
           base = mix(base, ink, hand);
         }
-      } else {
+      } else if (uDecalClock[i] == 0) {
         vec2 o = abs(uv - 0.5) * box.zw - box.zw * 0.5;
         float gap = length(max(o - vec2(0.0, 0.0), 0.0));
         // A soft shadow under the frame, down and to the side.
@@ -911,19 +911,26 @@ void main() {
   // The pen wanders a little; the paper does not.
   vec2 wob = vec2(vnoise(px / 19.0), vnoise(px / 19.0 + 11.0)) - 0.5;
   vec2 src = uv * uSrc + wob * 1.3;
-  ivec2 s = ivec2(floor(src));
-  vec4 here = data(s);
-  float dh = depthOf(here);
+  vec4 here = data(ivec2(floor(src)));
+  // Four looks within the pixel, so the pen's line has soft edges rather than stairs.
   float edge = 0.0;
   ivec2 ofs[4] = ivec2[4](ivec2(1, 0), ivec2(0, 1), ivec2(1, 1), ivec2(1, -1));
-  for (int i = 0; i < 4; i++) {
-    vec4 a = data(s + ofs[i]);
-    vec4 b = data(s - ofs[i]);
-    float e = 0.0;
-    if (abs(a.r - here.r) > 0.002 || abs(b.r - here.r) > 0.002) e = 1.0;
-    float da = abs(depthOf(a) + depthOf(b) - 2.0 * dh);
-    e = max(e, smoothstep(0.01, 0.03, da));
-    edge = max(edge, e);
+  vec2 sub[4] = vec2[4](vec2(-0.3, -0.1), vec2(0.1, -0.3), vec2(0.3, 0.1), vec2(-0.1, 0.3));
+  for (int n = 0; n < 4; n++) {
+    ivec2 s = ivec2(floor(src + sub[n] * 1.5));
+    vec4 c = data(s);
+    float dc = depthOf(c);
+    float found = 0.0;
+    for (int i = 0; i < 4; i++) {
+      vec4 a = data(s + ofs[i]);
+      vec4 b = data(s - ofs[i]);
+      float e = 0.0;
+      if (abs(a.r - c.r) > 0.002 || abs(b.r - c.r) > 0.002) e = 1.0;
+      float da = abs(depthOf(a) + depthOf(b) - 2.0 * dc);
+      e = max(e, smoothstep(0.01, 0.03, da));
+      found = max(found, e);
+    }
+    edge += found * 0.25;
   }
   vec3 col = texture(uColor, (src + 0.5 * 0.0) / uSrc).rgb;
   vec3 ink = vec3(0.17, 0.145, 0.13);

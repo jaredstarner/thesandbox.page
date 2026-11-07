@@ -60,7 +60,10 @@ function segment(room: Room, a: V3, b: V3, steps: number): V3[] {
     if (room.kappa === 0) {
       out.push(v);
     } else {
-      const q = room.kappa > 0 ? Math.hypot(v[0], v[1], v[2]) : Math.sqrt(Math.max(v[2] * v[2] - v[0] * v[0] - v[1] * v[1], 1e-9));
+      const q =
+        room.kappa > 0
+          ? Math.hypot(v[0], v[1], v[2])
+          : Math.sqrt(Math.max(v[2] * v[2] - v[0] * v[0] - v[1] * v[1], 1e-9));
       out.push([v[0] / q, v[1] / q, v[2] / q]);
     }
   }

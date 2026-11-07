@@ -169,7 +169,8 @@ export class Visitor {
         const reach = (RADIUS[prop.kind]! + BODY) / room.unit;
         const d = gdist(k, q, c);
         if (d < reach) {
-          const toward = k === 0 ? ([c[0] - p[0], c[1] - p[1], 0] as V3) : add(c, scale(p, -mdot(k, c, p) / mdot(k, p, p)));
+          const toward =
+            k === 0 ? ([c[0] - p[0], c[1] - p[1], 0] as V3) : add(c, scale(p, -mdot(k, c, p) / mdot(k, p, p)));
           block(scale(unit(k, toward), -1));
         }
       }
@@ -190,6 +191,7 @@ export class Visitor {
     this.f = normalise(k, add(fRest, scale(nv, fa)));
     this.r = normalise(k, add(rRest, scale(nv, ra)));
     this.p = renorm(k, q);
+    this.square();
 
     if (this.cell < 0) {
       for (let i = 0; i < room.n; i++) {
@@ -207,6 +209,7 @@ export class Visitor {
         this.p = apply(g, this.p);
         this.f = apply(g, this.f);
         this.r = apply(g, this.r);
+        this.square();
         if (room.flip[i]) this.above = !this.above;
         this.developed = mul(this.developed, invert(g));
         this.cell = room.pair[i]!;
@@ -215,6 +218,16 @@ export class Visitor {
         this.onCross?.();
       }
     }
+  }
+
+  /** Keeps the frame tangent and square against rounding, however long the walk. */
+  private square() {
+    const k = this.room.kappa;
+    const pp = k === 0 ? 1 : mdot(k, this.p, this.p);
+    const tangent = (v: V3): V3 => (k === 0 ? [v[0], v[1], 0] : add(v, scale(this.p, -mdot(k, v, this.p) / pp)));
+    this.f = normalise(k, tangent(this.f));
+    const r = tangent(this.r);
+    this.r = normalise(k, add(r, scale(this.f, -mdot(k, r, this.f))));
   }
 
   /** +1 if the visitor is as they came in, -1 if they are their own mirror image. */
@@ -281,7 +294,8 @@ function renorm(k: Room['kappa'], p: V3): V3 {
 function turnRight(k: Room['kappa'], p: V3, f: V3): V3 {
   if (k === 0) return [f[1], -f[0], 0];
   // In the tangent plane, the cross product (with the metric's sign) turns f by a right angle.
-  const c: V3 = k > 0 ? cross3(f, p) : [f[1] * p[2] - f[2] * p[1], f[2] * p[0] - f[0] * p[2], -(f[0] * p[1] - f[1] * p[0])];
+  const c: V3 =
+    k > 0 ? cross3(f, p) : [f[1] * p[2] - f[2] * p[1], f[2] * p[0] - f[0] * p[2], -(f[0] * p[1] - f[1] * p[0])];
   return normalise(k, c);
 }
 

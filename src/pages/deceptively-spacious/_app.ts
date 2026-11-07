@@ -41,6 +41,11 @@ export function start(root: HTMLElement) {
     preserveDrawingBuffer: debug,
   });
   if (!gl) root.dataset.nogl = '';
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    root.dataset.nogl = '';
+    setViewing(false);
+  });
   const renderer = gl ? new Renderer(canvas, gl) : null;
 
   // ---------------------------------------------------------------- chalk
@@ -135,7 +140,11 @@ export function start(root: HTMLElement) {
       hintEl.classList.remove('gone');
       canvas.focus({ preventScroll: true });
     } else {
+      // Back on the sheet the walk starts again from the door, not from wherever the visitor left off.
       keys.clear();
+      target = null;
+      visitor.place(room);
+      clearMarks();
     }
     resize();
   };
@@ -149,14 +158,6 @@ export function start(root: HTMLElement) {
     if (!viewing) return;
     if (e.key === 'Escape') {
       setViewing(false);
-      return;
-    }
-    if (e.key === 'n') {
-      choose(lot + 1);
-      return;
-    }
-    if (e.key === 'c') {
-      chalkBtn.click();
       return;
     }
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
@@ -269,7 +270,6 @@ export function start(root: HTMLElement) {
   let last = performance.now();
   let slow = 0;
   let frames = 0;
-  let spent = 0;
   let planTick = 0;
   let shownHand = '';
   let shownDoors = -1;
@@ -310,7 +310,6 @@ export function start(root: HTMLElement) {
       visitor.turn(turn, 0);
       target.yaw -= turn;
       if (Math.abs(target.yaw) < 0.12) {
-        forward = 1;
         const before = visitor.p;
         visitor.move(1, 0, dt, keys.has('shift') ? 1.6 : 1);
         const moved = Math.hypot(visitor.p[0] - before[0], visitor.p[1] - before[1]);
@@ -346,9 +345,7 @@ export function start(root: HTMLElement) {
           marksDirty = false;
           lastUpload = performance.now();
         }
-        const t0 = performance.now();
         renderer.draw(visitor.view());
-        spent += performance.now() - t0;
         // Hold the frame rate by tracing fewer pixels; the pen stays sharp, since it is drawn at full size.
         frames++;
         slow = slow * 0.95 + dt * 0.05;
@@ -356,7 +353,6 @@ export function start(root: HTMLElement) {
           frames = 0;
           if (slow > 0.024 && renderer.scale > 0.42) renderer.scale *= 0.86;
           else if (slow < 0.0125 && renderer.scale < 1) renderer.scale = Math.min(1, renderer.scale * 1.08);
-          spent = 0;
         }
       }
     }
