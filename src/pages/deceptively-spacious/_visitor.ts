@@ -154,6 +154,8 @@ export class Visitor {
           const gap = SkInv(k, dot(room.wall[i]!, q));
           if (gap > margin) continue;
           const a = SkInv(k, q[0] * room.along[i]![0] + q[1] * room.along[i]![1]);
+          // Only the wall itself: on a sphere the line it lies on passes close by every other door.
+          if (Math.abs(a) > room.halfWall[i]! + margin) continue;
           const opening = Math.abs(a) < room.doorW - (0.5 * BODY) / room.unit;
           if (!opening) block(unit(k, normalAt(k, room.wall[i]!, p)));
         }

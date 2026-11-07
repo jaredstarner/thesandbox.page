@@ -214,6 +214,8 @@ export interface Room {
   jambB: V3[];
   /** Directions along each wall, in the plane of the first two coordinates. */
   along: [number, number][];
+  /** How far each wall runs either side of its door, from the middle to a corner. */
+  halfWall: number[];
   corners: V3[];
   g: M3[];
   pair: number[];
@@ -297,6 +299,8 @@ export function buildRoom(spec: RoomSpec): Room {
     corners.push(scale(c, 1 / w));
   }
 
+  const halfWall = corners.map((c, i) => Math.abs(SkInv(k, c[0] * along[i]![0] + c[1] * along[i]![1])));
+
   const extent = k > 0 ? 1 : Math.max(...corners.flatMap((c) => [Math.abs(c[0] / c[2]), Math.abs(c[1] / c[2])])) * 1.12;
 
   return {
@@ -309,6 +313,7 @@ export function buildRoom(spec: RoomSpec): Room {
     jambA,
     jambB,
     along,
+    halfWall,
     corners,
     g,
     pair,
