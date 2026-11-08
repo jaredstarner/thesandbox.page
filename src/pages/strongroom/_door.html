@@ -13,7 +13,7 @@
     Notes from the last fitter are next to each lock below.
   -->
   <sr-world>
-    <!-- Behind the door. It is dark in there and the sheet says not to drill. -->
+    <!-- Behind the door. -->
     <sr-room hidden>
       <sr-boxes></sr-boxes>
       <sr-niche>
@@ -87,8 +87,8 @@
 
         <!--
           3. WATCHMAN. Clocks in four times a second from door.js and has never missed a round.
-          He doesn't watch the door. He watches the clock. If it stops for three seconds he
-          goes to see why. Pause script execution in Sources, wait, carry on.
+          The watchman watches that clock, not the door. If it stops for three seconds, the
+          watchman goes to see why. Pause script execution in Sources, wait, carry on.
         -->
         <sr-lock name="watchman" state="engaged">
           <sr-clock><sr-hand></sr-hand></sr-clock>
@@ -207,7 +207,7 @@
         </li>
         <li data-lock="watchman">
           <b>Watchman</b> <i>Sources</i>
-          <span>He only looks away if his clock stops.</span>
+          <span>Only looks away if the clock stops.</span>
         </li>
         <li data-lock="timelock">
           <b>Time lock</b> <i>Application</i>

@@ -2,8 +2,7 @@
   door.js. Ferris & Hale, job 4471.
 
   Runs the strongroom door. It is served exactly as written, so read as much of it as you
-  like. Everything happens in your browser, so nothing here can really stop you. The
-  question is only whether the door notices.
+  like. Everything happens in your browser, so nothing here can really stop you.
 
   Console commands: locks(), hint(), insert(), turn(), reset().
 */
@@ -46,7 +45,7 @@
       'Right-click the request and choose Block request URL. Or set the panel’s throttling to Offline. Two failed calls in a row and the line is dead.',
     ],
     watchman: [
-      'A timer in door.js runs four times a second. If the gap between two runs is over three seconds, the watchman has gone to look at his clock.',
+      'A timer in door.js runs four times a second. If the gap between two runs is over three seconds, the watchman goes to look at the clock.',
       'In Sources, the pause button (F8) stops all script on the page. The second hand on the door stops with it.',
       'Press pause, count to four, press resume. Anything that blocks the page for three seconds will do: alert("hello") in the Console works too.',
     ],
@@ -121,14 +120,14 @@
       [
         'Strongroom door. Combination lost, keyholders gone, no drilling.',
         '',
-        'You are in the right place. Everything that moves this door is in these panels.',
+        'You are in the right place: everything that moves this door is in these panels.',
         '',
-        '  locks()     what is still holding it',
-        '  hint()      a nudge on the next lock; ask again for more',
-        '  hint(5)     a nudge on lock 5',
-        '  reset()     lock it all up and start again',
+        '  locks()   what still holds it',
+        '  hint()    a nudge on the next lock',
+        '  hint(5)   a nudge on lock 5',
+        '  reset()   lock it all up again',
         '',
-        'Every element on the door is real and live. The fitter left notes in the HTML, next to each lock.',
+        'Every part of the door is a live element. The last fitter left notes in the HTML, next to each lock.',
       ].join('\n'),
     );
     const left = LOCKS.filter(({ name }) => !job.open[name]).length;
@@ -424,7 +423,7 @@
     const gap = now - lastRound;
     lastRound = now;
     if (document.hidden) return;
-    if (gap > 3000) setOpen('watchman', 'The clock stopped and he went to see why.');
+    if (gap > 3000) setOpen('watchman', 'The clock stopped and the watchman went to see why.');
   }
 
   document.addEventListener('visibilitychange', () => {
@@ -463,7 +462,7 @@
     if (left <= 0 && !job.open.timelock) {
       let how = 'You changed the record of when it was wound.';
       if (Date.now !== nativeNow) how = 'You gave it a different clock.';
-      else if (trueNow() - job.started >= WOUND_FOR) how = 'You waited. Nobody waits.';
+      else if (trueNow() - job.started >= WOUND_FOR) how = 'You waited the full 72 hours.';
       setOpen('timelock', how);
     }
   }
@@ -504,7 +503,7 @@
   let myTurn = -Infinity;
   let theirTurn = -Infinity;
 
-  // performance.timeOrigin + now(), not Date.now(), which may be wearing a false nose by this point.
+  // Not Date.now(), which lock 4 invites you to replace.
   const sharedClock = () => performance.timeOrigin + performance.now();
 
   function showHolders() {
@@ -918,6 +917,7 @@
     buildBolts();
     buildEdge();
     for (const { name } of LOCKS) show(name);
+    if (job.open.cam) cam.style.setProperty('--cam', `${GATE_ANGLE}deg`);
     showRelockers();
     showTally();
     showWheelLine();

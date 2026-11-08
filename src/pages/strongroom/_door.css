@@ -105,7 +105,7 @@ body:has(.strongroom) {
       ),
       linear-gradient(90deg, rgb(0 0 0 / 0.5) 0 2px, rgb(255 255 255 / 0.05) 2px 3px, transparent 3px) 0 0 / 44vmin 100%,
       linear-gradient(rgb(0 0 0 / 0.5) 0 2px, rgb(255 255 255 / 0.05) 2px 3px, transparent 3px) 0 0 / 100% 44vmin,
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='1400'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0013 .0024' numOctaves='5' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .24 0 0 0 0 .18 0 2.2 0 0 -.8'/%3E%3C/filter%3E%3Cfilter id='v' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='turbulence' baseFrequency='.0021 .0044' numOctaves='5' seed='8' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .72 0 0 0 0 .78 0 0 0 0 .66 2.4 0 0 0 0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='.92 .34 .1 .02 0 0 0 0 0 0 0 0 0 0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='1400' height='1400' filter='url(%23c)'/%3E%3Crect width='1400' height='1400' filter='url(%23v)'/%3E%3C/svg%3E")
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='1400'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0013 .0024' numOctaves='5' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .24 0 0 0 0 .18 0 2.2 0 0 -.8'/%3E%3C/filter%3E%3Cfilter id='v' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='turbulence' baseFrequency='.0021 .0044' numOctaves='5' seed='8' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .72 0 0 0 0 .78 0 0 0 0 .66 0 0 0 2.4 0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='.92 .34 .1 .02 0 0 0 0 0 0 0 0 0 0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='1400' height='1400' filter='url(%23c)'/%3E%3Crect width='1400' height='1400' filter='url(%23v)'/%3E%3C/svg%3E")
         0 0 / 1400px 1400px,
       #16251f;
     /* A round hole, for later. */
@@ -1330,8 +1330,9 @@ body:has(.strongroom) {
     flex: 0 0 100%;
   }
 
-  & sr-sheet li[data-open] {
-    opacity: 0.5;
+  & sr-sheet li[data-open] > *,
+  & sr-sheet li[data-open]::before {
+    opacity: 0.45;
   }
 
   & sr-sheet li[data-open]::after {
@@ -1647,6 +1648,12 @@ body:has(.strongroom) {
   .strongroom {
     --D: min(84dvh, calc((100vw - 450px) * 0.8));
     --cx: calc(390px + (100vw - 390px) / 2);
+  }
+}
+
+@media (min-width: 1361px) {
+  .strongroom {
+    --cx: calc(376px + (100vw - 376px - 64px) / 2);
   }
 }
 
