@@ -141,7 +141,10 @@
     });
     console.table(table);
     if (relockedUntil > performance.now()) {
-      say(`Relocker bolt is across the door for ${Math.ceil((relockedUntil - performance.now()) / 1000)} more seconds.`, RED);
+      say(
+        `Relocker bolt is across the door for ${Math.ceil((relockedUntil - performance.now()) / 1000)} more seconds.`,
+        RED,
+      );
     }
     return `${LOCKS.filter(({ name }) => job.open[name]).length} of 7 clear`;
   }
@@ -311,7 +314,8 @@
 
   function showWheelLine() {
     const line = sheet.querySelector('[data-wheel-line]');
-    if (line) line.textContent = allClear() ? 'All seven are clear. Turn the wheel.' : 'Clear all seven and the wheel turns.';
+    if (line)
+      line.textContent = allClear() ? 'All seven are clear. Turn the wheel.' : 'Clear all seven and the wheel turns.';
   }
 
   /* ------------------------------------------------------------- the relocker */
@@ -479,7 +483,9 @@
       return;
     }
     if (!(key instanceof Element) || !key.matches('sr-key')) {
-      say(`That isn't a key. It's ${key instanceof Element ? `<${key.localName}>` : typeof key}. Select an sr-key in Elements, then insert($0).`);
+      say(
+        `That isn't a key. It's ${key instanceof Element ? `<${key.localName}>` : typeof key}. Select an sr-key in Elements, then insert($0).`,
+      );
       return;
     }
     const cuts = key.getAttribute('bitting') ?? '';
@@ -524,7 +530,8 @@
     lockEl.second.dataset.turning = '';
     sounds.pawl();
     setTimeout(() => delete lockEl.second.dataset.turning, 1500);
-    if (others.size === 0) say('One key turned and sprang back. This lock wants a second holder. Open this page in another tab.');
+    if (others.size === 0)
+      say('One key turned and sprang back. This lock wants a second holder. Open this page in another tab.');
     else say('Turned. It holds for a second and a half.');
     checkTurns();
   }
@@ -570,7 +577,7 @@
   let dialNumber = 0;
 
   function dialValue() {
-    return (((-Math.round(dialTurned / 3.6)) % 100) + 100) % 100;
+    return ((-Math.round(dialTurned / 3.6) % 100) + 100) % 100;
   }
 
   function showDial() {
@@ -606,7 +613,10 @@
 
   function pointerAngle(event, element) {
     const box = element.getBoundingClientRect();
-    return (Math.atan2(event.clientY - (box.top + box.height / 2), event.clientX - (box.left + box.width / 2)) * 180) / Math.PI;
+    return (
+      (Math.atan2(event.clientY - (box.top + box.height / 2), event.clientX - (box.left + box.width / 2)) * 180) /
+      Math.PI
+    );
   }
 
   function capture(element, event) {

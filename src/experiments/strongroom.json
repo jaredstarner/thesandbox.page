@@ -2,6 +2,15 @@
   "title": "Strongroom",
   "summary": "A bank vault door with no way to open it from the front: its seven locks are worked from your browser's developer tools, so you turn a cam in the Styles pane, cut the alarm line in Network, stop the night watchman's clock from the debugger, and find the last number of the combination at a breakpoint.",
   "date": "2026-11-08",
-  "tags": ["devtools", "css", "css-3d", "mutation-observer", "broadcast-channel", "pointer-events", "web-audio", "game"],
+  "tags": [
+    "devtools",
+    "css",
+    "css-3d",
+    "mutation-observer",
+    "broadcast-channel",
+    "pointer-events",
+    "web-audio",
+    "game"
+  ],
   "plot": 38
 }

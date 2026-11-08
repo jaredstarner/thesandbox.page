@@ -68,13 +68,57 @@ body:has(.strongroom) {
   }
 
   /* Unknown tags start as inline; everything on this door is a box. */
-  & :is(
-    sr-world, sr-room, sr-boxes, sr-niche, sr-report, sr-tunnel, sr-wall, sr-hinge, sr-frame, sr-door, sr-arm,
-    sr-face, sr-bolts, sr-lock, sr-scale, sr-cam, sr-gate, sr-jewel, sr-label, sr-movement, sr-readout,
-    sr-glass, sr-gauge, sr-needle, sr-status, sr-clock, sr-hand, sr-escutcheon, sr-bow, sr-presence, sr-plate,
-    sr-dial, sr-index, sr-strobe, sr-tally, sr-relocker, sr-wheel, sr-spin, sr-spoke, sr-hub, sr-edge, sr-stamp,
-    sr-back, sr-shade, sr-cabinet, sr-rail, sr-key, sr-sheet
-  ) {
+  &
+    :is(
+      sr-world,
+      sr-room,
+      sr-boxes,
+      sr-niche,
+      sr-report,
+      sr-tunnel,
+      sr-wall,
+      sr-hinge,
+      sr-frame,
+      sr-door,
+      sr-arm,
+      sr-face,
+      sr-bolts,
+      sr-lock,
+      sr-scale,
+      sr-cam,
+      sr-gate,
+      sr-jewel,
+      sr-label,
+      sr-movement,
+      sr-readout,
+      sr-glass,
+      sr-gauge,
+      sr-needle,
+      sr-status,
+      sr-clock,
+      sr-hand,
+      sr-escutcheon,
+      sr-bow,
+      sr-presence,
+      sr-plate,
+      sr-dial,
+      sr-index,
+      sr-strobe,
+      sr-tally,
+      sr-relocker,
+      sr-wheel,
+      sr-spin,
+      sr-spoke,
+      sr-hub,
+      sr-edge,
+      sr-stamp,
+      sr-back,
+      sr-shade,
+      sr-cabinet,
+      sr-rail,
+      sr-key,
+      sr-sheet
+    ) {
     display: block;
   }
 
@@ -140,24 +184,17 @@ body:has(.strongroom) {
 
   /* Two hinge knuckles on the frame. Their arms belong to the door and swing with it. */
   & sr-hinge {
-    --barrel: linear-gradient(
-      90deg,
-      #101214,
-      #4d5256 14%,
-      #c9cdd0 36%,
-      #f0f2f3 44%,
-      #80858a 66%,
-      #272a2c 88%,
-      #0c0d0e
-    );
+    --barrel: linear-gradient(90deg, #101214, #4d5256 14%, #c9cdd0 36%, #f0f2f3 44%, #80858a 66%, #272a2c 88%, #0c0d0e);
     position: absolute;
     left: calc(var(--cx) + 52.6 * var(--u));
     top: calc(var(--cy) - 36 * var(--u));
     width: calc(8.8 * var(--u));
     height: calc(72 * var(--u));
     background:
-      linear-gradient(rgb(255 255 255 / 0.32), transparent 7%, transparent 92%, rgb(0 0 0 / 0.6)) 0 0 / 100% calc(17 * var(--u)) no-repeat,
-      linear-gradient(rgb(255 255 255 / 0.32), transparent 7%, transparent 92%, rgb(0 0 0 / 0.6)) 0 100% / 100% calc(17 * var(--u)) no-repeat,
+      linear-gradient(rgb(255 255 255 / 0.32), transparent 7%, transparent 92%, rgb(0 0 0 / 0.6)) 0 0 / 100%
+        calc(17 * var(--u)) no-repeat,
+      linear-gradient(rgb(255 255 255 / 0.32), transparent 7%, transparent 92%, rgb(0 0 0 / 0.6)) 0 100% / 100%
+        calc(17 * var(--u)) no-repeat,
       var(--barrel) 0 0 / 100% calc(17 * var(--u)) no-repeat,
       var(--barrel) 0 100% / 100% calc(17 * var(--u)) no-repeat;
     filter: drop-shadow(calc(1.1 * var(--u)) calc(1.3 * var(--u)) calc(1.2 * var(--u)) rgb(0 0 0 / 0.85));
@@ -171,13 +208,7 @@ body:has(.strongroom) {
     height: calc(2 * var(--R));
     margin: calc(-1 * var(--R)) 0 0 calc(-1 * var(--R));
     border-radius: 50%;
-    background: radial-gradient(
-      circle closest-side,
-      transparent 70%,
-      rgb(0 0 0 / 0.7) 86%,
-      #33373b 92%,
-      #101214 100%
-    );
+    background: radial-gradient(circle closest-side, transparent 70%, rgb(0 0 0 / 0.7) 86%, #33373b 92%, #101214 100%);
     pointer-events: none;
   }
 
@@ -216,7 +247,12 @@ body:has(.strongroom) {
     height: calc(9 * var(--u));
     clip-path: polygon(0 0, 88% 18%, 100% 28%, 100% 72%, 88% 82%, 0 100%);
     background:
-      radial-gradient(circle at calc(3.4 * var(--u)) 50%, rgb(0 0 0 / 0.55) 0 calc(1.1 * var(--u)), #d4d7da calc(1.14 * var(--u)) calc(1.22 * var(--u)), transparent calc(1.28 * var(--u))),
+      radial-gradient(
+        circle at calc(3.4 * var(--u)) 50%,
+        rgb(0 0 0 / 0.55) 0 calc(1.1 * var(--u)),
+        #d4d7da calc(1.14 * var(--u)) calc(1.22 * var(--u)),
+        transparent calc(1.28 * var(--u))
+      ),
       linear-gradient(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.08) 14%, transparent 62%, rgb(0 0 0 / 0.6)),
       linear-gradient(90deg, #6d7276, #b2b6ba 58%, #5e6367);
     transform: translateZ(calc(0.6 * var(--u)));
@@ -239,9 +275,7 @@ body:has(.strongroom) {
         rgb(0 0 0 / 0.5) 99.2%,
         rgb(0 0 0 / 0.75) 100%
       ),
-      var(--steel-brush),
-      var(--steel-sheen),
-      #7d8287;
+      var(--steel-brush), var(--steel-sheen), #7d8287;
     box-shadow: 0 0 calc(2 * var(--u)) rgb(0 0 0 / 0.9);
   }
 
@@ -263,9 +297,7 @@ body:has(.strongroom) {
         transparent 97.6%,
         rgb(0 0 0 / 0.36) 100%
       ),
-      var(--steel-brush),
-      var(--steel-sheen),
-      #8f9499;
+      var(--steel-brush), var(--steel-sheen), #8f9499;
     box-shadow:
       inset calc(0.25 * var(--u)) calc(0.35 * var(--u)) calc(0.6 * var(--u)) rgb(0 0 0 / 0.75),
       calc(-0.1 * var(--u)) calc(-0.1 * var(--u)) 0 rgb(0 0 0 / 0.35),
@@ -705,7 +737,8 @@ body:has(.strongroom) {
     border-radius: 50%;
     background:
       radial-gradient(circle at 50% 42%, #060606 0 15%, transparent 15.6%),
-      linear-gradient(#060606, #060606) 50% 62% / 11% 26% no-repeat, conic-gradient(from 210deg, #f1dca0, #a07f3c 25%, #ecd492 50%, #8a6a2c 75%, #f1dca0);
+      linear-gradient(#060606, #060606) 50% 62% / 11% 26% no-repeat,
+      conic-gradient(from 210deg, #f1dca0, #a07f3c 25%, #ecd492 50%, #8a6a2c 75%, #f1dca0);
     box-shadow:
       0 calc(0.26 * var(--u)) calc(0.7 * var(--u)) rgb(0 0 0 / 0.75),
       inset 0 0 0 calc(0.18 * var(--u)) rgb(90 66 22 / 0.8);
@@ -764,10 +797,26 @@ body:has(.strongroom) {
     text-align: center;
     color: #3a2b10;
     background:
-      radial-gradient(circle at calc(1.1 * var(--u)) calc(1.1 * var(--u)), #4f3d1a 0 calc(0.32 * var(--u)), transparent calc(0.36 * var(--u))),
-      radial-gradient(circle at calc(100% - 1.1 * var(--u)) calc(1.1 * var(--u)), #4f3d1a 0 calc(0.32 * var(--u)), transparent calc(0.36 * var(--u))),
-      radial-gradient(circle at calc(1.1 * var(--u)) calc(100% - 1.1 * var(--u)), #4f3d1a 0 calc(0.32 * var(--u)), transparent calc(0.36 * var(--u))),
-      radial-gradient(circle at calc(100% - 1.1 * var(--u)) calc(100% - 1.1 * var(--u)), #4f3d1a 0 calc(0.32 * var(--u)), transparent calc(0.36 * var(--u))),
+      radial-gradient(
+        circle at calc(1.1 * var(--u)) calc(1.1 * var(--u)),
+        #4f3d1a 0 calc(0.32 * var(--u)),
+        transparent calc(0.36 * var(--u))
+      ),
+      radial-gradient(
+        circle at calc(100% - 1.1 * var(--u)) calc(1.1 * var(--u)),
+        #4f3d1a 0 calc(0.32 * var(--u)),
+        transparent calc(0.36 * var(--u))
+      ),
+      radial-gradient(
+        circle at calc(1.1 * var(--u)) calc(100% - 1.1 * var(--u)),
+        #4f3d1a 0 calc(0.32 * var(--u)),
+        transparent calc(0.36 * var(--u))
+      ),
+      radial-gradient(
+        circle at calc(100% - 1.1 * var(--u)) calc(100% - 1.1 * var(--u)),
+        #4f3d1a 0 calc(0.32 * var(--u)),
+        transparent calc(0.36 * var(--u))
+      ),
       var(--brass);
     box-shadow:
       0 calc(0.3 * var(--u)) calc(0.7 * var(--u)) rgb(0 0 0 / 0.7),
@@ -815,7 +864,18 @@ body:has(.strongroom) {
     cursor: grab;
     touch-action: none;
     rotate: var(--dial, 0deg);
-    background: conic-gradient(from 18deg, #f4f5f6, #8a8f94 12%, #dfe2e4 25%, #7d8287 37%, #eceef0 50%, #868b90 62%, #dcdfe2 75%, #80858a 87%, #f4f5f6);
+    background: conic-gradient(
+      from 18deg,
+      #f4f5f6,
+      #8a8f94 12%,
+      #dfe2e4 25%,
+      #7d8287 37%,
+      #eceef0 50%,
+      #868b90 62%,
+      #dcdfe2 75%,
+      #80858a 87%,
+      #f4f5f6
+    );
     box-shadow:
       0 calc(0.4 * var(--u)) calc(1 * var(--u)) rgb(0 0 0 / 0.85),
       inset 0 0 0 calc(0.18 * var(--u)) rgb(255 255 255 / 0.4),
@@ -952,8 +1012,11 @@ body:has(.strongroom) {
     height: calc(5.4 * var(--u));
     margin: calc(-2.7 * var(--u)) 0 0 calc(-21 * var(--u));
     border-radius: calc(1 * var(--u));
-    background:
-      repeating-linear-gradient(135deg, #b52a1a 0 calc(2 * var(--u)), #1b1a18 calc(2 * var(--u)) calc(4 * var(--u)));
+    background: repeating-linear-gradient(
+      135deg,
+      #b52a1a 0 calc(2 * var(--u)),
+      #1b1a18 calc(2 * var(--u)) calc(4 * var(--u))
+    );
     box-shadow:
       0 calc(0.5 * var(--u)) calc(1 * var(--u)) rgb(0 0 0 / 0.85),
       inset 0 0 0 calc(0.2 * var(--u)) rgb(0 0 0 / 0.5);
@@ -1054,7 +1117,18 @@ body:has(.strongroom) {
     border-radius: 50%;
     background:
       radial-gradient(circle closest-side, transparent 48%, rgb(0 0 0 / 0.42) 50%, transparent 53%),
-      conic-gradient(from 24deg, #f7f8f9, #84898e 14%, #e9ebed 27%, #71767b 40%, #f1f3f4 52%, #7c8186 65%, #e2e5e7 78%, #6d7277 90%, #f7f8f9);
+      conic-gradient(
+        from 24deg,
+        #f7f8f9,
+        #84898e 14%,
+        #e9ebed 27%,
+        #71767b 40%,
+        #f1f3f4 52%,
+        #7c8186 65%,
+        #e2e5e7 78%,
+        #6d7277 90%,
+        #f7f8f9
+      );
     box-shadow:
       inset 0 0 0 calc(0.18 * var(--u)) rgb(255 255 255 / 0.5),
       inset 0 0 calc(0.9 * var(--u)) rgb(0 0 0 / 0.4);
@@ -1154,7 +1228,14 @@ body:has(.strongroom) {
     background:
       linear-gradient(118deg, rgb(255 255 255 / 0.16), transparent 34%),
       radial-gradient(circle closest-side, #b8924a 0 11%, #6c5226 11.5% 13%, #27292b 13.4% 15%, transparent 15.4%),
-      radial-gradient(circle closest-side, transparent 86%, #181a1c 86.4% 87.2%, #aeb2b6 87.6% 90%, #181a1c 90.4% 91%, transparent 91.4%),
+      radial-gradient(
+        circle closest-side,
+        transparent 86%,
+        #181a1c 86.4% 87.2%,
+        #aeb2b6 87.6% 90%,
+        #181a1c 90.4% 91%,
+        transparent 91.4%
+      ),
       linear-gradient(8deg, transparent 48.7%, #4a4e52 48.9%, #cfd3d6 50%, #4a4e52 51.1%, transparent 51.3%),
       linear-gradient(38deg, transparent 48.7%, #4a4e52 48.9%, #cfd3d6 50%, #4a4e52 51.1%, transparent 51.3%),
       linear-gradient(68deg, transparent 48.7%, #4a4e52 48.9%, #cfd3d6 50%, #4a4e52 51.1%, transparent 51.3%),
@@ -1216,9 +1297,7 @@ body:has(.strongroom) {
     width: 332px;
     max-height: calc(100dvh - 48px);
     color: var(--ink);
-    background:
-      linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 12%, rgb(80 50 10 / 0.08)),
-      #e6dcc2;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 12%, rgb(80 50 10 / 0.08)), #e6dcc2;
     box-shadow:
       0 14px 30px rgb(0 0 0 / 0.75),
       0 1px 0 rgb(255 255 255 / 0.3) inset;
@@ -1530,9 +1609,7 @@ body:has(.strongroom) {
     padding: 16px 18px 14px;
     rotate: -0.7deg;
     color: var(--ink);
-    background:
-      linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 12%, rgb(80 50 10 / 0.08)),
-      #e6dcc2;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 12%, rgb(80 50 10 / 0.08)), #e6dcc2;
     box-shadow: 0 10px 22px rgb(0 0 0 / 0.7);
     font-size: 13px;
     line-height: 1.4;
@@ -1605,7 +1682,14 @@ body:has(.strongroom) {
     text-transform: uppercase;
     text-align: center;
     background:
-      linear-gradient(90deg, rgb(0 0 0 / 0.55), rgb(255 255 255 / 0.1) 6%, transparent 11%, transparent 96%, rgb(0 0 0 / 0.35)),
+      linear-gradient(
+        90deg,
+        rgb(0 0 0 / 0.55),
+        rgb(255 255 255 / 0.1) 6%,
+        transparent 11%,
+        transparent 96%,
+        rgb(0 0 0 / 0.35)
+      ),
       radial-gradient(ellipse at 40% 30%, #6e1f18, #461009 70%, #2c0a06);
     box-shadow:
       0 12px 22px rgb(0 0 0 / 0.75),

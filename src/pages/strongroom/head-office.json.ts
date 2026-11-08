@@ -9,4 +9,6 @@ const reply = {
 };
 
 export const GET: APIRoute = () =>
-  new Response(`${JSON.stringify(reply, null, 2)}\n`, { headers: { 'Content-Type': 'application/json; charset=utf-8' } });
+  new Response(`${JSON.stringify(reply, null, 2)}\n`, {
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+  });

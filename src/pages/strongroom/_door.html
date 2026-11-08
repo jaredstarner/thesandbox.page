@@ -136,7 +136,14 @@
           Then dial them, one at a time, by hand, on the door.
         -->
         <sr-lock name="combination" state="engaged">
-          <sr-dial tabindex="0" role="slider" aria-label="Combination dial" aria-valuemin="0" aria-valuemax="99" aria-valuenow="0">
+          <sr-dial
+            tabindex="0"
+            role="slider"
+            aria-label="Combination dial"
+            aria-valuemin="0"
+            aria-valuemax="99"
+            aria-valuenow="0"
+          >
             <!-- dial scale -->
           </sr-dial>
           <sr-index></sr-index>
@@ -150,7 +157,14 @@
         <sr-relocker></sr-relocker>
 
         <!-- Turns when all seven are clear. It won't before then, but you can feel it try. -->
-        <sr-wheel tabindex="0" role="slider" aria-label="Door wheel" aria-valuemin="0" aria-valuemax="270" aria-valuenow="0">
+        <sr-wheel
+          tabindex="0"
+          role="slider"
+          aria-label="Door wheel"
+          aria-valuemin="0"
+          aria-valuemax="270"
+          aria-valuenow="0"
+        >
           <sr-spin>
             <sr-spoke></sr-spoke>
             <sr-spoke></sr-spoke>
@@ -195,7 +209,9 @@
         Nothing on this side opens it. All seven locks are worked from your browser's developer tools:
         <kbd>F12</kbd> or <kbd>Ctrl+Shift+I</kbd>, <kbd>Cmd+Option+I</kbd> on a Mac. Start in the Console.
       </p>
-      <p class="phone-note">Phones don't have developer tools. This one needs a computer; the door will still be here.</p>
+      <p class="phone-note">
+        Phones don't have developer tools. This one needs a computer; the door will still be here.
+      </p>
       <ol>
         <li data-lock="cam">
           <b>Cam</b> <i>Styles</i>
