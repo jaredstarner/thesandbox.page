@@ -312,7 +312,7 @@
 
   function showWheelLine() {
     const line = sheet.querySelector('[data-wheel-line]');
-    if (line) line.textContent = allClear() ? 'All seven are clear. Turn the wheel.' : 'The wheel turns when all seven are clear.';
+    if (line) line.textContent = allClear() ? 'All seven are clear. Turn the wheel.' : 'Clear all seven and the wheel turns.';
   }
 
   /* ------------------------------------------------------------- the relocker */
@@ -806,16 +806,18 @@
         .map((loc) => new URL(loc.textContent).pathname)
         .filter((path) => /^\/[a-z0-9-]+\/$/.test(path) && path !== '/strongroom/');
     } catch {}
-    const box = wall.getBoundingClientRect();
-    const across = Math.max(6, Math.ceil(box.width / 92));
-    const down = Math.max(5, Math.ceil(box.height / 70));
+    // clientWidth, not a bounding box: the room is still far off and scaled down at this point.
+    const across = Math.max(1, getComputedStyle(wall).gridTemplateColumns.split(' ').length);
+    const down = Math.max(5, Math.ceil(wall.clientHeight / 76));
     for (let i = 0; i < across * down; i++) {
-      const path = pages[i];
+      // The top rows are out of reach and out of the light, so the used boxes start lower down.
+      const path = pages[i - across];
       const front = document.createElement(path ? 'a' : 'span');
       front.className = 'box';
       if (path) {
         front.href = path;
-        front.title = path.slice(1, -1).replace(/-/g, ' ');
+        front.dataset.name = path.slice(1, -1).replace(/-/g, ' ');
+        front.title = front.dataset.name;
       }
       const tag = document.createElement('b');
       tag.textContent = String(i + 1);
@@ -891,6 +893,7 @@
       facet.style.setProperty('--a', `${angle}deg`);
       facet.style.setProperty('--chord', chord.toFixed(3));
       facet.style.setProperty('--dark', (0.62 - 0.62 * lit).toFixed(3));
+      if (i % 4 === 2) facet.dataset.bolt = '';
       pieces.push(facet);
     }
     edge.append(...pieces);
