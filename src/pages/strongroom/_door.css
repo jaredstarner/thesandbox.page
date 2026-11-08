@@ -1857,6 +1857,8 @@ body:has(.strongroom) {
       margin: 0;
       scale: none;
       overflow: visible;
+      display: flex;
+      flex-direction: column;
     }
 
     & sr-room::after {
@@ -1864,6 +1866,7 @@ body:has(.strongroom) {
     }
 
     & sr-niche {
+      order: -1;
       position: relative;
       inset: auto;
       width: auto;
