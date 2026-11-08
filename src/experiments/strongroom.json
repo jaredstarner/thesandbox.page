@@ -12,5 +12,6 @@
     "web-audio",
     "game"
   ],
+  "requires": [],
   "plot": 38
 }
