@@ -1480,6 +1480,10 @@ body:has(.strongroom) {
     visibility: hidden;
   }
 
+  &[data-instant] :is(sr-world, sr-door, sr-sheet, sr-cabinet) {
+    transition: none;
+  }
+
   /* ------------------------------------------------------------------ inside */
 
   & sr-room {
@@ -1829,6 +1833,47 @@ body:has(.strongroom) {
     margin: 0 0 8px;
     padding: 6px 8px;
     border: 1px dashed rgb(35 32 27 / 0.55);
+  }
+}
+
+/* A narrow view of the room: no walk through the door, and the wall of boxes follows the paperwork. */
+@media (max-width: 760px) {
+  .strongroom[data-door='inside'] {
+    & sr-world {
+      position: fixed;
+      inset: 0;
+      height: auto;
+      transform: none;
+      transition: none;
+      overflow: auto;
+    }
+
+    & sr-room {
+      position: relative;
+      left: auto;
+      top: auto;
+      width: auto;
+      height: auto;
+      margin: 0;
+      scale: none;
+      overflow: visible;
+    }
+
+    & sr-room::after {
+      display: none;
+    }
+
+    & sr-niche {
+      position: relative;
+      inset: auto;
+      width: auto;
+      box-shadow: none;
+    }
+
+    & sr-boxes {
+      position: relative;
+      inset: auto;
+    }
   }
 }
 

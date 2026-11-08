@@ -263,8 +263,8 @@
           [1120, 0.2, 0.34],
           [2970, 0.09, 0.12],
         ],
-        1.4,
-        1.2,
+        1,
+        1,
       ),
     swing: () =>
       strike(
@@ -816,7 +816,7 @@
     } catch {}
     // clientWidth, not a bounding box: the room is still far off and scaled down at this point.
     const across = Math.max(1, getComputedStyle(wall).gridTemplateColumns.split(' ').length);
-    const down = Math.max(5, Math.ceil(wall.clientHeight / 76));
+    const down = Math.max(Math.ceil(wall.clientHeight / 76), Math.ceil(pages.length / across) + 3);
     for (let i = 0; i < across * down; i++) {
       // The top rows are out of reach and out of the light, so the used boxes start lower down.
       const path = pages[i - across];
@@ -938,10 +938,13 @@
       if (key) root.querySelector('sr-lock[name="key"] sr-escutcheon').append(key);
     }
     if (job.doorOpen) {
+      // Coming back to an open door: already inside, with no walk through it.
+      root.dataset.instant = '';
       buildRoom();
       fitWorld();
       root.querySelector('sr-room').hidden = false;
       root.dataset.door = 'inside';
+      requestAnimationFrame(() => requestAnimationFrame(() => delete root.dataset.instant));
     }
   }
 
