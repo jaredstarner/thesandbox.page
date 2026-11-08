@@ -1,0 +1,250 @@
+<main class="strongroom" data-door="shut">
+  <!--
+    FERRIS & HALE, SAFE AND LOCK MAKERS. JOB 4471.
+
+    Strongroom door. No combination on file and the keyholders are gone.
+    The customer wants it open with no drilling.
+
+    Every part of this door is an element and all of it is live. Change something and the
+    door will answer. There are seven locks, each one an sr-lock. Their state attribute
+    only reports what the lock is doing: writing on it moves no bolts, and neither does
+    deleting the lock. The door counts both as drilling. Try it once if you must.
+
+    Notes from the last fitter are next to each lock below.
+  -->
+  <sr-world>
+    <!-- Behind the door. -->
+    <sr-room hidden>
+      <sr-boxes></sr-boxes>
+      <sr-niche>
+        <sr-report>
+          <h2>Job 4471: closed</h2>
+          <dl data-report></dl>
+          <p data-verdict></p>
+          <p class="room-actions">
+            <a href="/">Back out to the survey</a>
+            <button type="button" data-lock-up>Lock it all up again</button>
+          </p>
+        </sr-report>
+        <a class="ledger" href="/experiments/" aria-label="Open the register of everything in this building">
+          <span>Register</span>
+          <span>of</span>
+          <span>Objects</span>
+        </a>
+      </sr-niche>
+    </sr-room>
+
+    <sr-tunnel></sr-tunnel>
+    <sr-wall></sr-wall>
+    <sr-hinge></sr-hinge>
+    <sr-frame></sr-frame>
+
+    <sr-door>
+      <sr-arm></sr-arm>
+      <sr-arm></sr-arm>
+      <sr-face>
+        <sr-bolts></sr-bolts>
+
+        <!--
+          1. CAM. Its angle is the custom property on sr-cam in door.css, and that is the only
+          thing holding it. Click the value in Styles and use the arrow keys: one degree a
+          press, ten with Shift. Stop when the notch sits in the brass gate.
+        -->
+        <sr-lock name="cam" state="engaged">
+          <sr-scale></sr-scale>
+          <sr-cam></sr-cam>
+          <sr-gate></sr-gate>
+          <sr-jewel></sr-jewel>
+          <sr-label>Cam</sr-label>
+        </sr-lock>
+
+        <!--
+          4. TIME LOCK. Three movements, wound for 72 hours the first time you stood here. It
+          can't be picked, only waited out. It gets the time from Date.now() and the hour it
+          was wound from this browser's own storage, and it believes both.
+        -->
+        <sr-lock name="timelock" state="engaged">
+          <sr-movement></sr-movement>
+          <sr-movement></sr-movement>
+          <sr-movement></sr-movement>
+          <sr-readout>72:00:00</sr-readout>
+          <sr-glass></sr-glass>
+          <sr-jewel></sr-jewel>
+          <sr-label>Time lock</sr-label>
+        </sr-lock>
+
+        <!--
+          2. ALARM LINE. The door rings head office every four seconds, and you can watch it do
+          so in Network. As long as a call connects it holds. There's no wire to cut on this
+          side, but you can stop the calls getting out. Read what head office says first.
+        -->
+        <sr-lock name="alarm" state="engaged">
+          <sr-gauge><sr-needle></sr-needle></sr-gauge>
+          <sr-status>Line up</sr-status>
+          <sr-jewel></sr-jewel>
+          <sr-label>Alarm line</sr-label>
+        </sr-lock>
+
+        <!--
+          3. WATCHMAN. Clocks in four times a second from door.js and has never missed a round.
+          The watchman watches that clock, not the door. If it stops for three seconds, the
+          watchman goes to see why. Pause script execution in Sources, wait, carry on.
+        -->
+        <sr-lock name="watchman" state="engaged">
+          <sr-clock><sr-hand></sr-hand></sr-clock>
+          <sr-jewel></sr-jewel>
+          <sr-label>Watchman</sr-label>
+        </sr-lock>
+
+        <!--
+          5. KEY. One of the sixty-four in sr-cabinet fits. Its cuts are stamped on the edge of
+          this door, and you can only see the edge if your view is 320 px wide or less. The Device
+          toolbar will do that. Elements can search by selector, and when an element is selected
+          the Console calls it $0. So: insert($0).
+        -->
+        <sr-lock name="key" state="engaged">
+          <sr-escutcheon></sr-escutcheon>
+          <sr-jewel></sr-jewel>
+          <sr-label>Key</sr-label>
+        </sr-lock>
+
+        <sr-plate>
+          <strong>Ferris &amp; Hale</strong>
+          <span>Safe &amp; Lock Makers</span>
+          <small>Door No. 4471</small>
+        </sr-plate>
+
+        <!--
+          6. SECOND KEY. Dual custody: two holders, turning within a second and a half of each
+          other. You are one. Open this page in another tab and you are also the other. turn()
+          in each. Nobody is quick enough to do that by hand, but setTimeout is.
+        -->
+        <sr-lock name="second" state="engaged">
+          <sr-escutcheon><sr-bow></sr-bow></sr-escutcheon>
+          <sr-presence></sr-presence>
+          <sr-jewel></sr-jewel>
+          <sr-label>Second key</sr-label>
+        </sr-lock>
+
+        <!--
+          7. COMBINATION. Three numbers, kept apart on purpose.
+          First: head office has it. Look at what the alarm line gets back.
+          Second: the little window on this dial flashes it, too quickly to read. The Animations
+          drawer can slow it down or stop it.
+          Third: wheelPack() in door.js works it out every second and tells nobody. Put a
+          breakpoint on it and read the Scope.
+          Then dial them, one at a time, by hand, on the door.
+        -->
+        <sr-lock name="combination" state="engaged">
+          <sr-dial
+            tabindex="0"
+            role="slider"
+            aria-label="Combination dial"
+            aria-valuemin="0"
+            aria-valuemax="99"
+            aria-valuenow="0"
+          >
+            <!-- dial scale -->
+          </sr-dial>
+          <sr-index></sr-index>
+          <sr-strobe></sr-strobe>
+          <sr-tally><i></i><i></i><i></i></sr-tally>
+          <sr-jewel></sr-jewel>
+          <sr-label>Combination</sr-label>
+        </sr-lock>
+
+        <!-- The relocker. A sprung bolt behind a glass plate. Force anything and it fires. -->
+        <sr-relocker></sr-relocker>
+
+        <!-- Turns when all seven are clear. It won't before then, but you can feel it try. -->
+        <sr-wheel
+          tabindex="0"
+          role="slider"
+          aria-label="Door wheel"
+          aria-valuemin="0"
+          aria-valuemax="270"
+          aria-valuenow="0"
+        >
+          <sr-spin>
+            <sr-spoke></sr-spoke>
+            <sr-spoke></sr-spoke>
+            <sr-spoke></sr-spoke>
+            <sr-spoke></sr-spoke>
+            <sr-spoke></sr-spoke>
+            <sr-hub></sr-hub>
+          </sr-spin>
+        </sr-wheel>
+      </sr-face>
+
+      <!-- The edge of the door. You won't see this from where you are standing. -->
+      <sr-edge>
+        <sr-stamp><small>F &amp; H key cuts</small>47291</sr-stamp>
+      </sr-edge>
+
+      <sr-back></sr-back>
+    </sr-door>
+
+    <sr-shade></sr-shade>
+    <sr-caption>The edge of the door. Widen your view to go back.</sr-caption>
+  </sr-world>
+
+  <sr-cabinet aria-label="Key cabinet">
+    <sr-rail>
+      <!-- keys -->
+    </sr-rail>
+  </sr-cabinet>
+
+  <sr-sheet>
+    <button class="sheet-tab" type="button" aria-expanded="false">Job sheet</button>
+    <div class="sheet-body">
+      <header>
+        <p class="maker">Ferris &amp; Hale</p>
+        <p class="trade">Safe &amp; Lock Makers</p>
+      </header>
+      <h1>Strongroom</h1>
+      <p class="job">
+        <b>Job 4471.</b> Combination lost, keyholders gone. Customer wants the door open with no drilling.
+      </p>
+      <p class="job">
+        Nothing on this side opens it. All seven locks are worked from your browser's developer tools:
+        <kbd>F12</kbd> or <kbd>Ctrl+Shift+I</kbd>, <kbd>Cmd+Option+I</kbd> on a Mac. Start in the Console.
+      </p>
+      <p class="phone-note">
+        Phones don't have developer tools. This one needs a computer; the door will still be here.
+      </p>
+      <ol>
+        <li data-lock="cam">
+          <b>Cam</b> <i>Styles</i>
+          <span>Turn it until the notch meets the brass gate.</span>
+        </li>
+        <li data-lock="alarm">
+          <b>Alarm line</b> <i>Network</i>
+          <span>The door rings head office every four seconds and holds while the line is up.</span>
+        </li>
+        <li data-lock="watchman">
+          <b>Watchman</b> <i>Sources</i>
+          <span>Only looks away if the clock stops.</span>
+        </li>
+        <li data-lock="timelock">
+          <b>Time lock</b> <i>Application</i>
+          <span>Wound for 72 hours when you arrived. You could wait.</span>
+        </li>
+        <li data-lock="key">
+          <b>Key</b> <i>Device toolbar, Elements, Console</i>
+          <span>The cuts are stamped on the door's edge. Find the key that matches and <code>insert()</code> it.</span>
+        </li>
+        <li data-lock="second">
+          <b>Second key</b> <i>Two tabs, Console</i>
+          <span>Two holders, each to <code>turn()</code> within a second and a half.</span>
+        </li>
+        <li data-lock="combination">
+          <b>Combination</b> <i>Network, Animations, Sources</i>
+          <span>Three numbers kept apart. Dial them on the door.</span>
+        </li>
+      </ol>
+      <p class="job" data-wheel-line>Clear all seven and the wheel turns.</p>
+      <p class="tally">Relockers fired: <b data-relockers>0</b></p>
+      <p class="back"><a href="/">thesandbox.page</a></p>
+    </div>
+  </sr-sheet>
+</main>

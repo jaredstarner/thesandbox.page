@@ -586,5 +586,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Georgia', 'serif'],
     },
+    // /strongroom/: a geometric face for the engraved plates and a typewriter for the job sheet.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Josefin Sans',
+      cssVariable: '--font-strongroom',
+      weights: ['100 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Century Gothic', 'Futura', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Cutive Mono',
+      cssVariable: '--font-strongroom-type',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Courier New', 'monospace'],
+    },
   ],
 });

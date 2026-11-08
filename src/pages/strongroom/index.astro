@@ -1,0 +1,66 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import door from './_door.html?raw';
+
+// The door's HTML goes out as written, comments and line breaks included, because the
+// Elements panel and View Source are where the job is done. Only the two long, regular
+// parts are generated here: the key cabinet and the dial's scale.
+
+const BITTING = '47291';
+
+/** A small seeded generator, so the build's output doesn't change between builds. */
+function seeded(seed: number) {
+  let s = seed >>> 0;
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 2 ** 32;
+  };
+}
+
+function keyCabinet(): string {
+  const random = seeded(4471);
+  const keys = new Set<string>();
+  // Near misses first, so a key can't be picked out by eye from the first digit.
+  for (const near of ['47219', '47391', '42791', '47290', '17291', '47281', '74291', '47921']) keys.add(near);
+  while (keys.size < 63) {
+    let cuts = '';
+    for (let i = 0; i < 5; i++) cuts += String(1 + Math.floor(random() * 9));
+    if (cuts !== BITTING) keys.add(cuts);
+  }
+  const list = [...keys];
+  list.splice(Math.floor(random() * list.length), 0, BITTING);
+  // Shuffle: the near misses shouldn't sit together at the top of the cabinet.
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  return list.map((cuts) => `      <sr-key bitting="${cuts}"></sr-key>`).join('\n');
+}
+
+function dialScale(): string {
+  let marks = '';
+  for (let n = 0; n < 100; n++) {
+    const major = n % 10 === 0;
+    const mid = n % 5 === 0;
+    const length = major ? 5.5 : mid ? 4 : 2.6;
+    marks += `<path transform="rotate(${n * 3.6})" d="M0-47V${-47 + length}" stroke-width="${major ? 0.9 : 0.5}"/>`;
+    if (major) marks += `<text transform="rotate(${n * 3.6}) translate(0 -32)">${n}</text>`;
+  }
+  return `<svg viewBox="-50 -50 100 100" aria-hidden="true">${marks}</svg>`;
+}
+
+const html = door.replace('<!-- keys -->', keyCabinet()).replace('<!-- dial scale -->', dialScale());
+---
+
+<Bare
+  title="Strongroom"
+  description="A bank vault door with no way to open it from the front: seven locks, all worked from your browser's developer tools."
+>
+  <Font cssVariable="--font-strongroom" slot="head" />
+  <Font cssVariable="--font-strongroom-type" slot="head" />
+  <link slot="head" rel="stylesheet" href="/strongroom/door.css" />
+
+  <Fragment set:html={html} />
+  <script is:inline src="/strongroom/door.js"></script>
+</Bare>

@@ -1,0 +1,1909 @@
+/*
+  door.css. Ferris & Hale, job 4471.
+
+  The whole door is drawn here, in gradients, on real elements, so that every part you can
+  see is a part you can select. --u is one hundredth of the door's diameter.
+*/
+
+/* Registered so the Styles pane can step it and the page can read a clean value back. */
+@property --cam {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@property --light {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: -28deg;
+}
+
+body:has(.strongroom) {
+  margin: 0;
+  background: #070908;
+}
+
+.strongroom {
+  --D: min(84dvh, 78vw);
+  --u: calc(var(--D) / 100);
+  --cx: 50vw;
+  --cy: 50dvh;
+  --R: calc(51 * var(--u));
+  --lx: var(--cx);
+  --ly: calc(var(--cy) - 18 * var(--u));
+  --throw: 0;
+  --z: 3;
+
+  --steel-brush: repeating-conic-gradient(rgb(255 255 255 / 0.035) 0deg 0.45deg, rgb(0 0 0 / 0.04) 0.45deg 1deg);
+  --steel-sheen: conic-gradient(
+    from var(--light),
+    rgb(255 255 255 / 0.62),
+    rgb(255 255 255 / 0) 30deg,
+    rgb(0 0 0 / 0.22) 90deg,
+    rgb(255 255 255 / 0) 150deg,
+    rgb(255 255 255 / 0.5) 180deg,
+    rgb(255 255 255 / 0) 210deg,
+    rgb(0 0 0 / 0.26) 270deg,
+    rgb(255 255 255 / 0) 330deg,
+    rgb(255 255 255 / 0.62)
+  );
+  --brass: linear-gradient(135deg, #f1dca0, #b8924a 38%, #8a6a2c 62%, #d9bd77);
+  --enamel: radial-gradient(circle at 42% 38%, #f6efdc, #dfd4b6 78%, #b9ad8c);
+  --ink: #23201b;
+  --plate-font: var(--font-strongroom), 'Century Gothic', sans-serif;
+  --type-font: var(--font-strongroom-type), 'Courier New', monospace;
+
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  color: var(--ink);
+  background: #070908;
+  font-family: var(--type-font);
+  -webkit-font-smoothing: antialiased;
+
+  & *,
+  & *::before,
+  & *::after {
+    box-sizing: border-box;
+  }
+
+  /* Unknown tags start as inline; everything on this door is a box. */
+  &
+    :is(
+      sr-world,
+      sr-room,
+      sr-boxes,
+      sr-niche,
+      sr-report,
+      sr-tunnel,
+      sr-wall,
+      sr-hinge,
+      sr-frame,
+      sr-door,
+      sr-arm,
+      sr-face,
+      sr-bolts,
+      sr-lock,
+      sr-scale,
+      sr-cam,
+      sr-gate,
+      sr-jewel,
+      sr-label,
+      sr-movement,
+      sr-readout,
+      sr-glass,
+      sr-gauge,
+      sr-needle,
+      sr-status,
+      sr-clock,
+      sr-hand,
+      sr-escutcheon,
+      sr-bow,
+      sr-presence,
+      sr-plate,
+      sr-dial,
+      sr-index,
+      sr-strobe,
+      sr-tally,
+      sr-relocker,
+      sr-wheel,
+      sr-spin,
+      sr-spoke,
+      sr-hub,
+      sr-edge,
+      sr-stamp,
+      sr-back,
+      sr-shade,
+      sr-cabinet,
+      sr-rail,
+      sr-key,
+      sr-sheet
+    ) {
+    display: block;
+  }
+
+  & [hidden] {
+    display: none !important;
+  }
+
+  /* ------------------------------------------------------------------ the room around it */
+
+  & sr-world {
+    position: absolute;
+    inset: 0;
+    perspective: calc(var(--D) * 2.3);
+    perspective-origin: var(--cx) var(--cy);
+    transform-origin: var(--cx) var(--cy);
+    transition: transform 2.8s cubic-bezier(0.62, 0, 0.18, 1);
+  }
+
+  & sr-wall {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(
+        circle at var(--cx) var(--cy),
+        rgb(0 0 0 / 0.78) calc(var(--R) * 1.09),
+        rgb(0 0 0 / 0.26) calc(var(--R) * 1.2),
+        transparent calc(var(--R) * 1.6)
+      ),
+      linear-gradient(90deg, rgb(0 0 0 / 0.5) 0 2px, rgb(255 255 255 / 0.05) 2px 3px, transparent 3px) 0 0 / 44vmin 100%,
+      linear-gradient(rgb(0 0 0 / 0.5) 0 2px, rgb(255 255 255 / 0.05) 2px 3px, transparent 3px) 0 0 / 100% 44vmin,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='1400'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0013 .0024' numOctaves='5' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .24 0 0 0 0 .18 0 2.2 0 0 -.8'/%3E%3C/filter%3E%3Cfilter id='v' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='turbulence' baseFrequency='.0021 .0044' numOctaves='5' seed='8' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .72 0 0 0 0 .78 0 0 0 0 .66 0 0 0 2.4 0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='.92 .34 .1 .02 0 0 0 0 0 0 0 0 0 0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='1400' height='1400' filter='url(%23c)'/%3E%3Crect width='1400' height='1400' filter='url(%23v)'/%3E%3C/svg%3E")
+        0 0 / 1400px 1400px,
+      #16251f;
+    /* A round hole, for later. */
+    mask: radial-gradient(circle at var(--cx) var(--cy), transparent calc(var(--R) - 1px), #000 var(--R));
+  }
+
+  & sr-frame {
+    position: absolute;
+    left: var(--cx);
+    top: var(--cy);
+    width: calc(112 * var(--u));
+    height: calc(112 * var(--u));
+    margin: calc(-56 * var(--u)) 0 0 calc(-56 * var(--u));
+    border-radius: 50%;
+    background:
+      radial-gradient(
+        circle closest-side,
+        transparent 90.4%,
+        #000 90.5% 91%,
+        rgb(255 255 255 / 0.3) 91.2% 91.6%,
+        rgb(0 0 0 / 0.42) 96%,
+        rgb(255 255 255 / 0.34) 98.6%,
+        rgb(0 0 0 / 0.7) 100%
+      ),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-100 -100 200 200'%3E%3Cdefs%3E%3CradialGradient id='r' cx='.38' cy='.34'%3E%3Cstop stop-color='%23f4f5f6'/%3E%3Cstop offset='.5' stop-color='%23989da1'/%3E%3Cstop offset='1' stop-color='%232b2d30'/%3E%3C/radialGradient%3E%3Ccircle id='c' cy='-95.4' r='1.45' fill='url(%23r)' stroke='%23000' stroke-opacity='.55' stroke-width='.2'/%3E%3C/defs%3E%3Cuse href='%23c' transform='rotate(0.0)'/%3E%3Cuse href='%23c' transform='rotate(11.25)'/%3E%3Cuse href='%23c' transform='rotate(22.5)'/%3E%3Cuse href='%23c' transform='rotate(33.75)'/%3E%3Cuse href='%23c' transform='rotate(45.0)'/%3E%3Cuse href='%23c' transform='rotate(56.25)'/%3E%3Cuse href='%23c' transform='rotate(67.5)'/%3E%3Cuse href='%23c' transform='rotate(78.75)'/%3E%3Cuse href='%23c' transform='rotate(90.0)'/%3E%3Cuse href='%23c' transform='rotate(101.25)'/%3E%3Cuse href='%23c' transform='rotate(112.5)'/%3E%3Cuse href='%23c' transform='rotate(123.75)'/%3E%3Cuse href='%23c' transform='rotate(135.0)'/%3E%3Cuse href='%23c' transform='rotate(146.25)'/%3E%3Cuse href='%23c' transform='rotate(157.5)'/%3E%3Cuse href='%23c' transform='rotate(168.75)'/%3E%3Cuse href='%23c' transform='rotate(180.0)'/%3E%3Cuse href='%23c' transform='rotate(191.25)'/%3E%3Cuse href='%23c' transform='rotate(202.5)'/%3E%3Cuse href='%23c' transform='rotate(213.75)'/%3E%3Cuse href='%23c' transform='rotate(225.0)'/%3E%3Cuse href='%23c' transform='rotate(236.25)'/%3E%3Cuse href='%23c' transform='rotate(247.5)'/%3E%3Cuse href='%23c' transform='rotate(258.75)'/%3E%3Cuse href='%23c' transform='rotate(270.0)'/%3E%3Cuse href='%23c' transform='rotate(281.25)'/%3E%3Cuse href='%23c' transform='rotate(292.5)'/%3E%3Cuse href='%23c' transform='rotate(303.75)'/%3E%3Cuse href='%23c' transform='rotate(315.0)'/%3E%3Cuse href='%23c' transform='rotate(326.25)'/%3E%3Cuse href='%23c' transform='rotate(337.5)'/%3E%3Cuse href='%23c' transform='rotate(348.75)'/%3E%3C/svg%3E")
+        center / 100% 100% no-repeat,
+      var(--steel-brush),
+      var(--steel-sheen),
+      #6f7377;
+    mask: radial-gradient(circle closest-side, transparent 90.5%, #000 90.6%);
+  }
+
+  /* Two hinge knuckles on the frame. Their arms belong to the door and swing with it. */
+  & sr-hinge {
+    --barrel: linear-gradient(90deg, #101214, #4d5256 14%, #c9cdd0 36%, #f0f2f3 44%, #80858a 66%, #272a2c 88%, #0c0d0e);
+    position: absolute;
+    left: calc(var(--cx) + 52.6 * var(--u));
+    top: calc(var(--cy) - 36 * var(--u));
+    width: calc(8.8 * var(--u));
+    height: calc(72 * var(--u));
+    background:
+      linear-gradient(rgb(255 255 255 / 0.32), transparent 7%, transparent 92%, rgb(0 0 0 / 0.6)) 0 0 / 100%
+        calc(17 * var(--u)) no-repeat,
+      linear-gradient(rgb(255 255 255 / 0.32), transparent 7%, transparent 92%, rgb(0 0 0 / 0.6)) 0 100% / 100%
+        calc(17 * var(--u)) no-repeat,
+      var(--barrel) 0 0 / 100% calc(17 * var(--u)) no-repeat,
+      var(--barrel) 0 100% / 100% calc(17 * var(--u)) no-repeat;
+    filter: drop-shadow(calc(1.1 * var(--u)) calc(1.3 * var(--u)) calc(1.2 * var(--u)) rgb(0 0 0 / 0.85));
+  }
+
+  & sr-tunnel {
+    position: absolute;
+    left: var(--cx);
+    top: var(--cy);
+    width: calc(2 * var(--R));
+    height: calc(2 * var(--R));
+    margin: calc(-1 * var(--R)) 0 0 calc(-1 * var(--R));
+    border-radius: 50%;
+    background: radial-gradient(circle closest-side, transparent 70%, rgb(0 0 0 / 0.7) 86%, #33373b 92%, #101214 100%);
+    pointer-events: none;
+  }
+
+  & sr-shade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      circle 92vmin at var(--lx) var(--ly),
+      rgb(255 200 130 / 0.07) 0%,
+      rgb(40 26 8 / 0.05) 34%,
+      rgb(6 5 3 / 0.42) 68%,
+      rgb(3 3 2 / 0.8) 100%
+    );
+  }
+
+  /* ------------------------------------------------------------------ the door */
+
+  & sr-door {
+    position: absolute;
+    left: calc(var(--cx) - 50 * var(--u));
+    top: calc(var(--cy) - 50 * var(--u));
+    width: var(--D);
+    height: var(--D);
+    transform-style: preserve-3d;
+    /* The hinge line, on the right of the frame. */
+    transform-origin: calc(107 * var(--u)) 50%;
+    transition: transform 3.8s cubic-bezier(0.5, 0, 0.22, 1);
+  }
+
+  & sr-arm {
+    position: absolute;
+    left: calc(90.5 * var(--u));
+    top: calc(17.5 * var(--u));
+    width: calc(17.5 * var(--u));
+    height: calc(9 * var(--u));
+    clip-path: polygon(0 0, 88% 18%, 100% 28%, 100% 72%, 88% 82%, 0 100%);
+    background:
+      radial-gradient(
+        circle at calc(3.4 * var(--u)) 50%,
+        rgb(0 0 0 / 0.55) 0 calc(1.1 * var(--u)),
+        #d4d7da calc(1.14 * var(--u)) calc(1.22 * var(--u)),
+        transparent calc(1.28 * var(--u))
+      ),
+      linear-gradient(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.08) 14%, transparent 62%, rgb(0 0 0 / 0.6)),
+      linear-gradient(90deg, #6d7276, #b2b6ba 58%, #5e6367);
+    transform: translateZ(calc(0.6 * var(--u)));
+  }
+
+  & sr-arm + sr-arm {
+    top: calc(73.5 * var(--u));
+  }
+
+  & sr-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    backface-visibility: hidden;
+    background:
+      radial-gradient(
+        circle closest-side,
+        transparent 96%,
+        rgb(255 255 255 / 0.5) 97%,
+        rgb(0 0 0 / 0.5) 99.2%,
+        rgb(0 0 0 / 0.75) 100%
+      ),
+      var(--steel-brush), var(--steel-sheen), #7d8287;
+    box-shadow: 0 0 calc(2 * var(--u)) rgb(0 0 0 / 0.9);
+  }
+
+  /* The main plate: one step down from the rim, machine-turned. */
+  & sr-face::before {
+    content: '';
+    position: absolute;
+    inset: calc(6.4 * var(--u));
+    border-radius: 50%;
+    background:
+      radial-gradient(
+        circle closest-side,
+        rgb(0 0 0 / 0.5) 0,
+        rgb(0 0 0 / 0.32) 30%,
+        rgb(0 0 0 / 0.62) 36.4%,
+        rgb(255 255 255 / 0.34) 37%,
+        rgb(255 255 255 / 0.04) 38.2%,
+        transparent 39%,
+        transparent 97.6%,
+        rgb(0 0 0 / 0.36) 100%
+      ),
+      var(--steel-brush), var(--steel-sheen), #8f9499;
+    box-shadow:
+      inset calc(0.25 * var(--u)) calc(0.35 * var(--u)) calc(0.6 * var(--u)) rgb(0 0 0 / 0.75),
+      calc(-0.1 * var(--u)) calc(-0.1 * var(--u)) 0 rgb(0 0 0 / 0.35),
+      calc(0.15 * var(--u)) calc(0.2 * var(--u)) 0 rgb(255 255 255 / 0.4);
+  }
+
+  /* One warm lamp, up and to the left, over everything on the face. */
+  & sr-face::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+    border-radius: 50%;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 34% 16%, rgb(255 206 140 / 0.3), transparent 62%),
+      radial-gradient(circle at 74% 92%, rgb(30 44 60 / 0.5), transparent 58%);
+    mix-blend-mode: soft-light;
+  }
+
+  /* Witness slots: the tails of the door's bolts, in the rim. */
+  & sr-bolts {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+  }
+
+  & sr-bolts i {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(1.25 * var(--u));
+    height: calc(3.7 * var(--u));
+    margin: calc(-1.85 * var(--u)) 0 0 calc(-0.625 * var(--u));
+    border-radius: calc(0.625 * var(--u));
+    background: #0d0e0f;
+    box-shadow:
+      inset 0 calc(0.1 * var(--u)) calc(0.2 * var(--u)) #000,
+      0 0 0 calc(0.1 * var(--u)) rgb(255 255 255 / 0.18);
+    transform: rotate(var(--a)) translateY(calc(-46.7 * var(--u)));
+  }
+
+  & sr-bolts i::after {
+    content: '';
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    top: 5%;
+    height: 52%;
+    border-radius: calc(0.5 * var(--u));
+    background: linear-gradient(90deg, #5a5e62, #e2e5e8 45%, #63676b);
+    transform: translateY(calc(var(--throw) * 1.5 * var(--u)));
+  }
+
+  /* ------------------------------------------------------------------ locks, in general */
+
+  & sr-lock {
+    position: absolute;
+    left: calc(50 * var(--u) + var(--x) * var(--u));
+    top: calc(50 * var(--u) + var(--y) * var(--u));
+    width: calc(var(--s) * var(--u));
+    height: calc(var(--s) * var(--u));
+    margin: calc(var(--s) * var(--u) / -2) 0 0 calc(var(--s) * var(--u) / -2);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle closest-side, rgb(0 0 0 / 0) 86%, rgb(0 0 0 / 0.35) 100%), var(--steel-brush),
+      radial-gradient(circle at 36% 28%, #62676c, #3f4347 70%, #303336);
+    box-shadow:
+      inset calc(0.45 * var(--u)) calc(0.6 * var(--u)) calc(0.9 * var(--u)) rgb(0 0 0 / 0.85),
+      inset calc(-0.12 * var(--u)) calc(-0.15 * var(--u)) calc(0.2 * var(--u)) rgb(255 255 255 / 0.12),
+      calc(0.14 * var(--u)) calc(0.2 * var(--u)) 0 rgb(255 255 255 / 0.42),
+      calc(-0.1 * var(--u)) calc(-0.12 * var(--u)) 0 rgb(0 0 0 / 0.4);
+  }
+
+  & sr-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(1.1 * var(--u));
+    text-align: center;
+    font: 600 calc(1.08 * var(--u)) / 1 var(--plate-font);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #cfd2d4;
+    text-shadow: 0 calc(0.1 * var(--u)) 0 #000;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  & sr-jewel {
+    position: absolute;
+    left: 50%;
+    bottom: calc(2.7 * var(--u));
+    width: calc(1.25 * var(--u));
+    height: calc(1.25 * var(--u));
+    margin-left: calc(-0.625 * var(--u));
+    border-radius: 50%;
+    background: radial-gradient(circle at 36% 30%, #ffc0ae, #c6341f 42%, #5c120a 88%);
+    box-shadow:
+      0 0 0 calc(0.18 * var(--u)) #1a1b1c,
+      0 0 0 calc(0.3 * var(--u)) #8c7a4e,
+      0 0 calc(1.1 * var(--u)) rgb(232 72 44 / 0.5);
+    transition:
+      background 0.3s,
+      box-shadow 0.3s;
+  }
+
+  & sr-lock[state='open'] sr-jewel {
+    background: radial-gradient(circle at 36% 30%, #d5ffe7, #2ec277 42%, #0a4d2b 88%);
+    box-shadow:
+      0 0 0 calc(0.18 * var(--u)) #1a1b1c,
+      0 0 0 calc(0.3 * var(--u)) #8c7a4e,
+      0 0 calc(1.6 * var(--u)) rgb(70 230 150 / 0.75);
+  }
+
+  /* ------------------------------------------------------------------ 1. cam */
+
+  & sr-lock[name='cam'] {
+    --x: -21.4;
+    --y: -21.4;
+    --s: 19;
+  }
+
+  & sr-scale {
+    position: absolute;
+    inset: calc(1.5 * var(--u)) calc(1.5 * var(--u));
+    border-radius: 50%;
+    background: repeating-conic-gradient(rgb(255 255 255 / 0.5) 0deg 0.8deg, transparent 0.8deg 10deg);
+    mask: radial-gradient(circle closest-side, transparent 88%, #000 89%);
+  }
+
+  /* This is the part that turns. Change --cam. */
+  & sr-cam {
+    --cam: 41deg;
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    width: calc(11.6 * var(--u));
+    height: calc(11.6 * var(--u));
+    margin: calc(-5.8 * var(--u)) 0 0 calc(-5.8 * var(--u));
+    border-radius: 50%;
+    rotate: var(--cam);
+    transition: rotate 0.14s ease-out;
+    background:
+      conic-gradient(from -9deg, #0b0c0d 0 18deg, transparent 18deg),
+      conic-gradient(from 20deg, #e7eaec, #8b9095 25%, #ced2d5 50%, #7d8287 75%, #e7eaec);
+    box-shadow:
+      0 calc(0.3 * var(--u)) calc(0.7 * var(--u)) rgb(0 0 0 / 0.8),
+      inset 0 0 0 calc(0.12 * var(--u)) rgb(255 255 255 / 0.3);
+  }
+
+  & sr-cam::after {
+    content: '';
+    position: absolute;
+    inset: 37%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 36% 30%, #f5f6f7, #898e93 60%, #3d4043);
+    box-shadow: 0 0 0 calc(0.14 * var(--u)) rgb(0 0 0 / 0.5);
+  }
+
+  /* The gate is fixed. */
+  & sr-gate {
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    width: calc(2.2 * var(--u));
+    height: calc(3.2 * var(--u));
+    margin: calc(-1.6 * var(--u)) 0 0 calc(-1.1 * var(--u));
+    background: var(--brass);
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 50% 100%, 0 45%);
+    transform: rotate(137deg) translateY(calc(-6.7 * var(--u)));
+    filter: drop-shadow(0 calc(0.1 * var(--u)) calc(0.15 * var(--u)) #000);
+  }
+
+  & sr-lock[name='cam'] sr-jewel {
+    bottom: calc(1 * var(--u));
+    left: calc(3.6 * var(--u));
+  }
+
+  & sr-lock[name='cam'] sr-label {
+    bottom: calc(0.65 * var(--u));
+  }
+
+  /* ------------------------------------------------------------------ 4. time lock */
+
+  & sr-lock[name='timelock'] {
+    --x: 0;
+    --y: -30.4;
+    --s: 16;
+    width: calc(31 * var(--u));
+    margin-left: calc(-15.5 * var(--u));
+    border-radius: calc(8 * var(--u));
+    display: flex;
+    justify-content: center;
+    gap: calc(0.8 * var(--u));
+    padding-top: calc(1.5 * var(--u));
+  }
+
+  & sr-movement {
+    position: relative;
+    width: calc(8 * var(--u));
+    height: calc(8 * var(--u));
+    border-radius: 50%;
+    background: repeating-conic-gradient(rgb(35 30 22 / 0.8) 0deg 1deg, transparent 1deg 15deg), var(--enamel);
+    background-clip: padding-box;
+    box-shadow:
+      0 0 0 calc(0.32 * var(--u)) #a48650,
+      0 0 0 calc(0.44 * var(--u)) #2b2418,
+      0 calc(0.3 * var(--u)) calc(0.6 * var(--u)) calc(0.4 * var(--u)) rgb(0 0 0 / 0.5);
+  }
+
+  & sr-movement::before {
+    content: '';
+    position: absolute;
+    inset: 13%;
+    border-radius: 50%;
+    background: var(--enamel);
+  }
+
+  /* The hand, which counts the hours left. */
+  & sr-movement::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 12%;
+    width: calc(0.42 * var(--u));
+    height: 38%;
+    margin-left: calc(-0.21 * var(--u));
+    border-radius: calc(0.2 * var(--u)) calc(0.2 * var(--u)) 0 0;
+    background: #2a241b;
+    transform-origin: 50% 100%;
+    rotate: var(--left, 0deg);
+  }
+
+  & sr-readout {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(10.05 * var(--u));
+    text-align: center;
+    font: calc(1.6 * var(--u)) / 1 var(--type-font);
+    color: #f0c777;
+    text-shadow: 0 0 calc(0.6 * var(--u)) rgb(240 180 90 / 0.5);
+    font-variant-numeric: tabular-nums;
+  }
+
+  & sr-lock[name='timelock'] sr-label {
+    bottom: calc(0.9 * var(--u));
+  }
+
+  & sr-lock[name='timelock'] sr-jewel {
+    left: calc(5.2 * var(--u));
+    bottom: calc(3.7 * var(--u));
+  }
+
+  & sr-glass {
+    position: absolute;
+    inset: calc(0.5 * var(--u));
+    border-radius: calc(7.6 * var(--u));
+    pointer-events: none;
+    background: linear-gradient(112deg, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0.04) 22%, transparent 42%);
+  }
+
+  /* After the relocker fires. */
+  &[data-cracked] sr-glass::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 150' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='.75' stroke-width='.9'%3E%3Cpath d='M172 62 118 8M172 62l-19-58M172 62l62-43M172 62l115 22M172 62l63 88M172 62l-16 88M172 62 92 143M172 62 6 96M172 62 40 41'/%3E%3Cpath d='m144 34 18-13 26 25 25-12 9 24 36 8-25 22 12 28-34-14-17 22-11-29-30 13 6-29-34-9 26-16z'/%3E%3Cpath d='m122 12 30-6 49 8 40 6M46 44l14 49M92 142l64 7'/%3E%3C/g%3E%3C/svg%3E")
+      center / 100% 100% no-repeat;
+  }
+
+  /* ------------------------------------------------------------------ 2. alarm line */
+
+  & sr-lock[name='alarm'] {
+    --x: 21.8;
+    --y: -21.8;
+    --s: 19;
+  }
+
+  & sr-gauge {
+    position: absolute;
+    left: 50%;
+    top: calc(2.3 * var(--u));
+    width: calc(13 * var(--u));
+    height: calc(7.4 * var(--u));
+    margin-left: calc(-6.5 * var(--u));
+    border-radius: calc(6.5 * var(--u)) calc(6.5 * var(--u)) calc(0.5 * var(--u)) calc(0.5 * var(--u));
+    background:
+      conic-gradient(from -64deg at 50% 92%, rgb(35 30 22 / 0.9) 0 0.9deg, transparent 0.9deg 9deg) 0 0 / 100% 100%,
+      var(--enamel);
+    box-shadow:
+      0 0 0 calc(0.28 * var(--u)) #a48650,
+      0 0 0 calc(0.4 * var(--u)) #2b2418;
+    overflow: hidden;
+  }
+
+  & sr-gauge::before {
+    content: 'Head office';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(0.55 * var(--u));
+    z-index: 1;
+    text-align: center;
+    font: 600 calc(0.8 * var(--u)) / 1 var(--plate-font);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4b4232;
+  }
+
+  & sr-needle {
+    position: absolute;
+    left: 50%;
+    bottom: 6%;
+    width: calc(0.26 * var(--u));
+    height: 84%;
+    margin-left: calc(-0.14 * var(--u));
+    background: #a12a1b;
+    transform-origin: 50% 100%;
+    rotate: -52deg;
+    transition: rotate 0.5s cubic-bezier(0.2, 1.5, 0.5, 1);
+  }
+
+  & sr-lock[name='alarm'][data-ring='on'] sr-needle {
+    rotate: 34deg;
+    transition-duration: 0.14s;
+  }
+
+  & sr-lock[name='alarm']:not([data-line='dead']) sr-needle {
+    --rest: -8deg;
+  }
+
+  & sr-status {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(10.8 * var(--u));
+    text-align: center;
+    font: calc(1.2 * var(--u)) / 1 var(--type-font);
+    color: #f0c777;
+  }
+
+  & sr-lock[name='alarm'] sr-jewel {
+    bottom: calc(3.4 * var(--u));
+  }
+
+  /* ------------------------------------------------------------------ 3. watchman */
+
+  & sr-lock[name='watchman'] {
+    --x: 30.4;
+    --y: 0;
+    --s: 19;
+  }
+
+  & sr-clock {
+    position: absolute;
+    left: 50%;
+    top: calc(2 * var(--u));
+    width: calc(11.8 * var(--u));
+    height: calc(11.8 * var(--u));
+    margin-left: calc(-5.9 * var(--u));
+    border-radius: 50%;
+    background:
+      repeating-conic-gradient(from -1deg, rgb(35 30 22 / 0.9) 0deg 2deg, transparent 2deg 30deg),
+      repeating-conic-gradient(from -0.3deg, rgb(35 30 22 / 0.5) 0deg 0.6deg, transparent 0.6deg 6deg), var(--enamel);
+    box-shadow:
+      0 0 0 calc(0.34 * var(--u)) #a48650,
+      0 0 0 calc(0.46 * var(--u)) #2b2418,
+      0 calc(0.3 * var(--u)) calc(0.8 * var(--u)) calc(0.4 * var(--u)) rgb(0 0 0 / 0.6);
+  }
+
+  & sr-clock::before {
+    content: '';
+    position: absolute;
+    inset: 10%;
+    border-radius: 50%;
+    background: var(--enamel);
+  }
+
+  & sr-hand {
+    position: absolute;
+    left: 50%;
+    top: 7%;
+    width: calc(0.36 * var(--u));
+    height: 53%;
+    margin-left: calc(-0.18 * var(--u));
+    background: #a12a1b;
+    transform-origin: 50% 81%;
+    rotate: var(--second, 0deg);
+    border-radius: calc(0.2 * var(--u));
+  }
+
+  & sr-hand::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 81%;
+    width: calc(1.1 * var(--u));
+    height: calc(1.1 * var(--u));
+    margin: calc(-0.55 * var(--u)) 0 0 calc(-0.55 * var(--u));
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #e9524a, #6f1a12);
+  }
+
+  & sr-lock[name='watchman'] sr-jewel {
+    bottom: calc(0.9 * var(--u));
+    left: calc(3.6 * var(--u));
+  }
+
+  & sr-lock[name='watchman'] sr-label {
+    bottom: calc(0.65 * var(--u));
+    letter-spacing: 0.1em;
+  }
+
+  /* ------------------------------------------------------------------ 5 and 6. keys */
+
+  & sr-lock[name='key'] {
+    --x: 21.6;
+    --y: 21.6;
+    --s: 17;
+  }
+
+  & sr-lock[name='second'] {
+    --x: -21.6;
+    --y: 21.6;
+    --s: 17;
+  }
+
+  & sr-escutcheon {
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    width: calc(9 * var(--u));
+    height: calc(9 * var(--u));
+    margin: calc(-4.5 * var(--u)) 0 0 calc(-4.5 * var(--u));
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 42%, #060606 0 15%, transparent 15.6%),
+      linear-gradient(#060606, #060606) 50% 62% / 11% 26% no-repeat,
+      conic-gradient(from 210deg, #f1dca0, #a07f3c 25%, #ecd492 50%, #8a6a2c 75%, #f1dca0);
+    box-shadow:
+      0 calc(0.26 * var(--u)) calc(0.7 * var(--u)) rgb(0 0 0 / 0.75),
+      inset 0 0 0 calc(0.18 * var(--u)) rgb(90 66 22 / 0.8);
+  }
+
+  /* The bow of a key, seen end on, when one is in the lock. */
+  & sr-bow,
+  & sr-escutcheon sr-key {
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    width: calc(2 * var(--u));
+    height: calc(6.4 * var(--u));
+    margin: calc(-3.2 * var(--u)) 0 0 calc(-1 * var(--u));
+    border-radius: calc(1 * var(--u));
+    background: linear-gradient(90deg, #6d5222, #e9d08d 42%, #8e6f30);
+    box-shadow: calc(0.6 * var(--u)) calc(0.7 * var(--u)) calc(0.7 * var(--u)) rgb(0 0 0 / 0.65);
+    transition: rotate 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);
+    rotate: 0deg;
+  }
+
+  & sr-lock[state='open'] sr-bow,
+  & sr-lock[state='open'] sr-escutcheon sr-key,
+  & sr-lock[data-turning] sr-bow {
+    rotate: 90deg;
+  }
+
+  & sr-presence {
+    position: absolute;
+    left: calc(13 * var(--u));
+    top: calc(2.6 * var(--u));
+    width: calc(0.9 * var(--u));
+    height: calc(0.9 * var(--u));
+    border-radius: 50%;
+    background: #2b2518;
+    box-shadow: 0 0 0 calc(0.14 * var(--u)) #8c7a4e;
+  }
+
+  & sr-lock[data-holders='2'] sr-presence {
+    background: radial-gradient(circle at 36% 30%, #fff1c9, #eeb94f 55%, #8d5f12);
+    box-shadow:
+      0 0 0 calc(0.14 * var(--u)) #8c7a4e,
+      0 0 calc(1 * var(--u)) rgb(240 190 90 / 0.8);
+  }
+
+  /* ------------------------------------------------------------------ maker's plate */
+
+  & sr-plate {
+    position: absolute;
+    left: calc(50 * var(--u));
+    top: calc(82.4 * var(--u));
+    width: calc(27 * var(--u));
+    margin-left: calc(-13.5 * var(--u));
+    padding: calc(1.5 * var(--u)) calc(1 * var(--u)) calc(1.2 * var(--u));
+    border-radius: calc(0.7 * var(--u));
+    text-align: center;
+    color: #3a2b10;
+    background:
+      radial-gradient(
+        circle at calc(1.1 * var(--u)) calc(1.1 * var(--u)),
+        #4f3d1a 0 calc(0.32 * var(--u)),
+        transparent calc(0.36 * var(--u))
+      ),
+      radial-gradient(
+        circle at calc(100% - 1.1 * var(--u)) calc(1.1 * var(--u)),
+        #4f3d1a 0 calc(0.32 * var(--u)),
+        transparent calc(0.36 * var(--u))
+      ),
+      radial-gradient(
+        circle at calc(1.1 * var(--u)) calc(100% - 1.1 * var(--u)),
+        #4f3d1a 0 calc(0.32 * var(--u)),
+        transparent calc(0.36 * var(--u))
+      ),
+      radial-gradient(
+        circle at calc(100% - 1.1 * var(--u)) calc(100% - 1.1 * var(--u)),
+        #4f3d1a 0 calc(0.32 * var(--u)),
+        transparent calc(0.36 * var(--u))
+      ),
+      var(--brass);
+    box-shadow:
+      0 calc(0.3 * var(--u)) calc(0.7 * var(--u)) rgb(0 0 0 / 0.7),
+      inset 0 0 0 calc(0.14 * var(--u)) rgb(255 240 190 / 0.35);
+    font-family: var(--plate-font);
+    text-shadow: 0 calc(0.07 * var(--u)) 0 rgb(255 240 190 / 0.6);
+  }
+
+  & sr-plate strong {
+    display: block;
+    font-size: calc(2.15 * var(--u));
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  & sr-plate span,
+  & sr-plate small {
+    display: block;
+    margin-top: calc(0.34 * var(--u));
+    font-size: calc(1 * var(--u));
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    line-height: 1.15;
+    text-transform: uppercase;
+  }
+
+  /* ------------------------------------------------------------------ 7. combination */
+
+  & sr-lock[name='combination'] {
+    --x: -30.6;
+    --y: 0;
+    --s: 22.5;
+  }
+
+  & sr-dial {
+    position: absolute;
+    left: 50%;
+    top: 44.4%;
+    width: calc(17.2 * var(--u));
+    height: calc(17.2 * var(--u));
+    margin: calc(-8.6 * var(--u)) 0 0 calc(-8.6 * var(--u));
+    border-radius: 50%;
+    cursor: grab;
+    touch-action: none;
+    rotate: var(--dial, 0deg);
+    background: conic-gradient(
+      from 18deg,
+      #f4f5f6,
+      #8a8f94 12%,
+      #dfe2e4 25%,
+      #7d8287 37%,
+      #eceef0 50%,
+      #868b90 62%,
+      #dcdfe2 75%,
+      #80858a 87%,
+      #f4f5f6
+    );
+    box-shadow:
+      0 calc(0.4 * var(--u)) calc(1 * var(--u)) rgb(0 0 0 / 0.85),
+      inset 0 0 0 calc(0.18 * var(--u)) rgb(255 255 255 / 0.4),
+      inset 0 0 0 calc(0.36 * var(--u)) rgb(0 0 0 / 0.3);
+    outline: none;
+  }
+
+  & sr-dial svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    stroke: #111;
+    fill: #111;
+    pointer-events: none;
+  }
+
+  & sr-dial text {
+    stroke: none;
+    font: 700 7.5px var(--plate-font);
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+
+  /* The knob. */
+  & sr-dial::after {
+    content: '';
+    position: absolute;
+    inset: 29%;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle closest-side, transparent 80%, rgb(0 0 0 / 0.45) 100%),
+      repeating-conic-gradient(#d4d7da 0deg 2.5deg, #3f4347 2.5deg 5deg);
+    box-shadow:
+      0 calc(0.35 * var(--u)) calc(0.8 * var(--u)) rgb(0 0 0 / 0.8),
+      inset 0 0 0 calc(0.1 * var(--u)) rgb(255 255 255 / 0.4);
+  }
+
+  & sr-dial::before {
+    content: '';
+    position: absolute;
+    inset: 35%;
+    z-index: 1;
+    border-radius: 50%;
+    background: conic-gradient(from 18deg, #f4f5f6, #8a8f94 25%, #e6e8ea 50%, #80858a 75%, #f4f5f6);
+    box-shadow: 0 0 0 calc(0.1 * var(--u)) rgb(0 0 0 / 0.5);
+  }
+
+  /* The index mark, which doesn't turn. */
+  & sr-index {
+    position: absolute;
+    left: 50%;
+    top: calc(0.5 * var(--u));
+    width: calc(1.3 * var(--u));
+    height: calc(1.5 * var(--u));
+    margin-left: calc(-0.65 * var(--u));
+    background: var(--brass);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    pointer-events: none;
+  }
+
+  /* A little window. Something shows in it, for a very short time, every nine seconds. */
+  & sr-strobe {
+    position: absolute;
+    right: calc(1.5 * var(--u));
+    top: calc(1.5 * var(--u));
+    width: calc(3.1 * var(--u));
+    height: calc(2.2 * var(--u));
+    border-radius: calc(0.3 * var(--u));
+    background: #0c0d0e;
+    box-shadow:
+      0 0 0 calc(0.14 * var(--u)) #8c7a4e,
+      inset 0 calc(0.1 * var(--u)) calc(0.2 * var(--u)) #000;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  & sr-strobe::after {
+    content: '71';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font: 600 calc(1.5 * var(--u)) / 1 var(--plate-font);
+    color: #ffe6a6;
+    background: #4e3a12;
+    opacity: 0;
+    animation: sr-strobe 9s linear infinite;
+  }
+
+  & sr-tally {
+    position: absolute;
+    left: 50%;
+    bottom: calc(0.6 * var(--u));
+    translate: calc(5 * var(--u)) 0;
+    display: flex;
+    gap: calc(0.34 * var(--u));
+    pointer-events: none;
+  }
+
+  & sr-tally i {
+    width: calc(0.74 * var(--u));
+    height: calc(0.74 * var(--u));
+    border-radius: 50%;
+    background: #1d1e1f;
+    box-shadow: 0 0 0 calc(0.1 * var(--u)) #8c7a4e;
+  }
+
+  & sr-tally i[data-on] {
+    background: radial-gradient(circle at 36% 30%, #fff1c9, #eeb94f 55%, #8d5f12);
+    box-shadow:
+      0 0 0 calc(0.1 * var(--u)) #8c7a4e,
+      0 0 calc(0.8 * var(--u)) rgb(240 190 90 / 0.8);
+  }
+
+  & sr-lock[name='combination'] sr-jewel {
+    left: calc(5.2 * var(--u));
+    bottom: calc(0.55 * var(--u));
+  }
+
+  & sr-lock[name='combination'] sr-label {
+    bottom: calc(0.6 * var(--u));
+    letter-spacing: 0.08em;
+    font-size: calc(0.98 * var(--u));
+  }
+
+  /* ------------------------------------------------------------------ relocker */
+
+  & sr-relocker {
+    position: absolute;
+    left: calc(50 * var(--u));
+    top: calc(50 * var(--u));
+    width: calc(42 * var(--u));
+    height: calc(5.4 * var(--u));
+    margin: calc(-2.7 * var(--u)) 0 0 calc(-21 * var(--u));
+    border-radius: calc(1 * var(--u));
+    background: repeating-linear-gradient(
+      135deg,
+      #b52a1a 0 calc(2 * var(--u)),
+      #1b1a18 calc(2 * var(--u)) calc(4 * var(--u))
+    );
+    box-shadow:
+      0 calc(0.5 * var(--u)) calc(1 * var(--u)) rgb(0 0 0 / 0.85),
+      inset 0 0 0 calc(0.2 * var(--u)) rgb(0 0 0 / 0.5);
+    scale: 0 1;
+    opacity: 0;
+    transition:
+      scale 0.5s,
+      opacity 0.5s;
+  }
+
+  &[data-relocked] sr-relocker {
+    scale: 1 1;
+    opacity: 1;
+    transition: scale 0.07s cubic-bezier(0.2, 2, 0.5, 1);
+  }
+
+  /* ------------------------------------------------------------------ wheel */
+
+  & sr-wheel {
+    position: absolute;
+    left: calc(50 * var(--u));
+    top: calc(50 * var(--u));
+    width: calc(36 * var(--u));
+    height: calc(36 * var(--u));
+    margin: calc(-18 * var(--u)) 0 0 calc(-18 * var(--u));
+    border-radius: 50%;
+    cursor: grab;
+    touch-action: none;
+    outline: none;
+    filter: drop-shadow(calc(0.8 * var(--u)) calc(1.5 * var(--u)) calc(0.9 * var(--u)) rgb(0 0 0 / 0.65));
+  }
+
+  & sr-wheel:active {
+    cursor: grabbing;
+  }
+
+  & sr-spin {
+    position: absolute;
+    inset: 0;
+    rotate: var(--wheel, 0deg);
+  }
+
+  & sr-spoke {
+    position: absolute;
+    left: 50%;
+    top: calc(2.4 * var(--u));
+    width: calc(2.6 * var(--u));
+    height: calc(15.8 * var(--u));
+    margin-left: calc(-1.3 * var(--u));
+    transform-origin: 50% 100%;
+  }
+
+  /* The arm, tapered. */
+  & sr-spoke::before {
+    content: '';
+    position: absolute;
+    inset: calc(1 * var(--u)) 0 0;
+    clip-path: polygon(24% 0, 76% 0, 100% 100%, 0 100%);
+    background: linear-gradient(90deg, #26282a, #8a8e92 18%, #f6f7f8 40%, #a8adb1 62%, #3a3d40);
+  }
+
+  /* The knob. */
+  & sr-spoke::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: calc(-1.6 * var(--u));
+    width: calc(4.3 * var(--u));
+    height: calc(4.3 * var(--u));
+    margin-left: calc(-2.15 * var(--u));
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 34%, #ffffff, #d5d8db 16%, #8a8f94 48%, #33373a 80%, #1d1f21);
+  }
+
+  & sr-spoke:nth-child(1) {
+    rotate: 0deg;
+  }
+  & sr-spoke:nth-child(2) {
+    rotate: 72deg;
+  }
+  & sr-spoke:nth-child(3) {
+    rotate: 144deg;
+  }
+  & sr-spoke:nth-child(4) {
+    rotate: 216deg;
+  }
+  & sr-spoke:nth-child(5) {
+    rotate: 288deg;
+  }
+
+  & sr-hub {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(11 * var(--u));
+    height: calc(11 * var(--u));
+    margin: calc(-5.5 * var(--u)) 0 0 calc(-5.5 * var(--u));
+    border-radius: 50%;
+    background:
+      radial-gradient(circle closest-side, transparent 48%, rgb(0 0 0 / 0.42) 50%, transparent 53%),
+      conic-gradient(
+        from 24deg,
+        #f7f8f9,
+        #84898e 14%,
+        #e9ebed 27%,
+        #71767b 40%,
+        #f1f3f4 52%,
+        #7c8186 65%,
+        #e2e5e7 78%,
+        #6d7277 90%,
+        #f7f8f9
+      );
+    box-shadow:
+      inset 0 0 0 calc(0.18 * var(--u)) rgb(255 255 255 / 0.5),
+      inset 0 0 calc(0.9 * var(--u)) rgb(0 0 0 / 0.4);
+  }
+
+  /* ------------------------------------------------------------------ the rest of the solid */
+
+  & sr-edge {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+    transform-style: preserve-3d;
+  }
+
+  & sr-edge i {
+    position: absolute;
+    width: calc(30 * var(--u));
+    height: calc(var(--chord) * var(--u));
+    margin: calc(var(--chord) * var(--u) / -2) 0 0 calc(-15 * var(--u));
+    transform: rotateZ(var(--a)) translate3d(calc(50 * var(--u)), 0, calc(-15 * var(--u))) rotateY(90deg);
+    backface-visibility: hidden;
+    background:
+      linear-gradient(rgb(0 0 0 / var(--dark)), rgb(0 0 0 / var(--dark))),
+      linear-gradient(
+        90deg,
+        #55595d 0 1%,
+        #c2c6c9 1% 3%,
+        #8e9297 3% 12%,
+        #111214 12% 13%,
+        #a9adb1 13% 14%,
+        #7f8388 14% 26%,
+        #111214 26% 27%,
+        #b5b9bc 27% 28%,
+        #8b8f94 28% 72%,
+        #111214 72% 73%,
+        #a9adb1 73% 74%,
+        #6b6f74 74% 97%,
+        #2a2c2e 97%
+      );
+  }
+
+  /* Heads of the door's locking bolts, drawn back flush. */
+  & sr-edge i[data-bolt]::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(4.6 * var(--u));
+    height: calc(4.6 * var(--u));
+    margin: calc(-2.3 * var(--u)) 0 0 calc(-2.3 * var(--u));
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 36%, #f2f4f5, #aeb2b6 40%, #55595d 78%, #1b1c1e);
+    box-shadow:
+      0 0 0 calc(0.26 * var(--u)) #0d0e0f,
+      inset 0 0 0 calc(0.14 * var(--u)) rgb(0 0 0 / 0.3);
+    filter: brightness(calc(1 - var(--dark)));
+  }
+
+  & sr-stamp {
+    position: absolute;
+    width: calc(26 * var(--u));
+    height: calc(15 * var(--u));
+    margin: calc(-7.5 * var(--u)) 0 0 calc(-13 * var(--u));
+    transform: translate3d(calc(-50.2 * var(--u)), 0, calc(-15 * var(--u))) rotateY(-90deg);
+    backface-visibility: hidden;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    color: #101112;
+    font: 700 calc(6.6 * var(--u)) / 1 var(--plate-font);
+    letter-spacing: 0.08em;
+    text-shadow:
+      0 calc(0.12 * var(--u)) 0 rgb(255 255 255 / 0.5),
+      0 calc(-0.08 * var(--u)) 0 rgb(0 0 0 / 0.6);
+    background: linear-gradient(90deg, #8e9297, #c9cdd0 40%, #a2a6aa);
+    border-radius: calc(0.5 * var(--u));
+    box-shadow: inset 0 0 0 calc(0.18 * var(--u)) rgb(0 0 0 / 0.35);
+  }
+
+  & sr-stamp small {
+    display: block;
+    margin-bottom: calc(1 * var(--u));
+    font-size: calc(1.5 * var(--u));
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* The glass back, with the boltwork behind it: twelve bars driven from one hub. */
+  & sr-back {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    transform: translateZ(calc(-30 * var(--u))) rotateY(180deg);
+    backface-visibility: hidden;
+    background:
+      linear-gradient(118deg, rgb(255 255 255 / 0.16), transparent 34%),
+      radial-gradient(circle closest-side, #b8924a 0 11%, #6c5226 11.5% 13%, #27292b 13.4% 15%, transparent 15.4%),
+      radial-gradient(
+        circle closest-side,
+        transparent 86%,
+        #181a1c 86.4% 87.2%,
+        #aeb2b6 87.6% 90%,
+        #181a1c 90.4% 91%,
+        transparent 91.4%
+      ),
+      linear-gradient(8deg, transparent 48.7%, #4a4e52 48.9%, #cfd3d6 50%, #4a4e52 51.1%, transparent 51.3%),
+      linear-gradient(38deg, transparent 48.7%, #4a4e52 48.9%, #cfd3d6 50%, #4a4e52 51.1%, transparent 51.3%),
+      linear-gradient(68deg, transparent 48.7%, #4a4e52 48.9%, #cfd3d6 50%, #4a4e52 51.1%, transparent 51.3%),
+      linear-gradient(98deg, transparent 48.7%, #4a4e52 48.9%, #cfd3d6 50%, #4a4e52 51.1%, transparent 51.3%),
+      linear-gradient(128deg, transparent 48.7%, #4a4e52 48.9%, #cfd3d6 50%, #4a4e52 51.1%, transparent 51.3%),
+      linear-gradient(158deg, transparent 48.7%, #4a4e52 48.9%, #cfd3d6 50%, #4a4e52 51.1%, transparent 51.3%),
+      radial-gradient(circle closest-side, #33363a, #2b2e31 86%, #8d9195 96%, #4a4e52 100%);
+    box-shadow: inset 0 0 calc(5 * var(--u)) rgb(0 0 0 / 0.8);
+  }
+
+  /* ------------------------------------------------------------------ the key cabinet */
+
+  & sr-cabinet {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    translate: 0 -50%;
+    width: 52px;
+    padding: 8px 3px;
+    border-radius: 2px;
+    background:
+      linear-gradient(90deg, rgb(0 0 0 / 0.5), transparent 16%, transparent 84%, rgb(0 0 0 / 0.5)),
+      repeating-linear-gradient(1deg, #2d1c10 0 3px, #362210 3px 5px, #2a1a0d 5px 9px);
+    box-shadow:
+      0 8px 22px rgb(0 0 0 / 0.75),
+      inset 0 0 0 1px rgb(255 220 170 / 0.08);
+  }
+
+  & sr-rail {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+  }
+
+  & sr-key {
+    position: relative;
+    height: min(25px, 2.75dvh);
+  }
+
+  & sr-cabinet sr-key::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 3px;
+    width: 8px;
+    height: 21px;
+    margin-left: -4px;
+    background: linear-gradient(90deg, #6d5222, #e9d08d 42%, #8e6f30);
+    clip-path: path('M4 0a4 4 0 0 1 2.2 7.3v3.2h1.8v2h-1.8v2h1.3v2h-1.3v4.5h-3.2v-13.700a4 4 0 0 1 1-7.300z');
+    filter: drop-shadow(1px 1px 0 rgb(0 0 0 / 0.5));
+  }
+
+  /* ------------------------------------------------------------------ the job sheet */
+
+  & sr-sheet {
+    position: absolute;
+    left: 28px;
+    top: 24px;
+    width: 332px;
+    max-height: calc(100dvh - 48px);
+    color: var(--ink);
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 12%, rgb(80 50 10 / 0.08)), #e6dcc2;
+    box-shadow:
+      0 14px 30px rgb(0 0 0 / 0.75),
+      0 1px 0 rgb(255 255 255 / 0.3) inset;
+    font-size: 12px;
+    line-height: 1.36;
+    overflow: auto;
+    scrollbar-width: thin;
+  }
+
+  & .sheet-tab {
+    display: none;
+  }
+
+  & .sheet-body {
+    padding: 16px 20px 12px;
+  }
+
+  & sr-sheet header {
+    padding-bottom: 8px;
+    border-bottom: 3px double var(--ink);
+    text-align: center;
+    font-family: var(--plate-font);
+  }
+
+  & sr-sheet .maker {
+    margin: 0;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
+  & sr-sheet .trade {
+    margin: 0;
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  & sr-sheet h1 {
+    margin: 9px 0 6px;
+    font: 400 20px / 1.1 var(--type-font);
+    letter-spacing: 0.02em;
+  }
+
+  & sr-sheet .job {
+    margin: 0 0 6px;
+  }
+
+  & sr-sheet kbd {
+    font: inherit;
+    padding: 0 3px;
+    border: 1px solid rgb(35 32 27 / 0.45);
+    border-radius: 2px;
+    background: rgb(255 255 255 / 0.25);
+  }
+
+  & sr-sheet code {
+    font: inherit;
+    background: rgb(35 32 27 / 0.09);
+    padding: 0 2px;
+  }
+
+  & sr-sheet .phone-note {
+    display: none;
+  }
+
+  & sr-sheet ol {
+    list-style: none;
+    margin: 8px 0;
+    padding: 0;
+    counter-reset: lock;
+    border-top: 1px solid rgb(35 32 27 / 0.45);
+  }
+
+  & sr-sheet li {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    column-gap: 10px;
+    counter-increment: lock;
+    padding: 4px 0 4px 20px;
+    border-bottom: 1px solid rgb(35 32 27 / 0.22);
+  }
+
+  & sr-sheet li::before {
+    content: counter(lock) '.';
+    position: absolute;
+    left: 0;
+  }
+
+  & sr-sheet li b {
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  & sr-sheet li i {
+    font-style: normal;
+    font-size: 10.5px;
+    opacity: 0.66;
+  }
+
+  & sr-sheet li span {
+    flex: 0 0 100%;
+  }
+
+  & sr-sheet li[data-open] > *,
+  & sr-sheet li[data-open]::before {
+    opacity: 0.45;
+  }
+
+  & sr-sheet li[data-open]::after {
+    content: 'Open';
+    position: absolute;
+    right: 4px;
+    top: 46%;
+    padding: 1px 7px 0;
+    translate: 0 -50%;
+    rotate: -9deg;
+    border: 2px solid #a32a20;
+    border-radius: 3px;
+    color: #a32a20;
+    font: 700 12px / 1.4 var(--plate-font);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  & sr-sheet .tally {
+    margin: 4px 0 0;
+    color: #6d1c13;
+  }
+
+  & sr-sheet .tally b {
+    font-weight: 400;
+  }
+
+  & sr-sheet .back {
+    margin: 6px 0 0;
+    font-size: 11px;
+  }
+
+  & sr-sheet a {
+    color: inherit;
+  }
+
+  & sr-caption {
+    display: none;
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 12px;
+    font-size: 12px;
+    line-height: 1.35;
+    color: #cfd2d4;
+    text-align: center;
+  }
+
+  /* ------------------------------------------------------------------ the door opens */
+
+  &:not([data-door='shut']) sr-door {
+    transform: rotateY(114deg);
+  }
+
+  &:is([data-door='walking'], [data-door='inside']) sr-world {
+    transform: translate(calc(50vw - var(--cx)), calc(50dvh - var(--cy))) scale(var(--z));
+  }
+
+  &:not([data-door='shut']) :is(sr-sheet, sr-cabinet) {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s;
+  }
+
+  &[data-door='inside'] :is(sr-wall, sr-frame, sr-hinge, sr-door, sr-tunnel, sr-shade) {
+    visibility: hidden;
+  }
+
+  &[data-instant] :is(sr-world, sr-door, sr-sheet, sr-cabinet) {
+    transition: none;
+  }
+
+  /* ------------------------------------------------------------------ inside */
+
+  & sr-room {
+    position: absolute;
+    left: var(--cx);
+    top: var(--cy);
+    width: 100vw;
+    height: 100dvh;
+    margin: -50dvh 0 0 -50vw;
+    scale: calc(1 / var(--z));
+    overflow: hidden;
+    background: #14120e;
+    color: #e6dcc2;
+  }
+
+  /* One bulb, somewhere over the middle of the wall. */
+  & sr-room::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 58% 70% at 62% 34%, rgb(255 214 150 / 0.2), transparent 70%),
+      radial-gradient(ellipse 90% 90% at 60% 40%, transparent 44%, rgb(4 3 2 / 0.86) 100%);
+  }
+
+  & sr-boxes {
+    position: absolute;
+    inset: 0 0 0 clamp(300px, 30vw, 430px);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    grid-auto-rows: 76px;
+    align-content: start;
+    background: #0c0b09;
+    overflow: hidden;
+  }
+
+  & .box {
+    position: relative;
+    display: block;
+    margin: 1px;
+    border-radius: 2px;
+    text-decoration: none;
+    color: inherit;
+    background:
+      radial-gradient(circle at 50% 66%, #050505 0 2.6px, transparent 3px),
+      linear-gradient(180deg, rgb(255 255 255 / 0.1), transparent 12%, transparent 84%, rgb(0 0 0 / 0.42)),
+      linear-gradient(100deg, #5a5748, #737060 46%, #4b4a3e);
+    box-shadow:
+      inset 0 0 0 1px rgb(0 0 0 / 0.55),
+      inset 1px 1px 0 2px rgb(255 255 255 / 0.05);
+    transition:
+      filter 0.15s,
+      translate 0.15s;
+  }
+
+  & .box b {
+    position: absolute;
+    left: 50%;
+    top: 9px;
+    min-width: 26px;
+    padding: 1px 4px 0;
+    translate: -50% 0;
+    border-radius: 1px;
+    text-align: center;
+    font: 700 10px / 1.35 var(--plate-font);
+    letter-spacing: 0.08em;
+    color: #2d2110;
+    background: var(--brass);
+    box-shadow: 0 1px 1px rgb(0 0 0 / 0.6);
+  }
+
+  /* Boxes with something in them have a card in the holder. */
+  & a.box {
+    background:
+      radial-gradient(circle at 50% 86%, #050505 0 2.4px, transparent 2.8px),
+      linear-gradient(180deg, rgb(255 255 255 / 0.14), transparent 12%, transparent 84%, rgb(0 0 0 / 0.42)),
+      linear-gradient(100deg, #8c7f58, #a89a6c 46%, #7d7150);
+  }
+
+  & a.box::after {
+    content: attr(data-name);
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    top: 27px;
+    height: 27px;
+    padding: 1px 3px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 1px;
+    font: 10px / 1.05 var(--type-font);
+    letter-spacing: -0.02em;
+    text-align: center;
+    color: #23201b;
+    background: #e6dcc2;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.4);
+  }
+
+  & a.box:hover,
+  & a.box:focus-visible {
+    z-index: 1;
+    translate: 0 -2px;
+    filter: brightness(1.25);
+    outline: 1px solid #f1dca0;
+  }
+
+  & sr-niche {
+    position: absolute;
+    z-index: 2;
+    inset: 0 auto 0 0;
+    width: clamp(300px, 30vw, 430px);
+    padding: clamp(14px, 3dvh, 34px) clamp(14px, 2vw, 34px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(14px, 3dvh, 30px);
+    overflow: auto;
+    background:
+      linear-gradient(90deg, transparent 86%, rgb(0 0 0 / 0.55)),
+      repeating-linear-gradient(91deg, #231509 0 4px, #2b1a0b 4px 7px, #1f1307 7px 12px);
+    box-shadow: 6px 0 24px rgb(0 0 0 / 0.8);
+  }
+
+  & sr-report {
+    padding: 16px 18px 14px;
+    rotate: -0.7deg;
+    color: var(--ink);
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 12%, rgb(80 50 10 / 0.08)), #e6dcc2;
+    box-shadow: 0 10px 22px rgb(0 0 0 / 0.7);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  & sr-report h2 {
+    margin: 0 0 8px;
+    padding-bottom: 6px;
+    border-bottom: 3px double var(--ink);
+    font: 400 16px / 1.2 var(--type-font);
+  }
+
+  & sr-report dl {
+    margin: 0;
+  }
+
+  & sr-report dt {
+    margin-top: 5px;
+    font-size: 10.5px;
+    opacity: 0.66;
+  }
+
+  & sr-report dd {
+    margin: 0;
+  }
+
+  & sr-report [data-verdict] {
+    margin: 10px 0 0;
+    padding-top: 7px;
+    border-top: 1px solid rgb(35 32 27 / 0.45);
+  }
+
+  & .room-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    align-items: baseline;
+    margin: 10px 0 0;
+    font-size: 11.5px;
+  }
+
+  & .room-actions a,
+  & .room-actions button {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* The building's register, kept in here with everything else. */
+  & .ledger {
+    align-self: center;
+    flex: none;
+    width: clamp(140px, 13vw, 190px);
+    aspect-ratio: 3 / 4;
+    padding: 12% 8%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4%;
+    border-radius: 2px 6px 6px 2px;
+    color: #e5c97e;
+    text-decoration: none;
+    font: 600 clamp(12px, 1.2vw, 16px) / 1.2 var(--plate-font);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-align: center;
+    background:
+      linear-gradient(
+        90deg,
+        rgb(0 0 0 / 0.55),
+        rgb(255 255 255 / 0.1) 6%,
+        transparent 11%,
+        transparent 96%,
+        rgb(0 0 0 / 0.35)
+      ),
+      radial-gradient(ellipse at 40% 30%, #6e1f18, #461009 70%, #2c0a06);
+    box-shadow:
+      0 12px 22px rgb(0 0 0 / 0.75),
+      inset 0 0 0 5px #3a0d08,
+      inset 0 0 0 6px rgb(229 201 126 / 0.65);
+    transition: translate 0.18s;
+  }
+
+  & .ledger:hover,
+  & .ledger:focus-visible {
+    translate: 0 -5px;
+  }
+
+  & .ledger span:nth-child(2) {
+    font-size: 0.7em;
+    letter-spacing: 0.12em;
+    text-transform: none;
+  }
+}
+
+/* Once every nine seconds, for about forty milliseconds. */
+@keyframes sr-strobe {
+  0%,
+  96% {
+    opacity: 0;
+  }
+  96.01%,
+  96.45% {
+    opacity: 1;
+  }
+  96.46%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ fitting it in */
+
+@media (min-width: 1100px) {
+  .strongroom {
+    --D: min(84dvh, calc((100vw - 450px) * 0.8));
+    --cx: calc(390px + (100vw - 390px) / 2);
+  }
+}
+
+@media (min-width: 1361px) {
+  .strongroom {
+    --cx: calc(376px + (100vw - 376px - 64px) / 2);
+  }
+}
+
+@media (max-width: 1360px) {
+  .strongroom sr-cabinet {
+    display: none;
+  }
+}
+
+/* The sheet folds away when the window has been narrowed, usually by docked developer tools. */
+@media (max-width: 1099px) {
+  .strongroom {
+    & sr-sheet {
+      left: 12px;
+      top: auto;
+      bottom: 0;
+      width: min(340px, calc(100vw - 24px));
+      max-height: 44px;
+      overflow: hidden;
+      transition: max-height 0.28s ease;
+    }
+
+    & sr-sheet[data-open] {
+      max-height: calc(100dvh - 24px);
+      overflow: auto;
+    }
+
+    & .sheet-tab {
+      display: block;
+      width: 100%;
+      height: 44px;
+      padding: 0 22px;
+      border: 0;
+      background: none;
+      font: inherit;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: left;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    & .sheet-body {
+      padding-top: 4px;
+    }
+  }
+}
+
+/* A phone: nothing to dock, so the sheet simply follows the door. */
+@media (max-width: 640px) and (min-width: 321px) {
+  .strongroom {
+    --D: 82vw;
+    --cy: calc(var(--D) * 0.66);
+    position: absolute;
+    inset: 0 0 auto;
+    min-height: 100dvh;
+    overflow: hidden auto;
+
+    & sr-world {
+      position: relative;
+      inset: auto;
+      height: calc(var(--D) * 1.32);
+      overflow: clip;
+    }
+
+    & sr-sheet {
+      position: relative;
+      left: auto;
+      bottom: auto;
+      width: auto;
+      max-height: none;
+      margin: 0 12px 16px;
+      overflow: visible;
+    }
+
+    & .sheet-tab {
+      display: none;
+    }
+
+    & .sheet-body {
+      padding-top: 18px;
+    }
+  }
+}
+
+@media (hover: none) and (max-width: 900px) {
+  .strongroom sr-sheet .phone-note {
+    display: block;
+    margin: 0 0 8px;
+    padding: 6px 8px;
+    border: 1px dashed rgb(35 32 27 / 0.55);
+  }
+}
+
+/* A narrow view of the room: no walk through the door, and the wall of boxes follows the paperwork. */
+@media (max-width: 760px) {
+  .strongroom[data-door='inside'] {
+    & sr-world {
+      position: fixed;
+      inset: 0;
+      height: auto;
+      transform: none;
+      transition: none;
+      overflow: auto;
+    }
+
+    & sr-room {
+      position: relative;
+      left: auto;
+      top: auto;
+      width: auto;
+      height: auto;
+      margin: 0;
+      scale: none;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+    }
+
+    & sr-room::after {
+      display: none;
+    }
+
+    & sr-niche {
+      order: -1;
+      position: relative;
+      inset: auto;
+      width: auto;
+      box-shadow: none;
+    }
+
+    & sr-boxes {
+      position: relative;
+      inset: auto;
+    }
+  }
+}
+
+/* The door's edge, seen from 320 px or narrower. */
+@media (max-width: 320px) {
+  .strongroom {
+    --D: min(76dvh, 560px);
+    --cx: 50vw;
+    --cy: 50dvh;
+    background: radial-gradient(circle at 50% 40%, #2d3032, #08090a 70%);
+
+    & :is(sr-wall, sr-frame, sr-hinge, sr-tunnel, sr-room, sr-arm, sr-shade, sr-cabinet, sr-sheet) {
+      display: none !important;
+    }
+
+    & sr-world {
+      perspective: calc(var(--D) * 3);
+    }
+
+    & sr-door {
+      transform-origin: 50% 50%;
+      transform: translateX(calc(14 * var(--u))) rotateY(76deg);
+      transition: transform 0.9s cubic-bezier(0.3, 0, 0.2, 1);
+    }
+
+    & sr-caption {
+      display: block;
+    }
+  }
+}
