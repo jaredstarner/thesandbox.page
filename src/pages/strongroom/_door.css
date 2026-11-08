@@ -99,13 +99,13 @@ body:has(.strongroom) {
     background:
       radial-gradient(
         circle at var(--cx) var(--cy),
-        rgb(0 0 0 / 0.78) calc(var(--R) * 1.08),
-        rgb(0 0 0 / 0.34) calc(var(--R) * 1.2),
-        transparent calc(var(--R) * 1.75)
+        rgb(0 0 0 / 0.78) calc(var(--R) * 1.09),
+        rgb(0 0 0 / 0.26) calc(var(--R) * 1.2),
+        transparent calc(var(--R) * 1.6)
       ),
       linear-gradient(90deg, rgb(0 0 0 / 0.5) 0 2px, rgb(255 255 255 / 0.05) 2px 3px, transparent 3px) 0 0 / 44vmin 100%,
       linear-gradient(rgb(0 0 0 / 0.5) 0 2px, rgb(255 255 255 / 0.05) 2px 3px, transparent 3px) 0 0 / 100% 44vmin,
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='1400'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0013 .0024' numOctaves='5' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .24 0 0 0 0 .18 0 2.2 0 0 -.8'/%3E%3C/filter%3E%3Cfilter id='v' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='turbulence' baseFrequency='.0021 .0044' numOctaves='5' seed='8' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .72 0 0 0 0 .78 0 0 0 0 .66 2.4 0 0 0 0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='.5 .16 .04 0 0 0 0 0 0 0 0 0 0 0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='1400' height='1400' filter='url(%23c)'/%3E%3Crect width='1400' height='1400' filter='url(%23v)'/%3E%3C/svg%3E")
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='1400'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0013 .0024' numOctaves='5' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .24 0 0 0 0 .18 0 2.2 0 0 -.8'/%3E%3C/filter%3E%3Cfilter id='v' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='turbulence' baseFrequency='.0021 .0044' numOctaves='5' seed='8' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .72 0 0 0 0 .78 0 0 0 0 .66 2.4 0 0 0 0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='.92 .34 .1 .02 0 0 0 0 0 0 0 0 0 0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='1400' height='1400' filter='url(%23c)'/%3E%3Crect width='1400' height='1400' filter='url(%23v)'/%3E%3C/svg%3E")
         0 0 / 1400px 1400px,
       #16251f;
     /* A round hole, for later. */
@@ -130,6 +130,8 @@ body:has(.strongroom) {
         rgb(255 255 255 / 0.34) 98.6%,
         rgb(0 0 0 / 0.7) 100%
       ),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-100 -100 200 200'%3E%3Cdefs%3E%3CradialGradient id='r' cx='.38' cy='.34'%3E%3Cstop stop-color='%23f4f5f6'/%3E%3Cstop offset='.5' stop-color='%23989da1'/%3E%3Cstop offset='1' stop-color='%232b2d30'/%3E%3C/radialGradient%3E%3Ccircle id='c' cy='-95.4' r='1.45' fill='url(%23r)' stroke='%23000' stroke-opacity='.55' stroke-width='.2'/%3E%3C/defs%3E%3Cuse href='%23c' transform='rotate(0.0)'/%3E%3Cuse href='%23c' transform='rotate(11.25)'/%3E%3Cuse href='%23c' transform='rotate(22.5)'/%3E%3Cuse href='%23c' transform='rotate(33.75)'/%3E%3Cuse href='%23c' transform='rotate(45.0)'/%3E%3Cuse href='%23c' transform='rotate(56.25)'/%3E%3Cuse href='%23c' transform='rotate(67.5)'/%3E%3Cuse href='%23c' transform='rotate(78.75)'/%3E%3Cuse href='%23c' transform='rotate(90.0)'/%3E%3Cuse href='%23c' transform='rotate(101.25)'/%3E%3Cuse href='%23c' transform='rotate(112.5)'/%3E%3Cuse href='%23c' transform='rotate(123.75)'/%3E%3Cuse href='%23c' transform='rotate(135.0)'/%3E%3Cuse href='%23c' transform='rotate(146.25)'/%3E%3Cuse href='%23c' transform='rotate(157.5)'/%3E%3Cuse href='%23c' transform='rotate(168.75)'/%3E%3Cuse href='%23c' transform='rotate(180.0)'/%3E%3Cuse href='%23c' transform='rotate(191.25)'/%3E%3Cuse href='%23c' transform='rotate(202.5)'/%3E%3Cuse href='%23c' transform='rotate(213.75)'/%3E%3Cuse href='%23c' transform='rotate(225.0)'/%3E%3Cuse href='%23c' transform='rotate(236.25)'/%3E%3Cuse href='%23c' transform='rotate(247.5)'/%3E%3Cuse href='%23c' transform='rotate(258.75)'/%3E%3Cuse href='%23c' transform='rotate(270.0)'/%3E%3Cuse href='%23c' transform='rotate(281.25)'/%3E%3Cuse href='%23c' transform='rotate(292.5)'/%3E%3Cuse href='%23c' transform='rotate(303.75)'/%3E%3Cuse href='%23c' transform='rotate(315.0)'/%3E%3Cuse href='%23c' transform='rotate(326.25)'/%3E%3Cuse href='%23c' transform='rotate(337.5)'/%3E%3Cuse href='%23c' transform='rotate(348.75)'/%3E%3C/svg%3E")
+        center / 100% 100% no-repeat,
       var(--steel-brush),
       var(--steel-sheen),
       #6f7377;
@@ -528,8 +530,7 @@ body:has(.strongroom) {
   }
 
   /* After the relocker fires. */
-  .strongroom[data-relockers] & sr-glass::after,
-  &[data-relockers] sr-glass::after {
+  &[data-cracked] sr-glass::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -1214,7 +1215,6 @@ body:has(.strongroom) {
     top: 24px;
     width: 332px;
     max-height: calc(100dvh - 48px);
-    rotate: -0.5deg;
     color: var(--ink);
     background:
       linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 12%, rgb(80 50 10 / 0.08)),
@@ -1366,6 +1366,18 @@ body:has(.strongroom) {
 
   & sr-sheet a {
     color: inherit;
+  }
+
+  & sr-caption {
+    display: none;
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 12px;
+    font-size: 12px;
+    line-height: 1.35;
+    color: #cfd2d4;
+    text-align: center;
   }
 
   /* ------------------------------------------------------------------ the door opens */
@@ -1654,7 +1666,6 @@ body:has(.strongroom) {
       width: min(340px, calc(100vw - 24px));
       max-height: 44px;
       overflow: hidden;
-      rotate: none;
       transition: max-height 0.28s ease;
     }
 
@@ -1748,7 +1759,12 @@ body:has(.strongroom) {
 
     & sr-door {
       transform-origin: 50% 50%;
-      transform: translateX(calc(16 * var(--u))) rotateY(78deg);
+      transform: translateX(calc(14 * var(--u))) rotateY(76deg);
+      transition: transform 0.9s cubic-bezier(0.3, 0, 0.2, 1);
+    }
+
+    & sr-caption {
+      display: block;
     }
   }
 }

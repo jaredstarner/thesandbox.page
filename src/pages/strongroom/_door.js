@@ -5,7 +5,7 @@
   like. Everything happens in your browser, so nothing here can really stop you. The
   question is only whether the door notices.
 
-  Console commands: status(), hint(), insert(), turn(), reset().
+  Console commands: locks(), hint(), insert(), turn(), reset().
 */
 (function () {
   const root = document.querySelector('.strongroom');
@@ -123,7 +123,7 @@
         '',
         'You are in the right place. Everything that moves this door is in these panels.',
         '',
-        '  status()    what is still holding it',
+        '  locks()     what is still holding it',
         '  hint()      a nudge on the next lock; ask again for more',
         '  hint(5)     a nudge on lock 5',
         '  reset()     lock it all up and start again',
@@ -135,7 +135,7 @@
     if (left < 7) say(left ? `${7 - left} of 7 already clear from your last visit.` : 'All seven are clear.', QUIET);
   }
 
-  function status() {
+  function locks() {
     const table = {};
     LOCKS.forEach(({ name, title, tools }, i) => {
       table[`${i + 1}. ${title}`] = { state: job.open[name] ? 'open' : 'engaged', tools };
@@ -344,8 +344,7 @@
   function showRelockers() {
     const count = root.querySelector('[data-relockers]');
     if (count) count.textContent = String(job.relockers);
-    if (job.relockers) root.setAttribute('data-relockers', String(job.relockers));
-    else root.removeAttribute('data-relockers');
+    root.toggleAttribute('data-cracked', job.relockers > 0);
   }
 
   function isDoorPart(node) {
@@ -950,7 +949,8 @@
     if (root.dataset.door !== 'shut') fitWorld();
   });
 
-  window.status = status;
+  // Not status(): window.status has belonged to the browser since the nineties.
+  window.locks = locks;
   window.hint = hint;
   window.insert = insert;
   window.turn = turn;
