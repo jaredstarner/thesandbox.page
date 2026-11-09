@@ -605,5 +605,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Courier New', 'monospace'],
     },
+    // /xy-mode/: instrument legends, in a mono that holds up very small.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Martian Mono',
+      cssVariable: '--font-xy',
+      weights: ['100 800'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });

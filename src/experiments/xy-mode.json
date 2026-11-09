@@ -1,0 +1,17 @@
+{
+  "title": "XY mode",
+  "summary": "An oscilloscope wired straight to your speakers: the left channel pushes a dot of light sideways, the right pushes it up and down, and nothing else draws on the screen, so every chord, spinning tesseract, sketch, and sentence on the tube is exactly the sound you are hearing.",
+  "date": "2026-11-09",
+  "tags": [
+    "webgl2",
+    "color-buffer-float",
+    "web-audio",
+    "audio-worklet",
+    "pointer-events",
+    "getusermedia",
+    "oscilloscope",
+    "vector-synthesis"
+  ],
+  "requires": ["webgl2"],
+  "plot": 39
+}
