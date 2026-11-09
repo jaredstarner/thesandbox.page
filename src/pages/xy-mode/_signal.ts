@@ -418,6 +418,7 @@ class Bench {
 export class Signal {
   mode: Mode = 'idle';
   private pendingMode: Mode | null = null;
+  private pendingBar: number | null = null;
   private fade = 1;
   private readonly fadeStep: number;
   private readonly reel: Reel;
@@ -430,6 +431,8 @@ export class Signal {
   private dotX = 0;
   private dotY = 0;
   private readonly dotK: number;
+  private steered = 0;
+  private drift = 0;
   // Listening.
   private readonly twistBuf: Float32Array;
   private twistWrite = 0;
@@ -461,10 +464,18 @@ export class Signal {
       case 'pointer':
         this.tx = cmd.x;
         this.ty = cmd.y;
+        this.steered = 0;
         break;
       case 'reel':
-        if (cmd.action === 'play') this.reel.play(cmd.bar ?? 0);
-        else this.reel.stop();
+        if (cmd.action === 'stop') {
+          this.reel.stop();
+        } else if (this.mode === 'reel' && this.reel.playing) {
+          // Jumping while it sounds would click, so fade down, jump, and come back up.
+          this.pendingBar = cmd.bar ?? 0;
+          this.pendingMode = 'reel';
+        } else {
+          this.reel.play(cmd.bar ?? 0);
+        }
         break;
       case 'note':
         if (cmd.on) this.keys.noteOn(cmd.midi);
@@ -549,6 +560,13 @@ export class Signal {
       }
       default:
         for (let i = 0; i < n; i++) {
+          // Left alone, the dot wanders, far too slowly to be heard.
+          if (this.steered > this.sr * 4) {
+            this.drift += 1 / this.sr;
+            this.tx = 0.5 * Math.sin(this.drift * 0.83);
+            this.ty = 0.36 * Math.sin(this.drift * 0.57 + 1);
+          }
+          this.steered++;
           this.dotX += (this.tx - this.dotX) * this.dotK;
           this.dotY += (this.ty - this.dotY) * this.dotK;
           x[i] = this.dotX;
@@ -568,8 +586,13 @@ export class Signal {
           this.fade -= this.fadeStep;
           if (this.fade <= 0) {
             this.fade = 0;
+            if (this.mode === 'reel' && this.pendingMode !== 'reel') this.reel.stop();
             this.mode = this.pendingMode;
             this.pendingMode = null;
+            if (this.pendingBar !== null) {
+              this.reel.play(this.pendingBar);
+              this.pendingBar = null;
+            }
           }
         } else if (this.fade < 1) {
           this.fade = Math.min(1, this.fade + this.fadeStep);

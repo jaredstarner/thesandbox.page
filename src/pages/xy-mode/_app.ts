@@ -268,7 +268,6 @@ function start(el: HTMLElement): void {
 
   function stopReel(): void {
     reelRunning = false;
-    send({ type: 'reel', action: 'stop' });
     signalMode('idle');
     toggle.textContent = 'Play the reel';
     cueEl.textContent = opening;

@@ -144,7 +144,7 @@ function buildTunnel(p: Path, t: number): void {
       else p.lineTo(x, y);
     }
   }
-  p.finish(true);
+  p.finish(false);
 }
 
 /** A mountain valley, one ridge at a time, back and forth, so the beam never has to jump. */
@@ -175,7 +175,7 @@ function buildRidge(p: Path, t: number): void {
       else p.lineTo(x, y);
     }
   }
-  p.finish(true);
+  p.finish(false);
 }
 
 const RAD = Math.PI / 180;
