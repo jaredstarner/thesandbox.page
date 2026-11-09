@@ -884,11 +884,18 @@ function start(el: HTMLElement): void {
 
   // Tube controls change only the picture, so they never touch the signal.
   const phosphorButtons = $$<HTMLButtonElement>('[data-phosphor-pick]');
+  const PHOSPHOR_NOTES: Record<PhosphorId, string> = {
+    p31: 'Green, gone almost at once. Most lab scopes.',
+    p3: 'Amber, a little slower.',
+    p11: 'Blue, very short, made for photographing the screen.',
+    p7: 'A blue flash and a long yellow afterglow. Radar screens.',
+  };
   function setPhosphor(id: PhosphorId): void {
     beam.phosphor = id;
     el.dataset.phosphor = id;
     el.style.setProperty('--glow', PHOSPHORS[id].ui);
     for (const b of phosphorButtons) b.setAttribute('aria-pressed', String(b.dataset.phosphorPick === id));
+    $<HTMLElement>('[data-phosphor-note]').textContent = PHOSPHOR_NOTES[id];
     beam.clear();
     try {
       localStorage.setItem('xy-phosphor', id);
@@ -979,8 +986,8 @@ function start(el: HTMLElement): void {
 
   // ---------------------------------------------------------------- housekeeping
 
-  // A tone that nobody is attending to shouldn't drone on in the background. Reel and Keys stop
-  // by themselves, but Draw and Type hold a note for as long as there's a picture.
+  // A tone that nobody is attending to shouldn't drone on in the background. The reel ends by
+  // itself, but Draw, Type, and held Keys keep their note for as long as there's a picture.
   let lastTouch = performance.now();
   let idleMute = false;
   function touch(): void {
@@ -1040,7 +1047,7 @@ function start(el: HTMLElement): void {
     }
     beam.frame(dt);
     updateReel();
-    if (audioLive && (mode === 'draw' || mode === 'type') && !idleMute && now - lastTouch > 60000) {
+    if (audioLive && (mode === 'draw' || mode === 'type' || mode === 'keys') && !idleMute && now - lastTouch > 60000) {
       idleMute = true;
       applyVolume();
     }

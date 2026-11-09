@@ -190,6 +190,9 @@ const signalKnobs = [
             P7
           </button>
         </div>
+        <p class="note phosphor-note" data-phosphor-note>
+          Green, gone almost at once. Most lab scopes.
+        </p>
         <div class="knobs">
           <label class="knob">
             <span>Glow</span>
@@ -408,6 +411,7 @@ const signalKnobs = [
     max-width: 640px;
     text-align: center;
     color: var(--ink);
+    font-size: 12.5px;
     text-wrap: balance;
   }
   .reelrow {
@@ -421,7 +425,7 @@ const signalKnobs = [
     flex: none;
     cursor: pointer;
     padding: 7px 14px 8px;
-    border: 1px solid var(--faint);
+    border: 1px solid var(--dim);
     border-radius: 2px;
     color: rgb(var(--glow));
     font-size: 12px;
@@ -680,7 +684,10 @@ const signalKnobs = [
   }
   .phosphors {
     display: flex;
-    margin-bottom: 8px;
+  }
+  .phosphor-note {
+    margin: 6px 0 8px;
+    min-height: 3em;
   }
   .phosphors button {
     flex: 1;

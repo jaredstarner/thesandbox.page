@@ -144,11 +144,13 @@ export class Reel {
   private lpY = 0;
   private readonly lpK: number;
   private readonly lpSharp: number;
+  private readonly lpSoft: number;
 
   constructor(readonly sr: number) {
     this.dt = 1 / sr;
     this.lpK = 1 - Math.exp((-2 * Math.PI * 8000) / sr);
     this.lpSharp = 1 - Math.exp((-2 * Math.PI * 18000) / sr);
+    this.lpSoft = 1 - Math.exp((-2 * Math.PI * 4500) / sr);
     for (let i = 0; i < 16; i++) this.bells.push({ f: 220, ph: 0, env: 0, decay: 1, gx: 0, gy: 0 });
   }
 
@@ -341,9 +343,9 @@ export class Reel {
     const q = 48000 / this.sr;
     const kF = 0.0006 * q;
     // Pictures with jumps get a sharper edge, so the jumps stay fast and faint.
-    const dec = bar >= 51 && bar < 62 ? this.lpSharp : this.lpK;
+    const dec = bar >= 59 && bar < 62 ? this.lpSharp : bar >= 51 && bar < 59 ? this.lpSoft : this.lpK;
     const leadOn = bar >= 31 && bar < 59;
-    const leadLevel = bar >= 51 ? 0.012 : bar >= 43 ? 0.02 : bar >= 35 ? 0.032 : 0.028;
+    const leadLevel = bar >= 51 ? 0.016 : bar >= 43 ? 0.02 : bar >= 35 ? 0.032 : 0.028;
 
     const kickDecay = Math.exp(-this.dt / 0.11);
     const kickDrop = Math.exp(-this.dt / 0.035);

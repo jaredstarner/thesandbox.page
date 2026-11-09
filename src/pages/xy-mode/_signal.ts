@@ -112,7 +112,7 @@ class Keys {
     voice.on = true;
     voice.f = midiToFreq(m);
     voice.target = voice.f;
-    voice.ph = 0;
+    if (voice.env < 0.002) voice.ph = 0;
     this.assign();
   }
 
