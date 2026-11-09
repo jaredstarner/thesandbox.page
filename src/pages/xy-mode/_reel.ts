@@ -39,6 +39,7 @@ export const CUES: { bar: number; text: string }[] = [
   { bar: 31, text: 'The fine ripple along the lines is the melody, a small circle riding on the beam.' },
   { bar: 35, text: 'A torus knot needs no jumps, so there is no faint line where the beam crosses.' },
   { bar: 43, text: 'One spiral down the tunnel and another back up. The bend is the two channels drifting.' },
+  { bar: 47, text: 'Ridges, one after another, drawn back and forth without the beam ever having to jump.' },
   { bar: 51, text: 'Every coast takes so long to draw that the note falls to 55 Hz and below. So it flickers.' },
   { bar: 59, text: 'This is what the address sounds like.' },
   { bar: 62, text: 'Back to one note.' },
@@ -62,6 +63,7 @@ const SECTIONS: Section[] = [
   { from: 39, id: 'knot25', pattern: [0, 7, 12, 7, 0, 7, 12, 19], octave: 0 },
   { from: 41, id: 'knot35', pattern: [0, 7, 12, 7, 0, 12, 7, 19], octave: 0 },
   { from: 43, id: 'tunnel', pattern: [0, 0, 12, 0, 0, 7, 0, 12], octave: 0 },
+  { from: 47, id: 'ridge', pattern: [0, 0, 12, 0, 0, 7, 0, 12], octave: -12 },
   { from: 51, id: 'earth', pattern: FLAT, octave: -12 },
   { from: 59, id: 'title', pattern: FLAT, octave: -12 },
 ];
@@ -141,10 +143,12 @@ export class Reel {
   private lpX = 0;
   private lpY = 0;
   private readonly lpK: number;
+  private readonly lpSharp: number;
 
   constructor(readonly sr: number) {
     this.dt = 1 / sr;
     this.lpK = 1 - Math.exp((-2 * Math.PI * 8000) / sr);
+    this.lpSharp = 1 - Math.exp((-2 * Math.PI * 18000) / sr);
     for (let i = 0; i < 16; i++) this.bells.push({ f: 220, ph: 0, env: 0, decay: 1, gx: 0, gy: 0 });
   }
 
@@ -202,8 +206,8 @@ export class Reel {
     // Struck chords: root and fifth across the axes, the rest arriving through the bar.
     if (bar >= 11 && bar < 19) {
       if (s === 0) {
-        this.strike(midi(chord[0]), 0.5, true);
-        this.strike(midi(chord[1]), 0.5, false);
+        this.strike(midi(chord[0]), 0.55, true);
+        this.strike(midi(chord[1]), 0.55, false);
       }
       if (s === 6) this.strike(midi(chord[2]), 0.3, false);
       if (s === 8) this.strike(midi(chord[0] + 12), 0.34, true);
@@ -214,7 +218,7 @@ export class Reel {
     if (groove) {
       const four = bar >= 43;
       const kick = four ? s % 4 === 0 : s === 0 || s === 6 || s === 8;
-      if (kick) this.kick(four ? 0.11 : 0.1);
+      if (kick) this.kick(four ? 0.09 : bar >= 35 ? 0.06 : 0.09);
       const fill = bar % 8 === 2 && s >= 8 && s % 2 === 0;
       if (s === 4 || s === 12 || fill) this.snare(fill ? 0.7 : 1);
       if (s % 2 === 0 || bar >= 35) this.hat(s % 4 === 2 ? 1 : 0.55);
@@ -250,12 +254,12 @@ export class Reel {
   }
 
   private snare(amp: number): void {
-    this.snareEnv = 0.11 * amp;
+    this.snareEnv = 0.075 * amp;
     this.snarePh = 0;
   }
 
   private hat(amp: number): void {
-    this.hatEnv = 0.05 * amp;
+    this.hatEnv = 0.032 * amp;
   }
 
   private section(bar: number): void {
@@ -325,7 +329,7 @@ export class Reel {
     const ay = Math.max(openY, closeY) * 0.82;
     const whole = Math.floor(bar);
     if (bar >= 4.5 && bar < 11) {
-      this.fyTarget = 220 * RATIOS[Math.min(whole - 5, RATIOS.length - 1) < 0 ? 0 : Math.min(whole - 5, 5)] * 1.0011;
+      this.fyTarget = 220 * RATIOS[Math.min(whole - 5, RATIOS.length - 1) < 0 ? 0 : Math.min(whole - 5, 5)] * 1.0003;
     } else {
       this.fyTarget = 220;
     }
@@ -334,9 +338,10 @@ export class Reel {
     const locked = bar < 4.5 || bar >= 61;
 
     const kF = 0.0006;
-    const dec = this.lpK;
+    // Pictures with jumps get a sharper edge, so the jumps stay fast and faint.
+    const dec = bar >= 51 && bar < 62 ? this.lpSharp : this.lpK;
     const leadOn = bar >= 31 && bar < 59;
-    const leadLevel = bar >= 51 ? 0.012 : bar >= 43 ? 0.03 : bar >= 35 ? 0.06 : 0.035;
+    const leadLevel = bar >= 51 ? 0.012 : bar >= 43 ? 0.02 : bar >= 35 ? 0.032 : 0.028;
 
     const kickDecay = Math.exp(-this.dt / 0.11);
     const kickDrop = Math.exp(-this.dt / 0.035);

@@ -5,7 +5,8 @@ import { COAST } from './_coast';
 import type { Path } from './_path';
 import { setText } from './_strokes';
 
-export type SceneId = 'cube' | 'tesseract' | 'knot23' | 'knot34' | 'knot25' | 'knot35' | 'tunnel' | 'earth' | 'title';
+export type SceneId =
+  'cube' | 'tesseract' | 'knot23' | 'knot34' | 'knot25' | 'knot35' | 'tunnel' | 'ridge' | 'earth' | 'title';
 
 // Cube corners are numbered by their bits (x, y, z). The cube has eight odd corners, so a
 // single pass has to run over four of its edges twice.
@@ -123,8 +124,8 @@ function buildKnot(p: Path, t: number, turns: number, loops: number): void {
 function buildTunnel(p: Path, t: number): void {
   const steps = 360;
   const near = 0.58;
-  const far = 9;
-  const turns = 9;
+  const far = 7;
+  const turns = 5;
   const flow = t * 2.1;
   const log = Math.log(far / near);
   for (let leg = 0; leg < 2; leg++) {
@@ -140,6 +141,37 @@ function buildTunnel(p: Path, t: number): void {
       const x = cx + rho * Math.cos(angle);
       const y = cy + rho * Math.sin(angle);
       if (i === 0 && leg === 0) p.moveTo(x, y);
+      else p.lineTo(x, y);
+    }
+  }
+  p.finish(true);
+}
+
+/** A mountain valley, one ridge at a time, back and forth, so the beam never has to jump. */
+function buildRidge(p: Path, t: number): void {
+  const scroll = t * 1.5;
+  const whole = Math.floor(scroll);
+  const frac = scroll - whole;
+  const lines = 14;
+  const steps = 38;
+  for (let l = 0; l < lines; l++) {
+    const index = l + 1 - frac;
+    const z = 0.82 + index * index * 0.075 + index * 0.32;
+    const world = whole + l;
+    const reach = Math.min(4.3, (0.98 * z) / 0.92);
+    for (let i = 0; i <= steps; i++) {
+      const s = i / steps;
+      const across = (l % 2 ? 1 - s * 2 : s * 2 - 1) * reach;
+      const side = Math.abs(across) / 2.2;
+      const rise = side * side * (1.1 + 0.3 * Math.sin(world * 0.37));
+      const lumps =
+        0.34 * Math.sin(across * 1.7 + world * 0.61) +
+        0.2 * Math.sin(across * 3.9 - world * 0.97) +
+        0.1 * Math.sin(across * 8.3 + world * 1.73);
+      const h = Math.max(0, rise * (1 + lumps));
+      const x = (across * 0.92) / z;
+      const y = ((h - 1.04) * 0.92) / z + 0.2;
+      if (l === 0 && i === 0) p.moveTo(x, y);
       else p.lineTo(x, y);
     }
   }
@@ -255,7 +287,7 @@ function buildTitle(p: Path, t: number): void {
     p.clear();
   }
   const lean = 0.16 * Math.sin(t * 0.8);
-  const scale = 1.25;
+  const scale = 1.06;
   for (let i = 0; i < titleX.length; i++) {
     const x = titleX[i] * scale;
     const y = titleY[i] * scale;
@@ -283,6 +315,8 @@ export function buildScene(id: SceneId, p: Path, t: number): void {
       return buildKnot(p, t, 3, 5);
     case 'tunnel':
       return buildTunnel(p, t);
+    case 'ridge':
+      return buildRidge(p, t);
     case 'earth':
       return buildEarth(p, t);
     case 'title':

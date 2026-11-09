@@ -21,8 +21,8 @@ interface Phosphor {
 // Linear light. Lifetimes are stretched for a 60 Hz display: real P31 is under a millisecond,
 // and a browser can only show what is left at the end of a frame.
 export const PHOSPHORS: Record<PhosphorId, Phosphor> = {
-  p31: { fast: [0.1, 1, 0.26], slow: [0.1, 0.7, 0.2], mix: [1, 0.015], tau: [0.042, 0.42], ui: '106 255 148', gain: 1 },
-  p3: { fast: [1, 0.46, 0.05], slow: [1, 0.36, 0.03], mix: [1, 0.02], tau: [0.06, 0.5], ui: '255 178 76', gain: 1.15 },
+  p31: { fast: [0.1, 1, 0.26], slow: [0.1, 0.7, 0.2], mix: [1, 0.015], tau: [0.032, 0.42], ui: '106 255 148', gain: 1 },
+  p3: { fast: [1, 0.46, 0.05], slow: [1, 0.36, 0.03], mix: [1, 0.02], tau: [0.046, 0.5], ui: '255 178 76', gain: 1.15 },
   p11: { fast: [0.1, 0.32, 1], slow: [0.12, 0.3, 1], mix: [1, 0], tau: [0.032, 0.3], ui: '126 176 255', gain: 1.45 },
   p7: { fast: [0.22, 0.42, 1], slow: [0.8, 0.82, 0.16], mix: [1, 0.11], tau: [0.05, 1.5], ui: '206 214 112', gain: 1 },
 };
