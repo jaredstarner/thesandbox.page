@@ -3,7 +3,7 @@
 // faster beam, which is why long drawings come out dimmer.
 
 /** How much of a drawn stroke's time a pen-up jump of the same length gets. */
-const JUMP_WEIGHT = 0.05;
+const JUMP_WEIGHT = 0.02;
 
 export class Path {
   readonly xs: Float32Array;

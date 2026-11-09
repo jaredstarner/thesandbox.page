@@ -21,8 +21,8 @@ interface Phosphor {
 // Linear light. Lifetimes are stretched for a 60 Hz display: real P31 is under a millisecond,
 // and a browser can only show what is left at the end of a frame.
 export const PHOSPHORS: Record<PhosphorId, Phosphor> = {
-  p31: { fast: [0.1, 1, 0.26], slow: [0.1, 0.7, 0.2], mix: [1, 0.05], tau: [0.042, 0.42], ui: '106 255 148', gain: 1 },
-  p3: { fast: [1, 0.46, 0.05], slow: [1, 0.36, 0.03], mix: [1, 0.06], tau: [0.06, 0.5], ui: '255 178 76', gain: 1.15 },
+  p31: { fast: [0.1, 1, 0.26], slow: [0.1, 0.7, 0.2], mix: [1, 0.015], tau: [0.042, 0.42], ui: '106 255 148', gain: 1 },
+  p3: { fast: [1, 0.46, 0.05], slow: [1, 0.36, 0.03], mix: [1, 0.02], tau: [0.06, 0.5], ui: '255 178 76', gain: 1.15 },
   p11: { fast: [0.1, 0.32, 1], slow: [0.12, 0.3, 1], mix: [1, 0], tau: [0.032, 0.3], ui: '126 176 255', gain: 1.45 },
   p7: { fast: [0.22, 0.42, 1], slow: [0.8, 0.82, 0.16], mix: [1, 0.11], tau: [0.05, 1.5], ui: '206 214 112', gain: 1 },
 };
@@ -141,12 +141,12 @@ void main() {
   vec2 p = gl_FragCoord.xy;
   // The phosphor is a coat of grains, so light is never perfectly even across it.
   float g = grain(floor(p));
-  vec2 e = texture(screen, uv).rg * (0.93 + 0.14 * g) + texture(glow, uv).rg * 0.34;
+  vec2 e = texture(screen, uv).rg * (0.93 + 0.14 * g) + texture(glow, uv).rg * 0.2;
   vec3 light = fastColor * e.r + slowColor * e.g;
   // Glass: not black, and a little lighter where the tube's face is closest.
   vec2 c = (p - view.xy) / max(view.z, 1.0);
   float d = dot(c, c);
-  vec3 glass = (uiColor * 0.0028 + vec3(0.0026, 0.003, 0.0032)) * (1.0 / (1.0 + 0.5 * d));
+  vec3 glass = (uiColor * 0.0007 + vec3(0.0008, 0.001, 0.0011)) * (1.0 / (1.0 + 0.5 * d));
   light += glass * warm;
   // The engraved scale, lit from the edge of the glass.
   vec4 s = texture(scale, vec2(uv.x, 1.0 - uv.y));
@@ -485,8 +485,8 @@ export class Beam {
       const sigma = (1.05 + (1 - warmth) * 14) * this.focus * px;
       // The same energy per second over more screen is dimmer, as it should be, but let
       // less than all of that through or long drawings fade out altogether.
-      const auto = Math.max(0.3, Math.min(9, (this.smoothCover / 90) ** 0.74));
-      const base = (42 * px * px * this.intensity * auto * ph.gain * warmth * 48000) / this.sampleRate;
+      const auto = Math.max(0.03, Math.min(9, (this.smoothCover / 90) ** 0.74));
+      const base = (11 * px * px * this.intensity * auto * ph.gain * warmth * 48000) / this.sampleRate;
       // Long-lived phosphors collect more passes, so each one has to leave less.
       const live = Math.min(1, (0.05 / tauF) ** 0.75);
 
@@ -533,7 +533,7 @@ export class Beam {
       gl.viewport(0, 0, to.w, to.h);
       gl.bindTexture(gl.TEXTURE_2D, from.tex);
       gl.uniform2f(gl.getUniformLocation(this.up, 'px'), 0.5 / from.w, 0.5 / from.h);
-      gl.uniform1f(gl.getUniformLocation(this.up, 'weight'), 0.82);
+      gl.uniform1f(gl.getUniformLocation(this.up, 'weight'), 0.7);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
 

@@ -56,7 +56,7 @@ interface Section {
 const FLAT = [0, 0, 0, 0, 0, 0, 0, 0];
 const SECTIONS: Section[] = [
   { from: 19, id: 'cube', pattern: [0, 0, 12, 0, 7, 0, 12, 7], octave: 0 },
-  { from: 27, id: 'tesseract', pattern: [0, 0, 0, 7, 0, 0, 12, 7], octave: -12 },
+  { from: 27, id: 'tesseract', pattern: [0, 0, 0, 7, 0, 0, 12, 7], octave: 0 },
   { from: 35, id: 'knot23', pattern: [0, 7, 12, 7, 0, 7, 12, 19], octave: 0 },
   { from: 37, id: 'knot34', pattern: [0, 7, 12, 7, 0, 7, 12, 19], octave: 0 },
   { from: 39, id: 'knot25', pattern: [0, 7, 12, 7, 0, 7, 12, 19], octave: 0 },
@@ -202,8 +202,8 @@ export class Reel {
     // Struck chords: root and fifth across the axes, the rest arriving through the bar.
     if (bar >= 11 && bar < 19) {
       if (s === 0) {
-        this.strike(midi(chord[0]), 0.6, true);
-        this.strike(midi(chord[1]), 0.6, false);
+        this.strike(midi(chord[0]), 0.5, true);
+        this.strike(midi(chord[1]), 0.5, false);
       }
       if (s === 6) this.strike(midi(chord[2]), 0.3, false);
       if (s === 8) this.strike(midi(chord[0] + 12), 0.34, true);
@@ -214,13 +214,11 @@ export class Reel {
     if (groove) {
       const four = bar >= 43;
       const kick = four ? s % 4 === 0 : s === 0 || s === 6 || s === 8;
-      if (kick) this.kick(four ? 0.24 : 0.22);
+      if (kick) this.kick(four ? 0.11 : 0.1);
       const fill = bar % 8 === 2 && s >= 8 && s % 2 === 0;
       if (s === 4 || s === 12 || fill) this.snare(fill ? 0.7 : 1);
       if (s % 2 === 0 || bar >= 35) this.hat(s % 4 === 2 ? 1 : 0.55);
     }
-    // A slow kick under the globe.
-    if (bar >= 51 && bar < 59 && s === 0 && bar % 2 === 1) this.kick(0.12);
     // Lead.
     if (s % 2 === 0) {
       const eighth = s / 2;
@@ -316,7 +314,7 @@ export class Reel {
     this.section(bar);
     const pg = this.pathGain(bar);
     const fTarget = this.target(bar);
-    const padTarget = 0.03 * smooth(19, 21, bar) * (1 - smooth(50, 51, bar));
+    const padTarget = 0.012 * smooth(19, 21, bar) * (1 - smooth(50, 51, bar));
 
     // The opening and closing: one note on each axis, faded and phased through the bar.
     const openX = pulse(bar, 1, 1.25) * (1 - pulse(bar, 11, 11.5));
@@ -338,7 +336,7 @@ export class Reel {
     const kF = 0.0006;
     const dec = this.lpK;
     const leadOn = bar >= 31 && bar < 59;
-    const leadLevel = bar >= 51 ? 0.018 : bar >= 43 ? 0.05 : 0.07;
+    const leadLevel = bar >= 51 ? 0.012 : bar >= 43 ? 0.03 : bar >= 35 ? 0.06 : 0.035;
 
     const kickDecay = Math.exp(-this.dt / 0.11);
     const kickDrop = Math.exp(-this.dt / 0.035);
@@ -372,7 +370,7 @@ export class Reel {
           sx = this.a.x + (sx - this.a.x) * m;
           sy = this.a.y + (sy - this.a.y) * m;
         }
-        const duck = 1 - this.kickEnv * 0.9;
+        const duck = 1 - this.kickEnv * 1.6;
         px += sx * pg * duck * 0.88;
         py += sy * pg * duck * 0.88;
       }

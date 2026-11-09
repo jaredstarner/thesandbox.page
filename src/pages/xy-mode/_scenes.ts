@@ -148,22 +148,25 @@ function buildTunnel(p: Path, t: number): void {
 
 const RAD = Math.PI / 180;
 
+const runX = new Float32Array(4096);
+const runY = new Float32Array(4096);
+const runStart = new Int32Array(256);
+const runEnd = new Int32Array(256);
+const runUsed = new Uint8Array(256);
+
 function buildEarth(p: Path, t: number): void {
   const R = 0.84;
-  // The limb first, so there is always a disc to read the coasts against.
-  for (let i = 0; i <= 72; i++) {
-    const a = (i / 72) * Math.PI * 2;
-    if (i === 0) p.moveTo(R * Math.cos(a), R * Math.sin(a));
-    else p.lineTo(R * Math.cos(a), R * Math.sin(a));
-  }
   const lon0 = 20 * RAD - t * 0.26;
   const tilt = 0.32;
   const ct = Math.cos(tilt);
   const st = Math.sin(tilt);
   const cl = Math.cos(lon0);
   const sl = Math.sin(lon0);
+  // Find what faces us: runs of coast with their ends where they go over the limb.
+  let points = 0;
+  let runs = 0;
   for (const ring of COAST) {
-    let down = false;
+    let open = false;
     for (let i = 0; i < ring.length; i += 2) {
       const lon = ring[i] * RAD;
       const lat = ring[i + 1] * RAD;
@@ -176,12 +179,62 @@ function buildEarth(p: Path, t: number): void {
       const y1 = y0 * ct - z1 * st;
       const z2 = y0 * st + z1 * ct;
       if (z2 < 0.02) {
-        down = false;
+        if (open) runEnd[runs++] = points;
+        open = false;
         continue;
       }
-      if (down) p.lineTo(x1 * R, y1 * R);
-      else p.moveTo(x1 * R, y1 * R);
-      down = true;
+      if (!open) {
+        runStart[runs] = points;
+        open = true;
+      }
+      runX[points] = x1 * R;
+      runY[points] = y1 * R;
+      points++;
+    }
+    if (open) runEnd[runs++] = points;
+  }
+  // The limb first, so there is always a disc to read the coasts against.
+  for (let i = 0; i <= 72; i++) {
+    const a = (i / 72) * Math.PI * 2;
+    if (i === 0) p.moveTo(R * Math.cos(a), R * Math.sin(a));
+    else p.lineTo(R * Math.cos(a), R * Math.sin(a));
+  }
+  // The beam can't switch off, so every jump shows faintly. Take the coasts in whichever order
+  // keeps the jumps short.
+  runUsed.fill(0, 0, runs);
+  let cx = R;
+  let cy = 0;
+  for (let k = 0; k < runs; k++) {
+    let best = -1;
+    let bestD = Infinity;
+    let flip = false;
+    for (let r = 0; r < runs; r++) {
+      if (runUsed[r]) continue;
+      const a = runStart[r];
+      const b = runEnd[r] - 1;
+      const da = (runX[a] - cx) ** 2 + (runY[a] - cy) ** 2;
+      const db = (runX[b] - cx) ** 2 + (runY[b] - cy) ** 2;
+      if (da < bestD) {
+        bestD = da;
+        best = r;
+        flip = false;
+      }
+      if (db < bestD) {
+        bestD = db;
+        best = r;
+        flip = true;
+      }
+    }
+    runUsed[best] = 1;
+    const a = runStart[best];
+    const b = runEnd[best] - 1;
+    const count = b - a;
+    for (let i = 0; i <= count; i++) {
+      const at = flip ? b - i : a + i;
+      if (i === 0) p.moveTo(runX[at], runY[at]);
+      else p.lineTo(runX[at], runY[at]);
+      cx = runX[at];
+      cy = runY[at];
     }
   }
   p.finish(false);
