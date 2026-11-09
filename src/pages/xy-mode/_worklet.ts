@@ -9,7 +9,8 @@ declare class AudioWorkletProcessor {
   readonly port: MessagePort;
 }
 
-const PACKET = 256;
+// About 190 packets a second, whatever rate the device runs at.
+const PACKET = sampleRate > 60000 ? 512 : 256;
 
 class SignalProcessor extends AudioWorkletProcessor {
   private readonly signal = new Signal(sampleRate);

@@ -293,6 +293,7 @@ class Bench {
   process(x: Float32Array, y: Float32Array, n: number): void {
     const k = this.knobs;
     const TAU = Math.PI * 2;
+    const q = 48000 / this.sr;
 
     const trebleOn = k.treble > 0.001;
     const bassOn = k.bass > 0.001;
@@ -331,7 +332,7 @@ class Bench {
         this.theta += dTheta;
         if (this.theta > Math.PI) this.theta -= TAU;
         if (easing) {
-          this.theta *= 0.9995;
+          this.theta *= 1 - 0.0005 * q;
           if (Math.abs(this.theta) < 1e-4) this.theta = 0;
         }
         const c = Math.cos(this.theta);
@@ -387,9 +388,9 @@ class Bench {
         py = this.holdY;
       }
 
-      this.echoMix += (echoTarget - this.echoMix) * 0.002;
+      this.echoMix += (echoTarget - this.echoMix) * 0.002 * q;
       if (this.echoMix > 0.0005) {
-        this.delay += (delayTarget - this.delay) * 0.0004;
+        this.delay += (delayTarget - this.delay) * 0.0004 * q;
         const read = this.write - this.delay;
         const r0 = Math.floor(read);
         const frac = read - r0;

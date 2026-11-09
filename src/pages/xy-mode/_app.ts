@@ -657,7 +657,9 @@ function start(el: HTMLElement): void {
   canvas.addEventListener('pointermove', (e) => {
     if (drawing) {
       touch();
-      for (const ev of e.getCoalescedEvents?.() ?? [e]) {
+      // The coalesced list can come back empty, which must not lose the move itself.
+      const moves = e.getCoalescedEvents?.() ?? [];
+      for (const ev of moves.length ? moves : [e]) {
         const p = toTube(ev);
         const n = drawing.length;
         if (Math.hypot(p.x - drawing[n - 2], p.y - drawing[n - 1]) > 0.006) drawing.push(p.x, p.y);

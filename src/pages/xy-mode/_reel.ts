@@ -337,7 +337,9 @@ export class Reel {
     const delta = (Math.PI / 2) * smooth(3, 4, bar);
     const locked = bar < 4.5 || bar >= 61;
 
-    const kF = 0.0006;
+    // Glides are written per sample at 48 kHz; devices can run at other rates.
+    const q = 48000 / this.sr;
+    const kF = 0.0006 * q;
     // Pictures with jumps get a sharper edge, so the jumps stay fast and faint.
     const dec = bar >= 51 && bar < 62 ? this.lpSharp : this.lpK;
     const leadOn = bar >= 31 && bar < 59;
@@ -355,7 +357,7 @@ export class Reel {
 
       // The path, which is also the bass.
       if (pg > 0.0005 && (this.idA || this.idB)) {
-        this.f += (fTarget - this.f) * 0.002;
+        this.f += (fTarget - this.f) * 0.002 * q;
         this.ph += this.f * this.dt;
         if (this.ph >= 1 || this.a.n + this.b.n === 0) {
           this.ph %= 1;
@@ -409,7 +411,7 @@ export class Reel {
       }
 
       // Pad: the chord, very small on the tube, so it thickens the line.
-      this.padGain += (padTarget - this.padGain) * 0.0004;
+      this.padGain += (padTarget - this.padGain) * 0.0004 * q;
       if (this.padGain > 0.0005) {
         for (let v = 0; v < 3; v++) {
           this.padPh[v] += this.padF[v] * this.dt;
@@ -421,9 +423,9 @@ export class Reel {
 
       // Lead: a small circle riding on the beam.
       const leadWant = leadOn && this.leadGate ? leadLevel : 0;
-      this.leadEnv += (leadWant - this.leadEnv) * (leadWant > this.leadEnv ? 0.004 : 0.0006);
+      this.leadEnv += (leadWant - this.leadEnv) * (leadWant > this.leadEnv ? 0.004 : 0.0006) * q;
       if (this.leadEnv > 0.0004) {
-        this.leadF += (this.leadTarget - this.leadF) * 0.002;
+        this.leadF += (this.leadTarget - this.leadF) * 0.002 * q;
         this.leadPh += this.leadF * this.dt;
         if (this.leadPh >= 1) this.leadPh -= 1;
         px += this.leadEnv * Math.sin(TAU * this.leadPh);
