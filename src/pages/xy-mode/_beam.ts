@@ -233,7 +233,6 @@ export class Beam {
   // How much of the screen the beam is covering, for auto intensity.
   private readonly stamps = new Uint32Array(COVER * COVER);
   private frameNo = 1;
-  private coverage = 40;
   private smoothCover = 40;
   private scaleDirty = true;
   /** Lower if the machine can't keep up. */
@@ -481,7 +480,6 @@ export class Beam {
       let lit = 0;
       const since = stamp - 6;
       for (let i = 0; i < this.stamps.length; i++) if (this.stamps[i] > since) lit++;
-      this.coverage = lit;
       this.smoothCover += (lit - this.smoothCover) * Math.min(1, step * 6);
 
       const px = this.dpr;
@@ -489,7 +487,10 @@ export class Beam {
       // The same energy per second over more screen is dimmer, as it should be, but let
       // less than all of that through or long drawings fade out altogether.
       const auto = Math.max(0.03, Math.min(9, (this.smoothCover / 90) ** 0.74));
-      const base = (11 * px * px * this.intensity * auto * ph.gain * warmth * 48000) / this.sampleRate;
+      // A line's brightness goes as energy over beam speed over spot size, so scaling by both
+      // makes a figure the same brightness on a phone as on a large screen.
+      const scale = ((this.view.r * this.dpr) / 350) * px;
+      const base = (11 * scale * this.intensity * auto * ph.gain * warmth * 48000) / this.sampleRate;
       // Long-lived phosphors collect more passes, so each one has to leave less.
       const live = Math.min(1, (0.05 / tauF) ** 0.75);
 
