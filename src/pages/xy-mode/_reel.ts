@@ -254,12 +254,12 @@ export class Reel {
   }
 
   private snare(amp: number): void {
-    this.snareEnv = 0.075 * amp;
+    this.snareEnv = 0.045 * amp;
     this.snarePh = 0;
   }
 
   private hat(amp: number): void {
-    this.hatEnv = 0.032 * amp;
+    this.hatEnv = 0.015 * amp;
   }
 
   private section(bar: number): void {
@@ -449,7 +449,7 @@ export class Reel {
         this.prevNX = nx;
         this.prevNY = ny;
         this.snarePh += 195 * this.dt;
-        const tone = Math.sin(TAU * this.snarePh) * this.snareEnv * 0.8;
+        const tone = Math.sin(TAU * this.snarePh) * this.snareEnv * 1.3;
         px += nx * this.snareEnv + hx * this.hatEnv + tone;
         py += ny * this.snareEnv + hy * this.hatEnv + tone;
         this.snareEnv *= snareDecay;

@@ -107,7 +107,7 @@ const signalKnobs = [
           </label>
         </div>
         <p class="cue" data-keys-read>
-          Play with the keys below or your keyboard's bottom two rows. Hold two notes.
+          Play the keys below, or the Z and Q rows of your keyboard. Hold two notes.
         </p>
       </div>
 
@@ -278,6 +278,9 @@ const signalKnobs = [
     width: 100%;
     height: 100%;
     display: block;
+    touch-action: pan-y;
+  }
+  .xy[data-mode='draw'] .tube {
     touch-action: none;
   }
   .slot {

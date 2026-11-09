@@ -151,6 +151,9 @@ void main() {
   // The engraved scale, lit from the edge of the glass.
   vec4 s = texture(scale, vec2(uv.x, 1.0 - uv.y));
   light += uiColor * s.a * illum * 0.052 * (0.55 + 0.45 / (1.0 + 0.8 * d)) * warm;
+  // A toe: what the eye can barely see stays barely visible, or every jump of the beam, and
+  // the glow's long tail, gets lifted by the display curve.
+  light = light * light / (light + 0.03);
   vec3 mapped = 1.0 - exp(-light * 1.25);
   vec3 display = pow(mapped, vec3(1.0 / 2.2));
   // Dither, or the long dark falloff of the glow bands on an 8-bit screen.

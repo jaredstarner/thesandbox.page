@@ -165,11 +165,15 @@ class Keys {
       const semis = held[1].midi - held[0].midi;
       const [num, den] = JUST_RATIOS[semis % 12];
       const P = num * 2 ** Math.floor(semis / 12);
+      // The curve folds onto itself a quarter-turn from its most open position, and which
+      // phase that is depends on whether the two whole numbers of the ratio differ by an odd
+      // or an even amount: 1:2 opens at 0, where 1:1 opens at a quarter (the circle).
+      const open = (P - den) % 2 === 0 ? 0.25 : 0;
       const psi = den * held[1].ph - P * held[0].ph;
-      let err = 0.25 - (psi - Math.floor(psi));
-      if (err > 0.5) err -= 1;
-      if (err < -0.5) err += 1;
-      held[1].ph += (err * n * 2 * this.dt) / den;
+      let err = (open - (psi - Math.floor(psi))) % 0.5;
+      if (err > 0.25) err -= 0.5;
+      if (err < -0.25) err += 0.5;
+      held[1].ph += (err * n * 7 * this.dt) / den;
     }
     this.turnNow += (this.turn - this.turnNow) * Math.min(1, n * 12 * this.dt);
     const turn = this.turnNow * TAU;
