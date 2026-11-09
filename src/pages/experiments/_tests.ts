@@ -192,6 +192,13 @@ export const TECHNIQUES: Record<string, Technique> = {
       }
     },
   },
+  'audio-worklet': {
+    label: 'AudioWorklet',
+    webFeature: 'audio-worklet',
+    handling: 'May make sound.',
+    test: () =>
+      present(typeof AudioWorkletNode === 'function', 'AudioWorkletNode present, not started', 'no AudioWorkletNode'),
+  },
   getusermedia: {
     label: 'getUserMedia',
     webFeature: 'media-capture',
