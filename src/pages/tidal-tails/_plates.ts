@@ -37,7 +37,7 @@ export const PLATES: Plate[] = [
     name: 'The Antennae',
     ngc: 'NGC 4038 and 4039',
     caption:
-      'Two equal spirals on a bound orbit, both disks tilted 60° to it. Toomre and Toomre matched the two long, curved tails with almost exactly these numbers.',
+      'Two equal spirals on a bound orbit, each disk tilted 60° to it, seen edge on 600 million years after the first pass. From this side the two tails seem to cross below the pair, though they never meet.',
     enc: {
       ratio: 1,
       peri: 20,
@@ -45,8 +45,8 @@ export const PLATES: Plate[] = [
       a: { tilt: 60, turn: -30, on: true },
       b: { tilt: 60, turn: -30, on: true },
     },
-    time: 820,
-    view: { az: 0, el: 0, roll: 0, extent: 70 },
+    time: 600,
+    view: { az: -60, el: 90, roll: 0, extent: 100 },
   },
   {
     id: 'mice',
@@ -73,16 +73,16 @@ export const PLATES: Plate[] = [
     name: 'The Whirlpool',
     ngc: 'M51 and NGC 5195',
     caption:
-      'A companion of a third the mass swings past a large disk. Its pull raises two long spiral arms, and one of them reaches back toward it as a bridge.',
+      'A companion a third the mass swings past a large disk on a bound orbit. Its pull raises two long spiral arms, and one of them reaches out to it as a bridge.',
     enc: {
-      ratio: 0.33,
-      peri: 24,
-      ecc: 1,
-      a: { tilt: 20, turn: -90, on: true },
+      ratio: 0.35,
+      peri: 18,
+      ecc: 0.6,
+      a: { tilt: 25, turn: -90, on: true },
       b: { tilt: 0, turn: 0, on: false },
     },
-    time: 330,
-    view: { az: 0, el: 15, roll: 0, extent: 60 },
+    time: 200,
+    view: { az: 0, el: 20, roll: 0, extent: 45 },
   },
   {
     id: 'bridge',
@@ -93,14 +93,14 @@ export const PLATES: Plate[] = [
     caption:
       'Two disks spinning the same way as the pass, on a parabolic orbit. Each pulls a bridge of stars toward the other and flings a counter-tail away behind it.',
     enc: {
-      ratio: 0.8,
-      peri: 30,
+      ratio: 1,
+      peri: 28,
       ecc: 1,
-      a: { tilt: 10, turn: 0, on: true },
-      b: { tilt: 30, turn: 40, on: true },
+      a: { tilt: 0, turn: 0, on: true },
+      b: { tilt: 0, turn: 0, on: true },
     },
-    time: 450,
-    view: { az: 0, el: 35, roll: 0, extent: 95 },
+    time: 260,
+    view: { az: 0, el: 30, roll: 0, extent: 80 },
   },
   {
     id: 'ring',
@@ -127,7 +127,7 @@ export const PLATES: Plate[] = [
     name: 'With and against',
     ngc: 'Direct and retrograde',
     caption:
-      'The same pass, seen by two identical disks. The left one spins with the pass and is torn into a bridge and a tail; the right one spins against it and hardly notices.',
+      'One pass, two identical disks. The lower one spins the same way the pair goes round and is torn into a bridge and a tail; the upper one spins against it and keeps its shape.',
     enc: {
       ratio: 1,
       peri: 25,
