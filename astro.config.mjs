@@ -615,5 +615,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    // /tidal-tails/: the record card's face, and the typed plate labels.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'IBM Plex Sans Condensed',
+      cssVariable: '--font-tidal',
+      weights: [400, 500, 600],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Arial Narrow', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Special Elite',
+      cssVariable: '--font-tidal-type',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Courier New', 'monospace'],
+    },
   ],
 });

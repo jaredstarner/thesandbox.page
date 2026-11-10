@@ -1,0 +1,8 @@
+{
+  "title": "Tidal tails",
+  "summary": "Two disk galaxies on a collision course and up to a million stars to watch: set the orbit and the tilt of each disk, run a billion years forward and back, and turn the pair until it looks like the Antennae, the Mice, or the Whirlpool on an observatory plate.",
+  "date": "2026-11-10",
+  "tags": ["webgpu", "wgsl", "compute-shaders", "pointer-events", "restricted-three-body", "photographic-plates"],
+  "requires": ["webgpu"],
+  "plot": 40
+}
