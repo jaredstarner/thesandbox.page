@@ -443,20 +443,22 @@ function start(root: HTMLElement) {
     return [cssSize / 2 + sx * ppu, cssSize / 2 - sy * ppu] as const;
   };
   function drawMarks(step: number) {
+    // Each mass's path over the last 700 million years or so, up to now.
+    let da = '';
+    let db = '';
+    const from = Math.max(0, step - 600);
+    for (let k = from; k <= step; k += 3) {
+      const [a, b] = coresAt(orbit, Math.min(k, step));
+      const pa = project(a);
+      const pb = project(b);
+      const cmd = k === from ? 'M' : 'L';
+      da += `${cmd}${pa[0].toFixed(1)} ${pa[1].toFixed(1)}`;
+      db += `${cmd}${pb[0].toFixed(1)} ${pb[1].toFixed(1)}`;
+    }
+    trackA.setAttribute('d', da);
+    trackB.setAttribute('d', db);
     if (marksDirty) {
       svg.setAttribute('viewBox', `0 0 ${cssSize} ${cssSize}`);
-      let da = '';
-      let db = '';
-      for (let k = 0; k < orbit.steps; k += 3) {
-        const [a, b] = coresAt(orbit, k);
-        const pa = project(a);
-        const pb = project(b);
-        const cmd = k === 0 ? 'M' : 'L';
-        da += `${cmd}${pa[0].toFixed(1)} ${pa[1].toFixed(1)}`;
-        db += `${cmd}${pb[0].toFixed(1)} ${pb[1].toFixed(1)}`;
-      }
-      trackA.setAttribute('d', da);
-      trackB.setAttribute('d', db);
       // A scale bar of a round length, about a fifth of the plate.
       const ppk = cssSize / 2 / state.extent;
       const want = (cssSize * 0.2) / ppk;
@@ -567,10 +569,19 @@ function start(root: HTMLElement) {
       fail(`The graphics card wouldn't take the plate: ${error instanceof Error ? error.message : String(error)}`);
       return;
     }
+    if (new URLSearchParams(location.search).has('debug')) {
+      const errors: string[] = [];
+      (window as unknown as { gpuErrors: string[] }).gpuErrors = errors;
+      sky.device.addEventListener('uncapturederror', (ev) => errors.push((ev as GPUUncapturedErrorEvent).error.message));
+    }
     if (small) sky.active = 1 << 18;
     sky.device.lost.then((info) => {
       if (info.reason !== 'destroyed') fail('The graphics card dropped the plate. Reload the page to develop it again.');
     });
+    sky.setOrbit(orbit, SEED);
+    // Warm the pipelines first, so shader compilation isn't timed.
+    sky.advance(4, 4);
+    await sky.device.queue.onSubmittedWorkDone();
     sky.setOrbit(orbit, SEED);
     // A slow card gets fewer stars: time a short run and halve until it keeps up.
     for (let tries = 0; tries < 2; tries++) {
@@ -599,8 +610,10 @@ function start(root: HTMLElement) {
       /** Resolves once the stars have caught up with the clock. */
       settle: () =>
         new Promise<number>((resolve) => {
+          const until = performance.now() + 20000;
           const check = () => {
             if (sky && sky.step === stepAt(orbit, state.time)) resolve(sky.step);
+            else if (performance.now() > until) resolve(-1);
             else setTimeout(check, 50);
           };
           check();
@@ -614,6 +627,18 @@ function start(root: HTMLElement) {
       plate: (id: string) => {
         const p = PLATES.find((x) => x.id === id);
         if (p) applyPlate(p, false);
+      },
+      /** Try an encounter, moment, and view without a preset, for tuning. */
+      setup: (enc: Encounter, myr: number, view: View) => {
+        state.plate = null;
+        state.enc = structuredClone(enc);
+        state.rows = rowsOf(view);
+        state.extent = view.extent;
+        state.time = myr;
+        state.playing = false;
+        state.stopAt = null;
+        syncControls();
+        newOrbit();
       },
     };
   }
