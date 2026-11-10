@@ -319,8 +319,8 @@ export class Sky {
     const t = this.ensureTargets(w, h);
     const pxX = 2 / w;
     const pxY = 2 / h;
-    // Surface brightness holds as the plate zooms: fewer stars per pixel, each brighter.
-    const zoom = look.pxPerUnit / (140 * look.dpr);
+    // Surface brightness holds as the plate zooms: fewer stars per device pixel, each brighter.
+    const zoom = look.pxPerUnit / 140;
     const gain = Math.min(0.75, look.exposure * 0.075 * zoom * zoom);
     const view = new Float32Array(20);
     view.set([...look.rows[0], 0, ...look.rows[1], 0, ...look.rows[2], 0]);

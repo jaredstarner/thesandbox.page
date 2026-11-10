@@ -46,7 +46,7 @@ export const PLATES: Plate[] = [
       b: { tilt: 60, turn: -30, on: true },
     },
     time: 560,
-    view: { az: -90, el: 65, roll: 0, extent: 100 },
+    view: { az: -90, el: 65, roll: 0, extent: 115 },
   },
   {
     id: 'mice',
