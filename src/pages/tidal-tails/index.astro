@@ -31,21 +31,32 @@ const disks = [
           <canvas
             class="sky"
             data-sky
-            aria-label="A simulated photographic plate of two interacting galaxies. Drag to turn the pair."></canvas>
+            aria-label="A simulated photographic plate of two interacting galaxies. Drag to turn the pair."
+          ></canvas>
           <svg class="marks" data-marks aria-hidden="true">
             <path class="track track-a" data-track-a></path>
             <path class="track track-b" data-track-b></path>
-            <g class="tick" data-tick-a><path d="M-11 0h7M4 0h7M0 -11v7M0 4v7"></path></g>
-            <g class="tick" data-tick-b><path d="M-11 0h7M4 0h7M0 -11v7M0 4v7"></path></g>
+            <g class="tick" data-tick-a>
+              <path d="M-11 0h7M4 0h7M0 -11v7M0 4v7"></path>
+            </g>
+            <g class="tick" data-tick-b>
+              <path d="M-11 0h7M4 0h7M0 -11v7M0 4v7"></path>
+            </g>
           </svg>
-          <p class="etch etch-plate" data-etch-plate>244</p>
+          <p class="etch etch-plate" data-etch-plate>
+            244
+          </p>
           <div class="etch etch-scale" data-etch-scale>
             <span class="bar" data-scale-bar></span>
             <span data-scale-text>20 kpc</span>
           </div>
-          <p class="etch etch-time" data-etch-time>+0 Myr</p>
+          <p class="etch etch-time" data-etch-time>
+            +0 Myr
+          </p>
           <p class="nogpu" data-nogpu hidden></p>
-          <p class="busy" data-busy hidden>Developing</p>
+          <p class="busy" data-busy hidden>
+            Developing
+          </p>
         </div>
       </div>
 
@@ -60,18 +71,28 @@ const disks = [
           <span class="visually-hidden">Time since closest approach</span>
           <input type="range" data-time min="0" max="1000" step="1" value="0" />
         </label>
-        <output class="clock" data-clock>+0 Myr</output>
+        <output class="clock" data-clock>
+          +0 Myr
+        </output>
         <div class="speed" role="group" aria-label="Speed">
-          <button type="button" data-speed="0.5" aria-pressed="false">½×</button>
-          <button type="button" data-speed="1" aria-pressed="true">1×</button>
-          <button type="button" data-speed="4" aria-pressed="false">4×</button>
+          <button type="button" data-speed="0.5" aria-pressed="false">
+            ½×
+          </button>
+          <button type="button" data-speed="1" aria-pressed="true">
+            1×
+          </button>
+          <button type="button" data-speed="4" aria-pressed="false">
+            4×
+          </button>
         </div>
       </div>
     </section>
 
     <aside class="card">
       <header class="card-head">
-        <a class="home" href="/">thesandbox.page</a>
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
         <h1>Tidal tails</h1>
         <p class="intro">
           When two galaxies pass close, gravity draws long tails and bridges of stars out of both. Each plate here is a
@@ -82,56 +103,52 @@ const disks = [
       <section class="section" aria-labelledby="tidal-plates">
         <h2 id="tidal-plates">Plates</h2>
         <ul class="plates" data-plates>
-          {
-            PLATES.map((plate, i) => (
-              <li>
-                <button type="button" data-plate-pick={plate.id} aria-pressed={i === 0 ? 'true' : 'false'}>
-                  <span class="cat">{plate.cat}</span>
-                  <span class="name">{plate.name}</span>
-                  <span class="ngc">{plate.ngc}</span>
-                </button>
-              </li>
-            ))
-          }
+          {PLATES.map((plate, i) => (
+            <li>
+              <button type="button" data-plate-pick={plate.id} aria-pressed={i === 0 ? 'true' : 'false'}>
+                <span class="cat">{plate.cat}</span>
+                <span class="name">{plate.name}</span>
+                <span class="ngc">{plate.ngc}</span>
+              </button>
+            </li>
+          ))}
         </ul>
-        <p class="caption" data-caption>{PLATES[0]!.caption}</p>
+        <p class="caption" data-caption>
+          {PLATES[0]!.caption}
+        </p>
       </section>
 
       <section class="section" aria-labelledby="tidal-setup">
         <h2 id="tidal-setup">Encounter</h2>
         <div class="dials">
-          {
-            sliders.map((s) => (
+          {sliders.map((s) => (
+            <label class="dial">
+              <span class="dial-label">{s.label}</span>
+              <output data-out={s.name} />
+              <input type="range" data-dial={s.name} min={s.min} max={s.max} step={s.step} />
+            </label>
+          ))}
+          {disks.map((d) => (
+            <fieldset class="disk" data-disk={d.key}>
+              <legend>
+                <span>{d.label}</span>
+                <label class="has-disk">
+                  <input type="checkbox" data-disk-on={d.key} checked />
+                  <span>Disk of stars</span>
+                </label>
+              </legend>
               <label class="dial">
-                <span class="dial-label">{s.label}</span>
-                <output data-out={s.name} />
-                <input type="range" data-dial={s.name} min={s.min} max={s.max} step={s.step} />
+                <span class="dial-label">Tilt</span>
+                <output data-out={`${d.key}-tilt`} />
+                <input type="range" data-dial={`${d.key}-tilt`} min="0" max="180" step="1" />
               </label>
-            ))
-          }
-          {
-            disks.map((d) => (
-              <fieldset class="disk" data-disk={d.key}>
-                <legend>
-                  <span>{d.label}</span>
-                  <label class="has-disk">
-                    <input type="checkbox" data-disk-on={d.key} checked />
-                    <span>Disk of stars</span>
-                  </label>
-                </legend>
-                <label class="dial">
-                  <span class="dial-label">Tilt</span>
-                  <output data-out={`${d.key}-tilt`} />
-                  <input type="range" data-dial={`${d.key}-tilt`} min="0" max="180" step="1" />
-                </label>
-                <label class="dial">
-                  <span class="dial-label">Turn</span>
-                  <output data-out={`${d.key}-turn`} />
-                  <input type="range" data-dial={`${d.key}-turn`} min="-180" max="180" step="1" />
-                </label>
-              </fieldset>
-            ))
-          }
+              <label class="dial">
+                <span class="dial-label">Turn</span>
+                <output data-out={`${d.key}-turn`} />
+                <input type="range" data-dial={`${d.key}-turn`} min="-180" max="180" step="1" />
+              </label>
+            </fieldset>
+          ))}
         </div>
         <p class="hint">
           Tilt is the angle between a disk and the orbit: at 0° the stars go round the same way the galaxies pass, at
@@ -143,8 +160,12 @@ const disks = [
         <h2 id="tidal-view">Plate</h2>
         <div class="row">
           <div class="seg" role="group" aria-label="Plate">
-            <button type="button" data-mode-pick="negative" aria-pressed="true">Negative</button>
-            <button type="button" data-mode-pick="print" aria-pressed="false">Print</button>
+            <button type="button" data-mode-pick="negative" aria-pressed="true">
+              Negative
+            </button>
+            <button type="button" data-mode-pick="print" aria-pressed="false">
+              Print
+            </button>
           </div>
           <label class="check">
             <input type="checkbox" data-marks-on checked />
@@ -157,10 +178,18 @@ const disks = [
           <input type="range" data-dial="exposure" min="0" max="1" step="0.01" value="0.5" />
         </label>
         <div class="row">
-          <button type="button" class="ghost" data-view="face">Face on</button>
-          <button type="button" class="ghost" data-view="edge">Edge on</button>
-          <button type="button" class="ghost" data-view="plate">As catalogued</button>
-          <button type="button" class="ghost" data-share>Copy link</button>
+          <button type="button" class="ghost" data-view="face">
+            Face on
+          </button>
+          <button type="button" class="ghost" data-view="edge">
+            Edge on
+          </button>
+          <button type="button" class="ghost" data-view="plate">
+            As catalogued
+          </button>
+          <button type="button" class="ghost" data-share>
+            Copy link
+          </button>
         </div>
         <p class="hint">Drag the plate to turn the pair. Scroll or pinch to zoom.</p>
       </section>

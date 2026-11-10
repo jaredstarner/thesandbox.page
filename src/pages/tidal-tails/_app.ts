@@ -463,7 +463,9 @@ function start(root: HTMLElement) {
       // A scale bar of a round length, about a fifth of the plate.
       const ppk = cssSize / 2 / state.extent;
       const want = (cssSize * 0.2) / ppk;
-      const len = [5, 10, 20, 25, 50, 100, 200].reduce((best, c) => (Math.abs(c - want) < Math.abs(best - want) ? c : best));
+      const len = [5, 10, 20, 25, 50, 100, 200].reduce((best, c) =>
+        Math.abs(c - want) < Math.abs(best - want) ? c : best,
+      );
       scaleBar.style.width = `${(len * ppk).toFixed(1)}px`;
       scaleText.textContent = `${len} kpc`;
       marksDirty = false;
@@ -577,11 +579,14 @@ function start(root: HTMLElement) {
     if (new URLSearchParams(location.search).has('debug')) {
       const errors: string[] = [];
       (window as unknown as { gpuErrors: string[] }).gpuErrors = errors;
-      engine.device.addEventListener('uncapturederror', (ev) => errors.push((ev as GPUUncapturedErrorEvent).error.message));
+      engine.device.addEventListener('uncapturederror', (ev) =>
+        errors.push((ev as GPUUncapturedErrorEvent).error.message),
+      );
     }
     if (small) engine.active = 1 << 18;
     engine.device.lost.then((info) => {
-      if (info.reason !== 'destroyed') fail('The graphics card dropped the plate. Reload the page to develop it again.');
+      if (info.reason !== 'destroyed')
+        fail('The graphics card dropped the plate. Reload the page to develop it again.');
     });
     engine.setOrbit(orbit, SEED);
     // Warm the pipelines first, so shader compilation isn't timed.
