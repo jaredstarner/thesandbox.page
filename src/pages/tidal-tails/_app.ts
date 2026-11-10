@@ -246,7 +246,7 @@ function start(root: HTMLElement) {
     orbit = solve(state.enc);
     if (replay && !reduced) {
       // Run the pass from just before closest approach and pause at the catalogued moment.
-      state.time = Math.max(myrAt(orbit, 0), Math.min(-120, p.time - 400));
+      state.time = Math.max(myrAt(orbit, 0), Math.min(-200, p.time - 400));
       state.stopAt = p.time;
       state.playing = true;
     } else {
@@ -550,6 +550,8 @@ function start(root: HTMLElement) {
     el.hidden = false;
     canvas.hidden = true;
     busy.hidden = true;
+    state.playing = false;
+    root.dataset.gpu = 'none';
   };
   void (async () => {
     const gpu = navigator.gpu;

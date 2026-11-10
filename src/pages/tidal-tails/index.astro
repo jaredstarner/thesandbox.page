@@ -302,16 +302,19 @@ const disks = [
     overflow: visible;
     pointer-events: none;
   }
-  .tidal[data-marks='off'] .marks {
+  .tidal[data-marks='off'] .marks,
+  .tidal[data-gpu='none'] .marks,
+  .tidal[data-gpu='none'] .etch,
+  .tidal[data-gpu='none'] .transport {
     display: none;
   }
   .track {
     fill: none;
     stroke: var(--mark);
-    stroke-width: 1.1;
-    stroke-dasharray: 2 4;
+    stroke-width: 1;
+    stroke-dasharray: 1.5 4;
     stroke-linecap: round;
-    opacity: 0.85;
+    opacity: 0.7;
   }
   .tick path {
     fill: none;

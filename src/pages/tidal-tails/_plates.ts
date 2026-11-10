@@ -37,7 +37,7 @@ export const PLATES: Plate[] = [
     name: 'The Antennae',
     ngc: 'NGC 4038 and 4039',
     caption:
-      'Two equal spirals on a bound orbit, each disk tilted 60° to it, seen edge on 600 million years after the first pass. From this side the two tails seem to cross below the pair, though they never meet.',
+      'Two equal spirals on a bound orbit, each disk tilted 60° to it, 560 million years after their first close pass. The two long tails curving away from the pair are what gave the Antennae their name.',
     enc: {
       ratio: 1,
       peri: 20,
@@ -45,8 +45,8 @@ export const PLATES: Plate[] = [
       a: { tilt: 60, turn: -30, on: true },
       b: { tilt: 60, turn: -30, on: true },
     },
-    time: 600,
-    view: { az: -60, el: 90, roll: 0, extent: 100 },
+    time: 560,
+    view: { az: -90, el: 65, roll: 0, extent: 100 },
   },
   {
     id: 'mice',
