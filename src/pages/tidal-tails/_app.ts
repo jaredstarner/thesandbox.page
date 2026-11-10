@@ -566,8 +566,10 @@ function start(root: HTMLElement) {
       return;
     }
     const small = matchMedia('(pointer: coarse)').matches || Math.min(screen.width, innerWidth) < 700;
+    // Calibrate on a local handle, so the frame loop doesn't queue work into the timing.
+    let engine: Sky;
     try {
-      sky = await Sky.create(canvas, adapter, 1 << 20);
+      engine = await Sky.create(canvas, adapter, 1 << 20);
     } catch (error) {
       fail(`The graphics card wouldn't take the plate: ${error instanceof Error ? error.message : String(error)}`);
       return;
@@ -575,28 +577,28 @@ function start(root: HTMLElement) {
     if (new URLSearchParams(location.search).has('debug')) {
       const errors: string[] = [];
       (window as unknown as { gpuErrors: string[] }).gpuErrors = errors;
-      sky.device.addEventListener('uncapturederror', (ev) => errors.push((ev as GPUUncapturedErrorEvent).error.message));
+      engine.device.addEventListener('uncapturederror', (ev) => errors.push((ev as GPUUncapturedErrorEvent).error.message));
     }
-    if (small) sky.active = 1 << 18;
-    sky.device.lost.then((info) => {
+    if (small) engine.active = 1 << 18;
+    engine.device.lost.then((info) => {
       if (info.reason !== 'destroyed') fail('The graphics card dropped the plate. Reload the page to develop it again.');
     });
-    sky.setOrbit(orbit, SEED);
+    engine.setOrbit(orbit, SEED);
     // Warm the pipelines first, so shader compilation isn't timed.
-    sky.advance(4, 4);
-    await sky.device.queue.onSubmittedWorkDone();
-    sky.setOrbit(orbit, SEED);
+    engine.advance(4, 4);
+    await engine.device.queue.onSubmittedWorkDone();
     // A slow card gets fewer stars: time a short run and halve until it keeps up.
     for (let tries = 0; tries < 2; tries++) {
+      engine.setOrbit(orbit, SEED);
       const t0 = performance.now();
-      sky.advance(60, 60);
-      await sky.device.queue.onSubmittedWorkDone();
+      engine.advance(60, 60);
+      await engine.device.queue.onSubmittedWorkDone();
       const ms = performance.now() - t0;
-      if (ms < 70 || sky.active <= 1 << 17) break;
-      sky.active = Math.max(1 << 17, sky.active >> 1);
-      sky.setOrbit(orbit, SEED);
+      if (ms < 70 || engine.active <= 1 << 17) break;
+      engine.active = Math.max(1 << 17, engine.active >> 1);
     }
-    sky.setOrbit(orbit, SEED);
+    engine.setOrbit(orbit, SEED);
+    sky = engine;
     root.dataset.stars = String(sky.active);
     dirty = true;
   })();
