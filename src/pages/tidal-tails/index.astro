@@ -1,0 +1,748 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { PLATES } from './_plates';
+
+const description =
+  'Two disk galaxies pass close and gravity pulls tails and bridges of stars out of both. A million-star simulation after Toomre and Toomre (1972), drawn as an observatory plate.';
+
+const sliders = [
+  { name: 'ratio', label: 'Companion mass', min: 0.1, max: 1, step: 0.01 },
+  { name: 'peri', label: 'Closest approach', min: 0, max: 50, step: 0.5 },
+  { name: 'ecc', label: 'Orbit', min: 0.3, max: 1.6, step: 0.01 },
+];
+const disks = [
+  { key: 'a', label: 'First galaxy' },
+  { key: 'b', label: 'Second galaxy' },
+];
+---
+
+<Bare title="Tidal tails" description={description}>
+  <Font cssVariable="--font-tidal" slot="head" />
+  <Font cssVariable="--font-tidal-type" slot="head" />
+  <main class="tidal" data-mode="negative" data-marks="on">
+    <section class="bench" aria-label="The plate">
+      <div class="sleeve">
+        <p class="sleeve-label" data-sleeve>
+          <span data-sleeve-cat>Arp 244</span>
+          <span data-sleeve-name>NGC 4038 and 4039</span>
+        </p>
+        <div class="plate" data-plate>
+          <canvas
+            class="sky"
+            data-sky
+            aria-label="A simulated photographic plate of two interacting galaxies. Drag to turn the pair."></canvas>
+          <svg class="marks" data-marks aria-hidden="true">
+            <path class="track track-a" data-track-a></path>
+            <path class="track track-b" data-track-b></path>
+            <g class="tick" data-tick-a><path d="M-11 0h7M4 0h7M0 -11v7M0 4v7"></path></g>
+            <g class="tick" data-tick-b><path d="M-11 0h7M4 0h7M0 -11v7M0 4v7"></path></g>
+          </svg>
+          <p class="etch etch-plate" data-etch-plate>244</p>
+          <div class="etch etch-scale" data-etch-scale>
+            <span class="bar" data-scale-bar></span>
+            <span data-scale-text>20 kpc</span>
+          </div>
+          <p class="etch etch-time" data-etch-time>+0 Myr</p>
+          <p class="nogpu" data-nogpu hidden></p>
+          <p class="busy" data-busy hidden>Developing</p>
+        </div>
+      </div>
+
+      <div class="transport">
+        <button type="button" class="play" data-play aria-label="Play" aria-pressed="false">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path class="i-play" d="M6 4l10 6-10 6z"></path>
+            <path class="i-pause" d="M5 4h3.5v12H5zM11.5 4H15v12h-3.5z"></path>
+          </svg>
+        </button>
+        <label class="scrub">
+          <span class="visually-hidden">Time since closest approach</span>
+          <input type="range" data-time min="0" max="1000" step="1" value="0" />
+        </label>
+        <output class="clock" data-clock>+0 Myr</output>
+        <div class="speed" role="group" aria-label="Speed">
+          <button type="button" data-speed="0.5" aria-pressed="false">½×</button>
+          <button type="button" data-speed="1" aria-pressed="true">1×</button>
+          <button type="button" data-speed="4" aria-pressed="false">4×</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="card">
+      <header class="card-head">
+        <a class="home" href="/">thesandbox.page</a>
+        <h1>Tidal tails</h1>
+        <p class="intro">
+          When two galaxies pass close, gravity draws long tails and bridges of stars out of both. Each plate here is a
+          live simulation of a million stars, set up the way Alar and Juri Toomre did it in 1972.
+        </p>
+      </header>
+
+      <section class="section" aria-labelledby="tidal-plates">
+        <h2 id="tidal-plates">Plates</h2>
+        <ul class="plates" data-plates>
+          {
+            PLATES.map((plate, i) => (
+              <li>
+                <button type="button" data-plate-pick={plate.id} aria-pressed={i === 0 ? 'true' : 'false'}>
+                  <span class="cat">{plate.cat}</span>
+                  <span class="name">{plate.name}</span>
+                  <span class="ngc">{plate.ngc}</span>
+                </button>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="caption" data-caption>{PLATES[0]!.caption}</p>
+      </section>
+
+      <section class="section" aria-labelledby="tidal-setup">
+        <h2 id="tidal-setup">Encounter</h2>
+        <div class="dials">
+          {
+            sliders.map((s) => (
+              <label class="dial">
+                <span class="dial-label">{s.label}</span>
+                <output data-out={s.name} />
+                <input type="range" data-dial={s.name} min={s.min} max={s.max} step={s.step} />
+              </label>
+            ))
+          }
+          {
+            disks.map((d) => (
+              <fieldset class="disk" data-disk={d.key}>
+                <legend>
+                  <span>{d.label}</span>
+                  <label class="has-disk">
+                    <input type="checkbox" data-disk-on={d.key} checked />
+                    <span>Disk of stars</span>
+                  </label>
+                </legend>
+                <label class="dial">
+                  <span class="dial-label">Tilt</span>
+                  <output data-out={`${d.key}-tilt`} />
+                  <input type="range" data-dial={`${d.key}-tilt`} min="0" max="180" step="1" />
+                </label>
+                <label class="dial">
+                  <span class="dial-label">Turn</span>
+                  <output data-out={`${d.key}-turn`} />
+                  <input type="range" data-dial={`${d.key}-turn`} min="-180" max="180" step="1" />
+                </label>
+              </fieldset>
+            ))
+          }
+        </div>
+        <p class="hint">
+          Tilt is the angle between a disk and the orbit: at 0° the stars go round the same way the galaxies pass, at
+          180° they go against it. Turn sets where the tilted disk faces when the two are closest.
+        </p>
+      </section>
+
+      <section class="section" aria-labelledby="tidal-view">
+        <h2 id="tidal-view">Plate</h2>
+        <div class="row">
+          <div class="seg" role="group" aria-label="Plate">
+            <button type="button" data-mode-pick="negative" aria-pressed="true">Negative</button>
+            <button type="button" data-mode-pick="print" aria-pressed="false">Print</button>
+          </div>
+          <label class="check">
+            <input type="checkbox" data-marks-on checked />
+            <span>Orbits</span>
+          </label>
+        </div>
+        <label class="dial">
+          <span class="dial-label">Exposure</span>
+          <output data-out="exposure"></output>
+          <input type="range" data-dial="exposure" min="0" max="1" step="0.01" value="0.5" />
+        </label>
+        <div class="row">
+          <button type="button" class="ghost" data-view="face">Face on</button>
+          <button type="button" class="ghost" data-view="edge">Edge on</button>
+          <button type="button" class="ghost" data-view="plate">As catalogued</button>
+          <button type="button" class="ghost" data-share>Copy link</button>
+        </div>
+        <p class="hint">Drag the plate to turn the pair. Scroll or pinch to zoom.</p>
+      </section>
+
+      <details class="notes">
+        <summary>About the model</summary>
+        <p>
+          Each galaxy is a single point of mass with a flat disk of stars around it. The stars feel the pull of both
+          masses but have none of their own, so a million of them can be followed at once. This is the restricted
+          three-body model Alar and Juri Toomre used in <cite>Galactic Bridges and Tails</cite> (1972) to show that the
+          tails and bridges in pairs like the Antennae are made by gravity alone.
+        </p>
+        <p>
+          Their main finding holds here: a disk that spins the same way its neighbour passes is torn into a bridge and a
+          long tail, while a disk spinning against the pass barely changes. The two masses follow a plain Kepler orbit
+          and never merge, as in the 1972 paper; real pairs lose orbital energy to their dark matter halos and fall
+          together.
+        </p>
+        <p>
+          Catalogue numbers are from Halton Arp's <cite>Atlas of Peculiar Galaxies</cite> (1966). One unit of time on
+          the plate is a million years; distances assume galaxies about 30 kiloparsecs across.
+        </p>
+      </details>
+    </aside>
+  </main>
+</Bare>
+
+<style>
+  .tidal {
+    --desk: #15171a;
+    --desk-2: #1d2024;
+    --card: #ece6d8;
+    --card-line: #cfc6b2;
+    --ink: #1c1d21;
+    --ink-soft: #55534c;
+    --red: #9e3b2c;
+    --glass: #e7e4da;
+    --etch: rgba(20, 21, 24, 0.82);
+    --mark: #b0412f;
+    --sans: var(--font-tidal), 'Arial Narrow', sans-serif;
+    --type: var(--font-tidal-type), 'Courier New', monospace;
+
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--desk);
+    color: var(--ink);
+    font: 400 15px/1.45 var(--sans);
+  }
+  .tidal[data-mode='print'] {
+    --etch: rgba(236, 233, 224, 0.78);
+    --mark: #d4775f;
+  }
+  .tidal *,
+  .tidal *::before,
+  .tidal *::after {
+    box-sizing: border-box;
+  }
+  :global(body:has(.tidal)) {
+    margin: 0;
+    background: #15171a;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* The bench: the plate on its sleeve, and the transport under it. */
+  .bench {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    height: 100vh;
+    height: 100dvh;
+    padding: 20px 24px 18px;
+    background: radial-gradient(120% 90% at 50% 40%, var(--desk-2), var(--desk) 70%);
+  }
+  .sleeve {
+    --size: min(calc(100vw - 400px - 64px), calc(100dvh - 138px));
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: var(--size);
+  }
+  .sleeve-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0;
+    padding: 0 2px;
+    color: #a9a497;
+    font: 400 14px/1.2 var(--type);
+    letter-spacing: 0.04em;
+  }
+  .plate {
+    position: relative;
+    width: var(--size);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 2px;
+    background: var(--glass);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 18px 50px rgba(0, 0, 0, 0.55),
+      0 0 80px rgba(230, 226, 214, 0.08);
+    touch-action: none;
+    cursor: grab;
+  }
+  .tidal[data-mode='print'] .plate {
+    background: #0b0b0c;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 18px 50px rgba(0, 0, 0, 0.6);
+  }
+  .plate.dragging {
+    cursor: grabbing;
+  }
+  .sky {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .marks {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .tidal[data-marks='off'] .marks {
+    display: none;
+  }
+  .track {
+    fill: none;
+    stroke: var(--mark);
+    stroke-width: 1.1;
+    stroke-dasharray: 2 4;
+    stroke-linecap: round;
+    opacity: 0.85;
+  }
+  .tick path {
+    fill: none;
+    stroke: var(--mark);
+    stroke-width: 1.4;
+  }
+  .etch {
+    position: absolute;
+    margin: 0;
+    color: var(--etch);
+    font: 400 13px/1 var(--type);
+    letter-spacing: 0.06em;
+    pointer-events: none;
+  }
+  .etch-plate {
+    top: 14px;
+    left: 16px;
+    font-size: 15px;
+  }
+  .etch-time {
+    right: 16px;
+    bottom: 14px;
+  }
+  .etch-scale {
+    left: 16px;
+    bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .bar {
+    display: block;
+    height: 5px;
+    border: 1.2px solid var(--etch);
+    border-top: 0;
+  }
+  .nogpu,
+  .busy {
+    position: absolute;
+    margin: 0;
+    font: 400 15px/1.4 var(--sans);
+  }
+  .nogpu {
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 12%;
+    text-align: center;
+    color: var(--ink);
+  }
+  .nogpu[hidden],
+  .busy[hidden],
+  .tidal [hidden] {
+    display: none;
+  }
+  .busy {
+    top: 14px;
+    right: 16px;
+    color: var(--etch);
+    font: 400 13px/1 var(--type);
+    letter-spacing: 0.06em;
+  }
+
+  .transport {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: min(calc(100vw - 400px - 64px), calc(100dvh - 138px));
+    color: #d9d4c6;
+  }
+  .play {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid #5d5a52;
+    border-radius: 50%;
+    background: #23262b;
+    color: #ece6d8;
+    cursor: pointer;
+  }
+  .play svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+  }
+  .play .i-pause,
+  .play[aria-pressed='true'] .i-play {
+    display: none;
+  }
+  .play[aria-pressed='true'] .i-pause {
+    display: inline;
+  }
+  .scrub {
+    flex: 1;
+    display: flex;
+  }
+  .clock {
+    flex: none;
+    min-width: 8.5ch;
+    font: 400 15px/1 var(--type);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .speed {
+    display: flex;
+    flex: none;
+    border: 1px solid #4a4842;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .speed button {
+    padding: 6px 9px;
+    border: 0;
+    background: transparent;
+    color: #b8b3a6;
+    font: 500 13px/1 var(--sans);
+    cursor: pointer;
+  }
+  .speed button[aria-pressed='true'] {
+    background: #ece6d8;
+    color: var(--ink);
+  }
+
+  /* Range inputs, drawn as engraved rules with a brass slide. */
+  .tidal input[type='range'] {
+    width: 100%;
+    height: 24px;
+    margin: 0;
+    background: transparent;
+    appearance: none;
+    cursor: pointer;
+  }
+  .tidal input[type='range']::-webkit-slider-runnable-track {
+    height: 3px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.55;
+  }
+  .tidal input[type='range']::-moz-range-track {
+    height: 3px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.55;
+  }
+  .tidal input[type='range']::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+    margin-top: -6.5px;
+    border: 1px solid rgba(0, 0, 0, 0.45);
+    border-radius: 50%;
+    background: #c9a45b;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    appearance: none;
+  }
+  .tidal input[type='range']::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.45);
+    border-radius: 50%;
+    background: #c9a45b;
+  }
+  .tidal input[type='range']:focus-visible {
+    outline: 2px solid #c9a45b;
+    outline-offset: 2px;
+  }
+
+  /* The record card. */
+  .card {
+    position: relative;
+    padding: 26px 28px 40px;
+    background:
+      repeating-linear-gradient(transparent 0 27px, rgba(120, 140, 170, 0.12) 27px 28px) 0 154px / 100% 100% no-repeat,
+      var(--card);
+    box-shadow: -1px 0 0 rgba(0, 0, 0, 0.4);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 46px;
+    width: 1px;
+    background: rgba(158, 59, 44, 0.28);
+  }
+  .card-head,
+  .section,
+  .notes {
+    position: relative;
+    padding-left: 30px;
+  }
+  .home {
+    display: inline-block;
+    color: var(--ink-soft);
+    font: 400 13px/1 var(--type);
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+  .home:hover,
+  .home:focus-visible {
+    color: var(--red);
+  }
+  h1 {
+    margin: 14px 0 8px;
+    font: 600 34px/1 var(--sans);
+    letter-spacing: -0.01em;
+  }
+  .intro {
+    margin: 0;
+    color: #34332f;
+  }
+  .section {
+    margin-top: 24px;
+  }
+  h2 {
+    margin: 0 0 10px;
+    color: var(--red);
+    font: 400 14px/1 var(--type);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .plates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .plates button {
+    display: grid;
+    width: 100%;
+    gap: 1px;
+    padding: 7px 9px 8px;
+    border: 1px solid var(--card-line);
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.35);
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+  }
+  .plates button:hover {
+    border-color: #a79d86;
+  }
+  .plates button[aria-pressed='true'] {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--card);
+  }
+  .cat {
+    font: 400 12px/1.2 var(--type);
+    letter-spacing: 0.05em;
+    opacity: 0.8;
+  }
+  .name {
+    font: 600 15px/1.2 var(--sans);
+  }
+  .ngc {
+    font: 400 12.5px/1.25 var(--sans);
+    opacity: 0.75;
+  }
+  .caption {
+    min-height: 3lh;
+    margin: 10px 0 0;
+    color: #3d3c37;
+    font-size: 14px;
+  }
+  .dials {
+    display: grid;
+    gap: 6px;
+  }
+  .dial {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    column-gap: 10px;
+    color: var(--ink);
+  }
+  .dial input {
+    grid-column: 1 / -1;
+  }
+  .dial-label {
+    font: 500 14px/1.2 var(--sans);
+  }
+  .dial output {
+    font: 400 13px/1.2 var(--type);
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .disk {
+    margin: 6px 0 0;
+    padding: 6px 0 0;
+    border: 0;
+    border-top: 1px dashed var(--card-line);
+  }
+  .disk legend {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0;
+    font: 600 14px/1.2 var(--sans);
+  }
+  .disk[data-off] .dial {
+    opacity: 0.4;
+  }
+  .has-disk,
+  .check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font: 400 13.5px/1 var(--sans);
+    cursor: pointer;
+  }
+  .has-disk input,
+  .check input {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: var(--ink);
+  }
+  .hint {
+    margin: 10px 0 0;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    margin-bottom: 8px;
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .seg button {
+    padding: 6px 12px;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: 500 14px/1 var(--sans);
+    cursor: pointer;
+  }
+  .seg button[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--card);
+  }
+  .ghost {
+    padding: 6px 10px;
+    border: 1px solid var(--card-line);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.35);
+    color: var(--ink);
+    font: 500 13.5px/1 var(--sans);
+    cursor: pointer;
+  }
+  .ghost:hover {
+    border-color: var(--ink);
+  }
+  .card button:focus-visible,
+  .transport button:focus-visible,
+  .notes summary:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 2px;
+  }
+  .notes {
+    margin-top: 26px;
+    font-size: 14px;
+    color: #34332f;
+  }
+  .notes summary {
+    color: var(--red);
+    font: 400 14px/1.4 var(--type);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .notes p {
+    margin: 10px 0 0;
+  }
+
+  @media (max-width: 900px) {
+    .tidal {
+      grid-template-columns: 1fr;
+    }
+    .bench {
+      position: static;
+      height: auto;
+      padding: 12px 12px 14px;
+    }
+    .sleeve,
+    .transport {
+      --size: calc(100vw - 24px);
+      width: calc(100vw - 24px);
+    }
+    .transport {
+      gap: 10px;
+    }
+    .card {
+      padding: 22px 16px 36px;
+    }
+    .card::before {
+      left: 22px;
+    }
+    .card-head,
+    .section,
+    .notes {
+      padding-left: 20px;
+    }
+    h1 {
+      font-size: 30px;
+    }
+  }
+  @media (max-width: 420px) {
+    .speed button {
+      padding: 6px 7px;
+    }
+    .etch {
+      font-size: 11.5px;
+    }
+    .etch-plate {
+      font-size: 13px;
+    }
+  }
+</style>
+
+<script>
+  import './_app';
+</script>
