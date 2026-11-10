@@ -162,7 +162,7 @@ function start(root: HTMLElement) {
     h.set('m', state.rows.flat().map(r3).join(','));
     if (state.mode === 'print') h.set('n', 'print');
     if (state.exposure !== 0.5) h.set('k', String(state.exposure));
-    return `${location.pathname}#${h.toString()}`;
+    return `${location.pathname}${location.search}#${h.toString()}`;
   }
   let linkTimer = 0;
   const saveLink = () => {
@@ -362,8 +362,9 @@ function start(root: HTMLElement) {
     syncTime();
     saveLink();
   });
-  root.addEventListener('keydown', (ev) => {
-    if (ev.target instanceof HTMLInputElement || ev.target instanceof HTMLButtonElement) return;
+  document.addEventListener('keydown', (ev) => {
+    const t = ev.target as Element | null;
+    if (t?.closest('input, button, a, summary, select, textarea')) return;
     if (ev.key === ' ') {
       ev.preventDefault();
       playBtn.click();
