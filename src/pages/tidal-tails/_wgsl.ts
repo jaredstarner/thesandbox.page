@@ -55,7 +55,7 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
   var g = P.a;
   var salt = 0x51ed27u;
   if (f32(i) >= P.b.e2.w) { g = P.b; salt = 0x9e3779u; }
-  var st = pcg(i * 2654435761u ^ P.seed ^ salt);
+  var st = pcg((i * 2654435761u) ^ P.seed ^ salt);
   let R = g.e1.w;
   let eps = g.vel.w;
   let m = g.pos.w;
@@ -78,7 +78,7 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
     weight = 1.35;
   } else if (u < 0.22) {
     // Knots of young stars: small clumps on shared orbits that shear into arcs.
-    var cs = pcg(u32(rnd(&st) * 420.0) * 7919u ^ salt ^ P.seed);
+    var cs = pcg((u32(rnd(&st) * 420.0) * 7919u) ^ salt ^ P.seed);
     let rc = R * (0.22 + 0.78 * sqrt(rnd(&cs)));
     let tc = rnd(&cs) * TAU;
     let size = R * (0.008 + 0.018 * rnd(&cs));
@@ -253,7 +253,7 @@ fn vs(@builtin(vertex_index) vi: u32, @builtin(instance_index) ii: u32) -> Out {
     vec2f(-1.0, -1.0), vec2f(1.0, -1.0), vec2f(-1.0, 1.0),
     vec2f(-1.0, 1.0), vec2f(1.0, -1.0), vec2f(1.0, 1.0)
   );
-  var st = pcg(ii * 2246822519u ^ F.seed);
+  var st = pcg((ii * 2246822519u) ^ F.seed);
   let x = rnd(&st) * 1.9 - 0.95;
   let y = rnd(&st) * 1.9 - 0.95;
   // Brightness falls off as a power law: a few bright stars, many faint ones.
@@ -337,7 +337,7 @@ struct Comp {
 
 fn noise(p: vec2f) -> f32 {
   let q = vec2u(floor(p));
-  return f32(pcg(q.x * 73856093u ^ pcg(q.y * 19349663u ^ u32(C.seed)))) / 4294967296.0;
+  return f32(pcg((q.x * 73856093u) ^ pcg((q.y * 19349663u) ^ u32(C.seed)))) / 4294967296.0;
 }
 
 @fragment
