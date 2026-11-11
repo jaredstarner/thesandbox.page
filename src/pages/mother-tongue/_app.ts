@@ -529,7 +529,7 @@ export function start(root: HTMLElement): void {
   // Words: click any written word to trace it.
   interlinear.addEventListener('click', (e) => {
     const b = (e.target as Element).closest<HTMLElement>('[data-meaning]');
-    if (!b) return;
+    if (!b?.dataset.meaning) return;
     v.word = b.dataset.meaning as Meaning;
     textKey = '';
     invalidate();
@@ -649,8 +649,14 @@ export function start(root: HTMLElement): void {
           if (i === 0) form = form.charAt(0).toUpperCase() + form.slice(1);
         }
         const m = headMeaning(tk.parts);
-        const pressed = m === v.word ? 'true' : 'false';
-        html += `<button type="button" class="word" data-meaning="${m ?? ''}" aria-pressed="${pressed}"><span class="form">${esc(tk.before + form + tk.after)}</span><span class="gl">${glossHtml(tk.gloss)}</span></button>`;
+        const inner = `<span class="form">${esc(tk.before + form + tk.after)}</span><span class="gl">${glossHtml(tk.gloss)}</span>`;
+        // Grammar words have no meaning to trace, so only content words are buttons.
+        if (m) {
+          const pressed = m === v.word ? 'true' : 'false';
+          html += `<button type="button" class="word" data-meaning="${m}" aria-pressed="${pressed}">${inner}</button>`;
+        } else {
+          html += `<span class="word plain">${inner}</span>`;
+        }
       });
       html += `</div><p class="translation">${esc(s.english)}</p></div>`;
     });
@@ -661,7 +667,9 @@ export function start(root: HTMLElement): void {
     const m = v.word;
     const line = lineage(v.node);
     const protoForm = v.fam.root.snapshots[0].get(m) ?? [];
-    let html = `<h3>‘${esc(ENGLISH[m])}’ <span class="sub">traced from Proto-${esc(v.fam.root.name)} to ${esc(eraName(v.fam, v.node, t))}</span></h3>`;
+    const here = eraName(v.fam, v.node, t);
+    const span = v.node === v.fam.root && t < 40 ? `as Proto-${v.fam.root.name} said it` : `traced from Proto-${v.fam.root.name} to ${here}`;
+    let html = `<h3>‘${esc(ENGLISH[m])}’ <span class="sub">${esc(span)}</span></h3>`;
     html += '<ol class="chain">';
     html += `<li><span class="date">3,000 years ago</span><span class="step"><i class="proto">*${esc(ipa(protoForm))}</i></span></li>`;
     let prev = protoForm.join('');
