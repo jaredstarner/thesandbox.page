@@ -10,9 +10,16 @@ import type { Rng } from './_rng';
 
 export type ScriptType = 'alphabet' | 'abjad' | 'abugida';
 
-/** A letter: strokes through the nodes of a 3 x 3 grid, numbered row by row. */
+/** One pen stroke: a path through nodes of a 3 x 3 grid (numbered row by row), each
+ * edge straight or bowed to one side by `b`. */
+export interface Stroke {
+  n: number[];
+  b: number[];
+}
+
+/** A letter: a few strokes. */
 export interface Glyph {
-  strokes: number[][];
+  strokes: Stroke[];
 }
 
 export type MarkKind = 'dot' | 'bar' | 'tick' | 'hook' | 'ring' | 'pair' | 'chevron' | 'stroke';
@@ -99,34 +106,83 @@ export interface Script {
 }
 
 const NODE = (i: number): [number, number] => [(i % 3) / 2, Math.floor(i / 3) / 2];
+const col = (i: number) => i % 3;
+const row = (i: number) => Math.floor(i / 3);
 
-function neighbours(i: number, diagonal: boolean): number[] {
-  const x = i % 3;
-  const y = Math.floor(i / 3);
-  const out: number[] = [];
-  for (let dy = -1; dy <= 1; dy++)
-    for (let dx = -1; dx <= 1; dx++) {
-      if (!dx && !dy) continue;
-      if (!diagonal && dx && dy) continue;
-      const nx = x + dx;
-      const ny = y + dy;
-      if (nx >= 0 && nx < 3 && ny >= 0 && ny < 3) out.push(ny * 3 + nx);
-    }
+const DIRS: [number, number][] = [
+  [1, 0],
+  [-1, 0],
+  [0, 1],
+  [0, -1],
+  [1, 1],
+  [-1, -1],
+  [1, -1],
+  [-1, 1],
+];
+
+/** Unit grid edges a move covers, so a long stroke blocks the short ones under it. */
+function unitEdges(a: number, b: number): string[] {
+  const dx = Math.sign(col(b) - col(a));
+  const dy = Math.sign(row(b) - row(a));
+  const out: string[] = [];
+  let x = col(a);
+  let y = row(a);
+  while (x !== col(b) || y !== row(b)) {
+    const from = y * 3 + x;
+    x += dx;
+    y += dy;
+    const to = y * 3 + x;
+    out.push(from < to ? `${from}-${to}` : `${to}-${from}`);
+  }
   return out;
 }
 
-const edgeKey = (a: number, b: number) => (a < b ? `${a}-${b}` : `${b}-${a}`);
+/** Points along one edge: a straight line, or a quadratic bow. */
+function edgePoints(a: number, c: number, bend: number, samples = 10): Pt[] {
+  const [x0, y0] = NODE(a);
+  const [x1, y1] = NODE(c);
+  if (!bend) return [
+    [x0, y0],
+    [x1, y1],
+  ];
+  const len = Math.hypot(x1 - x0, y1 - y0);
+  const mx = (x0 + x1) / 2 - ((y1 - y0) / len) * bend * len;
+  const my = (y0 + y1) / 2 + ((x1 - x0) / len) * bend * len;
+  const out: Pt[] = [];
+  for (let k = 0; k <= samples; k++) {
+    const t = k / samples;
+    const u = 1 - t;
+    out.push([u * u * x0 + 2 * u * t * mx + t * t * x1, u * u * y0 + 2 * u * t * my + t * t * y1]);
+  }
+  return out;
+}
+
+/** A stroke as points, with the node corners flagged for rounding. */
+function strokePoints(st: Stroke): { pts: Pt[]; corner: boolean[] } {
+  const pts: Pt[] = [];
+  const corner: boolean[] = [];
+  for (let k = 0; k < st.n.length - 1; k++) {
+    const seg = edgePoints(st.n[k], st.n[k + 1], st.b[k]);
+    seg.forEach((p, i) => {
+      if (k > 0 && i === 0) return;
+      pts.push(p);
+      corner.push(i === 0 || i === seg.length - 1);
+    });
+  }
+  return { pts, corner };
+}
 
 /** Rasterize a glyph small and soft, to compare letters for likeness. */
-function raster(g: Glyph, size = 14): Float32Array {
+function raster(g: Glyph, size = 16): Float32Array {
   const out = new Float32Array(size * size);
   const pad = 2;
   const s = size - pad * 2 - 1;
   for (const stroke of g.strokes) {
-    for (let k = 0; k < stroke.length - 1; k++) {
-      const [x0, y0] = NODE(stroke[k]);
-      const [x1, y1] = NODE(stroke[k + 1]);
-      const steps = 24;
+    const { pts } = strokePoints(stroke);
+    for (let k = 0; k < pts.length - 1; k++) {
+      const [x0, y0] = pts[k];
+      const [x1, y1] = pts[k + 1];
+      const steps = Math.max(2, Math.ceil(Math.hypot(x1 - x0, y1 - y0) * 30));
       for (let q = 0; q <= steps; q++) {
         const x = pad + (x0 + (x1 - x0) * (q / steps)) * s;
         const y = pad + (y0 + (y1 - y0) * (q / steps)) * s;
@@ -155,73 +211,109 @@ function likeness(a: Float32Array, b: Float32Array): number {
   return sum ? diff / sum : 0;
 }
 
-export const edgeCount = (g: Glyph) => g.strokes.reduce((n, s) => n + s.length - 1, 0);
+/** Ink a letter needs, in grid units (the full height is 1). */
+export function inkLength(g: Glyph): number {
+  let n = 0;
+  for (const st of g.strokes) {
+    const { pts } = strokePoints(st);
+    for (let k = 1; k < pts.length; k++) n += Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]);
+  }
+  return n;
+}
 
-function makeGlyph(r: Rng, diagonal: number, symmetry: number): Glyph | null {
+export const edgeCount = (g: Glyph) => g.strokes.reduce((n, s) => n + s.n.length - 1, 0);
+
+interface Hand {
+  diagonal: number;
+  curvy: number;
+  symmetry: number;
+  long: number;
+}
+
+function makeGlyph(r: Rng, hand: Hand): Glyph | null {
   const used = new Set<string>();
   const touched = new Set<number>();
-  const strokes: number[][] = [];
-  const count = r.weighted([1, 2, 3], [2, 5, 2]);
+  const strokes: Stroke[] = [];
+  const count = r.weighted([1, 2, 3], [3, 5, 2]);
   for (let s = 0; s < count; s++) {
-    let start: number;
-    if (!strokes.length) start = r.int(9);
-    else start = r.pick([...touched]);
-    const stroke = [start];
+    const start = strokes.length ? r.pick([...touched]) : r.int(9);
+    const st: Stroke = { n: [start], b: [] };
     const len = r.weighted([1, 2, 3], [4, 4, 1.5]);
-    let prevDir: [number, number] | null = null;
+    let prev: [number, number] | null = null;
     for (let k = 0; k < len; k++) {
-      const here = stroke[stroke.length - 1];
-      const options = neighbours(here, r() < diagonal).filter((n) => !used.has(edgeKey(here, n)));
-      if (!options.length) break;
-      // Prefer carrying straight on to zigzags.
-      const weights = options.map((n) => {
-        if (!prevDir) return 1;
-        const d: [number, number] = [(n % 3) - (here % 3), Math.floor(n / 3) - Math.floor(here / 3)];
-        return d[0] === prevDir[0] && d[1] === prevDir[1] ? 2.6 : 1;
-      });
-      const next = r.weighted(options, weights);
-      prevDir = [(next % 3) - (here % 3), Math.floor(next / 3) - Math.floor(here / 3)];
-      used.add(edgeKey(here, next));
-      stroke.push(next);
+      const here = st.n[st.n.length - 1];
+      const options: { to: number; d: [number, number]; w: number }[] = [];
+      for (const d of DIRS) {
+        if (d[0] && d[1] && r() > hand.diagonal) continue;
+        for (const steps of [1, 2]) {
+          const x = col(here) + d[0] * steps;
+          const y = row(here) + d[1] * steps;
+          if (x < 0 || x > 2 || y < 0 || y > 2) continue;
+          const to = y * 3 + x;
+          if (unitEdges(here, to).some((e) => used.has(e))) continue;
+          let w = steps === 2 ? 1 + hand.long * 3 : 1;
+          if (prev && prev[0] === d[0] && prev[1] === d[1]) w *= 0.25;
+          if (prev && prev[0] === -d[0] && prev[1] === -d[1]) w = 0;
+          options.push({ to, d, w });
+        }
+      }
+      if (!options.length || options.every((o) => o.w === 0)) break;
+      const move = r.weighted(
+        options,
+        options.map((o) => o.w),
+      );
+      unitEdges(here, move.to).forEach((e) => used.add(e));
+      const bend = r() < hand.curvy ? r.pick([-1, 1]) * r.range(0.28, 0.5) : 0;
+      st.n.push(move.to);
+      st.b.push(bend);
+      prev = move.d;
     }
-    if (stroke.length < 2) continue;
-    for (const n of stroke) touched.add(n);
-    strokes.push(stroke);
+    if (st.n.length < 2) continue;
+    for (const n of st.n) touched.add(n);
+    strokes.push(st);
   }
   if (!strokes.length) return null;
-  let g: Glyph = { strokes };
-  if (r() < symmetry) {
+  if (r() < hand.symmetry) {
     // Add each stroke's mirror image unless it retraces an edge already drawn.
-    const mirrored = strokes.map((st) => st.map((n) => Math.floor(n / 3) * 3 + (2 - (n % 3))));
-    const merged = [...strokes];
-    for (const st of mirrored) {
-      const keys = st.slice(1).map((n, i) => edgeKey(st[i], n));
+    for (const st of [...strokes]) {
+      const m: Stroke = { n: st.n.map((n) => row(n) * 3 + (2 - col(n))), b: st.b.map((b) => -b) };
+      const keys = m.n.slice(1).flatMap((n, i) => unitEdges(m.n[i], n));
       if (keys.every((k) => !used.has(k))) {
         keys.forEach((k) => used.add(k));
-        merged.push(st);
+        strokes.push(m);
       }
     }
-    g = { strokes: merged };
   }
-  const edges = edgeCount(g);
-  if (edges < 2 || edges > 6) return null;
+  const g: Glyph = { strokes };
+  const all = strokes.flatMap((st) => st.n);
+  const height = Math.max(...all.map(row)) - Math.min(...all.map(row));
+  const width = Math.max(...all.map(col)) - Math.min(...all.map(col));
+  // Most letters stand the full height; a few sit short, as x-height letters do.
+  if (height < 2 && r() > 0.2) return null;
+  if (height < 1 || width < 1) return null;
+  const ink = inkLength(g);
+  if (ink < 1.6 || ink > 4.2) return null;
   return g;
 }
 
 /** A set of letters, all distinct from each other, ordered simplest first. */
 export function makeLetters(r: Rng, count: number): Glyph[] {
-  const diagonal = r.range(0.15, 0.75);
-  const symmetry = r.range(0.05, 0.4);
+  const hand: Hand = {
+    diagonal: r.range(0.2, 0.8),
+    curvy: r.weighted([0.08, 0.3, 0.55], [3, 4, 3]),
+    symmetry: r.range(0.08, 0.35),
+    long: r.range(0.3, 1),
+  };
   const chosen: { g: Glyph; ras: Float32Array }[] = [];
-  let threshold = 0.42;
-  for (let guard = 0; chosen.length < count && guard < 6000; guard++) {
-    if (guard && guard % 1500 === 0) threshold -= 0.05;
-    const g = makeGlyph(r, diagonal, symmetry);
+  let threshold = 0.5;
+  for (let guard = 0; chosen.length < count && guard < 8000; guard++) {
+    if (guard && guard % 1600 === 0) threshold -= 0.05;
+    const g = makeGlyph(r, hand);
     if (!g) continue;
     const ras = raster(g);
     if (chosen.every((c) => likeness(c.ras, ras) > threshold)) chosen.push({ g, ras });
   }
-  return chosen.map((c) => c.g).sort((a, b) => edgeCount(a) - edgeCount(b));
+  return chosen.map((c) => c.g).sort((a, b) => inkLength(a) - inkLength(b));
 }
 
 const MARK_KINDS: MarkKind[] = ['dot', 'bar', 'tick', 'hook', 'ring', 'pair', 'chevron', 'stroke'];
@@ -316,7 +408,7 @@ export function chooseOps(r: Rng, t0: number, t1: number, state: ScriptState, fi
     if (kind === 'simplify') {
       op.cuts = [];
       for (const [key, g] of script.letters) {
-        if (edgeCount(g) >= 4 && g.strokes.length >= 2 && r.chance(0.7)) op.cuts.push([key, r.int(g.strokes.length)]);
+        if (inkLength(g) >= 3 && g.strokes.length >= 2 && r.chance(0.7)) op.cuts.push([key, r.int(g.strokes.length)]);
       }
     }
     ops.push(op);
@@ -367,7 +459,7 @@ export function applyOp(state: ScriptState, op: ScriptOp, k: number): void {
 
 export const cloneScript = (s: Script): Script => ({
   ...s,
-  letters: new Map([...s.letters].map(([k, g]) => [k, { strokes: g.strokes.map((st) => [...st]) }])),
+  letters: new Map([...s.letters].map(([k, g]) => [k, { strokes: g.strokes.map((st) => ({ n: [...st.n], b: [...st.b] })) }])),
   derived: new Map(s.derived),
   vowelMarks: new Map(s.vowelMarks),
   state: { ...s.state },
@@ -519,16 +611,25 @@ export function deriveLetters(s: Script, pairs: Map<string, string>, inventory: 
 
 type Pt = [number, number];
 
-/** A polyline with its corners rounded by quadratic curves, sampled densely. */
-function smooth(points: Pt[], round: number): Pt[] {
+/** A polyline with its flagged corners rounded by quadratic curves, sampled densely. */
+function smooth(points: Pt[], corner: boolean[], round: number): Pt[] {
   if (points.length < 3 || round <= 0.001) return densify(points);
   const out: Pt[] = [points[0]];
   for (let i = 1; i < points.length - 1; i++) {
     const a = points[i - 1];
     const b = points[i];
     const c = points[i + 1];
+    if (!corner[i]) {
+      out.push(...densify([out[out.length - 1], b]).slice(1));
+      continue;
+    }
     const lab = Math.hypot(b[0] - a[0], b[1] - a[1]);
     const lbc = Math.hypot(c[0] - b[0], c[1] - b[1]);
+    const cross = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
+    if (Math.abs(cross) < 1e-6 || lab < 1e-6 || lbc < 1e-6) {
+      out.push(...densify([out[out.length - 1], b]).slice(1));
+      continue;
+    }
     const cut = round * 0.5 * Math.min(lab, lbc);
     const p: Pt = [b[0] + ((a[0] - b[0]) * cut) / lab, b[1] + ((a[1] - b[1]) * cut) / lab];
     const q: Pt = [b[0] + ((c[0] - b[0]) * cut) / lbc, b[1] + ((c[1] - b[1]) * cut) / lbc];
@@ -551,21 +652,6 @@ function densify(points: Pt[]): Pt[] {
     const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 0.06));
     for (let k = 1; k <= n; k++) out.push([x0 + ((x1 - x0) * k) / n, y0 + ((y1 - y0) * k) / n]);
   }
-  return out;
-}
-
-/** Merge runs of collinear edges, so a straight stroke has no false corners. */
-function straighten(points: Pt[]): Pt[] {
-  if (points.length < 3) return points;
-  const out: Pt[] = [points[0]];
-  for (let i = 1; i < points.length - 1; i++) {
-    const a = out[out.length - 1];
-    const b = points[i];
-    const c = points[i + 1];
-    const cross = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
-    if (Math.abs(cross) > 1e-6) out.push(b);
-  }
-  out.push(points[points.length - 1]);
   return out;
 }
 
@@ -668,21 +754,26 @@ export function drawGlyph(g: Glyph, st: ScriptState, size: number, mirror = 1, f
   g.strokes.forEach((stroke, i) => {
     const k = fading?.get(i) ?? 1;
     if (k <= 0.02) return;
-    let pts = straighten(stroke.map(NODE));
+    const sp = strokePoints(stroke);
+    let pts = sp.pts;
+    let corner = sp.corner;
     if (k < 1) {
       // Retract toward the stroke's start.
       const total = pts.slice(1).reduce((n, p, j) => n + Math.hypot(p[0] - pts[j][0], p[1] - pts[j][1]), 0);
       let left = total * k;
       const cut: Pt[] = [pts[0]];
+      const flags: boolean[] = [corner[0]];
       for (let j = 1; j < pts.length && left > 0; j++) {
         const seglen = Math.hypot(pts[j][0] - pts[j - 1][0], pts[j][1] - pts[j - 1][1]);
         const t = Math.min(1, left / seglen);
         cut.push([pts[j - 1][0] + (pts[j][0] - pts[j - 1][0]) * t, pts[j - 1][1] + (pts[j][1] - pts[j - 1][1]) * t]);
+        flags.push(t >= 1 ? corner[j] : false);
         left -= seglen;
       }
       pts = cut;
+      corner = flags;
     }
-    const placed = smooth(pts, st.round).map((p) => place(p, st, size, mirror));
+    const placed = smooth(pts, corner, st.round).map((p) => place(p, st, size, mirror));
     d += strokeOutline(placed, st, size);
   });
   return d;
