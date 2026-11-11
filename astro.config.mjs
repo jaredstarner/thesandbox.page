@@ -634,5 +634,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Courier New', 'monospace'],
     },
+    {
+      // /mother-tongue/: a face drawn for linguists, with every IPA letter in its latin-ext subset.
+      provider: fontProviders.fontsource(),
+      name: 'Charis SIL',
+      cssVariable: '--font-mother',
+      weights: [400, 700],
+      styles: ['normal', 'italic'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['Georgia', 'serif'],
+    },
   ],
 });
