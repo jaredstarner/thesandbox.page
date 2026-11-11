@@ -309,21 +309,41 @@ function build(seed: number, variant: number, force = false): Family | null {
   // its own, as real languages are, so sisters' names needn't be cognate.
   const leaves = nodes.filter((n) => !n.children.length);
   const names = new Set<string>();
+  const taken = new Set<Meaning>();
   const namers = r.fork('names').shuffle(['star', 'stone', 'tree', 'sun', 'moon', 'fish', 'bird', 'night', 'mouth', 'name', 'water', 'hill', 'plain', 'fire', 'dog'] as Meaning[]);
+  const nameScore = (name: string): number => {
+    const plain = fold(name);
+    let score = Math.abs(plain.length - 6) * 0.6;
+    if (plain.length < 3) score += 20;
+    score += (name.match(/[ëəă]/g) ?? []).length * 1.5;
+    score += (name.normalize('NFD').match(/[̀-ͯ]/g) ?? []).length * 0.4;
+    if (/[aeiouyëəăöüïèò]{3}/i.test(plain)) score += 4;
+    if (/^[aeiou]{2}/i.test(plain)) score += 3;
+    return score;
+  };
   for (const node of nodes) {
     const forms = node.snapshots[node.snapshots.length - 1];
-    const order = node.parent ? namers : (['people', ...namers] as Meaning[]);
-    let name = '';
-    for (const m of order) {
+    const order = node.parent ? [...namers, ...MEANINGS] : (['people', ...namers, ...MEANINGS] as Meaning[]);
+    let best = '';
+    let bestScore = Infinity;
+    let bestMeaning: Meaning | null = null;
+    for (const [k, m] of order.entries()) {
+      if (taken.has(m)) continue;
       const w = forms.get(m)!;
       const text = romanize(w, romanStyle(node.romanIndex), 'macron').replace(/[ʼ']/g, '');
       const cap = text.charAt(0).toUpperCase() + text.slice(1);
-      if (cap.length < 3 || names.has(cap)) continue;
-      name = cap;
-      break;
+      if (names.has(cap)) continue;
+      // Earlier meanings in the shuffled list win ties, so names vary from family to family.
+      const score = nameScore(cap) + k * 0.15 + (!node.parent && m === 'people' ? -3 : 0);
+      if (score < bestScore) {
+        bestScore = score;
+        best = cap;
+        bestMeaning = m;
+      }
     }
-    names.add(name);
-    node.name = name;
+    names.add(best);
+    if (bestMeaning) taken.add(bestMeaning);
+    node.name = best;
   }
 
   // Lay the leaves out left to right in tree order, parents above their children's middle.
