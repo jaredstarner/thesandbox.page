@@ -141,10 +141,11 @@ function unitEdges(a: number, b: number): string[] {
 function edgePoints(a: number, c: number, bend: number, samples = 10): Pt[] {
   const [x0, y0] = NODE(a);
   const [x1, y1] = NODE(c);
-  if (!bend) return [
-    [x0, y0],
-    [x1, y1],
-  ];
+  if (!bend)
+    return [
+      [x0, y0],
+      [x1, y1],
+    ];
   const len = Math.hypot(x1 - x0, y1 - y0);
   const mx = (x0 + x1) / 2 - ((y1 - y0) / len) * bend * len;
   const my = (y0 + y1) / 2 + ((x1 - x0) / len) * bend * len;
@@ -366,7 +367,14 @@ export function makeScript(r: Rng, phonemes: string[], frequency: Map<string, nu
 }
 
 /** Pick the drift a branch's scribes go through. */
-export function chooseOps(r: Rng, t0: number, t1: number, state: ScriptState, first: boolean, script: Script): ScriptOp[] {
+export function chooseOps(
+  r: Rng,
+  t0: number,
+  t1: number,
+  state: ScriptState,
+  first: boolean,
+  script: Script,
+): ScriptOp[] {
   const ops: ScriptOp[] = [];
   const span = t1 - t0;
   const slots = Math.max(1, Math.round(span / r.range(330, 520)));
@@ -460,14 +468,22 @@ export function applyOp(state: ScriptState, op: ScriptOp, k: number): void {
 
 export const cloneScript = (s: Script): Script => ({
   ...s,
-  letters: new Map([...s.letters].map(([k, g]) => [k, { strokes: g.strokes.map((st) => ({ n: [...st.n], b: [...st.b] })) }])),
+  letters: new Map(
+    [...s.letters].map(([k, g]) => [k, { strokes: g.strokes.map((st) => ({ n: [...st.n], b: [...st.b] })) }]),
+  ),
   derived: new Map(s.derived),
   vowelMarks: new Map(s.vowelMarks),
   state: { ...s.state },
 });
 
 /** Apply a finished simplify or vowels op to a script's letters. */
-export function settleOp(s: Script, op: ScriptOp, inventory: Set<string>, frequency: Map<string, number>, r: Rng): void {
+export function settleOp(
+  s: Script,
+  op: ScriptOp,
+  inventory: Set<string>,
+  frequency: Map<string, number>,
+  r: Rng,
+): void {
   if (op.kind === 'simplify' && op.cuts) {
     for (const [key, index] of op.cuts) {
       const g = s.letters.get(key);
@@ -703,17 +719,63 @@ function place(p: Pt, st: ScriptState, size: number, mirror: number): Pt {
 }
 
 const MARK_SHAPES: Record<MarkKind, Pt[][]> = {
-  dot: [[[0.5, 0.5], [0.5, 0.52]]],
-  bar: [[[0.15, 0.5], [0.85, 0.5]]],
-  tick: [[[0.3, 0.75], [0.7, 0.25]]],
-  hook: [[[0.25, 0.3], [0.7, 0.3], [0.7, 0.75]]],
-  ring: [[[0.5, 0.2], [0.8, 0.5], [0.5, 0.8], [0.2, 0.5], [0.5, 0.2]]],
-  pair: [
-    [[0.25, 0.5], [0.25, 0.52]],
-    [[0.75, 0.5], [0.75, 0.52]],
+  dot: [
+    [
+      [0.5, 0.5],
+      [0.5, 0.52],
+    ],
   ],
-  chevron: [[[0.15, 0.75], [0.5, 0.25], [0.85, 0.75]]],
-  stroke: [[[0.2, 0.8], [0.8, 0.2]]],
+  bar: [
+    [
+      [0.15, 0.5],
+      [0.85, 0.5],
+    ],
+  ],
+  tick: [
+    [
+      [0.3, 0.75],
+      [0.7, 0.25],
+    ],
+  ],
+  hook: [
+    [
+      [0.25, 0.3],
+      [0.7, 0.3],
+      [0.7, 0.75],
+    ],
+  ],
+  ring: [
+    [
+      [0.5, 0.2],
+      [0.8, 0.5],
+      [0.5, 0.8],
+      [0.2, 0.5],
+      [0.5, 0.2],
+    ],
+  ],
+  pair: [
+    [
+      [0.25, 0.5],
+      [0.25, 0.52],
+    ],
+    [
+      [0.75, 0.5],
+      [0.75, 0.52],
+    ],
+  ],
+  chevron: [
+    [
+      [0.15, 0.75],
+      [0.5, 0.25],
+      [0.85, 0.75],
+    ],
+  ],
+  stroke: [
+    [
+      [0.2, 0.8],
+      [0.8, 0.2],
+    ],
+  ],
 };
 
 /** Path data for a mark beside, above, below, or through a letter of the given width. */
@@ -736,7 +798,13 @@ function markPath(m: Mark, st: ScriptState, size: number, width: number, slot: n
   }
   const scale = m.place === 'through' ? s * 1.8 : s;
   // Marks keep a steady line, so a broad nib can't thin them to nothing.
-  const markState = { ...st, weight: st.weight * (m.kind === 'dot' || m.kind === 'pair' ? 1.5 : 0.9), aspect: 1, slant: 0, contrast: Math.min(st.contrast, 0.25) };
+  const markState = {
+    ...st,
+    weight: st.weight * (m.kind === 'dot' || m.kind === 'pair' ? 1.5 : 0.9),
+    aspect: 1,
+    slant: 0,
+    contrast: Math.min(st.contrast, 0.25),
+  };
   let d = '';
   for (const stroke of MARK_SHAPES[m.kind]) {
     const pts = densify(stroke.map(([x, y]) => [ox + x * scale, oy + y * scale] as Pt));

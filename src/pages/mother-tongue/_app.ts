@@ -35,7 +35,10 @@ const esc = (s: string) =>
 
 const isMorph = (p: string) => (MORPHS as readonly string[]).includes(p);
 
-function el<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string | number> = {}): SVGElementTagNameMap[K] {
+function el<K extends keyof SVGElementTagNameMap>(
+  tag: K,
+  attrs: Record<string, string | number> = {},
+): SVGElementTagNameMap[K] {
   const node = document.createElementNS(SVG, tag);
   for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, String(v));
   return node;
@@ -71,9 +74,23 @@ function signKey(sign: Sign): string {
   return `${sign.letter}|${sign.marks.map((m) => m.kind + m.place).join(',')}`;
 }
 
-function signPath(s: Script, sign: Sign, st: ScriptState, size: number, fading: Map<string, Map<number, number>>): string {
+function signPath(
+  s: Script,
+  sign: Sign,
+  st: ScriptState,
+  size: number,
+  fading: Map<string, Map<number, number>>,
+): string {
   const g = sign.letter === '·carrier' ? s.carrier : s.letters.get(sign.letter);
-  let d = g ? drawGlyph(g, st, size, st.mirror < 0 ? Math.min(-0.05, st.mirror) : Math.max(0.05, st.mirror), fading.get(sign.letter)) : '';
+  let d = g
+    ? drawGlyph(
+        g,
+        st,
+        size,
+        st.mirror < 0 ? Math.min(-0.05, st.mirror) : Math.max(0.05, st.mirror),
+        fading.get(sign.letter),
+      )
+    : '';
   if (!g && sign.letter) d = '';
   d += drawMarks(sign.marks, st, size);
   return d;
@@ -203,7 +220,9 @@ function drawWriting(
         cx += endRoom;
         const h = st.weight * size;
         const bx = at(cx - endRoom * 0.45);
-        group.append(el('rect', { x: (bx - h / 2).toFixed(2), y: y.toFixed(2), width: h.toFixed(2), height: size.toFixed(2) }));
+        group.append(
+          el('rect', { x: (bx - h / 2).toFixed(2), y: y.toFixed(2), width: h.toFixed(2), height: size.toFixed(2) }),
+        );
       }
     });
     if (dividers) group.append(el('path', { d: dividers, transform: `translate(0 ${y.toFixed(2)})` }));
@@ -237,7 +256,9 @@ interface TreeGeom {
 function geom(svg: SVGSVGElement): TreeGeom {
   const w = svg.clientWidth || 480;
   const h = svg.clientHeight || 700;
-  return h < 400 ? { w, h, left: 50, right: 14, top: 30, bottom: 34 } : { w, h, left: 58, right: 24, top: 40, bottom: 52 };
+  return h < 400
+    ? { w, h, left: 50, right: 14, top: 30, bottom: 34 }
+    : { w, h, left: 58, right: 24, top: 40, bottom: 52 };
 }
 
 const tx = (g: TreeGeom, n: Lang) => g.left + 26 + n.x * (g.w - g.left - g.right - 52);
@@ -291,7 +312,17 @@ function drawTree(svg: SVGSVGElement, v: View): void {
     }
     for (const c of n.changes) {
       const y = ty(g, c.t);
-      marks.append(el('line', { class: 'tick-change', stroke: color, x1: x - 5, x2: x + 5, y1: y, y2: y, opacity: dim ? 0.35 : 1 }));
+      marks.append(
+        el('line', {
+          class: 'tick-change',
+          stroke: color,
+          x1: x - 5,
+          x2: x + 5,
+          y1: y,
+          y2: y,
+          opacity: dim ? 0.35 : 1,
+        }),
+      );
     }
     for (const op of n.ops) {
       const y = ty(g, op.t);
@@ -668,7 +699,10 @@ export function start(root: HTMLElement): void {
     const line = lineage(v.node);
     const protoForm = v.fam.root.snapshots[0].get(m) ?? [];
     const here = eraName(v.fam, v.node, t);
-    const span = v.node === v.fam.root && t < 40 ? `as Proto-${v.fam.root.name} said it` : `traced from Proto-${v.fam.root.name} to ${here}`;
+    const span =
+      v.node === v.fam.root && t < 40
+        ? `as Proto-${v.fam.root.name} said it`
+        : `traced from Proto-${v.fam.root.name} to ${here}`;
     let html = `<h3>‘${esc(ENGLISH[m])}’ <span class="sub">${esc(span)}</span></h3>`;
     html += '<ol class="chain">';
     html += `<li><span class="date">3,000 years ago</span><span class="step"><i class="proto">*${esc(ipa(protoForm))}</i></span></li>`;
@@ -747,7 +781,15 @@ export function start(root: HTMLElement): void {
         const ps = document.createElementNS(SVG, 'svg');
         ps.classList.add('was');
         cell.append(ps);
-        drawWriting(ps, proto, new Map(), [{ signs: [{ letter: script.derived.get(p)?.base ?? p, marks: [] }] }], signWidth(proto.state, 14) + 2, 14, 'plain');
+        drawWriting(
+          ps,
+          proto,
+          new Map(),
+          [{ signs: [{ letter: script.derived.get(p)?.base ?? p, marks: [] }] }],
+          signWidth(proto.state, 14) + 2,
+          14,
+          'plain',
+        );
       }
       alphabet.append(cell);
     }
@@ -764,10 +806,13 @@ export function start(root: HTMLElement): void {
     const items: { t: number; html: string; node: Lang }[] = [];
     for (const n of line) {
       for (const c of n.changes) {
-        const ex = c.example ? ` <span class="ex">*${esc(ipa(c.example.before))} &gt; ${esc(ipa(c.example.after))} ‘${esc(ENGLISH[c.example.meaning])}’</span>` : '';
+        const ex = c.example
+          ? ` <span class="ex">*${esc(ipa(c.example.before))} &gt; ${esc(ipa(c.example.after))} ‘${esc(ENGLISH[c.example.meaning])}’</span>`
+          : '';
         items.push({ t: c.t, node: n, html: `${esc(c.text)}${ex}` });
       }
-      for (const op of n.ops) items.push({ t: op.t, node: n, html: `<span class="script-change">${esc(OP_TEXT[op.kind])}</span>` });
+      for (const op of n.ops)
+        items.push({ t: op.t, node: n, html: `<span class="script-change">${esc(OP_TEXT[op.kind])}</span>` });
       if (n.children.length) {
         const kids = n.children.map((c) => c.name).join(', ');
         items.push({ t: n.t1, node: n, html: `<span class="split-note">splits into ${esc(kids)}</span>` });

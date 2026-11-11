@@ -62,15 +62,30 @@ export interface Family {
 const INKS = ['#a3392b', '#2f5d8a', '#b07a1f', '#3f7a5a', '#7a3f74', '#4f6a78', '#9a5a2c', '#5b5f2a'];
 
 // Words a visitor should never be shown, kept out of plain sight.
-const BLOCKED = ['avtt', 'shpx', 'fuvg', 'phag', 'snt', 'xvxr', 'fcvp', 'puvax', 'encr', 'anmv', 'cvff', 'fyhg', 'jubER', 'qvpx', 'pbpx', 'gjng', 'jnax', 'ergneq', 'avtn', 'avtre'].map((w) =>
-  w.toLowerCase().replace(/[a-z]/g, (c) => String.fromCharCode(((c.charCodeAt(0) - 97 + 13) % 26) + 97)),
-);
+const BLOCKED = [
+  'avtt',
+  'shpx',
+  'fuvg',
+  'phag',
+  'snt',
+  'xvxr',
+  'fcvp',
+  'puvax',
+  'encr',
+  'anmv',
+  'cvff',
+  'fyhg',
+  'jubER',
+  'qvpx',
+  'pbpx',
+  'gjng',
+  'jnax',
+  'ergneq',
+  'avtn',
+  'avtre',
+].map((w) => w.toLowerCase().replace(/[a-z]/g, (c) => String.fromCharCode(((c.charCodeAt(0) - 97 + 13) % 26) + 97)));
 
-const fold = (s: string) =>
-  s
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase();
+const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 function clean(text: string): boolean {
   const t = fold(text);
@@ -142,7 +157,9 @@ function chooseChanges(
   let forms = start;
   const rootKeys = MEANINGS as readonly string[];
   for (const t of times) {
-    const candidates = RULES.filter((rule) => !used.has(rule.id) && (!rule.after || rule.after.some((a) => used.has(a))));
+    const candidates = RULES.filter(
+      (rule) => !used.has(rule.id) && (!rule.after || rule.after.some((a) => used.has(a))),
+    );
     for (let tries = 0; tries < 40 && candidates.length; tries++) {
       const rule = r.weighted(
         candidates,
@@ -276,7 +293,9 @@ function build(seed: number, variant: number, force = false): Family | null {
   const phonemes = [...inventoryOf(start)];
   const baseScript = makeScript(r.fork('script'), phonemes, frequencyOf(start));
 
-  const leafStyles = r.fork('styles').shuffle([...Array(ROMAN_STYLE_COUNT * 2).keys()].map((i) => i % ROMAN_STYLE_COUNT));
+  const leafStyles = r
+    .fork('styles')
+    .shuffle([...Array(ROMAN_STYLE_COUNT * 2).keys()].map((i) => i % ROMAN_STYLE_COUNT));
   let leafIndex = 0;
   for (const node of nodes) {
     const parent = node.parent;
@@ -310,7 +329,25 @@ function build(seed: number, variant: number, force = false): Family | null {
   const leaves = nodes.filter((n) => !n.children.length);
   const names = new Set<string>();
   const taken = new Set<Meaning>();
-  const namers = r.fork('names').shuffle(['star', 'stone', 'tree', 'sun', 'moon', 'fish', 'bird', 'night', 'mouth', 'name', 'water', 'hill', 'plain', 'fire', 'dog'] as Meaning[]);
+  const namers = r
+    .fork('names')
+    .shuffle([
+      'star',
+      'stone',
+      'tree',
+      'sun',
+      'moon',
+      'fish',
+      'bird',
+      'night',
+      'mouth',
+      'name',
+      'water',
+      'hill',
+      'plain',
+      'fire',
+      'dog',
+    ] as Meaning[]);
   const nameScore = (name: string): number => {
     const plain = fold(name);
     let score = Math.abs(plain.length - 6) * 0.6;

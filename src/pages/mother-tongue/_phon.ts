@@ -138,8 +138,7 @@ export function vowelSymbol(f: Omit<Vowel, 'kind'>): string {
   let best = 'a';
   let bestScore = Infinity;
   for (const [sym, v] of Object.entries(VOWEL_BASES)) {
-    const score =
-      Math.abs(v.height - f.height) * 2 + Math.abs(v.back - f.back) * 1.5 + (v.round === f.round ? 0 : 1.2);
+    const score = Math.abs(v.height - f.height) * 2 + Math.abs(v.back - f.back) * 1.5 + (v.round === f.round ? 0 : 1.2);
     if (score < bestScore) {
       bestScore = score;
       best = sym;

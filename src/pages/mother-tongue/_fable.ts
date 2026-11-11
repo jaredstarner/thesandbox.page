@@ -74,7 +74,12 @@ export const FABLE: Unit[] = [
   {
     main: [{ v: 'hurt', tense: 'prs', subj: { head: 'heart', poss: 'I' } }],
     when: {
-      clause: { v: 'see', tense: 'prs', subj: { head: 'I' }, comp: { v: 'drive', tense: 'prs', subj: { head: 'man' }, obj: horses } },
+      clause: {
+        v: 'see',
+        tense: 'prs',
+        subj: { head: 'I' },
+        comp: { v: 'drive', tense: 'prs', subj: { head: 'man' }, obj: horses },
+      },
     },
     end: '.”',
     open: true,

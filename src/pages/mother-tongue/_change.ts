@@ -119,9 +119,7 @@ export const RULES: Rule[] = [
     (w, s) => rewrite(w, s, (x, e) => (between(e) && (x === 'ɣ' || x === 'ð') ? null : undefined)),
     ['spirantize-between-vowels'],
   ),
-  simple('labial-fricatives', 3, '', (w, s) =>
-    rewrite(w, s, (x) => (x === 'β' ? 'v' : x === 'ɸ' ? 'f' : undefined)),
-  ),
+  simple('labial-fricatives', 3, '', (w, s) => rewrite(w, s, (x) => (x === 'β' ? 'v' : x === 'ɸ' ? 'f' : undefined))),
   simple('final-devoicing', 7, 'at the end of a word', (w, s) =>
     rewrite(w, s, (x, e) => (final(e) ? (devoiced(x) ?? undefined) : undefined)),
   ),
