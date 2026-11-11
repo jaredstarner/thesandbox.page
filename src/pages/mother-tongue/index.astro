@@ -1,0 +1,926 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+
+const description =
+  'A language family grown from one seed: a parent language splits into daughters over three thousand years, each with its own sound changes and its own drifting script, all telling the same fable.';
+---
+
+<Bare title="Mother tongue" description={description}>
+  <Font cssVariable="--font-mother" slot="head" />
+  <main class="mother" data-ready="false">
+    <header class="masthead">
+      <div class="title">
+        <h1>Mother tongue</h1>
+        <p class="dek">
+          One parent language, three thousand years, and the family it leaves behind. Drag along any branch of the tree
+          to read the same fable as it was said and written at that moment.
+        </p>
+      </div>
+      <div class="family-no">
+        <span class="label">Family</span>
+        <output data-seed>No. 1</output>
+        <button type="button" class="btn" data-new>
+          Grow another
+        </button>
+      </div>
+    </header>
+
+    <section class="tree-panel" aria-label="The family tree">
+      <svg
+        class="tree"
+        data-tree
+        role="slider"
+        tabindex="0"
+        aria-label="Family tree: choose a language and a date"
+      ></svg>
+      <p class="tree-key">
+        <span class="key-split">splits</span>
+        <span class="key-change">sound change</span>
+        <span class="key-script">change in the script</span>
+      </p>
+    </section>
+
+    <section class="reading" aria-live="polite">
+      <header class="reading-head">
+        <div>
+          <h2 data-era>Proto-language</h2>
+          <p class="when">
+            <span data-when>3,000 years ago</span> <span class="medium" data-medium-label></span>
+          </p>
+        </div>
+        <button type="button" class="btn play" data-play aria-pressed="false">
+          Play to here
+        </button>
+      </header>
+      <figure class="tablet" data-tablet>
+        <div class="stone" aria-hidden="true">
+          <div class="face"></div>
+        </div>
+        <div class="vellum" aria-hidden="true"></div>
+        <svg
+          class="inscription"
+          data-inscription
+          role="img"
+          aria-label="The fable written in the language's own script"
+        ></svg>
+        <figcaption data-script-caption></figcaption>
+      </figure>
+      <div class="interlinear" data-interlinear></div>
+    </section>
+
+    <section class="etymology" data-etymology aria-live="polite"></section>
+
+    <section class="alphabet-panel">
+      <h3>
+        The letters <span class="sub" data-alphabet-sub></span>
+      </h3>
+      <div class="alphabet" data-alphabet></div>
+    </section>
+
+    <section class="history-panel">
+      <h3>Sound changes on this line of descent</h3>
+      <ol class="history" data-history></ol>
+    </section>
+
+    <section class="compare-panel">
+      <h3>
+        Cognates <span class="sub">the same words in every language of the family, as each says them today</span>
+      </h3>
+      <div class="compare-wrap">
+        <table class="compare" data-compare></table>
+      </div>
+    </section>
+
+    <footer class="colophon">
+      <p>
+        The fable is August Schleicher’s <i>The Sheep and the Horses</i> (1868), the first text written in a
+        reconstructed parent language, retold here in plain English. Every language, word, and letter on this page is
+        made up when the page loads, from the family number: the same number grows the same family.
+      </p>
+      <p>
+        <a href="/">thesandbox.page</a>
+      </p>
+    </footer>
+
+    <noscript>
+      <p class="noscript">This page grows its languages in your browser, and needs JavaScript to do it.</p>
+    </noscript>
+  </main>
+</Bare>
+
+<style is:global>
+  body:has(.mother) {
+    margin: 0;
+    background: #efe9dd;
+  }
+
+  .mother {
+    --paper: #efe9dd;
+    --paper-deep: #e6dfcf;
+    --ink: #24201b;
+    --ink-soft: #5d554a;
+    --ink-faint: #8f8676;
+    --rule: #cfc5b2;
+    --rubric: #a3392b;
+    --lang: #a3392b;
+    --font: var(--font-mother), Georgia, serif;
+    box-sizing: border-box;
+    min-height: 100vh;
+    padding: 28px clamp(16px, 3vw, 44px) 40px;
+    color: var(--ink);
+    font: 400 17px/1.5 var(--font);
+    display: grid;
+    grid-template-columns: minmax(360px, 520px) minmax(0, 1fr);
+    grid-template-areas:
+      'mast mast'
+      'tree reading'
+      'tree etym'
+      'tree alpha'
+      'tree history'
+      'compare compare'
+      'foot foot';
+    column-gap: clamp(24px, 3vw, 56px);
+    align-items: start;
+  }
+
+  .mother *,
+  .mother *::before,
+  .mother *::after {
+    box-sizing: border-box;
+  }
+
+  .mother [hidden] {
+    display: none !important;
+  }
+
+  .mother h1,
+  .mother h2,
+  .mother h3 {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .mother .masthead {
+    grid-area: mast;
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .mother h1 {
+    font-size: clamp(34px, 4.4vw, 58px);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .mother .dek {
+    margin: 10px 0 0;
+    max-width: 44em;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .mother .family-no {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    white-space: nowrap;
+  }
+
+  .mother .label,
+  .mother .sub,
+  .mother .tree-key,
+  .mother .when {
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  .mother .label {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 12px;
+  }
+
+  .mother output[data-seed] {
+    font-variant-numeric: lining-nums;
+    font-weight: 700;
+  }
+
+  .mother .btn {
+    font: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    background: transparent;
+    border: 1.5px solid var(--ink);
+    border-radius: 2px;
+    padding: 5px 12px 6px;
+    cursor: pointer;
+  }
+
+  .mother .btn:hover,
+  .mother .btn:focus-visible {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .mother .btn[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .mother .tree-panel {
+    grid-area: tree;
+    position: sticky;
+    top: 16px;
+  }
+
+  .mother .tree {
+    display: block;
+    width: 100%;
+    height: min(78vh, 760px);
+    touch-action: none;
+    cursor: grab;
+    outline: none;
+    overflow: visible;
+  }
+
+  .mother .tree:focus-visible {
+    outline: 2px dashed var(--ink-faint);
+    outline-offset: 4px;
+  }
+
+  .mother .tree.dragging {
+    cursor: grabbing;
+  }
+
+  .mother .tree text {
+    font-family: var(--font);
+    fill: var(--ink);
+  }
+
+  .mother .tree .axis text {
+    font-size: 12px;
+    fill: var(--ink-faint);
+  }
+
+  .mother .tree .axis line {
+    stroke: var(--rule);
+    stroke-width: 1;
+  }
+
+  .mother .tree .branch {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  .mother .tree .branch.dim {
+    opacity: 0.35;
+  }
+
+  .mother .tree .split {
+    fill: var(--paper);
+    stroke: var(--ink);
+    stroke-width: 1.5;
+  }
+
+  .mother .tree .tick-change {
+    stroke-width: 1.5;
+  }
+
+  .mother .tree .tick-script {
+    fill: var(--paper);
+    stroke-width: 1.4;
+  }
+
+  .mother .tree .leaf-name {
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  /* A paper halo knocks out branches and marks behind a label. */
+  .mother .tree .leaf-name,
+  .mother .tree .node-name {
+    paint-order: stroke;
+    stroke: var(--paper);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+  }
+
+  .mother .tree .node-name {
+    font-size: 13px;
+    font-style: italic;
+    fill: var(--ink-soft);
+  }
+
+  .mother .tree .cursor-ring {
+    fill: var(--paper);
+    stroke-width: 3;
+  }
+
+  .mother .tree .cursor-line {
+    stroke-width: 1;
+    stroke-dasharray: 2 4;
+  }
+
+  .mother .tree .cursor-label {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .mother .tree-key {
+    display: flex;
+    gap: 18px;
+    margin: 10px 0 0;
+    flex-wrap: wrap;
+  }
+
+  .mother .tree-key span::before {
+    content: '';
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  .mother .key-split::before {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink);
+  }
+
+  .mother .key-change::before {
+    width: 10px;
+    height: 1.5px;
+    background: var(--ink);
+  }
+
+  .mother .key-script::before {
+    width: 7px;
+    height: 7px;
+    border: 1.4px solid var(--ink);
+    transform: rotate(45deg);
+  }
+
+  .mother .reading {
+    grid-area: reading;
+    min-width: 0;
+  }
+
+  .mother .reading-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .mother .reading-head h2 {
+    font-size: clamp(26px, 2.6vw, 36px);
+    line-height: 1.1;
+    color: var(--lang);
+  }
+
+  .mother .when {
+    margin: 4px 0 0;
+  }
+
+  .mother .medium::before {
+    content: '·';
+    margin: 0 6px;
+  }
+
+  .mother .medium:empty::before {
+    content: none;
+  }
+
+  .mother .tablet {
+    position: relative;
+    margin: 0;
+    padding: 30px 34px 18px;
+    isolation: isolate;
+  }
+
+  .mother .tablet .stone,
+  .mother .tablet .vellum {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+
+  .mother .tablet .stone {
+    opacity: calc(1 - var(--ink-k, 0));
+    filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.25)) drop-shadow(0 12px 14px rgb(40 30 20 / 0.28));
+  }
+
+  .mother .tablet .stone .face {
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(
+      0.5% 1.6%,
+      14% 0.4%,
+      31% 1%,
+      52% 0%,
+      70% 0.9%,
+      88% 0.2%,
+      99.5% 1.2%,
+      100% 18%,
+      99.3% 41%,
+      100% 66%,
+      99.4% 88%,
+      99.8% 98.6%,
+      84% 99.6%,
+      63% 98.9%,
+      41% 100%,
+      19% 99.2%,
+      0.6% 99.8%,
+      0% 81%,
+      0.7% 57%,
+      0% 33%
+    );
+    background:
+      radial-gradient(120% 90% at 30% 20%, rgb(255 255 255 / 0.18), transparent 60%),
+      radial-gradient(140% 120% at 80% 110%, rgb(0 0 0 / 0.14), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.22 0 0 0 0 0.18 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.008' numOctaves='4' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.27 0 0 0 0 0.22 0 0 -0.9 0 0.42'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23m)'/%3E%3C/svg%3E"),
+      #c6bdab;
+    box-shadow:
+      inset 0 3px 1px -1px rgb(255 255 255 / 0.4),
+      inset 3px 0 2px -2px rgb(255 255 255 / 0.3),
+      inset 0 -5px 8px -2px rgb(0 0 0 / 0.22),
+      inset -4px 0 6px -3px rgb(0 0 0 / 0.16);
+  }
+
+  .mother .tablet .vellum {
+    opacity: var(--ink-k, 0);
+    border-radius: 2px;
+    background:
+      radial-gradient(130% 100% at 50% 40%, transparent 55%, rgb(120 80 30 / 0.16)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.4 0 0 0 0 0.2 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E"),
+      #f1e6cd;
+    box-shadow:
+      0 1px 2px rgb(60 40 20 / 0.25),
+      0 12px 26px -14px rgb(60 40 20 / 0.45);
+  }
+
+  .mother .inscription {
+    display: block;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .mother .inscription .cut-light {
+    fill: rgb(255 251 242 / 0.7);
+    opacity: calc(1 - var(--ink-k, 0));
+  }
+
+  .mother .inscription .cut-dark {
+    fill: #3a332b;
+    opacity: calc(1 - var(--ink-k, 0));
+  }
+
+  .mother .inscription .ink {
+    fill: #2a1c12;
+    opacity: var(--ink-k, 0);
+  }
+
+  .mother .inscription .ruling line {
+    stroke: rgb(140 95 45 / 0.22);
+    stroke-width: 0.6;
+  }
+
+  .mother .inscription .ruling {
+    opacity: var(--ink-k, 0);
+  }
+
+  .mother .inscription .hl rect {
+    fill: var(--lang);
+    opacity: 0.09;
+  }
+
+  .mother .inscription .hl line {
+    stroke: var(--lang);
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0.75;
+  }
+
+  .mother .tablet figcaption {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .mother .interlinear {
+    margin-top: 22px;
+  }
+
+  .mother .sentence {
+    margin: 0 0 16px;
+  }
+
+  .mother .words {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 12px;
+    row-gap: 6px;
+  }
+
+  .mother .word {
+    display: inline-flex;
+    flex-direction: column;
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .mother .word.plain {
+    cursor: default;
+  }
+
+  .mother .word .form {
+    font-style: italic;
+    font-size: 18px;
+    line-height: 1.25;
+    border-bottom: 1.5px solid transparent;
+  }
+
+  .mother button.word:hover .form,
+  .mother button.word:focus-visible .form {
+    border-bottom-color: var(--lang);
+  }
+
+  .mother .word[aria-pressed='true'] .form {
+    color: var(--lang);
+    border-bottom-color: var(--lang);
+  }
+
+  .mother .word .gl {
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+
+  .mother .word .gl b {
+    font-weight: 400;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+  }
+
+  .mother .translation {
+    margin: 6px 0 0;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+
+  .mother .etymology,
+  .mother .alphabet-panel,
+  .mother .history-panel {
+    margin-top: 34px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    min-width: 0;
+  }
+
+  .mother .etymology {
+    grid-area: etym;
+  }
+
+  .mother .alphabet-panel {
+    grid-area: alpha;
+  }
+
+  .mother .history-panel {
+    grid-area: history;
+  }
+
+  .mother h3 {
+    font-size: 19px;
+    margin-bottom: 12px;
+  }
+
+  .mother h3 .sub {
+    font-weight: 400;
+    font-style: italic;
+    margin-left: 8px;
+  }
+
+  .mother .noscript {
+    grid-column: 1 / -1;
+  }
+
+  .mother .fable-title {
+    font-size: 15px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+
+  .mother .chain {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mother .chain li,
+  .mother .history li {
+    display: grid;
+    grid-template-columns: 9.5em minmax(0, 1fr);
+    gap: 12px;
+    padding: 4px 0;
+  }
+
+  .mother .date {
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-variant-numeric: lining-nums tabular-nums;
+    padding-top: 2px;
+  }
+
+  .mother .chain i {
+    font-size: 18px;
+  }
+
+  .mother .chain .why {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-left: 8px;
+  }
+
+  .mother .now {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    margin: 14px 0 0;
+  }
+
+  .mother .now .big {
+    font-size: 26px;
+    color: var(--lang);
+  }
+
+  .mother .now .ipa {
+    color: var(--ink-soft);
+  }
+
+  .mother svg.mini {
+    display: block;
+    overflow: visible;
+    fill: var(--ink);
+  }
+
+  .mother .kin {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 14px 18px;
+    margin-top: 18px;
+  }
+
+  .mother .kin-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 8px;
+    border-top: 3px solid var(--c);
+  }
+
+  .mother .kin-cell svg.mini {
+    fill: #2a1c12;
+    max-width: 100%;
+  }
+
+  .mother .kin-cell i {
+    font-size: 17px;
+  }
+
+  .mother .kin-cell span {
+    font-size: 13px;
+    color: var(--c);
+    font-weight: 700;
+  }
+
+  .mother .alphabet {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+    gap: 8px;
+  }
+
+  .mother .letter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 4px 8px;
+    background: var(--paper-deep);
+    border-radius: 2px;
+  }
+
+  .mother .letter svg.glyph {
+    fill: #2a1c12;
+    overflow: visible;
+    height: 62px;
+    width: auto;
+  }
+
+  .mother .letter svg.was {
+    fill: var(--ink-faint);
+    overflow: visible;
+    height: 22px;
+    width: auto;
+  }
+
+  .mother .letter .snd {
+    font-size: 15px;
+  }
+
+  .mother .alphabet .note {
+    grid-column: 1 / -1;
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  .mother .history {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mother .history li {
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+  }
+
+  .mother .history li:hover .what {
+    text-decoration: underline;
+    text-decoration-color: var(--rule);
+  }
+
+  .mother .history li.future {
+    opacity: 0.38;
+  }
+
+  .mother .history .what {
+    font-size: 15px;
+  }
+
+  .mother .history .ex {
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-left: 6px;
+  }
+
+  .mother .history .script-change {
+    font-style: italic;
+  }
+
+  .mother .history .script-change::before {
+    content: '◇ ';
+    font-style: normal;
+  }
+
+  .mother .history .split-note {
+    font-weight: 700;
+  }
+
+  .mother .compare-wrap {
+    overflow-x: auto;
+  }
+
+  .mother .compare {
+    border-collapse: collapse;
+    font-size: 16px;
+    min-width: 100%;
+  }
+
+  .mother .compare th,
+  .mother .compare td {
+    text-align: left;
+    padding: 5px 16px 5px 0;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .mother .compare thead th {
+    font-size: 14px;
+    border-bottom: 1.5px solid var(--ink);
+  }
+
+  .mother .compare tbody th {
+    font-weight: 400;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  .mother .compare td {
+    font-style: italic;
+  }
+
+  .mother .compare tbody tr {
+    cursor: pointer;
+  }
+
+  .mother .compare tbody tr:hover td,
+  .mother .compare tbody tr.on td {
+    background: var(--paper-deep);
+  }
+
+  .mother .compare-panel {
+    grid-area: compare;
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 2px solid var(--ink);
+    min-width: 0;
+  }
+
+  .mother .colophon {
+    grid-area: foot;
+    margin-top: 40px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+    font-size: 14px;
+    color: var(--ink-soft);
+    max-width: 60em;
+  }
+
+  .mother .colophon a {
+    color: inherit;
+  }
+
+  @media (max-width: 900px) {
+    .mother {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'mast'
+        'tree'
+        'reading'
+        'etym'
+        'alpha'
+        'history'
+        'compare'
+        'foot';
+      padding-top: 18px;
+      font-size: 16px;
+    }
+
+    .mother .masthead {
+      flex-direction: column;
+      align-items: start;
+      gap: 14px;
+    }
+
+    /* The tree stays in view while the tablet scrolls under it, so dragging shows its effect. */
+    .mother .tree-panel {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      margin: 0 calc(-1 * clamp(16px, 3vw, 44px)) 20px;
+      padding: 4px clamp(16px, 3vw, 44px) 2px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--rule);
+      box-shadow: 0 8px 14px -12px rgb(40 30 20 / 0.45);
+    }
+
+    .mother .tree {
+      height: 300px;
+    }
+
+    .mother .tree-key {
+      display: none;
+    }
+
+    .mother .chain li,
+    .mother .history li {
+      grid-template-columns: 6.8em minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .mother .date {
+      font-size: 12px;
+    }
+
+    .mother .tablet {
+      padding: 20px 16px 14px;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('.mother');
+  if (root) start(root);
+</script>

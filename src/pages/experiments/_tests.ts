@@ -551,6 +551,9 @@ export const TECHNIQUES: Record<string, Technique> = {
   electromechanical: { label: 'Electromechanical scoring' },
   'restricted-three-body': { label: 'Restricted three-body problem' },
   'photographic-plates': { label: 'Photographic plates' },
+  'sound-change': { label: 'Sound change' },
+  'writing-systems': { label: 'Writing systems' },
+  'interlinear-gloss': { label: 'Interlinear glossing' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
