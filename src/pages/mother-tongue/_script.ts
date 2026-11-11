@@ -390,7 +390,8 @@ export function chooseOps(r: Rng, t0: number, t1: number, state: ScriptState, fi
       pool.map((p) => p[0]),
       pool.map((p) => (kinds.includes(p[0]) ? 0 : p[1])),
     );
-    if (kinds.includes(kind)) break;
+    const weight = pool.find((p) => p[0] === kind)?.[1] ?? 0;
+    if (kinds.includes(kind) || weight <= 0) break;
     kinds.push(kind);
   }
   const times = kinds.map(() => r.range(t0 + span * 0.08, t1 - span * 0.08)).sort((a, b) => a - b);
@@ -734,7 +735,8 @@ function markPath(m: Mark, st: ScriptState, size: number, width: number, slot: n
     oy = size / 2 - s * 0.9;
   }
   const scale = m.place === 'through' ? s * 1.8 : s;
-  const markState = { ...st, weight: st.weight * (m.kind === 'dot' || m.kind === 'pair' ? 1.5 : 0.85), aspect: 1, slant: 0 };
+  // Marks keep a steady line, so a broad nib can't thin them to nothing.
+  const markState = { ...st, weight: st.weight * (m.kind === 'dot' || m.kind === 'pair' ? 1.5 : 0.9), aspect: 1, slant: 0, contrast: Math.min(st.contrast, 0.25) };
   let d = '';
   for (const stroke of MARK_SHAPES[m.kind]) {
     const pts = densify(stroke.map(([x, y]) => [ox + x * scale, oy + y * scale] as Pt));

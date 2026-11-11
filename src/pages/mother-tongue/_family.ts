@@ -316,7 +316,8 @@ function build(seed: number, variant: number, force = false): Family | null {
     let score = Math.abs(plain.length - 6) * 0.6;
     if (plain.length < 3) score += 20;
     score += (name.match(/[ëəă]/g) ?? []).length * 1.5;
-    score += (name.normalize('NFD').match(/[̀-ͯ]/g) ?? []).length * 0.4;
+    score += (name.normalize('NFD').match(/[̀-ͯ]/g) ?? []).length * 1.1;
+    if (/[^aeiouy]{3,}$/i.test(plain) || /[^aeiouy]{4}/i.test(plain)) score += 2.5;
     if (/[aeiouyëəăöüïèò]{3}/i.test(plain)) score += 4;
     if (/^[aeiou]{2}/i.test(plain)) score += 3;
     return score;

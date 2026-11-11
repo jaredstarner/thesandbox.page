@@ -84,7 +84,7 @@ function drawWriting(
   svg: SVGSVGElement,
   s: Script,
   fading: Map<string, Map<number, number>>,
-  words: { signs: Sign[]; end?: boolean }[],
+  words: { signs: Sign[]; end?: boolean; hl?: boolean }[],
   width: number,
   size: number,
   layers: 'tablet' | 'plain',
@@ -113,37 +113,49 @@ function drawWriting(
   const wordGap = dividerGap + (spaceGap - dividerGap) * st.spaces;
   const lineH = size * 2.15;
   const widths = words.map((w) => w.signs.reduce((n, sg) => n + (sg.twice ? 2 : 1) * (adv + gap), 0) - gap);
+  const endRoom = size * 0.9;
+  const room = (i: number) => widths[i] + (words[i].end ? endRoom : 0);
 
-  // Greedy line filling.
+  // Greedy line filling, then each full line justified by widening its word gaps.
   const lines: number[][] = [[]];
   let x = 0;
-  words.forEach((w, i) => {
-    const need = widths[i] + (x > 0 ? wordGap : 0);
+  words.forEach((_, i) => {
+    const need = room(i) + (x > 0 ? wordGap : 0);
     if (x > 0 && x + need > width) {
       lines.push([]);
       x = 0;
     }
-    x += x > 0 ? wordGap + widths[i] : widths[i];
+    x += x > 0 ? wordGap + room(i) : room(i);
     lines[lines.length - 1].push(i);
   });
 
   const group = el('g', { id: `${prefix}-lines` });
+  const marks = el('g', { class: 'hl' });
+  const ruling = el('g', { class: 'ruling' });
   const rtl = st.mirror < 0;
   const bous = st.bous > 0.5;
   lines.forEach((line, li) => {
     const flip = bous && li % 2 === 1;
     const backwards = rtl !== flip;
     const y = size * 0.95 + li * lineH;
+    const natural = line.reduce((n, wi) => n + room(wi), 0) + wordGap * (line.length - 1);
+    const last = li === lines.length - 1;
+    const stretch = !last && line.length > 1 ? Math.min((width - natural) / (line.length - 1), size * 1.4) : 0;
+    const lineGap = wordGap + Math.max(0, stretch);
+    const at = (px: number) => (backwards ? width - px : px);
+    if (layers === 'tablet') {
+      ruling.append(el('line', { x1: 0, x2: width, y1: y.toFixed(2), y2: y.toFixed(2) }));
+      ruling.append(el('line', { x1: 0, x2: width, y1: (y + size).toFixed(2), y2: (y + size).toFixed(2) }));
+    }
     let cx = 0;
     let dividers = '';
     line.forEach((wi, k) => {
       const w = words[wi];
       if (k > 0) {
         if (st.spaces < 0.98) {
-          const at = cx + wordGap / 2;
-          dividers += dividerPath({ ...st, weight: st.weight * (1 - st.spaces * 0.9) }, size, backwards ? width - at : at);
+          dividers += dividerPath({ ...st, weight: st.weight * (1 - st.spaces * 0.9) }, size, at(cx + lineGap / 2));
         }
-        cx += wordGap;
+        cx += lineGap;
       }
       const start = cx;
       for (const sign of w.signs) {
@@ -158,6 +170,25 @@ function drawWriting(
         }
       }
       cx -= gap;
+      if (w.hl && layers === 'tablet') {
+        const a = Math.min(at(start), at(cx));
+        const b = Math.max(at(start), at(cx));
+        marks.append(
+          el('rect', {
+            x: (a - size * 0.2).toFixed(2),
+            y: (y - size * 0.5).toFixed(2),
+            width: (b - a + size * 0.4).toFixed(2),
+            height: (size * 1.95).toFixed(2),
+            rx: 3,
+          }),
+          el('line', {
+            x1: (a - size * 0.1).toFixed(2),
+            x2: (b + size * 0.1).toFixed(2),
+            y1: (y + size * 1.38).toFixed(2),
+            y2: (y + size * 1.38).toFixed(2),
+          }),
+        );
+      }
       if (st.headline > 0.02) {
         const len = (cx - start + size * 0.2) * st.headline;
         const mid = (start + cx) / 2;
@@ -167,16 +198,12 @@ function drawWriting(
           el('rect', { x: x0.toFixed(2), y: (y - h * 0.45).toFixed(2), width: len.toFixed(2), height: h.toFixed(2) }),
         );
       }
-      if (w.end && k === line.length - 1) {
+      if (w.end) {
         // A sentence ends with a bar.
-        const bx = backwards ? width - cx - size * 0.45 : cx + size * 0.45;
+        cx += endRoom;
         const h = st.weight * size;
+        const bx = at(cx - endRoom * 0.45);
         group.append(el('rect', { x: (bx - h / 2).toFixed(2), y: y.toFixed(2), width: h.toFixed(2), height: size.toFixed(2) }));
-      } else if (w.end) {
-        const bx = cx + wordGap * 0.5;
-        const h = st.weight * size;
-        const px = backwards ? width - bx : bx;
-        group.append(el('rect', { x: (px - h / 2).toFixed(2), y: y.toFixed(2), width: h.toFixed(2), height: size.toFixed(2) }));
       }
     });
     if (dividers) group.append(el('path', { d: dividers, transform: `translate(0 ${y.toFixed(2)})` }));
@@ -186,7 +213,8 @@ function drawWriting(
   svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
   svg.setAttribute('height', String(height));
   if (layers === 'tablet') {
-    svg.append(el('use', { href: `#${prefix}-lines`, class: 'cut-light', transform: 'translate(0.9 1.1)' }));
+    svg.append(ruling, marks);
+    svg.append(el('use', { href: `#${prefix}-lines`, class: 'cut-light', transform: 'translate(1.1 1.3)' }));
     svg.append(el('use', { href: `#${prefix}-lines`, class: 'cut-dark' }));
     svg.append(el('use', { href: `#${prefix}-lines`, class: 'ink' }));
   } else {
@@ -209,7 +237,7 @@ interface TreeGeom {
 function geom(svg: SVGSVGElement): TreeGeom {
   const w = svg.clientWidth || 480;
   const h = svg.clientHeight || 700;
-  return { w, h, left: 58, right: 24, top: 40, bottom: 52 };
+  return h < 400 ? { w, h, left: 50, right: 14, top: 30, bottom: 34 } : { w, h, left: 58, right: 24, top: 40, bottom: 52 };
 }
 
 const tx = (g: TreeGeom, n: Lang) => g.left + 26 + n.x * (g.w - g.left - g.right - 52);
@@ -553,8 +581,7 @@ export function start(root: HTMLElement): void {
     const { fam: f, node, t } = v;
     const { forms, applied } = formsAt(node, t);
     const { script, fading } = scriptAt(f, node, t);
-    const color = node.children.length ? '#2a2622' : node.color;
-    root.style.setProperty('--lang', color);
+    root.style.setProperty('--lang', node.children.length ? '#a3392b' : node.color);
     drawTree(tree, v);
 
     eraEl.textContent = eraName(f, node, t);
@@ -565,10 +592,16 @@ export function start(root: HTMLElement): void {
 
     // The inscription.
     const words = f.sentences.flatMap((s) =>
-      s.tokens.map((tk, i) => ({ signs: spell(script, forms.get(tk.key) ?? []), end: i === s.tokens.length - 1 })),
+      s.tokens.map((tk, i) => ({
+        signs: spell(script, forms.get(tk.key) ?? []),
+        end: i === s.tokens.length - 1,
+        hl: headMeaning(tk.parts) === v.word,
+      })),
     );
     const width = Math.max(240, inscription.clientWidth || tablet.clientWidth - 60);
-    const size = Math.max(19, Math.min(36, width / 19));
+    // One letter size for the whole family, so the tablet keeps its size as you scrub.
+    const target = width < 600 ? 470 : 540;
+    const size = Math.max(15, Math.min(34, Math.sqrt((width * target) / (2.1 * signBudget(f)))));
     drawWriting(inscription, script, fading, words, width, size, 'tablet');
     captionEl.textContent = describeScript(script);
 
@@ -589,6 +622,7 @@ export function start(root: HTMLElement): void {
       lastUrl = url;
       scheduleUrl(url);
     }
+    if (!v.playing) playBtn.textContent = node === f.root && t < 40 ? 'Play' : 'Play to here';
     root.dataset.ready = 'true';
   }
 
@@ -746,6 +780,20 @@ export function start(root: HTMLElement): void {
   seedEl.textContent = `No. ${fam.seed}`;
   drawCompare();
   requestAnimationFrame(frame);
+}
+
+const budgets = new WeakMap<Family, number>();
+
+/** How many letters the fable takes when every sound is written, for sizing the tablet. */
+function signBudget(f: Family): number {
+  let n = budgets.get(f);
+  if (n === undefined) {
+    n = 0;
+    const forms = f.root.snapshots[0];
+    for (const s of f.sentences) for (const tk of s.tokens) n += (forms.get(tk.key)?.length ?? 0) + 1.2;
+    budgets.set(f, n);
+  }
+  return n;
 }
 
 const TYPE_TEXT: Record<string, string> = {
