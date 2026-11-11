@@ -171,7 +171,7 @@ export const RULES: Rule[] = [
     'lose-final-schwa',
     5,
     'at the end of a word',
-    (w, s) => {
+    (w) => {
       if (w[w.length - 1] !== 'ə' || nuclei(w).length < 2 || isCons(w[w.length - 3])) return w;
       return w.slice(0, -1);
     },
@@ -210,7 +210,7 @@ export const RULES: Rule[] = [
       if (c.place === 'vel') return 'ŋ';
     }),
   ),
-  simple('lose-final-stops', 5, 'at the end of a word', (w, s) => {
+  simple('lose-final-stops', 5, 'at the end of a word', (w) => {
     const last = w.length - 1;
     const c = cons(w[last]);
     if (!c || c.manner !== 'stop' || nuclei(w).length < 1 || w.length < 3) return w;
