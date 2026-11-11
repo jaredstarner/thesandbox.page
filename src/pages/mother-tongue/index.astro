@@ -530,6 +530,224 @@ const description =
     grid-column: 1 / -1;
   }
 
+  .mother .fable-title {
+    font-size: 15px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+
+  .mother .chain {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mother .chain li,
+  .mother .history li {
+    display: grid;
+    grid-template-columns: 9.5em minmax(0, 1fr);
+    gap: 12px;
+    padding: 4px 0;
+  }
+
+  .mother .date {
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-variant-numeric: lining-nums tabular-nums;
+    padding-top: 2px;
+  }
+
+  .mother .chain i {
+    font-size: 18px;
+  }
+
+  .mother .chain .why {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-left: 8px;
+  }
+
+  .mother .now {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    margin: 14px 0 0;
+  }
+
+  .mother .now .big {
+    font-size: 26px;
+    color: var(--lang);
+  }
+
+  .mother .now .ipa {
+    color: var(--ink-soft);
+  }
+
+  .mother svg.mini {
+    display: block;
+    overflow: visible;
+    fill: var(--ink);
+  }
+
+  .mother .kin {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 14px 18px;
+    margin-top: 18px;
+  }
+
+  .mother .kin-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 8px;
+    border-top: 3px solid var(--c);
+  }
+
+  .mother .kin-cell svg.mini {
+    fill: #2a1c12;
+    max-width: 100%;
+  }
+
+  .mother .kin-cell i {
+    font-size: 17px;
+  }
+
+  .mother .kin-cell span {
+    font-size: 13px;
+    color: var(--c);
+    font-weight: 700;
+  }
+
+  .mother .alphabet {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+    gap: 8px;
+  }
+
+  .mother .letter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 4px 8px;
+    background: var(--paper-deep);
+    border-radius: 2px;
+  }
+
+  .mother .letter svg.glyph {
+    fill: #2a1c12;
+    overflow: visible;
+    height: 46px;
+    width: auto;
+  }
+
+  .mother .letter svg.was {
+    fill: var(--ink-faint);
+    overflow: visible;
+    height: 22px;
+    width: auto;
+  }
+
+  .mother .letter .snd {
+    font-size: 15px;
+  }
+
+  .mother .alphabet .note {
+    grid-column: 1 / -1;
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  .mother .history {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mother .history li {
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+  }
+
+  .mother .history li:hover .what {
+    text-decoration: underline;
+    text-decoration-color: var(--rule);
+  }
+
+  .mother .history li.future {
+    opacity: 0.38;
+  }
+
+  .mother .history .what {
+    font-size: 15px;
+  }
+
+  .mother .history .ex {
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-left: 6px;
+  }
+
+  .mother .history .script-change {
+    font-style: italic;
+  }
+
+  .mother .history .script-change::before {
+    content: '◇ ';
+    font-style: normal;
+  }
+
+  .mother .history .split-note {
+    font-weight: 700;
+  }
+
+  .mother .compare-wrap {
+    overflow-x: auto;
+  }
+
+  .mother .compare {
+    border-collapse: collapse;
+    font-size: 16px;
+    min-width: 100%;
+  }
+
+  .mother .compare th,
+  .mother .compare td {
+    text-align: left;
+    padding: 5px 16px 5px 0;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .mother .compare thead th {
+    font-size: 14px;
+    border-bottom: 1.5px solid var(--ink);
+  }
+
+  .mother .compare tbody th {
+    font-weight: 400;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  .mother .compare td {
+    font-style: italic;
+  }
+
+  .mother .compare tbody tr {
+    cursor: pointer;
+  }
+
+  .mother .compare tbody tr:hover td,
+  .mother .compare tbody tr.on td {
+    background: var(--paper-deep);
+  }
+
   .mother .compare-panel {
     grid-area: compare;
     margin-top: 40px;
