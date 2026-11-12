@@ -277,8 +277,27 @@ const description =
   }
 
   .tides .masthead {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'back back'
+      'title dek';
+    align-items: end;
+    gap: 0 clamp(28px, 4vw, 64px);
     max-width: 1440px;
-    margin: 0 auto 26px;
+    margin: 0 auto 22px;
+  }
+
+  .tides .masthead .back {
+    grid-area: back;
+  }
+
+  .tides .masthead h1 {
+    grid-area: title;
+  }
+
+  .tides .masthead .dek {
+    grid-area: dek;
   }
 
   .tides .back {
@@ -299,15 +318,17 @@ const description =
 
   .tides h1 {
     margin: 0;
-    font: 300 clamp(44px, 7vw, 92px) / 0.95 var(--font);
+    font: 300 clamp(44px, 6vw, 78px) / 0.95 var(--font);
     letter-spacing: -0.02em;
     color: var(--text);
   }
 
   .tides .dek {
-    max-width: 46em;
-    margin: 18px 0 0;
-    font-size: clamp(17px, 1.6vw, 20px);
+    max-width: 44em;
+    margin: 0;
+    padding-bottom: 4px;
+    font-size: clamp(16px, 1.3vw, 18px);
+    line-height: 1.5;
     color: var(--text-soft);
   }
 
@@ -344,6 +365,51 @@ const description =
     touch-action: pan-y;
     user-select: none;
     -webkit-user-select: none;
+  }
+
+  .tides .tm-unit {
+    cursor: pointer;
+  }
+
+  .tides .tm-unit .tm-wheel,
+  .tides .tm-unit .tm-pin,
+  .tides .tm-unit .tm-tag {
+    transition: opacity 0.35s;
+  }
+
+  .tides .tm-unit.off .tm-wheel,
+  .tides .tm-unit.off .tm-pin {
+    opacity: 0.38;
+  }
+
+  .tides .tm-unit.off .tm-tag {
+    opacity: 0.35;
+  }
+
+  .tides .tm-unit:hover .tm-tag {
+    fill: #fff1c9;
+  }
+
+  .tides .tm-tag,
+  .tides .tm-plate,
+  .tides .tm-dialnum,
+  .tides .tm-date {
+    font-family: var(--plate-font);
+  }
+
+  .tides .tm-day,
+  .tides .tm-hnum {
+    font-family: var(--font);
+    font-style: italic;
+  }
+
+  .tides .tm-crank-hit {
+    cursor: grab;
+  }
+
+  .tides .machine.cranking,
+  .tides .machine.cranking .tm-crank-hit {
+    cursor: grabbing;
   }
 
   .tides .plate-note {
@@ -384,6 +450,10 @@ const description =
   .tides .field.motor,
   .tides .field.wheels {
     grid-column: 1 / -1;
+  }
+
+  .tides .field.units {
+    align-items: flex-start;
   }
 
   .tides .field-label {
@@ -760,6 +830,20 @@ const description =
     color: var(--text-faint);
     font-size: 15px;
     line-height: 1.5;
+  }
+
+  @media (max-width: 1000px) {
+    .tides .masthead {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'back'
+        'title'
+        'dek';
+    }
+
+    .tides .dek {
+      margin-top: 14px;
+    }
   }
 
   @media (max-width: 900px) {

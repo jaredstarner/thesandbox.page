@@ -319,22 +319,24 @@ export function turns(
   stepMin = 6,
 ): Turn[] {
   const out: Turn[] = [];
-  const step = stepMin * 60000;
+  if (!(to > from)) return out;
+  const n = Math.max(1, Math.ceil((to - from) / (stepMin * 60000)));
+  const step = (to - from) / n;
   let t0 = from;
   let r0 = rate(station, t0, enabled);
-  for (let t1 = from + step; t1 <= to + step / 2; t1 += step) {
+  for (let i = 1; i <= n; i++) {
+    const t1 = from + i * step;
     const r1 = rate(station, t1, enabled);
     if ((r0 > 0 && r1 <= 0) || (r0 < 0 && r1 >= 0)) {
       let lo = t0;
       let hi = t1;
-      for (let k = 0; k < 18; k++) {
+      for (let k = 0; k < 20; k++) {
         const mid = (lo + hi) / 2;
         const rm = rate(station, mid, enabled);
         if ((r0 > 0 && rm > 0) || (r0 < 0 && rm < 0)) lo = mid;
         else hi = mid;
       }
       const ms = (lo + hi) / 2;
-      // Tiny wiggles (a rate that barely crosses zero) are not tides.
       out.push({ ms, height: height(station, ms, enabled), kind: r0 > 0 ? 'high' : 'low' });
     }
     t0 = t1;
