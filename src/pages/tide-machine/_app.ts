@@ -1,6 +1,8 @@
-import { el, Machine, type Layout, type UnitSpec, type WheelState } from './_machine';
+import { figFour, figOne, figTwo } from './_figures';
+import { gauge } from './_gauge';
+import { Machine, type Layout, type UnitSpec, type WheelState } from './_machine';
 import { NAMES, PORTS, type Port } from './_ports';
-import { elongation, height, turns, wheels, type Station, type Turn, type Wheel } from './_tides';
+import { height, turns, wheels, type Station, type Turn, type Wheel } from './_tides';
 
 const FT = 3.28084;
 const HOUR = 3600000;
@@ -11,10 +13,6 @@ function stationOf(port: Port): Station {
     z0: port.z0,
     harmonics: port.h.map(([amp, phase, speed], i) => ({ name: NAMES[i], amp, phase, speed })),
   };
-}
-
-function subset(station: Station, names: string[]): Station {
-  return { z0: station.z0, harmonics: station.harmonics.filter((h) => names.includes(h.name)) };
 }
 
 /** Local-time helpers for a harbour's time zone. */
@@ -151,30 +149,6 @@ function reducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-/** Runs a frame loop only while an element is on screen. */
-function whileVisible(target: Element, tick: (dt: number, now: number) => void): void {
-  let raf = 0;
-  let last = 0;
-  const loop = (now: number) => {
-    const dt = last ? Math.min(0.1, (now - last) / 1000) : 0;
-    last = now;
-    tick(dt, now);
-    raf = requestAnimationFrame(loop);
-  };
-  new IntersectionObserver(
-    ([entry]) => {
-      if (entry.isIntersecting && !raf) {
-        last = 0;
-        raf = requestAnimationFrame(loop);
-      } else if (!entry.isIntersecting && raf) {
-        cancelAnimationFrame(raf);
-        raf = 0;
-      }
-    },
-    { rootMargin: '80px' },
-  ).observe(target);
-}
-
 /** Pick a grid step for the paper and height dial from a range in display units. */
 function stepFor(range: number, unit: 'ft' | 'm'): number {
   if (unit === 'ft') return range <= 2.6 ? 0.5 : range <= 9 ? 1 : range <= 18 ? 2 : 4;
@@ -228,7 +202,7 @@ interface BookRow {
   node: HTMLLIElement;
 }
 
-function hero(root: HTMLElement, onPort: (port: Port) => void): Port {
+function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => void): void {
   const svg = root.querySelector<SVGSVGElement>('[data-machine]')!;
   const machine = new Machine(svg, HERO);
   const portSel = root.querySelector<HTMLSelectElement>('[data-port]')!;
@@ -390,7 +364,7 @@ function hero(root: HTMLElement, onPort: (port: Port) => void): Port {
     const p = PORTS.find((x) => x.id === portSel.value);
     if (p) {
       choosePort(p);
-      onPort(p);
+      onChange(p, unit);
     }
   });
   dateIn.addEventListener('change', () => {
@@ -438,6 +412,7 @@ function hero(root: HTMLElement, onPort: (port: Port) => void): Port {
       book = [];
       keep.forEach((k) => addTurn(k, false));
       renderBook();
+      onChange(port, unit);
       dirty = true;
     }),
   );
@@ -525,6 +500,7 @@ function hero(root: HTMLElement, onPort: (port: Port) => void): Port {
 
   // Start on "now" with the paper already written, as if the machine had been turning all along.
   choosePort(port);
+  onChange(port, unit);
   setEngaged(new Set(NAMES));
   setRunning(running);
   computeTarget();
@@ -538,14 +514,17 @@ function hero(root: HTMLElement, onPort: (port: Port) => void): Port {
     scroller.scrollLeft = scroller.scrollWidth;
   });
 
-  return port;
 }
 
 export function start(root: HTMLElement): void {
   root.dataset.ready = 'true';
-  const first = hero(root, () => {});
-  void first;
-  void el;
-  void elongation;
-  void subset;
+  const gaugeEl = root.querySelector<HTMLElement>('[data-gauge]');
+  const view = gaugeEl ? gauge(gaugeEl) : null;
+  hero(root, (port, unit) => view?.show(port, unit));
+  const one = root.querySelector<SVGSVGElement>('[data-fig="one"]');
+  if (one) figOne(one);
+  const two = root.querySelector<SVGSVGElement>('[data-fig="two"]');
+  if (two) figTwo(two, root.querySelector<HTMLButtonElement>('[data-fig2-sun]'));
+  const four = root.querySelector<SVGSVGElement>('[data-fig="four"]');
+  if (four) figFour(four, root.querySelectorAll<HTMLInputElement>('input[name="fig4"]'));
 }

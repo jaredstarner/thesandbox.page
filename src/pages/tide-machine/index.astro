@@ -144,7 +144,8 @@ const description =
             <button type="button" class="btn quiet" data-fig2-sun aria-pressed="true">Sun's wheel in gear</button>
           </div>
           <figcaption>
-            <span class="fig-no">Fig. 2</span> The moon's wheel and the sun's, set for Boston, running a month in half a minute.
+            <span class="fig-no">Fig. 2</span> The moon's wheel and the sun's, set for San Diego, running a month in half a minute.
+            The marks along the top of the paper are new moon, first quarter, full moon, and last quarter.
           </figcaption>
         </figure>
       </section>
@@ -395,6 +396,32 @@ const description =
   .tides .tm-dialnum,
   .tides .tm-date {
     font-family: var(--plate-font);
+  }
+
+  .tides .tm-note,
+  .tides .tm-note-big,
+  .tides .tm-note-em,
+  .tides .tm-note-title,
+  .tides .tm-gnum,
+  .tides .tm-gday {
+    font-family: var(--font);
+  }
+
+  .tides .tm-note-em {
+    font-style: italic;
+    fill: var(--brass);
+  }
+
+  .tides .tm-note-title {
+    font-weight: 300;
+  }
+
+  .tides .fig-svg.dragging {
+    cursor: grabbing;
+  }
+
+  .tides [data-fig='one'] .tm-unit {
+    cursor: grab;
   }
 
   .tides .tm-day,
