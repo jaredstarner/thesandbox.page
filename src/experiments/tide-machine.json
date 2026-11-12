@@ -1,0 +1,8 @@
+{
+  "title": "Tide machine",
+  "summary": "A brass tide-predicting machine of the kind that made the world's tide tables for a century, set up for thirteen American harbours: turn the crank and thirty-seven wheels drive a chain over and under their pulleys, and the pen draws the tide for any date, braking at every high and low water.",
+  "date": "2026-11-12",
+  "tags": ["svg", "pointer-events", "live-data", "harmonic-analysis", "analog-computing"],
+  "requires": [],
+  "plot": 42
+}

@@ -1,0 +1,992 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { PORTS } from './_ports';
+
+const description =
+  'A brass tide-predicting machine set up for thirteen American harbours: thirty-seven wheels, one chain, and a pen that draws the tide for any date.';
+---
+
+<Bare title="Tide machine" description={description}>
+  <Font cssVariable="--font-tides" slot="head" />
+  <Font cssVariable="--font-tides-plate" slot="head" />
+  <main class="tides" data-ready="false">
+    <header class="masthead">
+      <p class="back">
+        <a href="/">thesandbox.page</a>
+      </p>
+      <h1>Tide machine</h1>
+      <p class="dek">
+        For about a century, from the 1870s, the tide tables for the world's ports were worked out on brass machines
+        like this one: a row of turning wheels, a chain running over and under their pulleys, and a pen. This one is set
+        up for thirteen American harbours. Turn the crank, or start the motor.
+      </p>
+    </header>
+
+    <section class="bench" aria-label="The machine">
+      <div class="plate hero">
+        <div class="scroller" data-scroller>
+          <svg class="machine" data-machine role="img" aria-label="Tide-predicting machine"></svg>
+        </div>
+        <p class="plate-note">The machine needs JavaScript to turn.</p>
+      </div>
+      <p class="swipe-hint">Swipe the machine sideways to see all 37 wheels. The crank and dials are at the right.</p>
+
+      <div class="desk">
+        <div class="controls">
+          <label class="field port">
+            <span class="field-label">Harbour</span>
+            <select data-port>
+              {PORTS.map((p) => (
+                <option value={p.id} selected={p.name === 'San Francisco'}>
+                  {p.name}, {p.region}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label class="field date">
+            <span class="field-label">Date</span>
+            <span class="date-row">
+              <input type="date" data-date min="1900-01-01" max="2099-12-31" />
+              <button type="button" class="btn quiet" data-today>
+                Today
+              </button>
+            </span>
+          </label>
+          <div class="field motor">
+            <span class="field-label">Motor</span>
+            <span class="motor-row">
+              <button type="button" class="btn primary" data-run aria-pressed="false">
+                Run
+              </button>
+              <button type="button" class="btn" data-next>
+                Next tide
+              </button>
+              <span class="speed" role="radiogroup" aria-label="Speed">
+                <label>
+                  <input type="radio" name="speed" value="1" />
+                  <span>1 hour a second</span>
+                </label>
+                <label>
+                  <input type="radio" name="speed" value="4" checked />
+                  <span>4 hours</span>
+                </label>
+                <label>
+                  <input type="radio" name="speed" value="12" />
+                  <span>12 hours</span>
+                </label>
+              </span>
+            </span>
+          </div>
+          <div class="field wheels">
+            <span class="field-label">Wheels</span>
+            <span class="wheel-row">
+              <span class="geared" data-geared>
+                37 of 37 in gear
+              </span>
+              <button type="button" class="btn quiet" data-preset="M2">
+                Moon only
+              </button>
+              <button type="button" class="btn quiet" data-preset="M2 S2">
+                Moon and sun
+              </button>
+              <button type="button" class="btn quiet" data-preset="all">
+                All 37
+              </button>
+            </span>
+            <span class="hint">Tap any wheel to take it out of gear.</span>
+          </div>
+          <div class="field units" role="radiogroup" aria-label="Units">
+            <span class="field-label">Heights</span>
+            <span class="unit-row">
+              <label>
+                <input type="radio" name="units" value="ft" checked />
+                <span>feet</span>
+              </label>
+              <label>
+                <input type="radio" name="units" value="m" />
+                <span>metres</span>
+              </label>
+            </span>
+          </div>
+        </div>
+
+        <aside class="book" aria-label="Tide book">
+          <h2>Tide book</h2>
+          <p class="book-sub" data-book-sub>
+            High and low waters, as the machine reaches them.
+          </p>
+          <ol class="book-list" data-book></ol>
+        </aside>
+      </div>
+    </section>
+
+    <article class="essay">
+      <h2 class="essay-head">How it works</h2>
+
+      <section>
+        <h3>One wheel, one rhythm</h3>
+        <p>
+          Every wheel stands for one rhythm in the tide. A pin on the wheel's face runs in a slot across a sliding
+          frame, so as the wheel turns, the frame and the pulley hanging from it ride up and down in a smooth wave.
+        </p>
+        <p>
+          Two settings fit the wave to a harbour. How far the pin sits from the centre sets the height of the wave, and
+          where it starts around the wheel sets its timing. Drag the pin to try both.
+        </p>
+        <figure class="fig">
+          <div class="plate">
+            <svg class="fig-svg" data-fig="one" role="img" aria-label="One wheel and a pen"></svg>
+          </div>
+          <figcaption>
+            <span class="fig-no">Fig. 1</span> One wheel, a sliding frame, and a pen. The pen draws the pulley's height
+            as the paper moves.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h3>Adding with a chain</h3>
+        <p>
+          A single chain ties the pulleys together. It is fixed at one end, runs over the top pulleys and under the
+          bottom ones, and hangs from a weight at the other end. When a top pulley rises, or a bottom one drops, the
+          chain has farther to go around it, and the free end is drawn in by twice the distance. The free end carries
+          the pen, so the pen moves by the sum of every wheel at once.
+        </p>
+        <p>
+          Beauchamp Tower suggested the chain in 1872, for the first machine, which William Thomson, later Lord Kelvin,
+          designed to add up ten rhythms.
+        </p>
+      </section>
+
+      <section>
+        <h3>The moon and the sun</h3>
+        <p>
+          The largest wheel belongs to the moon. Called M2, it turns once every 12 hours 25 minutes, half the time the
+          moon takes to come back to the same place in the sky. The sun's wheel, S2, turns once every 12 hours.
+        </p>
+        <p>
+          Running at slightly different speeds, the two pins drift in and out of step. Around new and full moon they
+          line up and the tides are large: spring tides. A week later they work against each other and the tides are
+          small: neap tides.
+        </p>
+        <figure class="fig">
+          <div class="plate">
+            <svg class="fig-svg" data-fig="two" role="img" aria-label="The moon's wheel and the sun's"></svg>
+          </div>
+          <div class="fig-controls">
+            <button type="button" class="btn quiet" data-fig2-sun aria-pressed="true">
+              Sun's wheel in gear
+            </button>
+          </div>
+          <figcaption>
+            <span class="fig-no">Fig. 2</span> The moon's wheel and the sun's, set for San Diego, running a month in
+            half a minute. The marks along the top of the paper are new moon, first quarter, full moon, and last
+            quarter.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h3>One tide a day, or two</h3>
+        <p>
+          The moon and the sun spend half their time north of the equator and half south, so the tide also has rhythms
+          that come round about once a day. Two wheels carry most of them: K1 and O1.
+        </p>
+        <p>
+          How much they matter depends on the harbour. At Boston they are small, and the two high tides each day are
+          about the same height. At Seattle they are nearly as large as the moon's main wheel, so one high each day
+          stands well above the other. At Pensacola they win outright, and most days have one high and one low.
+        </p>
+        <figure class="fig">
+          <div class="plate">
+            <svg class="fig-svg" data-fig="four" role="img" aria-label="Four wheels set for a harbour"></svg>
+          </div>
+          <div class="fig-controls" role="radiogroup" aria-label="Harbour">
+            <label>
+              <input type="radio" name="fig4" value="8443970" checked />
+              <span>Boston</span>
+            </label>
+            <label>
+              <input type="radio" name="fig4" value="9447130" />
+              <span>Seattle</span>
+            </label>
+            <label>
+              <input type="radio" name="fig4" value="8729840" />
+              <span>Pensacola</span>
+            </label>
+          </div>
+          <figcaption>
+            <span class="fig-no">Fig. 3</span> Four wheels, M2, S2, K1, and O1, set for three harbours, over four days.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h3>Thirty-seven wheels</h3>
+        <p>
+          Real harbours need more rhythms than that: the moon's oval orbit, the slow turning of that orbit, and the
+          overtides that shallow water adds, which make a tide come in faster than it goes out. Each is one more wheel,
+          with its speed fixed by gears.
+        </p>
+        <p>
+          The U.S. Coast and Geodetic Survey's Machine No. 2, finished in 1910, had 37 of them. It was about 11 feet
+          long and weighed about 2,500 pounds. A second set of pulleys added up how fast the water was rising or
+          falling, and the machine braked to a stop each time that sum passed zero, at every high and low water, so the
+          operator could read the time and height from its dials. It made the tide tables for American ports from 1912
+          to 1965.
+        </p>
+        <p>
+          The machine at the top of this page is set from the same 37 constants, as NOAA publishes them for each
+          harbour. It also works out the moon's 18.6-year cycle, which changes the size and timing of most wheels from
+          year to year, so it can be set to any date. Checked against NOAA's own predictions, its heights agree to
+          within about two inches, and its high and low waters to within a few minutes at most harbours. Where the tide
+          is small and slow to turn, as at St Thomas and Galveston, the times can differ by up to a quarter of an hour.
+        </p>
+      </section>
+
+      <section class="gauge" data-gauge>
+        <h3>Against the gauge</h3>
+        <p>
+          The machine knows the moon and the sun, but not the weather. Here is what it predicts for the last three days
+          at <span data-gauge-port>San Francisco</span>, against what the tide gauge in the harbour measured. The gap
+          between them is mostly wind, air pressure, and river water.
+        </p>
+        <figure class="fig">
+          <div class="plate paperplate">
+            <svg class="gauge-svg" data-gauge-svg role="img" aria-label="Predicted and measured water level"></svg>
+          </div>
+          <p class="gauge-read" data-gauge-read aria-live="polite">
+            Asking the gauge…
+          </p>
+          <figcaption>
+            <span class="fig-no">Fig. 4</span>
+            <span class="key key-machine">Machine</span>
+            <span class="key key-gauge">Gauge, every six minutes</span>
+            <span class="key key-gap">Difference</span>
+          </figcaption>
+        </figure>
+      </section>
+    </article>
+
+    <footer class="colophon">
+      <p>
+        Harmonic constants, datums, and gauge readings for each harbour come from NOAA's Center for Operational
+        Oceanographic Products and Services. Heights are above mean lower low water, the datum of U.S. charts; times are
+        local to each harbour.
+      </p>
+      <p>
+        <a href="/">thesandbox.page</a>
+      </p>
+    </footer>
+  </main>
+</Bare>
+
+<style is:global>
+  body:has(.tides) {
+    margin: 0;
+    background: #10161b;
+  }
+
+  .tides {
+    --night: #10161b;
+    --case: #182027;
+    --case-deep: #121a20;
+    --rule: #2a343c;
+    --text: #e8e1d1;
+    --text-soft: #b4ae9f;
+    --text-faint: #7d817c;
+    --brass: #dcb76c;
+    --brass-deep: #a27a36;
+    --paper: #ede5d1;
+    --ink-blue: #1f4f84;
+    --gauge: #c4452f;
+    --font: var(--font-tides), Georgia, serif;
+    --plate-font: var(--font-tides-plate), Optima, sans-serif;
+    box-sizing: border-box;
+    min-height: 100vh;
+    padding: 28px clamp(16px, 3vw, 48px) 48px;
+    color: var(--text);
+    font: 400 18px/1.6 var(--font);
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .tides *,
+  .tides *::before,
+  .tides *::after {
+    box-sizing: inherit;
+  }
+
+  .tides [hidden] {
+    display: none !important;
+  }
+
+  .tides a {
+    color: var(--brass);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .tides .masthead {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'back back'
+      'title dek';
+    align-items: end;
+    gap: 0 clamp(28px, 4vw, 64px);
+    max-width: 1440px;
+    margin: 0 auto 22px;
+  }
+
+  .tides .masthead .back {
+    grid-area: back;
+  }
+
+  .tides .masthead h1 {
+    grid-area: title;
+  }
+
+  .tides .masthead .dek {
+    grid-area: dek;
+  }
+
+  .tides .back {
+    margin: 0 0 18px;
+    font: 400 13px/1 var(--plate-font);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .tides .back a {
+    color: var(--text-faint);
+    text-decoration: none;
+  }
+
+  .tides .back a:hover {
+    color: var(--brass);
+  }
+
+  .tides h1 {
+    margin: 0;
+    font: 300 clamp(44px, 6vw, 78px) / 0.95 var(--font);
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .tides .dek {
+    max-width: 44em;
+    margin: 0;
+    padding-bottom: 4px;
+    font-size: clamp(16px, 1.3vw, 18px);
+    line-height: 1.5;
+    color: var(--text-soft);
+  }
+
+  /* The machine and its desk */
+
+  .tides .bench {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .tides .plate {
+    position: relative;
+    border-radius: 6px;
+    background: radial-gradient(120% 90% at 50% 0%, #1f2a33 0%, var(--case) 55%, var(--case-deep) 100%);
+    box-shadow:
+      inset 0 0 0 1px #2b3740,
+      0 30px 60px -30px rgb(0 0 0 / 0.7);
+    overflow: hidden;
+  }
+
+  .tides .hero .scroller {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #3a4650 transparent;
+  }
+
+  .tides .machine {
+    display: block;
+    width: 100%;
+    min-width: 980px;
+    height: auto;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .tides .tm-unit {
+    cursor: pointer;
+  }
+
+  .tides .tm-unit .tm-wheel,
+  .tides .tm-unit .tm-pin,
+  .tides .tm-unit .tm-tag {
+    transition: opacity 0.35s;
+  }
+
+  .tides .tm-unit.off .tm-wheel,
+  .tides .tm-unit.off .tm-pin {
+    opacity: 0.38;
+  }
+
+  .tides .tm-unit.off .tm-tag {
+    opacity: 0.35;
+  }
+
+  .tides .tm-unit:hover .tm-tag {
+    fill: #fff1c9;
+  }
+
+  .tides .tm-tag,
+  .tides .tm-plate,
+  .tides .tm-dialnum,
+  .tides .tm-date {
+    font-family: var(--plate-font);
+  }
+
+  .tides .tm-note,
+  .tides .tm-note-big,
+  .tides .tm-note-em,
+  .tides .tm-note-title,
+  .tides .tm-gnum,
+  .tides .tm-gday {
+    font-family: var(--font);
+  }
+
+  .tides .tm-note-em {
+    font-style: italic;
+    fill: var(--brass);
+  }
+
+  .tides .tm-note-title {
+    font-weight: 300;
+  }
+
+  .tides .fig-svg.dragging {
+    cursor: grabbing;
+  }
+
+  .tides [data-fig='one'] .tm-unit {
+    cursor: grab;
+  }
+
+  .tides .tm-day,
+  .tides .tm-hnum {
+    font-family: var(--font);
+    font-style: italic;
+  }
+
+  .tides .tm-crank-hit {
+    cursor: grab;
+  }
+
+  .tides .machine.cranking,
+  .tides .machine.cranking .tm-crank-hit {
+    cursor: grabbing;
+  }
+
+  .tides .swipe-hint {
+    display: none;
+    margin: 10px 0 0;
+    color: var(--text-faint);
+    font-size: 15px;
+    font-style: italic;
+  }
+
+  @media (max-width: 1030px) {
+    .tides .swipe-hint {
+      display: block;
+    }
+  }
+
+  .tides .tm-plate-dark {
+    font-family: var(--plate-font);
+    letter-spacing: 0.16em;
+    fill: #8f8a7c;
+  }
+
+  .tides .tm-read {
+    font-family: var(--font);
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    fill: #efe7d4;
+  }
+
+  .tides .plate-note {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    color: var(--text-faint);
+    font-style: italic;
+  }
+
+  .tides[data-ready='true'] .plate-note {
+    display: none;
+  }
+
+  .tides .desk {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+    gap: 28px clamp(24px, 4vw, 56px);
+    margin-top: 22px;
+  }
+
+  .tides .controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 32px;
+    align-content: start;
+  }
+
+  .tides .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .tides .field.motor,
+  .tides .field.wheels {
+    grid-column: 1 / -1;
+  }
+
+  .tides .field.units {
+    align-items: flex-start;
+  }
+
+  .tides .field-label {
+    font: 400 12px/1 var(--plate-font);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .tides select,
+  .tides input[type='date'] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    min-height: 44px;
+    padding: 9px 14px;
+    border: 1px solid #3a4650;
+    border-radius: 4px;
+    background: #141c22;
+    color: var(--text);
+    font: 500 17px/1.2 var(--font);
+    color-scheme: dark;
+  }
+
+  .tides select {
+    padding-right: 40px;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--brass) 50%),
+      linear-gradient(-45deg, transparent 50%, var(--brass) 50%);
+    background-position:
+      calc(100% - 20px) 52%,
+      calc(100% - 15px) 52%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+  }
+
+  .tides select:focus-visible,
+  .tides input:focus-visible,
+  .tides .btn:focus-visible,
+  .tides label:has(input:focus-visible) span {
+    outline: 2px solid var(--brass);
+    outline-offset: 2px;
+  }
+
+  .tides .date-row,
+  .tides .motor-row,
+  .tides .wheel-row,
+  .tides .unit-row,
+  .tides .fig-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .tides .date-row input {
+    flex: 1 1 auto;
+    width: auto;
+  }
+
+  .tides .btn {
+    min-height: 44px;
+    padding: 9px 18px;
+    border: 1px solid #4a5560;
+    border-radius: 4px;
+    background: #1c252c;
+    color: var(--text);
+    font: 500 16px/1.2 var(--font);
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+  }
+
+  .tides .btn:hover {
+    border-color: var(--brass-deep);
+    color: #fff6e2;
+  }
+
+  .tides .btn.primary {
+    min-width: 96px;
+    border-color: var(--brass-deep);
+    background: linear-gradient(#e2c27e, #b88d43);
+    color: #20170a;
+    font-weight: 650;
+  }
+
+  .tides .btn.primary[aria-pressed='true'] {
+    background: linear-gradient(#a98543, #d7b56f);
+    box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.35);
+  }
+
+  .tides .btn.quiet {
+    border-color: #36414a;
+    background: transparent;
+    color: var(--text-soft);
+  }
+
+  .tides .btn.quiet[aria-pressed='false'] {
+    color: var(--text-faint);
+  }
+
+  .tides .speed,
+  .tides .unit-row,
+  .tides .fig-controls[role='radiogroup'] {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border: 1px solid #36414a;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .tides .speed label,
+  .tides .unit-row label,
+  .tides .fig-controls label {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .tides .speed input,
+  .tides .unit-row input,
+  .tides .fig-controls input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .tides .speed span,
+  .tides .unit-row span,
+  .tides .fig-controls label span {
+    display: block;
+    min-height: 42px;
+    padding: 10px 14px;
+    color: var(--text-soft);
+    font-size: 15px;
+    line-height: 22px;
+    white-space: nowrap;
+  }
+
+  .tides .speed label + label span,
+  .tides .unit-row label + label span,
+  .tides .fig-controls label + label span {
+    border-left: 1px solid #36414a;
+  }
+
+  .tides .speed input:checked + span,
+  .tides .unit-row input:checked + span,
+  .tides .fig-controls input:checked + span {
+    background: #26313a;
+    color: #fff3d8;
+    box-shadow: inset 0 -2px 0 var(--brass);
+  }
+
+  .tides .geared {
+    min-width: 9.5em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tides .hint {
+    color: var(--text-faint);
+    font-size: 15px;
+    font-style: italic;
+  }
+
+  /* The tide book */
+
+  .tides .book {
+    padding: 18px 20px 14px;
+    border-radius: 4px;
+    background: var(--paper);
+    color: #23251f;
+    box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.8);
+    align-self: start;
+  }
+
+  .tides .book h2 {
+    margin: 0;
+    font: 400 13px/1 var(--plate-font);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #4a4c44;
+  }
+
+  .tides .book-sub {
+    margin: 6px 0 10px;
+    color: #5c5d55;
+    font-size: 15px;
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .tides .book-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tides .book-list li {
+    display: grid;
+    grid-template-columns: 6.6em 5.4em 1fr auto;
+    gap: 8px;
+    align-items: baseline;
+    padding: 5px 0;
+    border-top: 1px solid #d3c9b2;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .tides .book-list li.fresh {
+    animation: tides-ink 1.6s ease-out;
+  }
+
+  @keyframes tides-ink {
+    from {
+      background: #f6e7b8;
+    }
+    to {
+      background: transparent;
+    }
+  }
+
+  .tides .book-list .kind {
+    color: #5c5d55;
+    font-style: italic;
+  }
+
+  .tides .book-list .h {
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .tides .book-list li.high .h {
+    color: var(--ink-blue);
+  }
+
+  .tides .book-list .day {
+    color: #5c5d55;
+  }
+
+  .tides .book-empty {
+    padding: 8px 0 4px;
+    border-top: 1px solid #d3c9b2;
+    color: #6d6e66;
+    font-size: 15px;
+    font-style: italic;
+  }
+
+  /* The essay */
+
+  .tides .essay {
+    max-width: 1040px;
+    margin: 72px auto 0;
+  }
+
+  .tides .essay-head {
+    max-width: 680px;
+    margin: 0 auto 10px;
+    font: 400 13px/1 var(--plate-font);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  .tides .essay section {
+    margin: 0 0 56px;
+  }
+
+  .tides .essay h3,
+  .tides .essay p {
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .tides .essay h3 {
+    margin-top: 0;
+    margin-bottom: 14px;
+    font: 400 clamp(28px, 3.4vw, 38px) / 1.1 var(--font);
+    letter-spacing: -0.01em;
+  }
+
+  .tides .essay p {
+    margin-top: 0;
+    margin-bottom: 1em;
+    font-size: 19px;
+  }
+
+  .tides .fig {
+    margin: 30px 0 0;
+  }
+
+  .tides .fig-svg,
+  .tides .gauge-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .tides .fig-controls {
+    margin-top: 12px;
+  }
+
+  .tides .fig figcaption {
+    margin-top: 12px;
+    color: var(--text-soft);
+    font-size: 15px;
+    font-style: italic;
+    line-height: 1.45;
+  }
+
+  .tides .fig-no {
+    margin-right: 0.6em;
+    font: 400 12px/1 var(--plate-font);
+    font-style: normal;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  .tides .paperplate {
+    background: var(--paper);
+    box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.7);
+  }
+
+  .tides .gauge-read {
+    min-height: 1.6em;
+    margin: 14px 0 0 !important;
+    max-width: none !important;
+    color: var(--text);
+    font-size: 18px !important;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tides .key {
+    margin-right: 1.4em;
+    white-space: nowrap;
+  }
+
+  .tides .key::before {
+    content: '';
+    display: inline-block;
+    width: 22px;
+    height: 0;
+    margin-right: 7px;
+    vertical-align: middle;
+    border-top: 2.5px solid var(--ink-blue);
+  }
+
+  .tides .key-gauge::before {
+    width: 8px;
+    height: 8px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--gauge);
+  }
+
+  .tides .key-gap::before {
+    height: 10px;
+    border: 0;
+    background: #d9a48f;
+  }
+
+  .tides .colophon {
+    max-width: 680px;
+    margin: 40px auto 0;
+    padding-top: 22px;
+    border-top: 1px solid var(--rule);
+    color: var(--text-faint);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 1000px) {
+    .tides .masthead {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'back'
+        'title'
+        'dek';
+    }
+
+    .tides .dek {
+      margin-top: 14px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .tides .desk {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tides .controls {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .tides {
+      font-size: 17px;
+    }
+
+    .tides .essay p {
+      font-size: 18px;
+    }
+
+    .tides .speed span,
+    .tides .unit-row span,
+    .tides .fig-controls label span {
+      padding: 10px 11px;
+      font-size: 14px;
+    }
+
+    .tides .book-list li {
+      grid-template-columns: 6.2em 5em 1fr auto;
+      font-size: 15px;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('.tides');
+  if (root) start(root);
+</script>
