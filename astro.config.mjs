@@ -644,5 +644,24 @@ export default defineConfig({
       subsets: ['latin', 'latin-ext'],
       fallbacks: ['Georgia', 'serif'],
     },
+    // /tide-machine/: a text face drawn for small sizes, and a classical sans for the lettering engraved on the machine.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Piazzolla',
+      cssVariable: '--font-tides',
+      weights: ['100 900'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Tenor Sans',
+      cssVariable: '--font-tides-plate',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Optima', 'Candara', 'sans-serif'],
+    },
   ],
 });
