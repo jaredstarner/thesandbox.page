@@ -43,28 +43,36 @@ function whileVisible(target: Element, tick: (dt: number) => void): void {
   ).observe(target);
 }
 
-function callout(svg: SVGSVGElement, text: string, tx: number, ty: number, x: number, y: number): void {
+/** A label with a leader line; the function it returns re-points the line at a moving part. */
+function callout(svg: SVGSVGElement, text: string, tx: number, ty: number, x: number, y: number) {
   const g = el('g', { class: 'tm-callout' }, svg);
-  el('path', { d: `M${tx + 6} ${ty - 5}L${x} ${y}`, stroke: '#a88e5c', 'stroke-width': 1, fill: 'none' }, g);
-  el('circle', { cx: x, cy: y, r: 2.4, fill: '#d9bd7f' }, g);
-  const t = el('text', { x: tx, y: ty, 'text-anchor': 'end', class: 'tm-note', fill: '#cdbf9f', 'font-size': 17 }, g);
+  const line = el('path', { stroke: '#a88e5c', 'stroke-width': 1, fill: 'none' }, g);
+  const dot = el('circle', { r: 2.6, fill: '#e3c88a' }, g);
+  const t = el('text', { x: tx, y: ty, 'text-anchor': 'end', class: 'tm-note', fill: '#cdbf9f', 'font-size': 18 }, g);
   t.textContent = text;
+  const move = (px: number, py: number) => {
+    line.setAttribute('d', `M${tx + 8} ${ty - 6}L${(tx + 8 + px) / 2 + 10} ${ty - 6}L${px.toFixed(1)} ${py.toFixed(1)}`);
+    dot.setAttribute('cx', px.toFixed(1));
+    dot.setAttribute('cy', py.toFixed(1));
+  };
+  move(x, y);
+  return move;
 }
 
 /** Fig. 1: one wheel. Drag the pin to set its radius and its starting angle. */
 export function figOne(svg: SVGSVGElement): void {
   const layout: Layout = {
     width: 1000,
-    height: 500,
-    gearR: 66,
-    upperY: 112,
+    height: 520,
+    gearR: 84,
+    upperY: 128,
     lowerY: 0,
-    reach: 150,
-    pulleyR: 20,
-    units: [{ name: 'M2', row: 'upper', x: 770 }],
-    anchor: { x: 690, y: 330 },
-    guide: { x: 872, y: 254, r: 12 },
-    paper: { x0: 30, x1: 970, y0: 344, y1: 482 },
+    reach: 160,
+    pulleyR: 22,
+    units: [{ name: 'M2', row: 'upper', x: 640 }],
+    anchor: { x: 560, y: 352 },
+    guide: { x: 872, y: 278, r: 12 },
+    paper: { x0: 30, x1: 970, y0: 376, y1: 504 },
     hours: 30,
     tags: false,
   };
@@ -77,14 +85,16 @@ export function figOne(svg: SVGSVGElement): void {
   let dragging = false;
   const state: WheelState[] = [{ pin: amp * pinMax, angle: 0, engaged: true }];
   const angle = () => M2_SPEED * (t / HOUR) + phase;
+  const cx = 640;
+  const R = layout.gearR;
 
-  callout(svg, 'Wheel', 600, 60, 718, 74);
-  callout(svg, 'Pin: drag it', 600, 112, 700, 112);
-  callout(svg, 'Sliding frame', 600, 170, 704, 168);
-  callout(svg, 'Pulley', 600, 262, 748, 262);
-  callout(svg, 'Chain', 600, 312, 702, 312);
+  callout(svg, 'Wheel', 470, 58, cx - R * 0.62, layout.upperY - R * 0.62);
+  const toPin = callout(svg, 'Pin: drag it', 470, 108, cx, layout.upperY);
+  const toFrame = callout(svg, 'Sliding frame', 470, 168, cx - R, layout.upperY);
+  const toPulley = callout(svg, 'Pulley', 470, 262, cx - 22, 288);
+  callout(svg, 'Chain', 470, 330, 590, 330);
   const penX = layout.guide.x + layout.guide.r;
-  const penLabel = el('text', { x: penX + 28, y: 330, class: 'tm-note', fill: '#cdbf9f', 'font-size': 17 }, svg);
+  const penLabel = el('text', { x: penX + 30, y: 360, class: 'tm-note', fill: '#cdbf9f', 'font-size': 18 }, svg);
   penLabel.textContent = 'Pen';
 
   const pts: [number, number][] = [];
@@ -97,6 +107,12 @@ export function figOne(svg: SVGSVGElement): void {
     state[0].pin = amp * pinMax;
     state[0].angle = angle();
     m.frame(t, state, amp * Math.cos(angle() * RAD));
+    const u = m.unitState('M2');
+    if (u) {
+      toPin(u.pinX, u.pinY);
+      toFrame(cx - R * 1.02, layout.upperY + u.dy);
+      toPulley(cx - layout.pulleyR * 0.75, u.pulleyY + layout.pulleyR * 0.65);
+    }
   };
 
   const center = m.unitCenter('M2')!;
@@ -279,19 +295,19 @@ function quarters(from: number, to: number): { ms: number; q: number }[] {
 export function figTwo(svg: SVGSVGElement, sunBtn: HTMLButtonElement | null): void {
   const layout: Layout = {
     width: 1000,
-    height: 560,
+    height: 640,
     gearR: 40,
-    upperY: 92,
-    lowerY: 382,
+    upperY: 96,
+    lowerY: 386,
     reach: 120,
     pulleyR: 16,
     units: [
-      { name: 'M2', row: 'upper', x: 520 },
-      { name: 'S2', row: 'lower', x: 600 },
+      { name: 'M2', row: 'upper', x: 540 },
+      { name: 'S2', row: 'lower', x: 620 },
     ],
-    anchor: { x: 466, y: 278 },
-    guide: { x: 930, y: 208, r: 12 },
-    paper: { x0: 30, x1: 975, y0: 446, y1: 546 },
+    anchor: { x: 486, y: 282 },
+    guide: { x: 930, y: 212, r: 12 },
+    paper: { x0: 30, x1: 975, y0: 474, y1: 624 },
     hours: 720,
   };
   const start = Date.UTC(2026, 10, 12, 12);
@@ -299,7 +315,9 @@ export function figTwo(svg: SVGSVGElement, sunBtn: HTMLButtonElement | null): vo
   fig.m.setTime(
     (ms) => {
       const d = new Date(ms);
-      return d.getUTCDate() % 7 === 1 ? `${d.getUTCDate()} ${d.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' })}` : '';
+      return Math.floor(ms / 86400000) % 7 === 0
+        ? `${d.getUTCDate()} ${d.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' })}`
+        : '';
     },
     (ms) => ((((ms - 8 * HOUR) / HOUR) % 24) + 24) % 24,
   );
@@ -307,10 +325,10 @@ export function figTwo(svg: SVGSVGElement, sunBtn: HTMLButtonElement | null): vo
 
   const note = (x: number, y: number, size: number, cls = 'tm-note', anchor = 'start') =>
     el('text', { x, y, class: cls, fill: '#cdbf9f', 'font-size': size, 'text-anchor': anchor }, svg);
-  const n1 = note(574, 98, 17);
-  n1.textContent = 'Moon: 12 h 25 min';
-  const n2 = note(654, 388, 17);
-  n2.textContent = 'Sun: 12 h';
+  const n1 = note(574, 46, 17);
+  n1.textContent = 'the moon, 12 h 25 min';
+  const n2 = note(654, 445, 17);
+  n2.textContent = 'the sun, 12 h';
 
   // A moon showing its phase, and the date.
   const mx = 170;
@@ -381,21 +399,21 @@ const KINDS: Record<string, [string, string]> = {
 export function figFour(svg: SVGSVGElement, radios: NodeListOf<HTMLInputElement>): void {
   const layout: Layout = {
     width: 1000,
-    height: 560,
+    height: 610,
     gearR: 36,
     upperY: 92,
     lowerY: 382,
     reach: 120,
     pulleyR: 15,
     units: [
-      { name: 'K1', row: 'upper', x: 520 },
-      { name: 'O1', row: 'lower', x: 590 },
-      { name: 'S2', row: 'upper', x: 660 },
-      { name: 'M2', row: 'lower', x: 730 },
+      { name: 'K1', row: 'upper', x: 580 },
+      { name: 'O1', row: 'lower', x: 650 },
+      { name: 'S2', row: 'upper', x: 720 },
+      { name: 'M2', row: 'lower', x: 790 },
     ],
-    anchor: { x: 470, y: 277 },
+    anchor: { x: 530, y: 277 },
     guide: { x: 930, y: 209, r: 12 },
-    paper: { x0: 30, x1: 975, y0: 446, y1: 546 },
+    paper: { x0: 30, x1: 975, y0: 456, y1: 594 },
     hours: 96,
   };
   const names = ['M2', 'S2', 'K1', 'O1'];
@@ -440,7 +458,7 @@ export function figFour(svg: SVGSVGElement, radios: NodeListOf<HTMLInputElement>
       const y = 250 + i * 34;
       const label = el('text', { x: 40, y, class: 'tm-tag', fill: '#d9bd7f', 'font-size': 16 }, amps);
       label.textContent = n;
-      const w = Math.max(2, (h?.amp ?? 0) * 260);
+      const w = Math.max(2, (h?.amp ?? 0) * 230);
       el('rect', { x: 92, y: y - 13, width: w, height: 14, rx: 2, fill: '#b68a3e' }, amps);
       const v = el('text', { x: 100 + w, y, class: 'tm-note', fill: '#a9a597', 'font-size': 15 }, amps);
       v.textContent = `${((h?.amp ?? 0) * 3.28084).toFixed(1)} ft`;

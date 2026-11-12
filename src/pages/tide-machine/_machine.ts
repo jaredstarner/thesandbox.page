@@ -4,6 +4,7 @@
 
 const NS = 'http://www.w3.org/2000/svg';
 const RAD = Math.PI / 180;
+const HOUR_MS = 3600000;
 
 type Attrs = Record<string, string | number>;
 
@@ -82,6 +83,9 @@ interface UnitNodes {
   sheave: SVGGElement;
   tag?: SVGTextElement;
   disp: number;
+  pinX: number;
+  pinY: number;
+  dy: number;
 }
 
 /** Tangent points for a belt between two circles; `side` +1 means the circle's centre is to the right of travel. */
@@ -512,7 +516,7 @@ export class Machine {
 
     wheel.setAttribute('transform', `translate(${cx} ${cy})`);
     group.addEventListener('click', () => this.onWheel?.(spec.name));
-    return { spec, cx, cy, group, wheel, slot, pin, slide, sheave, tag, disp: 0 };
+    return { spec, cx, cy, group, wheel, slot, pin, slide, sheave, tag, disp: 0, pinX: cx, pinY: cy, dy: 0 };
   }
 
   private drawCrank(root: SVGGElement, c: { x: number; y: number; r: number }): void {
@@ -813,6 +817,9 @@ export class Machine {
       const px = u.cx + w.pin * Math.sin(a);
       const dy = -w.pin * Math.cos(a);
       u.pin.setAttribute('transform', `translate(${fmt(px)} ${fmt(u.cy + dy)})`);
+      u.pinX = px;
+      u.pinY = u.cy + dy;
+      u.dy = dy;
       u.slide.setAttribute('transform', `translate(0 ${fmt(dy)})`);
       u.disp = upper ? -dy : dy; // chain taken up by this pulley's motion
       const off = !w.engaged;
@@ -832,7 +839,7 @@ export class Machine {
       // Turn each pulley by the chain that has passed over it.
       const spin = ((taken * 2 + u.disp) / pr / RAD) % 360;
       taken += u.disp;
-      u.sheave.setAttribute('transform', `rotate(${fmt(spin)} ${u.cx} ${fmt(y)})`);
+      u.sheave.setAttribute('transform', `rotate(${fmt(spin)} ${u.cx} ${u.cy + (upper ? L.reach : -L.reach)})`);
     }
     const G = L.guide;
     circles.push({ x: G.x, y: G.y, r: G.r, s: 1 });
@@ -946,14 +953,15 @@ export class Machine {
     const endHour = Math.ceil(lh + hoursRight);
     let thin = this.heightPath;
     let bold = '';
-    const every = pxh < 3 ? 6 : pxh < 8 ? 3 : 1;
+    const every = pxh < 2 ? 24 : pxh < 3 ? 6 : pxh < 8 ? 3 : 1;
+    const weekly = pxh < 2;
     const labels: [number, number][] = [];
     for (let k = startHour; k <= endHour; k++) {
       const ms = t + (k - lh) * 3600000;
       const x = xOf(ms);
       if (x < P.x0 || x > P.x1) continue;
       const hod = ((k % 24) + 24) % 24;
-      if (hod === 0) bold += `M${fmt(x)} ${P.y0}V${P.y1}`;
+      if (hod === 0 && (!weekly || Math.floor((ms + 12 * HOUR_MS) / 86400000) % 7 === 0)) bold += `M${fmt(x)} ${P.y0}V${P.y1}`;
       else if (hod % every === 0) thin += `M${fmt(x)} ${P.y0}V${P.y1}`;
       if (hod === 12) labels.push([x, ms]);
     }
@@ -1002,6 +1010,14 @@ export class Machine {
     pt.y = clientY;
     const p = pt.matrixTransform(m.inverse());
     return { x: p.x, y: p.y };
+  }
+
+  /** Where a unit's moving parts were last drawn: its pin, and its sliding frame's offset. */
+  unitState(name: string): { pinX: number; pinY: number; dy: number; pulleyY: number } | null {
+    const u = this.units.find((n) => n.spec.name === name);
+    if (!u) return null;
+    const upper = u.spec.row === 'upper';
+    return { pinX: u.pinX, pinY: u.pinY, dy: u.dy, pulleyY: u.cy + (upper ? this.layout.reach : -this.layout.reach) + u.dy };
   }
 
   unitCenter(name: string): { x: number; y: number; r: number } | null {
