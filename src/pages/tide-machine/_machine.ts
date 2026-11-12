@@ -303,23 +303,18 @@ export class Machine {
 
     // The guide pulley and the chain.
     const G = L.guide;
+    const hangTop = L.frame === false ? G.y - G.r - 26 : this.railY('upper');
+    el('rect', { x: G.x - 3, y: hangTop, width: 6, height: G.y - hangTop, rx: 3, fill: this.ref('rod') }, root);
     const guide = el('g', { filter: this.ref('lift') }, root);
     el('circle', { cx: G.x, cy: G.y, r: G.r, fill: this.ref('brass'), stroke: '#4a3412', 'stroke-width': 1 }, guide);
     el('circle', { cx: G.x, cy: G.y, r: G.r * 0.62, fill: 'none', stroke: '#6f501f', 'stroke-width': 1 }, guide);
     el('circle', { cx: G.x, cy: G.y, r: 2.6, fill: this.ref('rod') }, guide);
-    el(
-      'path',
-      {
-        d: `M${G.x} ${G.y}L${G.x - 10} ${G.y - G.r - 16}L${G.x + 10} ${G.y - G.r - 16}Z`,
-        fill: '#2b343b',
-        stroke: '#4c565e',
-        'stroke-width': 1,
-      },
-      root,
-    );
+    // 2. The chain is made fast to an eye on a strut from the frame.
     const A = L.anchor;
-    el('circle', { cx: A.x, cy: A.y, r: 5, fill: this.ref('rod'), stroke: '#2a3136', 'stroke-width': 1 }, root);
-    el('rect', { x: A.x - 12, y: A.y + 3, width: 24, height: 9, rx: 2, fill: '#2b343b', stroke: '#4c565e' }, root);
+    const strutEnd = L.units.some((u) => u.row === 'lower') && L.frame !== false ? this.railY('lower') : L.paper.y0 - 10;
+    el('rect', { x: A.x - 3, y: A.y, width: 6, height: Math.max(8, strutEnd - A.y), rx: 3, fill: this.ref('rod') }, root);
+    el('rect', { x: A.x - 9, y: strutEnd - 6, width: 18, height: 12, rx: 2, fill: this.ref('bar'), stroke: '#5a3f15' }, root);
+    el('circle', { cx: A.x, cy: A.y, r: 6, fill: 'none', stroke: this.ref('bar'), 'stroke-width': 3.2 }, root);
     this.chainBase = el(
       'path',
       { fill: 'none', stroke: '#3c372f', 'stroke-width': 3.4, 'stroke-linejoin': 'round' },
@@ -356,20 +351,39 @@ export class Machine {
     if (L.nameplate) this.drawNameplate(root, L.nameplate);
   }
 
+  /** Height of the guide rail a row's rods slide through: clear of the wheels and of the pulleys. */
+  private railY(row: 'upper' | 'lower'): number {
+    const L = this.layout;
+    const off = Math.max(L.reach * 0.52, L.gearR + 14);
+    return row === 'upper' ? L.upperY + off : L.lowerY - off;
+  }
+
   private drawFrame(root: SVGGElement): void {
     const L = this.layout;
     const xs = L.units.map((u) => u.x);
     const x0 = Math.min(...xs, L.anchor.x) - L.gearR - 10;
     const x1 = Math.max(...xs) + L.gearR + 10;
     const g = el('g', { class: 'tm-frame' }, root);
+    const both = L.units.some((u) => u.row === 'upper') && L.units.some((u) => u.row === 'lower');
+    // 4. One drive: a shaft up the end of the frame joins the two rows, and the crank turns the lower one.
+    const driveX = x1 + 8;
+    if (both) {
+      el('rect', { x: driveX - 3, y: L.upperY, width: 6, height: L.lowerY - L.upperY, rx: 3, fill: this.ref('rail') }, g);
+    }
     for (const row of ['upper', 'lower'] as const) {
       if (!L.units.some((u) => u.row === row)) continue;
       const cy = row === 'upper' ? L.upperY : L.lowerY;
       // Drive shaft behind the wheels.
-      el('rect', { x: x0, y: cy - 3, width: x1 - x0, height: 6, rx: 3, fill: this.ref('rail'), opacity: 0.85 }, g);
-      // Guide rail the rods slide through.
-      const ry = row === 'upper' ? L.upperY + L.reach * 0.52 : L.lowerY - L.reach * 0.52;
-      el('rect', { x: x0, y: ry - 5, width: x1 - x0, height: 10, rx: 2, fill: this.ref('rail') }, g);
+      const dx1 = row === 'lower' && L.crank ? L.crank.x : both ? driveX : x1;
+      el('rect', { x: x0, y: cy - 3, width: dx1 - x0, height: 6, rx: 3, fill: this.ref('rail'), opacity: 0.9 }, g);
+      if (both) {
+        el('rect', { x: driveX - 9, y: cy - 9, width: 18, height: 18, rx: 3, fill: this.ref('bar'), stroke: '#5a3f15' }, g);
+        el('circle', { cx: driveX, cy, r: 2.6, fill: this.ref('rod') }, g);
+      }
+      // Guide rail the rods slide through, carried on to hang the guide pulley from.
+      const ry = this.railY(row);
+      const rx1 = row === 'upper' ? Math.max(x1, L.guide.x + 14) : x1;
+      el('rect', { x: x0, y: ry - 5, width: rx1 - x0, height: 10, rx: 2, fill: this.ref('rail') }, g);
       for (const u of L.units) {
         if (u.row !== row) continue;
         el('rect', { x: u.x - 7, y: ry - 8, width: 14, height: 16, rx: 2, fill: this.ref('bar'), stroke: '#5a3f15' }, g);
@@ -427,20 +441,9 @@ export class Machine {
       },
       slide,
     );
-    // Pulley block (fork) and pulley.
+    // The pulley, with the cheek of its block in front.
     const pr = L.pulleyR;
     const py = cy + sheaveY;
-    el(
-      'path',
-      {
-        d: `M${cx - pr - 3} ${py}A${pr + 3} ${pr + 3} 0 0 ${dir > 0 ? 1 : 0} ${cx + pr + 3} ${py}`,
-        fill: 'none',
-        stroke: '#58626a',
-        'stroke-width': 3,
-        transform: `rotate(${dir > 0 ? 180 : 0} ${cx} ${py})`,
-      },
-      slide,
-    );
     const sheave = el('g', {}, slide);
     el('circle', { cx, cy: py, r: pr, fill: this.ref('brass'), stroke: '#4a3412', 'stroke-width': 1 }, sheave);
     el('circle', { cx, cy: py, r: pr * 0.66, fill: this.ref('recess') }, sheave);
@@ -459,6 +462,22 @@ export class Machine {
       );
     }
     el('circle', { cx, cy: py, r: Math.max(2.2, pr * 0.2), fill: this.ref('rod') }, sheave);
+    const cheekW = Math.max(5, pr * 0.42);
+    el(
+      'rect',
+      {
+        x: cx - cheekW / 2,
+        y: dir > 0 ? py - pr - 6 : py,
+        width: cheekW,
+        height: pr + 6,
+        rx: cheekW / 2,
+        fill: this.ref('rod'),
+        stroke: '#2e363b',
+        'stroke-width': 0.6,
+      },
+      slide,
+    );
+    el('circle', { cx, cy: py, r: Math.max(2, pr * 0.16), fill: '#e9edef', stroke: '#2e363b', 'stroke-width': 0.6 }, slide);
 
     // The wheel, drawn under the sliding frame's slot but over its rod, on a still shadow (a filter on a
     // turning wheel would be redrawn every frame).
@@ -735,7 +754,7 @@ export class Machine {
       const y = this.yOf((k * this.gridStep) / this.unitScale);
       if (y < P.y0 + 4 || y > P.y1 - 4) continue;
       d += `M${P.x0} ${fmt(y)}H${P.x1}`;
-      if (!this.unitLabel) continue;
+      if (!this.unitLabel || y < P.y0 + 20) continue;
       const t = el('text', { x: P.x0 + 16, y: y - 4, class: 'tm-hnum', fill: '#7a6f57', 'font-size': 14 }, this.heightLabels);
       const v = k * this.gridStep;
       t.textContent = `${Number.isInteger(v) ? v : v.toFixed(1)} ${this.unitLabel}`;

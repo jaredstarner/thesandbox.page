@@ -192,7 +192,7 @@ const HERO: Layout = {
   guide: { x: 1312, y: 268, r: 12 },
   paper: { x0: 60, x1: 1552, y0: 562, y1: 752 },
   hours: 72,
-  crank: { x: 1470, y: 486, r: 30 },
+  crank: { x: 1470, y: 480, r: 30 },
   dials: { x: 1470, dateY: 50, clockY: 180, clockR: 52, heightY: 334, heightR: 62 },
   nameplate: { x: 640, y: 40, w: 400 },
 };
@@ -234,6 +234,8 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
   let book: BookRow[] = [];
   let glide: { from: number; to: number; start: number; dur: number } | null = null;
   let dirty = true;
+  /** True while the wheels settle to new settings: the machine waits, as an operator would. */
+  let hold = false;
 
   function computeTarget(): void {
     model = wheels(station, t, model);
@@ -333,6 +335,7 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
     machine.setName(`${p.name}, ${p.region}`);
     computeTarget();
     settle.begin(shown, target);
+    hold = shown.length > 0;
     resetSheet();
   }
 
@@ -376,6 +379,7 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
     glide = null;
     computeTarget();
     settle.begin(shown, target);
+    hold = true;
     resetSheet();
   });
   todayBtn.addEventListener('click', () => {
@@ -383,6 +387,7 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
     glide = null;
     computeTarget();
     settle.begin(shown, target);
+    hold = true;
     resetSheet();
   });
   runBtn.addEventListener('click', () => {
@@ -472,7 +477,9 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
     const dt = last ? Math.min(0.1, (now - last) / 1000) : 0;
     last = now;
     if (onScreen && !document.hidden) {
-      if (glide) {
+      if (hold) {
+        // Wait for the wheels.
+      } else if (glide) {
         const k = Math.min(1, (now - glide.start) / glide.dur);
         const e = 1 - (1 - k) ** 3;
         advance(glide.from + (glide.to - glide.from) * e);
@@ -480,9 +487,10 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
       } else if (running && dt > 0) {
         advance(t + dt * speed * HOUR);
       }
-      if (dirty || settle.pins.length) {
+      if (dirty) {
         computeTarget();
         const moving = settle.step(target, dt || 1 / 60, shown, engaged);
+        if (!moving) hold = false;
         crankTurns = (t / HOUR / 3) % 1;
         const f = zone.fields(t);
         machine.frame(t, shown, heightShown(), crankTurns, {
@@ -492,7 +500,7 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
           year: String(f.year),
           hours: f.hour + f.minute / 60 + (t % 60000) / HOUR,
         });
-        dirty = moving || running || !!glide;
+        dirty = moving || running || !!glide || hold;
       }
     }
     requestAnimationFrame(loop);
