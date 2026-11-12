@@ -47,9 +47,12 @@ export function gauge(section: HTMLElement): GaugeView {
   const svg = section.querySelector<SVGSVGElement>('[data-gauge-svg]')!;
   const read = section.querySelector<HTMLElement>('[data-gauge-read]')!;
   const portName = section.querySelector<HTMLElement>('[data-gauge-port]')!;
-  const W = 1000;
-  const H = 380;
-  const box = { x0: 74, x1: 980, y0: 22, y1: 330 };
+  // Phones get a narrower drawing, so the lettering stays readable.
+  const phone = (svg.parentElement?.clientWidth ?? 1000) < 620;
+  const W = phone ? 600 : 1000;
+  const H = phone ? 470 : 380;
+  const box = phone ? { x0: 78, x1: 586, y0: 22, y1: 410 } : { x0: 74, x1: 980, y0: 22, y1: 330 };
+  const fs = phone ? 21 : 14;
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
   let current: { port: Port; unit: 'ft' | 'm' } | null = null;
@@ -85,11 +88,16 @@ export function gauge(section: HTMLElement): GaugeView {
     for (let v = Math.ceil((lo * k) / step) * step; v <= hi * k; v += step) {
       const yy = y(v / k);
       el('path', { d: `M${box.x0} ${yy.toFixed(1)}H${box.x1}`, stroke: '#cfc4aa', 'stroke-width': 0.8 }, g);
-      const t = el('text', { x: box.x0 - 10, y: yy + 5, 'text-anchor': 'end', class: 'tm-gnum', fill: '#6d6350', 'font-size': 14 }, g);
+      const t = el('text', { x: box.x0 - 10, y: yy + fs * 0.35, 'text-anchor': 'end', class: 'tm-gnum', fill: '#6d6350', 'font-size': fs }, g);
       t.textContent = `${Number.isInteger(v) ? v : v.toFixed(1)} ${unit}`;
     }
     // Local midnights and day names.
-    const dayFmt = new Intl.DateTimeFormat('en-GB', { timeZone: port.zone, weekday: 'long', day: 'numeric', month: 'short' });
+    const dayFmt = new Intl.DateTimeFormat(
+      'en-GB',
+      phone
+        ? { timeZone: port.zone, weekday: 'short', day: 'numeric' }
+        : { timeZone: port.zone, weekday: 'long', day: 'numeric', month: 'short' },
+    );
     const hourFmt = new Intl.DateTimeFormat('en-US', { timeZone: port.zone, hourCycle: 'h23', hour: 'numeric' });
     for (let ms = Math.ceil(begin / HOUR) * HOUR; ms <= end; ms += HOUR) {
       const hr = +hourFmt.format(ms) % 24;
@@ -97,7 +105,7 @@ export function gauge(section: HTMLElement): GaugeView {
         el('path', { d: `M${x(ms).toFixed(1)} ${box.y0}V${box.y1}`, stroke: '#a89b7f', 'stroke-width': 1 }, g);
       }
       if (hr === 12) {
-        const t = el('text', { x: x(ms), y: H - 22, 'text-anchor': 'middle', class: 'tm-gday', fill: '#5d554a', 'font-size': 15 }, g);
+        const t = el('text', { x: x(ms), y: H - (phone ? 26 : 22), 'text-anchor': 'middle', class: 'tm-gday', fill: '#5d554a', 'font-size': fs + 1 }, g);
         t.textContent = dayFmt.format(ms).replace(',', '');
       }
     }
@@ -114,7 +122,7 @@ export function gauge(section: HTMLElement): GaugeView {
     el('path', { d: path(pred), fill: 'none', stroke: '#1f4f84', 'stroke-width': 2.4, 'stroke-linejoin': 'round' }, g);
     if (obs?.length) {
       const dots = el('g', { fill: '#c4452f' }, g);
-      for (const o of obs) el('circle', { cx: x(o.ms).toFixed(1), cy: y(o.v).toFixed(1), r: 1.9 }, dots);
+      for (const o of obs) el('circle', { cx: x(o.ms).toFixed(1), cy: y(o.v).toFixed(1), r: phone ? 2.2 : 1.9 }, dots);
     }
     el('rect', { x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0, fill: 'none', stroke: '#8f846b' }, g);
   }

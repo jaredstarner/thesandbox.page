@@ -28,6 +28,7 @@ const description =
         </div>
         <p class="plate-note">The machine needs JavaScript to turn.</p>
       </div>
+      <p class="swipe-hint">Swipe the machine sideways to see all 37 wheels. The crank and dials are at the right.</p>
 
       <div class="desk">
         <div class="controls">
@@ -437,6 +438,33 @@ const description =
   .tides .machine.cranking,
   .tides .machine.cranking .tm-crank-hit {
     cursor: grabbing;
+  }
+
+  .tides .swipe-hint {
+    display: none;
+    margin: 10px 0 0;
+    color: var(--text-faint);
+    font-size: 15px;
+    font-style: italic;
+  }
+
+  @media (max-width: 1030px) {
+    .tides .swipe-hint {
+      display: block;
+    }
+  }
+
+  .tides .tm-plate-dark {
+    font-family: var(--plate-font);
+    letter-spacing: 0.16em;
+    fill: #8f8a7c;
+  }
+
+  .tides .tm-read {
+    font-family: var(--font);
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    fill: #efe7d4;
   }
 
   .tides .plate-note {
