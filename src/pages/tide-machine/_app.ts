@@ -232,7 +232,7 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
   let model: Wheel[] = [];
   const target: { pin: number; angle: number }[] = [];
   let book: BookRow[] = [];
-  let glide: { from: number; to: number; start: number; dur: number } | null = null;
+  let glide: { from: number; to: number; start: number; dur: number; turn?: Turn } | null = null;
   let dirty = true;
   /** True while the wheels settle to new settings: the machine waits, as an operator would. */
   let hold = false;
@@ -402,7 +402,7 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
     const next = turns(station, start + 60000, start + 16 * HOUR, enabled, 6)[0];
     if (!next) return;
     const hours = (next.ms - t) / HOUR;
-    glide = { from: t, to: next.ms, start: performance.now(), dur: Math.min(2400, 700 + hours * 160) };
+    glide = { from: t, to: next.ms, start: performance.now(), dur: Math.min(2400, 700 + hours * 160), turn: next };
   });
   root.querySelectorAll<HTMLInputElement>('input[name="speed"]').forEach((r) =>
     r.addEventListener('change', () => {
@@ -485,7 +485,11 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
         const k = Math.min(1, (now - glide.start) / glide.dur);
         const e = 1 - (1 - k) ** 3;
         advance(glide.from + (glide.to - glide.from) * e);
-        if (k >= 1) glide = null;
+        if (k >= 1) {
+          // The glide stops on the turn itself, where the rate is zero, so enter it by hand.
+          if (glide.turn) addTurn(glide.turn, true);
+          glide = null;
+        }
       } else if (running && dt > 0) {
         advance(t + dt * speed * HOUR);
       }
