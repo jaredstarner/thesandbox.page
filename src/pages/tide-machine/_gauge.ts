@@ -128,7 +128,8 @@ export function gauge(section: HTMLElement): GaugeView {
   }
 
   function fmt(m: number, unit: 'ft' | 'm'): string {
-    return unit === 'ft' ? `${(m * FT).toFixed(2)} ft` : `${m.toFixed(2)} m`;
+    const v = Math.round((unit === 'ft' ? m * FT : m) * 100) / 100;
+    return `${(v || 0).toFixed(2)} ${unit}`;
   }
 
   async function load(): Promise<void> {

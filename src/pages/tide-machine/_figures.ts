@@ -86,16 +86,16 @@ export function figOne(svg: SVGSVGElement): void {
   const layout: Layout = phone
     ? {
         width: 600,
-        height: 660,
-        gearR: 104,
-        upperY: 150,
+        height: 750,
+        gearR: 96,
+        upperY: 240,
         lowerY: 0,
-        reach: 196,
-        pulleyR: 26,
-        units: [{ name: 'M2', row: 'upper', x: 230 }],
-        anchor: { x: 150, y: 420 },
-        guide: { x: 528, y: 332, r: 12 },
-        paper: { x0: 18, x1: 586, y0: 470, y1: 646 },
+        reach: 190,
+        pulleyR: 24,
+        units: [{ name: 'M2', row: 'upper', x: 330 }],
+        anchor: { x: 250, y: 500 },
+        guide: { x: 546, y: 416, r: 10 },
+        paper: { x0: 18, x1: 586, y0: 548, y1: 734 },
         hours: 22,
         tags: false,
       }
@@ -130,21 +130,23 @@ export function figOne(svg: SVGSVGElement): void {
 
   // Labels that ride with the parts they name.
   const wheelLabel = tagAlong(svg, 'Wheel', fs);
-  const pinLabel = tagAlong(svg, phone ? 'Pin: drag it' : 'Pin: drag it round or outward', fs);
+  const pinLabel = tagAlong(svg, 'Pin: drag it', fs);
   const frameLabel = tagAlong(svg, 'Sliding frame', fs);
   const pulleyLabel = tagAlong(svg, 'Pulley', fs);
   const penX = layout.guide.x + layout.guide.r;
   text(svg, penX - 14, layout.paper.y0 - 14, fs, 'Pen', 'tm-note', 'end');
-  const chainMidX = (cx + layout.guide.x) / 2 + 40;
-  text(svg, chainMidX, layout.guide.y - 30, fs, 'Chain', 'tm-note', 'middle');
+  const chainMidX = (cx + layout.guide.x) / 2 + (phone ? 30 : 60);
+  text(svg, chainMidX, layout.guide.y + (phone ? -44 : 40), fs, 'Chain', 'tm-note', 'middle');
 
-  // The two settings, read off the wheel.
-  const readX = phone ? 380 : 620;
-  const readY = phone ? 60 : 70;
+  // The two settings, read off the wheel: across the top on phones, to the right on wider screens.
+  const readX = phone ? 24 : 790;
+  const readY = phone ? 34 : 70;
+  const read2X = phone ? 300 : 790;
+  const read2Y = phone ? 34 : 70 + fs * 3.2;
   text(svg, readX, readY, fs * 0.72, 'PIN OUT', 'tm-plate-dark');
-  const readAmp = text(svg, readX, readY + fs * 1.4, fs * 1.5, '', 'tm-read');
-  text(svg, readX, readY + fs * 3, fs * 0.72, 'STARTED', 'tm-plate-dark');
-  const readPhase = text(svg, readX, readY + fs * 4.4, fs * 1.5, '', 'tm-read');
+  const readAmp = text(svg, readX, readY + fs * 1.5, fs * 1.5, '', 'tm-read');
+  text(svg, read2X, read2Y, fs * 0.72, 'STARTED', 'tm-plate-dark');
+  const readPhase = text(svg, read2X, read2Y + fs * 1.5, fs * 1.5, '', 'tm-read');
 
   const fill = () => {
     const pts: [number, number][] = [];
@@ -162,17 +164,16 @@ export function figOne(svg: SVGSVGElement): void {
     const u = m.unitState('M2');
     if (!u) return;
     const a = angle() * RAD;
-    // Wheel: a fixed point on the rim, upper left.
-    wheelLabel(cx - R * 0.74, cy - R * 0.6, cx - R - 34, cy - R * 0.9, 'end');
-    // Pin: label above and out from the pin, on whichever side it is.
-    const side = Math.sin(a) >= 0 ? 1 : -1;
-    const pinTx = phone ? (side > 0 ? cx + R + 20 : cx - R - 20) : cx + side * (R + 40);
-    pinLabel(u.pinX, u.pinY, pinTx, u.pinY - 4, side > 0 ? 'start' : 'end');
-    // Frame: label off its left end, riding with it.
+    // Wheel: a fixed point on the rim, lower left, where the frame rarely covers it.
+    wheelLabel(cx - R * 0.8, cy + R * 0.52, cx - R - 30, cy + R * 0.95, 'end');
+    // Pin: label beside the pin, to the right on phones and on whichever side it is otherwise.
+    const side = phone || Math.sin(a) >= 0 ? 1 : -1;
+    pinLabel(u.pinX, u.pinY, cx + side * (R + 30), u.pinY - 4, side > 0 ? 'start' : 'end');
+    // Frame: label above its left end, riding with it.
     const fy = cy + u.dy;
-    frameLabel(cx - R * 1.05 + 6, fy, cx - R - 34, fy + (phone ? 54 : 46), 'end');
+    frameLabel(cx - R * 1.05 + 6, fy, cx - R - 30, Math.max(fs * 3.4, fy - 34), 'end');
     // Pulley.
-    pulleyLabel(cx - layout.pulleyR * 0.7, u.pulleyY + layout.pulleyR * 0.7, cx - layout.pulleyR - 60, u.pulleyY + 30, 'end');
+    pulleyLabel(cx - layout.pulleyR * 0.7, u.pulleyY + layout.pulleyR * 0.7, cx - R - 30, u.pulleyY + 24, 'end');
     readAmp.textContent = `${Math.round(amp * 100)}%`;
     const start = ((((phase % 360) + 360) % 360) + 360) % 360;
     readPhase.textContent = `${Math.round(start)}° round`;
@@ -417,7 +418,7 @@ export function figTwo(svg: SVGSVGElement, sunBtn: HTMLButtonElement | null): vo
 
   const fs = phone ? 22 : 17;
   if (phone) {
-    text(svg, 400, 42, fs, 'the moon, 12 h 25 min');
+    text(svg, 326, 42, fs, 'the moon, 12 h 25 min', 'tm-note', 'end');
     text(svg, 410, 495, fs, 'the sun, 12 h', 'tm-note', 'end');
   } else {
     text(svg, 574, 46, fs, 'the moon, 12 h 25 min');
@@ -426,7 +427,7 @@ export function figTwo(svg: SVGSVGElement, sunBtn: HTMLButtonElement | null): vo
 
   // A moon showing its phase, and the date.
   const mx = phone ? 110 : 170;
-  const my = phone ? 120 : 176;
+  const my = phone ? 164 : 176;
   const mr = phone ? 70 : 70;
   el('circle', { cx: mx, cy: my, r: mr + 10, fill: 'rgb(255 240 200 / 0.05)' }, svg);
   el('circle', { cx: mx, cy: my, r: mr, fill: '#26313a', stroke: '#3a4752', 'stroke-width': 1 }, svg);

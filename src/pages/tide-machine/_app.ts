@@ -255,7 +255,9 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
   }
 
   function fmtH(m: number): string {
-    return unit === 'ft' ? `${(m * FT).toFixed(1)} ft` : `${m.toFixed(2)} m`;
+    // Round first so a reading just below zero doesn't print as -0.0.
+    const v = unit === 'ft' ? Math.round(m * FT * 10) / 10 : Math.round(m * 100) / 100;
+    return unit === 'ft' ? `${(v || 0).toFixed(1)} ft` : `${(v || 0).toFixed(2)} m`;
   }
 
   function setScale(): void {
@@ -314,7 +316,7 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
 
   function seedBook(): void {
     book = [];
-    for (const turn of turns(station, t - 26 * HOUR, t, enabled)) addTurn(turn, false);
+    for (const turn of turns(station, t - 50 * HOUR, t, enabled)) addTurn(turn, false);
     renderBook();
   }
 
