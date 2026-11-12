@@ -36,7 +36,12 @@ class Zone {
       minute: 'numeric',
       weekday: 'short',
     });
-    this.dayFmt = new Intl.DateTimeFormat('en-GB', { timeZone: zone, weekday: 'short', day: 'numeric', month: 'short' });
+    this.dayFmt = new Intl.DateTimeFormat('en-GB', {
+      timeZone: zone,
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
     this.timeFmt = new Intl.DateTimeFormat('en-US', { timeZone: zone, hour: 'numeric', minute: '2-digit' });
     this.zoneFmt = new Intl.DateTimeFormat('en-US', { timeZone: zone, timeZoneName: 'short' });
   }
@@ -527,7 +532,6 @@ function hero(root: HTMLElement, onChange: (port: Port, unit: 'ft' | 'm') => voi
   requestAnimationFrame(() => {
     scroller.scrollLeft = scroller.scrollWidth;
   });
-
 }
 
 export function start(root: HTMLElement): void {

@@ -187,12 +187,7 @@ export class Machine {
 
   private defs(): void {
     const d = el('defs', {}, this.svg);
-    const grad = (
-      type: 'linearGradient' | 'radialGradient',
-      name: string,
-      attrs: Attrs,
-      stops: [number, string][],
-    ) => {
+    const grad = (type: 'linearGradient' | 'radialGradient', name: string, attrs: Attrs, stops: [number, string][]) => {
       const g = el(type, { id: `${this.id}-${name}`, ...attrs }, d);
       for (const [o, c] of stops) el('stop', { offset: o, 'stop-color': c }, g);
     };
@@ -311,9 +306,18 @@ export class Machine {
     el('circle', { cx: G.x, cy: G.y, r: 2.6, fill: this.ref('rod') }, guide);
     // 2. The chain is made fast to an eye on a strut from the frame.
     const A = L.anchor;
-    const strutEnd = L.units.some((u) => u.row === 'lower') && L.frame !== false ? this.railY('lower') : L.paper.y0 - 10;
-    el('rect', { x: A.x - 3, y: A.y, width: 6, height: Math.max(8, strutEnd - A.y), rx: 3, fill: this.ref('rod') }, root);
-    el('rect', { x: A.x - 9, y: strutEnd - 6, width: 18, height: 12, rx: 2, fill: this.ref('bar'), stroke: '#5a3f15' }, root);
+    const strutEnd =
+      L.units.some((u) => u.row === 'lower') && L.frame !== false ? this.railY('lower') : L.paper.y0 - 10;
+    el(
+      'rect',
+      { x: A.x - 3, y: A.y, width: 6, height: Math.max(8, strutEnd - A.y), rx: 3, fill: this.ref('rod') },
+      root,
+    );
+    el(
+      'rect',
+      { x: A.x - 9, y: strutEnd - 6, width: 18, height: 12, rx: 2, fill: this.ref('bar'), stroke: '#5a3f15' },
+      root,
+    );
     el('circle', { cx: A.x, cy: A.y, r: 6, fill: 'none', stroke: this.ref('bar'), 'stroke-width': 3.2 }, root);
     this.chainBase = el(
       'path',
@@ -334,16 +338,20 @@ export class Machine {
 
     // The pen carriage: a weighted block on a guide rod, with the nib on its left.
     const penX = G.x + G.r;
-    el(
-      'rect',
-      { x: penX + 9, y: P.y0 - 14, width: 4, height: P.y1 - P.y0 + 28, rx: 2, fill: this.ref('rod') },
-      root,
-    );
+    el('rect', { x: penX + 9, y: P.y0 - 14, width: 4, height: P.y1 - P.y0 + 28, rx: 2, fill: this.ref('rod') }, root);
     this.carriage = el('g', {}, root);
     el('rect', { x: penX - 5, y: -5, width: 28, height: 32, rx: 5, fill: 'rgb(0 0 0 / 0.28)' }, this.carriage);
-    el('rect', { x: penX - 7, y: -9, width: 26, height: 30, rx: 3, fill: this.ref('bar'), stroke: '#5a3f15' }, this.carriage);
+    el(
+      'rect',
+      { x: penX - 7, y: -9, width: 26, height: 30, rx: 3, fill: this.ref('bar'), stroke: '#5a3f15' },
+      this.carriage,
+    );
     el('rect', { x: penX + 7.5, y: -9, width: 7, height: 30, fill: 'rgb(0 0 0 / 0.18)' }, this.carriage);
-    el('path', { d: `M${penX - 7} 0L${penX - 1} 0L${penX} 3L${penX - 1} 6L${penX - 7} 6Z`, fill: '#2a2a2a' }, this.carriage);
+    el(
+      'path',
+      { d: `M${penX - 7} 0L${penX - 1} 0L${penX} 3L${penX - 1} 6L${penX - 7} 6Z`, fill: '#2a2a2a' },
+      this.carriage,
+    );
     el('circle', { cx: penX, cy: -9, r: 3, fill: this.ref('rod') }, this.carriage);
 
     if (L.crank) this.drawCrank(root, L.crank);
@@ -368,7 +376,11 @@ export class Machine {
     // 4. One drive: a shaft up the end of the frame joins the two rows, and the crank turns the lower one.
     const driveX = x1 + 8;
     if (both) {
-      el('rect', { x: driveX - 3, y: L.upperY, width: 6, height: L.lowerY - L.upperY, rx: 3, fill: this.ref('rail') }, g);
+      el(
+        'rect',
+        { x: driveX - 3, y: L.upperY, width: 6, height: L.lowerY - L.upperY, rx: 3, fill: this.ref('rail') },
+        g,
+      );
     }
     for (const row of ['upper', 'lower'] as const) {
       if (!L.units.some((u) => u.row === row)) continue;
@@ -377,7 +389,11 @@ export class Machine {
       const dx1 = row === 'lower' && L.crank ? L.crank.x : both ? driveX : x1;
       el('rect', { x: x0, y: cy - 3, width: dx1 - x0, height: 6, rx: 3, fill: this.ref('rail'), opacity: 0.9 }, g);
       if (both) {
-        el('rect', { x: driveX - 9, y: cy - 9, width: 18, height: 18, rx: 3, fill: this.ref('bar'), stroke: '#5a3f15' }, g);
+        el(
+          'rect',
+          { x: driveX - 9, y: cy - 9, width: 18, height: 18, rx: 3, fill: this.ref('bar'), stroke: '#5a3f15' },
+          g,
+        );
         el('circle', { cx: driveX, cy, r: 2.6, fill: this.ref('rod') }, g);
       }
       // Guide rail the rods slide through, carried on to hang the guide pulley from.
@@ -386,7 +402,11 @@ export class Machine {
       el('rect', { x: x0, y: ry - 5, width: rx1 - x0, height: 10, rx: 2, fill: this.ref('rail') }, g);
       for (const u of L.units) {
         if (u.row !== row) continue;
-        el('rect', { x: u.x - 7, y: ry - 8, width: 14, height: 16, rx: 2, fill: this.ref('bar'), stroke: '#5a3f15' }, g);
+        el(
+          'rect',
+          { x: u.x - 7, y: ry - 8, width: 14, height: 16, rx: 2, fill: this.ref('bar'), stroke: '#5a3f15' },
+          g,
+        );
       }
     }
   }
@@ -477,7 +497,11 @@ export class Machine {
       },
       slide,
     );
-    el('circle', { cx, cy: py, r: Math.max(2, pr * 0.16), fill: '#e9edef', stroke: '#2e363b', 'stroke-width': 0.6 }, slide);
+    el(
+      'circle',
+      { cx, cy: py, r: Math.max(2, pr * 0.16), fill: '#e9edef', stroke: '#2e363b', 'stroke-width': 0.6 },
+      slide,
+    );
 
     // The wheel, drawn under the sliding frame's slot but over its rod, on a still shadow (a filter on a
     // turning wheel would be redrawn every frame).
@@ -542,7 +566,11 @@ export class Machine {
     const g = el('g', { class: 'tm-crank' }, root);
     el('circle', { cx: c.x, cy: c.y + 4, r: c.r * 1.45, fill: this.ref('shade') }, g);
     const turn = el('g', {}, g);
-    el('circle', { cx: c.x, cy: c.y, r: c.r, fill: 'none', stroke: this.ref('brass'), 'stroke-width': c.r * 0.2 }, turn);
+    el(
+      'circle',
+      { cx: c.x, cy: c.y, r: c.r, fill: 'none', stroke: this.ref('brass'), 'stroke-width': c.r * 0.2 },
+      turn,
+    );
     el('circle', { cx: c.x, cy: c.y, r: c.r, fill: 'none', stroke: '#4d3613', 'stroke-width': 0.8 }, turn);
     for (let k = 0; k < 6; k++) {
       el(
@@ -560,12 +588,12 @@ export class Machine {
     }
     el('circle', { cx: c.x, cy: c.y, r: c.r * 0.22, fill: this.ref('brass'), stroke: '#4d3613' }, turn);
     // Handle: an arm out past the rim and a wooden grip.
+    el('rect', { x: c.x - 4, y: c.y - c.r * 1.32, width: 8, height: c.r * 1.32, rx: 4, fill: this.ref('rod') }, turn);
     el(
-      'rect',
-      { x: c.x - 4, y: c.y - c.r * 1.32, width: 8, height: c.r * 1.32, rx: 4, fill: this.ref('rod') },
+      'circle',
+      { cx: c.x, cy: c.y - c.r * 1.32, r: 10, fill: '#5b2d16', stroke: '#2b140a', 'stroke-width': 1.2 },
       turn,
     );
-    el('circle', { cx: c.x, cy: c.y - c.r * 1.32, r: 10, fill: '#5b2d16', stroke: '#2b140a', 'stroke-width': 1.2 }, turn);
     el('circle', { cx: c.x - 3, cy: c.y - c.r * 1.32 - 3, r: 3.2, fill: '#9c5a33', opacity: 0.7 }, turn);
     el('circle', { cx: c.x, cy: c.y, r: c.r * 1.55, fill: 'transparent', class: 'tm-crank-hit' }, g);
     this.crankGroup = turn;
@@ -580,7 +608,15 @@ export class Machine {
     let x = D.x - total / 2;
     el(
       'rect',
-      { x: x - 12, y: D.dateY - 26, width: total + 24, height: 52, rx: 6, fill: this.ref('bar'), filter: this.ref('lift') },
+      {
+        x: x - 12,
+        y: D.dateY - 26,
+        width: total + 24,
+        height: 52,
+        rx: 6,
+        fill: this.ref('bar'),
+        filter: this.ref('lift'),
+      },
       g,
     );
     this.dateTexts = [];
@@ -660,7 +696,15 @@ export class Machine {
   private label(g: SVGGElement, x: number, y: number, text: string, size: number): SVGTextElement {
     const t = el(
       'text',
-      { x, y, 'text-anchor': 'middle', class: 'tm-plate', fill: '#3a3934', 'font-size': size, 'letter-spacing': '0.14em' },
+      {
+        x,
+        y,
+        'text-anchor': 'middle',
+        class: 'tm-plate',
+        fill: '#3a3934',
+        'font-size': size,
+        'letter-spacing': '0.14em',
+      },
       g,
     );
     t.textContent = text;
@@ -697,13 +741,29 @@ export class Machine {
     }
     const t1 = el(
       'text',
-      { x: n.x, y: n.y - 5, 'text-anchor': 'middle', class: 'tm-plate', fill: '#3b2a10', 'font-size': 12.5, 'letter-spacing': '0.2em' },
+      {
+        x: n.x,
+        y: n.y - 5,
+        'text-anchor': 'middle',
+        class: 'tm-plate',
+        fill: '#3b2a10',
+        'font-size': 12.5,
+        'letter-spacing': '0.2em',
+      },
       g,
     );
     t1.textContent = 'TIDE PREDICTING MACHINE';
     this.nameText = el(
       'text',
-      { x: n.x, y: n.y + 15, 'text-anchor': 'middle', class: 'tm-plate', fill: '#3b2a10', 'font-size': 14, 'letter-spacing': '0.16em' },
+      {
+        x: n.x,
+        y: n.y + 15,
+        'text-anchor': 'middle',
+        class: 'tm-plate',
+        fill: '#3b2a10',
+        'font-size': 14,
+        'letter-spacing': '0.16em',
+      },
       g,
     );
   }
@@ -755,7 +815,11 @@ export class Machine {
       if (y < P.y0 + 4 || y > P.y1 - 4) continue;
       d += `M${P.x0} ${fmt(y)}H${P.x1}`;
       if (!this.unitLabel || y < P.y0 + 20) continue;
-      const t = el('text', { x: P.x0 + 16, y: y - 4, class: 'tm-hnum', fill: '#7a6f57', 'font-size': 14 }, this.heightLabels);
+      const t = el(
+        'text',
+        { x: P.x0 + 16, y: y - 4, class: 'tm-hnum', fill: '#7a6f57', 'font-size': 14 },
+        this.heightLabels,
+      );
       const v = k * this.gridStep;
       t.textContent = `${Number.isInteger(v) ? v : v.toFixed(1)} ${this.unitLabel}`;
     }
@@ -980,7 +1044,8 @@ export class Machine {
       const x = xOf(ms);
       if (x < P.x0 || x > P.x1) continue;
       const hod = ((k % 24) + 24) % 24;
-      if (hod === 0 && (!weekly || Math.floor((ms + 12 * HOUR_MS) / 86400000) % 7 === 0)) bold += `M${fmt(x)} ${P.y0}V${P.y1}`;
+      if (hod === 0 && (!weekly || Math.floor((ms + 12 * HOUR_MS) / 86400000) % 7 === 0))
+        bold += `M${fmt(x)} ${P.y0}V${P.y1}`;
       else if (hod % every === 0) thin += `M${fmt(x)} ${P.y0}V${P.y1}`;
       if (hod === 12) labels.push([x, ms]);
     }
@@ -1036,7 +1101,12 @@ export class Machine {
     const u = this.units.find((n) => n.spec.name === name);
     if (!u) return null;
     const upper = u.spec.row === 'upper';
-    return { pinX: u.pinX, pinY: u.pinY, dy: u.dy, pulleyY: u.cy + (upper ? this.layout.reach : -this.layout.reach) + u.dy };
+    return {
+      pinX: u.pinX,
+      pinY: u.pinY,
+      dy: u.dy,
+      pulleyY: u.cy + (upper ? this.layout.reach : -this.layout.reach) + u.dy,
+    };
   }
 
   unitCenter(name: string): { x: number; y: number; r: number } | null {

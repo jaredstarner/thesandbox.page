@@ -12,7 +12,9 @@ const description =
   <Font cssVariable="--font-tides-plate" slot="head" />
   <main class="tides" data-ready="false">
     <header class="masthead">
-      <p class="back"><a href="/">thesandbox.page</a></p>
+      <p class="back">
+        <a href="/">thesandbox.page</a>
+      </p>
       <h1>Tide machine</h1>
       <p class="dek">
         For about a century, from the 1870s, the tide tables for the world's ports were worked out on brass machines
@@ -35,56 +37,85 @@ const description =
           <label class="field port">
             <span class="field-label">Harbour</span>
             <select data-port>
-              {
-                PORTS.map((p) => (
-                  <option value={p.id} selected={p.name === 'San Francisco'}>
-                    {p.name}, {p.region}
-                  </option>
-                ))
-              }
+              {PORTS.map((p) => (
+                <option value={p.id} selected={p.name === 'San Francisco'}>
+                  {p.name}, {p.region}
+                </option>
+              ))}
             </select>
           </label>
           <label class="field date">
             <span class="field-label">Date</span>
             <span class="date-row">
               <input type="date" data-date min="1900-01-01" max="2099-12-31" />
-              <button type="button" class="btn quiet" data-today>Today</button>
+              <button type="button" class="btn quiet" data-today>
+                Today
+              </button>
             </span>
           </label>
           <div class="field motor">
             <span class="field-label">Motor</span>
             <span class="motor-row">
-              <button type="button" class="btn primary" data-run aria-pressed="false">Run</button>
-              <button type="button" class="btn" data-next>Next tide</button>
+              <button type="button" class="btn primary" data-run aria-pressed="false">
+                Run
+              </button>
+              <button type="button" class="btn" data-next>
+                Next tide
+              </button>
               <span class="speed" role="radiogroup" aria-label="Speed">
-                <label><input type="radio" name="speed" value="1" /><span>1 hour a second</span></label>
-                <label><input type="radio" name="speed" value="4" checked /><span>4 hours</span></label>
-                <label><input type="radio" name="speed" value="12" /><span>12 hours</span></label>
+                <label>
+                  <input type="radio" name="speed" value="1" />
+                  <span>1 hour a second</span>
+                </label>
+                <label>
+                  <input type="radio" name="speed" value="4" checked />
+                  <span>4 hours</span>
+                </label>
+                <label>
+                  <input type="radio" name="speed" value="12" />
+                  <span>12 hours</span>
+                </label>
               </span>
             </span>
           </div>
           <div class="field wheels">
             <span class="field-label">Wheels</span>
             <span class="wheel-row">
-              <span class="geared" data-geared>37 of 37 in gear</span>
-              <button type="button" class="btn quiet" data-preset="M2">Moon only</button>
-              <button type="button" class="btn quiet" data-preset="M2 S2">Moon and sun</button>
-              <button type="button" class="btn quiet" data-preset="all">All 37</button>
+              <span class="geared" data-geared>
+                37 of 37 in gear
+              </span>
+              <button type="button" class="btn quiet" data-preset="M2">
+                Moon only
+              </button>
+              <button type="button" class="btn quiet" data-preset="M2 S2">
+                Moon and sun
+              </button>
+              <button type="button" class="btn quiet" data-preset="all">
+                All 37
+              </button>
             </span>
             <span class="hint">Tap any wheel to take it out of gear.</span>
           </div>
           <div class="field units" role="radiogroup" aria-label="Units">
             <span class="field-label">Heights</span>
             <span class="unit-row">
-              <label><input type="radio" name="units" value="ft" checked /><span>feet</span></label>
-              <label><input type="radio" name="units" value="m" /><span>metres</span></label>
+              <label>
+                <input type="radio" name="units" value="ft" checked />
+                <span>feet</span>
+              </label>
+              <label>
+                <input type="radio" name="units" value="m" />
+                <span>metres</span>
+              </label>
             </span>
           </div>
         </div>
 
         <aside class="book" aria-label="Tide book">
           <h2>Tide book</h2>
-          <p class="book-sub" data-book-sub>High and low waters, as the machine reaches them.</p>
+          <p class="book-sub" data-book-sub>
+            High and low waters, as the machine reaches them.
+          </p>
           <ol class="book-list" data-book></ol>
         </aside>
       </div>
@@ -96,18 +127,20 @@ const description =
       <section>
         <h3>One wheel, one rhythm</h3>
         <p>
-          Every wheel stands for one rhythm in the tide. A pin on the wheel's face runs in a slot across a sliding frame,
-          so as the wheel turns, the frame and the pulley hanging from it ride up and down in a smooth wave.
+          Every wheel stands for one rhythm in the tide. A pin on the wheel's face runs in a slot across a sliding
+          frame, so as the wheel turns, the frame and the pulley hanging from it ride up and down in a smooth wave.
         </p>
         <p>
           Two settings fit the wave to a harbour. How far the pin sits from the centre sets the height of the wave, and
           where it starts around the wheel sets its timing. Drag the pin to try both.
         </p>
         <figure class="fig">
-          <div class="plate"><svg class="fig-svg" data-fig="one" role="img" aria-label="One wheel and a pen"></svg></div>
+          <div class="plate">
+            <svg class="fig-svg" data-fig="one" role="img" aria-label="One wheel and a pen"></svg>
+          </div>
           <figcaption>
-            <span class="fig-no">Fig. 1</span> One wheel, a sliding frame, and a pen. The pen draws the pulley's height as
-            the paper moves.
+            <span class="fig-no">Fig. 1</span> One wheel, a sliding frame, and a pen. The pen draws the pulley's height
+            as the paper moves.
           </figcaption>
         </figure>
       </section>
@@ -133,20 +166,23 @@ const description =
           moon takes to come back to the same place in the sky. The sun's wheel, S2, turns once every 12 hours.
         </p>
         <p>
-          Running at slightly different speeds, the two pins drift in and out of step. Around new and full moon they line
-          up and the tides are large: spring tides. A week later they work against each other and the tides are small:
-          neap tides.
+          Running at slightly different speeds, the two pins drift in and out of step. Around new and full moon they
+          line up and the tides are large: spring tides. A week later they work against each other and the tides are
+          small: neap tides.
         </p>
         <figure class="fig">
           <div class="plate">
             <svg class="fig-svg" data-fig="two" role="img" aria-label="The moon's wheel and the sun's"></svg>
           </div>
           <div class="fig-controls">
-            <button type="button" class="btn quiet" data-fig2-sun aria-pressed="true">Sun's wheel in gear</button>
+            <button type="button" class="btn quiet" data-fig2-sun aria-pressed="true">
+              Sun's wheel in gear
+            </button>
           </div>
           <figcaption>
-            <span class="fig-no">Fig. 2</span> The moon's wheel and the sun's, set for San Diego, running a month in half a minute.
-            The marks along the top of the paper are new moon, first quarter, full moon, and last quarter.
+            <span class="fig-no">Fig. 2</span> The moon's wheel and the sun's, set for San Diego, running a month in
+            half a minute. The marks along the top of the paper are new moon, first quarter, full moon, and last
+            quarter.
           </figcaption>
         </figure>
       </section>
@@ -167,9 +203,18 @@ const description =
             <svg class="fig-svg" data-fig="four" role="img" aria-label="Four wheels set for a harbour"></svg>
           </div>
           <div class="fig-controls" role="radiogroup" aria-label="Harbour">
-            <label><input type="radio" name="fig4" value="8443970" checked /><span>Boston</span></label>
-            <label><input type="radio" name="fig4" value="9447130" /><span>Seattle</span></label>
-            <label><input type="radio" name="fig4" value="8729840" /><span>Pensacola</span></label>
+            <label>
+              <input type="radio" name="fig4" value="8443970" checked />
+              <span>Boston</span>
+            </label>
+            <label>
+              <input type="radio" name="fig4" value="9447130" />
+              <span>Seattle</span>
+            </label>
+            <label>
+              <input type="radio" name="fig4" value="8729840" />
+              <span>Pensacola</span>
+            </label>
           </div>
           <figcaption>
             <span class="fig-no">Fig. 3</span> Four wheels, M2, S2, K1, and O1, set for three harbours, over four days.
@@ -195,9 +240,8 @@ const description =
           The machine at the top of this page is set from the same 37 constants, as NOAA publishes them for each
           harbour. It also works out the moon's 18.6-year cycle, which changes the size and timing of most wheels from
           year to year, so it can be set to any date. Checked against NOAA's own predictions, its heights agree to
-          within about two inches, and its high and low waters to within a few minutes at most harbours. Where the
-          tide is small and slow to turn, as at St Thomas and Galveston, the times can differ by up to a quarter of an
-          hour.
+          within about two inches, and its high and low waters to within a few minutes at most harbours. Where the tide
+          is small and slow to turn, as at St Thomas and Galveston, the times can differ by up to a quarter of an hour.
         </p>
       </section>
 
@@ -212,7 +256,9 @@ const description =
           <div class="plate paperplate">
             <svg class="gauge-svg" data-gauge-svg role="img" aria-label="Predicted and measured water level"></svg>
           </div>
-          <p class="gauge-read" data-gauge-read aria-live="polite">Asking the gauge…</p>
+          <p class="gauge-read" data-gauge-read aria-live="polite">
+            Asking the gauge…
+          </p>
           <figcaption>
             <span class="fig-no">Fig. 4</span>
             <span class="key key-machine">Machine</span>
@@ -226,10 +272,12 @@ const description =
     <footer class="colophon">
       <p>
         Harmonic constants, datums, and gauge readings for each harbour come from NOAA's Center for Operational
-        Oceanographic Products and Services. Heights are above mean lower low water, the datum of U.S. charts; times
-        are local to each harbour.
+        Oceanographic Products and Services. Heights are above mean lower low water, the datum of U.S. charts; times are
+        local to each harbour.
       </p>
-      <p><a href="/">thesandbox.page</a></p>
+      <p>
+        <a href="/">thesandbox.page</a>
+      </p>
     </footer>
   </main>
 </Bare>
@@ -346,8 +394,7 @@ const description =
   .tides .plate {
     position: relative;
     border-radius: 6px;
-    background:
-      radial-gradient(120% 90% at 50% 0%, #1f2a33 0%, var(--case) 55%, var(--case-deep) 100%);
+    background: radial-gradient(120% 90% at 50% 0%, #1f2a33 0%, var(--case) 55%, var(--case-deep) 100%);
     box-shadow:
       inset 0 0 0 1px #2b3740,
       0 30px 60px -30px rgb(0 0 0 / 0.7);
@@ -538,7 +585,8 @@ const description =
   .tides select {
     padding-right: 40px;
     background-image:
-      linear-gradient(45deg, transparent 50%, var(--brass) 50%), linear-gradient(-45deg, transparent 50%, var(--brass) 50%);
+      linear-gradient(45deg, transparent 50%, var(--brass) 50%),
+      linear-gradient(-45deg, transparent 50%, var(--brass) 50%);
     background-position:
       calc(100% - 20px) 52%,
       calc(100% - 15px) 52%;

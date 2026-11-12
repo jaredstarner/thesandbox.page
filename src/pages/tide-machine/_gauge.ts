@@ -88,7 +88,11 @@ export function gauge(section: HTMLElement): GaugeView {
     for (let v = Math.ceil((lo * k) / step) * step; v <= hi * k; v += step) {
       const yy = y(v / k);
       el('path', { d: `M${box.x0} ${yy.toFixed(1)}H${box.x1}`, stroke: '#cfc4aa', 'stroke-width': 0.8 }, g);
-      const t = el('text', { x: box.x0 - 10, y: yy + fs * 0.35, 'text-anchor': 'end', class: 'tm-gnum', fill: '#6d6350', 'font-size': fs }, g);
+      const t = el(
+        'text',
+        { x: box.x0 - 10, y: yy + fs * 0.35, 'text-anchor': 'end', class: 'tm-gnum', fill: '#6d6350', 'font-size': fs },
+        g,
+      );
       t.textContent = `${Number.isInteger(v) ? v : v.toFixed(1)} ${unit}`;
     }
     // Local midnights and day names.
@@ -105,12 +109,24 @@ export function gauge(section: HTMLElement): GaugeView {
         el('path', { d: `M${x(ms).toFixed(1)} ${box.y0}V${box.y1}`, stroke: '#a89b7f', 'stroke-width': 1 }, g);
       }
       if (hr === 12) {
-        const t = el('text', { x: x(ms), y: H - (phone ? 26 : 22), 'text-anchor': 'middle', class: 'tm-gday', fill: '#5d554a', 'font-size': fs + 1 }, g);
+        const t = el(
+          'text',
+          {
+            x: x(ms),
+            y: H - (phone ? 26 : 22),
+            'text-anchor': 'middle',
+            class: 'tm-gday',
+            fill: '#5d554a',
+            'font-size': fs + 1,
+          },
+          g,
+        );
         t.textContent = dayFmt.format(ms).replace(',', '');
       }
     }
 
-    const path = (pts: Reading[]) => pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.ms).toFixed(1)} ${y(p.v).toFixed(1)}`).join('');
+    const path = (pts: Reading[]) =>
+      pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.ms).toFixed(1)} ${y(p.v).toFixed(1)}`).join('');
 
     if (obs?.length) {
       // The difference as a band between the two lines.
@@ -124,7 +140,11 @@ export function gauge(section: HTMLElement): GaugeView {
       const dots = el('g', { fill: '#c4452f' }, g);
       for (const o of obs) el('circle', { cx: x(o.ms).toFixed(1), cy: y(o.v).toFixed(1), r: phone ? 2.2 : 1.9 }, dots);
     }
-    el('rect', { x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0, fill: 'none', stroke: '#8f846b' }, g);
+    el(
+      'rect',
+      { x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0, fill: 'none', stroke: '#8f846b' },
+      g,
+    );
   }
 
   function fmt(m: number, unit: 'ft' | 'm'): string {
@@ -147,11 +167,19 @@ export function gauge(section: HTMLElement): GaugeView {
       const st = stationOf(port);
       const m = height(st, last.ms);
       const diff = last.v - m;
-      const time = new Intl.DateTimeFormat('en-US', { timeZone: port.zone, hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })
+      const time = new Intl.DateTimeFormat('en-US', {
+        timeZone: port.zone,
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZoneName: 'short',
+      })
         .format(last.ms)
         .replace(/\s?AM/, ' a.m.')
         .replace(/\s?PM/, ' p.m.');
-      const side = Math.abs(diff) < 0.005 ? 'level with the prediction' : `${fmt(Math.abs(diff), unit)} ${diff > 0 ? 'above' : 'below'} the prediction`;
+      const side =
+        Math.abs(diff) < 0.005
+          ? 'level with the prediction'
+          : `${fmt(Math.abs(diff), unit)} ${diff > 0 ? 'above' : 'below'} the prediction`;
       read.textContent = `Latest reading, ${time}: the gauge says ${fmt(last.v, unit)}, the machine ${fmt(m, unit)}. The sea is ${side}.`;
     } catch {
       if (my !== token) return;

@@ -60,10 +60,7 @@ export function nodal(a: Astro): Nodal {
   const nu = Math.asin((0.08884 * Math.sin(N)) / Math.sin(I));
   const xi = N - 2 * Math.atan(0.64412 * Math.tan(N / 2)) - nu;
   const nup = Math.atan2(Math.sin(2 * I) * Math.sin(nu), Math.sin(2 * I) * Math.cos(nu) + 0.3347);
-  const nupp2 = Math.atan2(
-    Math.sin(I) ** 2 * Math.sin(2 * nu),
-    Math.sin(I) ** 2 * Math.cos(2 * nu) + 0.0727,
-  );
+  const nupp2 = Math.atan2(Math.sin(I) ** 2 * Math.sin(2 * nu), Math.sin(I) ** 2 * Math.cos(2 * nu) + 0.0727);
   return {
     I: I / RAD,
     nu: nu / RAD,
@@ -163,7 +160,12 @@ export const CONSTITUENTS: Record<string, Def> = {
   NU2: { v: [2, -3, 4, -1, 0, 0, 0], factors: (b) => b.M2, label: 'Larger lunar evectional', family: 'semidiurnal' },
   S6: { v: [6, 0, 0, 0, 0, 0, 0], factors: () => ONE, label: 'Shallow water overtide', family: 'shallow' },
   MU2: { v: [2, -4, 4, 0, 0, 0, 0], factors: (b) => b.M2, label: 'Variational', family: 'semidiurnal' },
-  '2N2': { v: [2, -4, 2, 2, 0, 0, 0], factors: (b) => b.M2, label: 'Lunar elliptical, second order', family: 'semidiurnal' },
+  '2N2': {
+    v: [2, -4, 2, 2, 0, 0, 0],
+    factors: (b) => b.M2,
+    label: 'Lunar elliptical, second order',
+    family: 'semidiurnal',
+  },
   OO1: { v: [1, 2, 1, 0, 0, 0, 270], factors: (b) => b.OO1, label: 'Lunar diurnal', family: 'diurnal' },
   LAM2: { v: [2, -1, 0, 1, 0, 0, 180], factors: (b) => b.M2, label: 'Smaller lunar evectional', family: 'semidiurnal' },
   S1: { v: [1, 0, 0, 0, 0, 0, 180], factors: () => ONE, label: 'Solar diurnal', family: 'diurnal' },
@@ -172,13 +174,28 @@ export const CONSTITUENTS: Record<string, Def> = {
   MM: { v: [0, 1, 0, -1, 0, 0, 0], factors: (b) => b.Mm, label: 'Lunar monthly', family: 'long' },
   SSA: { v: [0, 0, 2, 0, 0, 0, 0], factors: () => ONE, label: 'Solar semiannual', family: 'long' },
   SA: { v: [0, 0, 1, 0, 0, 0, 0], factors: () => ONE, label: 'Solar annual', family: 'long' },
-  MSF: { v: [0, 2, -2, 0, 0, 0, 0], factors: (b) => conj(b.M2), label: 'Lunisolar synodic fortnightly', family: 'long' },
+  MSF: {
+    v: [0, 2, -2, 0, 0, 0, 0],
+    factors: (b) => conj(b.M2),
+    label: 'Lunisolar synodic fortnightly',
+    family: 'long',
+  },
   MF: { v: [0, 2, 0, 0, 0, 0, 0], factors: (b) => b.Mf, label: 'Lunisolar fortnightly', family: 'long' },
-  RHO: { v: [1, -3, 3, -1, 0, 0, 90], factors: (b) => b.O1, label: 'Larger lunar evectional diurnal', family: 'diurnal' },
+  RHO: {
+    v: [1, -3, 3, -1, 0, 0, 90],
+    factors: (b) => b.O1,
+    label: 'Larger lunar evectional diurnal',
+    family: 'diurnal',
+  },
   Q1: { v: [1, -3, 1, 1, 0, 0, 90], factors: (b) => b.O1, label: 'Larger lunar elliptic diurnal', family: 'diurnal' },
   T2: { v: [2, 0, -1, 0, 0, 1, 0], factors: () => ONE, label: 'Larger solar elliptic', family: 'semidiurnal' },
   R2: { v: [2, 0, 1, 0, 0, -1, 180], factors: () => ONE, label: 'Smaller solar elliptic', family: 'semidiurnal' },
-  '2Q1': { v: [1, -4, 1, 2, 0, 0, 90], factors: (b) => b.O1, label: 'Lunar elliptic diurnal, second order', family: 'diurnal' },
+  '2Q1': {
+    v: [1, -4, 1, 2, 0, 0, 90],
+    factors: (b) => b.O1,
+    label: 'Lunar elliptic diurnal, second order',
+    family: 'diurnal',
+  },
   P1: { v: [1, 0, -1, 0, 0, 0, 90], factors: () => ONE, label: 'Solar diurnal', family: 'diurnal' },
   '2SM2': {
     v: [2, 2, -2, 0, 0, 0, 0],
@@ -195,7 +212,12 @@ export const CONSTITUENTS: Record<string, Def> = {
     family: 'shallow',
   },
   K2: { v: [2, 0, 2, 0, 0, 0, 0], factors: (b) => b.K2, label: 'Lunisolar semidiurnal', family: 'semidiurnal' },
-  M8: { v: [8, -8, 8, 0, 0, 0, 0], factors: (b) => pow(b.M2, 4), label: 'Shallow water eighth diurnal', family: 'shallow' },
+  M8: {
+    v: [8, -8, 8, 0, 0, 0, 0],
+    factors: (b) => pow(b.M2, 4),
+    label: 'Shallow water eighth diurnal',
+    family: 'shallow',
+  },
   MS4: {
     v: [4, -2, 2, 0, 0, 0, 0],
     factors: (b) => b.M2,
