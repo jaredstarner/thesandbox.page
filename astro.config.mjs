@@ -663,5 +663,33 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Optima', 'Candara', 'sans-serif'],
     },
+    // /titivillus/: the Fell types, a seventeenth-century Oxford face, for the text, its small capitals, and the titles.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'IM Fell English',
+      cssVariable: '--font-fell',
+      weights: [400],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'IM Fell English SC',
+      cssVariable: '--font-fell-sc',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'IM Fell French Canon',
+      cssVariable: '--font-fell-canon',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
   ],
 });

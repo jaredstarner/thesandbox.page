@@ -1,0 +1,887 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import Initial from './_Initial.astro';
+
+const description =
+  'A printed account of Titivillus, the demon who collects the errors of scribes, with the demon loose in it: run across the letters and pluck the twelve misprints set into the text.';
+---
+
+<Bare title="Titivillus" description={description}>
+  <Font cssVariable="--font-fell" slot="head" />
+  <Font cssVariable="--font-fell-sc" slot="head" />
+  <Font cssVariable="--font-fell-canon" slot="head" />
+  <main class="titivillus" data-state="loading">
+    <p class="home">
+      <a href="/">thesandbox.page</a>
+    </p>
+
+    <div class="leaves" data-leaves>
+      <article class="leaf title-leaf" data-leaf="1" aria-label="Title page">
+        <div class="tp-frame">
+          <p class="tp-kicker" data-text>
+            The true account of
+          </p>
+          <h1 class="tp-title" data-text>
+            Titivillus
+          </h1>
+          <p class="tp-sub" data-text>
+            or, the Gatherer of Faults
+          </p>
+          <p class="tp-rule" aria-hidden="true">
+            <span></span>
+          </p>
+          <p class="tp-desc" data-text>
+            Of the devil who keeps the errors of choirs, scribes, and printers; with twelve faults set into this
+            impression for the reader to find.
+          </p>
+          <div class="tp-help" data-text>
+            <p class="keys-desktop">
+              <b>&larr; &rarr;</b> run &nbsp; <b>Space</b> leap, and again in the air to beat his wings &nbsp;
+              <b>&darr;</b> pluck the word underfoot &nbsp; <b>&darr; + Space</b> drop through a line
+            </p>
+            <p class="keys-touch">
+              Use the buttons below: run, leap (and leap again in the air to beat his wings), and pluck the word
+              underfoot.
+            </p>
+          </div>
+          <p class="tp-imprint" data-text>
+            Imprinted on thesandbox.page, anno MMXXVI
+          </p>
+        </div>
+        <noscript>
+          <p class="noscript">The devil needs JavaScript to run; the account reads well enough without him.</p>
+        </noscript>
+      </article>
+
+      <article class="leaf" data-leaf="2">
+        <header class="rh" data-text>
+          <span class="folio">2</span>
+          <span class="running">Titivillus</span>
+        </header>
+        <h2 class="chap" data-text>
+          <span class="num">Chap. I.</span> Of the devil in the choir.
+        </h2>
+        <div class="block">
+          <p class="body" data-body>
+            <Initial letter="I" />n a sermon set down in the 1220s, the preacher Jacques de Vitry told a story about a
+            house of monks at prayer. While they sang the psalms, a devil sat among them with a sack on his back. He was
+            not there to tempt anyone. He was there to collect. Every syllable a weary monk swallowed, every word
+            skipped to reach the end of a verse sooner, every line mumbled through half asleep, he picked up from the
+            floor of the choir and put into his sack.
+          </p>
+          <aside class="gloss" data-text>
+            Jacques de Vitry, <i>Sermones vulgares</i>, the tenth sermon.
+          </aside>
+        </div>
+        <div class="block">
+          <p class="body" data-body>
+            <span class="pil">&para;</span> When the sack was full he carried it away, for the faults were evidence. On
+            the day of judgment each slurred syllable would be counted against the monk who had dropped it, and the
+            devil meant to have every one ready.
+          </p>
+        </div>
+        <div class="block">
+          <p class="body" data-body>
+            <span class="pil">&para;</span> The preacher's devil had no name. About sixty years later a treatise on
+            penance, usually credited to John of Wales, gave him one, in two lines of Latin verse:
+          </p>
+          <aside class="gloss" data-text>
+            <i>Tractatus de Penitentia</i>, about 1285.
+          </aside>
+        </div>
+        <blockquote class="verse" data-text>
+          <p>Fragmina verborum Titivillus colligit horum,</p>
+          <p>quibus die mille vicibus se sarcinat ille.</p>
+        </blockquote>
+        <div class="block">
+          <p class="body" data-body>
+            <span class="pil">&para;</span> Titivillus gathers up the fragments of their words, and loads himself with
+            them a thousand times a day. The name came down in more than one spelling, Tutivillus and Tytivillus among
+            them, and one scholar has suggested that some of those spellings are themselves the slips of copyists. It
+            would be the kind of joke the devil enjoys most.
+          </p>
+          <aside class="gloss" data-text>
+            André Vernet on the name.
+          </aside>
+        </div>
+        <footer class="foot" data-text>
+          <span class="sig">A ij</span>
+          <span class="catch">The</span>
+        </footer>
+      </article>
+
+      <article class="leaf" data-leaf="3">
+        <header class="rh" data-text>
+          <span class="running">Titivillus</span>
+          <span class="folio">3</span>
+        </header>
+        <h2 class="chap" data-text>
+          <span class="num">Chap. II.</span> Of the devil at the desk.
+        </h2>
+        <div class="block">
+          <p class="body" data-body>
+            <Initial letter="T" />
+            he choir was only his first post. The faults he gathered there were faults of the tongue, and in a monastery
+            the other great labour of the tongue was copying. In the scriptorium, monks wrote out whole books by hand, a
+            letter at a time, through years of short winter days. The light is poor and the work is long, and the eye
+            slides from one line to another that ends with the same word. A scribe drops a line, doubles a letter,
+            writes a word twice. Titivillus followed the faults from the choir to the desk.
+          </p>
+        </div>
+        <div class="block">
+          <p class="body" data-body>
+            <span class="pil">&para;</span> He became, half in jest, the patron demon of scribes. It was useful to have
+            him. A fault the devil had a hand in was not wholly the scribe's own, and Titivillus could carry the blame
+            away with the evidence.
+          </p>
+        </div>
+        <div class="block">
+          <p class="body" data-body>
+            <span class="pil">&para;</span> In an English book of devotion from the fifteenth century he speaks for
+            himself, and calls himself a poor devil. Every day, he says, he must bring his master a thousand pokes full
+            of faults, a poke being a sack, so that nothing dropped is ever lost. He has a part in the old play{' '}
+            <i>Mankind</i> as its chief tormentor, and painters set him at the elbows of saints.
+          </p>
+          <aside class="gloss" data-text>
+            <i>The Myroure of Oure Ladye</i>, fifteenth century.
+          </aside>
+        </div>
+        <div class="block">
+          <p class="body" data-body>
+            <span class="pil">&para;</span> In the painting of Saint John on Patmos by Hieronymus Bosch, a small devil
+            with a human face and the body of an insect creeps toward the saint's pen and ink while he looks up at his
+            vision. It is often taken for Titivillus, come to see what can be gathered.
+          </p>
+          <aside class="gloss" data-text>
+            Bosch, <i>Saint John on Patmos</i>, about 1505.
+          </aside>
+        </div>
+        <footer class="foot" data-text>
+          <span class="sig">A iij</span>
+          <span class="catch">When</span>
+        </footer>
+      </article>
+
+      <article class="leaf" data-leaf="4">
+        <header class="rh" data-text>
+          <span class="folio">4</span>
+          <span class="running">Titivillus</span>
+        </header>
+        <h2 class="chap" data-text>
+          <span class="num">Chap. III.</span> Of the devil in the press.
+        </h2>
+        <div class="block">
+          <p class="body" data-body>
+            <Initial letter="W" />
+            hen books began to be printed from movable type, in the middle of the fifteenth century, the faults changed
+            their shape. A scribe's slip spoiled one copy; a compositor's slip went out in every copy of the edition.
+            Type is set by hand, letter by letter, upside down and backwards, from a case of small metal sorts. A letter
+            can go in the wrong way up. Two can trade places. A sort from another face can stray into the wrong box of
+            the case, and from there into the line. Titivillus followed the work out of the cloister and into the
+            printing house.
+          </p>
+        </div>
+        <div class="block">
+          <p class="body" data-body>
+            <span class="pil">&para;</span> So, in a manner, did his name. The youngest apprentice in a printing house,
+            the boy who mixed the ink, fetched the type, and carried broken letters from the hellbox to be melted and
+            cast again, was called the printer's devil. Joseph Moxon, writing on the craft in 1683, said the workmen
+            called such inky boys devils, and sometimes spirits, and sometimes flies. Benjamin Franklin, Walt Whitman,
+            and Mark Twain all began as printer's devils.
+          </p>
+          <aside class="gloss" data-text>
+            Moxon, <i>Mechanick Exercises</i>, 1683.
+          </aside>
+        </div>
+        <div class="block">
+          <p class="body" data-body>
+            <span class="pil">&para;</span> Some faults became famous. In 1631 the King's printers in London issued a
+            Bible in which one commandment had lost a single small word, so that it read: thou shalt commit adultery.
+            The printers were fined, and most of the copies were destroyed. It is exactly the sort of fault Titivillus
+            was blamed for: one little word, gone from the line and gathered up from the floor.
+          </p>
+          <aside class="gloss" data-text>
+            The so-called Wicked Bible.
+          </aside>
+        </div>
+        <footer class="foot" data-text>
+          <span class="sig">A iiij</span>
+          <span class="catch">A</span>
+        </footer>
+      </article>
+
+      <article class="leaf" data-leaf="5">
+        <header class="rh" data-text>
+          <span class="running">Titivillus</span>
+          <span class="folio">5</span>
+        </header>
+        <h2 class="chap" data-text>
+          <span class="num">Chap. IV.</span> Of errata, and of this impression.
+        </h2>
+        <div class="block">
+          <p class="body" data-body>
+            <Initial letter="A" /> printer who found faults after the sheets were printed could not call them back.
+            Instead he added a list at the end of the book, under the heading Errata: on such a leaf and such a line,
+            for this, read that. The list asked the reader to finish the work, pen in hand, setting each copy right one
+            fault at a time.
+          </p>
+        </div>
+        <div class="block">
+          <p class="body" data-body>
+            <span class="pil">&para;</span> This impression has faults in it. Twelve are set somewhere in these leaves:
+            a letter turned upside down, two letters that have traded places, a letter doubled or dropped, a letter
+            taken from the wrong case, a letter mistaken for its neighbour. They change with every impression, so no two
+            readers hunt the same ones. Titivillus wants them all. Run him along the lines and read as you go; when he
+            stands on a fault, pluck it, and it goes into his sack and is set right on the page. His sack stirs when one
+            is near.
+          </p>
+        </div>
+        <div class="block">
+          <p class="body" data-body>
+            <span class="pil">&para;</span> The notion that Titivillus puts the errors in, rather than only gathering
+            them up, came much later, and is traced to the novelist Anatole France. The older story is kinder. He never
+            made a fault in his life. He only noticed them, which is more than most readers do.
+          </p>
+        </div>
+        <footer class="foot" data-text>
+          <span class="sig">A v</span>
+          <span class="catch">Errata</span>
+        </footer>
+      </article>
+
+      <article class="leaf errata-leaf" data-leaf="6">
+        <header class="rh" data-text>
+          <span class="folio">6</span>
+          <span class="running">Titivillus</span>
+        </header>
+        <h2 class="errata-head" data-text>
+          Errata
+        </h2>
+        <p class="errata-intro" data-text>
+          Faults escaped in the printing, as the devil gathered them.
+        </p>
+        <ol class="errata-list" data-errata></ol>
+        <p class="errata-none" data-text data-errata-none>
+          None yet. Turn back and look.
+        </p>
+        <div class="errata-actions">
+          <button type="button" class="press" data-reveal>
+            Show the faults still in the text
+          </button>
+          <button type="button" class="press" data-again>
+            Print a new impression
+          </button>
+        </div>
+        <div class="finis" data-finis hidden>
+          <p class="finis-word" data-text>
+            Finis.
+          </p>
+          <p class="finis-note" data-text data-finis-note></p>
+        </div>
+        <p class="colophon" data-text>
+          Set in the Fell types, cut for the University of Oxford in the seventeenth century and given new life by Igino
+          Marini.
+        </p>
+      </article>
+    </div>
+
+    <canvas class="stage" data-stage aria-hidden="true"></canvas>
+
+    <aside class="slip" data-hud aria-live="polite">
+      <p class="slip-count">
+        <b data-count>0</b> of <b data-total>12</b> faults in the sack
+      </p>
+      <p class="slip-time" data-time>
+        0:00
+      </p>
+      <div class="slip-buttons">
+        <button type="button" data-sound aria-pressed="true">
+          Sound
+        </button>
+        <button type="button" data-goto-errata>
+          Errata
+        </button>
+      </div>
+    </aside>
+
+    <div class="pad" data-pad aria-hidden="true">
+      <div class="pad-side">
+        <button type="button" data-key="left" tabindex="-1">
+          <span>&#9664;</span>
+        </button>
+        <button type="button" data-key="right" tabindex="-1">
+          <span>&#9654;</span>
+        </button>
+      </div>
+      <div class="pad-side">
+        <button type="button" data-key="pluck" tabindex="-1">
+          <span>Pluck</span>
+        </button>
+        <button type="button" data-key="jump" tabindex="-1">
+          <span>Leap</span>
+        </button>
+      </div>
+    </div>
+  </main>
+</Bare>
+
+<script>
+  import { start } from './_game';
+
+  const root = document.querySelector<HTMLElement>('.titivillus');
+  if (root) start(root);
+</script>
+
+<style is:global>
+  body:has(.titivillus) {
+    margin: 0;
+    background: #20160f;
+    overscroll-behavior-y: none;
+  }
+  /* Faults and corrections, set by script into the words. */
+  .titivillus .tv-turn {
+    display: inline-block;
+    transform: rotate(180deg);
+  }
+  .titivillus .tv-wf {
+    font-style: italic;
+  }
+  .titivillus .w.bump {
+    position: relative;
+    animation: tv-bump 0.32s ease-out;
+  }
+  .titivillus .w.set {
+    animation: tv-set 1.8s ease-out;
+  }
+  .titivillus .w.missed {
+    color: #a12b1d;
+    text-decoration: underline 1px;
+    text-underline-offset: 3px;
+  }
+  .titivillus .mark {
+    position: absolute;
+    font-family: var(--font-fell);
+    font-style: italic;
+    font-size: 0.82em;
+    line-height: 1;
+    color: #a12b1d;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: tv-mark 0.5s ease-out;
+  }
+  @keyframes tv-bump {
+    0%,
+    100% {
+      top: 0;
+    }
+    35% {
+      top: -0.16em;
+    }
+  }
+  @keyframes tv-set {
+    0%,
+    30% {
+      color: #a12b1d;
+    }
+    100% {
+      color: inherit;
+    }
+  }
+  @keyframes tv-mark {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+</style>
+
+<style>
+  .titivillus {
+    --ink: #1c1712;
+    --paper: #efe5cf;
+    --paper-deep: #e4d6b8;
+    --rubric: #a12b1d;
+    --desk: #20160f;
+    --fs: 21px;
+    --lh: 1.52em;
+    --margin: 150px;
+    position: relative;
+    min-height: 100vh;
+    padding: 0 16px 160px;
+    color: var(--ink);
+    background:
+      radial-gradient(ellipse at 50% 0%, rgb(255 210 150 / 0.09), transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='420'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0035 0.11' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.7 0 0 0 -0.12'/%3E%3C/filter%3E%3Crect width='700' height='420' filter='url(%23g)'/%3E%3C/svg%3E"),
+      linear-gradient(#33241a, #1d140e);
+    font-family: var(--font-fell);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .home {
+    margin: 0;
+    padding: 18px 0 14px;
+    text-align: center;
+    font-family: var(--font-fell-sc);
+    font-size: 15px;
+    letter-spacing: 0.08em;
+  }
+  .home a {
+    color: #c9b48f;
+    text-decoration: none;
+  }
+  .home a:hover {
+    color: #f0dcb4;
+  }
+
+  .leaves {
+    position: relative;
+    width: min(800px, 100%);
+    margin: 0 auto;
+    display: grid;
+    gap: 22px;
+  }
+
+  .leaf {
+    position: relative;
+    box-sizing: border-box;
+    padding: 38px calc(var(--margin) + 28px) 30px 64px;
+    font-size: var(--fs);
+    line-height: var(--lh);
+    background-color: var(--paper);
+    background-image:
+      radial-gradient(ellipse 34px 26px at 12% 18%, rgb(150 100 40 / 0.07), transparent),
+      radial-gradient(ellipse 18px 22px at 81% 66%, rgb(150 100 40 / 0.06), transparent),
+      radial-gradient(ellipse 12px 9px at 63% 91%, rgb(150 100 40 / 0.06), transparent),
+      radial-gradient(ellipse 60px 40px at 92% 8%, rgb(150 100 40 / 0.05), transparent),
+      radial-gradient(ellipse at 50% 45%, transparent 55%, rgb(140 95 40 / 0.16) 100%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.25 0 0 0 0 0.12 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+    box-shadow:
+      0 1px 0 rgb(255 240 210 / 0.25) inset,
+      0 18px 40px -12px rgb(0 0 0 / 0.65),
+      0 2px 6px rgb(0 0 0 / 0.4);
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
+  }
+  .leaf:nth-child(even) {
+    padding: 38px 64px 30px calc(var(--margin) + 28px);
+  }
+
+  .rh {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 0 0 18px;
+    font-family: var(--font-fell-sc);
+    font-size: 0.86em;
+    letter-spacing: 0.06em;
+  }
+  .rh .running {
+    flex: 1;
+    text-align: center;
+  }
+  .rh .folio {
+    min-width: 2em;
+  }
+  .rh .folio:last-child {
+    text-align: right;
+  }
+
+  .chap {
+    margin: 0 0 0.5em;
+    font-family: var(--font-fell-sc);
+    font-weight: 400;
+    font-size: 1.12em;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    text-align: center;
+  }
+  .chap .num {
+    color: var(--rubric);
+  }
+
+  .block {
+    position: relative;
+  }
+  .body {
+    margin: 0;
+    text-align: justify;
+    hyphens: manual;
+  }
+  .block + .block .body,
+  .verse + .block .body {
+    margin-top: 0;
+  }
+  .pil {
+    color: var(--rubric);
+  }
+  .gloss {
+    position: absolute;
+    top: 0.25em;
+    left: calc(100% + 26px);
+    width: var(--margin);
+    font-size: 0.7em;
+    line-height: 1.3;
+    font-style: italic;
+    color: #3a2f25;
+  }
+  .leaf:nth-child(even) .gloss {
+    left: auto;
+    right: calc(100% + 26px);
+    text-align: right;
+  }
+
+  .verse {
+    margin: 0.35em 0 0.35em 2.4em;
+    font-style: italic;
+  }
+  .verse p {
+    margin: 0;
+  }
+  .verse p + p {
+    padding-left: 1.4em;
+  }
+
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 22px;
+    font-size: 0.86em;
+  }
+  .foot .sig {
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 3em;
+  }
+
+  /* Title page */
+  .title-leaf {
+    padding: 34px 34px 30px;
+  }
+  .leaf.title-leaf {
+    padding: 34px 34px 30px;
+  }
+  .tp-frame {
+    position: relative;
+    padding: 40px 42px 34px;
+    text-align: center;
+    border: 3px double var(--ink);
+    outline: 1px solid var(--ink);
+    outline-offset: 5px;
+  }
+  .tp-kicker {
+    margin: 6px 0 2px;
+    font-family: var(--font-fell-sc);
+    font-size: 0.95em;
+    letter-spacing: 0.12em;
+  }
+  .tp-title {
+    margin: 0;
+    font-family: var(--font-fell-canon);
+    font-weight: 400;
+    font-size: clamp(34px, 10.2vw, 96px);
+    line-height: 1.12;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--rubric);
+  }
+  .tp-sub {
+    margin: 4px 0 0;
+    font-style: italic;
+    font-size: 1.25em;
+  }
+  .tp-rule {
+    margin: 22px auto 20px;
+    width: 60%;
+    height: 9px;
+    border-top: 1px solid var(--ink);
+    border-bottom: 3px solid var(--ink);
+  }
+  .tp-rule span {
+    display: none;
+  }
+  .tp-desc {
+    margin: 0 auto;
+    max-width: 30em;
+    line-height: 1.45;
+  }
+  .tp-help {
+    margin: 26px auto 0;
+    max-width: 34em;
+    padding: 10px 14px;
+    font-size: 0.82em;
+    line-height: 1.5;
+    border-top: 1px solid rgb(28 23 18 / 0.5);
+    border-bottom: 1px solid rgb(28 23 18 / 0.5);
+  }
+  .tp-help p {
+    margin: 0;
+  }
+  .tp-help b {
+    font-weight: 400;
+    color: var(--rubric);
+  }
+  .keys-touch {
+    display: none;
+  }
+  .tp-imprint {
+    margin: 30px 0 0;
+    font-family: var(--font-fell-sc);
+    font-size: 0.82em;
+    letter-spacing: 0.1em;
+  }
+  .noscript {
+    margin: 18px 0 0;
+    font-style: italic;
+    text-align: center;
+  }
+
+  /* Errata leaf */
+  .errata-head {
+    margin: 0.2em 0 0.3em;
+    font-family: var(--font-fell-canon);
+    font-weight: 400;
+    font-size: 2.2em;
+    line-height: 1.1;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+  .errata-intro {
+    margin: 0 0 0.6em;
+    font-style: italic;
+    text-align: center;
+  }
+  .errata-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .errata-list :global(li) {
+    margin: 0;
+  }
+  .errata-list :global(li.missed) {
+    color: var(--rubric);
+  }
+  .errata-none {
+    margin: 0;
+    text-align: center;
+  }
+  .errata-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin: 1.2em 0 0.4em;
+  }
+  .press {
+    font: inherit;
+    font-size: 0.8em;
+    padding: 6px 14px;
+    color: var(--paper);
+    background: var(--ink);
+    border: 0;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .press:hover {
+    background: var(--rubric);
+  }
+  .press[hidden] {
+    display: none;
+  }
+  .finis {
+    text-align: center;
+  }
+  .finis[hidden] {
+    display: none;
+  }
+  .finis-word {
+    margin: 0.6em 0 0;
+    font-family: var(--font-fell-canon);
+    font-size: 2em;
+    line-height: 1.2;
+    color: var(--rubric);
+  }
+  .finis-note {
+    margin: 0;
+    font-style: italic;
+  }
+  .colophon {
+    margin: 1.4em 0 0;
+    font-size: 0.72em;
+    line-height: 1.4;
+    font-style: italic;
+    text-align: center;
+  }
+
+  /* The stage: the devil and everything he throws, drawn over the leaves. */
+  .stage {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .slip {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 10;
+    box-sizing: border-box;
+    width: 210px;
+    padding: 10px 14px 10px;
+    font-size: 16px;
+    line-height: 1.3;
+    background: var(--paper);
+    box-shadow:
+      0 8px 20px -6px rgb(0 0 0 / 0.6),
+      0 1px 3px rgb(0 0 0 / 0.4);
+    transform: rotate(0.6deg);
+  }
+  .slip p {
+    margin: 0;
+  }
+  .slip b {
+    font-weight: 400;
+    color: var(--rubric);
+  }
+  .slip-time {
+    font-family: var(--font-fell-sc);
+    font-size: 0.9em;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+  .slip-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .slip-buttons button {
+    flex: 1;
+    font: inherit;
+    font-size: 0.85em;
+    padding: 3px 0 4px;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid rgb(28 23 18 / 0.6);
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .slip-buttons button:hover {
+    color: var(--rubric);
+    border-color: var(--rubric);
+  }
+  .slip-buttons button[aria-pressed='false'] {
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+
+  .pad {
+    display: none;
+  }
+
+  @media (max-width: 760px) {
+    .titivillus {
+      --fs: 18px;
+      --margin: 0px;
+      padding: 0 8px 190px;
+    }
+    .leaf,
+    .leaf:nth-child(even) {
+      padding: 26px 20px 20px;
+    }
+    .leaf.title-leaf {
+      padding: 16px 14px 18px;
+    }
+    .tp-frame {
+      padding: 26px 16px 22px;
+    }
+    .gloss,
+    .leaf:nth-child(even) .gloss {
+      position: static;
+      width: auto;
+      margin: 0.15em 0 0.2em 1.6em;
+      text-align: left;
+    }
+    .verse {
+      margin-left: 1em;
+    }
+    .home {
+      padding-top: 58px;
+    }
+    .tp-title {
+      letter-spacing: 0.03em;
+    }
+    .slip {
+      top: 8px;
+      right: 8px;
+      left: 8px;
+      width: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px 6px 12px;
+      font-size: 14px;
+      transform: none;
+    }
+    .slip-time {
+      margin-top: 0;
+    }
+    .slip-buttons {
+      margin: 0 0 0 auto;
+      gap: 6px;
+    }
+    .slip-buttons button {
+      flex: none;
+      padding: 2px 9px 3px;
+    }
+  }
+
+  @media (max-width: 760px), (pointer: coarse) {
+    .pad {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 11;
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+      pointer-events: none;
+    }
+    .pad-side {
+      display: flex;
+      gap: 12px;
+    }
+    .pad button {
+      pointer-events: auto;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      width: 66px;
+      height: 66px;
+      padding: 0;
+      font: inherit;
+      font-family: var(--font-fell-sc);
+      font-size: 16px;
+      letter-spacing: 0.04em;
+      color: var(--paper);
+      background: radial-gradient(circle at 40% 35%, #3a2c22, #17110c 70%);
+      border: 2px solid rgb(239 229 207 / 0.5);
+      border-radius: 50%;
+      box-shadow: 0 6px 14px rgb(0 0 0 / 0.5);
+    }
+    .pad button.down {
+      background: radial-gradient(circle at 40% 35%, #b23a2a, #6e1a10 70%);
+    }
+    .keys-desktop {
+      display: none;
+    }
+    .keys-touch {
+      display: block;
+    }
+  }
+</style>
