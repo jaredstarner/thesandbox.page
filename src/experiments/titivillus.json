@@ -1,0 +1,8 @@
+{
+  "title": "Titivillus",
+  "summary": "A printed account of the medieval demon who collects the errors of scribes, with the demon loose in it: run and leap across the tops of the letters themselves, read as you go, and pluck the twelve misprints set into the text before you reach the errata.",
+  "date": "2026-11-13",
+  "tags": ["canvas", "typography", "font-loading", "pointer-events", "web-audio", "game", "platformer", "glyph-collision"],
+  "requires": ["canvas"],
+  "plot": 43
+}

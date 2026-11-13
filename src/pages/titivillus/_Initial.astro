@@ -1,0 +1,150 @@
+---
+// A woodcut initial: a letter cut in relief from a black block, over vine
+// scrolls, the way early printers framed the first letter of a chapter. The
+// scrollwork is generated from the letter, so each initial is its own block.
+
+interface Props {
+  letter: string;
+}
+
+const { letter } = Astro.props;
+
+let seed = 0;
+for (const ch of letter) seed = (seed * 31 + ch.charCodeAt(0) * 7919) >>> 0;
+const rand = () => {
+  seed = (seed + 0x6d2b79f5) >>> 0;
+  let t = seed;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+
+const f = (n: number) => n.toFixed(1);
+
+interface Spiral {
+  path: string;
+  leaves: string[];
+}
+
+// A tendril that winds inward from (x, y), leaves set along its outer side.
+function spiral(x: number, y: number, r0: number, a0: number, dir: number): Spiral {
+  const pts: [number, number][] = [];
+  const turns = 1.05 + rand() * 0.5;
+  const steps = 48;
+  // The centre the tendril winds about, one radius in from where it starts.
+  const cx = x - Math.cos(a0) * r0;
+  const cy = y - Math.sin(a0) * r0;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const r = r0 * (1 - 0.82 * t);
+    const a = a0 + dir * t * turns * Math.PI * 2;
+    pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]);
+  }
+  let path = `M${f(pts[0][0])} ${f(pts[0][1])}`;
+  for (let i = 1; i < pts.length - 1; i += 2) {
+    path += ` Q${f(pts[i][0])} ${f(pts[i][1])} ${f(pts[i + 1][0])} ${f(pts[i + 1][1])}`;
+  }
+  const leaves: string[] = [];
+  for (let i = 5; i < steps - 8; i += 7 + Math.floor(rand() * 3)) {
+    const [px, py] = pts[i];
+    const [qx, qy] = pts[i + 1];
+    const tang = Math.atan2(qy - py, qx - px);
+    const out = tang - dir * (Math.PI / 2) * 0.7;
+    const len = 5 + (1 - i / steps) * 6 + rand() * 2;
+    const w = len * 0.42;
+    const tipX = px + Math.cos(out) * len;
+    const tipY = py + Math.sin(out) * len;
+    const nx = Math.cos(out + Math.PI / 2) * w;
+    const ny = Math.sin(out + Math.PI / 2) * w;
+    const mx = (px + tipX) / 2;
+    const my = (py + tipY) / 2;
+    leaves.push(
+      `M${f(px)} ${f(py)} Q${f(mx + nx)} ${f(my + ny)} ${f(tipX)} ${f(tipY)} Q${f(mx - nx)} ${f(my - ny)} ${f(px)} ${f(py)}Z`,
+    );
+  }
+  return { path, leaves };
+}
+
+const spirals: Spiral[] = [
+  spiral(14, 16, 13, Math.PI * 1.15, 1),
+  spiral(86, 18, 12, Math.PI * 1.85, -1),
+  spiral(16, 84, 12, Math.PI * 0.2, -1),
+  spiral(84, 86, 13, Math.PI * 0.8, 1),
+  spiral(50, 10 + rand() * 4, 7, Math.PI * (1.4 + rand() * 0.2), rand() < 0.5 ? 1 : -1),
+  spiral(50, 92 - rand() * 4, 7, Math.PI * (0.4 + rand() * 0.2), rand() < 0.5 ? 1 : -1),
+];
+
+// Gouge marks: short cuts in the black ground, as a cutter clears the block.
+const cuts: string[] = [];
+for (let i = 0; i < 26; i++) {
+  const x = 9 + rand() * 82;
+  const y = 9 + rand() * 82;
+  const a = rand() * Math.PI;
+  const l = 1.5 + rand() * 2.5;
+  cuts.push(`M${f(x)} ${f(y)} l${f(Math.cos(a) * l)} ${f(Math.sin(a) * l)}`);
+}
+---
+
+<span class="initial" data-solid aria-hidden="true">
+  <svg viewBox="0 0 100 100" focusable="false">
+    <rect class="block" x="0" y="0" width="100" height="100" rx="1.2"></rect>
+    <rect class="frame" x="4" y="4" width="92" height="92"></rect>
+    <g class="vine">
+      {spirals.map((s) => <path d={s.path} />)}
+    </g>
+    <g class="leaf">
+      {spirals.flatMap((s) => s.leaves).map((d) => <path d={d} />)}
+    </g>
+    <g class="cut">
+      {cuts.map((d) => <path d={d} />)}
+    </g>
+    <text x="50" y="77" text-anchor="middle">{letter}</text>
+  </svg>
+</span>
+
+<style>
+  .initial {
+    float: left;
+    display: block;
+    width: calc(var(--lh) * 3 - 0.2em);
+    height: calc(var(--lh) * 3 - 0.2em);
+    margin: 0.32em 0.5em 0 0;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .block {
+    fill: var(--ink);
+  }
+  .frame {
+    fill: none;
+    stroke: var(--paper);
+    stroke-width: 1.1;
+  }
+  .vine path {
+    fill: none;
+    stroke: var(--paper);
+    stroke-width: 1.7;
+    stroke-linecap: round;
+  }
+  .leaf path {
+    fill: var(--paper);
+  }
+  .cut path {
+    stroke: var(--paper);
+    stroke-width: 0.7;
+    stroke-linecap: round;
+    opacity: 0.55;
+  }
+  text {
+    font-family: var(--font-fell-canon);
+    font-size: 84px;
+    fill: var(--paper);
+    stroke: var(--ink);
+    stroke-width: 5px;
+    paint-order: stroke;
+  }
+</style>
