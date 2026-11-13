@@ -232,6 +232,15 @@ export function buildLayout(container: HTMLElement): Layout {
     const y1 = Math.min(h, Math.ceil(r.bottom - oy));
     for (let y = y0; y < y1; y++) mask.fill(SOLID, y * w + x0, y * w + x1);
   }
+  // The top edge of each sheet is a ledge: he can stand on the paper's edge in
+  // the gap between two leaves, which is how he climbs back to the leaf above.
+  for (const l of leaves) {
+    const r = l.el.getBoundingClientRect();
+    const x0 = Math.max(0, Math.floor(r.left - ox));
+    const x1 = Math.min(w, Math.ceil(r.right - ox));
+    const y = Math.round(l.top);
+    if (y >= 0 && y + 2 <= h) for (let yy = y; yy < y + 2; yy++) mask.fill(ONEWAY, yy * w + x0, yy * w + x1);
+  }
   // The desk under the last leaf.
   mask.fill(SOLID, (h - 2) * w, h * w);
 

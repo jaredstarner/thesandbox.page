@@ -86,7 +86,7 @@ function setFault(core: string, kind: FaultKind, rand: Rand, vocab: Set<string>)
       if (i < 0) return null;
       const s = core.slice(0, i) + core.slice(i + 1);
       if (vocab.has(s)) return null;
-      return { html: esc(s), mark: `‸${core[i]}`, plain: s };
+      return { html: esc(s), mark: `${core[i]}/`, plain: s };
     }
     case 'literal': {
       i = pickIndex(rand, 1, n - 1, (k) => core[k] in LITERALS);

@@ -584,7 +584,7 @@ export function start(root: HTMLElement): void {
       sfx.leap();
     } else if (d.jumpBuf > 0 && !d.grounded && d.flaps > 0 && d.pluckT < 0) {
       // One beat of the wings in the air: enough to climb from one leaf back to the last.
-      d.vy = Math.min(d.vy, -P.jumpV * 0.8);
+      d.vy = Math.min(d.vy, -P.jumpV * 0.92);
       d.flaps = 0;
       d.jumpBuf = 0;
       d.flapT = 0.35;
