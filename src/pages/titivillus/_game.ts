@@ -130,6 +130,7 @@ export function start(root: HTMLElement): void {
 
   const params = new URLSearchParams(location.search);
   const debug = params.has('debug');
+  const showMask = params.get('debug') === 'mask';
   let seed = Number(params.get('seed')) || (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0;
 
   // ---- State -------------------------------------------------------------
@@ -199,7 +200,7 @@ export function start(root: HTMLElement): void {
     const gravity = 80 * fs;
     return {
       hw: fs * 0.3,
-      height: fs * 1.25,
+      height: fs * 1.6,
       stepUp: fs * 0.48,
       snap: fs * 0.28,
       run: 7.8 * fs,
@@ -209,7 +210,7 @@ export function start(root: HTMLElement): void {
       gravity,
       jumpV: Math.sqrt(2 * gravity * 2.5 * lineH),
       fallMax: 36 * fs,
-      scale: (fs * 1.3) / DEVIL_UNITS,
+      scale: (fs * 1.38) / DEVIL_UNITS,
       clear: Math.max(3, Math.round(fs * 0.28)),
     };
   }
@@ -763,7 +764,7 @@ export function start(root: HTMLElement): void {
     hx.setTransform(1, 0, 0, 1, 0, 0);
     hx.globalCompositeOperation = 'source-over';
     hx.clearRect(0, 0, size, size);
-    const r = 1.7 * dpr;
+    const r = 2 * dpr;
     for (let i = 0; i < 12; i++) {
       const a = (i / 12) * Math.PI * 2;
       hx.drawImage(spr, Math.cos(a) * r, Math.sin(a) * r);
@@ -792,7 +793,7 @@ export function start(root: HTMLElement): void {
     const oy = layout.oy - window.scrollY;
     g.translate(ox, oy);
 
-    if (debug) {
+    if (showMask) {
       maskImage ??= buildMaskImage();
       if (maskImage) g.drawImage(maskImage, 0, 0);
     }
