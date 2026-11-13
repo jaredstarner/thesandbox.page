@@ -359,7 +359,14 @@ export function start(root: HTMLElement): void {
     const [sx, sy] = [(w.x0 + w.x1) / 2, (w.y0 + w.y1) / 2];
     const faultyText = (f.el.textContent ?? '').replace(/^[^a-z]+|[^a-z]+$/gi, '');
     const cs = getComputedStyle(f.el);
-    flyers.push({ text: faultyText, font: `${cs.fontStyle} ${cs.fontSize} ${cs.fontFamily}`, x: sx, y: sy, t: 0, spin: (Math.random() - 0.5) * 7 });
+    flyers.push({
+      text: faultyText,
+      font: `${cs.fontStyle} ${cs.fontSize} ${cs.fontFamily}`,
+      x: sx,
+      y: sy,
+      t: 0,
+      spin: (Math.random() - 0.5) * 7,
+    });
     f.found = true;
     found++;
     addErrata(f, w);
@@ -887,7 +894,12 @@ export function start(root: HTMLElement): void {
     const a = KEYMAP[e.code];
     if (!a) return;
     const t = e.target as HTMLElement | null;
-    if (t && (t.tagName === 'BUTTON' || t.tagName === 'A' || t.tagName === 'INPUT') && (e.code === 'Space' || e.code === 'Enter')) return;
+    if (
+      t &&
+      (t.tagName === 'BUTTON' || t.tagName === 'A' || t.tagName === 'INPUT') &&
+      (e.code === 'Space' || e.code === 'Enter')
+    )
+      return;
     e.preventDefault();
     if (down) {
       if (!keys[a]) press(a);
@@ -906,14 +918,19 @@ export function start(root: HTMLElement): void {
   });
   // A hand on the scroll wheel or the page means the reader wants to look around.
   window.addEventListener('wheel', () => (follow = false), { passive: true });
-  window.addEventListener('touchmove', (e) => {
-    if (!(e.target as HTMLElement | null)?.closest('[data-pad]')) follow = false;
-  }, { passive: true });
+  window.addEventListener(
+    'touchmove',
+    (e) => {
+      if (!(e.target as HTMLElement | null)?.closest('[data-pad]')) follow = false;
+    },
+    { passive: true },
+  );
 
   if (pad) {
     for (const b of pad.querySelectorAll<HTMLButtonElement>('[data-key]')) {
       const key = b.dataset.key;
-      const a: Action | null = key === 'left' || key === 'right' || key === 'jump' ? key : key === 'pluck' ? 'down' : null;
+      const a: Action | null =
+        key === 'left' || key === 'right' || key === 'jump' ? key : key === 'pluck' ? 'down' : null;
       if (!a) continue;
       const on = (e: PointerEvent) => {
         e.preventDefault();

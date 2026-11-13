@@ -41,7 +41,12 @@ function pickIndex(rand: Rand, from: number, to: number, ok: (i: number) => bool
 }
 
 /** Try to set one fault of this kind in a word; null when the word can't take it. */
-function setFault(core: string, kind: FaultKind, rand: Rand, vocab: Set<string>): { html: string; mark: string; plain: string } | null {
+function setFault(
+  core: string,
+  kind: FaultKind,
+  rand: Rand,
+  vocab: Set<string>,
+): { html: string; mark: string; plain: string } | null {
   const n = core.length;
   const esc = escapeHtml;
   let i: number;

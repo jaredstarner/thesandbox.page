@@ -133,8 +133,7 @@ export function drawDevil(ctx: CanvasRenderingContext2D, x: number, y: number, s
 
   // Wings from the shoulder blades: folded on the ground, spread in the air.
   const beat = s.flap > 0 ? Math.sin((1 - s.flap) * Math.PI * 2) * 0.9 : 0;
-  const open =
-    (air ? (s.vy < 0 ? 0.95 : 0.45 + Math.sin(s.t * 22) * 0.35) : cheer ? 0.8 : 0.1 + breathe * 0.03) + beat;
+  const open = (air ? (s.vy < 0 ? 0.95 : 0.45 + Math.sin(s.t * 22) * 0.35) : cheer ? 0.8 : 0.1 + breathe * 0.03) + beat;
   ctx.save();
   ctx.translate(-1.8, -8.2);
   ctx.rotate(-0.25 - open * 1.0);
