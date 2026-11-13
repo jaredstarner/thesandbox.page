@@ -465,6 +465,7 @@ export function start(root: HTMLElement): void {
   }
 
   function updateHud(): void {
+    if (revealBtn) revealBtn.hidden = phase === 'finished' || phase === 'revealed';
     if (!hudCount) return;
     hudCount.innerHTML =
       phase === 'finished'

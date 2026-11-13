@@ -27,10 +27,13 @@ const description =
           </p>
           <div class="tp-help" data-text>
             <p class="keys-desktop">
-              <b>&larr; &rarr;</b> run &nbsp; <b>Space</b> leap &nbsp; <b>&darr;</b> pluck the word underfoot &nbsp;
-              <b>&darr; + Space</b> drop through a line
+              <b>&larr; &rarr;</b> run &nbsp; <b>Space</b> leap, and again in the air to beat his wings &nbsp;
+              <b>&darr;</b> pluck the word underfoot &nbsp; <b>&darr; + Space</b> drop through a line
             </p>
-            <p class="keys-touch">Use the buttons below: run, leap, and pluck the word underfoot.</p>
+            <p class="keys-touch">
+              Use the buttons below: run, leap (and leap again in the air to beat his wings), and pluck the word
+              underfoot.
+            </p>
           </div>
           <p class="tp-imprint" data-text>Imprinted on thesandbox.page, anno MMXXVI</p>
         </div>
@@ -590,6 +593,9 @@ const description =
   }
   .press:hover {
     background: var(--rubric);
+  }
+  .press[hidden] {
+    display: none;
   }
   .finis {
     text-align: center;
