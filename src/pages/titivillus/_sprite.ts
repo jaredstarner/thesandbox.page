@@ -23,6 +23,8 @@ export interface DevilState {
   gulp: number;
   /** Vertical speed, for the jump and fall shapes. */
   vy: number;
+  /** A wing beat in the air, 1 falling to 0. */
+  flap: number;
 }
 
 export const DEVIL_UNITS = 26;
@@ -124,7 +126,9 @@ export function drawDevil(ctx: CanvasRenderingContext2D, x: number, y: number, s
   ctx.translate(hipX, hipY);
   ctx.rotate(lean);
   // Wings from the shoulder blades: folded on the ground, spread in the air.
-  const flap = air ? (s.vy < 0 ? 0.9 : 0.4 + Math.sin(s.t * 22) * 0.35) : cheer ? 0.7 : 0.08 + breathe * 0.04;
+  const beat = s.flap > 0 ? Math.sin((1 - s.flap) * Math.PI * 2) * 0.9 : 0;
+  const flap =
+    (air ? (s.vy < 0 ? 0.9 : 0.4 + Math.sin(s.t * 22) * 0.35) : cheer ? 0.7 : 0.08 + breathe * 0.04) + beat;
   ctx.save();
   ctx.translate(-1.4, -7.4);
   ctx.rotate(-0.5 - flap * 1.1);

@@ -6,7 +6,19 @@
 // the paragraph, so the ground under the devil can move. A window resize
 // reflows the whole page, and he keeps his footing on the same word.
 
-import { AIR, SOLID, at, buildLayout, clearFontCache, lineOf, wrapIn, wrapWords, type Layout, type Word } from './_layout';
+import {
+  AIR,
+  SOLID,
+  at,
+  buildLayout,
+  clearFontCache,
+  leafAt,
+  lineOf,
+  wrapIn,
+  wrapWords,
+  type Layout,
+  type Word,
+} from './_layout';
 import { escapeHtml, mend, mulberry, setFaults, type Fault } from './_faults';
 import { DEVIL_UNITS, drawDevil, sackPoint, type DevilState, type Pose } from './_sprite';
 import * as sfx from './_sound';
@@ -164,6 +176,8 @@ export function start(root: HTMLElement): void {
     gulp: 0,
     cheerT: 0,
     peakY: 0,
+    flaps: 1,
+    flapT: 0,
   };
 
   const look: DevilState = {
@@ -177,6 +191,7 @@ export function start(root: HTMLElement): void {
     stir: 0,
     gulp: 0,
     vy: 0,
+    flap: 0,
   };
 
   // ---- Terrain -----------------------------------------------------------
@@ -524,7 +539,14 @@ export function start(root: HTMLElement): void {
       d.vx = Math.abs(d.vx) <= fr ? 0 : d.vx - Math.sign(d.vx) * fr;
     }
     let nx = d.x + d.vx * dt;
-    nx = clamp(nx, P.hw + 2, layout.w - P.hw - 2);
+    // He keeps to the text column of the leaf he is on; the margins are walls.
+    const leaf = leafAt(layout, d.y - 1);
+    const lo = (leaf ? leaf.left : 0) + P.hw * 0.5;
+    const hi = (leaf ? leaf.right : layout.w) - P.hw * 0.5;
+    if (nx < lo || nx > hi) {
+      nx = clamp(nx, lo, hi);
+      d.vx = 0;
+    }
     // Solid blocks (the woodcut initials) stop him at the body.
     const lead = nx + Math.sign(d.vx || 1) * P.hw;
     if (d.vx !== 0 && solidAt(lead, d.y - P.height + 2, d.y - P.stepUp - 1)) {
@@ -558,8 +580,18 @@ export function start(root: HTMLElement): void {
       d.coyote = 0;
       d.jumpBuf = 0;
       d.peakY = d.y;
+      d.flaps = 1;
       sfx.leap();
+    } else if (d.jumpBuf > 0 && !d.grounded && d.flaps > 0 && d.pluckT < 0) {
+      // One beat of the wings in the air: enough to climb from one leaf back to the last.
+      d.vy = Math.min(d.vy, -P.jumpV * 0.8);
+      d.flaps = 0;
+      d.jumpBuf = 0;
+      d.flapT = 0.35;
+      d.peakY = Math.min(d.peakY, d.y);
+      sfx.flap();
     }
+    d.flapT = Math.max(0, d.flapT - dt);
 
     if (d.grounded) {
       const gy = groundIn(d.x, d.y - P.stepUp, d.y + P.snap);
@@ -578,12 +610,13 @@ export function start(root: HTMLElement): void {
       d.vy = Math.min(P.fallMax, d.vy + P.gravity * gmul * dt);
       const ny = d.y + d.vy * dt;
       if (d.vy > 0) {
-        const gy = groundIn(d.x, d.y + 1, ny);
+        const gy = groundIn(d.x, d.y + 0.001, ny);
         if (gy !== null) {
           const fall = gy - d.peakY;
           d.y = gy;
           d.grounded = true;
           d.vy = 0;
+          d.flaps = 1;
           const hard = clamp(fall / (layout.lineH * 4), 0, 1);
           d.squash = 0.35 + hard * 0.65;
           if (fall > layout.lineH * 0.6) sfx.land(hard);
@@ -795,6 +828,7 @@ export function start(root: HTMLElement): void {
     look.stir = stir;
     look.gulp = d.gulp;
     look.vy = d.vy;
+    look.flap = d.flapT / 0.35;
     drawFigure(dpr);
 
     g.fillStyle = '#16110d';

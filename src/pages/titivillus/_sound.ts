@@ -101,6 +101,14 @@ export function leap(): void {
   burst(c.currentTime, 0.07, 1900, 1.4, 0.05);
 }
 
+export function flap(): void {
+  const c = ready();
+  if (!c) return;
+  const t = c.currentTime;
+  burst(t, 0.09, 900, 1.1, 0.06);
+  burst(t + 0.05, 0.07, 1300, 1.3, 0.04);
+}
+
 export function land(hard: number): void {
   const c = ready();
   if (!c) return;

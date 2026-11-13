@@ -27,6 +27,9 @@ export interface Leaf {
   el: HTMLElement;
   top: number;
   bottom: number;
+  /** The text column: the leaf inside its padding, margins excluded. */
+  left: number;
+  right: number;
 }
 
 export interface Layout {
@@ -166,7 +169,15 @@ export function buildLayout(container: HTMLElement): Layout {
   const leaves: Leaf[] = [];
   for (const el of container.querySelectorAll<HTMLElement>('[data-leaf]')) {
     const r = el.getBoundingClientRect();
-    leaves.push({ n: Number(el.dataset.leaf), el, top: r.top - oy, bottom: r.bottom - oy });
+    const cs = getComputedStyle(el);
+    leaves.push({
+      n: Number(el.dataset.leaf),
+      el,
+      top: r.top - oy,
+      bottom: r.bottom - oy,
+      left: r.left - ox + parseFloat(cs.paddingLeft),
+      right: r.right - ox - parseFloat(cs.paddingRight),
+    });
   }
   const leafAt = (y: number) => {
     for (const l of leaves) if (y >= l.top - 1 && y <= l.bottom + 1) return l.n;
@@ -230,6 +241,12 @@ export function buildLayout(container: HTMLElement): Layout {
   const lineH = cs ? parseFloat(cs.lineHeight) || fontSize * 1.52 : fontSize * 1.52;
 
   return { ox: ox + window.scrollX, oy: oy + window.scrollY, w, h, mask, words, leaves, fontSize, lineH };
+}
+
+/** The leaf at a height, or the next one down when the point is in the gap between two. */
+export function leafAt(layout: Layout, y: number): Leaf | null {
+  for (const l of layout.leaves) if (y < l.bottom + 1) return l;
+  return layout.leaves[layout.leaves.length - 1] ?? null;
 }
 
 /** The mask value at a container point; outside is air, except the desk below. */
