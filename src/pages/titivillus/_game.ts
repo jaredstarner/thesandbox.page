@@ -183,7 +183,7 @@ export function start(root: HTMLElement): void {
   function physicsFor(fs: number, lineH: number): Physics {
     const gravity = 80 * fs;
     return {
-      hw: fs * 0.2,
+      hw: fs * 0.3,
       height: fs * 1.25,
       stepUp: fs * 0.48,
       snap: fs * 0.28,
@@ -212,11 +212,16 @@ export function start(root: HTMLElement): void {
     return true;
   }
 
-  /** The highest top under the feet within a band, or null. */
+  /**
+   * The highest top under the feet within a band, or null. Every pixel column
+   * across his stance counts, so he bridges a word space and stands on a single
+   * stem, but drops off the end of a line.
+   */
   function groundIn(x: number, yTop: number, yBot: number): number | null {
-    const cols = [x - P.hw, x, x + P.hw];
+    const c0 = Math.round(x - P.hw);
+    const c1 = Math.round(x + P.hw);
     for (let y = Math.ceil(yTop); y <= Math.floor(yBot); y++) {
-      for (const c of cols) if (surface(c, y)) return y;
+      for (let c = c0; c <= c1; c++) if (surface(c, y)) return y;
     }
     return null;
   }
@@ -326,8 +331,8 @@ export function start(root: HTMLElement): void {
     const line = lineOf(layout, w);
     li.dataset.order = String(w.leaf * 1000 + line);
     li.innerHTML =
-      `Leaf ${w.leaf}, line ${line}: for <span class="w">${f.html}</span> read ` +
-      `<span class="w">${escapeHtml(f.core)}</span>.`;
+      `Leaf ${w.leaf}, line ${line}: for <span class="w">${escapeHtml(f.lead)}${f.html}</span> read ` +
+      `<span class="w">${escapeHtml(f.lead + f.core)}</span>.`;
     wrapIn(li);
     const after = [...errataList.children].find((c) => Number((c as HTMLElement).dataset.order) > w.leaf * 1000 + line);
     errataList.insertBefore(li, after ?? null);
@@ -407,8 +412,8 @@ export function start(root: HTMLElement): void {
         li.className = 'missed';
         li.dataset.order = String(w.leaf * 1000 + line);
         li.innerHTML =
-          `Leaf ${w.leaf}, line ${line}: for <span class="w">${f.html}</span> read ` +
-          `<span class="w">${escapeHtml(f.core)}</span>, not gathered.`;
+          `Leaf ${w.leaf}, line ${line}: for <span class="w">${escapeHtml(f.lead)}${f.html}</span> read ` +
+          `<span class="w">${escapeHtml(f.lead + f.core)}</span>, not gathered.`;
         wrapIn(li);
         const after = [...errataList.children].find(
           (c) => Number((c as HTMLElement).dataset.order) > w.leaf * 1000 + line,
@@ -704,6 +709,41 @@ export function start(root: HTMLElement): void {
     return c;
   }
 
+  // The devil is drawn off screen, then stamped over a paper-coloured halo, the
+  // way a woodcut figure keeps a margin of white around it, so he reads cleanly
+  // against the type behind him.
+  const spr = document.createElement('canvas');
+  const halo = document.createElement('canvas');
+  function drawFigure(dpr: number): void {
+    const size = Math.ceil(P.scale * 50 * dpr);
+    if (spr.width !== size) {
+      spr.width = spr.height = halo.width = halo.height = size;
+    }
+    const sx = spr.getContext('2d');
+    const hx = halo.getContext('2d');
+    if (!sx || !hx) return;
+    const fx = size / 2;
+    const fy = size * 0.76;
+    sx.setTransform(1, 0, 0, 1, 0, 0);
+    sx.clearRect(0, 0, size, size);
+    drawDevil(sx, fx, fy, P.scale * dpr, look);
+    hx.setTransform(1, 0, 0, 1, 0, 0);
+    hx.globalCompositeOperation = 'source-over';
+    hx.clearRect(0, 0, size, size);
+    const r = 1.7 * dpr;
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      hx.drawImage(spr, Math.cos(a) * r, Math.sin(a) * r);
+    }
+    hx.globalCompositeOperation = 'source-in';
+    hx.fillStyle = 'rgba(239, 229, 207, 0.92)';
+    hx.fillRect(0, 0, size, size);
+    const x = d.x - fx / dpr;
+    const y = d.vis - fy / dpr;
+    g.drawImage(halo, x, y, size / dpr, size / dpr);
+    g.drawImage(spr, x, y, size / dpr, size / dpr);
+  }
+
   function draw(): void {
     if (!layout) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
@@ -755,7 +795,7 @@ export function start(root: HTMLElement): void {
     look.stir = stir;
     look.gulp = d.gulp;
     look.vy = d.vy;
-    drawDevil(g, d.x, d.vis, P.scale, look);
+    drawFigure(dpr);
 
     g.fillStyle = '#16110d';
     for (const m of motes) {

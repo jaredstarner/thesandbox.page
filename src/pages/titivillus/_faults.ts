@@ -11,6 +11,8 @@ export interface Fault {
   /** The token as printed correctly, punctuation included. */
   original: string;
   prefix: string;
+  /** The letters of the prefix (a capital before the faulty run), for the errata. */
+  lead: string;
   core: string;
   suffix: string;
   kind: FaultKind;
@@ -143,6 +145,7 @@ export function setFaults(words: Word[], perLeaf: number, rand: Rand): Fault[] {
           el,
           original: token,
           prefix: m[1],
+          lead: m[1].replace(/[^a-z]/gi, ''),
           core: m[2],
           suffix: m[3],
           kind,
