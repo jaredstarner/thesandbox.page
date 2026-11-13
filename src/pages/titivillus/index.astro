@@ -243,6 +243,61 @@ const description =
     background: #20160f;
     overscroll-behavior-y: none;
   }
+  /* Faults and corrections, set by script into the words. */
+  .titivillus .tv-turn {
+    display: inline-block;
+    transform: rotate(180deg);
+  }
+  .titivillus .tv-wf {
+    font-style: italic;
+  }
+  .titivillus .w.bump {
+    position: relative;
+    animation: tv-bump 0.32s ease-out;
+  }
+  .titivillus .w.set {
+    animation: tv-set 1.8s ease-out;
+  }
+  .titivillus .w.missed {
+    color: #a12b1d;
+    text-decoration: underline 1px;
+    text-underline-offset: 3px;
+  }
+  .titivillus .mark {
+    position: absolute;
+    font-family: var(--font-fell);
+    font-style: italic;
+    font-size: 0.82em;
+    line-height: 1;
+    color: #a12b1d;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: tv-mark 0.5s ease-out;
+  }
+  @keyframes tv-bump {
+    0%,
+    100% {
+      top: 0;
+    }
+    35% {
+      top: -0.16em;
+    }
+  }
+  @keyframes tv-set {
+    0%,
+    30% {
+      color: #a12b1d;
+    }
+    100% {
+      color: inherit;
+    }
+  }
+  @keyframes tv-mark {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
 </style>
 
 <style>
