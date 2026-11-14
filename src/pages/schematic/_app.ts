@@ -344,9 +344,10 @@ export function start(root: HTMLElement): void {
 
   const setLegend = (net: Network) => {
     legend.replaceChildren();
+    // Roundels when every line has a short name, bars and names otherwise: one style per key.
+    const short = net.lines.every((l) => l.ref.length <= 4);
     for (const line of net.lines) {
       const li = document.createElement('li');
-      const short = line.ref.length <= 4;
       if (short) {
         const chip = document.createElement('b');
         chip.className = 'roundel';
@@ -662,7 +663,13 @@ export function start(root: HTMLElement): void {
       return;
     }
     const where = place.country ? `${place.name}, ${place.country}` : place.name;
-    say(`Asking OpenStreetMap for the metro around ${where}…`);
+    const asked = performance.now();
+    const asking = () =>
+      say(
+        `Asking OpenStreetMap for the metro around ${where}. Its public server can take a minute: ${Math.round((performance.now() - asked) / 1000)} s`,
+      );
+    asking();
+    const ticker = setInterval(asking, 1000);
     const dLat = 0.36;
     const dLon = 0.36 / Math.max(0.2, Math.cos((place.latitude * Math.PI) / 180));
     const bbox = [place.latitude - dLat, place.longitude - dLon, place.latitude + dLat, place.longitude + dLon]
@@ -685,16 +692,20 @@ out tags;`;
           signal: AbortSignal.timeout(70000),
         });
         if (res.ok || (res.status !== 429 && res.status !== 502 && res.status !== 504)) break;
-        say(`OpenStreetMap is busy; asking again (${attempt + 2} of 3)…`);
         await new Promise((r) => setTimeout(r, 4000 * (attempt + 1)));
-        if (token !== loadToken) return;
+        if (token !== loadToken) {
+          clearInterval(ticker);
+          return;
+        }
       }
       if (!res || !res.ok) throw new Error(String(res?.status));
       raw = await res.json();
     } catch {
+      clearInterval(ticker);
       say('OpenStreetMap is too busy to answer right now. Try again in a minute, or pick a city above.');
       return;
     }
+    clearInterval(ticker);
     if (token !== loadToken) return;
     // Prefer the heavy metro where a city has one; light rail and monorail only when it doesn't.
     const routes = raw.elements.filter((e) => e.type === 'relation' && e.tags?.type === 'route');
