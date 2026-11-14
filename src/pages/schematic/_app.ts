@@ -11,7 +11,8 @@ import { fromOverpass, type Network } from './_osm';
 import { prepare, type Prepared } from './_prep';
 import { frameAt, frameBounds, type Frame, type Scene } from './_scene';
 
-const loaders = import.meta.glob<Network>('./_data/*.json', { import: 'default' });
+// The snapshots ship as plain files fetched on demand, so no code is shared with other pages.
+const dataUrls = import.meta.glob<string>('./_data/*.json', { query: '?url', import: 'default', eager: true });
 
 interface Drawing {
   title: string;
@@ -456,10 +457,16 @@ export function start(root: HTMLElement): void {
   const loadCity = async (id: string) => {
     const city = CITIES.find((c) => c.id === id) ?? CITIES[0];
     setChecked(cityButtons, cityButtons.find((b) => b.dataset.cityId === city.id) ?? null);
-    const load = loaders[`./_data/${city.id}.json`];
-    if (!load) return;
+    const url = dataUrls[`./_data/${city.id}.json`];
+    if (!url) return;
     const token = ++loadToken;
-    const net = await load();
+    let net: Network;
+    try {
+      net = (await (await fetch(url)).json()) as Network;
+    } catch {
+      if (token === loadToken) note.textContent = 'This city did not load. Try another.';
+      return;
+    }
     if (token !== loadToken) return;
     show(city.name, city.system, net);
     searchStatus.textContent = '';
