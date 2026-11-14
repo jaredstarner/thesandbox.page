@@ -55,6 +55,8 @@ export function start(root: HTMLElement): void {
   const canvas = q<HTMLCanvasElement>('[data-canvas]');
   const note = q<HTMLElement>('[data-note]');
   const card = q<HTMLElement>('[data-card]');
+  const hint = q<HTMLElement>('[data-hint]');
+  const still = matchMedia('(prefers-reduced-motion: reduce)');
   const cityHead = q<HTMLElement>('[data-city]');
   const systemHead = q<HTMLElement>('[data-system]');
   const legend = q<HTMLOListElement>('[data-legend]');
@@ -87,6 +89,12 @@ export function start(root: HTMLElement): void {
   let height = 0;
   let dpr = 1;
   let playing: { from: number; t0: number; dur: number } | null = null;
+  /** On a small screen, a glide in to where the names can be read once the diagram is finished. */
+  let glide: { from: View; to: View; t0: number } | null = null;
+  let lastTap = { t: 0, x: 0, y: 0 };
+  /** After the glide in, keep the zoom hint up until the visitor touches the map. */
+  let hintAfterGlide = false;
+  const coarse = matchMedia('(pointer: coarse)');
   let raf = 0;
   let job = 0;
   let loadToken = 0;
@@ -155,6 +163,25 @@ export function start(root: HTMLElement): void {
 
   const currentView = () => userView ?? autoView() ?? { scale: 1, ox: 0, oy: 0 };
 
+  const startGlide = (now: number) => {
+    if (!drawing?.final || userView || width >= 600) return;
+    const from = autoView();
+    if (!from || NAME_SIZE * from.scale >= 7) return;
+    // Centre on the middle of the busiest stations, at a scale where names are about 8.5 px.
+    const busy: number[] = [];
+    drawing.g.served.forEach((lines, s) => {
+      if (lines.length > 1 && !Number.isNaN(drawing!.final!.pos[s * 2])) busy.push(s);
+    });
+    const pool = busy.length ? busy : drawing.g.keys;
+    const xs = pool.map((s) => drawing!.final!.pos[s * 2]).sort((a, b) => a - b);
+    const ys = pool.map((s) => drawing!.final!.pos[s * 2 + 1]).sort((a, b) => a - b);
+    const cx = xs[xs.length >> 1];
+    const cy = ys[ys.length >> 1];
+    const scale = 8.5 / NAME_SIZE;
+    glide = { from, to: { scale, ox: width / 2 - cx * scale, oy: height / 2 - cy * scale }, t0: now + 300 };
+    hintAfterGlide = true;
+  };
+
   // --- Drawing ---
 
   const sceneNow = (): Scene | null => {
@@ -185,6 +212,15 @@ export function start(root: HTMLElement): void {
       marker: drawing.marker,
     });
     updateScale(view);
+    hint.hidden = !(
+      drawing.labels &&
+      u > 0.98 &&
+      !glide &&
+      ((NAME_SIZE * view.scale < 8.5 && !userView) || hintAfterGlide)
+    );
+    hint.textContent = coarse.matches
+      ? 'Pinch to zoom. Double-tap to see the whole map.'
+      : 'Scroll or pinch to zoom in. Double-click to fit.';
     if (pinned !== null || hover !== null) showCard(pinned ?? hover!, fr, view);
     else card.hidden = true;
   };
@@ -197,11 +233,25 @@ export function start(root: HTMLElement): void {
     raf = 0;
     let again = false;
     if (playing) {
-      const t = Math.min(1, (now - playing.t0) / playing.dur);
+      const t = Math.min(1, Math.max(0, (now - playing.t0) / playing.dur));
       u = playing.from + (1 - playing.from) * ease(t);
       morph.value = String(Math.round(u * 1000));
-      if (t >= 1) playing = null;
-      else again = true;
+      if (t >= 1) {
+        playing = null;
+        startGlide(now);
+      }
+      again = true;
+    }
+    if (glide) {
+      const t = Math.min(1, (now - glide.t0) / 1400);
+      const k = ease(t);
+      userView = {
+        scale: glide.from.scale + (glide.to.scale - glide.from.scale) * k,
+        ox: glide.from.ox + (glide.to.ox - glide.from.ox) * k,
+        oy: glide.from.oy + (glide.to.oy - glide.from.oy) * k,
+      };
+      if (t >= 1) glide = null;
+      again = true;
     }
     const want = moved.checked ? 1 : 0;
     if (Math.abs(truthAlpha - want) > 0.01) {
@@ -323,6 +373,8 @@ export function start(root: HTMLElement): void {
     d.final = null;
     d.labels = null;
     d.extent = null;
+    glide = null;
+    hintAfterGlide = false;
     const frames = await runLayout({ geo: d.prep.keyStart, chains: d.prep.chains, angle, seed });
     if (token !== loadToken || drawing !== d) return;
     d.scene = { g: d.g, prep: d.prep, angle, frames: [d.truthKeys, ...frames], colours: d.net.lines.map((l) => l.colour) };
@@ -336,7 +388,15 @@ export function start(root: HTMLElement): void {
     root.dataset.state = 'ready';
     note.textContent = '';
     u = from;
-    playing = { from, t0: performance.now(), dur: PLAY_MS * (1 - from * 0.6) };
+    // With reduced motion, go straight to the diagram; the slider still runs back through it.
+    if (still.matches) {
+      u = 1;
+      morph.value = '1000';
+    } else {
+      // A first look at the real map before it starts to move.
+      const hold = from === 0 ? 900 : 0;
+      playing = { from, t0: performance.now() + hold, dur: PLAY_MS * (1 - from * 0.6) };
+    }
     schedule();
   };
 
@@ -462,6 +522,8 @@ export function start(root: HTMLElement): void {
 
   stage.addEventListener('pointerdown', (e) => {
     const p = local(e);
+    glide = null;
+    hintAfterGlide = false;
     pointers.set(e.pointerId, p);
     try {
       stage.setPointerCapture(e.pointerId);
@@ -523,6 +585,17 @@ export function start(root: HTMLElement): void {
       stage.classList.remove('dragging');
     }
     if (wasTap && e.type === 'pointerup') {
+      const now = performance.now();
+      if (now - lastTap.t < 320 && Math.hypot(p.x - lastTap.x, p.y - lastTap.y) < 30) {
+        // Double tap: back to the whole map.
+        userView = null;
+        glide = null;
+        pinned = null;
+        lastTap = { t: 0, x: 0, y: 0 };
+        schedule();
+        return;
+      }
+      lastTap = { t: now, x: p.x, y: p.y };
       const s = nearest(p.x, p.y);
       pinned = s === pinned ? null : s;
       schedule();
@@ -541,6 +614,8 @@ export function start(root: HTMLElement): void {
     'wheel',
     (e) => {
       e.preventDefault();
+      glide = null;
+      hintAfterGlide = false;
       const p = local(e);
       const v = currentView();
       const k = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0016));
@@ -648,6 +723,29 @@ out tags;`;
     show(place.name, system, net);
     searchStatus.textContent = `Drawn from OpenStreetMap as it stands today.`;
   };
+
+  // Render checks: ?debug exposes where stations are drawn and lets a check set the slider.
+  if (new URLSearchParams(location.search).has('debug')) {
+    (window as unknown as { schematic: object }).schematic = {
+      ready: () => Boolean(drawing?.labels) && !playing,
+      station: (name: string) => {
+        if (!drawing) return null;
+        const s = drawing.g.names.indexOf(name);
+        if (s < 0) return null;
+        const fr = drawing.scene ? frameAt(drawing.scene, u) : null;
+        if (!fr) return null;
+        const v = currentView();
+        return { x: fr.pos[s * 2] * v.scale + v.ox, y: fr.pos[s * 2 + 1] * v.scale + v.oy };
+      },
+      set: (value: number) => {
+        playing = null;
+        u = value;
+        morph.value = String(Math.round(u * 1000));
+        schedule();
+      },
+      clashes: () => drawing?.labels?.filter((l) => l.clash).length ?? null,
+    };
+  }
 
   // Start on the city named in the hash, or the first.
   const fromHash = location.hash.slice(1);

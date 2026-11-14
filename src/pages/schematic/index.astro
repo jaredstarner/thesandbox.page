@@ -26,6 +26,7 @@ const description =
           <canvas data-canvas></canvas>
           <p class="stage-note" data-note>The diagram needs JavaScript to draw.</p>
           <div class="card" data-card hidden></div>
+          <p class="hint" data-hint hidden>Scroll or pinch to zoom in. Double-click to fit.</p>
         </div>
         <div class="sheet-foot">
           <ol class="legend" data-legend></ol>
@@ -238,6 +239,20 @@ const description =
     margin: 0;
     color: var(--muted);
     font-size: 15px;
+    pointer-events: none;
+  }
+  .schematic .hint {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 4px 12px 5px;
+    border-radius: 999px;
+    background: rgb(21 23 26 / 82%);
+    color: #f4f2ec;
+    font-size: 12.5px;
+    white-space: nowrap;
     pointer-events: none;
   }
   .schematic[data-state='ready'] .stage-note:empty {
