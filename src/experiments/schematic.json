@@ -1,0 +1,8 @@
+{
+  "title": "Schematic",
+  "summary": "Real metro networks pulled out of OpenStreetMap and redrawn as transit diagrams while you watch: every station starts where it really is, then the lines straighten onto forty-five degrees, the stations space out evenly, and the names find room, for twelve cities or any other you type in.",
+  "date": "2026-11-14",
+  "tags": ["svg", "canvas", "web-workers", "pointer-events", "live-data", "openstreetmap", "graph-layout"],
+  "requires": [],
+  "plot": 44
+}
