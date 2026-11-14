@@ -97,8 +97,7 @@ function stationGeometry(scene: Scene, fr: Frame): Map<number, StationGeom> {
   const out = new Map<number, StationGeom>();
   // How many chain ends meet at each station: one means the end of a line.
   const ends = new Map<number, number>();
-  for (const c of g.chains)
-    for (const k of [c.a, c.b]) ends.set(g.keys[k], (ends.get(g.keys[k]) ?? 0) + 1);
+  for (const c of g.chains) for (const k of [c.a, c.b]) ends.set(g.keys[k], (ends.get(g.keys[k]) ?? 0) + 1);
   fr.chains.forEach((c, ci) => {
     const chain = g.chains[ci];
     const ids = [g.keys[chain.a], ...chain.inner, g.keys[chain.b]];
@@ -323,8 +322,7 @@ export function drawFrame(
   }
 }
 
-const esc = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const r2 = (v: number) => Math.round(v * 100) / 100;
 
 /** The finished diagram as a standalone SVG poster. */
@@ -376,7 +374,11 @@ export function toSVG(
     `</g>`,
   );
   const path = (cmds: Cmd[]) =>
-    cmds.map((c) => (c[0] === 'Q' ? `Q${r2(c[1])} ${r2(c[2])} ${r2(c[3])} ${r2(c[4])}` : `${c[0]}${r2(c[1])} ${r2(c[2])}`)).join('');
+    cmds
+      .map((c) =>
+        c[0] === 'Q' ? `Q${r2(c[1])} ${r2(c[2])} ${r2(c[3])} ${r2(c[4])}` : `${c[0]}${r2(c[1])} ${r2(c[2])}`,
+      )
+      .join('');
   const casing: string[] = [];
   const strokes: string[] = [];
   for (const c of fr.chains) {
@@ -394,7 +396,10 @@ export function toSVG(
   fr.chains.forEach((c, ci) => {
     if (!g.chains[ci].transfer) return;
     const d = `M${r2(c.pts[0])} ${r2(c.pts[1])}L${r2(c.pts[c.pts.length - 2])} ${r2(c.pts[c.pts.length - 1])}`;
-    walks.push(`<path d="${d}" stroke="${INK}" stroke-width="0.3"/>`, `<path d="${d}" stroke="${PAPER}" stroke-width="0.17"/>`);
+    walks.push(
+      `<path d="${d}" stroke="${INK}" stroke-width="0.3"/>`,
+      `<path d="${d}" stroke="${PAPER}" stroke-width="0.17"/>`,
+    );
   });
   parts.push(`<g fill="none">${walks.join('')}</g>`);
   const geom = stationGeometry(scene, fr);

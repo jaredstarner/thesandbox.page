@@ -11,7 +11,9 @@ const description =
   <Font cssVariable="--font-schematic" slot="head" />
   <main class="schematic" data-state="loading">
     <header class="band">
-      <p class="home"><a href="/">thesandbox.page</a></p>
+      <p class="home">
+        <a href="/">thesandbox.page</a>
+      </p>
       <h1>Schematic</h1>
       <p class="dek">A metro map, straightened while you watch.</p>
     </header>
@@ -24,15 +26,21 @@ const description =
         </div>
         <div class="stage" data-stage>
           <canvas data-canvas></canvas>
-          <p class="stage-note" data-note>The diagram needs JavaScript to draw.</p>
+          <p class="stage-note" data-note>
+            The diagram needs JavaScript to draw.
+          </p>
           <div class="card" data-card hidden></div>
-          <p class="hint" data-hint hidden>Scroll or pinch to zoom in. Double-click to fit.</p>
+          <p class="hint" data-hint hidden>
+            Scroll or pinch to zoom in. Double-click to fit.
+          </p>
         </div>
         <div class="sheet-foot">
           <ol class="legend" data-legend></ol>
           <div class="scale" data-scale aria-hidden="true">
             <span class="scale-bar" data-scale-bar></span>
-            <span class="scale-text" data-scale-text>1 km</span>
+            <span class="scale-text" data-scale-text>
+              1 km
+            </span>
           </div>
         </div>
         <figcaption class="credit">
@@ -42,18 +50,20 @@ const description =
 
       <aside class="desk">
         <div class="group">
-          <p class="group-label" id="city-label">City</p>
+          <p class="group-label" id="city-label">
+            City
+          </p>
           <div class="cities" role="radiogroup" aria-labelledby="city-label" data-cities>
-            {
-              CITIES.map((c, i) => (
-                <button type="button" role="radio" aria-checked={i === 0 ? 'true' : 'false'} data-city-id={c.id}>
-                  {c.name}
-                </button>
-              ))
-            }
+            {CITIES.map((c, i) => (
+              <button type="button" role="radio" aria-checked={i === 0 ? 'true' : 'false'} data-city-id={c.id}>
+                {c.name}
+              </button>
+            ))}
           </div>
           <form class="search" data-search>
-            <label class="visually-hidden" for="city-search">Any other city with a metro</label>
+            <label class="visually-hidden" for="city-search">
+              Any other city with a metro
+            </label>
             <input id="city-search" type="search" placeholder="Any other city with a metro" autocomplete="off" />
             <button type="submit">Draw</button>
           </form>
@@ -61,7 +71,9 @@ const description =
         </div>
 
         <div class="group">
-          <label class="group-label" for="morph">Geography to diagram</label>
+          <label class="group-label" for="morph">
+            Geography to diagram
+          </label>
           <div class="morph">
             <span>Where it is</span>
             <input id="morph" type="range" min="0" max="1000" value="0" data-morph />
@@ -70,18 +82,32 @@ const description =
         </div>
 
         <div class="group">
-          <p class="group-label" id="angle-label">Angles</p>
+          <p class="group-label" id="angle-label">
+            Angles
+          </p>
           <div class="angles" role="radiogroup" aria-labelledby="angle-label" data-angles>
-            <button type="button" role="radio" aria-checked="false" data-angle="90">90°</button>
-            <button type="button" role="radio" aria-checked="false" data-angle="60">60°</button>
-            <button type="button" role="radio" aria-checked="true" data-angle="45">45°</button>
+            <button type="button" role="radio" aria-checked="false" data-angle="90">
+              90°
+            </button>
+            <button type="button" role="radio" aria-checked="false" data-angle="60">
+              60°
+            </button>
+            <button type="button" role="radio" aria-checked="true" data-angle="45">
+              45°
+            </button>
           </div>
         </div>
 
         <div class="group actions">
-          <button type="button" data-redraw>Straighten it again</button>
-          <button type="button" data-download>Download SVG</button>
-          <label class="check"><input type="checkbox" data-moved /> Show where each station really is</label>
+          <button type="button" data-redraw>
+            Straighten it again
+          </button>
+          <button type="button" data-download>
+            Download SVG
+          </button>
+          <label class="check">
+            <input type="checkbox" data-moved /> Show where each station really is
+          </label>
         </div>
 
         <div class="group about">

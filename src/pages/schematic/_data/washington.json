@@ -1,1 +1,159 @@
-{"stations":[["Franconia–Springfield",38.7666,-77.16775],["Van Dorn Street",38.7993,-77.12909],["King Street–Old Town",38.80681,-77.06067],["Braddock Road",38.81414,-77.05367],["Potomac Yard",38.83324,-77.04643],["Ronald Reagan Washington National Airport",38.85349,-77.04404],["Crystal City",38.85782,-77.05027],["Pentagon City",38.86283,-77.05947],["Pentagon",38.86913,-77.05405],["Arlington Cemetery",38.88459,-77.0631],["Rosslyn",38.89607,-77.07092],["Foggy Bottom–GWU",38.90074,-77.05037],["Farragut West",38.90137,-77.04041],["McPherson Square",38.90137,-77.03209],["Metro Center",38.8983,-77.02801],["Federal Triangle",38.89341,-77.02808],["Smithsonian",38.88845,-77.02856],["L'Enfant Plaza",38.88492,-77.02192],["Federal Center Southwest",38.8851,-77.01511],["Capitol South",38.8851,-77.00603],["Eastern Market",38.88449,-76.99565],["Potomac Avenue",38.88129,-76.9852],["Stadium–Armory",38.88671,-76.97714],["Benning Road",38.89109,-76.93854],["Downtown Largo",38.90046,-76.84474],["Greenbelt",39.0111,-76.91118],["College Park–University of Maryland",38.9783,-76.92834],["Hyattsville Crossing",38.96531,-76.95634],["West Hyattsville",38.95523,-76.96952],["Fort Totten",38.95177,-77.00243],["Georgia Avenue–Petworth",38.93681,-77.02396],["Columbia Heights",38.92837,-77.03263],["U Street",38.91701,-77.02746],["Shaw–Howard University",38.91348,-77.02191],["Mount Vernon Square",38.90553,-77.02192],["Gallery Place",38.89848,-77.02194],["Archives",38.89367,-77.02192],["Waterfront",38.87646,-77.01745],["Navy Yard–Ballpark",38.87648,-77.00621],["Anacostia",38.86313,-76.9956],["Congress Heights",38.84487,-76.98787],["Southern Avenue",38.84105,-76.97509],["Naylor Road",38.85113,-76.95668],["Suitland",38.84459,-76.93279],["Branch Avenue",38.8269,-76.91212],["New Carrollton",38.94804,-76.8719],["Court House",38.89011,-77.08735],["Clarendon",38.88677,-77.0954],["Virginia Square–GMU",38.88331,-77.10334],["Ballston–MU",38.8823,-77.11174],["East Falls Church",38.886,-77.15682],["West Falls Church–VT",38.90087,-77.18923],["Dunn Loring–Merrifield",38.88359,-77.22758],["Vienna/Fairfax–GMU",38.87764,-77.2724],["Glenmont",39.06178,-77.05359],["Wheaton",39.03774,-77.05021],["Forest Glen",39.015,-77.0429],["Silver Spring",38.9937,-77.03116],["Takoma",38.97594,-77.01808],["Brookland–CUA",38.93313,-76.99452],["Rhode Island Avenue–Brentwood",38.92085,-76.99596],["NoMa–Gallaudet U",38.9067,-77.00327],["Union",38.89777,-77.00744],["Judiciary Square",38.89608,-77.01667],["Farragut North",38.90329,-77.03974],["Dupont Circle",38.90976,-77.04352],["Woodley Park",38.92503,-77.05236],["Cleveland Park",38.93476,-77.05799],["Van Ness–UDC",38.94388,-77.06334],["Tenleytown–AU",38.9488,-77.07955],["Friendship Heights",38.95988,-77.08523],["Bethesda",38.98435,-77.09413],["Medical Center",38.99885,-77.09683],["Grosvenor–Strathmore",39.02953,-77.10402],["North Bethesda",39.04852,-77.11305],["Twinbrook",39.06272,-77.12125],["Rockville",39.08426,-77.14618],["Shady Grove",39.11991,-77.16466],["McLean",38.92452,-77.21013],["Tysons",38.92062,-77.22224],["Greensboro",38.92129,-77.23419],["Spring Hill",38.92925,-77.24193],["Wiehle–Reston East",38.94772,-77.34],["Reston Town Center",38.95282,-77.36056],["Herndon",38.95278,-77.38455],["Innovation Center",38.96093,-77.41577],["Washington Dulles International Airport",38.95579,-77.44822],["Loudoun Gateway",38.99253,-77.46131],["Ashburn",39.00504,-77.49128],["Loudon Gateway",38.99174,-77.46032],["Eisenhower Avenue",38.80037,-77.07111],["Huntington",38.79383,-77.0753]],"lines":[{"ref":"B","name":"WMATA Blue Line","colour":"#009cde","routes":[[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]]},{"ref":"G","name":"WMATA Green Line","colour":"#00b140","routes":[[25,26,27,28,29,30,31,32,33,34,35,36,17,37,38,39,40,41,42,43,44]]},{"ref":"O","name":"WMATA Orange Line","colour":"#ed8b00","routes":[[45,22,21,20,19,18,17,16,15,14,13,12,11,10,46,47,48,49,50,51,52,53],[49,48,47,46,10,12,13,14,15,16,17,18,19,20,21,22]]},{"ref":"R","name":"WMATA Red Line","colour":"#bf0d3e","routes":[[54,55,56,57,58,29,59,60,61,62,63,35,14,64,65,66,67,68,69,70,71,72,73,74,75,76,77]]},{"ref":"S","name":"WMATA Silver Line","colour":"#919d9d","routes":[[24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,46,47,48,49,50,78,79,80,81,82,83,84,85,86,87,88],[88,89,86,85,84,83,82,81,80,79,78,50,49,48,47,46,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],[45,22,21,20,19,18,17,16,15,14,13,12,11,10,46,47,48,49,50,78,79,80,81,82,83,84,85,86,87,88],[88,89,86,85,84,83,82,81,80,79,78,50,49,48,47,46,10,11,12,13,14,15,16,17,18,19,20,21,22,45]]},{"ref":"Y","name":"WMATA Yellow Line","colour":"#ffd100","routes":[[25,26,27,28,29,30,31,32,33,34,35,36,17,8,7,6,5,4,3,2,90,91],[34,35,36,17,8,7,6,5,4,3,2,90,91]]}]}
+{
+  "stations": [
+    ["Franconia–Springfield", 38.7666, -77.16775],
+    ["Van Dorn Street", 38.7993, -77.12909],
+    ["King Street–Old Town", 38.80681, -77.06067],
+    ["Braddock Road", 38.81414, -77.05367],
+    ["Potomac Yard", 38.83324, -77.04643],
+    ["Ronald Reagan Washington National Airport", 38.85349, -77.04404],
+    ["Crystal City", 38.85782, -77.05027],
+    ["Pentagon City", 38.86283, -77.05947],
+    ["Pentagon", 38.86913, -77.05405],
+    ["Arlington Cemetery", 38.88459, -77.0631],
+    ["Rosslyn", 38.89607, -77.07092],
+    ["Foggy Bottom–GWU", 38.90074, -77.05037],
+    ["Farragut West", 38.90137, -77.04041],
+    ["McPherson Square", 38.90137, -77.03209],
+    ["Metro Center", 38.8983, -77.02801],
+    ["Federal Triangle", 38.89341, -77.02808],
+    ["Smithsonian", 38.88845, -77.02856],
+    ["L'Enfant Plaza", 38.88492, -77.02192],
+    ["Federal Center Southwest", 38.8851, -77.01511],
+    ["Capitol South", 38.8851, -77.00603],
+    ["Eastern Market", 38.88449, -76.99565],
+    ["Potomac Avenue", 38.88129, -76.9852],
+    ["Stadium–Armory", 38.88671, -76.97714],
+    ["Benning Road", 38.89109, -76.93854],
+    ["Downtown Largo", 38.90046, -76.84474],
+    ["Greenbelt", 39.0111, -76.91118],
+    ["College Park–University of Maryland", 38.9783, -76.92834],
+    ["Hyattsville Crossing", 38.96531, -76.95634],
+    ["West Hyattsville", 38.95523, -76.96952],
+    ["Fort Totten", 38.95177, -77.00243],
+    ["Georgia Avenue–Petworth", 38.93681, -77.02396],
+    ["Columbia Heights", 38.92837, -77.03263],
+    ["U Street", 38.91701, -77.02746],
+    ["Shaw–Howard University", 38.91348, -77.02191],
+    ["Mount Vernon Square", 38.90553, -77.02192],
+    ["Gallery Place", 38.89848, -77.02194],
+    ["Archives", 38.89367, -77.02192],
+    ["Waterfront", 38.87646, -77.01745],
+    ["Navy Yard–Ballpark", 38.87648, -77.00621],
+    ["Anacostia", 38.86313, -76.9956],
+    ["Congress Heights", 38.84487, -76.98787],
+    ["Southern Avenue", 38.84105, -76.97509],
+    ["Naylor Road", 38.85113, -76.95668],
+    ["Suitland", 38.84459, -76.93279],
+    ["Branch Avenue", 38.8269, -76.91212],
+    ["New Carrollton", 38.94804, -76.8719],
+    ["Court House", 38.89011, -77.08735],
+    ["Clarendon", 38.88677, -77.0954],
+    ["Virginia Square–GMU", 38.88331, -77.10334],
+    ["Ballston–MU", 38.8823, -77.11174],
+    ["East Falls Church", 38.886, -77.15682],
+    ["West Falls Church–VT", 38.90087, -77.18923],
+    ["Dunn Loring–Merrifield", 38.88359, -77.22758],
+    ["Vienna/Fairfax–GMU", 38.87764, -77.2724],
+    ["Glenmont", 39.06178, -77.05359],
+    ["Wheaton", 39.03774, -77.05021],
+    ["Forest Glen", 39.015, -77.0429],
+    ["Silver Spring", 38.9937, -77.03116],
+    ["Takoma", 38.97594, -77.01808],
+    ["Brookland–CUA", 38.93313, -76.99452],
+    ["Rhode Island Avenue–Brentwood", 38.92085, -76.99596],
+    ["NoMa–Gallaudet U", 38.9067, -77.00327],
+    ["Union", 38.89777, -77.00744],
+    ["Judiciary Square", 38.89608, -77.01667],
+    ["Farragut North", 38.90329, -77.03974],
+    ["Dupont Circle", 38.90976, -77.04352],
+    ["Woodley Park", 38.92503, -77.05236],
+    ["Cleveland Park", 38.93476, -77.05799],
+    ["Van Ness–UDC", 38.94388, -77.06334],
+    ["Tenleytown–AU", 38.9488, -77.07955],
+    ["Friendship Heights", 38.95988, -77.08523],
+    ["Bethesda", 38.98435, -77.09413],
+    ["Medical Center", 38.99885, -77.09683],
+    ["Grosvenor–Strathmore", 39.02953, -77.10402],
+    ["North Bethesda", 39.04852, -77.11305],
+    ["Twinbrook", 39.06272, -77.12125],
+    ["Rockville", 39.08426, -77.14618],
+    ["Shady Grove", 39.11991, -77.16466],
+    ["McLean", 38.92452, -77.21013],
+    ["Tysons", 38.92062, -77.22224],
+    ["Greensboro", 38.92129, -77.23419],
+    ["Spring Hill", 38.92925, -77.24193],
+    ["Wiehle–Reston East", 38.94772, -77.34],
+    ["Reston Town Center", 38.95282, -77.36056],
+    ["Herndon", 38.95278, -77.38455],
+    ["Innovation Center", 38.96093, -77.41577],
+    ["Washington Dulles International Airport", 38.95579, -77.44822],
+    ["Loudoun Gateway", 38.99253, -77.46131],
+    ["Ashburn", 39.00504, -77.49128],
+    ["Loudon Gateway", 38.99174, -77.46032],
+    ["Eisenhower Avenue", 38.80037, -77.07111],
+    ["Huntington", 38.79383, -77.0753]
+  ],
+  "lines": [
+    {
+      "ref": "B",
+      "name": "WMATA Blue Line",
+      "colour": "#009cde",
+      "routes": [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]]
+    },
+    {
+      "ref": "G",
+      "name": "WMATA Green Line",
+      "colour": "#00b140",
+      "routes": [[25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 17, 37, 38, 39, 40, 41, 42, 43, 44]]
+    },
+    {
+      "ref": "O",
+      "name": "WMATA Orange Line",
+      "colour": "#ed8b00",
+      "routes": [
+        [45, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 46, 47, 48, 49, 50, 51, 52, 53],
+        [49, 48, 47, 46, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
+      ]
+    },
+    {
+      "ref": "R",
+      "name": "WMATA Red Line",
+      "colour": "#bf0d3e",
+      "routes": [
+        [54, 55, 56, 57, 58, 29, 59, 60, 61, 62, 63, 35, 14, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77]
+      ]
+    },
+    {
+      "ref": "S",
+      "name": "WMATA Silver Line",
+      "colour": "#919d9d",
+      "routes": [
+        [
+          24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 46, 47, 48, 49, 50, 78, 79, 80, 81, 82, 83, 84,
+          85, 86, 87, 88
+        ],
+        [
+          88, 89, 86, 85, 84, 83, 82, 81, 80, 79, 78, 50, 49, 48, 47, 46, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+          21, 22, 23, 24
+        ],
+        [
+          45, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 46, 47, 48, 49, 50, 78, 79, 80, 81, 82, 83, 84, 85,
+          86, 87, 88
+        ],
+        [
+          88, 89, 86, 85, 84, 83, 82, 81, 80, 79, 78, 50, 49, 48, 47, 46, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+          21, 22, 45
+        ]
+      ]
+    },
+    {
+      "ref": "Y",
+      "name": "WMATA Yellow Line",
+      "colour": "#ffd100",
+      "routes": [
+        [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 17, 8, 7, 6, 5, 4, 3, 2, 90, 91],
+        [34, 35, 36, 17, 8, 7, 6, 5, 4, 3, 2, 90, 91]
+      ]
+    }
+  ]
+}

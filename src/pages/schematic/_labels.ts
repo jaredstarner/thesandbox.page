@@ -79,14 +79,7 @@ function segBox(c: Capsule, b: Box): number {
     }
     return true;
   };
-  if (
-    clip(-dx, x0 + b.hw) &&
-    clip(dx, b.hw - x0) &&
-    clip(-dy, y0 + b.hh) &&
-    clip(dy, b.hh - y0) &&
-    t0 <= t1
-  )
-    return 0;
+  if (clip(-dx, x0 + b.hw) && clip(dx, b.hw - x0) && clip(-dy, y0 + b.hh) && clip(dy, b.hh - y0) && t0 <= t1) return 0;
   // Otherwise the nearest of: segment ends to box, box corners to segment.
   let best = Math.min(pointBox(c.ax, c.ay, b), pointBox(c.bx, c.by, b));
   const l2 = dx * dx + dy * dy;
@@ -148,12 +141,7 @@ const CANDIDATES: Candidate[] = [
 ];
 for (const c of CANDIDATES.slice(0, 8)) CANDIDATES.push({ ...c, cost: c.cost + 1.8, far: 0.5 });
 
-export function placeLabels(
-  g: Graph,
-  fr: Frame,
-  marker: Float64Array,
-  measure: (text: string) => number,
-): Label[] {
+export function placeLabels(g: Graph, fr: Frame, marker: Float64Array, measure: (text: string) => number): Label[] {
   const h = NAME_SIZE * 1.18;
   // Obstacles: every chain's bundle as capsules, and every station's marker.
   const caps: Capsule[] = [];
@@ -192,7 +180,8 @@ export function placeLabels(
     const j0 = Math.floor((b.cy - reach) / CELL);
     const j1 = Math.floor((b.cy + reach) / CELL);
     const out = new Set<number>();
-    for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) for (const x of map.get(cellKey(i, j)) ?? []) out.add(x);
+    for (let i = i0; i <= i1; i++)
+      for (let j = j0; j <= j1; j++) for (const x of map.get(cellKey(i, j)) ?? []) out.add(x);
     return out;
   };
 

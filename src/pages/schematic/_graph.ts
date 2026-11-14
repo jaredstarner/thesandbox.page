@@ -130,7 +130,10 @@ export function buildGraph(net: Network): Graph {
   for (const e of edges.values()) {
     nbrs[e.a].push(e.b);
     nbrs[e.b].push(e.a);
-    edgeLines.set(edgeKey(e.a, e.b), [...e.lines].sort((x, y) => x - y));
+    edgeLines.set(
+      edgeKey(e.a, e.b),
+      [...e.lines].sort((x, y) => x - y),
+    );
   }
   const linesOf = (a: number, b: number) => edgeLines.get(edgeKey(a, b)) ?? [];
   const sameLines = (p: number[], q: number[]) => p.length === q.length && p.every((x, i) => x === q[i]);

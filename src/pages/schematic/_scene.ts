@@ -60,8 +60,7 @@ export function frameAt(scene: Scene, u: number): Frame {
   const settle = smooth(1, 1 + Math.max(2, (total - 2) * 0.45), f);
 
   const pos = new Float64Array(n * 2).fill(NaN);
-  const base = (s: number, axis: number) =>
-    prep.truth[s * 2 + axis] * (1 - open) + prep.opened[s * 2 + axis] * open;
+  const base = (s: number, axis: number) => prep.truth[s * 2 + axis] * (1 - open) + prep.opened[s * 2 + axis] * open;
 
   g.keys.forEach((s, k) => {
     pos[s * 2] = key(k, 0);

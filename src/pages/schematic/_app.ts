@@ -143,7 +143,11 @@ export function start(root: HTMLElement): void {
     const fb = drawing.extent ?? frameBounds(drawing.final);
     const vf = fit(fb, drawing.extent ? 0.5 : 3.2, drawing.extent ? 0.5 : 1.2);
     const k = ease(Math.min(1, u * 1.15));
-    return { scale: vt.scale + (vf.scale - vt.scale) * k, ox: vt.ox + (vf.ox - vt.ox) * k, oy: vt.oy + (vf.oy - vt.oy) * k };
+    return {
+      scale: vt.scale + (vf.scale - vt.scale) * k,
+      ox: vt.ox + (vf.ox - vt.ox) * k,
+      oy: vt.oy + (vf.oy - vt.oy) * k,
+    };
   };
 
   const boundsOf = (pts: Float64Array, g: Graph): [number, number, number, number] => {
@@ -306,7 +310,9 @@ export function start(root: HTMLElement): void {
       const km = Math.hypot(dx, dy) / drawing.prep.unitsPerKm;
       const p = document.createElement('p');
       p.textContent =
-        km < 0.1 ? 'Drawn almost exactly where it stands.' : `Drawn ${km.toFixed(km < 10 ? 1 : 0)} km from where it stands.`;
+        km < 0.1
+          ? 'Drawn almost exactly where it stands.'
+          : `Drawn ${km.toFixed(km < 10 ? 1 : 0)} km from where it stands.`;
       card.append(p);
     }
     card.hidden = false;
@@ -378,7 +384,13 @@ export function start(root: HTMLElement): void {
     hintAfterGlide = false;
     const frames = await runLayout({ geo: d.prep.keyStart, chains: d.prep.chains, angle, seed });
     if (token !== loadToken || drawing !== d) return;
-    d.scene = { g: d.g, prep: d.prep, angle, frames: [d.truthKeys, ...frames], colours: d.net.lines.map((l) => l.colour) };
+    d.scene = {
+      g: d.g,
+      prep: d.prep,
+      angle,
+      frames: [d.truthKeys, ...frames],
+      colours: d.net.lines.map((l) => l.colour),
+    };
     d.final = frameAt(d.scene, 1);
     await document.fonts.ready;
     if (token !== loadToken || drawing !== d) return;
@@ -410,7 +422,19 @@ export function start(root: HTMLElement): void {
       truthKeys[k * 2] = prep.truth[s * 2];
       truthKeys[k * 2 + 1] = prep.truth[s * 2 + 1];
     });
-    drawing = { title, system, net, g, prep, marker: markerSizes(g), truthKeys, scene: null, final: null, labels: null, extent: null };
+    drawing = {
+      title,
+      system,
+      net,
+      g,
+      prep,
+      marker: markerSizes(g),
+      truthKeys,
+      scene: null,
+      final: null,
+      labels: null,
+      extent: null,
+    };
     const stations = g.served.filter((s) => s.length).length;
     cityHead.textContent = title;
     systemHead.textContent = `${system} · ${net.lines.length} lines · ${stations} stations`;
@@ -540,7 +564,12 @@ export function start(root: HTMLElement): void {
     if (pointers.size === 1) down = { x: p.x, y: p.y, view: { ...currentView() } };
     else if (pointers.size === 2) {
       const [a, b] = [...pointers.values()];
-      pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), view: { ...currentView() }, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
+      pinch = {
+        d: Math.hypot(a.x - b.x, a.y - b.y),
+        view: { ...currentView() },
+        mx: (a.x + b.x) / 2,
+        my: (a.y + b.y) / 2,
+      };
       down = null;
     }
   });
@@ -733,7 +762,8 @@ out tags;`;
     const counts = new Map<string, number>();
     for (const r of routes) {
       const nw = r.tags?.network?.trim();
-      if (nw && nw.length <= 28 && (!hasSubway || r.tags?.route === 'subway')) counts.set(nw, (counts.get(nw) ?? 0) + 1);
+      if (nw && nw.length <= 28 && (!hasSubway || r.tags?.route === 'subway'))
+        counts.set(nw, (counts.get(nw) ?? 0) + 1);
     }
     const system = [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? (hasSubway ? 'Metro' : 'Light rail');
     show(place.name, system, net);
