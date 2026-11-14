@@ -1,0 +1,521 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { CITIES } from './_cities';
+
+const description =
+  'Real metro networks from OpenStreetMap, redrawn as transit diagrams while you watch: lines straighten, stations space out, and the names find room.';
+---
+
+<Bare title="Schematic" description={description}>
+  <Font cssVariable="--font-schematic" slot="head" />
+  <main class="schematic" data-state="loading">
+    <header class="band">
+      <p class="home"><a href="/">thesandbox.page</a></p>
+      <h1>Schematic</h1>
+      <p class="dek">A metro map, straightened while you watch.</p>
+    </header>
+
+    <section class="board">
+      <figure class="sheet" aria-label="Diagram">
+        <div class="sheet-head">
+          <h2 data-city>Vienna</h2>
+          <p data-system>U-Bahn</p>
+        </div>
+        <div class="stage" data-stage>
+          <canvas data-canvas></canvas>
+          <p class="stage-note" data-note>The diagram needs JavaScript to draw.</p>
+          <div class="card" data-card hidden></div>
+        </div>
+        <div class="sheet-foot">
+          <ol class="legend" data-legend></ol>
+          <div class="scale" data-scale aria-hidden="true">
+            <span class="scale-bar" data-scale-bar></span>
+            <span class="scale-text" data-scale-text>1 km</span>
+          </div>
+        </div>
+        <figcaption class="credit">
+          Network data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, ODbL
+        </figcaption>
+      </figure>
+
+      <aside class="desk">
+        <div class="group">
+          <p class="group-label" id="city-label">City</p>
+          <div class="cities" role="radiogroup" aria-labelledby="city-label" data-cities>
+            {
+              CITIES.map((c, i) => (
+                <button type="button" role="radio" aria-checked={i === 0 ? 'true' : 'false'} data-city-id={c.id}>
+                  {c.name}
+                </button>
+              ))
+            }
+          </div>
+          <form class="search" data-search>
+            <label class="visually-hidden" for="city-search">Any other city with a metro</label>
+            <input id="city-search" type="search" placeholder="Any other city with a metro" autocomplete="off" />
+            <button type="submit">Draw</button>
+          </form>
+          <p class="search-status" data-search-status aria-live="polite"></p>
+        </div>
+
+        <div class="group">
+          <label class="group-label" for="morph">Geography to diagram</label>
+          <div class="morph">
+            <span>Where it is</span>
+            <input id="morph" type="range" min="0" max="1000" value="0" data-morph />
+            <span>How to read it</span>
+          </div>
+        </div>
+
+        <div class="group">
+          <p class="group-label" id="angle-label">Angles</p>
+          <div class="angles" role="radiogroup" aria-labelledby="angle-label" data-angles>
+            <button type="button" role="radio" aria-checked="false" data-angle="90">90°</button>
+            <button type="button" role="radio" aria-checked="false" data-angle="60">60°</button>
+            <button type="button" role="radio" aria-checked="true" data-angle="45">45°</button>
+          </div>
+        </div>
+
+        <div class="group actions">
+          <button type="button" data-redraw>Straighten it again</button>
+          <button type="button" data-download>Download SVG</button>
+          <label class="check"><input type="checkbox" data-moved /> Show where each station really is</label>
+        </div>
+
+        <div class="group about">
+          <p>
+            Every station starts where it really stands. The drawing then moves the junctions about a grid, one step at
+            a time, trading accuracy for straight lines, even spacing, and clean angles, and finally finds a place for
+            every name. The slider runs back through each step.
+          </p>
+        </div>
+      </aside>
+    </section>
+  </main>
+</Bare>
+
+<style is:global>
+  .schematic {
+    --wall: #e4e2dc;
+    --sheet: #ffffff;
+    --ink: #15171a;
+    --muted: #5d6168;
+    --rule: #c9c6be;
+    --band: #15171a;
+    --band-ink: #f4f2ec;
+    --accent: #0b5cad;
+    --font: var(--font-schematic), 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+
+    box-sizing: border-box;
+    min-height: 100dvh;
+    margin: 0;
+    background: var(--wall);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.45;
+    display: flex;
+    flex-direction: column;
+  }
+  body:has(.schematic) {
+    margin: 0;
+    background: #e4e2dc;
+  }
+  .schematic *,
+  .schematic *::before,
+  .schematic *::after {
+    box-sizing: border-box;
+  }
+  .schematic [hidden] {
+    display: none !important;
+  }
+  .schematic .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .schematic .band {
+    display: flex;
+    align-items: baseline;
+    gap: 0 20px;
+    flex-wrap: wrap;
+    padding: 14px 28px 12px;
+    background: var(--band);
+    color: var(--band-ink);
+  }
+  .schematic .band h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    order: 1;
+  }
+  .schematic .band .dek {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 300;
+    opacity: 0.86;
+    order: 2;
+  }
+  .schematic .band .home {
+    margin: 0 0 0 auto;
+    font-size: 14px;
+    order: 3;
+  }
+  .schematic .band a {
+    color: inherit;
+    text-underline-offset: 3px;
+  }
+
+  .schematic .board {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 22px;
+    padding: 22px 28px 28px;
+    min-height: 0;
+  }
+
+  .schematic .sheet {
+    margin: 0;
+    background: var(--sheet);
+    border: 1px solid #d3d0c8;
+    box-shadow:
+      0 1px 0 rgb(0 0 0 / 4%),
+      0 18px 40px -24px rgb(30 25 15 / 35%);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    min-height: 0;
+    height: calc(100dvh - 62px - 50px);
+    min-height: 560px;
+    position: relative;
+  }
+  .schematic .sheet-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 18px 24px 0;
+  }
+  .schematic .sheet-head h2 {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+  }
+  .schematic .sheet-head p {
+    margin: 0;
+    font-size: 17px;
+    color: var(--muted);
+  }
+  .schematic .stage {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+    touch-action: none;
+    cursor: grab;
+  }
+  .schematic .stage.dragging {
+    cursor: grabbing;
+  }
+  .schematic .stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .schematic .stage-note {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+    pointer-events: none;
+  }
+  .schematic[data-state='ready'] .stage-note:empty {
+    display: none;
+  }
+
+  .schematic .sheet-foot {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 0 24px 6px;
+  }
+  .schematic .legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 13px;
+  }
+  .schematic .legend li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+  }
+  .schematic .legend i {
+    display: inline-block;
+    width: 26px;
+    height: 6px;
+    border-radius: 1px;
+  }
+  .schematic .scale {
+    display: grid;
+    justify-items: end;
+    gap: 3px;
+    font-size: 12px;
+    color: var(--muted);
+    flex: none;
+    transition: opacity 0.2s;
+  }
+  .schematic .scale-bar {
+    display: block;
+    height: 6px;
+    border: 1.5px solid var(--ink);
+    border-top: 0;
+    width: 60px;
+  }
+  .schematic .credit {
+    padding: 4px 24px 12px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .schematic .credit a {
+    color: inherit;
+  }
+
+  .schematic .card {
+    position: absolute;
+    z-index: 2;
+    min-width: 180px;
+    max-width: 280px;
+    padding: 10px 12px 11px;
+    background: var(--sheet);
+    border: 1.5px solid var(--ink);
+    box-shadow: 0 10px 24px -14px rgb(0 0 0 / 45%);
+    font-size: 13px;
+    line-height: 1.35;
+    pointer-events: none;
+  }
+  .schematic .card strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .schematic .card .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .schematic .card .chip {
+    padding: 0 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+  }
+  .schematic .card p {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .schematic .desk {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-size: 14px;
+  }
+  .schematic .group {
+    display: grid;
+    gap: 8px;
+  }
+  .schematic .group-label {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .schematic button {
+    font: inherit;
+    color: inherit;
+  }
+  .schematic .cities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .schematic .cities button,
+  .schematic .angles button {
+    padding: 5px 11px 6px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1.2;
+  }
+  .schematic .cities button[aria-checked='true'],
+  .schematic .angles button[aria-checked='true'] {
+    background: var(--ink);
+    color: var(--band-ink);
+  }
+  .schematic .cities button:hover,
+  .schematic .angles button:hover {
+    background: rgb(0 0 0 / 7%);
+  }
+  .schematic .cities button[aria-checked='true']:hover,
+  .schematic .angles button[aria-checked='true']:hover {
+    background: #33373d;
+  }
+  .schematic .search {
+    display: flex;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .schematic .search input {
+    flex: 1;
+    min-width: 0;
+    padding: 7px 12px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: var(--sheet);
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .schematic .search button,
+  .schematic .actions button {
+    padding: 7px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--band-ink);
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .schematic .search button:hover,
+  .schematic .actions button:hover {
+    background: #33373d;
+  }
+  .schematic .search-status {
+    margin: 0;
+    min-height: 1.4em;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .schematic .morph {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .schematic .morph input {
+    width: 100%;
+    accent-color: var(--ink);
+  }
+  .schematic .angles {
+    display: flex;
+    gap: 6px;
+  }
+  .schematic .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .schematic .check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .schematic .check input {
+    accent-color: var(--ink);
+    width: 16px;
+    height: 16px;
+    margin: 0;
+  }
+  .schematic .about p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+
+  @media (max-width: 900px) {
+    .schematic .band {
+      padding: 12px 16px 10px;
+    }
+    .schematic .band h1 {
+      font-size: 24px;
+    }
+    .schematic .band .dek {
+      font-size: 14px;
+      width: 100%;
+      order: 4;
+    }
+    .schematic .board {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 12px 12px 24px;
+      gap: 16px;
+    }
+    .schematic .sheet {
+      height: auto;
+      min-height: 0;
+      grid-template-rows: auto auto auto auto;
+    }
+    .schematic .stage {
+      height: min(118vw, 72dvh);
+    }
+    .schematic .sheet-head {
+      padding: 12px 14px 0;
+    }
+    .schematic .sheet-head h2 {
+      font-size: 26px;
+    }
+    .schematic .sheet-head p {
+      font-size: 14px;
+    }
+    .schematic .sheet-foot {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 0 14px 4px;
+    }
+    .schematic .scale {
+      justify-items: start;
+    }
+    .schematic .credit {
+      padding: 4px 14px 10px;
+    }
+    .schematic .desk {
+      padding: 0 4px;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('.schematic');
+  if (root) start(root);
+</script>

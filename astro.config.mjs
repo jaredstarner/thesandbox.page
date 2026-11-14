@@ -691,5 +691,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Georgia', 'serif'],
     },
+    // /schematic/: Signika, a sans drawn for wayfinding, for station names and the sheet. Latin Extended for names like Großfeldsiedlung.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Signika',
+      cssVariable: '--font-schematic',
+      weights: ['300 700'],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
+    },
   ],
 });
