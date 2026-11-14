@@ -12,6 +12,8 @@ export interface Chain {
   inner: number[];
   /** Line indexes running along the chain, ascending. */
   lines: number[];
+  /** A walking connection between two stations of different names, with no line on it. */
+  transfer?: boolean;
 }
 
 export interface Graph {
@@ -24,6 +26,8 @@ export interface Graph {
   keys: number[];
   /** Key index of each station, or -1. */
   keyOf: Int32Array;
+  /** 1 for stations joined to another by a walking transfer. */
+  walk: Uint8Array;
   chains: Chain[];
   /** Median distance between neighbouring stations, km. */
   spacing: number;
@@ -138,6 +142,29 @@ export function buildGraph(net: Network): Graph {
     if (d === 0) continue;
     if (d !== 2) isKey[i] = 1;
     else if (!sameLines(linesOf(i, nbrs[i][0]), linesOf(i, nbrs[i][1]))) isKey[i] = 1;
+  }
+
+  // Walking transfers: stations a short walk apart, under different names, on lines that don't meet
+  // there. Many systems name each line's platforms separately at one interchange.
+  const lineSets: Set<number>[] = Array.from({ length: n }, () => new Set());
+  for (const e of edges.values())
+    for (const li of e.lines) {
+      lineSets[e.a].add(li);
+      lineSets[e.b].add(li);
+    }
+  const transfers: [number, number][] = [];
+  const walkMark = new Uint8Array(n);
+  for (let i = 0; i < n; i++) {
+    if (!nbrs[i].length) continue;
+    for (let j = i + 1; j < n; j++) {
+      if (!nbrs[j].length || dist(i, j) > 0.22) continue;
+      if ([...lineSets[i]].some((li) => lineSets[j].has(li))) continue;
+      transfers.push([i, j]);
+      walkMark[i] = 1;
+      walkMark[j] = 1;
+      isKey[i] = 1;
+      isKey[j] = 1;
+    }
   }
 
   // Walk chains from every key; a loop with no key gets one.
@@ -269,6 +296,7 @@ export function buildGraph(net: Network): Graph {
       inner: c.inner,
       lines: linesOf(c.a, c.inner.length ? c.inner[0] : c.b),
     }));
+  for (const [i, j] of transfers) out.push({ a: keyOf[i], b: keyOf[j], inner: [], lines: [], transfer: true });
 
   const served: number[][] = Array.from({ length: n }, () => []);
   for (const e of edges.values()) {
@@ -302,6 +330,7 @@ export function buildGraph(net: Network): Graph {
     served,
     keys,
     keyOf,
+    walk: walkMark,
     chains: out,
     spacing,
     bounds: [minX, minY, maxX, maxY],

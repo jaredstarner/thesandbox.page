@@ -144,7 +144,15 @@ const W = {
   near: 24,
   dir: 2.4,
   anchor: 0.012,
+  walk: 20,
 };
+
+/** Preferred chain length over the minimum its stations need; room kept between a key and other chains, and between keys. */
+const STRETCH = 1.25;
+const CLEAR = 1.1;
+const NEAR = 1.4;
+/** Two keys side by side still need room for their names between them, in station spacings. */
+const MIN_LINK = 2.5;
 
 /** Angles below this between two chains leaving one key are penalised, by setting. */
 const MIN_GAP: Record<Angle, number> = { 45: Math.PI / 4, 60: Math.PI / 3, 90: Math.PI / 2 };
@@ -163,14 +171,16 @@ export function layout(input: LayoutInput): LayoutResult {
   const weight = new Float64Array(m);
   const geoAngle = new Float64Array(m);
   const side = new Int8Array(m);
+  const walk = new Uint8Array(m);
   const inc: number[][] = Array.from({ length: n }, () => []);
   chains.forEach((c, i) => {
     ca[i] = c.a;
     cb[i] = c.b;
-    target[i] = c.inner + 1;
+    target[i] = c.lines === 0 ? 1 : Math.max(c.inner + 1, MIN_LINK);
     weight[i] = 1 + 0.12 * c.inner + 0.25 * (c.lines - 1);
     geoAngle[i] = Math.atan2(geo[c.b * 2 + 1] - geo[c.a * 2 + 1], geo[c.b * 2] - geo[c.a * 2]);
     side[i] = c.side;
+    walk[i] = c.lines === 0 ? 1 : 0;
     inc[c.a].push(i);
     inc[c.b].push(i);
   });
@@ -211,7 +221,7 @@ export function layout(input: LayoutInput): LayoutResult {
     route[o + 1] = ay;
     route[o + 4] = bx;
     route[o + 5] = by;
-    const bp = bendPoint(angle, ax, ay, bx, by, side[c]);
+    const bp = walk[c] ? null : bendPoint(angle, ax, ay, bx, by, side[c]);
     if (bp) {
       bent[c] = 1;
       route[o + 2] = bp[0];
@@ -235,12 +245,14 @@ export function layout(input: LayoutInput): LayoutResult {
     const dy = pos[b * 2 + 1] - pos[a * 2 + 1];
     const d = Math.hypot(dx, dy);
     if (d < 1e-9) return 1e4;
+    // A walking transfer only needs to stay short; it may lie at any angle.
+    if (walk[c]) return W.walk * Math.max(0, d - 1.4) ** 2 + (d < 1 ? W.short * (1 - d) ** 2 : 0);
     const th = Math.atan2(dy, dx);
     const s = Math.sin((Math.PI * th) / period);
     let e = W.angle * weight[c] * s * s;
     const t = target[c];
     const l = plen[c];
-    e += W.length * ((l - t * 1.15) / t) ** 2;
+    e += W.length * ((l - t * STRETCH) / t) ** 2;
     if (l < t) e += W.short * ((t - l) / t) ** 2;
     e += W.dir * weight[c] * (1 - Math.cos(th - geoAngle[c]));
     return e;
@@ -344,7 +356,7 @@ export function layout(input: LayoutInput): LayoutResult {
     const o = c * 6;
     const px = pos[u * 2];
     const py = pos[u * 2 + 1];
-    const reach = 1.0;
+    const reach = CLEAR;
     const d = Math.min(
       segDist(px, py, route[o], route[o + 1], route[o + 2], route[o + 3]),
       segDist(px, py, route[o + 2], route[o + 3], route[o + 4], route[o + 5]),
@@ -354,7 +366,7 @@ export function layout(input: LayoutInput): LayoutResult {
 
   const nearTerm = (u: number, v: number) => {
     const d = Math.hypot(pos[u * 2] - pos[v * 2], pos[u * 2 + 1] - pos[v * 2 + 1]);
-    return d < 1.2 ? W.near * ((1.2 - d) / 1.2) ** 2 : 0;
+    return d < NEAR ? W.near * ((NEAR - d) / NEAR) ** 2 : 0;
   };
 
   const anchorTerm = (v: number) =>

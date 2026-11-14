@@ -127,6 +127,8 @@ interface Candidate {
   angle: number;
   align: Label['align'];
   cost: number;
+  /** Extra distance from the station, for names set out in the gap between lines at a busy junction. */
+  far?: number;
 }
 
 const D = Math.SQRT1_2;
@@ -144,6 +146,7 @@ const CANDIDATES: Candidate[] = [
   { dx: D, dy: D, angle: Math.PI / 4, align: 'left', cost: 2.6 },
   { dx: -D, dy: -D, angle: Math.PI / 4, align: 'right', cost: 2.8 },
 ];
+for (const c of CANDIDATES.slice(0, 8)) CANDIDATES.push({ ...c, cost: c.cost + 1.8, far: 0.5 });
 
 export function placeLabels(
   g: Graph,
@@ -155,7 +158,7 @@ export function placeLabels(
   // Obstacles: every chain's bundle as capsules, and every station's marker.
   const caps: Capsule[] = [];
   for (const c of fr.chains) {
-    const r = ((c.lines.length - 1) * GAP + LINE) / 2 + 0.04;
+    const r = c.lines.length ? ((c.lines.length - 1) * GAP + LINE) / 2 + 0.04 : 0.18;
     for (let i = 2; i < c.pts.length; i += 2)
       caps.push({ ax: c.pts[i - 2], ay: c.pts[i - 1], bx: c.pts[i], by: c.pts[i + 1], r });
   }
@@ -225,8 +228,8 @@ export function placeLabels(
     const gap = marker[s] + 0.14;
     let best: { box: Box; label: Label; score: number; ci: number } | null = null;
     CANDIDATES.forEach((cand, ci) => {
-      const ax = x + cand.dx * gap;
-      const ay = y + cand.dy * gap;
+      const ax = x + cand.dx * (gap + (cand.far ?? 0));
+      const ay = y + cand.dy * (gap + (cand.far ?? 0));
       const ux = Math.cos(cand.angle);
       const uy = Math.sin(cand.angle);
       // Centre of the text box from the reference point and alignment.
@@ -287,4 +290,34 @@ export function placeLabels(
     }
   }
   return labels;
+}
+
+/** The area the placed names cover, layout units: minX, minY, maxX, maxY. */
+export function labelExtent(
+  g: Graph,
+  labels: Label[],
+  measure: (text: string) => number,
+): [number, number, number, number] {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  const h = (NAME_SIZE * 1.18) / 2;
+  for (const l of labels) {
+    if (l.clash) continue;
+    const w = measure(g.names[l.station]);
+    const ux = Math.cos(l.angle);
+    const uy = Math.sin(l.angle);
+    const from = l.align === 'left' ? 0 : l.align === 'right' ? -w : -w / 2;
+    for (const along of [from, from + w])
+      for (const across of [-h, h]) {
+        const x = l.x + ux * along - uy * across;
+        const y = l.y + uy * along + ux * across;
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+  }
+  return [minX, minY, maxX, maxY];
 }

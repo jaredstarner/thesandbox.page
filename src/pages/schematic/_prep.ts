@@ -18,9 +18,10 @@ export interface Prepared {
   unitsPerKm: number;
 }
 
-const MIX = 0.7;
+const MIX = 0.8;
+const SPREAD = 1.6;
 
-export function prepare(g: Graph): Prepared {
+export function prepare(g: Graph, mix = MIX, spread = SPREAD): Prepared {
   const n = g.names.length;
   const live: number[] = [];
   for (let i = 0; i < n; i++) if (g.served[i].length) live.push(i);
@@ -58,7 +59,7 @@ export function prepare(g: Graph): Prepared {
     }
     // Both mappings put the median station at rMed; the even one grows with the square root of the share.
     const even = Math.sqrt(frac(r) / 0.5) * rMed;
-    const R = (1 - MIX) * r + MIX * even;
+    const R = (1 - mix) * r + mix * even;
     openedKm[i * 2] = cx + (dx / r) * R;
     openedKm[i * 2 + 1] = cy + (dy / r) * R;
   }
@@ -72,7 +73,7 @@ export function prepare(g: Graph): Prepared {
     ratios.push((c.inner.length + 1) / Math.max(len, 1e-6));
   }
   ratios.sort((a, b) => a - b);
-  const unitsPerKm = (ratios[ratios.length >> 1] || 1) * 1.2;
+  const unitsPerKm = (ratios[ratios.length >> 1] || 1) * spread;
 
   const truth = new Float64Array(n * 2);
   const opened = new Float64Array(n * 2);

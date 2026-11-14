@@ -75,7 +75,7 @@ export function frameAt(scene: Scene, u: number): Frame {
     const bx = key(c.b, 0);
     const by = key(c.b, 1);
     const side = prep.chains[ci].side;
-    const bp = bendPoint(angle, ax, ay, bx, by, side);
+    const bp = c.transfer ? null : bendPoint(angle, ax, ay, bx, by, side);
     // The drawn route and its length.
     const route = bp ? [ax, ay, bp[0], bp[1], bx, by] : [ax, ay, bx, by];
     const segs: number[] = [];

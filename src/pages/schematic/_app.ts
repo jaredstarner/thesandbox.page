@@ -5,7 +5,7 @@
 import { CITIES } from './_cities';
 import { drawFrame, getFamily, markerSizes, setFamily, toSVG, type View } from './_draw';
 import { buildGraph, type Graph } from './_graph';
-import { NAME_SIZE, placeLabels, type Label } from './_labels';
+import { labelExtent, NAME_SIZE, placeLabels, type Label } from './_labels';
 import { layout, type Angle, type LayoutInput } from './_layout';
 import { fromOverpass, type Network } from './_osm';
 import { prepare, type Prepared } from './_prep';
@@ -24,6 +24,8 @@ interface Drawing {
   scene: Scene | null;
   final: Frame | null;
   labels: Label[] | null;
+  /** The finished diagram's bounds with its names. */
+  extent: [number, number, number, number] | null;
 }
 
 const OVERPASS = 'https://overpass-api.de/api/interpreter';
@@ -130,8 +132,8 @@ export function start(root: HTMLElement): void {
     const tb = boundsOf(drawing.prep.truth, drawing.g);
     const vt = fit(tb, 1, 1);
     if (!drawing.final) return vt;
-    const fb = frameBounds(drawing.final);
-    const vf = fit(fb, 3.2, 1.2);
+    const fb = drawing.extent ?? frameBounds(drawing.final);
+    const vf = fit(fb, drawing.extent ? 0.5 : 3.2, drawing.extent ? 0.5 : 1.2);
     const k = ease(Math.min(1, u * 1.15));
     return { scale: vt.scale + (vf.scale - vt.scale) * k, ox: vt.ox + (vf.ox - vt.ox) * k, oy: vt.oy + (vf.oy - vt.oy) * k };
   };
@@ -320,6 +322,7 @@ export function start(root: HTMLElement): void {
     d.scene = null;
     d.final = null;
     d.labels = null;
+    d.extent = null;
     const frames = await runLayout({ geo: d.prep.keyStart, chains: d.prep.chains, angle, seed });
     if (token !== loadToken || drawing !== d) return;
     d.scene = { g: d.g, prep: d.prep, angle, frames: [d.truthKeys, ...frames], colours: d.net.lines.map((l) => l.colour) };
@@ -327,6 +330,9 @@ export function start(root: HTMLElement): void {
     await document.fonts.ready;
     if (token !== loadToken || drawing !== d) return;
     d.labels = placeLabels(d.g, d.final, d.marker, measure);
+    const fb = frameBounds(d.final);
+    const lb = labelExtent(d.g, d.labels, measure);
+    d.extent = [Math.min(fb[0], lb[0]), Math.min(fb[1], lb[1]), Math.max(fb[2], lb[2]), Math.max(fb[3], lb[3])];
     root.dataset.state = 'ready';
     note.textContent = '';
     u = from;
@@ -343,7 +349,7 @@ export function start(root: HTMLElement): void {
       truthKeys[k * 2] = prep.truth[s * 2];
       truthKeys[k * 2 + 1] = prep.truth[s * 2 + 1];
     });
-    drawing = { title, system, net, g, prep, marker: markerSizes(g), truthKeys, scene: null, final: null, labels: null };
+    drawing = { title, system, net, g, prep, marker: markerSizes(g), truthKeys, scene: null, final: null, labels: null, extent: null };
     const stations = g.served.filter((s) => s.length).length;
     cityHead.textContent = title;
     systemHead.textContent = `${system} · ${net.lines.length} lines · ${stations} stations`;

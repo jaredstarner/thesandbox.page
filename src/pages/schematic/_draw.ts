@@ -78,7 +78,7 @@ export function markerSizes(g: Graph): Float64Array {
 }
 
 export function isInterchange(g: Graph, s: number): boolean {
-  return g.served[s].length > 1 && g.keyOf[s] >= 0;
+  return (g.served[s].length > 1 && g.keyOf[s] >= 0) || g.walk[s] === 1;
 }
 
 interface StationGeom {
@@ -210,6 +210,24 @@ export function drawFrame(
     ctx.stroke();
   }
   ctx.globalAlpha = 1;
+
+  // Walking transfers: a connector between the two rings.
+  fr.chains.forEach((c, ci) => {
+    if (!g.chains[ci].transfer) return;
+    const [ax, ay] = [c.pts[0], c.pts[1]];
+    const [bx, by] = [c.pts[c.pts.length - 2], c.pts[c.pts.length - 1]];
+    ctx.lineCap = 'butt';
+    ctx.beginPath();
+    ctx.moveTo(X(ax), Y(ay));
+    ctx.lineTo(X(bx), Y(by));
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 0.3 * S;
+    ctx.stroke();
+    ctx.strokeStyle = PAPER;
+    ctx.lineWidth = Math.max(0.1, 0.3 * S - Math.max(0.8, S * 0.065) * 2);
+    ctx.stroke();
+    ctx.lineCap = 'round';
+  });
 
   // Stations.
   const geom = stationGeometry(scene, fr);
@@ -365,6 +383,13 @@ export function toSVG(
     `<g fill="none" stroke="${PAPER}" stroke-width="${r2(LINE + CASING * 2)}" stroke-linecap="round" stroke-linejoin="round">${casing.join('')}</g>`,
     `<g fill="none" stroke-width="${LINE}" stroke-linecap="round" stroke-linejoin="round">${strokes.join('')}</g>`,
   );
+  const walks: string[] = [];
+  fr.chains.forEach((c, ci) => {
+    if (!g.chains[ci].transfer) return;
+    const d = `M${r2(c.pts[0])} ${r2(c.pts[1])}L${r2(c.pts[c.pts.length - 2])} ${r2(c.pts[c.pts.length - 1])}`;
+    walks.push(`<path d="${d}" stroke="${INK}" stroke-width="0.3"/>`, `<path d="${d}" stroke="${PAPER}" stroke-width="0.17"/>`);
+  });
+  parts.push(`<g fill="none">${walks.join('')}</g>`);
   const geom = stationGeometry(scene, fr);
   const labelSide = new Map(labels.map((l) => [l.station, l]));
   const marks: string[] = [];
