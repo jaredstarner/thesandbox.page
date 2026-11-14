@@ -443,7 +443,12 @@ export function start(root: HTMLElement): void {
 
   // --- Controls ---
 
-  for (const b of cityButtons) b.addEventListener('click', () => void loadCity(b.dataset.cityId!));
+  for (const b of cityButtons)
+    b.addEventListener('click', () => {
+      // Keep the city in the address, so a link opens on it.
+      history.replaceState(null, '', `#${b.dataset.cityId}`);
+      void loadCity(b.dataset.cityId!);
+    });
 
   for (const b of angleButtons)
     b.addEventListener('click', () => {

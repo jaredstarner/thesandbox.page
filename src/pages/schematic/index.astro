@@ -254,6 +254,16 @@ const description =
     font-size: 12.5px;
     white-space: nowrap;
     pointer-events: none;
+    animation: schematic-hint 7s forwards;
+  }
+  @keyframes schematic-hint {
+    0%,
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
   }
   .schematic[data-state='ready'] .stage-note:empty {
     display: none;
