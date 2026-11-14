@@ -226,6 +226,7 @@ export function placeLabels(
     const y = fr.pos[s * 2 + 1];
     const w = measure(g.names[s]);
     const gap = marker[s] + 0.14;
+    const allowed = g.served[s].length > 1 || g.keyOf[s] >= 0 ? 2 : 1;
     let best: { box: Box; label: Label; score: number; ci: number } | null = null;
     CANDIDATES.forEach((cand, ci) => {
       const ax = x + cand.dx * (gap + (cand.far ?? 0));
@@ -248,11 +249,13 @@ export function placeLabels(
         if (segBox(c, box) < c.r) hits++;
       }
       score += hits * 40;
+      let hard = 0;
       for (const o of near(box, sGrid)) {
         if (o === s) continue;
-        if (pointBox(fr.pos[o * 2], fr.pos[o * 2 + 1], box) < marker[o] + 0.05) score += 30;
+        if (pointBox(fr.pos[o * 2], fr.pos[o * 2 + 1], box) < marker[o] + 0.05) hard++;
       }
-      for (const li of near(box, lGrid)) if (boxesOverlap(box, placed[li], 0.06)) score += 60;
+      for (const li of near(box, lGrid)) if (boxesOverlap(box, placed[li], 0.06)) hard++;
+      score += hard * 200;
       const prev = prevOf.get(s);
       if (prev !== undefined && chosen.get(prev) === ci) score -= 0.7;
       if (!best || score < best.score) {
@@ -267,7 +270,8 @@ export function placeLabels(
             y: cand.angle === 0 && cand.dy !== 0 ? cy : ay,
             angle: cand.angle,
             align: cand.align,
-            clash: score >= 30,
+            // A name may cross a line or two (it is drawn with a halo), never another name or station.
+            clash: hard > 0 || hits > allowed,
             sx: cand.dx / len,
             sy: cand.dy / len,
           },

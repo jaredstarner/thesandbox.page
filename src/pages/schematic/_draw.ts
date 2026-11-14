@@ -297,6 +297,9 @@ export function drawFrame(
   const px = NAME_SIZE * S;
   if (opt.labels && opt.labelAlpha > 0 && px >= 4.5) {
     ctx.fillStyle = INK;
+    ctx.strokeStyle = PAPER;
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = Math.max(2, px * 0.3);
     ctx.font = `500 ${px}px ${family}`;
     ctx.textBaseline = 'middle';
     for (const l of opt.labels) {
@@ -308,9 +311,13 @@ export function drawFrame(
         ctx.save();
         ctx.translate(X(l.x), Y(l.y));
         ctx.rotate(l.angle);
+        ctx.strokeText(g.names[l.station], 0, px * 0.04);
         ctx.fillText(g.names[l.station], 0, px * 0.04);
         ctx.restore();
-      } else ctx.fillText(g.names[l.station], X(l.x), Y(l.y) + px * 0.04);
+      } else {
+        ctx.strokeText(g.names[l.station], X(l.x), Y(l.y) + px * 0.04);
+        ctx.fillText(g.names[l.station], X(l.x), Y(l.y) + px * 0.04);
+      }
     }
     ctx.globalAlpha = 1;
   }
@@ -439,7 +446,7 @@ export function toSVG(
     );
   }
   parts.push(
-    `<g font-family="${esc(FONT_STACK)}" font-size="${NAME_SIZE}" font-weight="500" fill="${INK}">${names.join('')}</g>`,
+    `<g font-family="${esc(FONT_STACK)}" font-size="${NAME_SIZE}" font-weight="500" fill="${INK}" stroke="${PAPER}" stroke-width="0.11" stroke-linejoin="round" paint-order="stroke">${names.join('')}</g>`,
   );
   // Key along the foot.
   let kx = x0 + pad;

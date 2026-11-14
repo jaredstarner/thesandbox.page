@@ -744,6 +744,18 @@ out tags;`;
         schedule();
       },
       clashes: () => drawing?.labels?.filter((l) => l.clash).length ?? null,
+      svg: () =>
+        drawing?.scene && drawing.final && drawing.labels
+          ? toSVG(
+              drawing.scene,
+              drawing.final,
+              drawing.labels,
+              drawing.marker,
+              drawing.title,
+              drawing.system,
+              drawing.net.lines.map((l) => l.ref),
+            )
+          : null,
     };
   }
 
