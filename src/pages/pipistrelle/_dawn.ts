@@ -84,9 +84,9 @@ const WALL_H = 1.6;
 export function buildHeights(world: World): Float32Array {
   const n = GW * GH;
   // Leaves: inside-distance, capped, then blurred into rounded crowns.
-  let a = new Float32Array(n);
+  const a = new Float32Array(n);
   for (let i = 0; i < n; i++) a[i] = Math.min(5, Math.max(0, -world.leafSd[i]));
-  let b = new Float32Array(n);
+  const b = new Float32Array(n);
   const r = 6;
   for (let pass = 0; pass < 3; pass++) {
     // Horizontal box blur.
