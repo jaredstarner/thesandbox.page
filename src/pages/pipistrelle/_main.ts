@@ -217,10 +217,11 @@ export function start(root: HTMLElement): void {
     endT = 0;
     bat.wantsAttack = false;
     const total = ORDER.reduce((s, k) => s + (k === 'tiger' ? 0 : caught[k]), 0);
+    const fed = total === 0 ? 'with nothing caught' : `with ${total} insect${total === 1 ? '' : 's'} inside you`;
     el.endTitle.textContent = late ? 'Caught out by first light' : 'Home before first light';
     el.endLine.textContent = late
-      ? `The sky was already pale when you gave up the hunt at ${homeAt}, with ${total} insect${total === 1 ? '' : 's'} inside you. This is the ground you flew over in the dark, as it looks by day, with what you heard of it laid over the top.`
-      : `In under the eaves at ${homeAt}, with ${total} insect${total === 1 ? '' : 's'} inside you. This is the ground you flew over in the dark, as it looks by day, with what you heard of it laid over the top.`;
+      ? `The sky was already pale when you gave up the hunt at ${homeAt}, ${fed}. This is the ground you flew over in the dark, as it looks by day, with what you heard of it laid over the top.`
+      : `In under the eaves at ${homeAt}, ${fed}. This is the ground you flew over in the dark, as it looks by day, with what you heard of it laid over the top.`;
     const rows: string[] = [];
     for (const sp of ORDER) {
       if (!caught[sp]) continue;

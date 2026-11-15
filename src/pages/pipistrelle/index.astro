@@ -36,9 +36,11 @@ const description =
         <li style="--f: 45" class="peak">45</li>
         <li style="--f: 20">20 kHz</li>
       </ol>
-      <p class="readout"><span data-readout>detector off</span><span class="note" data-note hidden>
-          · played ten times lower, two and a half times slower</span
-        ></p>
+      <p class="readout">
+        <span data-readout>detector off</span><span class="note" data-note hidden
+          >played ten times lower, two and a half times slower</span
+        >
+      </p>
     </section>
 
     <button class="buzz" type="button" data-buzz aria-label="Close in and buzz (hold)">
@@ -227,6 +229,10 @@ const description =
   .bumps[hidden],
   .note[hidden] {
     display: none;
+  }
+
+  .note::before {
+    content: '\00a0\00b7\00a0';
   }
 
   .detector {

@@ -312,7 +312,7 @@ export class Renderer {
     if (lampOn > 0) {
       c.save();
       c.globalCompositeOperation = 'lighter';
-      c.globalAlpha = lampOn * 0.62;
+      c.globalAlpha = lampOn * 0.58;
       c.imageSmoothingQuality = 'high';
       if (this.lampSprite) c.drawImage(this.lampSprite, lx - lr, ly - lr, lr * 2, lr * 2);
       c.globalAlpha = lampOn;
