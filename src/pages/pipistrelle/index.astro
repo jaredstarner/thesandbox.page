@@ -1,0 +1,521 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+
+const description =
+  'A July night heard the way a bat hears it: the dark is drawn only where your calls come back, so you hunt moths by echo and find your way home before first light.';
+---
+
+<Bare title="Pipistrelle" description={description}>
+  <Font cssVariable="--font-pip-serif" slot="head" />
+  <Font cssVariable="--font-pip-mono" slot="head" />
+  <main class="pip" data-state="intro">
+    <canvas class="night" data-night aria-hidden="true"></canvas>
+
+    <header class="top">
+      <p class="home"><a href="/">thesandbox.page</a></p>
+      <h1 class="title">Pipistrelle</h1>
+    </header>
+
+    <div class="clock" aria-live="off">
+      <p class="time" data-clock>21:40</p>
+      <p class="phase" data-phase>at the roost</p>
+    </div>
+
+    <aside class="tally" aria-label="The night's catch">
+      <h2>Caught</h2>
+      <ol data-tally></ol>
+      <p class="bumps" data-bumps hidden></p>
+    </aside>
+
+    <section class="detector" aria-label="Bat detector">
+      <canvas data-sono aria-hidden="true"></canvas>
+      <ol class="khz" aria-hidden="true">
+        <li style="--f: 100">100</li>
+        <li style="--f: 80">80</li>
+        <li style="--f: 60">60</li>
+        <li style="--f: 45" class="peak">45</li>
+        <li style="--f: 20">20 kHz</li>
+      </ol>
+      <p class="readout" data-readout>detector off</p>
+    </section>
+
+    <button class="buzz" type="button" data-buzz aria-label="Close in and buzz (hold)">
+      <span>Buzz</span>
+    </button>
+
+    <p class="toast" data-toast role="status"></p>
+
+    <div class="card intro" data-intro>
+      <h2>A July night at the edge of a village</h2>
+      <p>
+        Heard the way a common pipistrelle hears it. There is no light out here but one streetlamp. Every call you make
+        goes out ahead of you and comes back off leaves, walls, and wings, and the night is drawn only where it comes
+        back.
+      </p>
+      <p class="how how-fine">
+        Steer with the pointer. Hold the mouse button or <kbd>Space</kbd> to close in: your calls quicken into a feeding
+        buzz, and whatever is in front of you at the end of it is caught.
+      </p>
+      <p class="how how-coarse">
+        Drag anywhere to steer. Hold <b>Buzz</b> to close in: your calls quicken into a feeding buzz, and whatever is in
+        front of you at the end of it is caught.
+      </p>
+      <p class="small">
+        The calls are played ten times lower than a bat makes them, and the night runs two and a half times slower, so
+        you can keep up. Be home under the barn eaves by first light.
+      </p>
+      <button type="button" class="go" data-start>Leave the roost</button>
+      <p class="small sound">Best with sound on.</p>
+      <noscript><p class="small">The night needs JavaScript to be heard.</p></noscript>
+    </div>
+
+    <div class="card end" data-end hidden>
+      <h2 data-end-title>First light</h2>
+      <p data-end-line></p>
+      <dl class="sheet" data-end-sheet></dl>
+      <button type="button" class="go" data-again>Fly another night</button>
+    </div>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.pip)) {
+    margin: 0;
+    background: #03060a;
+    overscroll-behavior: none;
+  }
+
+  .pip {
+    --ink: #03060a;
+    --echo: #d6ece4;
+    --dim: rgb(214 236 228 / 0.62);
+    --faint: rgb(214 236 228 / 0.16);
+    --amber: #ffc46b;
+    --sodium: #ff9a46;
+    --serif: var(--font-pip-serif), Georgia, serif;
+    --mono: var(--font-pip-mono), ui-monospace, monospace;
+    --sono-h: 118px;
+
+    position: fixed;
+    inset: 0;
+    overflow: clip;
+    background: var(--ink);
+    color: var(--echo);
+    font-family: var(--serif);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .night {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+  }
+
+  .top {
+    position: absolute;
+    top: 18px;
+    left: 22px;
+    pointer-events: none;
+  }
+
+  .home {
+    margin: 0 0 4px;
+    font: 400 11px/1.2 var(--mono);
+    letter-spacing: 0.08em;
+    pointer-events: auto;
+  }
+
+  .home a {
+    color: var(--dim);
+    text-decoration: none;
+  }
+
+  .home a:hover,
+  .home a:focus-visible {
+    color: var(--echo);
+    text-decoration: underline;
+  }
+
+  .title {
+    margin: 0;
+    font: italic 300 40px/1 var(--serif);
+    letter-spacing: 0.01em;
+    color: var(--echo);
+  }
+
+  .clock {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    text-align: right;
+    pointer-events: none;
+  }
+
+  .time {
+    margin: 0;
+    font: 300 30px/1 var(--mono);
+    letter-spacing: 0.02em;
+  }
+
+  .phase {
+    margin: 6px 0 0;
+    font: italic 400 15px/1.2 var(--serif);
+    color: var(--dim);
+  }
+
+  .tally {
+    position: absolute;
+    right: 22px;
+    top: 96px;
+    width: 210px;
+    text-align: right;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .pip[data-state='night'] .tally,
+  .pip[data-state='end'] .tally {
+    opacity: 1;
+  }
+
+  .tally h2 {
+    margin: 0 0 6px;
+    font: 500 10px/1 var(--mono);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .tally ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tally :global(li) {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    font: italic 400 15px/1.45 var(--serif);
+    color: var(--dim);
+  }
+
+  .tally :global(li b) {
+    min-width: 2.2em;
+    font: 400 13px/1.7 var(--mono);
+    font-style: normal;
+    color: var(--echo);
+  }
+
+  .tally :global(li.fresh b) {
+    color: var(--amber);
+  }
+
+  .bumps {
+    margin: 8px 0 0;
+    font: italic 400 13px/1.3 var(--serif);
+    color: var(--dim);
+  }
+
+  .bumps[hidden] {
+    display: none;
+  }
+
+  .detector {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--sono-h);
+    border-top: 1px solid var(--faint);
+    background: linear-gradient(to bottom, rgb(3 6 10 / 0.72), rgb(3 6 10 / 0.92));
+    pointer-events: none;
+  }
+
+  .detector canvas {
+    position: absolute;
+    inset: 8px 64px 22px 22px;
+    width: calc(100% - 86px);
+    height: calc(100% - 30px);
+    display: block;
+  }
+
+  .khz {
+    position: absolute;
+    top: 8px;
+    bottom: 22px;
+    right: 0;
+    width: 60px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .khz li {
+    position: absolute;
+    left: 6px;
+    bottom: calc(var(--f) / 120 * 100%);
+    transform: translateY(50%);
+    font: 400 9.5px/1 var(--mono);
+    color: var(--dim);
+    white-space: nowrap;
+  }
+
+  .khz li::before {
+    content: '';
+    position: absolute;
+    right: calc(100% + 3px);
+    top: 50%;
+    width: 5px;
+    border-top: 1px solid var(--faint);
+  }
+
+  .khz li.peak {
+    color: var(--amber);
+  }
+
+  .readout {
+    position: absolute;
+    left: 22px;
+    bottom: 5px;
+    margin: 0;
+    font: 400 10px/1.2 var(--mono);
+    letter-spacing: 0.06em;
+    color: var(--dim);
+  }
+
+  .buzz {
+    display: none;
+    position: absolute;
+    right: 18px;
+    bottom: calc(var(--sono-h) + 18px);
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    border: 1px solid rgb(255 196 107 / 0.55);
+    background: radial-gradient(circle at 50% 40%, rgb(255 196 107 / 0.16), rgb(3 6 10 / 0.6) 70%);
+    color: var(--amber);
+    font: italic 500 18px/1 var(--serif);
+    touch-action: none;
+  }
+
+  .buzz[aria-pressed='true'] {
+    background: radial-gradient(circle at 50% 40%, rgb(255 196 107 / 0.42), rgb(3 6 10 / 0.6) 75%);
+  }
+
+  .pip[data-state='night'] .buzz {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    .pip[data-state='night'] .buzz {
+      display: block;
+    }
+  }
+
+  .toast {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--sono-h) + 22px);
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: min(560px, calc(100% - 140px));
+    margin: 0;
+    font: italic 400 18px/1.35 var(--serif);
+    text-align: center;
+    color: var(--echo);
+    text-shadow: 0 0 12px var(--ink);
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+  }
+
+  .card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -54%);
+    box-sizing: border-box;
+    width: min(520px, calc(100% - 32px));
+    max-height: calc(100% - 40px);
+    overflow: auto;
+    padding: 30px 34px 26px;
+    border: 1px solid var(--faint);
+    background: rgb(3 6 10 / 0.8);
+    backdrop-filter: blur(6px);
+    color: var(--echo);
+  }
+
+  .card[hidden] {
+    display: none;
+  }
+
+  .card h2 {
+    margin: 0 0 14px;
+    font: italic 400 27px/1.15 var(--serif);
+  }
+
+  .card p {
+    margin: 0 0 12px;
+    font: 400 17.5px/1.5 var(--serif);
+    color: rgb(214 236 228 / 0.86);
+  }
+
+  .card .small {
+    font-size: 15px;
+    color: var(--dim);
+  }
+
+  .card kbd {
+    padding: 0 5px;
+    border: 1px solid var(--faint);
+    border-radius: 3px;
+    font: 400 13px/1.4 var(--mono);
+  }
+
+  .how-coarse {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    .how-fine {
+      display: none;
+    }
+    .how-coarse {
+      display: block;
+    }
+  }
+
+  .go {
+    margin: 8px 0 12px;
+    padding: 10px 22px;
+    border: 1px solid rgb(255 196 107 / 0.6);
+    border-radius: 999px;
+    background: rgb(255 196 107 / 0.08);
+    color: var(--amber);
+    font: italic 500 19px/1 var(--serif);
+    cursor: pointer;
+  }
+
+  .go:hover,
+  .go:focus-visible {
+    background: rgb(255 196 107 / 0.18);
+    outline: none;
+  }
+
+  .sound {
+    margin: 0;
+  }
+
+  .sheet {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 18px;
+    margin: 4px 0 16px;
+    padding: 12px 0;
+    border-top: 1px solid var(--faint);
+    border-bottom: 1px solid var(--faint);
+  }
+
+  .sheet :global(dt) {
+    font: italic 400 16.5px/1.4 var(--serif);
+    color: rgb(214 236 228 / 0.86);
+  }
+
+  .sheet :global(dd) {
+    margin: 0;
+    font: 400 14px/1.65 var(--mono);
+    text-align: right;
+  }
+
+  .pip[data-state='intro'] .night,
+  .pip[data-state='end'] .night {
+    cursor: default;
+  }
+
+  @media (max-width: 640px) {
+    .pip {
+      --sono-h: 86px;
+    }
+    .top {
+      top: 12px;
+      left: 14px;
+    }
+    .title {
+      font-size: 30px;
+    }
+    .clock {
+      top: 12px;
+      right: 14px;
+    }
+    .time {
+      font-size: 22px;
+    }
+    .phase {
+      font-size: 13px;
+    }
+    .tally {
+      top: 66px;
+      right: 14px;
+      width: 160px;
+    }
+    .tally :global(li) {
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .tally :global(li b) {
+      font-size: 11.5px;
+    }
+    .detector canvas {
+      inset: 6px 52px 18px 14px;
+      width: calc(100% - 66px);
+      height: calc(100% - 24px);
+    }
+    .khz {
+      top: 6px;
+      bottom: 18px;
+      width: 48px;
+    }
+    .readout {
+      left: 14px;
+      bottom: 4px;
+    }
+    .card {
+      padding: 22px 20px 18px;
+    }
+    .card h2 {
+      font-size: 23px;
+    }
+    .card p {
+      font-size: 16px;
+    }
+    .card .small {
+      font-size: 14px;
+    }
+    .toast {
+      font-size: 15.5px;
+      max-width: calc(100% - 130px);
+      left: 14px;
+      transform: none;
+      text-align: left;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_main';
+
+  const root = document.querySelector<HTMLElement>('.pip');
+  if (root) start(root);
+</script>

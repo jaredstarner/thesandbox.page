@@ -1,0 +1,8 @@
+{
+  "title": "Pipistrelle",
+  "summary": "A July night at the edge of a village, heard the way a bat hears it: the screen stays dark except where your own calls come back off leaves, walls, water, and wings, so you hunt moths over the pond and round the streetlamp by echo, close in with a feeding buzz, and find your way home to the barn before first light shows you where you have been.",
+  "date": "2026-11-15",
+  "tags": ["canvas", "web-audio", "pointer-events", "game", "echolocation", "ray-casting"],
+  "requires": ["canvas"],
+  "plot": 45
+}
