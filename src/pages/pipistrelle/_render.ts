@@ -57,6 +57,8 @@ export class Renderer {
   private lampSprite: HTMLCanvasElement | null = null;
   dawn: HTMLCanvasElement | null = null;
   private pending: Pending[] = [];
+  /** Insect echoes, drawn fresh each frame so their glow fades cleanly. */
+  private sparks: { x: number; y: number; vis: number; born: number }[] = [];
   private rings: Ring[] = [];
   flashes: Flash[] = [];
   /** Device pixels per CSS pixel. */
@@ -112,6 +114,7 @@ export class Renderer {
     this.mctx.clearRect(0, 0, this.memory.width, this.memory.height);
     this.pctx.clearRect(0, 0, this.width, this.height);
     this.pending.length = 0;
+    this.sparks.length = 0;
     this.rings.length = 0;
     this.flashes.length = 0;
   }
@@ -235,9 +238,7 @@ export class Renderer {
         continue;
       }
       if (e.kind === KIND_INSECT) {
-        const r = (5 + e.vis * 9) * this.dpr;
-        p.globalAlpha = Math.min(1, 0.35 + e.vis);
-        p.drawImage(this.glowAmber, this.sx(e.x) - r, this.sy(e.y) - r, r * 2, r * 2);
+        this.sparks.push({ x: e.x, y: e.y, vis: e.vis, born: e.born });
         continue;
       }
       const b = Math.min(bucketsN - 1, Math.floor(e.vis * bucketsN));
@@ -250,8 +251,8 @@ export class Renderer {
       path.arc(cx, cy, r, a0, e.bearing + e.half);
       // And a mark on the memory of the ground.
       if (e.vis > 0.05) {
-        m.globalAlpha = Math.min(0.35, e.vis * 0.2);
-        m.drawImage(this.dot, e.x * MEMORY_PX - 2, e.y * MEMORY_PX - 2, 4, 4);
+        m.globalAlpha = Math.min(0.3, e.vis * 0.16);
+        m.drawImage(this.dot, e.x * MEMORY_PX - 1.5, e.y * MEMORY_PX - 1.5, 3, 3);
       }
     }
     p.globalAlpha = 1;
@@ -347,7 +348,7 @@ export class Renderer {
     // What the bat remembers of the ground.
     if (opts.memoryAlpha > 0) {
       c.save();
-      c.globalCompositeOperation = dawn > 0.5 ? 'source-over' : 'lighter';
+      c.globalCompositeOperation = 'lighter';
       c.globalAlpha = opts.memoryAlpha;
       c.imageSmoothingEnabled = true;
       c.drawImage(this.memory, x0, y0, ww, wh);
@@ -359,6 +360,24 @@ export class Renderer {
     c.globalCompositeOperation = 'lighter';
     c.drawImage(this.phosphor, 0, 0);
     c.restore();
+
+    // Wings caught in the call: each insect echo glints, then fades.
+    if (this.sparks.length) {
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      const keep: typeof this.sparks = [];
+      for (const s of this.sparks) {
+        const age = now - s.born;
+        if (age > 1.6) continue;
+        keep.push(s);
+        const env = age < 0.03 ? age / 0.03 : Math.exp(-(age - 0.03) / 0.42);
+        const r = (4 + s.vis * 8) * this.dpr;
+        c.globalAlpha = Math.min(1, (0.3 + s.vis) * env);
+        c.drawImage(this.glowAmber, this.sx(s.x) - r, this.sy(s.y) - r, r * 2, r * 2);
+      }
+      this.sparks = keep;
+      c.restore();
+    }
 
     // The range the echoes are arriving from right now.
     c.save();

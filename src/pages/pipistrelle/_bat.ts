@@ -8,7 +8,7 @@ import { wrap, type CallShape } from './_sonar';
 
 export type Phase = 'roost' | 'search' | 'approach' | 'buzz' | 'pause';
 
-export const CRUISE = 5.2;
+export const CRUISE = 6;
 const MAX_TURN = 3.6;
 
 export interface Call {

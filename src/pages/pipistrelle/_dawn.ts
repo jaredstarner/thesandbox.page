@@ -26,7 +26,7 @@ import {
 export const DAWN_PX = 16;
 /** Pixels per metre of the lamp's patch, and its radius in metres. */
 export const LAMP_PX = 32;
-export const LAMP_R = 7.5;
+export const LAMP_R = 6;
 const LAMP_H = 6;
 
 type RGB = [number, number, number];
@@ -342,7 +342,7 @@ export function paintLamp(world: World, H: Float32Array): Painting {
       const lz = LAMP_H - h0;
       const r = Math.hypot(lx, ly, lz);
       const lambert = Math.max(0, (s.n[0] * lx + s.n[1] * ly + s.n[2] * lz) / r);
-      let I = (LAMP_H * LAMP_H) / (r * r) * lambert;
+      let I = ((LAMP_H * LAMP_H) / (r * r)) ** 1.6 * lambert;
       // Shadows thrown away from the lamp.
       if (d > 0.3) {
         for (let k = 0.15; k < d - 0.2; k += 0.12) {
@@ -360,7 +360,7 @@ export function paintLamp(world: World, H: Float32Array): Painting {
       const edge = Math.max(0, Math.min(1, (LAMP_R - d) / (LAMP_R * 0.35)));
       I *= edge * edge;
       const lum = (s.c[0] * 0.3 + s.c[1] * 0.55 + s.c[2] * 0.15) / 255;
-      const v = Math.min(1.2, lum * I * 2.2);
+      const v = Math.min(1, lum * I * 1.5);
       data[o] = 255 * v;
       data[o + 1] = 148 * v;
       data[o + 2] = 58 * v;

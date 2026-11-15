@@ -191,8 +191,12 @@ export function buildWorld(): World {
     for (let gx = 0; gx < GW; gx++) {
       const x = (gx + 0.5) * CELL;
       if (gaps.some(([a, b]) => x > a && x < b)) continue;
+      // Round the hedge off where it stops at a gate.
+      let dg = Infinity;
+      for (const [a, b] of gaps) dg = Math.min(dg, Math.abs(x - a), Math.abs(x - b));
+      const taper = dg < 1.1 ? Math.sqrt(dg / 1.1) : 1;
       const yc = f(x);
-      const w = half * (1 + 0.28 * fbm(x * 0.35 + seed, seed)) + 0.15 * noise2(x * 2.3, seed * 5);
+      const w = (half * (1 + 0.28 * fbm(x * 0.35 + seed, seed)) + 0.15 * noise2(x * 2.3, seed * 5)) * taper;
       const y0 = Math.max(0, Math.floor((yc - w * 1.6) / CELL));
       const y1 = Math.min(GH - 1, Math.ceil((yc + w * 1.6) / CELL));
       for (let gy = y0; gy <= y1; gy++) {
@@ -321,7 +325,7 @@ export function buildWorld(): World {
   addWall(gwA, gwB, 0.8, true);
 
   const corners = [...barn, gwA, gwB];
-  const lamp = { x: 60, y: lane(60) + 2.3, r: 7.5 };
+  const lamp = { x: 60, y: lane(60) + 2.3, r: 6 };
   const posts = [{ x: lamp.x, y: lamp.y, r: 0.12 }];
 
   // The roost: a gap under the eaves at the barn's north-east corner.

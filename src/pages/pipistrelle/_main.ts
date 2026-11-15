@@ -158,8 +158,21 @@ export function start(root: HTMLElement): void {
     view.setCamera(view.camX, view.camY, state === 'end' ? endZoom() : view.flightZoom());
   }
 
+  /** At the end, the map fits beside the card on a wide screen, or under it on a narrow one. */
+  function endFrame(): { zoom: number; cx: number; cy: number } {
+    const d = view.dpr;
+    const wide = view.width / d > 1000;
+    const left = wide ? 440 * d : 0;
+    const top = 70 * d;
+    const bottom = (wide ? 130 : 96) * d;
+    const zoom = Math.min((view.width - left - 24 * d) / WORLD_W, (view.height - top - bottom) / WORLD_H);
+    const cx = WORLD_W / 2 - (left - 24 * d) / 2 / zoom;
+    const cy = WORLD_H / 2 - (top - bottom) / 2 / zoom;
+    return { zoom, cx, cy };
+  }
+
   function endZoom(): number {
-    return Math.min(view.width / (WORLD_W * 1.04), (view.height - 40 * view.dpr) / (WORLD_H * 1.06));
+    return endFrame().zoom;
   }
 
   function beginNight(): void {
@@ -193,6 +206,7 @@ export function start(root: HTMLElement): void {
   }
 
   function endNight(late: boolean): void {
+    homeAt = clockText(DUSK + night * (DAWN - DUSK));
     state = 'end';
     root.dataset.state = 'end';
     endT = 0;
@@ -270,9 +284,8 @@ export function start(root: HTMLElement): void {
       const u = Math.min(1, endT / 3.5);
       const e = u * u * (3 - 2 * u);
       const zoom = z0 + (z1 - z0) * e;
-      const cx = bat.x + (WORLD_W / 2 - bat.x) * e;
-      const cy = bat.y + (WORLD_H / 2 - bat.y) * e;
-      view.setCamera(cx, cy + (20 * view.dpr * e) / zoom, zoom);
+      const f = endFrame();
+      view.setCamera(bat.x + (f.cx - bat.x) * e, bat.y + (f.cy - bat.y) * e, zoom);
       return;
     }
 
@@ -403,12 +416,10 @@ export function start(root: HTMLElement): void {
       toast('The sky is paling. Head home to the barn eaves before first light.', 6);
     }
     if (night >= HOME_CALL && Math.hypot(bat.x - world.roost.x, bat.y - world.roost.y) < 1.6) {
-      homeAt = clockText(minutes);
       endNight(false);
       return;
     }
     if (night >= 1) {
-      homeAt = clockText(minutes);
       endNight(true);
       return;
     }
@@ -436,7 +447,7 @@ export function start(root: HTMLElement): void {
     update(now, dt);
     const dawn = state === 'end' ? Math.min(1, 0.25 + endT / 3) : Math.max(0, (night - 0.9) / 0.1) * 0.55;
     view.draw(now, dt, bat, swarm.insects, dawn, {
-      memoryAlpha: state === 'end' ? 0.5 : 0.3,
+      memoryAlpha: state === 'end' ? 0.85 : 0.26,
       showBat: state !== 'end' || endT < 1.5,
       trail: state === 'end' && endT > 1.2 ? trail : null,
       catches: state === 'end' ? catches : null,
@@ -574,6 +585,9 @@ export function start(root: HTMLElement): void {
       },
       get caught() {
         return caught;
+      },
+      get echoes() {
+        return echoes;
       },
       press(on: boolean) {
         spaceDown = on;
