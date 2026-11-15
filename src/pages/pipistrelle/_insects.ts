@@ -365,7 +365,7 @@ export class Swarm {
       if (d > range) continue;
       const off = Math.abs(wrap(Math.atan2(dy, dx) - heading));
       if (off > 0.9) continue;
-      const score = d * (1 + off * 1.5) / (0.6 + SPECIES[i.sp].size);
+      const score = (d * (1 + off * 1.5)) / (0.6 + SPECIES[i.sp].size);
       if (score < bestScore) {
         bestScore = score;
         best = i;

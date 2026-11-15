@@ -5,19 +5,7 @@
 // direction it left, so what a wall reflects is heard behind it, as a mirror
 // image.
 
-import {
-  CELL,
-  GW,
-  GH,
-  MAT_LEAF,
-  MAT_REED,
-  MAT_TRUNK,
-  WORLD_H,
-  WORLD_W,
-  hash2,
-  type World,
-  type Wall,
-} from './_world';
+import { CELL, GW, GH, MAT_LEAF, MAT_REED, MAT_TRUNK, WORLD_H, WORLD_W, hash2, type World, type Wall } from './_world';
 
 export const SOUND = 343; // metres per second
 

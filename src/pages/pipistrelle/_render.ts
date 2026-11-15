@@ -136,7 +136,17 @@ export class Renderer {
   }
 
   /** Queues a call's echoes to land on the phosphor as they arrive. */
-  addCall(echoes: Echo[], bx: number, by: number, heading: number, beam: number, range: number, rays: number, now: number, strong: number): void {
+  addCall(
+    echoes: Echo[],
+    bx: number,
+    by: number,
+    heading: number,
+    beam: number,
+    range: number,
+    rays: number,
+    now: number,
+    strong: number,
+  ): void {
     const half = (beam / rays) * 1.15 + 0.004;
     for (const e of echoes) {
       const s = spreading(e.range);
@@ -276,7 +286,13 @@ export class Renderer {
     bat: Bat,
     insects: Insect[],
     dawn: number,
-    opts: { memoryAlpha: number; showBat: boolean; trail: { x: number; y: number }[] | null; catches: { x: number; y: number }[] | null; homeArrow: boolean },
+    opts: {
+      memoryAlpha: number;
+      showBat: boolean;
+      trail: { x: number; y: number }[] | null;
+      catches: { x: number; y: number }[] | null;
+      homeArrow: boolean;
+    },
   ): void {
     const c = this.ctx;
     const W = this.width;
@@ -409,7 +425,10 @@ export class Renderer {
       const y = this.sy(f.y);
       if (f.kind === 'catch' || f.kind === 'spit') {
         const r = (8 + age * 40) * this.dpr;
-        c.strokeStyle = f.kind === 'catch' ? `rgba(${AMBER_RGB}, ${(0.8 * (1 - age / 1.2)).toFixed(3)})` : `rgba(200, 120, 90, ${(0.7 * (1 - age / 1.2)).toFixed(3)})`;
+        c.strokeStyle =
+          f.kind === 'catch'
+            ? `rgba(${AMBER_RGB}, ${(0.8 * (1 - age / 1.2)).toFixed(3)})`
+            : `rgba(200, 120, 90, ${(0.7 * (1 - age / 1.2)).toFixed(3)})`;
         c.lineWidth = 1.5 * this.dpr;
         c.beginPath();
         c.arc(x, y, r, 0, Math.PI * 2);

@@ -173,7 +173,11 @@ export class Bat {
     if (this.y < m) desired = this.heading + wrap(Math.PI / 2 - this.heading) * 0.8;
     if (this.y > WORLD_H - m) desired = this.heading + wrap(-Math.PI / 2 - this.heading) * 0.8;
     // A flinch from leaves just ahead.
-    const ahead = sampleField(this.world.leafSd, this.x + Math.cos(this.heading) * 0.9, this.y + Math.sin(this.heading) * 0.9);
+    const ahead = sampleField(
+      this.world.leafSd,
+      this.x + Math.cos(this.heading) * 0.9,
+      this.y + Math.sin(this.heading) * 0.9,
+    );
     if (ahead < 0.1) {
       const left = sampleField(
         this.world.leafSd,

@@ -190,7 +190,8 @@ interface Surface {
 
 /** What is at a point, unlit. */
 function surface(world: World, H: Float32Array, x: number, y: number, px: number, py: number): Surface {
-  const ci = Math.min(GW - 1, Math.max(0, Math.floor(x / CELL))) + Math.min(GH - 1, Math.max(0, Math.floor(y / CELL))) * GW;
+  const ci =
+    Math.min(GW - 1, Math.max(0, Math.floor(x / CELL))) + Math.min(GH - 1, Math.max(0, Math.floor(y / CELL))) * GW;
   const grain = hash2(px, py) - 0.5;
   const n1 = fbm(x * 0.22, y * 0.22);
   const n2 = noise2(x * 3.1, y * 3.1);

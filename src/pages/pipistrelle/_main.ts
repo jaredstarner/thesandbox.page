@@ -334,7 +334,10 @@ export function start(root: HTMLElement): void {
       view.flashes.push({ x: bat.x, y: bat.y, t0: now, kind: 'bump' });
       if (res.bumped === 'wall' && !hints.wall) {
         hints.wall = true;
-        toast('The barn wall. Smooth walls send a call away like a mirror, so they only show when you face them square.', 6.5);
+        toast(
+          'The barn wall. Smooth walls send a call away like a mirror, so they only show when you face them square.',
+          6.5,
+        );
       } else if (res.bumped === 'leaves' && !hints.leaves) {
         hints.leaves = true;
         toast('Into the leaves. Fly along the edges, where the echoes are clean.');
@@ -363,7 +366,11 @@ export function start(root: HTMLElement): void {
           sound.munch(got.sp === 'underwing' || got.sp === 'crane');
           if (!hints.first) {
             hints.first = true;
-            toast(got.sp === 'midge' ? 'A midge. Small, but there are thousands.' : `Caught: ${SPECIES[got.sp].name.toLowerCase().replace(/s$/, '')}.`);
+            toast(
+              got.sp === 'midge'
+                ? 'A midge. Small, but there are thousands.'
+                : `Caught: ${SPECIES[got.sp].name.toLowerCase().replace(/s$/, '')}.`,
+            );
           } else if (got.sp === 'underwing') {
             toast('A large yellow underwing: the biggest meal out here.', 3);
           }
@@ -431,7 +438,14 @@ export function start(root: HTMLElement): void {
     }
 
     el.phase.textContent = bat.stunned > 0 ? 'bumped' : PHASE_LABEL[bat.phase];
-    const rate = bat.phase === 'search' ? 10 : bat.phase === 'approach' ? Math.round(1 / Math.max(0.012, 0.045 - (bat.phaseT / 0.28) * 0.033)) : bat.phase === 'buzz' ? 180 : 0;
+    const rate =
+      bat.phase === 'search'
+        ? 10
+        : bat.phase === 'approach'
+          ? Math.round(1 / Math.max(0.012, 0.045 - (bat.phaseT / 0.28) * 0.033))
+          : bat.phase === 'buzz'
+            ? 180
+            : 0;
     if (sound.enabled) {
       el.readout.textContent = rate ? `${rate} calls a second` : 'between calls';
       el.note.hidden = false;
