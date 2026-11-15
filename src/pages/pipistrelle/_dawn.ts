@@ -357,7 +357,7 @@ export function paintLamp(world: World, H: Float32Array): Painting {
         }
       }
       if (!s.lit) I *= 0.55;
-      const edge = Math.max(0, Math.min(1, (LAMP_R - d) / (LAMP_R * 0.35)));
+      const edge = Math.max(0, Math.min(1, (LAMP_R - d) / (LAMP_R * 0.62)));
       I *= edge * edge;
       // Sodium light flattens colour to one hue, so the ground reads by its texture alone.
       const grit = 1 + (hash2(px, py) - 0.5) * 0.35 + noise2(x * 7, y * 7) * 0.12;

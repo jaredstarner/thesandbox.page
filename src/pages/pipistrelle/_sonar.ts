@@ -239,7 +239,7 @@ export function castCall(
         y: by + d0y * L,
         range: L,
         bearing: a0,
-        amp: (hardKind === 1 ? 0.75 : 0.8) * energy * beamGain,
+        amp: (hardKind === 1 ? 0.75 : 0.42) * energy * beamGain,
         kind: bounced ? KIND_MIRROR : KIND_SOLID,
         id: -1,
       });

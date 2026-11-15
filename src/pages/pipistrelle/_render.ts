@@ -312,7 +312,7 @@ export class Renderer {
     if (lampOn > 0) {
       c.save();
       c.globalCompositeOperation = 'lighter';
-      c.globalAlpha = lampOn * 0.58;
+      c.globalAlpha = lampOn * 0.52;
       c.imageSmoothingQuality = 'high';
       if (this.lampSprite) c.drawImage(this.lampSprite, lx - lr, ly - lr, lr * 2, lr * 2);
       c.globalAlpha = lampOn;
@@ -526,39 +526,45 @@ export class Renderer {
     const c = this.ctx;
     const x = this.sx(bat.x);
     const y = this.sy(bat.y);
-    const span = Math.max(38 * this.dpr, Math.min(64 * this.dpr, 0.62 * this.zoom));
-    const flap = 0.62 + 0.38 * Math.cos(bat.wing);
+    const span = Math.max(46 * this.dpr, Math.min(70 * this.dpr, 0.7 * this.zoom));
+    // Seen from above, a downstroke barely narrows the span; keep the silhouette readable.
+    const flap = 0.78 + 0.22 * Math.cos(bat.wing);
+    const s = span / 2;
     c.save();
+    // A little dark round the bat, so it reads over the lamp's light and the echoes.
+    const halo = c.createRadialGradient(x, y, 0, x, y, s * 1.1);
+    halo.addColorStop(0, 'rgba(3, 6, 10, 0.55)');
+    halo.addColorStop(1, 'rgba(3, 6, 10, 0)');
+    c.fillStyle = halo;
+    c.fillRect(x - s * 1.1, y - s * 1.1, s * 2.2, s * 2.2);
     c.translate(x, y);
     c.rotate(bat.heading + Math.PI / 2);
-    const s = span / 2;
-    const fill = 'rgba(176, 196, 190, 0.92)';
-    const membrane = 'rgba(150, 172, 166, 0.55)';
-    // Wings: forearm and fingers, membrane scalloped between them.
+    const membrane = 'rgba(178, 198, 192, 0.9)';
+    const bone = 'rgba(3, 6, 10, 0.42)';
     for (const side of [-1, 1]) {
       const w = s * flap;
-      const sh = { x: side * s * 0.08, y: -s * 0.12 };
-      const wrist = { x: side * w * 0.45, y: -s * 0.3 };
-      const tip = { x: side * w * 1.0, y: -s * 0.05 };
-      const f2 = { x: side * w * 0.86, y: s * 0.22 };
-      const f3 = { x: side * w * 0.58, y: s * 0.36 };
-      const foot = { x: side * s * 0.13, y: s * 0.3 };
+      const sh = { x: side * s * 0.07, y: -s * 0.14 };
+      const wrist = { x: side * w * 0.48, y: -s * 0.27 };
+      const tip = { x: side * w, y: -s * 0.02 };
+      const f2 = { x: side * w * 0.82, y: s * 0.24 };
+      const f3 = { x: side * w * 0.52, y: s * 0.34 };
+      const foot = { x: side * s * 0.12, y: s * 0.3 };
       c.beginPath();
       c.moveTo(sh.x, sh.y);
-      c.lineTo(wrist.x, wrist.y);
-      c.lineTo(tip.x, tip.y);
-      c.quadraticCurveTo((tip.x + f2.x) / 2 - side * s * 0.02, (tip.y + f2.y) / 2 - s * 0.04, f2.x, f2.y);
-      c.quadraticCurveTo((f2.x + f3.x) / 2, (f2.y + f3.y) / 2 - s * 0.06, f3.x, f3.y);
-      c.quadraticCurveTo((f3.x + foot.x) / 2, (f3.y + foot.y) / 2 - s * 0.04, foot.x, foot.y);
+      c.quadraticCurveTo(side * w * 0.22, -s * 0.3, wrist.x, wrist.y);
+      c.quadraticCurveTo(side * w * 0.8, -s * 0.2, tip.x, tip.y);
+      // The trailing edge, scalloped between the fingers.
+      c.quadraticCurveTo(side * w * 0.86, s * 0.08, f2.x, f2.y);
+      c.quadraticCurveTo(side * w * 0.66, s * 0.22, f3.x, f3.y);
+      c.quadraticCurveTo(side * s * 0.3, s * 0.22, foot.x, foot.y);
       c.closePath();
       c.fillStyle = membrane;
       c.fill();
-      c.strokeStyle = fill;
-      c.lineWidth = 1.2 * this.dpr;
+      c.strokeStyle = bone;
+      c.lineWidth = 0.9 * this.dpr;
       c.beginPath();
-      c.moveTo(sh.x, sh.y);
-      c.lineTo(wrist.x, wrist.y);
-      c.lineTo(tip.x, tip.y);
+      c.moveTo(wrist.x, wrist.y);
+      c.lineTo(tip.x * 0.97, tip.y);
       c.moveTo(wrist.x, wrist.y);
       c.lineTo(f2.x, f2.y);
       c.moveTo(wrist.x, wrist.y);
@@ -566,25 +572,25 @@ export class Renderer {
       c.stroke();
     }
     // Tail membrane.
-    c.beginPath();
-    c.moveTo(-s * 0.13, s * 0.3);
-    c.quadraticCurveTo(0, s * 0.62, s * 0.13, s * 0.3);
-    c.closePath();
     c.fillStyle = membrane;
-    c.fill();
-    // Body, head, and ears.
-    c.fillStyle = fill;
     c.beginPath();
-    c.ellipse(0, s * 0.08, s * 0.1, s * 0.25, 0, 0, Math.PI * 2);
+    c.moveTo(-s * 0.12, s * 0.3);
+    c.quadraticCurveTo(0, s * 0.64, s * 0.12, s * 0.3);
+    c.closePath();
+    c.fill();
+    // Body, head, and ears, a shade darker and warmer: the fur.
+    c.fillStyle = 'rgb(150, 160, 150)';
+    c.beginPath();
+    c.ellipse(0, s * 0.07, s * 0.1, s * 0.25, 0, 0, Math.PI * 2);
     c.fill();
     c.beginPath();
-    c.ellipse(0, -s * 0.24, s * 0.075, s * 0.085, 0, 0, Math.PI * 2);
+    c.ellipse(0, -s * 0.25, s * 0.078, s * 0.088, 0, 0, Math.PI * 2);
     c.fill();
     for (const side of [-1, 1]) {
       c.beginPath();
-      c.moveTo(side * s * 0.03, -s * 0.3);
-      c.lineTo(side * s * 0.1, -s * 0.42);
-      c.lineTo(side * s * 0.075, -s * 0.27);
+      c.moveTo(side * s * 0.025, -s * 0.31);
+      c.lineTo(side * s * 0.1, -s * 0.43);
+      c.lineTo(side * s * 0.08, -s * 0.27);
       c.closePath();
       c.fill();
     }
