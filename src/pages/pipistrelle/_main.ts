@@ -113,10 +113,16 @@ export function start(root: HTMLElement): void {
   // The first-light painting, made off the main thread.
   try {
     const worker = new Worker(new URL('./_dawn-worker.ts', import.meta.url), { type: 'module' });
-    worker.onmessage = (ev: MessageEvent<{ width: number; height: number; data: Uint8ClampedArray<ArrayBuffer> }>) => {
-      const { width, height, data } = ev.data;
-      view.setDawn(new ImageData(data, width, height));
-      worker.terminate();
+    worker.onmessage = (
+      ev: MessageEvent<{ kind: 'lamp' | 'day'; width: number; height: number; data: Uint8ClampedArray<ArrayBuffer> }>,
+    ) => {
+      const { kind, width, height, data } = ev.data;
+      const img = new ImageData(data, width, height);
+      if (kind === 'lamp') view.setLamp(img);
+      else {
+        view.setDay(img);
+        worker.terminate();
+      }
     };
   } catch {
     // No painting at dawn; the night still works.
@@ -206,6 +212,7 @@ export function start(root: HTMLElement): void {
     rows.push(`<dt>Feeding buzzes</dt><dd>${buzzes}</dd>`);
     rows.push(`<dt>Collisions</dt><dd>${bat.bumps}</dd>`);
     el.endSheet.innerHTML = rows.join('');
+    el.phase.textContent = late ? 'caught out' : 'at the roost';
     window.setTimeout(() => {
       if (state === 'end') el.end.hidden = false;
     }, 3200);

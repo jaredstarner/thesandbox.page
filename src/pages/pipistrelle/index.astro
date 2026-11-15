@@ -361,6 +361,15 @@ const description =
     display: none;
   }
 
+  .card.end {
+    left: 22px;
+    top: 104px;
+    transform: none;
+    width: min(400px, calc(100% - 32px));
+    max-height: calc(100% - 104px - var(--sono-h) - 20px);
+    padding: 24px 26px 20px;
+  }
+
   .card h2 {
     margin: 0 0 14px;
     font: italic 400 27px/1.15 var(--serif);
@@ -493,6 +502,15 @@ const description =
     }
     .card {
       padding: 22px 20px 18px;
+    }
+    .card.end {
+      left: 12px;
+      right: 12px;
+      top: auto;
+      bottom: calc(var(--sono-h) + 10px);
+      width: auto;
+      max-height: 56%;
+      padding: 18px 18px 14px;
     }
     .card h2 {
       font-size: 23px;

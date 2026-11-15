@@ -1,8 +1,12 @@
-// Paints the first-light view off the main thread, so the night never stutters.
+// Paints the day view and the lamp's patch off the main thread, so the night never stutters.
 
 import { buildWorld } from './_world';
-import { paintDawn } from './_dawn';
+import { buildHeights, buildSunShadow, paintDawn, paintLamp } from './_dawn';
 
 const world = buildWorld();
-const { width, height, data } = paintDawn(world);
-(self as unknown as Worker).postMessage({ width, height, data }, [data.buffer]);
+const H = buildHeights(world);
+const lamp = paintLamp(world, H);
+(self as unknown as Worker).postMessage({ kind: 'lamp', ...lamp }, [lamp.data.buffer]);
+const S = buildSunShadow(H);
+const day = paintDawn(world, H, S);
+(self as unknown as Worker).postMessage({ kind: 'day', ...day }, [day.data.buffer]);

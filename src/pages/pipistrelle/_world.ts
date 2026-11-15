@@ -129,6 +129,16 @@ export function pondK(p: Pond, x: number, y: number): number {
   return Math.hypot(u, v) / wobble;
 }
 
+/** How thick the reeds stand at a point, 0 to 1. They grow in beds round about two thirds of the bank. */
+export function reedAt(p: Pond, x: number, y: number): number {
+  const k = pondK(p, x, y);
+  if (k < 1 || k > 1.16) return 0;
+  const a = Math.atan2(y - p.cy, x - p.cx);
+  const bed = Math.sin(a * 2 + 0.9) + 0.5 * Math.sin(a * 5) + 0.35 * fbm(x * 0.6, y * 0.6);
+  if (bed <= -0.35) return 0;
+  return Math.min(1, (bed + 0.35) * 2) * Math.min(1, (k - 1) / 0.025, (1.16 - k) / 0.04);
+}
+
 export function buildWorld(): World {
   const mat = new Uint8Array(GW * GH);
   const dens = new Uint8Array(GW * GH);
@@ -259,11 +269,8 @@ export function buildWorld(): World {
         water[i] = 1;
         mat[i] = MAT_EMPTY;
         dens[i] = 0;
-      } else if (k < 1.16) {
-        const a = Math.atan2(y - pond.cy, x - pond.cx);
-        // Reeds stand in beds round about two thirds of the bank.
-        const bed = Math.sin(a * 2 + 0.9) + 0.5 * Math.sin(a * 5) + 0.35 * fbm(x * 0.6, y * 0.6);
-        if (bed > -0.35) setLeaf(i, MAT_REED, 60, 80);
+      } else if (reedAt(pond, x, y) > 0) {
+        setLeaf(i, MAT_REED, 60, 80);
       }
     }
   }
@@ -314,7 +321,7 @@ export function buildWorld(): World {
   addWall(gwA, gwB, 0.8, true);
 
   const corners = [...barn, gwA, gwB];
-  const lamp = { x: 60, y: lane(60) + 2.3, r: 9 };
+  const lamp = { x: 60, y: lane(60) + 2.3, r: 7.5 };
   const posts = [{ x: lamp.x, y: lamp.y, r: 0.12 }];
 
   // The roost: a gap under the eaves at the barn's north-east corner.

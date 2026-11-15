@@ -65,10 +65,10 @@ export class Sound {
     this.detector.gain.value = 0.9;
     this.detector.connect(this.master);
     this.analyser = ctx.createAnalyser();
-    this.analyser.fftSize = 1024;
+    this.analyser.fftSize = 512;
     this.analyser.smoothingTimeConstant = 0;
-    this.analyser.minDecibels = -96;
-    this.analyser.maxDecibels = -22;
+    this.analyser.minDecibels = -82;
+    this.analyser.maxDecibels = -20;
     this.detector.connect(this.analyser);
 
     this.world = ctx.createGain();
@@ -192,12 +192,15 @@ export class Sound {
         R[d + i] += s * gr;
       }
     }
-    // Keep a cluttered return from clipping.
-    for (let i = 0; i < len; i++) {
-      const l = L[i];
-      const r = R[i];
-      if (l > 0.8 || l < -0.8) L[i] = Math.tanh(l);
-      if (r > 0.8 || r < -0.8) R[i] = Math.tanh(r);
+    // Keep a cluttered return from clipping, without distorting it.
+    let peak = 0;
+    for (let i = 0; i < len; i++) peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i]));
+    if (peak > 0.7) {
+      const k = 0.7 / peak;
+      for (let i = 0; i < len; i++) {
+        L[i] *= k;
+        R[i] *= k;
+      }
     }
     const src = ctx.createBufferSource();
     src.buffer = buf;

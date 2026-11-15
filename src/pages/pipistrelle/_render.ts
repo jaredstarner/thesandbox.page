@@ -7,10 +7,11 @@
 import { WORLD_H, WORLD_W, type World } from './_world';
 import { KIND_INSECT, KIND_SOLID, SOUND, spreading, type Echo } from './_sonar';
 import { STRETCH } from './_sound';
+import { LAMP_R } from './_dawn';
 import type { Bat } from './_bat';
 import type { Insect } from './_insects';
 
-const MEMORY_PX = 12;
+const MEMORY_PX = 16;
 const ECHO_RGB = '214, 236, 228';
 const SOLID_RGB = '240, 250, 246';
 const AMBER_RGB = '255, 196, 107';
@@ -52,6 +53,7 @@ export class Renderer {
   private memory: HTMLCanvasElement;
   private mctx: CanvasRenderingContext2D;
   private glowAmber: HTMLCanvasElement;
+  private dot: HTMLCanvasElement;
   private lampSprite: HTMLCanvasElement | null = null;
   dawn: HTMLCanvasElement | null = null;
   private pending: Pending[] = [];
@@ -81,6 +83,7 @@ export class Renderer {
     this.memory.height = Math.round(WORLD_H * MEMORY_PX);
     this.mctx = this.memory.getContext('2d')!;
     this.glowAmber = glow(AMBER_RGB);
+    this.dot = softDot();
   }
 
   /** The zoom the night is flown at, for this screen. */
@@ -113,39 +116,20 @@ export class Renderer {
     this.flashes.length = 0;
   }
 
-  setDawn(img: ImageData): void {
+  setDay(img: ImageData): void {
     const c = document.createElement('canvas');
     c.width = img.width;
     c.height = img.height;
     c.getContext('2d')!.putImageData(img, 0, 0);
     this.dawn = c;
-    // The patch of ground the lamp lights, in sodium orange, for the night.
-    const L = this.world.lamp;
-    const px = img.width / WORLD_W;
-    const size = Math.ceil(L.r * 2 * px);
-    const s = document.createElement('canvas');
-    s.width = size;
-    s.height = size;
-    const sc = s.getContext('2d')!;
-    sc.drawImage(c, (L.x - L.r) * px, (L.y - L.r) * px, size, size, 0, 0, size, size);
-    // Sodium light leaves almost no colour but its own.
-    const d = sc.getImageData(0, 0, size, size);
-    for (let i = 0; i < d.data.length; i += 4) {
-      const lum = (d.data[i] * 0.3 + d.data[i + 1] * 0.55 + d.data[i + 2] * 0.15) / 255;
-      d.data[i] = 255 * lum;
-      d.data[i + 1] = 150 * lum;
-      d.data[i + 2] = 62 * lum;
-    }
-    sc.putImageData(d, 0, 0);
-    sc.globalCompositeOperation = 'destination-in';
-    const g = sc.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    g.addColorStop(0, 'rgba(0,0,0,0.95)');
-    g.addColorStop(0.35, 'rgba(0,0,0,0.55)');
-    g.addColorStop(0.7, 'rgba(0,0,0,0.14)');
-    g.addColorStop(1, 'rgba(0,0,0,0)');
-    sc.fillStyle = g;
-    sc.fillRect(0, 0, size, size);
-    this.lampSprite = s;
+  }
+
+  setLamp(img: ImageData): void {
+    const c = document.createElement('canvas');
+    c.width = img.width;
+    c.height = img.height;
+    c.getContext('2d')!.putImageData(img, 0, 0);
+    this.lampSprite = c;
   }
 
   /** Queues a call's echoes to land on the phosphor as they arrive. */
@@ -265,10 +249,9 @@ export class Renderer {
       path.moveTo(cx + Math.cos(a0) * r, cy + Math.sin(a0) * r);
       path.arc(cx, cy, r, a0, e.bearing + e.half);
       // And a mark on the memory of the ground.
-      if (e.vis > 0.04) {
-        m.globalAlpha = Math.min(0.5, e.vis * 0.32);
-        m.fillStyle = e.kind === KIND_SOLID ? `rgb(${SOLID_RGB})` : `rgb(${ECHO_RGB})`;
-        m.fillRect(e.x * MEMORY_PX - 0.8, e.y * MEMORY_PX - 0.8, 1.6, 1.6);
+      if (e.vis > 0.05) {
+        m.globalAlpha = Math.min(0.35, e.vis * 0.2);
+        m.drawImage(this.dot, e.x * MEMORY_PX - 2, e.y * MEMORY_PX - 2, 4, 4);
       }
     }
     p.globalAlpha = 1;
@@ -323,16 +306,18 @@ export class Renderer {
     const L = this.world.lamp;
     const lx = this.sx(L.x);
     const ly = this.sy(L.y);
-    const lr = L.r * this.zoom;
+    const lr = LAMP_R * this.zoom;
     const lampOn = 1 - Math.min(1, dawn * 1.4);
     if (lampOn > 0) {
       c.save();
       c.globalCompositeOperation = 'lighter';
-      c.globalAlpha = lampOn;
+      c.globalAlpha = lampOn * 0.85;
+      c.imageSmoothingQuality = 'high';
       if (this.lampSprite) c.drawImage(this.lampSprite, lx - lr, ly - lr, lr * 2, lr * 2);
+      c.globalAlpha = lampOn;
       const g = c.createRadialGradient(lx, ly, 0, lx, ly, lr);
-      g.addColorStop(0, 'rgba(255, 154, 70, 0.22)');
-      g.addColorStop(0.3, 'rgba(255, 140, 60, 0.09)');
+      g.addColorStop(0, 'rgba(255, 154, 70, 0.1)');
+      g.addColorStop(0.3, 'rgba(255, 140, 60, 0.035)');
       g.addColorStop(1, 'rgba(255, 120, 50, 0)');
       c.fillStyle = g;
       c.fillRect(lx - lr, ly - lr, lr * 2, lr * 2);
@@ -347,8 +332,8 @@ export class Renderer {
       // Moths in the light, seen rather than heard.
       for (const i of insects) {
         const d = Math.hypot(i.x - L.x, i.y - L.y);
-        if (d > L.r * 0.85 || i.mode === 'down') continue;
-        const lit = (1 - d / (L.r * 0.85)) ** 1.6;
+        if (d > LAMP_R * 0.85 || i.mode === 'down') continue;
+        const lit = (1 - d / (LAMP_R * 0.85)) ** 1.6;
         const s = (i.sp === 'midge' ? 1.1 : i.sp === 'underwing' || i.sp === 'tiger' ? 2.2 : 1.6) * this.dpr;
         c.globalAlpha = lampOn * Math.min(1, lit * 1.4);
         c.fillStyle = 'rgb(255, 214, 160)';
@@ -362,7 +347,7 @@ export class Renderer {
     // What the bat remembers of the ground.
     if (opts.memoryAlpha > 0) {
       c.save();
-      c.globalCompositeOperation = 'lighter';
+      c.globalCompositeOperation = dawn > 0.5 ? 'source-over' : 'lighter';
       c.globalAlpha = opts.memoryAlpha;
       c.imageSmoothingEnabled = true;
       c.drawImage(this.memory, x0, y0, ww, wh);
@@ -577,6 +562,20 @@ export class Renderer {
     }
     c.restore();
   }
+}
+
+function softDot(): HTMLCanvasElement {
+  const c = document.createElement('canvas');
+  c.width = 16;
+  c.height = 16;
+  const g = c.getContext('2d')!;
+  const grad = g.createRadialGradient(8, 8, 0, 8, 8, 8);
+  grad.addColorStop(0, `rgba(${ECHO_RGB}, 1)`);
+  grad.addColorStop(0.5, `rgba(${ECHO_RGB}, 0.45)`);
+  grad.addColorStop(1, `rgba(${ECHO_RGB}, 0)`);
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 16, 16);
+  return c;
 }
 
 function glow(rgb: string): HTMLCanvasElement {
