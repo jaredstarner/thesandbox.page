@@ -51,6 +51,7 @@ export function start(root: HTMLElement): void {
     tally: root.querySelector<HTMLElement>('[data-tally]')!,
     bumps: root.querySelector<HTMLElement>('[data-bumps]')!,
     readout: root.querySelector<HTMLElement>('[data-readout]')!,
+    note: root.querySelector<HTMLElement>('[data-note]')!,
     toast: root.querySelector<HTMLElement>('[data-toast]')!,
     intro: root.querySelector<HTMLElement>('[data-intro]')!,
     end: root.querySelector<HTMLElement>('[data-end]')!,
@@ -161,13 +162,17 @@ export function start(root: HTMLElement): void {
   /** At the end, the map fits beside the card on a wide screen, or under it on a narrow one. */
   function endFrame(): { zoom: number; cx: number; cy: number } {
     const d = view.dpr;
-    const wide = view.width / d > 1000;
-    const left = wide ? 440 * d : 0;
-    const top = 70 * d;
-    const bottom = (wide ? 130 : 96) * d;
-    const zoom = Math.min((view.width - left - 24 * d) / WORLD_W, (view.height - top - bottom) / WORLD_H);
-    const cx = WORLD_W / 2 - (left - 24 * d) / 2 / zoom;
-    const cy = WORLD_H / 2 - (top - bottom) / 2 / zoom;
+    const W = view.width;
+    const H = view.height;
+    const wide = W / d > 1000;
+    // The rectangle the map should fill, in device pixels.
+    const L = (wide ? 444 : 12) * d;
+    const R = W - (wide ? 24 : 12) * d;
+    const T = (wide ? 96 : 112) * d;
+    const B = wide ? H - 136 * d : Math.min(H * 0.5, T + ((R - L) * WORLD_H) / WORLD_W);
+    const zoom = Math.min((R - L) / WORLD_W, (B - T) / WORLD_H);
+    const cx = WORLD_W / 2 - ((L + R) / 2 - W / 2) / zoom;
+    const cy = WORLD_H / 2 - ((T + B) / 2 - H / 2) / zoom;
     return { zoom, cx, cy };
   }
 
@@ -427,9 +432,8 @@ export function start(root: HTMLElement): void {
     el.phase.textContent = bat.stunned > 0 ? 'bumped' : PHASE_LABEL[bat.phase];
     const rate = bat.phase === 'search' ? 10 : bat.phase === 'approach' ? Math.round(1 / Math.max(0.012, 0.045 - (bat.phaseT / 0.28) * 0.033)) : bat.phase === 'buzz' ? 180 : 0;
     if (sound.enabled) {
-      el.readout.textContent = rate
-        ? `${rate} calls a second · played ten times lower, two and a half times slower`
-        : 'played ten times lower, two and a half times slower';
+      el.readout.textContent = rate ? `${rate} calls a second` : 'between calls';
+      el.note.hidden = false;
     }
 
     // Camera: a little ahead of the bat.

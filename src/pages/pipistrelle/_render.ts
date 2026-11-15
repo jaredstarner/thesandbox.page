@@ -312,7 +312,7 @@ export class Renderer {
     if (lampOn > 0) {
       c.save();
       c.globalCompositeOperation = 'lighter';
-      c.globalAlpha = lampOn * 0.85;
+      c.globalAlpha = lampOn * 0.62;
       c.imageSmoothingQuality = 'high';
       if (this.lampSprite) c.drawImage(this.lampSprite, lx - lr, ly - lr, lr * 2, lr * 2);
       c.globalAlpha = lampOn;
@@ -371,7 +371,7 @@ export class Renderer {
         if (age > 1.6) continue;
         keep.push(s);
         const env = age < 0.03 ? age / 0.03 : Math.exp(-(age - 0.03) / 0.42);
-        const r = (4 + s.vis * 8) * this.dpr;
+        const r = (2.6 + s.vis * 6.5) * this.dpr * Math.max(0.55, Math.min(1.2, this.zoom / (70 * this.dpr)));
         c.globalAlpha = Math.min(1, (0.3 + s.vis) * env);
         c.drawImage(this.glowAmber, this.sx(s.x) - r, this.sy(s.y) - r, r * 2, r * 2);
       }
@@ -458,6 +458,15 @@ export class Renderer {
           c.fill();
         }
       }
+      c.restore();
+    }
+
+    // A hairline round the map once it is all in view.
+    if (dawn > 0.95) {
+      c.save();
+      c.strokeStyle = `rgba(${ECHO_RGB}, 0.22)`;
+      c.lineWidth = 1 * this.dpr;
+      c.strokeRect(Math.round(x0) + 0.5, Math.round(y0) + 0.5, Math.round(ww) - 1, Math.round(wh) - 1);
       c.restore();
     }
 

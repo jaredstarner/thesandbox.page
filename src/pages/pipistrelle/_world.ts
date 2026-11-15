@@ -325,7 +325,7 @@ export function buildWorld(): World {
   addWall(gwA, gwB, 0.8, true);
 
   const corners = [...barn, gwA, gwB];
-  const lamp = { x: 60, y: lane(60) + 2.3, r: 6 };
+  const lamp = { x: 60, y: lane(60) + 2.3, r: 5.5 };
   const posts = [{ x: lamp.x, y: lamp.y, r: 0.12 }];
 
   // The roost: a gap under the eaves at the barn's north-east corner.
