@@ -701,5 +701,24 @@ export default defineConfig({
       subsets: ['latin', 'latin-ext'],
       fallbacks: ['Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
     },
+    // /pipistrelle/: Crimson Pro for the night's notes, JetBrains Mono for the bat detector.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Crimson Pro',
+      cssVariable: '--font-pip-serif',
+      weights: ['200 900'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'JetBrains Mono',
+      cssVariable: '--font-pip-mono',
+      weights: ['100 800'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });

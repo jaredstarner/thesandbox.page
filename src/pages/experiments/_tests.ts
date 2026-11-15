@@ -554,6 +554,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   'sound-change': { label: 'Sound change' },
   'writing-systems': { label: 'Writing systems' },
   'interlinear-gloss': { label: 'Interlinear glossing' },
+  echolocation: { label: 'Echolocation' },
+  'ray-casting': { label: 'Ray casting' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
