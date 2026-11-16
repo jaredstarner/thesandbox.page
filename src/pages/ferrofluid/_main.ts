@@ -301,7 +301,7 @@ function start(root: HTMLElement) {
             ranResolve = resolve;
             worker.postMessage({ kind: 'run', seconds });
           }),
-        state: () => ({ coil, actualCoil, frames, spikes: spikes.length, view: viewName }),
+        state: () => ({ coil, actualCoil, frames, spikes: spikes.length, view: viewName, hand, magnet: bench.magnet }),
       },
     });
   }
