@@ -50,10 +50,10 @@ export interface Magnet {
   lift: number;
 }
 
-const MAG_NEAR = 16;
-const MAG_FAR = 46;
+const MAG_NEAR = 22;
+const MAG_FAR = 60;
 /** Field on the magnet's axis at the fluid when pressed against the dish, mT. */
-const MAG_B0 = 60;
+const MAG_B0 = 70;
 
 /** Dipole strength for the renderer: B on axis at depth z is 2 MAGNET_K / z^3. */
 export const MAGNET_K = (MAG_B0 * MAG_NEAR * MAG_NEAR * MAG_NEAR) / 2;
@@ -298,7 +298,7 @@ export interface Spike {
   y: number;
   /** Height above the surrounding pool, mm. */
   h: number;
-  /** 6: hexagonal neighbourhood, 4: square, 0: neither (an edge or a defect). */
+  /** 6: hexagonal neighbourhood, 4: square, 5: a defect (five or seven neighbours), 0: an edge. */
   kind: number;
 }
 
@@ -306,6 +306,7 @@ export interface LatticeStats {
   count: number;
   hex: number;
   square: number;
+  defect: number;
   /** Median distance to the nearest spike, mm. */
   spacing: number;
 }
@@ -401,15 +402,18 @@ function classify(spikes: Spike[], wrap: boolean) {
     const psi6 = Math.hypot(c6, s6) / count;
     if (count === 6 && psi6 > 0.6) spikes[a].kind = 6;
     else if (count === 4 && psi4 > 0.6) spikes[a].kind = 4;
+    else if (count === 5 || count === 7 || (count === 6 && psi6 <= 0.6)) spikes[a].kind = 5;
   }
 }
 
 export function latticeStats(spikes: Spike[], wrap: boolean): LatticeStats {
   let hex = 0;
   let square = 0;
+  let defect = 0;
   for (const s of spikes) {
     if (s.kind === 6) hex++;
     else if (s.kind === 4) square++;
+    else if (s.kind === 5) defect++;
   }
   const near: number[] = [];
   for (let a = 0; a < spikes.length; a++) {
@@ -429,7 +433,7 @@ export function latticeStats(spikes: Spike[], wrap: boolean): LatticeStats {
     if (best < Infinity) near.push(best);
   }
   near.sort((a, b) => a - b);
-  return { count: spikes.length, hex, square, spacing: near.length ? near[near.length >> 1] : 0 };
+  return { count: spikes.length, hex, square, defect, spacing: near.length ? near[near.length >> 1] : 0 };
 }
 
 export function mulberry(seed: number): () => number {

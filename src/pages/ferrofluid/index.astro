@@ -4,35 +4,176 @@ import Bare from '../../layouts/Bare.astro';
 
 const description =
   'A dish of ferrofluid on an electromagnet: turn up the coil and the black liquid stands up in a lattice of spikes, or hold a magnet under the dish and drag the pool after it.';
+
+// The meter's scale: 0 to 40 mT over a 100 degree arc.
+const ARC = 100;
+const angle = (b: number) => -ARC / 2 + (b / 40) * ARC;
+const ticks = Array.from({ length: 41 }, (_, b) => {
+  const a = (angle(b) * Math.PI) / 180;
+  const major = b % 5 === 0;
+  const r0 = major ? 112 : 117;
+  return {
+    b,
+    major,
+    x1: 150 + r0 * Math.sin(a),
+    y1: 160 - r0 * Math.cos(a),
+    x2: 150 + 124 * Math.sin(a),
+    y2: 160 - 124 * Math.cos(a),
+    tx: 150 + 99 * Math.sin(a),
+    ty: 160 - 99 * Math.cos(a) + 4,
+  };
+});
+const onset = (() => {
+  const a = (angle(16.7) * Math.PI) / 180;
+  return { x1: 150 + 126 * Math.sin(a), y1: 160 - 126 * Math.cos(a), x2: 150 + 134 * Math.sin(a), y2: 160 - 134 * Math.cos(a) };
+})();
 ---
 
 <Bare title="Ferrofluid" description={description}>
   <Font cssVariable="--font-ferro-panel" slot="head" />
   <Font cssVariable="--font-ferro-text" slot="head" />
-  <main class="ferro">
+  <main class="ferro" data-view="bench">
     <canvas class="scene" data-scene aria-label="A porcelain dish of ferrofluid on an electromagnet"></canvas>
+    <canvas class="marks" data-marks aria-hidden="true"></canvas>
+
     <header class="masthead">
       <p class="home"><a href="/">thesandbox.page</a></p>
       <h1>Ferrofluid</h1>
+      <p class="dek">A dish of magnetic liquid on an electromagnet.</p>
     </header>
+
+    <p class="hint" data-hint>
+      <span class="fine">Press on the dish to hold a magnet under it, and drag to move it.</span>
+      <span class="coarse">Touch the dish to hold a magnet under it, and drag to move it.</span>
+    </p>
+
+    <section class="panel" aria-label="Coil supply">
+      <div class="face">
+        <p class="maker">Coil supply <span>0 to 40 mT</span></p>
+        <svg class="meter" viewBox="0 0 300 172" aria-hidden="true">
+          <defs>
+            <linearGradient id="ferro-glass" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fff" stop-opacity="0.5"></stop>
+              <stop offset="0.45" stop-color="#fff" stop-opacity="0"></stop>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="6" width="288" height="160" rx="6" class="dial"></rect>
+          <path d="M 55 77 A 124 124 0 0 1 245 77" class="arc"></path>
+          {
+            ticks.map((t) => (
+              <line x1={t.x1.toFixed(1)} y1={t.y1.toFixed(1)} x2={t.x2.toFixed(1)} y2={t.y2.toFixed(1)} class={t.major ? 'tick major' : 'tick'} />
+            ))
+          }
+          {
+            ticks
+              .filter((t) => t.major)
+              .map((t) => (
+                <text x={t.tx.toFixed(1)} y={t.ty.toFixed(1)} class="num">
+                  {t.b}
+                </text>
+              ))
+          }
+          <line x1={onset.x1.toFixed(1)} y1={onset.y1.toFixed(1)} x2={onset.x2.toFixed(1)} y2={onset.y2.toFixed(1)} class="onset"></line>
+          <text x="150" y="120" class="unit">mT</text>
+          <g class="needle" data-needle>
+            <line x1="150" y1="160" x2="150" y2="44"></line>
+          </g>
+          <circle cx="150" cy="160" r="9" class="hub"></circle>
+          <rect x="6" y="6" width="288" height="160" rx="6" fill="url(#ferro-glass)" class="glass"></rect>
+        </svg>
+
+        <label class="fader">
+          <span class="label">Current</span>
+          <input type="range" min="0" max="40" step="0.1" value="0" data-coil aria-label="Coil field, millitesla" />
+          <output data-coil-out>0.0 mT</output>
+        </label>
+
+        <dl class="readouts">
+          <div>
+            <dt>Spikes</dt>
+            <dd data-count>0</dd>
+          </div>
+          <div>
+            <dt>Spacing</dt>
+            <dd data-spacing>–</dd>
+          </div>
+          <div class="wide">
+            <dt>Lattice</dt>
+            <dd data-lattice>flat</dd>
+          </div>
+        </dl>
+
+        <div class="controls">
+          <div class="views" role="group" aria-label="View">
+            <button type="button" data-view-btn="bench" aria-pressed="true">Bench</button>
+            <button type="button" data-view-btn="above" aria-pressed="false">Above</button>
+            <button type="button" data-view-btn="low" aria-pressed="false">Low</button>
+          </div>
+          <button type="button" class="toggle" data-marks-btn aria-pressed="false">Lattice</button>
+          <button type="button" class="toggle" popovertarget="ferro-notes">Notes</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="notes" id="ferro-notes" popover>
+      <h2>On the dish</h2>
+      <p>
+        Ferrofluid is an oil carrying grains of magnetite about ten nanometres across, each coated so they never clump.
+        In a field every grain turns into a small magnet, and the whole liquid is pulled along the field lines.
+      </p>
+      <p>
+        Bring the coil up slowly. Nothing happens until about 16.7 mT. Then the flat surface gives way and spikes stand up
+        about a centimetre apart, a spacing set by gravity pulling against surface tension. They come in hexagons. Past
+        about 21 mT, patches of them go over to squares.
+      </p>
+      <p>
+        Bring it back down and the spikes hold on below the field where they appeared. In that band a single press on the
+        dish can raise a spike or two that stay up on their own.
+      </p>
+      <p>Hold the magnet under the dish and the pool runs to it and stands up as a hedgehog.</p>
+      <p class="small">
+        Cowley and Rosensweig described the spikes in 1967. The thresholds here are measurements by Gollwitzer, Rehberg,
+        and Richter on a fluid called APG 512A; the spikes come from a Swift-Hohenberg pattern model tuned to them, and
+        the pool flows as a thin viscous layer.
+      </p>
+      <button type="button" popovertarget="ferro-notes" popovertargetaction="hide">Close</button>
+    </div>
+
+    <p class="fallback" data-fallback hidden>
+      This dish needs WebGL 2 and web workers, which this browser does not offer. It is a porcelain dish of ferrofluid on
+      an electromagnet; turn the coil up and the liquid stands up in spikes.
+    </p>
   </main>
 </Bare>
+
+<script>
+  import './_main';
+</script>
 
 <style>
   :global(body:has(.ferro)) {
     margin: 0;
-    background: #1d1c1a;
+    background: #121110;
+    overflow: hidden;
   }
 
   .ferro {
-    position: relative;
-    min-height: 100vh;
-    min-height: 100dvh;
-    color: #ebe6dc;
+    --enamel: #e7e1d3;
+    --enamel-edge: #c9c1ae;
+    --ink: #1d1b18;
+    --ink-soft: #5a554c;
+    --signal: #b3372a;
+    --text: #ece7dc;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    color: var(--text);
     font-family: var(--font-ferro-text);
+    isolation: isolate;
   }
 
-  .scene {
+  .scene,
+  .marks {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -40,9 +181,488 @@ const description =
     display: block;
   }
 
+  .scene {
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .ferro[data-pressing] .scene {
+    cursor: grabbing;
+  }
+
+  .marks {
+    pointer-events: none;
+  }
+
   .masthead {
     position: absolute;
-    top: 20px;
-    left: 24px;
+    top: 22px;
+    left: 26px;
+    pointer-events: none;
+  }
+
+  .masthead > * {
+    pointer-events: auto;
+  }
+
+  .home {
+    margin: 0 0 10px;
+    font: 500 13px/1 var(--font-ferro-panel);
+    letter-spacing: 0.08em;
+  }
+
+  .home a {
+    color: rgb(236 231 220 / 0.62);
+    text-decoration: none;
+  }
+
+  .home a:hover,
+  .home a:focus-visible {
+    color: var(--text);
+  }
+
+  h1 {
+    margin: 0;
+    font: 300 46px/0.95 var(--font-ferro-panel);
+    letter-spacing: 0.01em;
+  }
+
+  .dek {
+    margin: 8px 0 0;
+    font: 400 15px/1.35 var(--font-ferro-text);
+    color: rgb(236 231 220 / 0.7);
+  }
+
+  .hint {
+    position: absolute;
+    left: 26px;
+    bottom: 22px;
+    margin: 0;
+    max-width: 340px;
+    font: 400 14px/1.4 var(--font-ferro-text);
+    color: rgb(236 231 220 / 0.72);
+    transition: opacity 0.6s;
+    pointer-events: none;
+  }
+
+  .hint[data-gone] {
+    opacity: 0;
+  }
+
+  .hint .coarse {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    .hint .fine {
+      display: none;
+    }
+
+    .hint .coarse {
+      display: inline;
+    }
+  }
+
+  .panel {
+    position: absolute;
+    right: 24px;
+    bottom: 24px;
+    width: 316px;
+  }
+
+  .face {
+    box-sizing: border-box;
+    padding: 14px 16px 16px;
+    border-radius: 10px;
+    background:
+      radial-gradient(120% 90% at 30% 0%, rgb(255 255 255 / 0.35), transparent 60%),
+      linear-gradient(180deg, var(--enamel), #ddd6c5);
+    color: var(--ink);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.5),
+      inset 0 -2px 0 var(--enamel-edge),
+      0 18px 40px rgb(0 0 0 / 0.45),
+      0 2px 6px rgb(0 0 0 / 0.35);
+    font-family: var(--font-ferro-panel);
+  }
+
+  .maker {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 0 0 8px;
+    font: 700 13px/1 var(--font-ferro-panel);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .maker span {
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+  }
+
+  .meter {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .meter .dial {
+    fill: #f6f2e8;
+    stroke: #2a2723;
+    stroke-width: 2.5;
+  }
+
+  .meter .arc {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.2;
+  }
+
+  .meter .tick {
+    stroke: var(--ink);
+    stroke-width: 1;
+  }
+
+  .meter .tick.major {
+    stroke-width: 1.8;
+  }
+
+  .meter .num {
+    font: 600 13px/1 var(--font-ferro-panel);
+    fill: var(--ink);
+    text-anchor: middle;
+  }
+
+  .meter .unit {
+    font: 700 15px/1 var(--font-ferro-panel);
+    letter-spacing: 0.1em;
+    fill: var(--ink-soft);
+    text-anchor: middle;
+  }
+
+  .meter .onset {
+    stroke: var(--signal);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  .meter .needle {
+    transform-origin: 150px 160px;
+    transform: rotate(-50deg);
+  }
+
+  .meter .needle line {
+    stroke: #111;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  .meter .hub {
+    fill: #26231f;
+  }
+
+  .meter .glass {
+    pointer-events: none;
+  }
+
+  .fader {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0 4px;
+  }
+
+  .fader .label,
+  .readouts dt {
+    font: 700 11px/1 var(--font-ferro-panel);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .fader output {
+    min-width: 58px;
+    text-align: right;
+    font: 600 16px/1 var(--font-ferro-panel);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fader input {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 26px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .fader input::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #2b2824, #4a463f);
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.6);
+  }
+
+  .fader input::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #2b2824, #4a463f);
+  }
+
+  .fader input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 24px;
+    margin-top: -9px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #3a3631, #15130f);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.25),
+      0 2px 3px rgb(0 0 0 / 0.5);
+  }
+
+  .fader input::-moz-range-thumb {
+    width: 18px;
+    height: 24px;
+    border: 0;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #3a3631, #15130f);
+  }
+
+  .fader input:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+
+  .readouts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    margin: 12px 0 14px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: #191714;
+    color: #e9c46a;
+  }
+
+  .readouts div {
+    min-width: 0;
+  }
+
+  .readouts .wide {
+    grid-column: 1 / -1;
+  }
+
+  .readouts dt {
+    color: rgb(233 196 106 / 0.55);
+    font-size: 10px;
+  }
+
+  .readouts dd {
+    margin: 4px 0 0;
+    font: 500 18px/1.1 var(--font-ferro-panel);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .views {
+    display: flex;
+  }
+
+  .controls button {
+    appearance: none;
+    padding: 7px 11px 6px;
+    border: 1px solid #8f8778;
+    background: linear-gradient(180deg, #f3eee3, #d9d1bf);
+    color: var(--ink);
+    font: 700 11px/1 var(--font-ferro-panel);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .views button {
+    border-radius: 0;
+    margin-left: -1px;
+  }
+
+  .views button:first-child {
+    border-radius: 4px 0 0 4px;
+    margin-left: 0;
+  }
+
+  .views button:last-child {
+    border-radius: 0 4px 4px 0;
+  }
+
+  .controls button[aria-pressed='true'] {
+    background: linear-gradient(180deg, #2a2723, #3d3933);
+    color: #f1ecdf;
+    border-color: #1d1b18;
+  }
+
+  .controls button:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+    position: relative;
+  }
+
+  .notes {
+    box-sizing: border-box;
+    width: min(460px, calc(100vw - 32px));
+    max-height: calc(100dvh - 48px);
+    overflow: auto;
+    padding: 22px 24px 20px;
+    border: 0;
+    border-radius: 10px;
+    background: #f1ece1;
+    color: var(--ink);
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.5);
+    font: 400 15px/1.5 var(--font-ferro-text);
+  }
+
+  .notes::backdrop {
+    background: rgb(10 9 8 / 0.45);
+  }
+
+  .notes h2 {
+    margin: 0 0 10px;
+    font: 600 22px/1.1 var(--font-ferro-panel);
+    letter-spacing: 0.02em;
+  }
+
+  .notes p {
+    margin: 0 0 11px;
+  }
+
+  .notes .small {
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .notes button {
+    margin-top: 4px;
+    padding: 8px 14px 7px;
+    border: 1px solid #8f8778;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #f3eee3, #d9d1bf);
+    font: 700 11px/1 var(--font-ferro-panel);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .fallback {
+    position: absolute;
+    left: 26px;
+    top: 160px;
+    max-width: 420px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  @media (max-width: 720px) {
+    .masthead {
+      top: 14px;
+      left: 16px;
+    }
+
+    .home {
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      font-size: 34px;
+    }
+
+    .dek {
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .panel {
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      width: auto;
+    }
+
+    .face {
+      display: grid;
+      grid-template-columns: 132px 1fr;
+      grid-template-areas:
+        'meter maker'
+        'meter readouts'
+        'fader fader'
+        'controls controls';
+      column-gap: 12px;
+      padding: 10px 12px 12px;
+    }
+
+    .maker {
+      grid-area: maker;
+      font-size: 11px;
+      margin: 2px 0 6px;
+    }
+
+    .maker span {
+      display: none;
+    }
+
+    .meter {
+      grid-area: meter;
+      align-self: start;
+    }
+
+    .readouts {
+      grid-area: readouts;
+      margin: 0;
+      padding: 7px 9px;
+      gap: 5px 8px;
+    }
+
+    .readouts dd {
+      font-size: 15px;
+      margin-top: 2px;
+    }
+
+    .fader {
+      grid-area: fader;
+      margin: 10px 0 8px;
+    }
+
+    .controls {
+      grid-area: controls;
+      justify-content: space-between;
+    }
+
+    .controls button {
+      padding: 8px 10px 7px;
+    }
+
+    .hint {
+      left: 16px;
+      right: 16px;
+      bottom: auto;
+      top: 96px;
+      font-size: 13px;
+    }
   }
 </style>
