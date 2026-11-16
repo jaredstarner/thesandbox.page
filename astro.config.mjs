@@ -720,5 +720,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    // /ferrofluid/: Sofia Sans Condensed for the instrument panel's engraved labels, Sofia Sans for its notes.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Sofia Sans Condensed',
+      cssVariable: '--font-ferro-panel',
+      weights: ['300 800'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Arial Narrow', 'Helvetica Neue', 'Arial', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Sofia Sans',
+      cssVariable: '--font-ferro-text',
+      weights: ['300 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
+    },
   ],
 });

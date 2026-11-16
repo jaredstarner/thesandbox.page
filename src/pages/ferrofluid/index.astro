@@ -1,0 +1,48 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+
+const description =
+  'A dish of ferrofluid on an electromagnet: turn up the coil and the black liquid stands up in a lattice of spikes, or hold a magnet under the dish and drag the pool after it.';
+---
+
+<Bare title="Ferrofluid" description={description}>
+  <Font cssVariable="--font-ferro-panel" slot="head" />
+  <Font cssVariable="--font-ferro-text" slot="head" />
+  <main class="ferro">
+    <canvas class="scene" data-scene aria-label="A porcelain dish of ferrofluid on an electromagnet"></canvas>
+    <header class="masthead">
+      <p class="home"><a href="/">thesandbox.page</a></p>
+      <h1>Ferrofluid</h1>
+    </header>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.ferro)) {
+    margin: 0;
+    background: #1d1c1a;
+  }
+
+  .ferro {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    color: #ebe6dc;
+    font-family: var(--font-ferro-text);
+  }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .masthead {
+    position: absolute;
+    top: 20px;
+    left: 24px;
+  }
+</style>

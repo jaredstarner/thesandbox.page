@@ -556,6 +556,9 @@ export const TECHNIQUES: Record<string, Technique> = {
   'interlinear-gloss': { label: 'Interlinear glossing' },
   echolocation: { label: 'Echolocation' },
   'ray-casting': { label: 'Ray casting' },
+  ferrofluid: { label: 'Ferrofluid' },
+  'pattern-formation': { label: 'Pattern formation' },
+  fft: { label: 'Fast Fourier transform' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
