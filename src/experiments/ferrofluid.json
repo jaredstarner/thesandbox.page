@@ -1,0 +1,8 @@
+{
+  "title": "Ferrofluid",
+  "summary": "A porcelain dish of ferrofluid on an electromagnet: turn up the coil and the black liquid stands up in a hexagonal lattice of spikes that crowds and breaks up as the field climbs, or hold a magnet under the dish and drag the whole pool into a hedgehog that follows your hand.",
+  "date": "2026-11-16",
+  "tags": ["webgl2", "web-workers", "pointer-events", "physics", "ferrofluid", "pattern-formation", "fft"],
+  "requires": ["webgl2", "web-workers"],
+  "plot": 46
+}
