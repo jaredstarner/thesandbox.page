@@ -185,10 +185,11 @@ void main() {
     col = alb * diffuseLight(n, 1.0) + env(reflect(-v, n), 0.25) * schlick(0.045, dot(n, v));
   } else if (mat == 3) {
     float sh = n.y > 0.5 ? mix(0.25, 1.0, discShadow(vPos.xz, 62.5, 24.0)) : 1.0;
-    float rings = 0.94 + 0.06 * sin(r * 9.0 + vnoise(vec2(r * 0.8, 0.0)) * 3.0);
-    vec3 refl = env(reflect(-v, n), 0.32) * mix(0.35, 1.0, sh);
-    col = refl * vec3(0.86, 0.87, 0.88) * rings;
-    col += vec3(0.06) * diffuseLight(n, sh);
+    // Black anodized and turned: the lathe's rings show only in the reflection.
+    float rings = 0.8 + 0.2 * sin(r * 9.0 + vnoise(vec2(r * 0.8, 0.0)) * 3.0);
+    vec3 refl = env(reflect(-v, n), 0.22) * mix(0.35, 1.0, sh);
+    col = refl * vec3(0.16, 0.165, 0.175) * rings;
+    col += vec3(0.022, 0.022, 0.024) * diffuseLight(n, sh);
     if (n.y > 0.5) col *= 1.0 - 0.5 * exp(-max(0.0, r - 44.0) / 3.0) * step(r, 60.0) * uDishShadow;
   } else if (mat == 4 || mat == 5) {
     vec3 alb = mat == 4 ? vec3(0.86, 0.85, 0.82) : vec3(0.74, 0.72, 0.68);
@@ -218,6 +219,7 @@ out vec3 vN;
 out float vD;
 out float vCav;
 out float vSpike;
+out vec3 vBedN;
 
 const float DXC = ${DX.toFixed(4)};
 const float HALF = ${(DOMAIN / 2).toFixed(1)};
@@ -259,12 +261,17 @@ void main() {
     float cc = 3.0 * d.y / r2;
     B += uMag.w * f * vec3(cc * d.x, 3.0 * d.y * d.y / r2 - 1.0, cc * d.z);
   }
-  vec2 lean = B.xz / max(abs(B.y), 4.0) * spike * 0.55;
-  lean = clamp(lean, vec2(-4.0), vec2(4.0));
+  vec2 lean = B.xz / max(abs(B.y), 4.0) * spike * 0.32;
+  lean = clamp(lean, vec2(-2.5), vec2(2.5));
   vec3 p = vec3(x + lean.x, ${FLOOR_Y.toFixed(1)} + h, z + lean.y);
   vPos = p;
   vN = n;
   vD = hd.g;
+  // The porcelain's own normal, from the profile rather than the grid, so dry walls shade smoothly.
+  float t = clamp(r - ${DISH.floor.toFixed(1)}, 0.0, ${(DISH.fillet - 0.01).toFixed(2)});
+  float slope = r > ${DISH.floor.toFixed(1)} ? t / sqrt(${DISH.fillet.toFixed(1)} * ${DISH.fillet.toFixed(1)} - t * t) : 0.0;
+  vec2 radial = r > 0.001 ? vec2(x, z) / r : vec2(0.0);
+  vBedN = normalize(vec3(-slope * radial.x, 1.0, -slope * radial.y));
   gl_Position = uVP * vec4(p, 1.0);
 }
 `;
@@ -276,24 +283,26 @@ in vec3 vN;
 in float vD;
 in float vCav;
 in float vSpike;
+in vec3 vBedN;
 uniform vec3 uCam;
 out vec4 outColor;
 void main() {
   float r = length(vPos.xz);
-  if (r > ${(DISH.rim + 0.3).toFixed(1)}) discard;
+  if (r > ${(DISH.rim + 0.12).toFixed(2)}) discard;
   vec3 n = normalize(vN);
   vec3 v = normalize(uCam - vPos);
   // Porcelain glaze where the dish is dry, with the brown stain a thin film of ferrofluid leaves.
   vec3 glaze = vec3(0.86, 0.85, 0.82);
   float sh = wallShadow(vPos.xz, vPos.y - ${FLOOR_Y.toFixed(1)});
-  vec3 porc = glaze * diffuseLight(n, mix(0.45, 1.0, sh)) + env(reflect(-v, n), 0.04) * schlick(0.045, dot(n, v));
+  float wet = smoothstep(0.05, 0.35, vD + vSpike);
+  vec3 bn = normalize(mix(normalize(vBedN), n, smoothstep(0.0, 0.3, vD)));
+  vec3 porc = glaze * diffuseLight(bn, mix(0.45, 1.0, sh)) + env(reflect(-v, bn), 0.04) * schlick(0.045, dot(bn, v));
   float film = smoothstep(0.004, 0.06, vD);
   porc *= mix(vec3(1.0), vec3(0.42, 0.3, 0.22), film);
   // Ferrofluid: a black, glossy oil.
-  float wet = smoothstep(0.05, 0.35, vD + vSpike);
   float F = schlick(0.05, dot(n, v));
   float occ = 1.0 - 0.75 * vCav;
-  vec3 refl = env(reflect(-v, n), 0.01) * occ;
+  vec3 refl = env(reflect(-v, n), 0.035) * occ;
   vec3 ff = refl * F + diffuseLight(n, 1.0) * vec3(0.012, 0.0105, 0.009);
   vec3 col = mix(porc, ff, wet);
   outColor = vec4(tonemap(col), 1.0);
@@ -608,7 +617,7 @@ export class Bench {
     // The dish: lip, outer wall, foot. y relative to its floor, which sits 4 mm above the plate.
     const f = FLOOR_Y;
     const lip: [number, number][] = [
-      [57.6, bed(57.6)],
+      [DISH.rim, bed(DISH.rim)],
       [58.4, 18.6],
       [59.5, 19.6],
       [60.8, 20.0],
@@ -653,9 +662,9 @@ export class Bench {
       0,
       Math.cos(a),
       0,
-      -18,
+      20,
       0,
-      152,
+      136,
       1,
     ]);
 

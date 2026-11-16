@@ -281,9 +281,12 @@ export class Bulk {
         d[k] = v > 0 ? v : 0;
       }
     }
-    // Hold the volume exactly; clipping at zero can gain a little.
+    // A film thinner than this has drained; then hold the volume exactly.
     let v = 0;
-    for (let k = 0; k < NB * NB; k++) v += d[k];
+    for (let k = 0; k < NB * NB; k++) {
+      if (d[k] < 0.015) d[k] = 0;
+      v += d[k];
+    }
     if (v > 0) {
       const f = this.volume / v;
       for (let k = 0; k < NB * NB; k++) d[k] *= f;
@@ -349,6 +352,12 @@ export function findSpikes(u: Float64Array, floor: number, wrap: boolean, height
   return spikes;
 }
 
+/** Classify again after filtering, so dropped low bumps don't count as neighbours. */
+export function classifySpikes(spikes: Spike[]) {
+  for (const s of spikes) s.kind = 0;
+  classify(spikes, false);
+}
+
 function parabola(a: number, b: number, c: number): number {
   const den = a - 2 * b + c;
   if (den >= 0) return 0;
@@ -402,7 +411,7 @@ function classify(spikes: Spike[], wrap: boolean) {
     const psi6 = Math.hypot(c6, s6) / count;
     if (count === 6 && psi6 > 0.6) spikes[a].kind = 6;
     else if (count === 4 && psi4 > 0.6) spikes[a].kind = 4;
-    else if (count === 5 || count === 7 || (count === 6 && psi6 <= 0.6)) spikes[a].kind = 5;
+    else spikes[a].kind = 5;
   }
 }
 
@@ -458,7 +467,7 @@ const R_DRY = -2.5;
 const PATTERN_RATE = 14;
 const PATTERN_DT = 0.3;
 /** Spike height in mm per unit of u (on its sharpened positive part). */
-const SPIKE_MM = 3;
+const SPIKE_MM = 3.3;
 
 export interface Inputs {
   /** Coil setting, mT at the centre of the dish. */
@@ -480,6 +489,7 @@ export class Dish {
   readonly dFine = new Float64Array(N * N);
   readonly field = new Float64Array(N * N);
   private readonly r = new Float64Array(N * N);
+  private readonly tmp = new Float64Array(N * N);
   private readonly bv = new Float64Array(3);
   /** The coil's actual field, following the setting through its inductance. */
   coil = 0;
@@ -542,6 +552,9 @@ export class Dish {
     const k0 = KC * DX * (1 - 0.05 * Math.max(0, Math.min(2, eCoil)));
     this.pattern.params = { ...PATTERN, notch: 0.45 + 0.47 * smooth(20, 27, this.coil) };
     this.pattern.setScale(k0, PATTERN_DT, 3);
+    // Full growth only once the coil is into the squares; below that, a capped rate keeps
+    // the magnet's mound in hexagons, the way a hedgehog stands, instead of rolls.
+    const rMax = 0.55 + (R_MAX - 0.55) * smooth(20, 27, this.coil);
     for (let j = 0; j < N; j++) {
       for (let i = 0; i < N; i++) {
         const k = j * N + i;
@@ -560,7 +573,7 @@ export class Dish {
         const s = (1 - Math.exp(-d / 1.2)) / 0.9765;
         const e = (b / BC) ** 2 * s - 1;
         let g = e < 0 ? KAPPA_BELOW * e : KAPPA * e;
-        if (g > R_MAX) g = R_MAX;
+        if (g > rMax) g = rMax;
         const wet = smooth(0.05, 0.6, d);
         this.r[k] = R_DRY + (g - R_DRY) * wet;
       }
@@ -595,6 +608,18 @@ export class Dish {
         this.dFine[j * N + i] = this.rho[j * N + i] > DISH.rim ? 0 : v;
       }
     }
+    // Two passes of a 3 x 3 blur round off the coarse grid's corners at the contact line.
+    const a = this.dFine;
+    const t = this.tmp;
+    for (let pass = 0; pass < 2; pass++) {
+      for (let j = 1; j < N - 1; j++) {
+        for (let i = 1; i < N - 1; i++) {
+          const k = j * N + i;
+          t[k] = (4 * a[k] + 2 * (a[k - 1] + a[k + 1] + a[k - N] + a[k + N]) + a[k - N - 1] + a[k - N + 1] + a[k + N - 1] + a[k + N + 1]) / 16;
+        }
+      }
+      for (let k = 0; k < N * N; k++) a[k] = this.rho[k] > DISH.rim ? 0 : t[k];
+    }
   }
 
   /** Spike height above the bulk surface for a cell, mm. */
@@ -602,7 +627,7 @@ export class Dish {
     const u = this.pattern.u[k];
     const d = this.dFine[k];
     const avail = smooth(0, 2.5, d);
-    const s = u > 0 ? Math.pow(u, 1.15) : 0.45 * u;
+    const s = u > 0 ? Math.pow(u, 1.45) : 0.45 * u;
     const h = SPIKE_MM * s * avail;
     return Math.max(h, -0.85 * d);
   }
@@ -623,13 +648,25 @@ export class Dish {
     for (let k = 0; k < N * N; k++) if (u[k] > max && this.dFine[k] > 0.3) max = u[k];
     if (max < 0.15) return [];
     const list = findSpikes(u, Math.max(0.12, max * 0.35), false, (k) => this.spikeAt(k));
-    return list
-      .filter((s) => s.h > 0.4)
-      .map((s) => {
-        const i = Math.max(0, Math.min(N - 1, Math.floor((s.x + DOMAIN / 2) / DX)));
-        const j = Math.max(0, Math.min(N - 1, Math.floor((s.y + DOMAIN / 2) / DX)));
-        const k = j * N + i;
-        return { ...s, top: this.bedFine[k] + this.dFine[k] + this.spikeAt(k) };
-      });
+    const cell = (x: number, y: number) => {
+      const i = Math.max(0, Math.min(N - 1, Math.floor((x + DOMAIN / 2) / DX)));
+      const j = Math.max(0, Math.min(N - 1, Math.floor((y + DOMAIN / 2) / DX)));
+      return j * N + i;
+    };
+    const kept = list.filter((s) => s.h > 0.4);
+    classifySpikes(kept);
+    return kept.map((s) => {
+      // A spike within a spacing of dry porcelain or the wall has no full neighbourhood: an edge.
+      for (let a = 0; a < 8; a++) {
+        const t = (a / 8) * Math.PI * 2;
+        const k = cell(s.x + 9 * Math.cos(t), s.y + 9 * Math.sin(t));
+        if (this.dFine[k] < 0.4 || this.rho[k] > DISH.rim - 3) {
+          s.kind = 0;
+          break;
+        }
+      }
+      const k = cell(s.x, s.y);
+      return { ...s, top: this.bedFine[k] + this.dFine[k] + this.spikeAt(k) };
+    });
   }
 }

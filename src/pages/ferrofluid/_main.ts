@@ -18,10 +18,10 @@ const VIEWS: Record<string, (aspect: number) => View> = {
     target: [0, 42, a < 0.8 ? 10 : 18],
     el: 0.6,
     az: -0.12,
-    dist: a < 0.8 ? 760 / Math.max(a, 0.45) ** 0.55 : a < 1.25 ? 600 : 520,
+    dist: a < 0.8 ? 690 / Math.max(a, 0.45) ** 0.55 : a < 1.25 ? 560 : 470,
     fov: 0.5,
   }),
-  above: (a) => ({ target: [0, FLOOR_Y, 4], el: 1.17, az: -0.08, dist: a < 1 ? 520 / Math.max(a, 0.45) : 380, fov: 0.42 }),
+  above: (a) => ({ target: [0, FLOOR_Y, 4], el: 1.08, az: -0.08, dist: a < 1 ? 520 / Math.max(a, 0.45) : 380, fov: 0.42 }),
   low: (a) => ({ target: [0, FLOOR_Y + 6, 0], el: 0.15, az: -0.25, dist: a < 0.8 ? 560 : 330, fov: 0.42 }),
 };
 
