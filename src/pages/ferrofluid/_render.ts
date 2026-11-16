@@ -12,6 +12,9 @@ export const FLOOR_Y = PLATE_TOP + 4;
 const COIL_R = 105;
 const FLANGE_R = 112;
 const PLATE_R = 108.5;
+/** Where the turned inner wall takes over from the fluid's grid: 53 mm out, on the fillet. */
+const INNER_R = 53;
+const INNER_FROM = Math.asin((INNER_R - DISH.floor) / DISH.fillet);
 
 const LIGHTS = /* glsl */ `
 const vec3 KEY_DIR = normalize(vec3(-0.42, 0.78, -0.46));
@@ -288,7 +291,7 @@ uniform vec3 uCam;
 out vec4 outColor;
 void main() {
   float r = length(vPos.xz);
-  if (r > ${(DISH.rim + 0.12).toFixed(2)}) discard;
+  if (r > ${(INNER_R + 0.15).toFixed(2)}) discard;
   vec3 n = normalize(vN);
   vec3 v = normalize(uCam - vPos);
   // Porcelain glaze where the dish is dry, with the brown stain a thin film of ferrofluid leaves.
@@ -297,8 +300,8 @@ void main() {
   float wet = smoothstep(0.05, 0.35, vD + vSpike);
   vec3 bn = normalize(mix(normalize(vBedN), n, smoothstep(0.0, 0.3, vD)));
   vec3 porc = glaze * diffuseLight(bn, mix(0.45, 1.0, sh)) + env(reflect(-v, bn), 0.04) * schlick(0.045, dot(bn, v));
-  float film = smoothstep(0.004, 0.06, vD);
-  porc *= mix(vec3(1.0), vec3(0.42, 0.3, 0.22), film);
+  float film = smoothstep(0.012, 0.07, vD);
+  porc *= mix(vec3(1.0), vec3(0.5, 0.37, 0.27), film);
   // Ferrofluid: a black, glossy oil.
   float F = schlick(0.05, dot(n, v));
   float occ = 1.0 - 0.75 * vCav;
@@ -616,8 +619,15 @@ export class Bench {
     );
     // The dish: lip, outer wall, foot. y relative to its floor, which sits 4 mm above the plate.
     const f = FLOOR_Y;
+    // The steep top of the inner fillet is turned here too: on the fluid's half-millimetre grid
+    // it would show as a sawtooth. The pool never climbs this high.
+    const fillet: [number, number][] = [];
+    for (let k = 0; k <= 14; k++) {
+      const th = INNER_FROM + ((Math.PI / 2 - INNER_FROM) * k) / 14;
+      fillet.push([DISH.floor + DISH.fillet * Math.sin(th), DISH.fillet - DISH.fillet * Math.cos(th)]);
+    }
     const lip: [number, number][] = [
-      [DISH.rim, bed(DISH.rim)],
+      ...fillet,
       [58.4, 18.6],
       [59.5, 19.6],
       [60.8, 20.0],
@@ -662,9 +672,9 @@ export class Bench {
       0,
       Math.cos(a),
       0,
-      20,
+      30,
       0,
-      136,
+      130,
       1,
     ]);
 

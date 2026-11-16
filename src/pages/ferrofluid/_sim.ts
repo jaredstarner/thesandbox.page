@@ -89,7 +89,7 @@ export function head(b: number): number {
 // mu0 Ms^2 / (chi rho g) in mm is about 71; the effective scale is smaller,
 // since the fluid's own magnetization weakens the field inside it and surface
 // tension holds a mound together.
-const HEAD_SCALE = 20;
+const HEAD_SCALE = 12;
 
 // ---------------------------------------------------------------- pattern
 
@@ -458,13 +458,14 @@ export function mulberry(seed: number): () => number {
 
 // ---------------------------------------------------------------- the dish
 
-/** Growth rate per unit of supercriticality, above and below onset. */
-const KAPPA = 0.5;
+/** Growth rate per unit of supercriticality: steep just past onset so spikes come up promptly, gentler beyond. */
+const KAPPA_NEAR = 1;
+const KAPPA = 0.35;
 const KAPPA_BELOW = 0.3;
 const R_MAX = 1;
 const R_DRY = -2.5;
 /** Pattern time units per second. */
-const PATTERN_RATE = 14;
+const PATTERN_RATE = 18;
 const PATTERN_DT = 0.3;
 /** Spike height in mm per unit of u (on its sharpened positive part). */
 const SPIKE_MM = 3.3;
@@ -572,7 +573,7 @@ export class Dish {
         // A thin layer needs a stronger field before it stands up.
         const s = (1 - Math.exp(-d / 1.2)) / 0.9765;
         const e = (b / BC) ** 2 * s - 1;
-        let g = e < 0 ? KAPPA_BELOW * e : KAPPA * e;
+        let g = e < 0 ? KAPPA_BELOW * e : e < 0.3 ? KAPPA_NEAR * e : 0.3 * KAPPA_NEAR + KAPPA * (e - 0.3);
         if (g > rMax) g = rMax;
         const wet = smooth(0.05, 0.6, d);
         this.r[k] = R_DRY + (g - R_DRY) * wet;
@@ -581,7 +582,7 @@ export class Dish {
     this.owed += dt * PATTERN_RATE;
     let n = 0;
     while (this.owed >= PATTERN_DT && n < 3) {
-      this.pattern.step(this.r, 0.004);
+      this.pattern.step(this.r, 0.008);
       this.owed -= PATTERN_DT;
       this.steps++;
       n++;

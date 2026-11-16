@@ -15,14 +15,14 @@ interface Frame {
 
 const VIEWS: Record<string, (aspect: number) => View> = {
   bench: (a) => ({
-    target: [0, 42, a < 0.8 ? 10 : 18],
+    target: [0, 36, a < 0.8 ? 10 : 30],
     el: 0.6,
     az: -0.12,
     dist: a < 0.8 ? 690 / Math.max(a, 0.45) ** 0.55 : a < 1.25 ? 560 : 470,
     fov: 0.5,
   }),
   above: (a) => ({ target: [0, FLOOR_Y, 4], el: 1.08, az: -0.08, dist: a < 1 ? 520 / Math.max(a, 0.45) : 380, fov: 0.42 }),
-  low: (a) => ({ target: [0, FLOOR_Y + 6, 0], el: 0.15, az: -0.25, dist: a < 0.8 ? 560 : 330, fov: 0.42 }),
+  close: (a) => ({ target: [0, FLOOR_Y + 3, -4], el: 0.46, az: -0.22, dist: a < 0.8 ? 400 : 240, fov: 0.42 }),
 };
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
@@ -114,7 +114,23 @@ function start(root: HTMLElement) {
     coilOut.textContent = `${coil.toFixed(1)} mT`;
     send();
   };
-  coilInput.addEventListener('input', () => setCoil(Number(coilInput.value)));
+  let touched = false;
+  coilInput.addEventListener('input', () => {
+    touched = true;
+    setCoil(Number(coilInput.value));
+  });
+
+  // The supply comes on shortly after load and winds up to 20 mT, so the pool stands up while you watch.
+  if (!params.has('still')) {
+    const from = performance.now() + 900;
+    const wind = (now: number) => {
+      if (touched) return;
+      const t = Math.min(1, Math.max(0, (now - from) / 3200));
+      setCoil(20 * (1 - (1 - t) ** 2));
+      if (t < 1) requestAnimationFrame(wind);
+    };
+    requestAnimationFrame(wind);
+  }
 
   let viewName = 'bench';
   let viewFrom: View | null = null;
@@ -256,7 +272,10 @@ function start(root: HTMLElement) {
   if (debug) {
     Object.assign(window, {
       ferro: {
-        setCoil,
+        setCoil: (v: number) => {
+          touched = true;
+          setCoil(v);
+        },
         setView,
         marks: (on: boolean) => {
           showMarks = on;
