@@ -5,7 +5,7 @@
 import { Dish, N, latticeStats, magnetDepth, type Inputs } from './_sim';
 
 const scope = self as unknown as Worker;
-const seed = Number(new URL(self.location.href).searchParams.get('seed')) || (Date.now() & 0xffff);
+const seed = Number(new URL(self.location.href).searchParams.get('seed')) || Date.now() & 0xffff;
 let dish = new Dish(seed);
 let inputs: Inputs = { coil: 0, hand: null };
 const pool: Float32Array[] = [];

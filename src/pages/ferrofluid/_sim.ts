@@ -616,7 +616,14 @@ export class Dish {
       for (let j = 1; j < N - 1; j++) {
         for (let i = 1; i < N - 1; i++) {
           const k = j * N + i;
-          t[k] = (4 * a[k] + 2 * (a[k - 1] + a[k + 1] + a[k - N] + a[k + N]) + a[k - N - 1] + a[k - N + 1] + a[k + N - 1] + a[k + N + 1]) / 16;
+          t[k] =
+            (4 * a[k] +
+              2 * (a[k - 1] + a[k + 1] + a[k - N] + a[k + N]) +
+              a[k - N - 1] +
+              a[k - N + 1] +
+              a[k + N - 1] +
+              a[k + N + 1]) /
+            16;
         }
       }
       for (let k = 0; k < N * N; k++) a[k] = this.rho[k] > DISH.rim ? 0 : t[k];
