@@ -26,8 +26,8 @@ const BASE: Spec[] = [
   w('T-3', 'B-3', 'black'),
 ];
 
-const CHASER_LEDS = [19, 20, 21, 22, 23, 25, 26, 27, 28, 29];
-const CHASER_COLORS = ['red', 'red', 'yellow', 'yellow', 'green', 'green', 'yellow', 'yellow', 'red', 'red'];
+/** The chaser's ten LEDs run as a loop: Q0 to Q4 left to right along the bottom, Q5 to Q9 back along the top. */
+const LOOP = [19, 21, 23, 25, 27];
 
 export const PROJECTS: Project[] = [
   {
@@ -145,37 +145,38 @@ export const PROJECTS: Project[] = [
     note: 'A faster 555 clocks a CD4017 decade counter. The counter holds one of its ten outputs high and moves to the next on every rising edge of the clock, so the light runs down the row of LEDs and starts again.',
     tries: [
       'Pull the blue clock wire out of b12 and the chase stops where it is.',
-      'Move the wire from a13 to the + rail. Pin 13 high inhibits the clock.',
+      'Move the wire in a13 over to the + rail. Pin 13 high holds the count.',
       'Swap the 22 kΩ for 68 kΩ to slow it down.',
     ],
     parts: [
       ...BASE,
-      { kind: 'ne555', at: 'f4', rot: 0 },
+      // The 555 turned end for end, so its output sits in the top half beside the counter's clock.
+      { kind: 'ne555', at: 'e7', rot: 2 },
+      w('a7', 'T-7', 'black'),
       w('a4', 'T+4', 'red'),
-      w('j4', 'B-4', 'black'),
       w('j7', 'B+7', 'red'),
-      r('T+5', 'a5', 1e3),
-      r('b5', 'b6', 22e3),
-      w('d6', 'g5', 'blue'),
-      ecap('h5', 'h4', 10e-6),
-      cap('a7', 'T-7', 10e-9),
-      w('h6', 'b12', 'blue'),
+      r('i7', 'i6', 1e3),
+      r('h6', 'h5', 22e3),
+      w('g5', 'c6', 'blue'),
+      ecap('j5', 'B-5', 10e-6),
+      w('b5', 'b12', 'blue'),
       { kind: 'cd4017', at: 'f10', rot: 0 },
       w('a10', 'T+10', 'red'),
       w('a11', 'T-11', 'black'),
       w('a13', 'T-13', 'black'),
       w('j17', 'B-17', 'black'),
       w('g12', 'g19', 'orange'),
-      w('g11', 'h20', 'yellow'),
-      w('g13', 'i21', 'green'),
-      w('g16', 'f22', 'white'),
-      w('b16', 'f23', 'orange'),
-      w('g10', 'i25', 'yellow'),
-      w('g14', 'h26', 'green'),
-      w('g15', 'g27', 'white'),
-      w('b17', 'g28', 'orange'),
-      w('b15', 'h29', 'yellow'),
-      ...CHASER_LEDS.map((c, i) => led(`j${c}`, `B-${c}`, CHASER_COLORS[i])),
+      w('h11', 'h21', 'yellow'),
+      w('i13', 'i23', 'green'),
+      w('g16', 'f25', 'white'),
+      w('d16', 'g27', 'orange'),
+      w('i10', 'e27', 'yellow'),
+      w('h14', 'd25', 'green'),
+      w('i15', 'c23', 'white'),
+      w('c17', 'c21', 'orange'),
+      w('b15', 'b19', 'yellow'),
+      ...LOOP.map((c) => led(`j${c}`, `B-${c}`, 'red')),
+      ...[...LOOP].reverse().map((c) => led(`a${c}`, `T-${c}`, 'green')),
     ],
   },
   {
