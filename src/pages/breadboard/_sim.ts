@@ -571,7 +571,8 @@ export class Sim {
           const va = V(d.n[0]);
           const i = st.dead ? 0 : (vj - vk) / c.led!.rs;
           if (!st.dead) {
-            if (i > 0.045) st.stress += dt * (i / 0.045) ** 3;
+            // Rated 20 mA; past about 75 mA the die overheats in under a second, far past it at once.
+            if (i > 0.075) st.stress += dt * ((i - 0.075) / 0.03) ** 2;
             else st.stress = Math.max(0, st.stress - dt * 0.05);
             if (st.stress > 0.6) {
               st.dead = true;

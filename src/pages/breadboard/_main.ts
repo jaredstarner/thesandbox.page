@@ -1263,7 +1263,7 @@ class Bench {
     unit.textContent = u;
     const where = this.root.querySelector<HTMLElement>('.m-where');
     if (where) {
-      const name = (h: string | null) => (h ? `${h} (${stripName(HOLE.get(h)!.strip)})` : 'resting');
+      const name = (h: string | null) => (h ? `${h.replace('-', '−')} (${stripName(HOLE.get(h)!.strip)})` : 'resting');
       where.textContent = m === 'off' ? 'Turn the dial to measure.' : `Red: ${name(this.probes[0].hole)}. Black: ${name(this.probes[1].hole)}.`;
     }
   }

@@ -35,7 +35,7 @@ export const PROJECTS: Project[] = [
     title: 'Light an LED',
     note: 'Current leaves the + rail, runs through a 470 Ω resistor and a red LED, and returns along the − rail. The resistor sets the current: about 15 mA here, inside what a small LED is happy with.',
     tries: [
-      'Select the resistor and step it down to 100 Ω. The LED gets brighter, and its current climbs past what it is rated for.',
+      'Select the resistor and step it down to 100 Ω. The LED gets brighter, and its current climbs well past its 20 mA rating.',
       'Drag the resistor off the board and bridge the gap with a wire.',
       'Turn the LED round by dragging its legs past each other.',
     ],

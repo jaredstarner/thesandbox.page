@@ -26,7 +26,7 @@ export class Sound {
     const buzz = ctx.createGain();
     buzz.gain.value = 0;
     const tone = ctx.createGain();
-    tone.gain.value = 0.16;
+    tone.gain.value = 0.09;
     const f = 2350;
     const o1 = ctx.createOscillator();
     o1.type = 'sine';
