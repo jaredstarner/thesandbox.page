@@ -20,11 +20,7 @@ const ecap = (a: string, b: string, value: number): Spec => ({ kind: 'ecap', a, 
 const cap = (a: string, b: string, value: number): Spec => ({ kind: 'cap', a, b, value });
 
 /** Every board starts with the battery on the top rails and both rail pairs joined at the left. */
-const BASE: Spec[] = [
-  { kind: 'battery', a: 'T+1', b: 'T-1' },
-  w('T+2', 'B+2', 'red'),
-  w('T-3', 'B-3', 'black'),
-];
+const BASE: Spec[] = [{ kind: 'battery', a: 'T+1', b: 'T-1' }, w('T+2', 'B+2', 'red'), w('T-3', 'B-3', 'black')];
 
 /** The chaser's ten LEDs run as a loop: Q0 to Q4 left to right along the bottom, Q5 to Q9 back along the top. */
 const LOOP = [19, 21, 23, 25, 27];

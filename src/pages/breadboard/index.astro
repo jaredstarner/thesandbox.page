@@ -73,16 +73,26 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
   <Font cssVariable="--font-bb-mono" slot="head" />
   <main class="bb" data-lamp="on" data-meter="off" data-sheet="">
     <header class="bar">
-      <a class="home" href="/" aria-label="thesandbox.page home">thesandbox.page</a>
+      <a class="home" href="/" aria-label="thesandbox.page home">
+        thesandbox.page
+      </a>
       <div class="title">
         <h1>Breadboard</h1>
         <p>Plug parts in, wire them to the battery, and the circuit runs.</p>
       </div>
       <div class="switches">
-        <button type="button" class="sw" data-act="power" aria-pressed="true"><i></i>Power</button>
-        <button type="button" class="sw" data-act="lamp" aria-pressed="true"><i></i>Lamp</button>
-        <button type="button" class="sw" data-act="sound" aria-pressed="true"><i></i>Sound</button>
-        <button type="button" class="undo" data-act="undo" disabled aria-label="Undo">Undo</button>
+        <button type="button" class="sw" data-act="power" aria-pressed="true">
+          <i></i>Power
+        </button>
+        <button type="button" class="sw" data-act="lamp" aria-pressed="true">
+          <i></i>Lamp
+        </button>
+        <button type="button" class="sw" data-act="sound" aria-pressed="true">
+          <i></i>Sound
+        </button>
+        <button type="button" class="undo" data-act="undo" disabled aria-label="Undo">
+          Undo
+        </button>
       </div>
     </header>
 
@@ -100,52 +110,52 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
 
     <nav class="tray" aria-label="Parts drawer">
       <ul>
-        {
-          drawer.map((d) => (
-            <li>
-              <button type="button" data-part={d.kind} aria-pressed="false">
-                <canvas data-icon={d.kind} aria-hidden="true" />
-                <span>{d.label}</span>
-              </button>
-            </li>
-          ))
-        }
+        {drawer.map((d) => (
+          <li>
+            <button type="button" data-part={d.kind} aria-pressed="false">
+              <canvas data-icon={d.kind} aria-hidden="true" />
+              <span>{d.label}</span>
+            </button>
+          </li>
+        ))}
       </ul>
       <div class="wires" role="group" aria-label="Wire colour">
-        {
-          WIRE_COLORS.filter((c) => c !== 'red' && c !== 'black').map((c) => (
-            <button
-              type="button"
-              class={`sw-${c}`}
-              data-wire={c}
-              aria-pressed={c === 'blue' ? 'true' : 'false'}
-              aria-label={`${c} wire`}
-            />
-          ))
-        }
+        {WIRE_COLORS.filter((c) => c !== 'red' && c !== 'black').map((c) => (
+          <button
+            type="button"
+            class={`sw-${c}`}
+            data-wire={c}
+            aria-pressed={c === 'blue' ? 'true' : 'false'}
+            aria-label={`${c} wire`}
+          />
+        ))}
       </div>
     </nav>
 
     <aside class="side">
       <section class="book" aria-labelledby="book-h">
-        <h2 id="book-h" class="kicker">Project booklet</h2>
+        <h2 id="book-h" class="kicker">
+          Project booklet
+        </h2>
         <ol class="index">
-          {
-            PROJECTS.map((p, i) => (
-              <li>
-                <button type="button" data-project={p.id} aria-current={p.id === first.id ? 'true' : 'false'}>
-                  <b>{p.id === 'blank' ? '·' : i + 1}</b>
-                  {p.title}
-                </button>
-              </li>
-            ))
-          }
+          {PROJECTS.map((p, i) => (
+            <li>
+              <button type="button" data-project={p.id} aria-current={p.id === first.id ? 'true' : 'false'}>
+                <b>{p.id === 'blank' ? '·' : i + 1}</b>
+                {p.title}
+              </button>
+            </li>
+          ))}
         </ol>
         <article class="card">
           <h2>{first.title}</h2>
           <p class="note">{first.note}</p>
           <h3>Try</h3>
-          <ul>{first.tries.map((t) => <li>{t}</li>)}</ul>
+          <ul>
+            {first.tries.map((t) => (
+              <li>{t}</li>
+            ))}
+          </ul>
         </article>
       </section>
 
@@ -164,39 +174,56 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
               <svg viewBox="-22 -4 158 54" aria-hidden="true">
                 <g transform="skewX(-6)">
                   <polygon data-minus data-on="false" points={horiz(-19, -5, MID)} />
-                  {
-                    digits.map((x) => (
-                      <g data-digit transform={`translate(${x} 0)`}>
-                        {segments.map(([k, pts]) => (
-                          <polygon data-seg={k} data-on="false" points={pts} />
-                        ))}
-                        <circle data-dp data-on="false" cx={W + 4.3} cy={BOT} r="2.2" />
-                      </g>
-                    ))
-                  }
+                  {digits.map((x) => (
+                    <g data-digit transform={`translate(${x} 0)`}>
+                      {segments.map(([k, pts]) => (
+                        <polygon data-seg={k} data-on="false" points={pts} />
+                      ))}
+                      <circle data-dp data-on="false" cx={W + 4.3} cy={BOT} r="2.2" />
+                    </g>
+                  ))}
                 </g>
               </svg>
               <span class="unit"></span>
             </div>
             <div class="dial" role="radiogroup" aria-label="Meter function">
-              <button type="button" role="radio" data-mode="off" aria-checked="true">Off</button>
-              <button type="button" role="radio" data-mode="V" aria-checked="false">V<small>⎓</small></button>
-              <button type="button" role="radio" data-mode="mA" aria-checked="false">mA</button>
-              <button type="button" role="radio" data-mode="ohm" aria-checked="false">Ω</button>
+              <button type="button" role="radio" data-mode="off" aria-checked="true">
+                Off
+              </button>
+              <button type="button" role="radio" data-mode="V" aria-checked="false">
+                V<small>⎓</small>
+              </button>
+              <button type="button" role="radio" data-mode="mA" aria-checked="false">
+                mA
+              </button>
+              <button type="button" role="radio" data-mode="ohm" aria-checked="false">
+                Ω
+              </button>
               <span class="knob" aria-hidden="true"></span>
             </div>
-            <div class="jacks" aria-hidden="true"><i class="com"></i><i class="vma"></i></div>
+            <div class="jacks" aria-hidden="true">
+              <i class="com"></i>
+              <i class="vma"></i>
+            </div>
           </div>
         </div>
         <p class="m-where">Turn the dial to measure.</p>
-        <button type="button" class="fuse" data-act="fuse" hidden>Fit a new fuse</button>
+        <button type="button" class="fuse" data-act="fuse" hidden>
+          Fit a new fuse
+        </button>
       </section>
     </aside>
 
     <nav class="tabs" aria-label="Panels">
-      <button type="button" data-sheet-open="book">Booklet</button>
-      <button type="button" data-sheet-open="part">Part</button>
-      <button type="button" data-sheet-open="meter">Meter</button>
+      <button type="button" data-sheet-open="book">
+        Booklet
+      </button>
+      <button type="button" data-sheet-open="part">
+        Part
+      </button>
+      <button type="button" data-sheet-open="meter">
+        Meter
+      </button>
     </nav>
   </main>
 </Bare>
@@ -253,7 +280,9 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
   }
   .home {
     color: rgb(242 237 224 / 0.55);
-    font: 400 12px/1 var(--font-bb-mono), monospace;
+    font:
+      400 12px/1 var(--font-bb-mono),
+      monospace;
     text-decoration: none;
     letter-spacing: 0.02em;
   }
@@ -484,7 +513,9 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
   }
   .kicker {
     margin: 0 0 8px;
-    font: 700 11px/1 var(--font-bb-mono), monospace;
+    font:
+      700 11px/1 var(--font-bb-mono),
+      monospace;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: rgb(242 237 224 / 0.5);
@@ -525,7 +556,9 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
     color: var(--ink-2);
   }
   .index b {
-    font: 700 12px/1 var(--font-bb-mono), monospace;
+    font:
+      700 12px/1 var(--font-bb-mono),
+      monospace;
     color: var(--red);
     width: 1.2em;
   }
@@ -551,7 +584,9 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
   }
   .card h3 {
     margin: 0 0 4px;
-    font: 700 11px/1 var(--font-bb-mono), monospace;
+    font:
+      700 11px/1 var(--font-bb-mono),
+      monospace;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--blue);
@@ -619,7 +654,9 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
     color: var(--ink-2);
   }
   .i-ctl :global(select) {
-    font: 500 13px var(--font-bb-mono), monospace;
+    font:
+      500 13px var(--font-bb-mono),
+      monospace;
     padding: 4px 6px;
     border: 1px solid rgb(28 30 33 / 0.3);
     border-radius: 4px;
@@ -694,7 +731,9 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
   }
   .unit {
     min-width: 2.4em;
-    font: 700 16px/1 var(--font-bb-mono), monospace;
+    font:
+      700 16px/1 var(--font-bb-mono),
+      monospace;
     color: #1d221b;
     text-align: right;
   }
@@ -710,7 +749,9 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
     border-radius: 5px;
     background: #1a1c1f;
     color: rgb(242 237 224 / 0.75);
-    font: 700 13px/1 var(--font-bb-mono), monospace;
+    font:
+      700 13px/1 var(--font-bb-mono),
+      monospace;
   }
   .dial button[aria-checked='true'] {
     background: #f0c03a;

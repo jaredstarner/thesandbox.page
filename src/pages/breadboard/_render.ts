@@ -248,7 +248,7 @@ export class Renderer {
       c.fillRect(0, 0, 256, 256);
       // Mottled conductive vinyl.
       let seed = 7;
-      const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
       for (let i = 0; i < 2600; i++) {
         const x = rnd() * 256,
           y = rnd() * 256,
@@ -1559,7 +1559,14 @@ export class Renderer {
     ctx.save();
     ctx.globalAlpha = 0.82;
     const p = ghost.part;
-    if (p.kind === 'wire' || p.kind === 'res' || p.kind === 'led' || p.kind === 'ecap' || p.kind === 'cap' || p.kind === 'ldr') {
+    if (
+      p.kind === 'wire' ||
+      p.kind === 'res' ||
+      p.kind === 'led' ||
+      p.kind === 'ecap' ||
+      p.kind === 'cap' ||
+      p.kind === 'ldr'
+    ) {
       // Draw from the pin positions even when they miss the board.
       const [a, b] = ghost.pins;
       if (a && b) {
@@ -1584,8 +1591,21 @@ export class Renderer {
     }
   }
 
-  private drawTwoLeadAt(ctx: CanvasRenderingContext2D, p: Part, a: { x: number; y: number }, b: { x: number; y: number }) {
-    const fakeHoles = [a, b].map((q, i) => ({ id: `ghost${i}`, x: q.x, y: q.y, strip: -1, rail: null, row: -1, col: -1 }));
+  private drawTwoLeadAt(
+    ctx: CanvasRenderingContext2D,
+    p: Part,
+    a: { x: number; y: number },
+    b: { x: number; y: number },
+  ) {
+    const fakeHoles = [a, b].map((q, i) => ({
+      id: `ghost${i}`,
+      x: q.x,
+      y: q.y,
+      strip: -1,
+      rail: null,
+      row: -1,
+      col: -1,
+    }));
     const holes = fakeHoles as Hole[];
     switch (p.kind) {
       case 'wire':
@@ -1631,7 +1651,14 @@ export class Renderer {
     this.view = { ...saved, s, rot: 0, dpr, ox: w / 2 - ((x0 + x1) / 2) * s, oy: h / 2 - ((y0 + y1) / 2) * s };
     c.clearRect(0, 0, cv.width, cv.height);
     this.worldTransform(c);
-    const p: Part = { id: 'icon', kind, value: kind === 'res' ? 4.7e3 : kind === 'ecap' ? 100e-6 : 100e-9, color: color ?? (kind === 'wire' ? 'blue' : 'red'), pos: 0.3, rot: 0 };
+    const p: Part = {
+      id: 'icon',
+      kind,
+      value: kind === 'res' ? 4.7e3 : kind === 'ecap' ? 100e-6 : 100e-9,
+      color: color ?? (kind === 'wire' ? 'blue' : 'red'),
+      pos: 0.3,
+      rot: 0,
+    };
     const fake = (pts: [number, number][]) =>
       pts.map(([x, y], i) => ({ id: `icon${i}`, x, y, strip: -1, rail: null, row: -1, col: -1 }) as Hole);
     c.save();
@@ -1642,34 +1669,54 @@ export class Renderer {
         break;
       }
       case 'res':
-        this.drawResistor(c, p, fake([
-          [0, 0],
-          [4, 0],
-        ]));
+        this.drawResistor(
+          c,
+          p,
+          fake([
+            [0, 0],
+            [4, 0],
+          ]),
+        );
         break;
       case 'led':
-        this.drawLed(c, p, fake([
-          [0, 0],
-          [1, 0],
-        ]));
+        this.drawLed(
+          c,
+          p,
+          fake([
+            [0, 0],
+            [1, 0],
+          ]),
+        );
         break;
       case 'ecap':
-        this.drawEcap(c, p, fake([
-          [0, 0],
-          [1, 0],
-        ]));
+        this.drawEcap(
+          c,
+          p,
+          fake([
+            [0, 0],
+            [1, 0],
+          ]),
+        );
         break;
       case 'cap':
-        this.drawCeramic(c, p, fake([
-          [0, 0],
-          [1, 0],
-        ]));
+        this.drawCeramic(
+          c,
+          p,
+          fake([
+            [0, 0],
+            [1, 0],
+          ]),
+        );
         break;
       case 'ldr':
-        this.drawLdr(c, p, fake([
-          [0, 0],
-          [1, 0],
-        ]));
+        this.drawLdr(
+          c,
+          p,
+          fake([
+            [0, 0],
+            [1, 0],
+          ]),
+        );
         break;
       default:
         this.drawFootprintAt(c, kind, 0, 0, 0, p);
