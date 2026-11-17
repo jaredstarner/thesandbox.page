@@ -154,7 +154,6 @@ export class Sim {
   /** Newton steps that did not converge since load. */
   misses = 0;
 
-  private circuit: Circuit = { nets: 1, ground: 0, devices: [] };
   private devs: Compiled[] = [];
   private size = 0;
   private map: Int32Array = new Int32Array(1);
@@ -179,7 +178,6 @@ export class Sim {
   }
 
   load(circuit: Circuit) {
-    this.circuit = circuit;
     // Net index to unknown index; the ground net is -1.
     this.map = new Int32Array(circuit.nets);
     let k = 0;

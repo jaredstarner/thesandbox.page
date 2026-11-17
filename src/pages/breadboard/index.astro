@@ -1,21 +1,203 @@
 ---
 import { Font } from 'astro:assets';
 import Bare from '../../layouts/Bare.astro';
+import { PROJECTS } from './_projects';
+import { WIRE_COLORS } from './_parts';
 
 const description =
   'A solderless breadboard, a 9 V battery, and a drawer of parts: wire up LEDs, a 555 timer, and a decade counter, and the circuit runs as it would on a real bench.';
+
+const first = PROJECTS.find((p) => p.id === 'chaser')!;
+
+const drawer: { kind: string; label: string }[] = [
+  { kind: 'wire', label: 'Wire' },
+  { kind: 'res', label: 'Resistor' },
+  { kind: 'led', label: 'LED' },
+  { kind: 'ecap', label: 'Capacitor' },
+  { kind: 'cap', label: 'Ceramic' },
+  { kind: 'button', label: 'Button' },
+  { kind: 'pot', label: 'Trimmer' },
+  { kind: 'ldr', label: 'LDR' },
+  { kind: 'npn', label: 'Transistor' },
+  { kind: 'ne555', label: '555 timer' },
+  { kind: 'cd4017', label: '4017 counter' },
+  { kind: 'buzzer', label: 'Buzzer' },
+];
+
+// Seven-segment LCD geometry: four digits, each 24 x 44, segments 4.6 thick.
+const W = 24,
+  H = 44,
+  T = 4.6,
+  G = 0.9;
+const L = T / 2,
+  R = W - T / 2,
+  TOP = T / 2,
+  MID = H / 2,
+  BOT = H - T / 2;
+const horiz = (x0: number, x1: number, y: number) =>
+  [
+    [x0, y],
+    [x0 + T / 2, y - T / 2],
+    [x1 - T / 2, y - T / 2],
+    [x1, y],
+    [x1 - T / 2, y + T / 2],
+    [x0 + T / 2, y + T / 2],
+  ]
+    .map((p) => p.map((v) => v.toFixed(2)).join(','))
+    .join(' ');
+const vert = (x: number, y0: number, y1: number) =>
+  [
+    [x, y0],
+    [x + T / 2, y0 + T / 2],
+    [x + T / 2, y1 - T / 2],
+    [x, y1],
+    [x - T / 2, y1 - T / 2],
+    [x - T / 2, y0 + T / 2],
+  ]
+    .map((p) => p.map((v) => v.toFixed(2)).join(','))
+    .join(' ');
+const segments: [string, string][] = [
+  ['a', horiz(L + G, R - G, TOP)],
+  ['b', vert(R, TOP + G, MID - G)],
+  ['c', vert(R, MID + G, BOT - G)],
+  ['d', horiz(L + G, R - G, BOT)],
+  ['e', vert(L, MID + G, BOT - G)],
+  ['f', vert(L, TOP + G, MID - G)],
+  ['g', horiz(L + G, R - G, MID)],
+];
+const digits = [0, 1, 2, 3].map((i) => i * 33);
 ---
 
 <Bare title="Breadboard" description={description}>
   <Font cssVariable="--font-bb-sans" slot="head" />
   <Font cssVariable="--font-bb-mono" slot="head" />
-  <main class="bb">
+  <main class="bb" data-lamp="on" data-meter="off" data-sheet="">
     <header class="bar">
-      <h1>Breadboard</h1>
+      <a class="home" href="/" aria-label="thesandbox.page home">thesandbox.page</a>
+      <div class="title">
+        <h1>Breadboard</h1>
+        <p>Plug parts in, wire them to the battery, and the circuit runs.</p>
+      </div>
+      <div class="switches">
+        <button type="button" class="sw" data-act="power" aria-pressed="true"><i></i>Power</button>
+        <button type="button" class="sw" data-act="lamp" aria-pressed="true"><i></i>Lamp</button>
+        <button type="button" class="sw" data-act="sound" aria-pressed="true"><i></i>Sound</button>
+        <button type="button" class="undo" data-act="undo" disabled aria-label="Undo">Undo</button>
+      </div>
     </header>
+
     <div class="stage">
-      <canvas class="bench" aria-label="A breadboard on an anti-static mat"></canvas>
+      <canvas
+        class="bench"
+        tabindex="0"
+        aria-label="A breadboard on an anti-static mat, with a 9 volt battery beside it. Drag parts from the drawer onto the board, and drag between empty holes to run wires."
+      ></canvas>
+      <p class="status" role="status" aria-live="polite"></p>
+      <noscript>
+        <p class="nojs">The bench needs JavaScript: the circuit is solved in the page as you build it.</p>
+      </noscript>
     </div>
+
+    <nav class="tray" aria-label="Parts drawer">
+      <ul>
+        {
+          drawer.map((d) => (
+            <li>
+              <button type="button" data-part={d.kind} aria-pressed="false">
+                <canvas data-icon={d.kind} aria-hidden="true" />
+                <span>{d.label}</span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="wires" role="group" aria-label="Wire colour">
+        {
+          WIRE_COLORS.filter((c) => c !== 'red' && c !== 'black').map((c) => (
+            <button
+              type="button"
+              class={`sw-${c}`}
+              data-wire={c}
+              aria-pressed={c === 'blue' ? 'true' : 'false'}
+              aria-label={`${c} wire`}
+            />
+          ))
+        }
+      </div>
+    </nav>
+
+    <aside class="side">
+      <section class="book" aria-labelledby="book-h">
+        <h2 id="book-h" class="kicker">Project booklet</h2>
+        <ol class="index">
+          {
+            PROJECTS.map((p, i) => (
+              <li>
+                <button type="button" data-project={p.id} aria-current={p.id === first.id ? 'true' : 'false'}>
+                  <b>{p.id === 'blank' ? '·' : i + 1}</b>
+                  {p.title}
+                </button>
+              </li>
+            ))
+          }
+        </ol>
+        <article class="card">
+          <h2>{first.title}</h2>
+          <p class="note">{first.note}</p>
+          <h3>Try</h3>
+          <ul>{first.tries.map((t) => <li>{t}</li>)}</ul>
+        </article>
+      </section>
+
+      <section class="inspect" data-empty="1" aria-live="off">
+        <h2 class="kicker">Selected part</h2>
+        <p class="i-name">Nothing selected</p>
+        <p class="i-hint">Click a part to read its voltage and current, change its value, or turn it.</p>
+        <dl class="i-read"></dl>
+        <div class="i-ctl"></div>
+      </section>
+
+      <section class="meter" aria-label="Multimeter">
+        <div class="dmm">
+          <div class="face">
+            <div class="lcd" aria-live="off">
+              <svg viewBox="-22 -4 158 54" aria-hidden="true">
+                <g transform="skewX(-6)">
+                  <polygon data-minus data-on="false" points={horiz(-19, -5, MID)} />
+                  {
+                    digits.map((x) => (
+                      <g data-digit transform={`translate(${x} 0)`}>
+                        {segments.map(([k, pts]) => (
+                          <polygon data-seg={k} data-on="false" points={pts} />
+                        ))}
+                        <circle data-dp data-on="false" cx={W + 4.3} cy={BOT} r="2.2" />
+                      </g>
+                    ))
+                  }
+                </g>
+              </svg>
+              <span class="unit"></span>
+            </div>
+            <div class="dial" role="radiogroup" aria-label="Meter function">
+              <button type="button" role="radio" data-mode="off" aria-checked="true">Off</button>
+              <button type="button" role="radio" data-mode="V" aria-checked="false">V<small>⎓</small></button>
+              <button type="button" role="radio" data-mode="mA" aria-checked="false">mA</button>
+              <button type="button" role="radio" data-mode="ohm" aria-checked="false">Ω</button>
+              <span class="knob" aria-hidden="true"></span>
+            </div>
+            <div class="jacks" aria-hidden="true"><i class="com"></i><i class="vma"></i></div>
+          </div>
+        </div>
+        <p class="m-where">Turn the dial to measure.</p>
+        <button type="button" class="fuse" data-act="fuse" hidden>Fit a new fuse</button>
+      </section>
+    </aside>
+
+    <nav class="tabs" aria-label="Panels">
+      <button type="button" data-sheet-open="book">Booklet</button>
+      <button type="button" data-sheet-open="part">Part</button>
+      <button type="button" data-sheet-open="meter">Meter</button>
+    </nav>
   </main>
 </Bare>
 
@@ -26,16 +208,672 @@ const description =
 <style>
   :global(body:has(.bb)) {
     margin: 0;
-    background: #1d2427;
+    background: #171c1f;
   }
   .bb {
-    min-height: 100dvh;
-    color: #ece6d6;
+    --paper: #f2ede0;
+    --paper-2: #e6dfcd;
+    --ink: #1c1e21;
+    --ink-2: #5b5a54;
+    --red: #c4362c;
+    --blue: #2b56a6;
+    --amber: #ffcf5a;
+    --bench: #171c1f;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: 100dvh;
+    min-height: 620px;
+    color: var(--paper);
     font-family: var(--font-bb-sans), sans-serif;
+    background: var(--bench);
+    overflow: hidden;
+  }
+  .bb *,
+  .bb *::before,
+  .bb *::after {
+    box-sizing: border-box;
+  }
+  .bb button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  /* Header */
+  .bar {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgb(255 255 255 / 0.07);
+    background: linear-gradient(#20262a, #1a1f22);
+  }
+  .home {
+    color: rgb(242 237 224 / 0.55);
+    font: 400 12px/1 var(--font-bb-mono), monospace;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+  .home:hover {
+    color: var(--paper);
+  }
+  .title {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    min-width: 0;
+  }
+  h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+  }
+  .title p {
+    margin: 0;
+    color: rgb(242 237 224 / 0.6);
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .switches {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+  .sw,
+  .undo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 9px;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    border-radius: 6px;
+    background: rgb(255 255 255 / 0.04);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .sw i {
+    width: 22px;
+    height: 12px;
+    border-radius: 6px;
+    background: #3a4146;
+    position: relative;
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.5);
+  }
+  .sw i::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #8d959b;
+    transition: transform 0.15s;
+  }
+  .sw[aria-pressed='true'] i {
+    background: #b8432f;
+  }
+  .sw[aria-pressed='true'] i::after {
+    transform: translateX(10px);
+    background: #fff4e0;
+  }
+  .undo {
+    padding: 6px 12px;
+  }
+  .undo:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  /* Bench */
+  .stage {
+    grid-column: 1;
+    grid-row: 2;
+    position: relative;
+    min-height: 0;
   }
   .bench {
     display: block;
     width: 100%;
-    height: 80dvh;
+    height: 100%;
+    touch-action: none;
+    outline: none;
+  }
+  .status {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translate(-50%, -8px);
+    margin: 0;
+    max-width: min(560px, calc(100% - 32px));
+    padding: 9px 14px;
+    border-radius: 6px;
+    background: rgb(20 22 25 / 0.92);
+    border: 1px solid rgb(255 207 90 / 0.35);
+    color: #fbe9c0;
+    font-size: 14px;
+    line-height: 1.35;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.2s,
+      transform 0.2s;
+  }
+  .status[data-show='1'] {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  .nojs {
+    position: absolute;
+    inset: 40% 10% auto;
+    text-align: center;
+    color: var(--paper);
+  }
+
+  /* Drawer */
+  .tray {
+    grid-column: 1;
+    grid-row: 3;
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    padding: 10px 16px 12px;
+    border-top: 1px solid rgb(255 255 255 / 0.07);
+    background: linear-gradient(#1d2326, #161a1d);
+    overflow-x: auto;
+  }
+  .tray ul {
+    display: flex;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tray [data-part] {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    width: 76px;
+    padding: 6px 4px 6px;
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 8px;
+    background: rgb(255 255 255 / 0.035);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .tray [data-part]:hover {
+    background: rgb(255 255 255 / 0.07);
+  }
+  .tray [data-part][aria-pressed='true'] {
+    border-color: var(--amber);
+    background: rgb(255 207 90 / 0.12);
+  }
+  .tray canvas {
+    width: 64px;
+    height: 38px;
+    pointer-events: none;
+  }
+  .tray span {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: rgb(242 237 224 / 0.8);
+    white-space: nowrap;
+  }
+  .wires {
+    display: grid;
+    grid-template-columns: repeat(3, 18px);
+    align-content: center;
+    gap: 6px;
+    padding-left: 12px;
+    border-left: 1px solid rgb(255 255 255 / 0.08);
+  }
+  .bb .wires button,
+  .bb .swatches button {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid rgb(0 0 0 / 0.35);
+    box-shadow: inset -2px -2px 3px rgb(0 0 0 / 0.25);
+  }
+  .bb .wires button[aria-pressed='true'],
+  .bb .swatches button[aria-pressed='true'] {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+  .bb .sw-red {
+    background: #cf3a2e;
+  }
+  .bb .sw-black {
+    background: #26272a;
+  }
+  .bb .sw-blue {
+    background: #2c62c2;
+  }
+  .bb .sw-green {
+    background: #2c9449;
+  }
+  .bb .sw-yellow {
+    background: #e6bf2c;
+  }
+  .bb .sw-orange {
+    background: #e57d2a;
+  }
+  .bb .sw-white {
+    background: #e9e7e0;
+  }
+
+  /* Side column */
+  .side {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px 14px 16px;
+    overflow-y: auto;
+    border-left: 1px solid rgb(255 255 255 / 0.07);
+    background: #1a1f22;
+  }
+  .kicker {
+    margin: 0 0 8px;
+    font: 700 11px/1 var(--font-bb-mono), monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(242 237 224 / 0.5);
+  }
+  .book,
+  .inspect {
+    padding: 14px 14px 16px;
+    border-radius: 4px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.6) inset,
+      0 8px 18px rgb(0 0 0 / 0.35);
+  }
+  .book .kicker,
+  .inspect .kicker {
+    color: var(--red);
+  }
+  .index {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 10px;
+    margin: 0 0 12px;
+    padding: 0 0 12px;
+    list-style: none;
+    border-bottom: 1px dashed rgb(28 30 33 / 0.25);
+  }
+  .index button {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    width: 100%;
+    padding: 3px 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    font-size: 13.5px;
+    color: var(--ink-2);
+  }
+  .index b {
+    font: 700 12px/1 var(--font-bb-mono), monospace;
+    color: var(--red);
+    width: 1.2em;
+  }
+  .index button:hover,
+  .index button[aria-current='true'] {
+    color: var(--ink);
+  }
+  .index button[aria-current='true'] {
+    text-decoration: underline;
+    text-decoration-color: var(--red);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 2px;
+  }
+  .card h2 {
+    margin: 0 0 6px;
+    font-size: 19px;
+    letter-spacing: -0.01em;
+  }
+  .card .note {
+    margin: 0 0 10px;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .card h3 {
+    margin: 0 0 4px;
+    font: 700 11px/1 var(--font-bb-mono), monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+  .card ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+  .card li + li {
+    margin-top: 4px;
+  }
+  .i-name {
+    margin: 0 0 6px;
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .i-hint {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.4;
+    color: var(--ink-2);
+  }
+  .inspect:not([data-empty='1']) .i-hint {
+    display: none;
+  }
+  .inspect[data-empty='1'] .i-name {
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+  .i-read {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 14px;
+    margin: 0;
+    font-size: 13.5px;
+  }
+  .i-read:empty {
+    display: none;
+  }
+  .i-read :global(dt) {
+    color: var(--ink-2);
+  }
+  .i-read :global(dd) {
+    margin: 0;
+    font-family: var(--font-bb-mono), monospace;
+    font-size: 13px;
+    text-align: right;
+  }
+  .i-ctl {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .i-ctl:empty {
+    display: none;
+  }
+  .i-ctl :global(.i-value) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13.5px;
+    color: var(--ink-2);
+  }
+  .i-ctl :global(select) {
+    font: 500 13px var(--font-bb-mono), monospace;
+    padding: 4px 6px;
+    border: 1px solid rgb(28 30 33 / 0.3);
+    border-radius: 4px;
+    background: #fffdf6;
+    color: var(--ink);
+  }
+  .i-ctl :global(.swatches) {
+    display: flex;
+    gap: 8px;
+  }
+  .i-ctl :global(.i-acts) {
+    display: flex;
+    gap: 8px;
+  }
+  .i-ctl :global(.i-acts button) {
+    padding: 5px 11px;
+    border: 1px solid rgb(28 30 33 / 0.3);
+    border-radius: 4px;
+    background: #fffdf6;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .i-ctl :global(.i-acts button[data-do='remove']) {
+    margin-left: auto;
+    color: var(--red);
+  }
+
+  /* Multimeter */
+  .meter {
+    margin-top: auto;
+  }
+  .dmm {
+    padding: 12px;
+    border-radius: 18px;
+    background: linear-gradient(160deg, #f0c03a, #d29a17);
+    box-shadow:
+      inset 0 2px 0 rgb(255 255 255 / 0.35),
+      inset 0 -3px 0 rgb(0 0 0 / 0.2),
+      0 10px 20px rgb(0 0 0 / 0.4);
+  }
+  .face {
+    display: grid;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: linear-gradient(#2f3236, #232528);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+  }
+  .lcd {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px 8px 6px;
+    border-radius: 4px;
+    background: linear-gradient(#c3ccb6, #aab59c);
+    box-shadow:
+      inset 0 2px 4px rgb(0 0 0 / 0.45),
+      inset 0 0 0 1px rgb(0 0 0 / 0.3);
+  }
+  .lcd svg {
+    width: 100%;
+    height: 54px;
+  }
+  .lcd polygon,
+  .lcd circle {
+    fill: rgb(30 36 28 / 0.07);
+  }
+  .lcd [data-on='true'] {
+    fill: #1d221b;
+  }
+  .unit {
+    min-width: 2.4em;
+    font: 700 16px/1 var(--font-bb-mono), monospace;
+    color: #1d221b;
+    text-align: right;
+  }
+  .dial {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+  }
+  .dial button {
+    padding: 6px 0;
+    border: 1px solid rgb(255 255 255 / 0.12);
+    border-radius: 5px;
+    background: #1a1c1f;
+    color: rgb(242 237 224 / 0.75);
+    font: 700 13px/1 var(--font-bb-mono), monospace;
+  }
+  .dial button[aria-checked='true'] {
+    background: #f0c03a;
+    border-color: #f0c03a;
+    color: #1a1c1f;
+  }
+  .dial small {
+    font-size: 11px;
+  }
+  .knob {
+    display: none;
+  }
+  .jacks {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+    padding-right: 4px;
+  }
+  .jacks i {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #0b0b0c 35%, #5a5d61 38%, #2a2c2f 70%);
+  }
+  .jacks .vma {
+    background: radial-gradient(circle, #0b0b0c 35%, #c4362c 38%, #7e1f18 70%);
+  }
+  .m-where {
+    margin: 8px 2px 0;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: rgb(242 237 224 / 0.65);
+  }
+  .fuse {
+    margin-top: 6px;
+    padding: 5px 11px;
+    border: 1px solid var(--amber);
+    border-radius: 4px;
+    background: none;
+    font-size: 13px;
+  }
+  .tabs {
+    display: none;
+  }
+
+  /* Dark room */
+  .bb[data-lamp='off'] .side {
+    background: #121619;
+  }
+
+  /* Phones and narrow windows: the side column becomes sheets over the bench. */
+  @media (max-width: 899px) {
+    .bb {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr) auto auto;
+      min-height: 0;
+    }
+    .bar {
+      gap: 10px;
+      padding: 8px 12px;
+      flex-wrap: wrap;
+    }
+    .home {
+      display: none;
+    }
+    .title p {
+      display: none;
+    }
+    h1 {
+      font-size: 19px;
+    }
+    .switches {
+      gap: 5px;
+    }
+    .sw,
+    .undo {
+      padding: 5px 8px 5px 7px;
+      font-size: 12px;
+      gap: 6px;
+    }
+    .sw i {
+      width: 18px;
+      height: 10px;
+    }
+    .sw i::after {
+      width: 6px;
+      height: 6px;
+    }
+    .sw[aria-pressed='true'] i::after {
+      transform: translateX(8px);
+    }
+    .tray {
+      grid-row: 3;
+      padding: 8px 10px;
+      gap: 8px;
+    }
+    .tray [data-part] {
+      width: 64px;
+    }
+    .tray canvas {
+      width: 54px;
+      height: 32px;
+    }
+    .side {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 52px;
+      max-height: 58dvh;
+      z-index: 5;
+      padding: 12px 12px 14px;
+      border-left: 0;
+      border-top: 1px solid rgb(255 255 255 / 0.1);
+      box-shadow: 0 -12px 30px rgb(0 0 0 / 0.5);
+      transform: translateY(110%);
+      transition: transform 0.22s ease;
+    }
+    .bb:is([data-sheet='book'], [data-sheet='part'], [data-sheet='meter']) .side {
+      transform: none;
+    }
+    .side > section {
+      display: none;
+    }
+    .bb[data-sheet='book'] .book,
+    .bb[data-sheet='part'] .inspect,
+    .bb[data-sheet='meter'] .meter {
+      display: block;
+    }
+    .meter {
+      margin-top: 0;
+    }
+    .tabs {
+      grid-row: 4;
+      position: relative;
+      z-index: 6;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid rgb(255 255 255 / 0.08);
+      background: #14181b;
+    }
+    .tabs button {
+      height: 52px;
+      border: 0;
+      background: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgb(242 237 224 / 0.7);
+    }
+    .bb[data-sheet='book'] [data-sheet-open='book'],
+    .bb[data-sheet='part'] [data-sheet-open='part'],
+    .bb[data-sheet='meter'] [data-sheet-open='meter'] {
+      color: var(--amber);
+      box-shadow: inset 0 2px 0 var(--amber);
+    }
+    .bb[data-selected='1'] [data-sheet-open='part']::after {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin-left: 6px;
+      border-radius: 50%;
+      background: var(--amber);
+      vertical-align: middle;
+    }
   }
 </style>
