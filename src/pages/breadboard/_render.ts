@@ -405,31 +405,37 @@ export class Renderer {
     const { x, y, w, h } = BATTERY;
     ctx.save();
     this.shadow(ctx, 3);
-    // Jacket rim around the snap.
-    const g = ctx.createLinearGradient(x - w / 2, 0, x + w / 2, 0);
-    g.addColorStop(0, '#3d4144');
-    g.addColorStop(0.5, '#5a5f63');
-    g.addColorStop(1, '#2f3235');
+    // The steel jacket's crimped top edge shows round the snap.
+    const g = ctx.createLinearGradient(x - w / 2, y - h / 2, x + w / 2, y + h / 2);
+    g.addColorStop(0, '#d9dde1');
+    g.addColorStop(0.45, '#8d939a');
+    g.addColorStop(1, '#5d636a');
     ctx.fillStyle = g;
-    roundRect(ctx, x - w / 2, y - h / 2, w, h, 0.7);
+    roundRect(ctx, x - w / 2, y - h / 2, w, h, 0.75);
     ctx.fill();
     this.noShadow(ctx);
-    // The snap.
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 0.05;
+    roundRect(ctx, x - w / 2 + 0.18, y - h / 2 + 0.18, w - 0.36, h - 0.36, 0.6);
+    ctx.stroke();
+    // The snap clip.
+    ctx.save();
+    this.shadow(ctx, 0.6);
     const sg = ctx.createLinearGradient(x - w / 2, y - h / 2, x + w / 2, y + h / 2);
-    sg.addColorStop(0, '#2b2c2f');
-    sg.addColorStop(1, '#141517');
+    sg.addColorStop(0, '#2e3033');
+    sg.addColorStop(1, '#121315');
     ctx.fillStyle = sg;
-    roundRect(ctx, x - w / 2 + 0.35, y - h / 2 + 0.35, w - 0.7, h - 0.7, 0.55);
+    roundRect(ctx, x - w / 2 + 0.45, y - h / 2 + 0.45, w - 0.9, h - 0.9, 0.5);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 0.06;
-    for (let k = 0; k < 4; k++) {
-      const yy = y + h / 2 - 1.2 - k * 0.35;
-      ctx.beginPath();
-      ctx.moveTo(x - w / 2 + 0.9, yy);
-      ctx.lineTo(x + w / 2 - 0.9, yy);
-      ctx.stroke();
-    }
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 0.05;
+    roundRect(ctx, x - w / 2 + 0.62, y - h / 2 + 0.62, w - 1.24, h - 1.24, 0.38);
+    ctx.stroke();
+    // Strain relief where the leads leave.
+    ctx.fillStyle = '#1b1c1f';
+    roundRect(ctx, x - 1.7, y - h / 2 - 0.15, 3.4, 0.9, 0.35);
+    ctx.fill();
     // Two rivets over the terminals.
     for (const [dy, label] of [
       [-1.9, '+'],
@@ -443,15 +449,17 @@ export class Renderer {
       ctx.beginPath();
       ctx.arc(x, y + dy, 0.72, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = 'rgba(230,230,225,0.55)';
+      ctx.fillStyle = 'rgba(230,230,225,0.6)';
       ctx.font = `700 0.7px ${this.mono}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       this.uprightText(ctx, label, x + 1.85, y + dy);
     }
-    ctx.fillStyle = 'rgba(230,226,215,0.6)';
-    ctx.font = `700 0.85px ${this.sans}`;
-    this.uprightText(ctx, '9V', x, y + h / 2 - 2.6);
+    ctx.fillStyle = 'rgba(236,232,220,0.75)';
+    ctx.font = `700 0.95px ${this.sans}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    this.uprightText(ctx, '9V', x, y + h / 2 - 1.55);
     ctx.restore();
   }
 
@@ -1312,7 +1320,7 @@ export class Renderer {
     }
     if (!scene.lamp) {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.fillStyle = 'rgba(6, 9, 20, 0.8)';
+      ctx.fillStyle = 'rgba(4, 6, 14, 0.9)';
       ctx.fillRect(0, 0, w * dpr, h * dpr);
       this.worldTransform(ctx);
     }
@@ -1345,10 +1353,10 @@ export class Renderer {
     const [r, g, bl] = (LED_TINT[color] ?? LED_TINT.red).glow;
     const k = Math.min(1.4, b);
     // Spill on the board.
-    const spill = (dark ? 7 : 3.4) * (0.5 + 0.5 * k);
+    const spill = (dark ? 8.5 : 3.4) * (0.5 + 0.5 * k);
     const sg = ctx.createRadialGradient(x, y, 0.4, x, y, spill);
-    sg.addColorStop(0, `rgba(${r},${g},${bl},${(dark ? 0.34 : 0.2) * k})`);
-    sg.addColorStop(0.4, `rgba(${r},${g},${bl},${(dark ? 0.1 : 0.05) * k})`);
+    sg.addColorStop(0, `rgba(${r},${g},${bl},${(dark ? 0.5 : 0.2) * k})`);
+    sg.addColorStop(0.35, `rgba(${r},${g},${bl},${(dark ? 0.16 : 0.05) * k})`);
     sg.addColorStop(1, `rgba(${r},${g},${bl},0)`);
     ctx.fillStyle = sg;
     ctx.beginPath();
@@ -1703,16 +1711,16 @@ export class Renderer {
       const parked = !pr.hole && !pr.free;
       const ang = parked ? Math.PI * 0.02 : Math.PI * 0.2;
       const dir = { x: Math.cos(ang), y: Math.sin(ang) };
-      const needle = 12 * k,
-        guard = 6 * k,
-        handle = 58 * k;
+      const needle = 15 * k,
+        guard = 7 * k,
+        handle = 70 * k;
       const hx = tip.x + dir.x * (needle + guard + handle),
         hy = tip.y + dir.y * (needle + guard + handle);
       const anchor = this.probeAnchor(pr.color);
       // Cable.
       ctx.lineCap = 'round';
       ctx.strokeStyle = 'rgba(0,0,0,0.35)';
-      ctx.lineWidth = 6 * k;
+      ctx.lineWidth = 8 * k;
       const cable = new Path2D();
       cable.moveTo(hx, hy);
       cable.bezierCurveTo(hx + dir.x * 60, hy + dir.y * 60 + 30, anchor.x - 80, anchor.y + 10, anchor.x, anchor.y);
@@ -1721,11 +1729,11 @@ export class Renderer {
       ctx.stroke(cable);
       ctx.restore();
       ctx.strokeStyle = pr.color === 'red' ? '#b42d24' : '#1d1e20';
-      ctx.lineWidth = 4.5 * k;
+      ctx.lineWidth = 6 * k;
       ctx.stroke(cable);
       // Needle.
       ctx.strokeStyle = '#d7dadd';
-      ctx.lineWidth = 2 * k;
+      ctx.lineWidth = 2.6 * k;
       ctx.beginPath();
       ctx.moveTo(tip.x, tip.y);
       ctx.lineTo(tip.x + dir.x * (needle + 2), tip.y + dir.y * (needle + 2));
@@ -1745,13 +1753,13 @@ export class Renderer {
       g.addColorStop(0.45, base);
       g.addColorStop(1, mixHex(base, '#000000', 0.45));
       ctx.fillStyle = g;
-      roundRect(ctx, needle, -6.5 * k, guard, 13 * k, 2 * k);
+      roundRect(ctx, needle, -9 * k, guard, 18 * k, 2.5 * k);
       ctx.fill();
       ctx.shadowColor = 'transparent';
-      roundRect(ctx, needle + guard - 1, -4.2 * k, handle, 8.4 * k, 4 * k);
+      roundRect(ctx, needle + guard - 1, -6 * k, handle, 12 * k, 6 * k);
       ctx.fill();
       ctx.fillStyle = 'rgba(0,0,0,0.22)';
-      for (let i = 0; i < 6; i++) ctx.fillRect(needle + guard + 10 * k + i * 6 * k, -4.2 * k, 1.6 * k, 8.4 * k);
+      for (let i = 0; i < 7; i++) ctx.fillRect(needle + guard + 12 * k + i * 6.5 * k, -6 * k, 2 * k, 12 * k);
       ctx.restore();
       if (pr.hole) {
         ctx.fillStyle = '#ffffff';
