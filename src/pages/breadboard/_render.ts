@@ -755,8 +755,8 @@ export class Renderer {
     ctx.rotate(Math.atan2(dy, dx));
     // Flange with the flat on the cathode side (toward b, +x).
     const rim = new Path2D();
-    const R = 1.12;
-    const flat = 0.94;
+    const R = 1.14;
+    const flat = 1.02;
     const th = Math.acos(flat / R);
     rim.arc(0, 0, R, th, Math.PI * 2 - th);
     rim.closePath();
@@ -783,7 +783,7 @@ export class Renderer {
     g.addColorStop(1, tint.deep);
     ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.arc(0, 0, 0.98, 0, Math.PI * 2);
+    ctx.arc(0, 0, 0.94, 0, Math.PI * 2);
     ctx.fill();
     // The lead frame inside: anvil (cathode, larger) and post.
     ctx.globalAlpha = 0.28;
@@ -800,7 +800,7 @@ export class Renderer {
     if (look?.dead) {
       ctx.fillStyle = 'rgba(20,14,10,0.7)';
       ctx.beginPath();
-      ctx.arc(0, 0, 0.98, 0, Math.PI * 2);
+      ctx.arc(0, 0, 0.94, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = 'rgba(240,235,220,0.35)';
       ctx.lineWidth = 0.035;
@@ -1285,7 +1285,7 @@ export class Renderer {
         y: y + (Math.random() - 0.5) * 0.6,
         vx: (ux / n) * sp + (Math.random() - 0.5) * 0.6,
         vy: (uy / n) * sp + (Math.random() - 0.5) * 0.6,
-        r: 0.3 + Math.random() * 0.4,
+        r: 0.45 + Math.random() * 0.5,
         age: -Math.random() * 0.4,
         life: 1.6 + Math.random() * 1.6,
         dark,
@@ -1538,8 +1538,8 @@ export class Renderer {
       p.vy *= 1 - dt * 0.6;
       p.r += dt * 0.9;
       const t = p.age / p.life;
-      const a = Math.max(0, Math.min(1, t * 6) * (1 - t)) * 0.42;
-      const c = Math.round(210 - p.dark * 120);
+      const a = Math.max(0, Math.min(1, t * 6) * (1 - t)) * 0.6;
+      const c = Math.round(205 - p.dark * 140);
       const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
       g.addColorStop(0, `rgba(${c},${c},${c - 6},${a})`);
       g.addColorStop(1, `rgba(${c},${c},${c - 6},0)`);

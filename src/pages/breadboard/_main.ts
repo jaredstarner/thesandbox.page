@@ -282,7 +282,10 @@ class Bench {
             this.r.smoke(where.x, where.y, 14, 0.6);
           }
           this.sound.pop(1);
-          this.status(`The ${p ? partName(p).toLowerCase() : 'LED'} burnt out. Nothing was limiting its current.`);
+          {
+            const peak = this.sim.states.get(ev.id)?.peak ?? 0;
+            this.status(`The ${p ? lower(partName(p)) : 'LED'} burnt out with ${Math.round(peak * 1000)} mA through it. It is rated for 20.`);
+          }
           break;
         case 'scorch':
           if (where) this.r.smoke(where.x, where.y, 10, 0.25);
@@ -298,7 +301,7 @@ class Bench {
             this.r.smoke(where.x, where.y, 22, 0.75);
           }
           this.sound.pop(0.8);
-          this.status(`The ${p ? partName(p).toLowerCase() : 'part'} burnt through.`);
+          this.status(`The ${p ? lower(partName(p)) : 'part'} burnt through.`);
           break;
         case 'burst':
           if (where) this.r.smoke(where.x, where.y, 18, 0.35);
@@ -887,7 +890,8 @@ class Bench {
     this.armedRot = 0;
     for (const b of this.root.querySelectorAll<HTMLButtonElement>('[data-part]'))
       b.setAttribute('aria-pressed', String(b.dataset.part === this.armed));
-    if (this.armed) this.status(`Tap a hole to place the ${this.armed === 'wire' ? 'wire' : partName(this.template(this.armed)).toLowerCase()}. R turns it; Esc puts it away.`);
+    if (this.armed)
+      this.status(`Tap a hole to place the ${lower(partName(this.template(this.armed)))}. R turns it; Esc puts it away.`);
   }
 
   // ---------------------------------------------------------------- controls
@@ -967,7 +971,7 @@ class Bench {
         this.snapshot();
         this.sim.forget(p.id);
         this.changed();
-        this.status(`Fitted a new ${partName(p).toLowerCase()}.`);
+        this.status(`Fitted a new ${lower(partName(p))}.`);
       }
     });
   }
@@ -1326,6 +1330,11 @@ class Bench {
     });
     (window as unknown as { breadboard: unknown }).breadboard = api;
   }
+}
+
+/** Lower-case a part name for the middle of a sentence, keeping LED, NE555, and the like. */
+function lower(name: string): string {
+  return /^[A-Z][a-z]/.test(name) ? name.charAt(0).toLowerCase() + name.slice(1) : name;
 }
 
 function segDist(p: Pt, a: Pt, b: Pt): number {

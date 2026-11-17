@@ -53,6 +53,8 @@ export interface PartState {
   period: number;
   highTime: number;
   lastFall: number;
+  /** The current that killed a part. */
+  peak: number;
   /** Buzzer drive and LDR resistance (low-passed). */
   level: number;
   rLog: number;
@@ -129,6 +131,7 @@ function freshState(): PartState {
     period: 0,
     highTime: 0,
     lastFall: -1,
+    peak: 0,
     level: 0,
     rLog: Math.log(20e3),
   };
@@ -576,6 +579,7 @@ export class Sim {
             else st.stress = Math.max(0, st.stress - dt * 0.05);
             if (st.stress > 0.6) {
               st.dead = true;
+              st.peak = i;
               this.events.push({ type: 'pop', id: d.id });
             }
           }
