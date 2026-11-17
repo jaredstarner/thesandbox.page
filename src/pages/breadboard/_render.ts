@@ -1281,8 +1281,8 @@ export class Renderer {
     for (let i = 0; i < amount; i++) {
       const sp = 0.6 + Math.random() * 1.2;
       this.puffs.push({
-        x: x + (Math.random() - 0.5) * 0.6,
-        y: y + (Math.random() - 0.5) * 0.6,
+        x: x + (Math.random() - 0.5) * 0.9,
+        y: y + (Math.random() - 0.5) * 0.9,
         vx: (ux / n) * sp + (Math.random() - 0.5) * 0.6,
         vy: (uy / n) * sp + (Math.random() - 0.5) * 0.6,
         r: 0.45 + Math.random() * 0.5,

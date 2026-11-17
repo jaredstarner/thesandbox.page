@@ -295,7 +295,7 @@ class Bench {
         case 'pop':
           if (where) {
             this.r.flash(where.x, where.y);
-            this.r.smoke(where.x, where.y, 14, 0.6);
+            this.r.smoke(where.x, where.y, 14, 0.45);
           }
           this.sound.pop(1);
           {
@@ -399,8 +399,15 @@ class Bench {
 
   private ghostPins(p: Part): Ghost['pins'] {
     const occ = occupancy(this.parts, this.drag?.t === 'move' ? this.drag.id : undefined);
+    const at = p.at ? HOLE.get(p.at) : undefined;
+    const fp = FOOTPRINT[p.kind];
     return pinHoles(p).map((h, i) => {
       if (h) return { x: h.x, y: h.y, ok: !occ.has(h.id) };
+      // A leg that misses the board: show where it would go.
+      if (at && fp) {
+        const [rx, ry] = rotate(fp[i][0], fp[i][1], p.rot ?? 0);
+        return { x: at.x + rx, y: at.y + ry, ok: false };
+      }
       const pt = this.hover ?? { x: 0, y: 0 };
       return { x: pt.x + i, y: pt.y, ok: false };
     });
@@ -827,8 +834,7 @@ class Bench {
       d.cand = { ...p, a: a?.id, b: b?.id };
     } else {
       const [cx, cy] = footprintCentre(p.kind, 0, 0, p.rot ?? 0);
-      const at = holeNear(pt.x - cx, pt.y - cy, 0.8);
-      d.cand = { ...p, at: at?.id };
+      d.cand = this.snapFootprint(p, pt.x - cx, pt.y - cy);
     }
     d.ok = d.over && this.valid(d.cand);
   }
@@ -855,12 +861,32 @@ class Bench {
       }
     } else {
       const at = o.at ? HOLE.get(o.at) : undefined;
-      if (at) {
-        const n = holeNear(at.x + dx, at.y + dy, 0.8);
-        d.cand = { ...o, at: n?.id };
-      }
+      if (at) d.cand = this.snapFootprint(o, at.x + dx, at.y + dy, d.id);
     }
     d.ok = !d.remove && !!d.cand && this.valid(d.cand, d.id);
+  }
+
+  /**
+   * Pin 1's hole for a rigid part aimed at (x, y): the nearest anchor whose legs all land in free
+   * holes, so a chip dragged near the channel settles across it. Falls back to the nearest hole.
+   */
+  private snapFootprint(p: Part, x: number, y: number, except?: string): Part {
+    let best: Part | null = null;
+    let bd = Infinity;
+    for (const dy of [0, -1, 1, -2, 2, -3, 3]) {
+      for (const dx of [0, -1, 1]) {
+        const h = holeNear(x + dx, y + dy, 0.75);
+        if (!h) continue;
+        const cand = { ...p, at: h.id };
+        const dist = (h.x - x) ** 2 + (h.y - y) ** 2;
+        if (dist < bd && this.valid(cand, except)) {
+          bd = dist;
+          best = cand;
+        }
+      }
+    }
+    if (best && bd < 6.5) return best;
+    return { ...p, at: holeNear(x, y, 0.8)?.id };
   }
 
   private valid(p: Part, except?: string): boolean {
