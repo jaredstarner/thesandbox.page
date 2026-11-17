@@ -34,7 +34,17 @@ const LUX_OFF = 2;
 type Pt = { x: number; y: number };
 
 type Drag =
-  | { t: 'move'; id: string; orig: Part; start: Pt; leg: -1 | 0 | 1; cand: Part | null; ok: boolean; remove: boolean; moved: boolean }
+  | {
+      t: 'move';
+      id: string;
+      orig: Part;
+      start: Pt;
+      leg: -1 | 0 | 1;
+      cand: Part | null;
+      ok: boolean;
+      remove: boolean;
+      moved: boolean;
+    }
   | { t: 'new'; part: Part; cand: Part | null; ok: boolean; over: boolean; moved: boolean; start: Pt | null }
   | { t: 'wire'; from: Hole; cand: Part | null; ok: boolean }
   | { t: 'press'; id: string; start: Pt; kind: 'button' | 'ldr' }
@@ -248,7 +258,13 @@ class Bench {
     let buzz = 0;
     for (const p of this.parts) {
       const st = this.sim.states.get(p.id);
-      const look: PartLook = this.looks.get(p.id) ?? { glow: 0, dead: false, scorched: false, pressed: false, covered: false };
+      const look: PartLook = this.looks.get(p.id) ?? {
+        glow: 0,
+        dead: false,
+        scorched: false,
+        pressed: false,
+        covered: false,
+      };
       const wasDead = look.dead,
         wasScorched = look.scorched;
       look.pressed = this.pressed.has(p.id);
@@ -284,7 +300,9 @@ class Bench {
           this.sound.pop(1);
           {
             const peak = this.sim.states.get(ev.id)?.peak ?? 0;
-            this.status(`The ${p ? lower(partName(p)) : 'LED'} burnt out with ${Math.round(peak * 1000)} mA through it. It is rated for 20.`);
+            this.status(
+              `The ${p ? lower(partName(p)) : 'LED'} burnt out with ${Math.round(peak * 1000)} mA through it; it is rated for 20 mA.`,
+            );
           }
           break;
         case 'scorch':
@@ -362,7 +380,10 @@ class Bench {
     }
     const hp = !this.drag && this.hover ? this.hit(this.hover) : null;
     return {
-      parts: this.drag?.t === 'move' && this.drag.moved ? this.parts.filter((p) => p.id !== (this.drag as { id: string }).id) : this.parts,
+      parts:
+        this.drag?.t === 'move' && this.drag.moved
+          ? this.parts.filter((p) => p.id !== (this.drag as { id: string }).id)
+          : this.parts,
       looks: this.looks,
       selected: this.selected,
       hoverHole: hh,
@@ -543,7 +564,13 @@ class Bench {
           const [rx, ry] = rotate(1, -0.85, p.rot ?? 0);
           const centre = { x: at.x + rx, y: at.y + ry };
           this.snapshot();
-          this.drag = { t: 'turn', id: p.id, centre, startAng: Math.atan2(pt.y - centre.y, pt.x - centre.x), startPos: p.pos ?? 0.5 };
+          this.drag = {
+            t: 'turn',
+            id: p.id,
+            centre,
+            startAng: Math.atan2(pt.y - centre.y, pt.x - centre.x),
+            startPos: p.pos ?? 0.5,
+          };
           this.select(p.id);
           return;
         }
@@ -587,7 +614,17 @@ class Bench {
             (d.kind === 'ldr' ? this.covered : this.pressed).delete(d.id);
             this.updateParams();
             const p = this.part(d.id)!;
-            this.drag = { t: 'move', id: p.id, orig: { ...p }, start: d.start, leg: -1, cand: null, ok: false, remove: false, moved: false };
+            this.drag = {
+              t: 'move',
+              id: p.id,
+              orig: { ...p },
+              start: d.start,
+              leg: -1,
+              cand: null,
+              ok: false,
+              remove: false,
+              moved: false,
+            };
             this.updateMove(this.drag, pt);
           }
           break;
@@ -811,7 +848,9 @@ class Bench {
         d.cand = d.leg === 1 ? { ...o, b: h?.id } : { ...o, a: h?.id };
       } else if (ha && hb) {
         const na = holeNear(ha.x + dx, ha.y + dy, 0.8);
-        const nb = na ? (holeAt(na.x + (hb.x - ha.x), na.y + (hb.y - ha.y)) ?? holeNear(hb.x + dx, hb.y + dy, 0.8)) : null;
+        const nb = na
+          ? (holeAt(na.x + (hb.x - ha.x), na.y + (hb.y - ha.y)) ?? holeNear(hb.x + dx, hb.y + dy, 0.8))
+          : null;
         d.cand = { ...o, a: na?.id, b: nb?.id };
       }
     } else {
@@ -891,7 +930,9 @@ class Bench {
     for (const b of this.root.querySelectorAll<HTMLButtonElement>('[data-part]'))
       b.setAttribute('aria-pressed', String(b.dataset.part === this.armed));
     if (this.armed)
-      this.status(`Tap a hole to place the ${lower(partName(this.template(this.armed)))}. R turns it; Esc puts it away.`);
+      this.status(
+        `Tap a hole to place the ${lower(partName(this.template(this.armed)))}. R turns it; Esc puts it away.`,
+      );
   }
 
   // ---------------------------------------------------------------- controls
@@ -985,7 +1026,15 @@ class Bench {
         try {
           b.setPointerCapture(e.pointerId);
         } catch {}
-        this.drag = { t: 'new', part: this.template(kind), cand: null, ok: false, over: false, moved: false, start: { x: e.clientX, y: e.clientY } };
+        this.drag = {
+          t: 'new',
+          part: this.template(kind),
+          cand: null,
+          ok: false,
+          over: false,
+          moved: false,
+          start: { x: e.clientX, y: e.clientY },
+        };
       });
       b.addEventListener('pointermove', (e) => {
         const d = this.drag;
@@ -996,7 +1045,8 @@ class Bench {
         this.hover = pt;
         this.hoverHole = holeNear(pt.x, pt.y);
         const rect = this.canvas.getBoundingClientRect();
-        const inside = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
+        const inside =
+          e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
         const saved = d.start;
         d.start = null;
         this.updateNew(d, pt);
@@ -1163,14 +1213,19 @@ class Bench {
         return [
           ['Through it', A(i)],
           ['Across it', V(v)],
-          ['State', st.dead ? 'Burnt out' : i > 0.035 ? 'Overdriven' : i > 5e-5 ? 'Lit' : v < -0.1 ? 'Reversed' : 'Dark'],
+          [
+            'State',
+            st.dead ? 'Burnt out' : i > 0.035 ? 'Overdriven' : i > 5e-5 ? 'Lit' : v < -0.1 ? 'Reversed' : 'Dark',
+          ],
         ];
       case 'ecap':
       case 'cap':
         return [
           ['Charged to', V(v)],
           ['Current', A(i)],
-          ...(p.kind === 'ecap' ? ([['State', st.dead ? 'Vented' : v < -0.5 ? 'Reverse biased' : 'Fine']] as [string, string][]) : []),
+          ...(p.kind === 'ecap'
+            ? ([['State', st.dead ? 'Vented' : v < -0.5 ? 'Reverse biased' : 'Fine']] as [string, string][])
+            : []),
         ];
       case 'ldr':
         return [
@@ -1206,7 +1261,10 @@ class Bench {
         return [
           ['Supply', V(v)],
           ['Output', !st.powered ? 'Unpowered' : r.a > 0.5 ? 'High' : 'Low'],
-          ['Frequency', f > 0 ? `${f.toFixed(f < 10 ? 2 : 0)} Hz, ${Math.round((st.highTime / st.period) * 100)}% high` : 'Steady'],
+          [
+            'Frequency',
+            f > 0 ? `${f.toFixed(f < 10 ? 2 : 0)} Hz, ${Math.round((st.highTime / st.period) * 100)}% high` : 'Steady',
+          ],
         ];
       }
       case 'cd4017':
@@ -1234,8 +1292,8 @@ class Bench {
     const lcd = this.root.querySelector<HTMLElement>('.lcd');
     if (!lcd) return;
     const unit = lcd.querySelector<HTMLElement>('.unit')!;
-    let text = '';
-    let u = '';
+    let text: string;
+    let u: string;
     const m = this.meterMode;
     const v = this.sim.meterReading;
     const placed = this.probes[0].hole && this.probes[1].hole;
@@ -1268,7 +1326,10 @@ class Bench {
     const where = this.root.querySelector<HTMLElement>('.m-where');
     if (where) {
       const name = (h: string | null) => (h ? `${h.replace('-', '−')} (${stripName(HOLE.get(h)!.strip)})` : 'resting');
-      where.textContent = m === 'off' ? 'Turn the dial to measure.' : `Red: ${name(this.probes[0].hole)}. Black: ${name(this.probes[1].hole)}.`;
+      where.textContent =
+        m === 'off'
+          ? 'Turn the dial to measure.'
+          : `Red: ${name(this.probes[0].hole)}. Black: ${name(this.probes[1].hole)}.`;
     }
   }
 
@@ -1392,7 +1453,8 @@ function setLcd(lcd: HTMLElement, text: string) {
   digits.forEach((g, i) => {
     const { c, dp } = shown[i];
     const on = SEGS[c] ?? '';
-    for (const seg of g.querySelectorAll<SVGElement>('[data-seg]')) seg.dataset.on = String(on.includes(seg.dataset.seg!));
+    for (const seg of g.querySelectorAll<SVGElement>('[data-seg]'))
+      seg.dataset.on = String(on.includes(seg.dataset.seg!));
     const d = g.querySelector<SVGElement>('[data-dp]');
     if (d) d.dataset.on = String(dp);
   });
