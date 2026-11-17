@@ -140,7 +140,7 @@ export const PROJECTS: Project[] = [
   {
     id: 'chaser',
     title: 'Chaser',
-    note: 'A faster 555 clocks a CD4017 decade counter. The counter holds one of its ten outputs high and moves to the next on every rising edge of the clock, so the light runs down the row of LEDs and starts again.',
+    note: 'A faster 555 clocks a CD4017 decade counter. The counter holds one of its ten outputs high and moves to the next on every rising edge of the clock, so the light runs round the loop of LEDs: along the bottom row, then back along the top.',
     tries: [
       'Pull the blue clock wire out of b12 and the chase stops where it is.',
       'Move the wire in a13 over to the + rail. Pin 13 high holds the count.',
