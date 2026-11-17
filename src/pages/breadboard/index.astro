@@ -91,7 +91,15 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
           <i></i>Sound
         </button>
         <button type="button" class="undo" data-act="undo" disabled aria-label="Undo">
-          Undo
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path
+              d="M5.5 3.5 2.5 6.5l3 3M3 6.5h6.5a4 4 0 0 1 0 8H7"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+            ></path>
+          </svg>
+          <span>Undo</span>
         </button>
       </div>
     </header>
@@ -294,12 +302,14 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
     align-items: baseline;
     gap: 14px;
     min-width: 0;
+    overflow: hidden;
   }
   h1 {
     margin: 0;
     font-weight: 700;
     font-size: 22px;
     letter-spacing: -0.01em;
+    white-space: nowrap;
   }
   .title p {
     margin: 0;
@@ -354,6 +364,11 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
   }
   .undo {
     padding: 6px 12px;
+  }
+  .undo svg {
+    display: none;
+    width: 15px;
+    height: 15px;
   }
   .undo:disabled {
     opacity: 0.4;
@@ -820,7 +835,16 @@ const digits = [0, 1, 2, 3].map((i) => i * 33);
       display: none;
     }
     h1 {
-      font-size: 18px;
+      font-size: 17px;
+    }
+    .switches {
+      flex: none;
+    }
+    .undo svg {
+      display: block;
+    }
+    .undo span {
+      display: none;
     }
     .switches {
       gap: 4px;
