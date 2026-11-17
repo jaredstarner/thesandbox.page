@@ -1,0 +1,41 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+
+const description =
+  'A solderless breadboard, a 9 V battery, and a drawer of parts: wire up LEDs, a 555 timer, and a decade counter, and the circuit runs as it would on a real bench.';
+---
+
+<Bare title="Breadboard" description={description}>
+  <Font cssVariable="--font-bb-sans" slot="head" />
+  <Font cssVariable="--font-bb-mono" slot="head" />
+  <main class="bb">
+    <header class="bar">
+      <h1>Breadboard</h1>
+    </header>
+    <div class="stage">
+      <canvas class="bench" aria-label="A breadboard on an anti-static mat"></canvas>
+    </div>
+  </main>
+</Bare>
+
+<script>
+  import './_main';
+</script>
+
+<style>
+  :global(body:has(.bb)) {
+    margin: 0;
+    background: #1d2427;
+  }
+  .bb {
+    min-height: 100dvh;
+    color: #ece6d6;
+    font-family: var(--font-bb-sans), sans-serif;
+  }
+  .bench {
+    display: block;
+    width: 100%;
+    height: 80dvh;
+  }
+</style>

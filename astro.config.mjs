@@ -739,5 +739,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
     },
+    // /breadboard/: Space Grotesk for the kit booklet and labels, Space Mono for readings and the board's print.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Space Grotesk',
+      cssVariable: '--font-bb-sans',
+      weights: ['300 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Space Mono',
+      cssVariable: '--font-bb-mono',
+      weights: [400, 700],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });

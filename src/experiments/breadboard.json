@@ -1,0 +1,8 @@
+{
+  "title": "Breadboard",
+  "summary": "A solderless breadboard, a 9 V battery, a drawer of parts, and a multimeter: plug in resistors, LEDs, a 555 timer, and a decade counter, wire them up, and the circuit is solved a thousand times a second, so lights blink, chase, fade, and burn out the way they would on a real bench.",
+  "date": "2026-11-17",
+  "tags": ["canvas", "pointer-events", "web-audio", "svg", "circuit-simulation", "newton-raphson"],
+  "requires": ["canvas"],
+  "plot": 47
+}

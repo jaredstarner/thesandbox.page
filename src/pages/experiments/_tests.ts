@@ -559,6 +559,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   ferrofluid: { label: 'Ferrofluid' },
   'pattern-formation': { label: 'Pattern formation' },
   fft: { label: 'Fast Fourier transform' },
+  'circuit-simulation': { label: 'Circuit simulation (modified nodal analysis)' },
+  'newton-raphson': { label: 'Newton-Raphson iteration' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
