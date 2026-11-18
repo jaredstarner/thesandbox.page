@@ -86,7 +86,8 @@ const RAW: Raw[] = [
     date: '1927-04-21',
     article:
       "Violin and bow, in a case lined with green baize; on the 8.14. A note under the strings: 'I am giving it up. Whoever finds this, don't.'",
-    disposal: 'Unclaimed after three months. To the finder under the regulations: Porter Coyle, for his boy Michael, aged nine.',
+    disposal:
+      'Unclaimed after three months. To the finder under the regulations: Porter Coyle, for his boy Michael, aged nine.',
   },
   {
     id: 'goose',
@@ -125,7 +126,8 @@ const RAW: Raw[] = [
   {
     id: 'dog',
     date: '1931-05-26',
-    article: "Dog, Airedale, answering to 'Major', in a first-class seat of the 8.14 with a ticket for Saltcote in his collar.",
+    article:
+      "Dog, Airedale, answering to 'Major', in a first-class seat of the 8.14 with a ticket for Saltcote in his collar.",
     disposal: 'Claimed by his owner, who had put him on the train to visit her sister. He had not wanted to go.',
   },
   {
@@ -139,7 +141,8 @@ const RAW: Raw[] = [
     id: 'dress',
     date: '1932-05-19',
     article: "Wedding dress in a dressmaker's box, with the bill in it, unpaid; on the rack of the 8.14.",
-    disposal: 'Claimed on the Friday by the dressmaker, not the bride. The wedding went ahead on the Saturday, the bride in her second best.',
+    disposal:
+      'Claimed on the Friday by the dressmaker, not the bride. The wedding went ahead on the Saturday, the bride in her second best.',
   },
   {
     id: 'glove-l',
@@ -184,7 +187,8 @@ const RAW: Raw[] = [
   {
     id: 'pigeons',
     date: '1936-06-24',
-    article: 'Pigeons, racing, twelve, in a basket labelled for release at Hollins Bay; on the 2.10, having missed their stop.',
+    article:
+      'Pigeons, racing, twelve, in a basket labelled for release at Hollins Bay; on the 2.10, having missed their stop.',
     disposal:
       'Released from the office roof at 3.15 by order of the stationmaster. All found their own way home. Basket unclaimed.',
   },
@@ -220,13 +224,15 @@ const RAW: Raw[] = [
   {
     id: 'doll',
     date: '1939-09-01',
-    article: "Doll, rag, in a knitted coat, 'Rosie' stitched on the hem; Platform 1, the evacuation, the same train as [[gasmask]].",
+    article:
+      "Doll, rag, in a knitted coat, 'Rosie' stitched on the hem; Platform 1, the evacuation, the same train as [[gasmask]].",
     disposal: 'Unclaimed. Kept with [[gasmask]].',
   },
   {
     id: 'kitbag',
     date: '1940-06-04',
-    article: 'Kitbag, army, soaked through, with sand in the bottom and a cockle shell; on the first troop train up from the coast.',
+    article:
+      'Kitbag, army, soaked through, with sand in the bottom and a cockle shell; on the first troop train up from the coast.',
     disposal: 'Claimed in August by the soldier, who asked if he could keep the sand. He could.',
   },
   {
@@ -266,7 +272,8 @@ const RAW: Raw[] = [
   {
     id: 'ship',
     date: '1947-08-19',
-    article: 'Ship in a bottle, a three-masted barque under full sail, in a quart beer bottle; on the rack of the boat train.',
+    article:
+      'Ship in a bottle, a three-masted barque under full sail, in a quart beer bottle; on the rack of the boat train.',
     disposal:
       "Claimed by a merchant seaman who had built it on watch in the war. He would not say how long it took, then said, 'Four years.'",
   },
@@ -286,7 +293,8 @@ const RAW: Raw[] = [
   {
     id: 'valentine',
     date: '1950-02-14',
-    article: "Valentine, unsigned, addressed 'To the lady in the green hat on the 8.14'; on the floor of the booking hall.",
+    article:
+      "Valentine, unsigned, addressed 'To the lady in the green hat on the 8.14'; on the floor of the booking hall.",
     disposal:
       "Put in the window at the stationmaster's suggestion. Claimed on the 16th by a lady in a green hat who was not the lady in the green hat. I let it go.",
   },
@@ -321,7 +329,8 @@ const RAW: Raw[] = [
   {
     id: 'bleak2',
     date: '1952-03-21',
-    article: "Book: 'Bleak House', vol. II, green cloth; on the 8.14, the same corner seat. Pencilled inside the cover: '41'.",
+    article:
+      "Book: 'Bleak House', vol. II, green cloth; on the 8.14, the same corner seat. Pencilled inside the cover: '41'.",
     disposal:
       "Claimed the same day by a gentleman, Mr R. Abbot. He asked whether a lady had collected vol. I. I said I couldn't say.",
     pencil: 'See [[bleak1]].',
@@ -343,7 +352,8 @@ const RAW: Raw[] = [
   {
     id: 'television',
     date: '1953-06-02',
-    article: 'Television set, twelve-inch, in a crate; delivered to the refreshment room on Coronation morning, addressed to nobody.',
+    article:
+      'Television set, twelve-inch, in a crate; delivered to the refreshment room on Coronation morning, addressed to nobody.',
     disposal:
       'Kept for the day. The whole station watched it. Claimed on the 3rd by a shop that had meant it for Aldermoor Road, Wrayford.',
   },
@@ -410,7 +420,8 @@ const RAW: Raw[] = [
   {
     id: 'concert',
     date: '1957-06-15',
-    article: "Concert at the Assembly Rooms. The soloist was Michael Coyle, the porter's boy, on the violin from [[violin]].",
+    article:
+      "Concert at the Assembly Rooms. The soloist was Michael Coyle, the porter's boy, on the violin from [[violin]].",
     disposal: 'Not an article. Entered because Mr Pell would want it to be. I sent him the programme.',
   },
   {
@@ -481,7 +492,8 @@ const RAW: Raw[] = [
   {
     id: 'platform6',
     date: '1963-05-13',
-    article: 'Horace ([[horace]]) found at seven in the morning on Platform 6. How he crossed the footbridge is not known.',
+    article:
+      'Horace ([[horace]]) found at seven in the morning on Platform 6. How he crossed the footbridge is not known.',
     disposal: 'Returned. Spoken to.',
   },
   {
@@ -501,13 +513,15 @@ const RAW: Raw[] = [
     id: 'paddle',
     date: '1965-05-10',
     article: 'Paddle, one, varnished; on the 2.10. No canoe.',
-    disposal: 'Claimed, with the canoe ([[canoe]]), by two schoolmasters who had each been certain the other one had it.',
+    disposal:
+      'Claimed, with the canoe ([[canoe]]), by two schoolmasters who had each been certain the other one had it.',
   },
   {
     id: 'letter',
     date: '1965-11-22',
     article: "Letter, sealed, unstamped, addressed 'To whoever finds this'; on the bookstall counter.",
-    disposal: "Opened, as addressed. It said: 'Hello. I hope the rest of your day is better.' It was. Pinned up over the counter.",
+    disposal:
+      "Opened, as addressed. It said: 'Hello. I hope the rest of your day is better.' It was. Pinned up over the counter.",
   },
   {
     id: 'wig',
@@ -588,7 +602,8 @@ const RAW: Raw[] = [
   {
     id: 'ghost',
     date: '1977-11-14',
-    article: "A gentleman asked whether anyone had handed in his ghost. I asked him to describe it. He said he couldn't.",
+    article:
+      "A gentleman asked whether anyone had handed in his ghost. I asked him to describe it. He said he couldn't.",
     disposal: 'Nothing answering the description.',
   },
   {
@@ -708,7 +723,8 @@ const RAW: Raw[] = [
   {
     id: 'last',
     date: '1986-10-31',
-    article: 'Tortoise, Horace ([[horace]]). Handed in 1938. In good order, age not known. The last article in this office.',
+    article:
+      'Tortoise, Horace ([[horace]]). Handed in 1938. In good order, age not known. The last article in this office.',
     disposal:
       'Unclaimed after forty-eight years. Taken home by D. Mensah at closing, with this book and the umbrella. Office closed 5.30 p.m.',
   },

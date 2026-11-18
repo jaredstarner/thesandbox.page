@@ -25,7 +25,6 @@ for (let i = 0; i < ENTRIES.length; i += PER_LEAF) {
 const leaves: Leaf[] = [{ kind: 'front' }, ...ledger];
 const spreads: Leaf[][] = [];
 for (let i = 0; i < leaves.length; i += 2) spreads.push(leaves.slice(i, i + 2));
-
 ---
 
 <Bare title="Lost property" description={description}>
@@ -39,115 +38,118 @@ for (let i = 0; i < leaves.length; i += 2) spreads.push(leaves.slice(i, i + 2));
       <h1 id="lp-notice-title">Lost Property</h1>
       <p class="n-lead">Nothing in this register can be seen until it is asked for.</p>
       <p class="n-how">
-        <span class="n-keys"
-          >Search it with your browser’s Find, <span class="nowrap"><kbd>Ctrl</kbd> <kbd>F</kbd></span>, or <span class="nowrap"
-            ><kbd>⌘</kbd> <kbd>F</kbd> on a Mac,</span
-          ></span
-        ><span class="n-touch">Search it with Find in page, in your browser’s menu,</span><span class="n-none"
-          >Ask at the counter below</span
-        > for anything somebody might have left on a train. Every entry that answers is written in as you come to it, and
-        whatever you find stays found.
+        <span class="n-keys">
+          Search it with your browser’s Find,{' '}
+          <span class="nowrap">
+            <kbd>Ctrl</kbd> <kbd>F</kbd>
+          </span>
+          , or{' '}
+          <span class="nowrap">
+            <kbd>⌘</kbd> <kbd>F</kbd> on a Mac,
+          </span>
+        </span>
+        <span class="n-touch">Search it with Find in page, in your browser’s menu,</span>
+        <span class="n-none">Ask at the counter below</span> for anything somebody might have left on a train. Every
+        entry that answers is written in as you come to it, and whatever you find stays found.
       </p>
       <p class="n-alt">Or ask at the counter, at the foot of the window.</p>
     </aside>
 
     <div class="book">
-      {
-        spreads.map((spread) => (
-          <section class="spread">
-            {spread.map((leaf, side) => (
-              <article class:list={['leaf', side === 0 ? 'verso' : 'recto', leaf.kind]}>
-                {leaf.kind === 'front' ? (
-                  <div class="front">
-                    <p class="f-office">Lost Property Office</p>
-                    <p class="f-station">Aldermoor Central</p>
-                    <h2 class="f-title">Register of Articles</h2>
-                    <p class="f-rule" aria-hidden="true" />
-                    <p class="f-form">
-                      <span class="f-label">Commenced</span>
-                      <span class="hand pell">3rd March 1924</span>
+      {spreads.map((spread) => (
+        <section class="spread">
+          {spread.map((leaf, side) => (
+            <article class:list={['leaf', side === 0 ? 'verso' : 'recto', leaf.kind]}>
+              {leaf.kind === 'front' ? (
+                <div class="front">
+                  <p class="f-office">Lost Property Office</p>
+                  <p class="f-station">Aldermoor Central</p>
+                  <h2 class="f-title">Register of Articles</h2>
+                  <p class="f-rule" aria-hidden="true" />
+                  <p class="f-form">
+                    <span class="f-label">Commenced</span>
+                    <span class="hand pell">3rd March 1924</span>
+                  </p>
+                  <p class="hand pell f-note">Remarkable articles only. The ordinary go in the day book. A. Pell</p>
+                  <p class="hand dunmore f-note">Continued, July 1951. I. Dunmore</p>
+                  <p class="hand mensah f-note">Continued, April 1979. D. Mensah</p>
+                  <div class="regs">
+                    <p class="r-head">Regulations</p>
+                    <p>
+                      Articles found on the Company’s premises are to be handed to this Office and entered. Articles
+                      unclaimed after three months may be sold, or given up to the finder. Perishable articles may be
+                      disposed of after six hours. A fee is payable on every claim.
                     </p>
-                    <p class="hand pell f-note">Remarkable articles only. The ordinary go in the day book. A. Pell</p>
-                    <p class="hand dunmore f-note">Continued, July 1951. I. Dunmore</p>
-                    <p class="hand mensah f-note">Continued, April 1979. D. Mensah</p>
-                    <div class="regs">
-                      <p class="r-head">Regulations</p>
-                      <p>
-                        Articles found on the Company’s premises are to be handed to this Office and entered. Articles
-                        unclaimed after three months may be sold, or given up to the finder. Perishable articles may be
-                        disposed of after six hours. A fee is payable on every claim.
-                      </p>
-                    </div>
                   </div>
-                ) : (
-                  <>
-                    <header class="running">
-                      <span class="r-title">{side === 0 ? 'Lost Property Office' : 'Register of Articles'}</span>
-                      <span class="folio">{leaf.folio}</span>
-                    </header>
-                    <div class="heads" aria-hidden="true">
-                      <span>No.</span>
-                      <span>Date</span>
-                      <span class="h-body">
-                        <span>Article, and where found</span>
-                        <span>How disposed of</span>
-                      </span>
-                    </div>
-                    <ol class="rows">
-                      {leaf.lines.map((line) =>
-                        line.kind === 'year' ? (
-                          <li class="year" data-hand={line.hand}>
-                            <span class="y">{line.year}</span>
-                          </li>
-                        ) : (
-                          <li class="row" id={`no-${line.entry.no}`} data-hand={line.entry.hand}>
-                            <span class="no">{line.entry.no}</span>
-                            <span class="day">{line.entry.day}</span>
-                            <div
-                              class="body"
-                              id={`e-${line.entry.no}`}
-                              data-no={line.entry.no}
-                              hidden={OPEN.has(line.entry.no) ? undefined : 'until-found'}
-                            >
-                              <p class="article">
-                                {line.entry.article.map((s) =>
-                                  'ref' in s ? <a href={`#no-${s.ref}`}>No. {s.ref}</a> : s.text,
-                                )}
-                              </p>
-                              <p class="disp">
-                                {line.entry.disposal.map((s) =>
-                                  'ref' in s ? <a href={`#no-${s.ref}`}>No. {s.ref}</a> : s.text,
-                                )}
-                              </p>
-                              {line.entry.pencil && (
-                                <p class="pencil">
-                                  {line.entry.pencil.map((s) =>
-                                    'ref' in s ? <a href={`#no-${s.ref}`}>No. {s.ref}</a> : s.text,
-                                  )}
-                                </p>
-                              )}
-                            </div>
-                          </li>
-                        ),
-                      )}
-                      {leaf.last && (
-                        <li class="closing" data-hand="mensah">
-                          <p>Office closed 31st October 1986.</p>
-                          <p>Articles still unclaimed at closing: two.</p>
-                          <p class="sig">D. Mensah</p>
-                          <span class="stamp" aria-hidden="true">
-                            Every entry found
-                          </span>
+                </div>
+              ) : (
+                <>
+                  <header class="running">
+                    <span class="r-title">{side === 0 ? 'Lost Property Office' : 'Register of Articles'}</span>
+                    <span class="folio">{leaf.folio}</span>
+                  </header>
+                  <div class="heads" aria-hidden="true">
+                    <span>No.</span>
+                    <span>Date</span>
+                    <span class="h-body">
+                      <span>Article, and where found</span>
+                      <span>How disposed of</span>
+                    </span>
+                  </div>
+                  <ol class="rows">
+                    {leaf.lines.map((line) =>
+                      line.kind === 'year' ? (
+                        <li class="year" data-hand={line.hand}>
+                          <span class="y">{line.year}</span>
                         </li>
-                      )}
-                    </ol>
-                  </>
-                )}
-              </article>
-            ))}
-          </section>
-        ))
-      }
+                      ) : (
+                        <li class="row" id={`no-${line.entry.no}`} data-hand={line.entry.hand}>
+                          <span class="no">{line.entry.no}</span>
+                          <span class="day">{line.entry.day}</span>
+                          <div
+                            class="body"
+                            id={`e-${line.entry.no}`}
+                            data-no={line.entry.no}
+                            hidden={OPEN.has(line.entry.no) ? undefined : 'until-found'}
+                          >
+                            <p class="article">
+                              {line.entry.article.map((s) =>
+                                'ref' in s ? <a href={`#no-${s.ref}`}>No. {s.ref}</a> : s.text,
+                              )}
+                            </p>
+                            <p class="disp">
+                              {line.entry.disposal.map((s) =>
+                                'ref' in s ? <a href={`#no-${s.ref}`}>No. {s.ref}</a> : s.text,
+                              )}
+                            </p>
+                            {line.entry.pencil && (
+                              <p class="pencil">
+                                {line.entry.pencil.map((s) =>
+                                  'ref' in s ? <a href={`#no-${s.ref}`}>No. {s.ref}</a> : s.text,
+                                )}
+                              </p>
+                            )}
+                          </div>
+                        </li>
+                      ),
+                    )}
+                    {leaf.last && (
+                      <li class="closing" data-hand="mensah">
+                        <p>Office closed 31st October 1986.</p>
+                        <p>Articles still unclaimed at closing: two.</p>
+                        <p class="sig">D. Mensah</p>
+                        <span class="stamp" aria-hidden="true">
+                          Every entry found
+                        </span>
+                      </li>
+                    )}
+                  </ol>
+                </>
+              )}
+            </article>
+          ))}
+        </section>
+      ))}
     </div>
 
     <script is:inline>
@@ -175,8 +177,12 @@ for (let i = 0; i < leaves.length; i += 2) spreads.push(leaves.slice(i, i + 2));
       </span>
       <output class="s-reply" for="lp-ask" aria-live="polite"></output>
       <span class="s-foot">
-        <span class="s-tally">Found <b class="s-count">1</b> of {ENTRIES.length}</span>
-        <button type="button" class="s-reset">Start again</button>
+        <span class="s-tally">
+          Found <b class="s-count">1</b> of {ENTRIES.length}
+        </span>
+        <button type="button" class="s-reset">
+          Start again
+        </button>
       </span>
     </form>
   </main>
@@ -247,9 +253,7 @@ for (let i = 0; i < leaves.length; i += 2) spreads.push(leaves.slice(i, i + 2));
     max-width: 560px;
     margin: 0 auto 56px;
     padding: 26px 34px 22px;
-    background:
-      linear-gradient(rgb(255 255 255 / 0.18), rgb(255 255 255 / 0)),
-      #e9dcbc;
+    background: linear-gradient(rgb(255 255 255 / 0.18), rgb(255 255 255 / 0)), #e9dcbc;
     color: #3b2418;
     text-align: center;
     border: 1px solid #b89d72;

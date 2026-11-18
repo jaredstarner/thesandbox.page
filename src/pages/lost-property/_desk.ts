@@ -56,17 +56,11 @@ function save(found: Set<number>) {
   }
 }
 
-const normalize = (s: string) =>
-  s
-    .toLowerCase()
-    .replace(/[‘’]/g, "'")
-    .replace(/…/g, '...')
-    .replace(/\s+/g, ' ');
+const normalize = (s: string) => s.toLowerCase().replace(/[‘’]/g, "'").replace(/…/g, '...').replace(/\s+/g, ' ');
 
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-const counted = (n: number, one: string, many: string) =>
-  `${n <= 20 ? WORDS[n] : String(n)} ${n === 1 ? one : many}`;
+const counted = (n: number, one: string, many: string) => `${n <= 20 ? WORDS[n] : String(n)} ${n === 1 ? one : many}`;
 
 const nos = (list: number[]) => (list.length === 1 ? `No. ${list[0]}` : `Nos. ${list.join(', ')}`);
 
@@ -164,7 +158,9 @@ function start(root: HTMLElement) {
     } else if (fresh.length === matches.length) {
       say(`${counted(fresh.length, 'entry', 'entries')} answering that description: ${nos(list)}.`);
     } else {
-      say(`${counted(fresh.length, 'new entry', 'new entries')} of ${WORDS[matches.length].toLowerCase()}: ${nos(list)}.`);
+      say(
+        `${counted(fresh.length, 'new entry', 'new entries')} of ${WORDS[matches.length].toLowerCase()}: ${nos(list)}.`,
+      );
     }
     const first = (fresh[0] ?? matches[0]).closest<HTMLElement>('.row');
     if (first) {
