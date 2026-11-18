@@ -36,7 +36,7 @@ const STOP = new Set(
 );
 
 /** More matches than this and the clerk asks you to be more particular. */
-const LIMIT = 16;
+const LIMIT = 20;
 
 function load(): Set<number> {
   try {
@@ -141,11 +141,13 @@ function start(root: HTMLElement) {
       say('The clerk asks for something more particular.');
       return;
     }
-    const forms = new Set([q]);
+    // Whole words, singular or plural, the way a clerk would look it up.
+    const forms = new Set([q, `${q}s`, `${q}es`]);
     if (q.length > 4 && q.endsWith('ies')) forms.add(q.slice(0, -3) + 'y');
-    else if (q.length > 4 && /(ch|sh|x|s)es$/.test(q)) forms.add(q.slice(0, -2));
-    else if (q.length > 3 && q.endsWith('s') && !q.endsWith('ss')) forms.add(q.slice(0, -1));
-    const pattern = new RegExp(`(^|[^a-z0-9])(${[...forms].map(escape).join('|')})`);
+    if (q.length > 4 && q.endsWith('es')) forms.add(q.slice(0, -2));
+    if (q.length > 3 && q.endsWith('s') && !q.endsWith('ss')) forms.add(q.slice(0, -1));
+    if (q.endsWith('y')) forms.add(q.slice(0, -1) + 'ies');
+    const pattern = new RegExp(`(^|[^a-z0-9])(${[...forms].map(escape).join('|')})(?![a-z0-9])`);
     const matches = bodies.filter((b) => pattern.test(index.get(b) ?? ''));
     if (matches.length === 0) {
       say('Nothing answering the description.');
@@ -162,7 +164,7 @@ function start(root: HTMLElement) {
     } else if (fresh.length === matches.length) {
       say(`${counted(fresh.length, 'entry', 'entries')} answering that description: ${nos(list)}.`);
     } else {
-      say(`${counted(fresh.length, 'new entry', 'new entries')}, of ${matches.length}: ${nos(list)}.`);
+      say(`${counted(fresh.length, 'new entry', 'new entries')} of ${WORDS[matches.length].toLowerCase()}: ${nos(list)}.`);
     }
     const first = (fresh[0] ?? matches[0]).closest<HTMLElement>('.row');
     if (first) {
