@@ -758,5 +758,43 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    // /lost-property/: Besley for the ledger's printed ruling, and one hand for each of its three clerks.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Besley',
+      cssVariable: '--font-lp-print',
+      weights: ['400 700'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'La Belle Aurore',
+      cssVariable: '--font-lp-pell',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['cursive'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Playwrite GB J',
+      cssVariable: '--font-lp-dunmore',
+      // The CDN has no variable file for this family; static 400 only.
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['cursive'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Shadows Into Light Two',
+      cssVariable: '--font-lp-mensah',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['cursive'],
+    },
   ],
 });

@@ -1,0 +1,1015 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { ENTRIES, OPEN, type Entry, type Hand } from './_ledger';
+
+const description =
+  'A railway lost-property ledger, 1924 to 1986, blank until you search it with your browser’s Find: ask for anything and the clerks’ entries ink themselves in.';
+
+const PER_LEAF = 10;
+
+type Line = { kind: 'year'; year: number; hand: Hand } | { kind: 'entry'; entry: Entry };
+type Leaf = { kind: 'front' } | { kind: 'ledger'; folio: number; lines: Line[]; last: boolean };
+
+const ledger: Leaf[] = [];
+for (let i = 0; i < ENTRIES.length; i += PER_LEAF) {
+  const lines: Line[] = [];
+  let year = 0;
+  for (const entry of ENTRIES.slice(i, i + PER_LEAF)) {
+    if (entry.year !== year) lines.push({ kind: 'year', year: entry.year, hand: entry.hand });
+    year = entry.year;
+    lines.push({ kind: 'entry', entry });
+  }
+  ledger.push({ kind: 'ledger', folio: ledger.length + 1, lines, last: i + PER_LEAF >= ENTRIES.length });
+}
+const leaves: Leaf[] = [{ kind: 'front' }, ...ledger];
+const spreads: Leaf[][] = [];
+for (let i = 0; i < leaves.length; i += 2) spreads.push(leaves.slice(i, i + 2));
+---
+
+<Bare title="Lost property" description={description}>
+  <Font cssVariable="--font-lp-print" slot="head" />
+  <Font cssVariable="--font-lp-pell" slot="head" />
+  <Font cssVariable="--font-lp-dunmore" slot="head" />
+  <Font cssVariable="--font-lp-mensah" slot="head" />
+  <main class="lp" data-total={ENTRIES.length}>
+    <aside class="notice" aria-labelledby="lp-notice-title">
+      <p class="n-office">Aldermoor Central</p>
+      <h1 id="lp-notice-title">Lost Property</h1>
+      <p class="n-lead">Nothing in this register can be seen until it is asked for.</p>
+      <p class="n-how">
+        <span class="n-keys">
+          Search it with your browser’s Find,{' '}
+          <span class="nowrap">
+            <kbd>Ctrl</kbd> <kbd>F</kbd>
+          </span>
+          , or{' '}
+          <span class="nowrap">
+            <kbd>⌘</kbd> <kbd>F</kbd> on a Mac,
+          </span>
+        </span>
+        <span class="n-touch">Search it with Find in page, in your browser’s menu,</span>
+        <span class="n-none">Ask at the counter below</span> for anything somebody might have left on a train. Every
+        entry that answers is written in as you come to it, and whatever you find stays found.
+      </p>
+      <p class="n-alt">Or ask at the counter, at the foot of the window.</p>
+    </aside>
+
+    <div class="book">
+      {spreads.map((spread) => (
+        <section class="spread">
+          {spread.map((leaf, side) => (
+            <article class:list={['leaf', side === 0 ? 'verso' : 'recto', leaf.kind]}>
+              {leaf.kind === 'front' ? (
+                <div class="front">
+                  <p class="f-office">Lost Property Office</p>
+                  <p class="f-station">Aldermoor Central</p>
+                  <h2 class="f-title">Register of Articles</h2>
+                  <p class="f-rule" aria-hidden="true" />
+                  <p class="f-form">
+                    <span class="f-label">Commenced</span>
+                    <span class="hand pell">3rd March 1924</span>
+                  </p>
+                  <p class="hand pell f-note">Remarkable articles only. The ordinary go in the day book. A. Pell</p>
+                  <p class="hand dunmore f-note">Continued, July 1951. I. Dunmore</p>
+                  <p class="hand mensah f-note">Continued, April 1979. D. Mensah</p>
+                  <div class="regs">
+                    <p class="r-head">Regulations</p>
+                    <p>
+                      Articles found on the Company’s premises are to be handed to this Office and entered. Articles
+                      unclaimed after three months may be sold, or given up to the finder. Perishable articles may be
+                      disposed of after six hours. A fee is payable on every claim.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <header class="running">
+                    <span class="r-title">{side === 0 ? 'Lost Property Office' : 'Register of Articles'}</span>
+                    <span class="folio">{leaf.folio}</span>
+                  </header>
+                  <div class="heads" aria-hidden="true">
+                    <span>No.</span>
+                    <span>Date</span>
+                    <span class="h-body">
+                      <span>Article, and where found</span>
+                      <span>How disposed of</span>
+                    </span>
+                  </div>
+                  <ol class="rows">
+                    {leaf.lines.map((line) =>
+                      line.kind === 'year' ? (
+                        <li class="year" data-hand={line.hand}>
+                          <span class="y">{line.year}</span>
+                        </li>
+                      ) : (
+                        <li class="row" id={`no-${line.entry.no}`} data-hand={line.entry.hand}>
+                          <span class="no">{line.entry.no}</span>
+                          <span class="day">{line.entry.day}</span>
+                          <div
+                            class="body"
+                            id={`e-${line.entry.no}`}
+                            data-no={line.entry.no}
+                            hidden={OPEN.has(line.entry.no) ? undefined : 'until-found'}
+                            data-open={OPEN.has(line.entry.no) ? '' : undefined}
+                          >
+                            <p class="article">
+                              {line.entry.article.map((s) =>
+                                'ref' in s ? <a href={`#no-${s.ref}`}>No. {s.ref}</a> : s.text,
+                              )}
+                            </p>
+                            <p class="disp">
+                              {line.entry.disposal.map((s) =>
+                                'ref' in s ? <a href={`#no-${s.ref}`}>No. {s.ref}</a> : s.text,
+                              )}
+                            </p>
+                            {line.entry.pencil && (
+                              <p class="pencil">
+                                {line.entry.pencil.map((s) =>
+                                  'ref' in s ? <a href={`#no-${s.ref}`}>No. {s.ref}</a> : s.text,
+                                )}
+                              </p>
+                            )}
+                          </div>
+                        </li>
+                      ),
+                    )}
+                    {leaf.last && (
+                      <li class="closing" data-hand="mensah">
+                        <p>Office closed 31st October 1986.</p>
+                        <p>Articles still unclaimed at closing: two.</p>
+                        <p class="sig">D. Mensah</p>
+                        <span class="stamp" aria-hidden="true">
+                          Every entry found
+                        </span>
+                      </li>
+                    )}
+                  </ol>
+                </>
+              )}
+            </article>
+          ))}
+        </section>
+      ))}
+    </div>
+
+    <script is:inline>
+      (() => {
+        try {
+          const found = JSON.parse(localStorage.getItem('lost-property:found') || '[]');
+          if (!Array.isArray(found)) return;
+          for (const n of found) document.getElementById('e-' + (n | 0))?.removeAttribute('hidden');
+        } catch {
+          /* storage unavailable: start with a blank book */
+        }
+      })();
+    </script>
+
+    <footer class="colophon">
+      <a href="/">thesandbox.page</a>
+      <span>Set in Besley, La Belle Aurore, Playwrite GB J, and Shadows Into Light Two.</span>
+    </footer>
+
+    <form class="slip" role="search" autocomplete="off">
+      <label for="lp-ask">Ask at the counter</label>
+      <span class="s-field">
+        <input id="lp-ask" name="q" type="search" placeholder="an umbrella, a glove…" enterkeyhint="search" />
+        <button type="submit">Ask</button>
+      </span>
+      <output class="s-reply" for="lp-ask" aria-live="polite"></output>
+      <span class="s-foot">
+        <span class="s-tally">
+          Found <b class="s-count">1</b> of {ENTRIES.length}
+        </span>
+        <button type="button" class="s-reset">
+          Start again
+        </button>
+      </span>
+    </form>
+  </main>
+</Bare>
+
+<script>
+  import './_desk';
+</script>
+
+<style>
+  @property --lp-wipe {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: 140%;
+  }
+
+  :global(body:has(.lp)) {
+    margin: 0;
+    background: #24170f;
+  }
+
+  .lp {
+    --lh: 26px;
+    --c1: 36px;
+    --c2: 74px;
+    /* Container units, so the ruling and the columns agree on the width. */
+    --c4: 31cqi;
+    --paper: #f1e6cc;
+    --paper-edge: #e3d2ac;
+    --rule: rgb(92 128 176 / 0.42);
+    --red: rgb(178 66 52 / 0.72);
+    --print: #5d3a2a;
+    --ink-pell: #46301f;
+    --wet-pell: #3c4572;
+    --ink-dunmore: #1e2b4e;
+    --wet-dunmore: #2f55c4;
+    --ink-mensah: #23419a;
+    --wet-mensah: #3159d6;
+    --pencil: #6f6b66;
+
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+    padding: 48px 24px 200px;
+    box-sizing: border-box;
+    color: var(--print);
+    font-family: var(--font-lp-print);
+    background:
+      radial-gradient(ellipse 80% 520px at 50% 0, rgb(255 214 150 / 0.2), transparent 70%),
+      repeating-linear-gradient(
+        91deg,
+        rgb(0 0 0 / 0) 0 7px,
+        rgb(0 0 0 / 0.07) 7px 9px,
+        rgb(255 200 140 / 0.025) 9px 15px,
+        rgb(0 0 0 / 0.04) 15px 16px
+      ),
+      linear-gradient(180deg, #3a2618, #24170f 60%, #1d120c);
+  }
+
+  .lp *,
+  .lp *::before,
+  .lp *::after {
+    box-sizing: border-box;
+  }
+
+  /* The notice on the counter. */
+  .notice {
+    max-width: 560px;
+    margin: 0 auto 56px;
+    padding: 26px 34px 22px;
+    background: linear-gradient(rgb(255 255 255 / 0.18), rgb(255 255 255 / 0)), #e9dcbc;
+    color: #3b2418;
+    text-align: center;
+    border: 1px solid #b89d72;
+    outline: 3px double #7d5a3c;
+    outline-offset: -10px;
+    box-shadow:
+      0 18px 30px rgb(0 0 0 / 0.45),
+      0 2px 0 rgb(255 255 255 / 0.3) inset;
+    transform: rotate(-0.6deg);
+  }
+
+  .notice h1 {
+    margin: 2px 0 10px;
+    font: 700 34px/1 var(--font-lp-print);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .n-office {
+    margin: 0;
+    font: 600 12px/1.4 var(--font-lp-print);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  .n-lead {
+    margin: 0 0 10px;
+    text-wrap: balance;
+    font: italic 500 19px/1.35 var(--font-lp-print);
+  }
+
+  .n-how,
+  .n-alt {
+    margin: 0 auto 8px;
+    max-width: 44ch;
+    font: 15px/1.55 var(--font-lp-print);
+    text-wrap: pretty;
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  .n-alt {
+    margin-bottom: 0;
+    font-style: italic;
+  }
+
+  .notice kbd {
+    display: inline-block;
+    min-width: 1.6em;
+    padding: 0 0.35em;
+    border: 1px solid #8b6a49;
+    border-radius: 3px;
+    font: 600 12px/1.5 var(--font-lp-print);
+    background: #f4ead2;
+    box-shadow: 0 1px 0 #8b6a49;
+  }
+
+  .n-touch,
+  .n-none {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    .n-keys {
+      display: none;
+    }
+    .n-touch {
+      display: inline;
+    }
+  }
+
+  .lp[data-nofind] .n-keys,
+  .lp[data-nofind] .n-touch,
+  .lp[data-nofind] .n-alt {
+    display: none;
+  }
+
+  .lp[data-nofind] .n-none {
+    display: inline;
+  }
+
+  /* The book: one opening after another down the counter. */
+  .book {
+    max-width: 1320px;
+    margin: 0 auto;
+  }
+
+  .spread {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 0 0 64px;
+    border-radius: 3px;
+    background: #4a2618;
+    padding: 7px;
+    box-shadow:
+      0 0 0 1px #2b140c,
+      0 34px 50px rgb(0 0 0 / 0.55),
+      0 8px 14px rgb(0 0 0 / 0.35);
+  }
+
+  .leaf {
+    container-type: inline-size;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 30px 30px 52px;
+    background-color: var(--paper);
+    background-image:
+      radial-gradient(circle at 18% 84%, rgb(170 120 60 / 0.1) 0 3px, transparent 14px),
+      radial-gradient(circle at 76% 12%, rgb(170 120 60 / 0.08) 0 2px, transparent 10px),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .3 0 0 0 0 .14 .5 0 0 0 -.16'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    box-shadow:
+      inset 0 0 60px rgb(150 105 45 / 0.16),
+      inset 0 0 6px rgb(120 80 30 / 0.2);
+  }
+
+  .leaf::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .verso {
+    border-radius: 2px 0 0 2px;
+  }
+
+  .verso::after {
+    background: linear-gradient(to left, rgb(60 35 10 / 0.3), rgb(60 35 10 / 0.08) 22px, transparent 70px);
+  }
+
+  .recto {
+    border-radius: 0 2px 2px 0;
+  }
+
+  .recto::after {
+    background: linear-gradient(to right, rgb(60 35 10 / 0.3), rgb(60 35 10 / 0.08) 22px, transparent 70px);
+  }
+
+  .running {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    height: var(--lh);
+    font: 600 11px/1 var(--font-lp-print);
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--print);
+  }
+
+  .recto .running {
+    flex-direction: row-reverse;
+  }
+
+  .folio {
+    font: italic 500 15px/1 var(--font-lp-print);
+    letter-spacing: 0;
+  }
+
+  /* Printed column heads and the ruling under them. */
+  .heads,
+  .row {
+    display: grid;
+    grid-template-columns: var(--c1) var(--c2) minmax(0, 1fr);
+  }
+
+  .heads {
+    height: calc(var(--lh) * 2);
+    align-items: center;
+    border-top: 1px solid var(--red);
+    border-bottom: 3px double var(--red);
+    font: italic 500 12.5px/1.15 var(--font-lp-print);
+    color: var(--print);
+    text-align: center;
+  }
+
+  .h-body,
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--c4);
+  }
+
+  .h-body > span {
+    padding: 0 6px;
+  }
+
+  .rows {
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background-image:
+      linear-gradient(var(--red), var(--red)), linear-gradient(var(--red), var(--red)),
+      linear-gradient(var(--red), var(--red)), linear-gradient(var(--red), var(--red)),
+      linear-gradient(var(--red), var(--red)),
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0 calc(var(--lh) - 1px),
+        var(--rule) calc(var(--lh) - 1px) var(--lh)
+      );
+    background-size:
+      1px 100%,
+      1px 100%,
+      1px 100%,
+      1px 100%,
+      1px 100%,
+      100% var(--lh);
+    background-position:
+      calc(var(--c1) - 1px) 0,
+      calc(var(--c1) + var(--c2) - 3px) 0,
+      calc(var(--c1) + var(--c2) - 1px) 0,
+      calc(100% - var(--c4) - 2px) 0,
+      calc(100% - var(--c4)) 0,
+      0 0;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+    min-height: calc(var(--lh) * 14);
+  }
+
+  .heads {
+    background-image:
+      linear-gradient(var(--red), var(--red)), linear-gradient(var(--red), var(--red)),
+      linear-gradient(var(--red), var(--red)), linear-gradient(var(--red), var(--red)),
+      linear-gradient(var(--red), var(--red));
+    background-size: 1px 100%;
+    background-position:
+      calc(var(--c1) - 1px) 0,
+      calc(var(--c1) + var(--c2) - 3px) 0,
+      calc(var(--c1) + var(--c2) - 1px) 0,
+      calc(100% - var(--c4) - 2px) 0,
+      calc(100% - var(--c4)) 0;
+    background-repeat: no-repeat;
+  }
+
+  /* The three hands. */
+  .lp [data-hand='pell'],
+  .hand.pell {
+    --ink: var(--ink-pell);
+    --wet: var(--wet-pell);
+    --hand: var(--font-lp-pell);
+    --size: 17px;
+    --nudge: 2px;
+  }
+
+  .lp [data-hand='dunmore'],
+  .hand.dunmore {
+    --ink: var(--ink-dunmore);
+    --wet: var(--wet-dunmore);
+    --hand: var(--font-lp-dunmore);
+    --size: 12.5px;
+    --nudge: 1px;
+  }
+
+  .lp [data-hand='mensah'],
+  .hand.mensah {
+    --ink: var(--ink-mensah);
+    --wet: var(--wet-mensah);
+    --hand: var(--font-lp-mensah);
+    --size: 17.5px;
+    --nudge: 2px;
+  }
+
+  .row,
+  .year,
+  .closing,
+  .hand {
+    color: var(--ink);
+    font-family: var(--hand);
+    font-size: var(--size);
+    font-weight: 400;
+    line-height: var(--lh);
+  }
+
+  .row p,
+  .closing p {
+    margin: 0;
+  }
+
+  .no,
+  .day,
+  .y,
+  .article,
+  .disp,
+  .pencil,
+  .closing p {
+    position: relative;
+    top: var(--nudge);
+  }
+
+  .no {
+    text-align: center;
+  }
+
+  .day {
+    padding: 0 4px 0 7px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .year {
+    height: var(--lh);
+  }
+
+  .y {
+    display: block;
+    width: calc(var(--c1) + var(--c2));
+    padding-left: calc(var(--c1) + 7px);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .article,
+  .disp {
+    padding: 0 8px;
+  }
+
+  .pencil {
+    grid-column: 1 / -1;
+    padding: 0 8px 0 22px;
+    color: var(--pencil);
+    font-size: calc(var(--size) * 0.94);
+    text-shadow: 0 0 0.4px rgb(80 80 80 / 0.5);
+  }
+
+  .pencil::before {
+    content: '\2192\00a0';
+  }
+
+  .body a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgb(110 107 102 / 0.55);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .body a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .row:target {
+    background: linear-gradient(90deg, rgb(255 214 120 / 0.38), rgb(255 214 120 / 0.1));
+  }
+
+  /* Newly found: the ink goes on wet and dries to its colour. */
+  .body.fresh {
+    animation: lp-ink 2.6s cubic-bezier(0.3, 0.5, 0.4, 1) both;
+    mask-image: linear-gradient(100deg, #000 calc(var(--lp-wipe) - 40%), transparent var(--lp-wipe));
+  }
+
+  .row.asked {
+    animation: lp-asked 3.2s ease-out both;
+  }
+
+  @keyframes lp-ink {
+    0% {
+      --lp-wipe: 0%;
+      color: var(--wet);
+    }
+    55% {
+      --lp-wipe: 140%;
+      color: var(--wet);
+    }
+    100% {
+      --lp-wipe: 140%;
+      color: var(--ink);
+    }
+  }
+
+  @keyframes lp-asked {
+    from {
+      background-color: rgb(255 210 110 / 0.42);
+    }
+    to {
+      background-color: rgb(255 210 110 / 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .body.fresh {
+      animation-duration: 0.01s;
+    }
+  }
+
+  /* The flyleaf. */
+  .front {
+    position: sticky;
+    top: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 40px;
+    text-align: center;
+  }
+
+  .f-office,
+  .f-station {
+    margin: 0;
+    font: 600 12px/1.6 var(--font-lp-print);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+
+  .f-station {
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .f-title {
+    margin: 22px 0 6px;
+    font: italic 500 46px/1.05 var(--font-lp-print);
+    color: #4b2a1d;
+  }
+
+  .f-rule {
+    width: 180px;
+    height: 7px;
+    margin: 8px 0 30px;
+    border-top: 1px solid var(--red);
+    border-bottom: 3px double var(--red);
+  }
+
+  .f-form {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    width: min(360px, 100%);
+    margin: 0 0 30px;
+    border-bottom: 1px dotted var(--print);
+  }
+
+  .f-label {
+    font: italic 14px/1 var(--font-lp-print);
+  }
+
+  .f-form .hand {
+    font-size: 20px;
+    line-height: 1.4;
+  }
+
+  .f-note {
+    width: min(400px, 100%);
+    margin: 0 0 10px;
+    text-align: left;
+    line-height: 1.7;
+  }
+
+  .f-note.pell {
+    font-size: 19px;
+  }
+
+  .f-note.dunmore {
+    font-size: 14px;
+  }
+
+  .f-note.mensah {
+    font-size: 19px;
+  }
+
+  .regs {
+    width: min(330px, 100%);
+    margin: 44px 0 0;
+    padding: 12px 16px 14px;
+    background: #f7eedb;
+    border: 1px solid #cdb68e;
+    box-shadow: 0 1px 3px rgb(80 50 20 / 0.25);
+    transform: rotate(1.2deg);
+    font: 12px/1.5 var(--font-lp-print);
+    color: #4d3022;
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  .regs p {
+    margin: 0;
+  }
+
+  .regs .r-head {
+    margin-bottom: 4px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  /* The last word, and the stamp for a finished book. */
+  .closing {
+    position: relative;
+    padding: calc(var(--lh) * 2) 0 0 calc(var(--c1) + var(--c2) + 8px);
+  }
+
+  .closing .sig {
+    padding-left: 40%;
+  }
+
+  .stamp {
+    display: none;
+    width: max-content;
+    margin: calc(var(--lh) * 0.6) 0 calc(var(--lh) * 0.4) 34%;
+    padding: 6px 14px;
+    border: 3px double rgb(150 32 40 / 0.78);
+    border-radius: 6px;
+    color: rgb(150 32 40 / 0.8);
+    font: 700 15px/1.2 var(--font-lp-print);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    transform: rotate(-7deg);
+    mix-blend-mode: multiply;
+  }
+
+  .lp[data-complete] .stamp {
+    display: block;
+  }
+
+  /* The counter slip. */
+  .slip {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    width: 290px;
+    padding: 12px 14px 10px;
+    background: #ece0c2;
+    color: #3d2619;
+    border: 1px solid #a88a5f;
+    border-radius: 4px;
+    box-shadow:
+      0 14px 28px rgb(0 0 0 / 0.5),
+      0 1px 0 rgb(255 255 255 / 0.4) inset;
+    font-family: var(--font-lp-print);
+  }
+
+  .slip label {
+    font: 600 11px/1 var(--font-lp-print);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .s-field {
+    display: flex;
+    gap: 6px;
+  }
+
+  .slip input {
+    flex: 1;
+    min-width: 0;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid #8f704b;
+    border-radius: 3px;
+    background: #faf4e4;
+    color: #2b1b12;
+    font: 15px/1 var(--font-lp-print);
+  }
+
+  .slip input::placeholder {
+    color: #9b8466;
+    font-style: italic;
+  }
+
+  .slip button {
+    font: 600 13px/1 var(--font-lp-print);
+    color: #f5ead2;
+    background: #6b3a26;
+    border: 1px solid #4a2416;
+    border-radius: 3px;
+    padding: 0 14px;
+    cursor: pointer;
+  }
+
+  .slip button:hover {
+    background: #7d4630;
+  }
+
+  .slip :focus-visible {
+    outline: 2px solid #2f55c4;
+    outline-offset: 2px;
+  }
+
+  .s-reply {
+    min-height: 1.4em;
+    font: italic 13.5px/1.4 var(--font-lp-print);
+  }
+
+  .s-reply:empty {
+    display: none;
+  }
+
+  .s-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font: 12.5px/1 var(--font-lp-print);
+  }
+
+  .s-tally :global(b) {
+    font-weight: 700;
+  }
+
+  .slip .s-reset {
+    padding: 4px 0;
+    background: none;
+    border: 0;
+    color: #6b3a26;
+    font: italic 12.5px/1 var(--font-lp-print);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .slip .s-reset:hover {
+    background: none;
+    color: #3d2619;
+  }
+
+  .colophon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin: 0 auto;
+    color: rgb(236 220 190 / 0.6);
+    font: 12px/1.5 var(--font-lp-print);
+    text-align: center;
+  }
+
+  .colophon a {
+    color: rgb(236 220 190 / 0.85);
+    letter-spacing: 0.12em;
+  }
+
+  /* One page to an opening on narrower screens. */
+  @media (max-width: 1080px) {
+    .book {
+      max-width: 780px;
+    }
+
+    .spread {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
+      padding: 0;
+      background: none;
+      box-shadow: none;
+      margin-bottom: 40px;
+    }
+
+    .leaf {
+      border-radius: 2px;
+      box-shadow:
+        inset 0 0 50px rgb(150 105 45 / 0.16),
+        0 0 0 6px #4a2618,
+        0 24px 40px rgb(0 0 0 / 0.5);
+    }
+
+    .leaf::after {
+      background: linear-gradient(to right, rgb(60 35 10 / 0.22), transparent 40px);
+    }
+
+    .recto .running {
+      flex-direction: row;
+    }
+  }
+
+  /* Phones: the disposal goes under the article. */
+  @media (max-width: 600px) {
+    .lp {
+      --c1: 26px;
+      --c2: 72px;
+      padding: 24px 12px 170px;
+    }
+
+    .leaf {
+      padding: 20px 12px 36px;
+    }
+
+    .h-body,
+    .body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .h-body > span:last-child {
+      display: none;
+    }
+
+    .rows {
+      background-size:
+        1px 100%,
+        1px 100%,
+        1px 100%,
+        0 0,
+        0 0,
+        100% var(--lh);
+    }
+
+    .heads {
+      background-size:
+        1px 100%,
+        1px 100%,
+        1px 100%,
+        0 0,
+        0 0;
+    }
+
+    .disp {
+      padding-left: 22px;
+    }
+
+    .disp::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: calc(var(--lh) / 2 + 1px);
+      width: 9px;
+      border-top: 1px solid var(--red);
+    }
+
+    .f-title {
+      font-size: 34px;
+    }
+
+    .notice {
+      padding: 22px 20px 18px;
+      margin-bottom: 36px;
+    }
+
+    .notice h1 {
+      font-size: 26px;
+    }
+
+    .n-alt {
+      display: none;
+    }
+
+    .slip {
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: auto;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      border-radius: 8px 8px 0 0;
+      border-width: 1px 0 0;
+    }
+
+    .slip label {
+      display: none;
+    }
+
+    .closing .sig {
+      padding-left: 30%;
+    }
+  }
+</style>
