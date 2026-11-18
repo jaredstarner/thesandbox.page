@@ -789,7 +789,7 @@ export default defineConfig({
     },
     {
       provider: fontProviders.fontsource(),
-      name: 'Nothing You Could Do',
+      name: 'Shadows Into Light Two',
       cssVariable: '--font-lp-mensah',
       weights: [400],
       styles: ['normal'],
