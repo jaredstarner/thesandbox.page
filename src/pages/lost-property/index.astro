@@ -111,6 +111,7 @@ for (let i = 0; i < leaves.length; i += 2) spreads.push(leaves.slice(i, i + 2));
                             id={`e-${line.entry.no}`}
                             data-no={line.entry.no}
                             hidden={OPEN.has(line.entry.no) ? undefined : 'until-found'}
+                            data-open={OPEN.has(line.entry.no) ? '' : undefined}
                           >
                             <p class="article">
                               {line.entry.article.map((s) =>

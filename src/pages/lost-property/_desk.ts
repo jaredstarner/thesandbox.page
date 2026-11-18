@@ -78,7 +78,9 @@ function start(root: HTMLElement) {
   if (!('onbeforematch' in document.documentElement)) root.dataset.nofind = '';
 
   const index = new Map(bodies.map((b) => [b, normalize(b.textContent ?? '')]));
-  const open = new Set(bodies.filter((b) => !b.hasAttribute('hidden')).map((b) => Number(b.dataset.no)));
+  // The entries the book opens with, marked in the markup: by now the restore
+  // script has also unhidden everything found on earlier visits.
+  const open = new Set(bodies.filter((b) => b.hasAttribute('data-open')).map((b) => Number(b.dataset.no)));
   for (const n of open) found.add(n);
 
   const update = () => {
