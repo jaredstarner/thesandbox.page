@@ -40,8 +40,9 @@ for (let i = 0; i < leaves.length; i += 2) spreads.push(leaves.slice(i, i + 2));
       <p class="n-lead">Nothing in this register can be seen until it is asked for.</p>
       <p class="n-how">
         <span class="n-keys"
-          >Search it with your browser’s Find, <span class="nowrap"><kbd>Ctrl</kbd> <kbd>F</kbd></span>, or
-          <span class="nowrap"><kbd>⌘</kbd> <kbd>F</kbd> on a Mac,</span></span
+          >Search it with your browser’s Find, <span class="nowrap"><kbd>Ctrl</kbd> <kbd>F</kbd></span>, or <span class="nowrap"
+            ><kbd>⌘</kbd> <kbd>F</kbd> on a Mac,</span
+          ></span
         ><span class="n-touch">Search it with Find in page, in your browser’s menu,</span><span class="n-none"
           >Ask at the counter below</span
         > for anything somebody might have left on a train. Every entry that answers is written in as you come to it, and
@@ -749,10 +750,9 @@ for (let i = 0; i < leaves.length; i += 2) spreads.push(leaves.slice(i, i + 2));
   }
 
   .stamp {
-    position: absolute;
-    right: 6%;
-    bottom: calc(var(--lh) * -2.4);
     display: none;
+    width: max-content;
+    margin: calc(var(--lh) * 0.6) 0 calc(var(--lh) * 0.4) 34%;
     padding: 6px 14px;
     border: 3px double rgb(150 32 40 / 0.78);
     border-radius: 6px;
@@ -923,7 +923,7 @@ for (let i = 0; i < leaves.length; i += 2) spreads.push(leaves.slice(i, i + 2));
   @media (max-width: 600px) {
     .lp {
       --c1: 26px;
-      --c2: 56px;
+      --c2: 66px;
       padding: 24px 12px 170px;
     }
 
