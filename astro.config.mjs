@@ -781,7 +781,8 @@ export default defineConfig({
       provider: fontProviders.fontsource(),
       name: 'Playwrite GB J',
       cssVariable: '--font-lp-dunmore',
-      weights: ['100 400'],
+      // The CDN has no variable file for this family; static 400 only.
+      weights: [400],
       styles: ['normal'],
       subsets: ['latin'],
       fallbacks: ['cursive'],
