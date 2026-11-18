@@ -330,6 +330,16 @@ export const TECHNIQUES: Record<string, Technique> = {
     test: () =>
       present('popover' in HTMLElement.prototype, 'the popover attribute is reflected', 'no popover attribute'),
   },
+  'hidden-until-found': {
+    label: 'hidden="until-found"',
+    webFeature: 'hidden-until-found',
+    test: () =>
+      present(
+        'onbeforematch' in document.documentElement,
+        'the beforematch event is supported',
+        'no beforematch event; find in page cannot reveal hidden text',
+      ),
+  },
   wasm: {
     label: 'WebAssembly',
     webFeature: 'wasm',
@@ -561,6 +571,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   fft: { label: 'Fast Fourier transform' },
   'circuit-simulation': { label: 'Circuit simulation (modified nodal analysis)' },
   'newton-raphson': { label: 'Newton-Raphson iteration' },
+  'interactive-fiction': { label: 'Interactive fiction' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

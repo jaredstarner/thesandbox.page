@@ -1,0 +1,24 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+
+const description =
+  'A railway lost-property ledger, 1924 to 1986, blank until you search it with your browser’s Find: ask for anything and the clerks’ entries ink themselves in.';
+---
+
+<Bare title="Lost property" description={description}>
+  <Font cssVariable="--font-lp-print" slot="head" />
+  <Font cssVariable="--font-lp-pell" slot="head" />
+  <Font cssVariable="--font-lp-dunmore" slot="head" />
+  <Font cssVariable="--font-lp-mensah" slot="head" />
+  <main class="lp">
+    <h1>Lost property</h1>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.lp)) {
+    margin: 0;
+    background: #2a1c13;
+  }
+</style>
