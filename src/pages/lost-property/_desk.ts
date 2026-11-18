@@ -58,7 +58,7 @@ function save(found: Set<number>) {
 
 const normalize = (s: string) => s.toLowerCase().replace(/[‘’]/g, "'").replace(/…/g, '...').replace(/\s+/g, ' ');
 
-const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const counted = (n: number, one: string, many: string) => `${n <= 20 ? WORDS[n] : String(n)} ${n === 1 ? one : many}`;
 
@@ -141,7 +141,7 @@ function start(root: HTMLElement) {
     if (q.length > 4 && q.endsWith('es')) forms.add(q.slice(0, -2));
     if (q.length > 3 && q.endsWith('s') && !q.endsWith('ss')) forms.add(q.slice(0, -1));
     if (q.endsWith('y')) forms.add(q.slice(0, -1) + 'ies');
-    const pattern = new RegExp(`(^|[^a-z0-9])(${[...forms].map(escape).join('|')})(?![a-z0-9])`);
+    const pattern = new RegExp(`(^|[^a-z0-9])(${[...forms].map(escapeRegExp).join('|')})(?![a-z0-9])`);
     const matches = bodies.filter((b) => pattern.test(index.get(b) ?? ''));
     if (matches.length === 0) {
       say('Nothing answering the description.');
