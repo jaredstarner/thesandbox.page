@@ -1,0 +1,1360 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { METHODS } from './_method';
+import { BAND } from './_band';
+import {
+  BELLS,
+  CEILING_DEPTH,
+  CROWN_FRAC,
+  LEVELS,
+  VIEW,
+  WALL,
+  bellPath,
+  crownPath,
+  ropeDrop,
+  wallPath,
+} from './_tower';
+
+const description =
+  "A church tower's ringing chamber on practice night: take hold of a rope and ring with the band as the order of the bells changes at every blow.";
+
+const bellName = (i: number) => (i === 0 ? 'Treble' : i === 5 ? 'Tenor' : `${['', '2nd', '3rd', '4th', '5th'][i]}`);
+
+// Night sky: a fixed scatter of stars, wider than the drawing so a wide window still has sky either side.
+let seed = 7;
+const rnd = () => {
+  seed = (seed * 16807) % 2147483647;
+  return seed / 2147483647;
+};
+const stars = Array.from({ length: 260 }, () => {
+  const x = -700 + rnd() * (VIEW.w + 1400);
+  const y = -200 + rnd() * 760;
+  const r = 0.4 + rnd() * rnd() * 1.3;
+  return { x, y, r, o: 0.3 + rnd() * 0.6 };
+}).filter((s) => s.x < WALL.outer - 4 || s.x > WALL.right + 4 || s.y < LEVELS.parapet - 30);
+
+// Stone courses on the cut walls.
+const courses: number[] = [];
+for (let y = LEVELS.parapet + 6; y < LEVELS.ground; y += 15) courses.push(y);
+
+// Louvres in the two belfry lancets.
+const lancets = [176, 464];
+const louvres = Array.from({ length: 9 }, (_, i) => 118 + i * 21);
+
+// Chamber floorboards converge towards the back wall.
+const boards = Array.from({ length: 17 }, (_, i) => i);
+
+const f = (n: number) => n.toFixed(1);
+const pit = (WALL.rightInner - WALL.inner) / 6;
+---
+
+<Bare title="Ropesight" {description}>
+  <Font cssVariable="--font-rs-board" slot="head" />
+  <Font cssVariable="--font-rs-text" slot="head" />
+  <main class="rs" data-state="idle">
+    <div class="tower-wrap">
+      <svg
+        class="tower"
+        viewBox={`0 0 ${VIEW.w} ${VIEW.h}`}
+        role="img"
+        aria-label="A church tower cut open: six bells in their frame at the top, a turret clock below them, and the ringing chamber at the bottom, where six ropes hang in a circle."
+      >
+        <defs>
+          <linearGradient id="rs-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#0a0f20"></stop>
+            <stop offset="0.65" stop-color="#151d36"></stop>
+            <stop offset="1" stop-color="#232c48"></stop>
+          </linearGradient>
+          <linearGradient id="rs-belfry" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#141a2c"></stop>
+            <stop offset="1" stop-color="#1c2336"></stop>
+          </linearGradient>
+          <linearGradient id="rs-clockroom" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#1b1e2a"></stop>
+            <stop offset="1" stop-color="#272731"></stop>
+          </linearGradient>
+          <radialGradient id="rs-lamp" cx="0.5" cy="0.12" r="0.9">
+            <stop offset="0" stop-color="#f7e0b4"></stop>
+            <stop offset="0.42" stop-color="#d8b282"></stop>
+            <stop offset="1" stop-color="#6f563f"></stop>
+          </radialGradient>
+          <linearGradient id="rs-floor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#5e432c"></stop>
+            <stop offset="1" stop-color="#36251a"></stop>
+          </linearGradient>
+          <linearGradient id="rs-bronze" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#4f3412"></stop>
+            <stop offset="0.3" stop-color="#b3863f"></stop>
+            <stop offset="0.45" stop-color="#e7c47e"></stop>
+            <stop offset="0.62" stop-color="#9c6e30"></stop>
+            <stop offset="1" stop-color="#3b2710"></stop>
+          </linearGradient>
+          <linearGradient id="rs-bell-in" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3a2710"></stop>
+            <stop offset="1" stop-color="#7a5524"></stop>
+          </linearGradient>
+          <linearGradient id="rs-moonbeam" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#a9c2ff" stop-opacity="0.16"></stop>
+            <stop offset="1" stop-color="#a9c2ff" stop-opacity="0"></stop>
+          </linearGradient>
+          <linearGradient id="rs-board" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#1b1a1d"></stop>
+            <stop offset="1" stop-color="#0e0e10"></stop>
+          </linearGradient>
+          <linearGradient id="rs-gilt" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#f3dc92"></stop>
+            <stop offset="0.5" stop-color="#c79a3d"></stop>
+            <stop offset="1" stop-color="#8f6a22"></stop>
+          </linearGradient>
+          <radialGradient id="rs-pool" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#ffd99a" stop-opacity="0.22"></stop>
+            <stop offset="1" stop-color="#ffd99a" stop-opacity="0"></stop>
+          </radialGradient>
+          <pattern id="rs-sally" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(32)">
+            <rect width="16" height="16" fill="#b02a2f"></rect>
+            <rect y="5.3" width="16" height="5.3" fill="#ece3cf"></rect>
+            <rect y="10.6" width="16" height="5.4" fill="#25427c"></rect>
+          </pattern>
+          <clipPath id="rs-belfry-clip">
+            <rect
+              x={WALL.inner}
+              y={LEVELS.belfryTop}
+              width={WALL.rightInner - WALL.inner}
+              height={LEVELS.belfryFloor - LEVELS.belfryTop}
+            ></rect>
+          </clipPath>
+          <clipPath id="rs-chamber-clip">
+            <rect
+              x={WALL.inner}
+              y={LEVELS.chamberTop}
+              width={WALL.rightInner - WALL.inner}
+              height={LEVELS.frontFloor - LEVELS.chamberTop}
+            ></rect>
+          </clipPath>
+        </defs>
+
+        <!-- Night outside, wider than the drawing -->
+        <rect x="-1400" y="-600" width={VIEW.w + 2800} height={LEVELS.frontFloor + 600} fill="url(#rs-sky)"></rect>
+        {stars.map((s) => (
+          <circle cx={f(s.x)} cy={f(s.y)} r={f(s.r)} fill="#e8ecff" opacity={s.o.toFixed(2)} />
+        ))}
+        <g class="moon">
+          <circle cx="700" cy="70" r="15" fill="#f2efe1"></circle>
+          <circle cx="706" cy="65" r="13.5" fill="#0d1226" opacity="0.92"></circle>
+        </g>
+        <!-- Churchyard: a low wall and two yews -->
+        <rect class="ground" x="-1400" y={LEVELS.frontFloor - 6} width={VIEW.w + 2800} height="700"></rect>
+        <path class="yew" d="M -120 896 C -150 860 -130 800 -96 760 C -70 800 -46 850 -72 896 Z"></path>
+        <path class="yew" d="M 700 896 C 676 852 690 810 720 776 C 748 812 762 858 738 896 Z"></path>
+
+        <!-- The tower's cut walls: coursed stone either side, battlements at the top -->
+        <g class="stone">
+          <rect
+            x={WALL.outer}
+            y={LEVELS.parapet}
+            width={WALL.inner - WALL.outer}
+            height={LEVELS.ground - LEVELS.parapet}
+          ></rect>
+          <rect
+            x={WALL.rightInner}
+            y={LEVELS.parapet}
+            width={WALL.right - WALL.rightInner}
+            height={LEVELS.ground - LEVELS.parapet}
+          ></rect>
+          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <rect x={WALL.outer + i * 63.6} y={LEVELS.parapet - 22} width="32" height="24" />
+          ))}
+          <rect
+            x={WALL.outer}
+            y={LEVELS.parapet}
+            width={WALL.right - WALL.outer}
+            height={LEVELS.belfryTop - LEVELS.parapet}
+          ></rect>
+        </g>
+        <g class="courses">
+          {courses.map((y, i) => (
+            <>
+              <line x1={WALL.outer} y1={y} x2={WALL.inner} y2={y} />
+              <line x1={WALL.rightInner} y1={y} x2={WALL.right} y2={y} />
+              <line x1={WALL.outer + (i % 2 ? 10 : 19)} y1={y} x2={WALL.outer + (i % 2 ? 10 : 19)} y2={y + 15} />
+              <line
+                x1={WALL.rightInner + (i % 2 ? 17 : 8)}
+                y1={y}
+                x2={WALL.rightInner + (i % 2 ? 17 : 8)}
+                y2={y + 15}
+              />
+            </>
+          ))}
+          {[LEVELS.parapet + 10, LEVELS.parapet + 21].map((y) => (
+            <line x1={WALL.outer} y1={y} x2={WALL.right} y2={y} />
+          ))}
+        </g>
+
+        <!-- Belfry -->
+        <rect
+          class="belfry"
+          x={WALL.inner}
+          y={LEVELS.belfryTop}
+          width={WALL.rightInner - WALL.inner}
+          height={LEVELS.belfryFloor - LEVELS.belfryTop}
+        ></rect>
+        {lancets.map((x) => (
+          <g class="lancet">
+            <path
+              d={`M ${x - 34} 300 L ${x - 34} 126 Q ${x - 34} 94 ${x} 82 Q ${x + 34} 94 ${x + 34} 126 L ${x + 34} 300 Z`}
+              class="lancet-sky"
+            />
+            {louvres.map((y) => (
+              <path
+                d={`M ${x - 34} ${y} L ${x + 34} ${y} L ${x + 34} ${y + 9} L ${x - 34} ${y + 13} Z`}
+                class="louvre"
+              />
+            ))}
+            <path
+              d={`M ${x + 30} 108 L ${x + 150} ${LEVELS.belfryFloor} L ${x - 10} ${LEVELS.belfryFloor} L ${x - 30} 140 Z`}
+              fill="url(#rs-moonbeam)"
+            />
+          </g>
+        ))}
+        <!-- The bell frame: a long beam at the bearings, posts and braces to the floor -->
+        <g class="frame">
+          <rect x={WALL.inner} y={LEVELS.axis + 5} width={WALL.rightInner - WALL.inner} height="9"></rect>
+          <rect x={WALL.inner} y={LEVELS.belfryFloor - 30} width={WALL.rightInner - WALL.inner} height="10"></rect>
+          {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+            <rect
+              x={WALL.inner + pit * i - 4}
+              y={LEVELS.axis + 5}
+              width="8"
+              height={LEVELS.belfryFloor - LEVELS.axis - 5}
+            />
+          ))}
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <path
+              d={`M ${f(WALL.inner + pit * i + 4)} ${LEVELS.belfryFloor - 30} L ${f(WALL.inner + pit * (i + 0.5))} ${LEVELS.axis + 14} L ${f(WALL.inner + pit * (i + 1) - 4)} ${LEVELS.belfryFloor - 30}`}
+              class="brace"
+            />
+          ))}
+        </g>
+        {BELLS.map((b, i) => (
+          <g class="plaque" transform={`translate(${f(b.x)} ${LEVELS.belfryFloor - 52})`}>
+            <rect x="-9" y="-9" width="18" height="16" rx="2" />
+            <text y="3.4" text-anchor="middle">
+              {i + 1}
+            </text>
+          </g>
+        ))}
+
+        <g clip-path="url(#rs-belfry-clip)">
+          {BELLS.map((b, i) => (
+            <g class="bell" data-bell={i} transform={`translate(${f(b.x)} ${f(b.y)})`}>
+              <g class="swing back">
+                <g class="wheel">
+                  <circle r={f(b.r)} class="rim" />
+                  <circle r={f(b.r - 3.4)} class="rim-inner" />
+                  {[0, 1, 2, 3, 4, 5].map((k) => {
+                    const a = (k * Math.PI) / 3 + 0.3;
+                    return <line x1="0" y1="0" x2={f(Math.cos(a) * (b.r - 2))} y2={f(Math.sin(a) * (b.r - 2))} />;
+                  })}
+                </g>
+                <rect class="stay" x="-2.2" y={f(-b.h * 0.92)} width="4.4" height={f(b.h * 0.92)} rx="1.5" />
+                <path class="inside" d={bellPath(b.h)} />
+              </g>
+              <g class="clapper">
+                <line x1="0" y1="0" x2="0" y2={f(b.h * 0.86)} />
+                <ellipse cx="0" cy={f(b.h * 0.74)} rx={f(b.h * 0.075)} ry={f(b.h * 0.1)} />
+              </g>
+              <g class="swing front">
+                <path class="wall" d={wallPath(b.h, -1)} />
+                <path class="wall" d={wallPath(b.h, 1)} />
+                <path class="wall" d={crownPath(b.h)} />
+                <rect
+                  class="headstock"
+                  x={f(-b.h * 0.36)}
+                  y={f(-b.h * 0.06)}
+                  width={f(b.h * 0.72)}
+                  height={f(b.h * (0.06 + CROWN_FRAC))}
+                  rx="1.5"
+                />
+              </g>
+              <circle class="gudgeon" r="2.4" />
+            </g>
+          ))}
+        </g>
+
+        <!-- Belfry floor, in section -->
+        <rect
+          class="floor-cut"
+          x={WALL.inner}
+          y={LEVELS.belfryFloor}
+          width={WALL.rightInner - WALL.inner}
+          height="12"
+        ></rect>
+
+        <!-- Clock room: the turret clock on its stool, its pendulum swinging down through a slot in the floor -->
+        <rect
+          class="clockroom"
+          x={WALL.inner}
+          y={LEVELS.belfryFloor + 12}
+          width={WALL.rightInner - WALL.inner}
+          height={LEVELS.clockFloor - LEVELS.belfryFloor - 12}
+        ></rect>
+        <g class="turret-clock" transform={`translate(540 ${LEVELS.clockFloor - 44})`}>
+          <rect x="-30" y="14" width="60" height="6" class="stool"></rect>
+          <rect x="-26" y="20" width="5" height="24" class="stool"></rect>
+          <rect x="21" y="20" width="5" height="24" class="stool"></rect>
+          <rect x="-28" y="-16" width="56" height="30" rx="3" class="clock-frame"></rect>
+          <circle cx="-11" cy="-2" r="9" class="clock-wheel"></circle>
+          <circle cx="8" cy="3" r="6" class="clock-wheel"></circle>
+          <circle cx="19" cy="-6" r="4" class="clock-wheel"></circle>
+          <line x1="-11" y1="-16" x2="-11" y2="-26" class="clock-rod"></line>
+          <line x1="-11" y1="-26" x2="-11" y2="-60" class="clock-rod"></line>
+          <g class="pendulum">
+            <line x1="0" y1="14" x2="0" y2="62" class="clock-rod"></line>
+            <circle cx="0" cy="62" r="6" class="bob"></circle>
+          </g>
+        </g>
+        <!-- The dial on the tower's face, telling the real time -->
+        <g class="dial" transform={`translate(${WALL.outer - 2} ${LEVELS.belfryFloor + 44})`}>
+          <circle r="27" class="dial-face"></circle>
+          <circle r="22.5" class="dial-ring"></circle>
+          {Array.from({ length: 12 }, (_, k) => {
+            const a = (k * Math.PI) / 6;
+            return (
+              <line
+                x1={f(Math.sin(a) * 18.5)}
+                y1={f(-Math.cos(a) * 18.5)}
+                x2={f(Math.sin(a) * 22)}
+                y2={f(-Math.cos(a) * 22)}
+                class="dial-tick"
+              />
+            );
+          })}
+          <line class="hand hour" x1="0" y1="2" x2="0" y2="-12"></line>
+          <line class="hand minute" x1="0" y1="3" x2="0" y2="-19"></line>
+          <circle r="1.8" class="dial-boss"></circle>
+        </g>
+
+        <!-- Ropes through the clock room: from each wheel's garter hole to its place in the circle below -->
+        <g class="rope-runs">
+          {BELLS.map((b, i) => (
+            <line data-run={i} x1={f(ropeDrop(i))} y1={f(b.y)} x2={f(ropeDrop(i))} y2={LEVELS.clockFloor} />
+          ))}
+        </g>
+
+        <!-- Ringing chamber ceiling, in section -->
+        <rect
+          class="floor-cut"
+          x={WALL.inner}
+          y={LEVELS.clockFloor}
+          width={WALL.rightInner - WALL.inner}
+          height={LEVELS.chamberTop - LEVELS.clockFloor}
+        ></rect>
+
+        <!-- The ringing chamber -->
+        <g clip-path="url(#rs-chamber-clip)">
+          <rect
+            class="plaster"
+            x={WALL.inner}
+            y={LEVELS.chamberTop}
+            width={WALL.rightInner - WALL.inner}
+            height={LEVELS.backFloor - LEVELS.chamberTop}
+          ></rect>
+          <!-- The ceiling's underside, boarded, receding to the back wall -->
+          <rect
+            class="ceiling"
+            x={WALL.inner}
+            y={LEVELS.chamberTop}
+            width={WALL.rightInner - WALL.inner}
+            height={CEILING_DEPTH}
+          ></rect>
+          {[0, 1, 2, 3].map((k) => {
+            const y = LEVELS.chamberTop + 7 + k * 9.5 - k * k * 0.7;
+            return <line class="ceiling-joist" x1={WALL.inner} y1={f(y)} x2={WALL.rightInner} y2={f(y)} />;
+          })}
+          <!-- North window, dark at this hour -->
+          <path class="window" d="M 296 650 L 296 548 Q 296 524 320 514 Q 344 524 344 548 L 344 650 Z"></path>
+          <path class="window-bars" d="M 320 516 L 320 650 M 296 584 L 344 584"></path>
+          <rect class="sill" x="290" y="649" width="60" height="6"></rect>
+          <!-- Peal boards: two old ones, and one waiting -->
+          <g class="board old" transform="translate(92 500)">
+            <rect width="132" height="94" rx="2"></rect>
+            <rect x="5" y="5" width="122" height="84" class="board-line"></rect>
+            <text x="66" y="22" text-anchor="middle" class="board-head">
+              THIS TOWER
+            </text>
+            <text x="66" y="36" text-anchor="middle" class="board-small">
+              on Saturday 4 June 1955
+            </text>
+            <text x="66" y="50" text-anchor="middle" class="board-small">
+              was rung a peal of
+            </text>
+            <text x="66" y="64" text-anchor="middle" class="board-head">
+              5040 PLAIN BOB MINOR
+            </text>
+            <text x="66" y="78" text-anchor="middle" class="board-small">
+              in 2 hours 51 minutes
+            </text>
+          </g>
+          <g class="board old" transform="translate(416 500)">
+            <rect width="132" height="94" rx="2"></rect>
+            <rect x="5" y="5" width="122" height="84" class="board-line"></rect>
+            <text x="66" y="22" text-anchor="middle" class="board-head">
+              TO MARK
+            </text>
+            <text x="66" y="36" text-anchor="middle" class="board-small">
+              the Coronation, 2 June 1953
+            </text>
+            <text x="66" y="50" text-anchor="middle" class="board-small">
+              the bells were rung
+            </text>
+            <text x="66" y="64" text-anchor="middle" class="board-head">
+              1260 GRANDSIRE
+            </text>
+            <text x="66" y="78" text-anchor="middle" class="board-small">
+              DOUBLES
+            </text>
+          </g>
+          <g class="board yours" transform="translate(92 606)">
+            <rect width="132" height="40" rx="2"></rect>
+            <rect x="5" y="5" width="122" height="30" class="board-line"></rect>
+            <text x="66" y="24" text-anchor="middle" class="board-small" data-yours>
+              Your touch goes here
+            </text>
+          </g>
+          <!-- The practice notice, pinned up -->
+          <g class="notice" transform="translate(440 610) rotate(-2)">
+            <rect width="84" height="60"></rect>
+            <text x="42" y="16" text-anchor="middle" class="notice-head">
+              PRACTICE
+            </text>
+            <text x="42" y="28" text-anchor="middle">
+              Thursdays 7.30
+            </text>
+            <text x="42" y="40" text-anchor="middle">
+              Learners welcome
+            </text>
+            <text x="42" y="51" text-anchor="middle">
+              Please stand bells
+            </text>
+            <circle cx="42" cy="4" r="1.6" class="pin"></circle>
+          </g>
+          <!-- A bench along the back wall -->
+          <rect class="bench" x="74" y="744" width="160" height="7" rx="2"></rect>
+          <rect class="bench" x="406" y="744" width="160" height="7" rx="2"></rect>
+          <rect class="bench-leg" x="84" y="751" width="5" height="45"></rect>
+          <rect class="bench-leg" x="220" y="751" width="5" height="45"></rect>
+          <rect class="bench-leg" x="416" y="751" width="5" height="45"></rect>
+          <rect class="bench-leg" x="552" y="751" width="5" height="45"></rect>
+          <!-- Floor -->
+          <path
+            class="floor"
+            d={`M ${WALL.inner} ${LEVELS.backFloor} L ${WALL.rightInner} ${LEVELS.backFloor} L ${WALL.rightInner} ${LEVELS.frontFloor} L ${WALL.inner} ${LEVELS.frontFloor} Z`}
+          ></path>
+          {boards.map((k) => {
+            const t = k / (boards.length - 1);
+            const xb = 120 + t * 400;
+            const xf = -90 + t * 820;
+            return <line class="board-gap" x1={f(xb)} y1={LEVELS.backFloor} x2={f(xf)} y2={LEVELS.frontFloor} />;
+          })}
+          <ellipse class="mat" cx="320" cy="850" rx="226" ry="36"></ellipse>
+          <g class="spots"></g>
+          <ellipse cx="320" cy="560" rx="260" ry="160" fill="url(#rs-pool)"></ellipse>
+          <g class="bosses"></g>
+          <g class="ropes"></g>
+          <line class="lamp-flex" x1="320" y1={LEVELS.chamberTop} x2="320" y2={LEVELS.chamberTop + 30}></line>
+          <path
+            class="lamp-shade"
+            d={`M 304 ${LEVELS.chamberTop + 42} L 336 ${LEVELS.chamberTop + 42} L 328 ${LEVELS.chamberTop + 30} L 312 ${LEVELS.chamberTop + 30} Z`}
+          ></path>
+          <ellipse class="lamp-bulb" cx="320" cy={LEVELS.chamberTop + 43} rx="5" ry="3"></ellipse>
+        </g>
+
+        <!-- Below the chamber floor -->
+        <rect
+          class="floor-cut"
+          x={WALL.inner}
+          y={LEVELS.frontFloor}
+          width={WALL.rightInner - WALL.inner}
+          height={LEVELS.ground - LEVELS.frontFloor}
+        ></rect>
+      </svg>
+      <div class="cue" aria-hidden="true"></div>
+      <p class="caption" aria-live="assertive"></p>
+    </div>
+
+    <aside class="panel">
+      <header>
+        <p class="kicker">St Michael &amp; All Angels · Thursday practice</p>
+        <h1>Ropesight</h1>
+        <p class="lede">
+          Six bells are up and the band are stood at their ropes. Take one. Each blow sounds about a second after you
+          pull, so you ring by watching the rope you follow and pulling just after it moves.
+        </p>
+      </header>
+
+      <form class="setup">
+        <fieldset class="pick-bell">
+          <legend>Your rope</legend>
+          <div class="bells">
+            {BELLS.map((_, i) => (
+              <label>
+                <input type="radio" name="bell" value={i + 1} checked={i === 1} />
+                <span class="no">{i + 1}</span>
+                <span class="nm">{bellName(i)}</span>
+                <span class="who" data-who={i}>
+                  {BAND[i].name}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset class="pick-method">
+          <legend>Ring</legend>
+          {METHODS.map((m, k) => (
+            <label>
+              <input type="radio" name="method" value={m.id} checked={k === 0} />
+              <span class="mname">{m.name}</span>
+              <span class="mblurb">{m.blurb}</span>
+            </label>
+          ))}
+        </fieldset>
+
+        <div class="row">
+          <label class="touch">
+            <span>Touch</span>
+            <select name="touch"></select>
+          </label>
+          <fieldset class="speed">
+            <legend>Pace</legend>
+            <label>
+              <input type="radio" name="speed" value="steady" checked /> Steady
+            </label>
+            <label>
+              <input type="radio" name="speed" value="brisk" /> Brisk
+            </label>
+          </fieldset>
+        </div>
+        <label class="guide">
+          <input type="checkbox" name="guide" checked /> Show me when to pull
+        </label>
+
+        <div class="go-row">
+          <button type="submit" class="go">
+            Look to
+          </button>
+          <button type="button" class="listen">
+            Just listen
+          </button>
+        </div>
+        <p class="keys">
+          Pull with <kbd>Space</kbd>, or tap the tower.
+        </p>
+        <details class="about">
+          <summary>How change ringing works</summary>
+          <p>
+            English church bells are hung to swing full circle. Each rests mouth up against a wooden stay, and a pull on
+            its rope sends it right round to rest mouth up on the other side, sounding once on the way: handstroke when
+            you pull the striped sally, backstroke when you pull the tail end.
+          </p>
+          <p>
+            A bell that heavy can only be held back or hurried by a fraction of a beat, so it can only swap places with
+            a neighbour from one row to the next. Instead of tunes, the band ring changes: every bell sounds once in
+            each row, pairs swap by a pattern called a method, and the conductor calls bobs and singles to vary it,
+            until the bells come back into rounds. The pause before each handstroke row is the handstroke gap.
+          </p>
+        </details>
+      </form>
+
+      <section class="live" hidden>
+        <div class="status">
+          <p class="where">
+            <span class="place-note">-</span> <span class="follow-note"></span>
+          </p>
+          <p class="last" aria-live="polite"></p>
+        </div>
+        <div class="charts">
+          <figure class="line">
+            <canvas class="blue-line" width="300" height="300"></canvas>
+            <figcaption>Your line through the changes</figcaption>
+          </figure>
+          <figure class="strike">
+            <canvas class="striking" width="300" height="300"></canvas>
+            <figcaption>Striking: every blow against an even beat</figcaption>
+          </figure>
+        </div>
+        <div class="live-actions">
+          <button type="button" class="pull">
+            Pull
+          </button>
+          <button type="button" class="stand">
+            Stand
+          </button>
+        </div>
+      </section>
+
+      <section class="result" hidden>
+        <div class="peal-board">
+          <p class="pb-tower">St Michael &amp; All Angels</p>
+          <p class="pb-date"></p>
+          <p class="pb-was">was rung a touch of</p>
+          <p class="pb-touch"></p>
+          <p class="pb-time"></p>
+          <ol class="pb-band"></ol>
+          <p class="pb-note"></p>
+        </div>
+        <p class="verdict"></p>
+        <div class="result-actions">
+          <button type="button" class="again">
+            Ring again
+          </button>
+        </div>
+      </section>
+    </aside>
+  </main>
+</Bare>
+
+<style>
+  .rs {
+    --night: #0e1222;
+    --ink: #e9e2d0;
+    --muted: #a7a191;
+    --gilt: #e0bd6a;
+    --blue: #4f7fe0;
+    --red: #d24a3f;
+    --panel: #151826;
+    --line: #2b3047;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(330px, 420px);
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--night);
+    color: var(--ink);
+    font-family: var(--font-rs-text);
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  :global(body:has(.rs)) {
+    margin: 0;
+    background: #0e1222;
+  }
+  .rs *,
+  .rs *::before,
+  .rs *::after {
+    box-sizing: border-box;
+  }
+  .rs [hidden] {
+    display: none !important;
+  }
+
+  .tower-wrap {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 12px;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+  }
+  .tower {
+    width: 100%;
+    height: 100%;
+    max-height: calc(100dvh - 24px);
+    overflow: visible;
+  }
+
+  /* Drawing */
+  .tower .stone rect {
+    fill: #3b3a45;
+  }
+  .tower .courses line {
+    stroke: #2b2a33;
+    stroke-width: 1;
+  }
+  .tower .belfry {
+    fill: url(#rs-belfry);
+  }
+  .tower .lancet-sky {
+    fill: #0b1124;
+    stroke: #2c3044;
+    stroke-width: 3;
+  }
+  .tower .louvre {
+    fill: #262a3b;
+  }
+  .tower .frame rect {
+    fill: #3a2c22;
+  }
+  .tower .bell .rim {
+    fill: none;
+    stroke: #7a5a3c;
+    stroke-width: 3.2;
+  }
+  .tower .bell .rim-inner {
+    fill: none;
+    stroke: #5b412b;
+    stroke-width: 1;
+  }
+  .tower .bell .wheel line {
+    stroke: #6b4e33;
+    stroke-width: 2;
+  }
+  .tower .bell .stay {
+    fill: #8a6a48;
+  }
+  .tower .bell .headstock {
+    fill: #4a4e58;
+    stroke: #2c2f36;
+    stroke-width: 0.6;
+  }
+  .tower .bell .inside {
+    fill: url(#rs-bell-in);
+  }
+  .tower .bell .wall {
+    fill: url(#rs-bronze);
+    stroke: #2a1a08;
+    stroke-width: 0.6;
+  }
+  .tower .bell .clapper line {
+    stroke: #17181c;
+    stroke-width: 2.2;
+  }
+  .tower .bell .clapper ellipse {
+    fill: #17181c;
+  }
+  .tower .bell .gudgeon {
+    fill: #9aa0ab;
+  }
+  .tower .plaque rect {
+    fill: #1a1f30;
+    stroke: #3c4258;
+  }
+  .tower .plaque text {
+    font-family: var(--font-rs-board);
+    font-size: 11px;
+    fill: #9aa0b4;
+  }
+  .tower .bell.mine ~ .plaque text,
+  .tower .plaque.mine text {
+    fill: var(--gilt);
+  }
+  .tower .plaque.mine rect {
+    stroke: var(--gilt);
+  }
+  .tower .plaque.struck rect {
+    fill: #5b4a22;
+  }
+  .tower .plaque.struck text {
+    fill: #fff1c4;
+  }
+  .tower .plaque.follow rect {
+    stroke: #9fc0ff;
+  }
+  .tower .plaque.follow text {
+    fill: #cfe0ff;
+  }
+  .tower .brace {
+    fill: none;
+    stroke: #33271e;
+    stroke-width: 5;
+  }
+  .tower .yew {
+    fill: #0b1018;
+  }
+  .tower .floor-cut {
+    fill: #2c2520;
+  }
+  .tower .clockroom {
+    fill: url(#rs-clockroom);
+  }
+  .tower .stool {
+    fill: #3b2e24;
+  }
+  .tower .clock-frame {
+    fill: #2e3a35;
+    stroke: #48574f;
+  }
+  .tower .clock-wheel {
+    fill: none;
+    stroke: #b39a5a;
+    stroke-width: 2;
+  }
+  .tower .clock-rod {
+    stroke: #6c7377;
+    stroke-width: 1.6;
+  }
+  .tower .bob {
+    fill: #9c8a5c;
+  }
+  .tower .dial-face {
+    fill: #1d3156;
+    stroke: #c7a250;
+    stroke-width: 2;
+  }
+  .tower .dial-ring {
+    fill: none;
+    stroke: #c7a250;
+    stroke-width: 0.6;
+  }
+  .tower .dial-tick {
+    stroke: #e3c477;
+    stroke-width: 1.6;
+  }
+  .tower .hand {
+    stroke: #f0d58c;
+    stroke-linecap: round;
+  }
+  .tower .hand.hour {
+    stroke-width: 2.4;
+  }
+  .tower .hand.minute {
+    stroke-width: 1.5;
+  }
+  .tower .dial-boss {
+    fill: #f0d58c;
+  }
+  .tower .rope-runs line {
+    stroke: #c9b78e;
+    stroke-width: 1.4;
+    opacity: 0.6;
+  }
+  .tower .plaster {
+    fill: url(#rs-lamp);
+  }
+  .tower .window {
+    fill: #142041;
+    stroke: #6d5a45;
+    stroke-width: 4;
+  }
+  .tower .window-bars {
+    stroke: #5a4936;
+    stroke-width: 1.6;
+    fill: none;
+  }
+  .tower .sill {
+    fill: #a58f72;
+  }
+  .tower .board rect:first-child {
+    fill: url(#rs-board);
+    stroke: #6a4a24;
+    stroke-width: 3;
+  }
+  .tower .board-line {
+    fill: none;
+    stroke: url(#rs-gilt);
+    stroke-width: 0.8;
+  }
+  .tower .board-head {
+    font-family: var(--font-rs-board);
+    font-size: 8.4px;
+    letter-spacing: 0.06em;
+    fill: url(#rs-gilt);
+  }
+  .tower .board-small {
+    font-family: var(--font-rs-board);
+    font-style: italic;
+    font-size: 7.6px;
+    fill: #d6b468;
+  }
+  .tower .board.yours text {
+    font-size: 7px;
+  }
+  .tower .ceiling {
+    fill: #4a3a2c;
+  }
+  .tower .ceiling-joist {
+    stroke: #33271d;
+    stroke-width: 2;
+  }
+  .tower .notice rect {
+    fill: #e9e1cc;
+  }
+  .tower .notice text {
+    font-family: var(--font-rs-text);
+    font-size: 6.4px;
+    fill: #3a3326;
+  }
+  .tower .notice .notice-head {
+    font-family: var(--font-rs-board);
+    font-size: 8px;
+    letter-spacing: 0.1em;
+  }
+  .tower .notice .pin {
+    fill: #b4282e;
+  }
+  /* Ropes are built by the script. */
+  .rs :global(.rope .hemp),
+  .rs :global(.rope .tail) {
+    stroke: #d8c79f;
+    fill: none;
+    stroke-linecap: round;
+  }
+  .rs :global(.rope .sally) {
+    fill: url(#rs-sally);
+    stroke: rgb(0 0 0 / 0.35);
+    stroke-width: 0.6;
+  }
+  .rs :global(.rope.mine .sally) {
+    stroke: #f0cf7a;
+    stroke-width: 1.6;
+  }
+  .rs :global(.rope.follow .sally) {
+    stroke: #9fc0ff;
+    stroke-width: 1.6;
+  }
+  .rs :global(.rope .cue-ring) {
+    fill: none;
+    stroke: #f0cf7a;
+    stroke-width: 1.6;
+    opacity: 0;
+  }
+  .rs :global(.rope .cue-ring.now) {
+    stroke-width: 3;
+    stroke: #fff1c4;
+  }
+  .tower .bench {
+    fill: #5d4330;
+  }
+  .tower .bench-leg {
+    fill: #4a3424;
+  }
+  .tower .floor {
+    fill: url(#rs-floor);
+  }
+  .tower .board-gap {
+    stroke: #2c1e14;
+    stroke-width: 0.8;
+  }
+  .tower .mat {
+    fill: #6b2b26;
+    opacity: 0.5;
+  }
+  .rs :global(.spots ellipse) {
+    fill: #2a1a12;
+    opacity: 0.55;
+  }
+  .rs :global(.spots ellipse.mine) {
+    fill: #e0bd6a;
+    opacity: 0.35;
+  }
+  .rs :global(.bosses ellipse) {
+    fill: #6b5139;
+    stroke: #3e2e20;
+    stroke-width: 0.8;
+  }
+  .tower .lamp-flex {
+    stroke: #222;
+    stroke-width: 1;
+  }
+  .tower .lamp-shade {
+    fill: #2c4a3b;
+  }
+  .tower .lamp-bulb {
+    fill: #fff3cc;
+  }
+  .tower .ground {
+    fill: #10141f;
+  }
+
+  .cue {
+    position: absolute;
+    pointer-events: none;
+  }
+  .caption {
+    position: absolute;
+    left: 50%;
+    top: 37%;
+    transform: translateX(-50%);
+    margin: 0;
+    pointer-events: none;
+    font-family: var(--font-rs-board);
+    font-size: clamp(20px, 3vw, 34px);
+    color: #fff4d6;
+    text-shadow:
+      0 2px 12px rgb(0 0 0 / 0.8),
+      0 0 2px rgb(0 0 0 / 0.9);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .caption.on {
+    opacity: 1;
+  }
+  .caption :global(small) {
+    display: block;
+    font-family: var(--font-rs-text);
+    font-size: 0.42em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #d8cdb2;
+    text-align: center;
+  }
+
+  /* Panel */
+  .panel {
+    background: var(--panel);
+    border-left: 1px solid var(--line);
+    padding: 28px 26px 32px;
+    overflow-y: auto;
+    max-height: 100vh;
+    max-height: 100dvh;
+  }
+  .kicker {
+    margin: 0 0 4px;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .panel h1 {
+    margin: 0 0 10px;
+    font-family: var(--font-rs-board);
+    font-weight: 400;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--gilt);
+  }
+  .lede {
+    margin: 0 0 22px;
+    color: #cfc8b6;
+  }
+  fieldset {
+    border: 0;
+    margin: 0 0 18px;
+    padding: 0;
+    min-width: 0;
+  }
+  legend,
+  .touch > span {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0;
+  }
+  .bells {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .bells label {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    padding: 8px 2px 7px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .bells input,
+  .pick-method input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .bells .no {
+    font-family: var(--font-rs-board);
+    font-size: 24px;
+    line-height: 1;
+  }
+  .bells .nm {
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+  .bells .who {
+    font-size: 10px;
+    color: #7f7a6d;
+    line-height: 1.2;
+    margin-top: 3px;
+  }
+  .bells label:has(input:checked) {
+    border-color: var(--gilt);
+    background: rgb(224 189 106 / 0.1);
+  }
+  .bells label:has(input:checked) .who {
+    color: var(--gilt);
+  }
+  .bells label:has(input:focus-visible),
+  .pick-method label:has(input:focus-visible) {
+    outline: 2px solid #9fc0ff;
+    outline-offset: 2px;
+  }
+  .pick-method {
+    display: grid;
+    gap: 6px;
+  }
+  .pick-method label {
+    position: relative;
+    display: grid;
+    padding: 9px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .pick-method label:has(input:checked) {
+    border-color: var(--gilt);
+    background: rgb(224 189 106 / 0.08);
+  }
+  .mname {
+    font-family: var(--font-rs-board);
+    font-size: 17px;
+  }
+  .mblurb {
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .touch {
+    flex: 1 1 180px;
+    margin-bottom: 18px;
+  }
+  .touch select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: #0f1220;
+    color: var(--ink);
+    font: inherit;
+  }
+  .speed label {
+    margin-right: 12px;
+    cursor: pointer;
+  }
+  .guide {
+    display: block;
+    margin: 0 0 20px;
+    cursor: pointer;
+  }
+  .rs button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 999px;
+    padding: 11px 22px;
+    border: 1px solid var(--line);
+    background: #20253a;
+    color: var(--ink);
+  }
+  .go-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .rs button.go,
+  .rs button.again {
+    background: var(--gilt);
+    border-color: var(--gilt);
+    color: #1b1407;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 12px 30px;
+  }
+  .about {
+    margin-top: 22px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+    color: #c4bdab;
+    font-size: 13.5px;
+  }
+  .about summary {
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .about p {
+    margin: 10px 0 0;
+  }
+  .keys {
+    margin: 10px 0 0;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  kbd {
+    font-family: inherit;
+    font-size: 11px;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+
+  .status {
+    margin-bottom: 14px;
+  }
+  .where {
+    margin: 0;
+    font-family: var(--font-rs-board);
+    font-size: 22px;
+  }
+  .follow-note {
+    font-family: var(--font-rs-text);
+    font-size: 14px;
+    color: #9fc0ff;
+  }
+  .last {
+    margin: 2px 0 0;
+    min-height: 1.4em;
+    color: var(--muted);
+  }
+  .charts {
+    display: grid;
+    gap: 14px;
+  }
+  .charts figure {
+    margin: 0;
+  }
+  .charts canvas {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    display: block;
+    background: #0f1220;
+    border-radius: 8px;
+  }
+  .charts figcaption {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+  .live-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .rs button.pull {
+    display: none;
+  }
+
+  .peal-board {
+    background: linear-gradient(#1b1a1d, #0d0d0f);
+    border: 6px solid #6a4a24;
+    outline: 1px solid #8a6631;
+    outline-offset: -12px;
+    border-radius: 4px;
+    padding: 26px 22px 24px;
+    text-align: center;
+    font-family: var(--font-rs-board);
+    color: #d9b86c;
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.5);
+  }
+  .peal-board p {
+    margin: 0;
+  }
+  .pb-tower,
+  .pb-touch {
+    background: linear-gradient(#f6e2a0, #c99a3c 55%, #95701f);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .pb-tower {
+    font-size: 19px;
+  }
+  .pb-date,
+  .pb-was,
+  .pb-time,
+  .pb-note {
+    font-style: italic;
+    font-size: 15px;
+  }
+  .pb-date {
+    margin-top: 6px !important;
+  }
+  .pb-touch {
+    font-size: 24px;
+    line-height: 1.15;
+    margin: 4px 0 !important;
+  }
+  .pb-band {
+    list-style: none;
+    padding: 0;
+    margin: 14px auto !important;
+    max-width: 260px;
+    text-align: left;
+    font-size: 15px;
+  }
+  .pb-band :global(li) {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .pb-band :global(li.you) {
+    color: #f6e2a0;
+  }
+  .verdict {
+    margin: 16px 0;
+    color: #cfc8b6;
+  }
+
+  @media (max-width: 860px) {
+    .rs {
+      grid-template-columns: 1fr;
+    }
+    .tower-wrap {
+      height: auto;
+      padding: 8px 8px 0;
+    }
+    .tower {
+      height: auto;
+      max-height: 68dvh;
+    }
+    .panel {
+      border-left: 0;
+      border-top: 1px solid var(--line);
+      max-height: none;
+      padding: 22px 16px 28px;
+    }
+    .panel h1 {
+      font-size: 38px;
+    }
+    .rs[data-state='ringing'] .tower {
+      max-height: 56dvh;
+    }
+    /* While ringing on a phone, the tower and your rope's controls come first. */
+    .rs[data-state='ringing'] .panel header {
+      display: none;
+    }
+    .live {
+      display: flex;
+      flex-direction: column;
+    }
+    .live .status {
+      order: 1;
+    }
+    .live .live-actions {
+      order: 2;
+      margin: 0 0 16px;
+    }
+    .live .charts {
+      order: 3;
+    }
+    .rs button.pull {
+      display: block;
+      flex: 1;
+      padding: 18px;
+      font-size: 18px;
+      background: #2a3150;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_main';
+  const root = document.querySelector<HTMLElement>('.rs');
+  if (root) start(root);
+</script>

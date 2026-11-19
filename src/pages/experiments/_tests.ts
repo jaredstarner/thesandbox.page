@@ -572,6 +572,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   'circuit-simulation': { label: 'Circuit simulation (modified nodal analysis)' },
   'newton-raphson': { label: 'Newton-Raphson iteration' },
   'interactive-fiction': { label: 'Interactive fiction' },
+  'change-ringing': { label: 'Change ringing' },
+  'place-notation': { label: 'Place notation' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

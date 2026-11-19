@@ -1,0 +1,8 @@
+{
+  "title": "Ropesight",
+  "summary": "A church tower's ringing chamber on practice night: take hold of a rope, ring rounds with the band, then follow Plain Bob and Grandsire as the order of the bells changes at every blow, with each bell swinging full circle and its clapper striking where the physics puts it, and your striking timed to the millisecond and lettered onto a peal board.",
+  "date": "2026-11-19",
+  "tags": ["svg", "web-audio", "pointer-events", "physics", "game", "change-ringing", "place-notation"],
+  "requires": ["web-audio"],
+  "plot": 49
+}
