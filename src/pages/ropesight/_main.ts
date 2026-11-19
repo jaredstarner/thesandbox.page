@@ -4,7 +4,7 @@ import { BAND, Performance, SPEEDS, conductor, type Judgement } from './_band';
 import { Bell } from './_bell';
 import { drawLine, drawStriking } from './_charts';
 import { makePlan, methodById, type Plan } from './_method';
-import { Ring } from './_sound';
+import { Ring, castRing } from './_sound';
 import { BELLS, CROWN_FRAC, LEVELS, ROPE, ceilingAt, circlePos, floorAt, pxPerMetre, ropeDrop } from './_tower';
 
 const SVGNS = 'http://www.w3.org/2000/svg';
@@ -33,8 +33,8 @@ export function start(root: HTMLElement): void {
   const live = root.querySelector<HTMLElement>('.live')!;
   const result = root.querySelector<HTMLElement>('.result')!;
   const caption = root.querySelector<HTMLElement>('.caption')!;
-  const placeEl = root.querySelector<HTMLElement>('.place')!;
-  const followEl = root.querySelector<HTMLElement>('.follow')!;
+  const placeEl = root.querySelector<HTMLElement>('.place-note')!;
+  const followEl = root.querySelector<HTMLElement>('.follow-note')!;
   const lastEl = root.querySelector<HTMLElement>('.last')!;
   const lineCanvas = root.querySelector<HTMLCanvasElement>('canvas.blue-line')!;
   const strikeCanvas = root.querySelector<HTMLCanvasElement>('canvas.striking')!;
@@ -43,10 +43,13 @@ export function start(root: HTMLElement): void {
   const yoursText = svg.querySelector<SVGTextElement>('[data-yours]');
 
   const bellGroups = [...svg.querySelectorAll<SVGGElement>('g.bell')];
-  const swings = bellGroups.map((g) => g.querySelector<SVGGElement>('.swing')!);
+  const swings = bellGroups.map((g) => [...g.querySelectorAll<SVGGElement>('.swing')]);
+  const plaques = [...svg.querySelectorAll<SVGGElement>('g.plaque')];
   const clappers = bellGroups.map((g) => g.querySelector<SVGGElement>('.clapper')!);
   const runs = [...svg.querySelectorAll<SVGLineElement>('.rope-runs line')];
   const ropesG = svg.querySelector<SVGGElement>('g.ropes')!;
+  const spotsG = svg.querySelector<SVGGElement>('g.spots');
+  const bossesG = svg.querySelector<SVGGElement>('g.bosses');
   const pendulum = svg.querySelector<SVGGElement>('.pendulum');
   const hourHand = svg.querySelector<SVGLineElement>('.hand.hour');
   const minuteHand = svg.querySelector<SVGLineElement>('.hand.minute');
@@ -60,6 +63,10 @@ export function start(root: HTMLElement): void {
   let ctx: AudioContext | null = null;
   let ring: Ring | null = null;
   let state: 'idle' | 'ringing' | 'done' = 'idle';
+  // Cast the bells while the page settles, so the first pull isn't kept waiting.
+  let buffers: AudioBuffer[] | null = null;
+  const casting = typeof OfflineAudioContext === 'function' ? castRing().then((b) => (buffers = b)) : null;
+  casting?.catch(() => undefined);
   let guide = true;
   const pending: number[] = [];
   let captionUntil = 0;
@@ -68,13 +75,15 @@ export function start(root: HTMLElement): void {
   let lookTo: { at: number; text: string; who: string }[] = [];
   let startedAt = 0;
 
-  const clock = () => (ctx ? ctx.currentTime : performance.now() / 1000);
+  // The simulation keeps the page's clock, which runs whether or not sound has been allowed to start; each
+  // blow is mapped onto the audio clock as it is scheduled.
+  const clock = () => performance.now() / 1000;
   const eventTime = (e: Event) => {
     const now = clock();
-    if (!ctx) return now;
-    const age = (performance.now() - e.timeStamp) / 1000;
-    return age > 0 && age < 0.25 ? now - age : now;
+    const t = e.timeStamp / 1000;
+    return t > now - 0.25 && t <= now ? t : now;
   };
+  const toAudio = (t: number) => (ctx ? ctx.currentTime + (t - clock()) : 0);
 
   // ---- Setup form ----
   const fillTouches = () => {
@@ -104,9 +113,11 @@ export function start(root: HTMLElement): void {
   // ---- Ropes in the circle ----
   function layoutRopes(): void {
     ropesG.replaceChildren();
+    spotsG?.replaceChildren();
+    bossesG?.replaceChildren();
     ropes = [];
     for (let k = 0; k < 6; k++) {
-      const p = circlePos(k + 1, mine);
+      const p = circlePos(k + 1);
       const g = document.createElementNS(SVGNS, 'g');
       g.classList.add('rope');
       if (k + 1 === mine) g.classList.add('mine');
@@ -126,6 +137,20 @@ export function start(root: HTMLElement): void {
         g.append(cue);
       }
       ropes.push({ g, upper, sally, lower, tail, cue, k, z: p.z, x: p.x, s: p.s });
+      // Where each ringer stands, and the boss where the rope comes through the ceiling.
+      const spot = document.createElementNS(SVGNS, 'ellipse');
+      spot.setAttribute('cx', p.x.toFixed(1));
+      spot.setAttribute('cy', (floorAt(p.z) - 2).toFixed(1));
+      spot.setAttribute('rx', (17 * p.s).toFixed(1));
+      spot.setAttribute('ry', (4.2 * p.s).toFixed(1));
+      if (k + 1 === mine) spot.classList.add('mine');
+      spotsG?.append(spot);
+      const boss = document.createElementNS(SVGNS, 'ellipse');
+      boss.setAttribute('cx', p.x.toFixed(1));
+      boss.setAttribute('cy', ceilingAt(p.z).toFixed(1));
+      boss.setAttribute('rx', (7 * p.s).toFixed(1));
+      boss.setAttribute('ry', (2.2 * p.s).toFixed(1));
+      bossesG?.append(boss);
       runs[k]?.setAttribute('x2', p.x.toFixed(1));
       runs[k]?.setAttribute('y2', String(LEVELS.clockFloor));
       runs[k]?.setAttribute('x1', ropeDrop(k).toFixed(1));
@@ -133,6 +158,7 @@ export function start(root: HTMLElement): void {
     // Back of the circle first, so nearer ropes pass in front.
     for (const r of [...ropes].sort((a, b) => a.z - b.z)) ropesG.append(r.g);
     bellGroups.forEach((g, i) => g.classList.toggle('mine', i + 1 === mine));
+    plaques.forEach((g, i) => g.classList.toggle('mine', i + 1 === mine));
     renderScene(idleBells);
   }
 
@@ -143,8 +169,8 @@ export function start(root: HTMLElement): void {
     const sTop = floor - (ROPE.sallyHigh + lift) * ppm;
     const sBot = floor - (ROPE.sallyLow + lift) * ppm;
     const tailY = floor - (ROPE.tailEnd + lift) * ppm;
-    const w = 7.5 * r.s;
-    const rw = 2.4 * r.s;
+    const w = 11 * r.s;
+    const rw = 2.8 * r.s;
     r.upper.setAttribute('x1', r.x.toFixed(1));
     r.upper.setAttribute('x2', r.x.toFixed(1));
     r.upper.setAttribute('y1', ceilingAt(r.z).toFixed(1));
@@ -189,7 +215,7 @@ export function start(root: HTMLElement): void {
     for (let i = 0; i < 6; i++) {
       const b = bells[i];
       const deg = (-b.theta * 180) / Math.PI;
-      swings[i].setAttribute('transform', `rotate(${deg.toFixed(2)})`);
+      for (const sw of swings[i]) sw.setAttribute('transform', `rotate(${deg.toFixed(2)})`);
       // The clapper hangs from the crown, which the bell carries round on its swing.
       const h = BELLS[i].h;
       const crown = CROWN_FRAC * h;
@@ -199,6 +225,7 @@ export function start(root: HTMLElement): void {
       const phi = b.theta + (b.phi - b.theta) * 1.4;
       clappers[i].setAttribute('transform', `translate(${cx.toFixed(2)} ${cy.toFixed(2)}) rotate(${((-phi * 180) / Math.PI).toFixed(2)})`);
       bellGroups[i].classList.toggle('follow', i === follow);
+      plaques[i]?.classList.toggle('follow', i === follow);
     }
     for (const r of ropes) {
       renderRope(r, bells[r.k].rope(), now, r.cue ? cueAt : null);
@@ -256,7 +283,7 @@ export function start(root: HTMLElement): void {
   }
 
   // ---- Ringing ----
-  async function begin(listenOnly: boolean): Promise<void> {
+  function begin(listenOnly: boolean): void {
     const data = new FormData(form);
     const def = methodById(String(data.get('method')));
     const touch = def.touches[Number(data.get('touch') ?? 0)] ?? def.touches[0];
@@ -265,9 +292,11 @@ export function start(root: HTMLElement): void {
     guide = data.get('guide') === 'on';
     try {
       if (!ctx) ctx = new AudioContext();
-      if (ctx.state === 'suspended') await ctx.resume();
-      if (!ring) ring = new Ring(ctx);
-      ring.wake();
+      if (ctx.state === 'suspended') void ctx.resume();
+      const live = ctx;
+      if (!ring && buffers) ring = new Ring(live, buffers);
+      else if (!ring) void casting?.then((b) => (ring = ring ?? new Ring(live, b)));
+      ring?.wake();
     } catch {
       ctx = null;
       ring = null;
@@ -277,7 +306,7 @@ export function start(root: HTMLElement): void {
     const cond = conductor(mine);
     const treble = mine === 1 && !listenOnly ? 'You' : BAND[0].name;
     perf = new Performance(plan, mine - 1, gap, now, now + 2.6, Math.floor(Math.random() * 1e6), listenOnly);
-    perf.onStrike = (i, at, speed) => ring?.strike(i, at + LATENCY, 0.45 + speed / 10);
+    perf.onStrike = (i, at, speed) => ring?.strike(i, toAudio(at + LATENCY), 0.45 + speed / 10);
     perf.onJudge = judged;
     startedAt = now;
     lookTo = [
@@ -300,9 +329,9 @@ export function start(root: HTMLElement): void {
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    void begin(false);
+    begin(false);
   });
-  root.querySelector('.listen')?.addEventListener('click', () => void begin(true));
+  root.querySelector('.listen')?.addEventListener('click', () => begin(true));
 
   function judged(j: Judgement): void {
     if (!perf) return;
@@ -404,6 +433,11 @@ export function start(root: HTMLElement): void {
       void ctx?.suspend();
     }
   });
+
+  // A handle for automated checks, only with ?debug: the performance, so a test can time its pulls.
+  if (new URLSearchParams(location.search).has('debug')) {
+    (window as unknown as { ropesight: unknown }).ropesight = { perf: () => perf, state: () => state };
+  }
 
   // ---- Frame loop ----
   function frame(): void {

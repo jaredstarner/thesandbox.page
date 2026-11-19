@@ -8,14 +8,27 @@ export const WALL = { outer: 36, inner: 64, right: 604, rightInner: 576 };
 export const LEVELS = {
   parapet: 46,
   belfryTop: 78,
-  axis: 188,
-  belfryFloor: 352,
-  clockFloor: 504,
-  chamberTop: 520,
-  backFloor: 812,
+  axis: 192,
+  belfryFloor: 350,
+  clockFloor: 432,
+  chamberTop: 448,
+  backFloor: 796,
   frontFloor: 902,
   ground: 960,
 };
+
+/** The ringing chamber's rope circle, in perspective: depth z from -1 (back) to 1 (front). */
+export const CIRCLE = { cx: 320, rx: 206 };
+/** The circle is seen a little off square, so no two ropes line up one behind the other. */
+const RING_ROT = Math.PI / 12;
+
+/** Rope k (1 to 6, clockwise from above) on the circle. The 2nd hangs nearest. */
+export function circlePos(k: number): { x: number; z: number; s: number } {
+  const a = RING_ROT + ((k - 2) * Math.PI) / 3;
+  const z = Math.cos(a);
+  const s = 0.7 + 0.3 * ((z + 1) / 2);
+  return { x: CIRCLE.cx - CIRCLE.rx * Math.sin(a) * (0.84 + 0.16 * s), z, s };
+}
 
 export interface BellGeom {
   /** Headstock axis. */
@@ -27,10 +40,22 @@ export interface BellGeom {
   r: number;
 }
 
+/**
+ * The frame's pits, left to right, hold the bells in the order their ropes fall in the circle below, so the
+ * ropes drop through the clock room without crossing.
+ */
+const SLOT_OF: number[] = (() => {
+  const xs = [1, 2, 3, 4, 5, 6].map((k) => circlePos(k).x);
+  const order = [0, 1, 2, 3, 4, 5].sort((a, b) => xs[a] - xs[b]);
+  const slot: number[] = [];
+  order.forEach((bell, i) => (slot[bell] = i));
+  return slot;
+})();
+
 export const BELLS: BellGeom[] = Array.from({ length: 6 }, (_, i) => {
   const pit = (WALL.rightInner - WALL.inner) / 6;
-  const h = 44 + i * 3.6;
-  return { x: WALL.inner + pit * (i + 0.5), y: LEVELS.axis, h, r: 30 + i * 1.4 };
+  const h = 45 + i * 2.2;
+  return { x: WALL.inner + pit * (SLOT_OF[i] + 0.5), y: LEVELS.axis, h, r: 31 + i * 1.1 };
 });
 
 /** Where each bell's rope leaves its wheel and drops through the belfry floor. */
@@ -41,86 +66,80 @@ export function ropeDrop(i: number): number {
 /** Crown sits this far below the headstock axis, as a fraction of the bell's height. */
 export const CROWN_FRAC = 0.16;
 
-/**
- * The bell's outline, mouth down, with the headstock axis at the origin, in units of its height.
- * Built from a half profile mirrored about the centre line.
- */
+type Pt = [number, number];
+
+/** Half profile of the bell's outside, crown to lip: a start point, then cubic segments, in units of height. */
+const OUTER: Pt[] = [
+  // English bell proportions: mouth about 1.28 times the height, shoulder half that, a waist that barely
+  // swells, then the flare out to a heavy soundbow and a lip that turns down.
+  [0.2, 0],
+  [0.3, 0],
+  [0.34, 0.035],
+  [0.34, 0.12],
+  [0.34, 0.32],
+  [0.35, 0.46],
+  [0.39, 0.58],
+  [0.43, 0.7],
+  [0.53, 0.8],
+  [0.585, 0.88],
+  [0.625, 0.93],
+  [0.64, 0.96],
+  [0.64, 1.0],
+]
+
+/** Wall thickness at a given depth: thin at the waist, thickest at the soundbow where the clapper strikes. */
+function wall(y: number): number {
+  return 0.055 + 0.095 * Math.exp(-Math.pow((y - 0.9) / 0.12, 2));
+}
+
+/** The profile's points for one side, outside or inside face, in drawing units. */
+function profile(h: number, inset: boolean, side: 1 | -1): Pt[] {
+  return OUTER.map(([x, y]) => {
+    const xx = inset ? Math.max(0, x - wall(y)) : x;
+    const yy = inset ? Math.max(y, 0.07) : y;
+    return [side * xx * h, (yy + CROWN_FRAC) * h];
+  });
+}
+
+const p2 = ([x, y]: Pt) => `${x.toFixed(2)} ${y.toFixed(2)}`;
+
+/** Path commands walking the points forwards (M then Cs), or backwards (L to the end, then Cs). */
+function walk(pts: Pt[], first: 'M' | 'L'): string {
+  let d = `${first} ${p2(pts[0])}`;
+  for (let i = 1; i + 2 < pts.length; i += 3) d += ` C ${p2(pts[i])} ${p2(pts[i + 1])} ${p2(pts[i + 2])}`;
+  return d;
+}
+
+/** The whole bell's silhouette, mouth down, headstock axis at the origin: the dark inside, seen through the cut. */
 export function bellPath(h: number): string {
-  const c = CROWN_FRAC;
-  // Right half, crown to lip: shoulder, waist, soundbow flaring to the lip.
-  const half: [number, number][][] = [
-    [
-      [0.17, c],
-      [0.28, c + 0.01],
-      [0.3, c + 0.12],
-    ],
-    [
-      [0.31, c + 0.36],
-      [0.33, c + 0.56],
-      [0.41, c + 0.74],
-    ],
-    [
-      [0.46, c + 0.85],
-      [0.52, c + 0.9],
-      [0.53, c + 1.0],
-    ],
-  ];
-  const f = (x: number, y: number) => `${(x * h).toFixed(2)} ${(y * h).toFixed(2)}`;
-  let d = `M ${f(0, c)}`;
-  for (const [a, b, e] of half) d += ` C ${f(a[0], a[1])} ${f(b[0], b[1])} ${f(e[0], e[1])}`;
-  // Across the mouth: the lip's thickness, a shallow curve, and back out to the other lip.
-  d += ` L ${f(0.44, c + 1.0)} Q ${f(0, c + 0.94)} ${f(-0.44, c + 1.0)} L ${f(-0.53, c + 1.0)}`;
-  // The left half, walked back up from lip to crown: the same curves mirrored, control points reversed.
-  const back = [
-    [
-      [-0.52, c + 0.9],
-      [-0.46, c + 0.85],
-      [-0.41, c + 0.74],
-    ],
-    [
-      [-0.33, c + 0.56],
-      [-0.31, c + 0.36],
-      [-0.3, c + 0.12],
-    ],
-    [
-      [-0.28, c + 0.01],
-      [-0.17, c],
-      [0, c],
-    ],
-  ];
-  for (const [a, b, e] of back) d += ` C ${f(a[0], a[1])} ${f(b[0], b[1])} ${f(e[0], e[1])}`;
-  return d + ' Z';
+  return `${walk(profile(h, false, 1), 'M')} ${walk(profile(h, false, -1).reverse(), 'L')} Z`;
 }
 
-/** The soundbow's thick band, drawn as a darker stripe just above the lip. */
-export function bowPath(h: number): string {
-  const c = CROWN_FRAC;
-  const f = (x: number, y: number) => `${(x * h).toFixed(2)} ${(y * h).toFixed(2)}`;
-  return `M ${f(-0.47, c + 0.86)} Q ${f(0, c + 0.8)} ${f(0.47, c + 0.86)} L ${f(0.53, c + 1.0)} L ${f(0.44, c + 1.0)} Q ${f(0, c + 0.94)} ${f(-0.44, c + 1.0)} L ${f(-0.53, c + 1.0)} Z`;
+/** One wall of the bell in section (side 1 right, -1 left): outside down to the lip, inside back up. */
+export function wallPath(h: number, side: 1 | -1): string {
+  return `${walk(profile(h, false, side), 'M')} ${walk(profile(h, true, side).reverse(), 'L')} Z`;
 }
 
-/** The ringing chamber's rope circle, in perspective: depth z from -1 (back) to 1 (front). */
-export const CIRCLE = { cx: 320, rx: 196 };
+/** The crown's top plate, cut through, joining the two walls under the headstock. */
+export function crownPath(h: number): string {
+  const f = (x: number, y: number) => p2([x * h, (y + CROWN_FRAC) * h]);
+  return `M ${f(-0.3, 0)} L ${f(0.3, 0)} L ${f(0.29, 0.075)} L ${f(-0.29, 0.075)} Z`;
+}
 
 export function floorAt(z: number): number {
   return LEVELS.backFloor + ((LEVELS.frontFloor - LEVELS.backFloor) * (z + 1)) / 2;
 }
 
+/** How far the ceiling's underside recedes before it meets the back wall. */
+export const CEILING_DEPTH = 36;
+
 export function ceilingAt(z: number): number {
-  return LEVELS.chamberTop + 34 * (1 - (z + 1) / 2);
+  return LEVELS.chamberTop + CEILING_DEPTH * (1 - (z + 1) / 2);
 }
 
 /** Pixels per metre of height at depth z; the chamber is four metres floor to ceiling. */
 export function pxPerMetre(z: number): number {
   return (floorAt(z) - ceilingAt(z)) / 4;
-}
-
-/** Rope k's place on the circle when the visitor's rope is front and centre. */
-export function circlePos(k: number, mine: number): { x: number; z: number; s: number } {
-  const a = ((k - mine) * Math.PI) / 3;
-  const z = Math.cos(a);
-  const s = 0.72 + 0.28 * ((z + 1) / 2);
-  return { x: CIRCLE.cx - CIRCLE.rx * Math.sin(a) * (0.86 + 0.14 * s), z, s };
 }
 
 /** Heights, in metres above the floor, of a rope's parts with the bell at handstroke. */

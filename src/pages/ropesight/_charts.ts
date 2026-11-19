@@ -53,7 +53,7 @@ export function drawLine(canvas: HTMLCanvasElement, perf: Performance, row: numb
     for (let r = Math.max(0, first - 1); r < Math.min(rows.length, first + visible + 2); r++) {
       const p = rows[r].indexOf(bell);
       const x = xs(p);
-      const y = ys(r) - lh * 0.3;
+      const y = ys(r) - lh * 0.24;
       if (!started) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
       started = true;
@@ -70,9 +70,10 @@ export function drawLine(canvas: HTMLCanvasElement, perf: Performance, row: numb
     const past = r < cur;
     for (let p = 0; p < 6; p++) {
       const b = rows[r][p];
-      const isMine = b === mine;
-      ctx.font = `${isMine ? 700 : 400} ${Math.round(lh * 0.66)}px ${font}`;
-      ctx.fillStyle = isMine ? '#cfe0ff' : past ? '#5d5a52' : '#a9a392';
+      // As in a method book's blue line: your bell and the treble are drawn as lines, not figures.
+      if (b === mine || b === 1) continue;
+      ctx.font = `400 ${Math.round(lh * 0.66)}px ${font}`;
+      ctx.fillStyle = past ? '#5d5a52' : '#a9a392';
       ctx.fillText(String(b), xs(p), y);
     }
     // Strokes and calls in the margin.
@@ -81,10 +82,10 @@ export function drawLine(canvas: HTMLCanvasElement, perf: Performance, row: numb
     const cap = perf.plan.captions.find((c) => c.row === r && c.kind === 'call');
     if (cap && cap.text !== 'Stand next') {
       ctx.fillStyle = '#e0bd6a';
-      ctx.fillText(cap.text.replace('Go ', 'Go'), x0 + colW * 6 + 6, y);
+      ctx.fillText(cap.text.startsWith('Go ') ? 'Go' : cap.text, x0 + colW * 6 + 8, y);
     } else if (r === perf.plan.start) {
       ctx.fillStyle = '#7f7a6d';
-      ctx.fillText('changes', x0 + colW * 6 + 6, y);
+      ctx.fillText('changes', x0 + colW * 6 + 8, y);
     }
     ctx.textAlign = 'center';
   }

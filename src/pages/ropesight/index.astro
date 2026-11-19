@@ -3,24 +3,35 @@ import { Font } from 'astro:assets';
 import Bare from '../../layouts/Bare.astro';
 import { METHODS } from './_method';
 import { BAND } from './_band';
-import { BELLS, LEVELS, VIEW, WALL, bellPath, bowPath, ropeDrop, CROWN_FRAC } from './_tower';
+import {
+  BELLS,
+  CEILING_DEPTH,
+  CROWN_FRAC,
+  LEVELS,
+  VIEW,
+  WALL,
+  bellPath,
+  crownPath,
+  ropeDrop,
+  wallPath,
+} from './_tower';
 
 const description =
   "A church tower's ringing chamber on practice night: take hold of a rope and ring with the band as the order of the bells changes at every blow.";
 
 const bellName = (i: number) => (i === 0 ? 'Treble' : i === 5 ? 'Tenor' : `${['', '2nd', '3rd', '4th', '5th'][i]}`);
 
-// Night sky: a fixed scatter of stars so every build draws the same sky.
+// Night sky: a fixed scatter of stars, wider than the drawing so a wide window still has sky either side.
 let seed = 7;
 const rnd = () => {
   seed = (seed * 16807) % 2147483647;
   return seed / 2147483647;
 };
-const stars = Array.from({ length: 70 }, () => {
-  const x = rnd() * VIEW.w;
-  const y = rnd() * 520;
+const stars = Array.from({ length: 260 }, () => {
+  const x = -700 + rnd() * (VIEW.w + 1400);
+  const y = -200 + rnd() * 760;
   const r = 0.4 + rnd() * rnd() * 1.3;
-  return { x, y, r, o: 0.35 + rnd() * 0.6 };
+  return { x, y, r, o: 0.3 + rnd() * 0.6 };
 }).filter((s) => s.x < WALL.outer - 4 || s.x > WALL.right + 4 || s.y < LEVELS.parapet - 30);
 
 // Stone courses on the cut walls.
@@ -29,12 +40,13 @@ for (let y = LEVELS.parapet + 6; y < LEVELS.ground; y += 15) courses.push(y);
 
 // Louvres in the two belfry lancets.
 const lancets = [176, 464];
-const louvres = Array.from({ length: 9 }, (_, i) => 120 + i * 21);
+const louvres = Array.from({ length: 9 }, (_, i) => 118 + i * 21);
 
-// Chamber floorboards converge on the rope circle's far side.
-const boards = Array.from({ length: 15 }, (_, i) => i);
+// Chamber floorboards converge towards the back wall.
+const boards = Array.from({ length: 17 }, (_, i) => i);
 
 const f = (n: number) => n.toFixed(1);
+const pit = (WALL.rightInner - WALL.inner) / 6;
 ---
 
 <Bare title="Ropesight" {description}>
@@ -50,36 +62,40 @@ const f = (n: number) => n.toFixed(1);
       >
         <defs>
           <linearGradient id="rs-sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#0b1022"></stop>
-            <stop offset="0.7" stop-color="#18213d"></stop>
-            <stop offset="1" stop-color="#26304d"></stop>
+            <stop offset="0" stop-color="#0a0f20"></stop>
+            <stop offset="0.65" stop-color="#151d36"></stop>
+            <stop offset="1" stop-color="#232c48"></stop>
           </linearGradient>
           <linearGradient id="rs-belfry" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#151b2e"></stop>
-            <stop offset="1" stop-color="#1d2438"></stop>
+            <stop offset="0" stop-color="#141a2c"></stop>
+            <stop offset="1" stop-color="#1c2336"></stop>
           </linearGradient>
           <linearGradient id="rs-clockroom" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#1c1f2c"></stop>
-            <stop offset="1" stop-color="#2a2a33"></stop>
+            <stop offset="0" stop-color="#1b1e2a"></stop>
+            <stop offset="1" stop-color="#272731"></stop>
           </linearGradient>
-          <radialGradient id="rs-lamp" cx="0.5" cy="0.18" r="0.85">
-            <stop offset="0" stop-color="#f6dcae"></stop>
-            <stop offset="0.45" stop-color="#d9b483"></stop>
-            <stop offset="1" stop-color="#7d6248"></stop>
+          <radialGradient id="rs-lamp" cx="0.5" cy="0.12" r="0.9">
+            <stop offset="0" stop-color="#f7e0b4"></stop>
+            <stop offset="0.42" stop-color="#d8b282"></stop>
+            <stop offset="1" stop-color="#6f563f"></stop>
           </radialGradient>
           <linearGradient id="rs-floor" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#5a3f2a"></stop>
-            <stop offset="1" stop-color="#3a281b"></stop>
+            <stop offset="0" stop-color="#5e432c"></stop>
+            <stop offset="1" stop-color="#36251a"></stop>
           </linearGradient>
           <linearGradient id="rs-bronze" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#5a3c18"></stop>
-            <stop offset="0.28" stop-color="#b88a45"></stop>
-            <stop offset="0.42" stop-color="#e4c07a"></stop>
-            <stop offset="0.6" stop-color="#9a6d31"></stop>
-            <stop offset="1" stop-color="#3f2a12"></stop>
+            <stop offset="0" stop-color="#4f3412"></stop>
+            <stop offset="0.3" stop-color="#b3863f"></stop>
+            <stop offset="0.45" stop-color="#e7c47e"></stop>
+            <stop offset="0.62" stop-color="#9c6e30"></stop>
+            <stop offset="1" stop-color="#3b2710"></stop>
+          </linearGradient>
+          <linearGradient id="rs-bell-in" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3a2710"></stop>
+            <stop offset="1" stop-color="#7a5524"></stop>
           </linearGradient>
           <linearGradient id="rs-moonbeam" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#a9c2ff" stop-opacity="0.2"></stop>
+            <stop offset="0" stop-color="#a9c2ff" stop-opacity="0.16"></stop>
             <stop offset="1" stop-color="#a9c2ff" stop-opacity="0"></stop>
           </linearGradient>
           <linearGradient id="rs-board" x1="0" y1="0" x2="0" y2="1">
@@ -91,23 +107,31 @@ const f = (n: number) => n.toFixed(1);
             <stop offset="0.5" stop-color="#c79a3d"></stop>
             <stop offset="1" stop-color="#8f6a22"></stop>
           </linearGradient>
-          <pattern id="rs-sally" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(32)">
-            <rect width="14" height="14" fill="#b4282e"></rect>
-            <rect y="4.6" width="14" height="4.6" fill="#ece3cf"></rect>
-            <rect y="9.3" width="14" height="4.7" fill="#23407a"></rect>
+          <radialGradient id="rs-pool" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#ffd99a" stop-opacity="0.22"></stop>
+            <stop offset="1" stop-color="#ffd99a" stop-opacity="0"></stop>
+          </radialGradient>
+          <pattern id="rs-sally" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(32)">
+            <rect width="16" height="16" fill="#b02a2f"></rect>
+            <rect y="5.3" width="16" height="5.3" fill="#ece3cf"></rect>
+            <rect y="10.6" width="16" height="5.4" fill="#25427c"></rect>
           </pattern>
           <clipPath id="rs-chamber-clip">
             <rect x={WALL.inner} y={LEVELS.chamberTop} width={WALL.rightInner - WALL.inner} height={LEVELS.frontFloor - LEVELS.chamberTop}></rect>
           </clipPath>
         </defs>
 
-        <!-- Night outside -->
-        <rect width={VIEW.w} height={VIEW.h} fill="url(#rs-sky)"></rect>
+        <!-- Night outside, wider than the drawing -->
+        <rect x="-1400" y="-600" width={VIEW.w + 2800} height={LEVELS.frontFloor + 600} fill="url(#rs-sky)"></rect>
         {stars.map((s) => <circle cx={f(s.x)} cy={f(s.y)} r={f(s.r)} fill="#e8ecff" opacity={s.o.toFixed(2)} />)}
         <g class="moon">
-          <circle cx="590" cy="24" r="13" fill="#f2efe1"></circle>
-          <circle cx="595" cy="20" r="11.5" fill="#0d1226" opacity="0.9"></circle>
+          <circle cx="700" cy="70" r="15" fill="#f2efe1"></circle>
+          <circle cx="706" cy="65" r="13.5" fill="#0d1226" opacity="0.92"></circle>
         </g>
+        <!-- Churchyard: a low wall and two yews -->
+        <rect class="ground" x="-1400" y={LEVELS.frontFloor - 6} width={VIEW.w + 2800} height="700"></rect>
+        <path class="yew" d="M -120 896 C -150 860 -130 800 -96 760 C -70 800 -46 850 -72 896 Z"></path>
+        <path class="yew" d="M 700 896 C 676 852 690 810 720 776 C 748 812 762 858 738 896 Z"></path>
 
         <!-- The tower's cut walls: coursed stone either side, battlements at the top -->
         <g class="stone">
@@ -115,7 +139,7 @@ const f = (n: number) => n.toFixed(1);
           <rect x={WALL.rightInner} y={LEVELS.parapet} width={WALL.right - WALL.rightInner} height={LEVELS.ground - LEVELS.parapet}></rect>
           {
             [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <rect x={WALL.outer + i * 71} y={LEVELS.parapet - 22} width="34" height="24" />
+              <rect x={WALL.outer + i * 63.6} y={LEVELS.parapet - 22} width="32" height="24" />
             ))
           }
           <rect x={WALL.outer} y={LEVELS.parapet} width={WALL.right - WALL.outer} height={LEVELS.belfryTop - LEVELS.parapet}></rect>
@@ -131,11 +155,7 @@ const f = (n: number) => n.toFixed(1);
               </>
             ))
           }
-          {
-            [LEVELS.parapet + 10, LEVELS.parapet + 21].map((y) => (
-              <line x1={WALL.outer} y1={y} x2={WALL.right} y2={y} />
-            ))
-          }
+          {[LEVELS.parapet + 10, LEVELS.parapet + 21].map((y) => <line x1={WALL.outer} y1={y} x2={WALL.right} y2={y} />)}
         </g>
 
         <!-- Belfry -->
@@ -143,50 +163,66 @@ const f = (n: number) => n.toFixed(1);
         {
           lancets.map((x) => (
             <g class="lancet">
-              <path d={`M ${x - 34} 300 L ${x - 34} 128 Q ${x - 34} 96 ${x} 84 Q ${x + 34} 96 ${x + 34} 128 L ${x + 34} 300 Z`} class="lancet-sky" />
+              <path d={`M ${x - 34} 300 L ${x - 34} 126 Q ${x - 34} 94 ${x} 82 Q ${x + 34} 94 ${x + 34} 126 L ${x + 34} 300 Z`} class="lancet-sky" />
               {louvres.map((y) => (
                 <path d={`M ${x - 34} ${y} L ${x + 34} ${y} L ${x + 34} ${y + 9} L ${x - 34} ${y + 13} Z`} class="louvre" />
               ))}
-              <path d={`M ${x + 30} 110 L ${x + 150} 352 L ${x - 10} 352 L ${x - 30} 140 Z`} fill="url(#rs-moonbeam)" />
+              <path d={`M ${x + 30} 108 L ${x + 150} ${LEVELS.belfryFloor} L ${x - 10} ${LEVELS.belfryFloor} L ${x - 30} 140 Z`} fill="url(#rs-moonbeam)" />
             </g>
           ))
         }
         <!-- The bell frame: a long beam at the bearings, posts and braces to the floor -->
         <g class="frame">
-          <rect x={WALL.inner} y={LEVELS.axis + 6} width={WALL.rightInner - WALL.inner} height="9"></rect>
-          <rect x={WALL.inner} y={LEVELS.belfryFloor - 32} width={WALL.rightInner - WALL.inner} height="10"></rect>
+          <rect x={WALL.inner} y={LEVELS.axis + 5} width={WALL.rightInner - WALL.inner} height="9"></rect>
+          <rect x={WALL.inner} y={LEVELS.belfryFloor - 30} width={WALL.rightInner - WALL.inner} height="10"></rect>
           {
-            [0, 1, 2, 3, 4, 5, 6].map((i) => {
-              const x = WALL.inner + ((WALL.rightInner - WALL.inner) / 6) * i;
-              return <rect x={x - 4} y={LEVELS.axis + 6} width="8" height={LEVELS.belfryFloor - LEVELS.axis - 6} />;
-            })
+            [0, 1, 2, 3, 4, 5, 6].map((i) => (
+              <rect x={WALL.inner + pit * i - 4} y={LEVELS.axis + 5} width="8" height={LEVELS.belfryFloor - LEVELS.axis - 5} />
+            ))
+          }
+          {
+            [0, 1, 2, 3, 4, 5].map((i) => (
+              <path d={`M ${f(WALL.inner + pit * i + 4)} ${LEVELS.belfryFloor - 30} L ${f(WALL.inner + pit * (i + 0.5))} ${LEVELS.axis + 14} L ${f(WALL.inner + pit * (i + 1) - 4)} ${LEVELS.belfryFloor - 30}`} class="brace" />
+            ))
           }
         </g>
+        {
+          BELLS.map((b, i) => (
+            <g class="plaque" transform={`translate(${f(b.x)} ${LEVELS.belfryFloor - 52})`}>
+              <rect x="-9" y="-9" width="18" height="16" rx="2" />
+              <text y="3.4" text-anchor="middle">
+                {i + 1}
+              </text>
+            </g>
+          ))
+        }
 
         {
           BELLS.map((b, i) => (
             <g class="bell" data-bell={i} transform={`translate(${f(b.x)} ${f(b.y)})`}>
-              <g class="swing">
+              <g class="swing back">
                 <g class="wheel">
                   <circle r={f(b.r)} class="rim" />
-                  <circle r={f(b.r - 3.2)} class="rim-inner" />
+                  <circle r={f(b.r - 3.4)} class="rim-inner" />
                   {[0, 1, 2, 3, 4, 5].map((k) => {
-                    const a = (k * Math.PI) / 3;
+                    const a = (k * Math.PI) / 3 + 0.3;
                     return <line x1="0" y1="0" x2={f(Math.cos(a) * (b.r - 2))} y2={f(Math.sin(a) * (b.r - 2))} />;
                   })}
                 </g>
-                <rect class="stay" x="-2.2" y={f(-b.h * 0.95)} width="4.4" height={f(b.h * 0.95)} rx="1.5" />
-                <rect class="headstock" x={f(-b.h * 0.34)} y={f(-b.h * 0.07)} width={f(b.h * 0.68)} height={f(b.h * (0.07 + CROWN_FRAC + 0.02))} rx="2" />
-                <path class="body" d={bellPath(b.h)} />
-                <path class="bow" d={bowPath(b.h)} />
-                <path class="shine" d={`M ${f(-b.h * 0.12)} ${f(b.h * (CROWN_FRAC + 0.08))} C ${f(-b.h * 0.14)} ${f(b.h * (CROWN_FRAC + 0.4))} ${f(-b.h * 0.2)} ${f(b.h * (CROWN_FRAC + 0.66))} ${f(-b.h * 0.3)} ${f(b.h * (CROWN_FRAC + 0.82))}`} />
+                <rect class="stay" x="-2.2" y={f(-b.h * 0.92)} width="4.4" height={f(b.h * 0.92)} rx="1.5" />
+                <path class="inside" d={bellPath(b.h)} />
               </g>
               <g class="clapper">
-                <line x1="0" y1="0" x2="0" y2={f(b.h * 0.7)} />
-                <ellipse cx="0" cy={f(b.h * 0.7)} rx={f(b.h * 0.075)} ry={f(b.h * 0.1)} />
+                <line x1="0" y1="0" x2="0" y2={f(b.h * 0.86)} />
+                <ellipse cx="0" cy={f(b.h * 0.74)} rx={f(b.h * 0.075)} ry={f(b.h * 0.1)} />
+              </g>
+              <g class="swing front">
+                <path class="wall" d={wallPath(b.h, -1)} />
+                <path class="wall" d={wallPath(b.h, 1)} />
+                <path class="wall" d={crownPath(b.h)} />
+                <rect class="headstock" x={f(-b.h * 0.36)} y={f(-b.h * 0.06)} width={f(b.h * 0.72)} height={f(b.h * (0.06 + CROWN_FRAC))} rx="1.5" />
               </g>
               <circle class="gudgeon" r="2.4" />
-              <text class="bell-no" y={f(-b.r - 9)} text-anchor="middle">{i + 1}</text>
             </g>
           ))
         }
@@ -194,25 +230,25 @@ const f = (n: number) => n.toFixed(1);
         <!-- Belfry floor, in section -->
         <rect class="floor-cut" x={WALL.inner} y={LEVELS.belfryFloor} width={WALL.rightInner - WALL.inner} height="12"></rect>
 
-        <!-- Clock room: the turret clock on its stool, pendulum swinging below -->
+        <!-- Clock room: the turret clock on its stool, its pendulum swinging down through a slot in the floor -->
         <rect class="clockroom" x={WALL.inner} y={LEVELS.belfryFloor + 12} width={WALL.rightInner - WALL.inner} height={LEVELS.clockFloor - LEVELS.belfryFloor - 12}></rect>
-        <g class="turret-clock" transform="translate(470 408)">
-          <rect x="-46" y="20" width="92" height="7" class="stool"></rect>
-          <rect x="-40" y="27" width="6" height="40" class="stool"></rect>
-          <rect x="34" y="27" width="6" height="40" class="stool"></rect>
-          <rect x="-44" y="-22" width="88" height="42" rx="3" class="clock-frame"></rect>
-          <circle cx="-18" cy="-2" r="14" class="clock-wheel"></circle>
-          <circle cx="12" cy="4" r="9" class="clock-wheel"></circle>
-          <circle cx="28" cy="-8" r="6" class="clock-wheel"></circle>
-          <line x1="-18" y1="-22" x2="-18" y2="-34" class="clock-rod"></line>
-          <line x1="-18" y1="-34" x2="-108" y2="-34" class="clock-rod"></line>
+        <g class="turret-clock" transform={`translate(512 ${LEVELS.clockFloor - 44})`}>
+          <rect x="-30" y="14" width="60" height="6" class="stool"></rect>
+          <rect x="-26" y="20" width="5" height="24" class="stool"></rect>
+          <rect x="21" y="20" width="5" height="24" class="stool"></rect>
+          <rect x="-28" y="-16" width="56" height="30" rx="3" class="clock-frame"></rect>
+          <circle cx="-11" cy="-2" r="9" class="clock-wheel"></circle>
+          <circle cx="8" cy="3" r="6" class="clock-wheel"></circle>
+          <circle cx="19" cy="-6" r="4" class="clock-wheel"></circle>
+          <line x1="-11" y1="-16" x2="-11" y2="-26" class="clock-rod"></line>
+          <line x1="-11" y1="-26" x2="-60" y2="-26" class="clock-rod"></line>
           <g class="pendulum">
-            <line x1="0" y1="20" x2="0" y2="84" class="clock-rod"></line>
-            <circle cx="0" cy="84" r="8" class="bob"></circle>
+            <line x1="0" y1="14" x2="0" y2="62" class="clock-rod"></line>
+            <circle cx="0" cy="62" r="6" class="bob"></circle>
           </g>
         </g>
         <!-- The dial on the tower's face, telling the real time -->
-        <g class="dial" transform={`translate(${WALL.outer - 2} 430)`}>
+        <g class="dial" transform={`translate(${WALL.outer - 2} ${LEVELS.belfryFloor + 44})`}>
           <circle r="27" class="dial-face"></circle>
           <circle r="22.5" class="dial-ring"></circle>
           {
@@ -236,7 +272,7 @@ const f = (n: number) => n.toFixed(1);
 
         <!-- Ropes through the clock room: from each wheel's garter hole to its place in the circle below -->
         <g class="rope-runs">
-          {BELLS.map((b, i) => <line data-run={i} x1={f(ropeDrop(i))} y1={f(b.y)} x2={f(ropeDrop(i))} y2={LEVELS.chamberTop} />)}
+          {BELLS.map((b, i) => <line data-run={i} x1={f(ropeDrop(i))} y1={f(b.y)} x2={f(ropeDrop(i))} y2={LEVELS.clockFloor} />)}
         </g>
 
         <!-- Ringing chamber ceiling, in section -->
@@ -246,14 +282,19 @@ const f = (n: number) => n.toFixed(1);
         <g clip-path="url(#rs-chamber-clip)">
           <rect class="plaster" x={WALL.inner} y={LEVELS.chamberTop} width={WALL.rightInner - WALL.inner} height={LEVELS.backFloor - LEVELS.chamberTop}></rect>
           <!-- The ceiling's underside, boarded, receding to the back wall -->
-          <rect class="ceiling" x={WALL.inner} y={LEVELS.chamberTop} width={WALL.rightInner - WALL.inner} height="34"></rect>
-          {[0, 1, 2, 3].map((k) => <line class="ceiling-joist" x1={WALL.inner} y1={LEVELS.chamberTop + 6 + k * 8.5 - k * k * 0.6} x2={WALL.rightInner} y2={LEVELS.chamberTop + 6 + k * 8.5 - k * k * 0.6} />)}
+          <rect class="ceiling" x={WALL.inner} y={LEVELS.chamberTop} width={WALL.rightInner - WALL.inner} height={CEILING_DEPTH}></rect>
+          {
+            [0, 1, 2, 3].map((k) => {
+              const y = LEVELS.chamberTop + 7 + k * 9.5 - k * k * 0.7;
+              return <line class="ceiling-joist" x1={WALL.inner} y1={f(y)} x2={WALL.rightInner} y2={f(y)} />;
+            })
+          }
           <!-- North window, dark at this hour -->
-          <path class="window" d="M 296 708 L 296 610 Q 296 586 320 576 Q 344 586 344 610 L 344 708 Z"></path>
-          <path class="window-bars" d="M 320 578 L 320 708 M 296 644 L 344 644"></path>
-          <rect class="sill" x="290" y="707" width="60" height="6"></rect>
+          <path class="window" d="M 296 650 L 296 548 Q 296 524 320 514 Q 344 524 344 548 L 344 650 Z"></path>
+          <path class="window-bars" d="M 320 516 L 320 650 M 296 584 L 344 584"></path>
+          <rect class="sill" x="290" y="649" width="60" height="6"></rect>
           <!-- Peal boards: two old ones, and one waiting -->
-          <g class="board old" transform="translate(92 560)">
+          <g class="board old" transform="translate(92 500)">
             <rect width="132" height="94" rx="2"></rect>
             <rect x="5" y="5" width="122" height="84" class="board-line"></rect>
             <text x="66" y="22" text-anchor="middle" class="board-head">THIS TOWER</text>
@@ -262,7 +303,7 @@ const f = (n: number) => n.toFixed(1);
             <text x="66" y="64" text-anchor="middle" class="board-head">5040 PLAIN BOB MINOR</text>
             <text x="66" y="78" text-anchor="middle" class="board-small">in 2 hours 51 minutes</text>
           </g>
-          <g class="board old" transform="translate(416 560)">
+          <g class="board old" transform="translate(416 500)">
             <rect width="132" height="94" rx="2"></rect>
             <rect x="5" y="5" width="122" height="84" class="board-line"></rect>
             <text x="66" y="22" text-anchor="middle" class="board-head">TO MARK</text>
@@ -271,13 +312,13 @@ const f = (n: number) => n.toFixed(1);
             <text x="66" y="64" text-anchor="middle" class="board-head">1260 GRANDSIRE</text>
             <text x="66" y="78" text-anchor="middle" class="board-small">DOUBLES</text>
           </g>
-          <g class="board yours" transform="translate(92 664)">
+          <g class="board yours" transform="translate(92 606)">
             <rect width="132" height="40" rx="2"></rect>
             <rect x="5" y="5" width="122" height="30" class="board-line"></rect>
             <text x="66" y="24" text-anchor="middle" class="board-small" data-yours>Your touch goes here</text>
           </g>
           <!-- The practice notice, pinned up -->
-          <g class="notice" transform="translate(440 666) rotate(-2)">
+          <g class="notice" transform="translate(440 610) rotate(-2)">
             <rect width="84" height="60"></rect>
             <text x="42" y="16" text-anchor="middle" class="notice-head">PRACTICE</text>
             <text x="42" y="28" text-anchor="middle">Thursdays 7.30</text>
@@ -285,33 +326,34 @@ const f = (n: number) => n.toFixed(1);
             <text x="42" y="51" text-anchor="middle">Please stand bells</text>
             <circle cx="42" cy="4" r="1.6" class="pin"></circle>
           </g>
-          <!-- A bench along the back wall, and the lamp overhead -->
-          <rect class="bench" x="74" y="760" width="160" height="7" rx="2"></rect>
-          <rect class="bench" x="406" y="760" width="160" height="7" rx="2"></rect>
-          <rect class="bench-leg" x="84" y="767" width="5" height="40"></rect>
-          <rect class="bench-leg" x="220" y="767" width="5" height="40"></rect>
-          <rect class="bench-leg" x="416" y="767" width="5" height="40"></rect>
-          <rect class="bench-leg" x="552" y="767" width="5" height="40"></rect>
+          <!-- A bench along the back wall -->
+          <rect class="bench" x="74" y="744" width="160" height="7" rx="2"></rect>
+          <rect class="bench" x="406" y="744" width="160" height="7" rx="2"></rect>
+          <rect class="bench-leg" x="84" y="751" width="5" height="45"></rect>
+          <rect class="bench-leg" x="220" y="751" width="5" height="45"></rect>
+          <rect class="bench-leg" x="416" y="751" width="5" height="45"></rect>
+          <rect class="bench-leg" x="552" y="751" width="5" height="45"></rect>
           <!-- Floor -->
           <path class="floor" d={`M ${WALL.inner} ${LEVELS.backFloor} L ${WALL.rightInner} ${LEVELS.backFloor} L ${WALL.rightInner} ${LEVELS.frontFloor} L ${WALL.inner} ${LEVELS.frontFloor} Z`}></path>
           {
             boards.map((k) => {
               const t = k / (boards.length - 1);
-              const xb = 140 + t * 360;
-              const xf = -60 + t * 760;
+              const xb = 120 + t * 400;
+              const xf = -90 + t * 820;
               return <line class="board-gap" x1={f(xb)} y1={LEVELS.backFloor} x2={f(xf)} y2={LEVELS.frontFloor} />;
             })
           }
-          <ellipse class="mat" cx="320" cy="858" rx="210" ry="30"></ellipse>
+          <ellipse class="mat" cx="320" cy="850" rx="226" ry="36"></ellipse>
+          <g class="spots"></g>
+          <ellipse cx="320" cy="560" rx="260" ry="160" fill="url(#rs-pool)"></ellipse>
+          <g class="bosses"></g>
           <g class="ropes"></g>
-          <line class="lamp-flex" x1="320" y1={LEVELS.chamberTop} x2="320" y2="548"></line>
-          <path class="lamp-shade" d="M 304 560 L 336 560 L 328 548 L 312 548 Z"></path>
-          <ellipse class="lamp-bulb" cx="320" cy="561" rx="5" ry="3"></ellipse>
+          <line class="lamp-flex" x1="320" y1={LEVELS.chamberTop} x2="320" y2={LEVELS.chamberTop + 30}></line>
+          <path class="lamp-shade" d={`M 304 ${LEVELS.chamberTop + 42} L 336 ${LEVELS.chamberTop + 42} L 328 ${LEVELS.chamberTop + 30} L 312 ${LEVELS.chamberTop + 30} Z`}></path>
+          <ellipse class="lamp-bulb" cx="320" cy={LEVELS.chamberTop + 43} rx="5" ry="3"></ellipse>
         </g>
 
-        <!-- Ground outside -->
-        <rect class="ground" x="0" y={LEVELS.frontFloor} width={WALL.outer} height={LEVELS.ground - LEVELS.frontFloor}></rect>
-        <rect class="ground" x={WALL.right} y={LEVELS.frontFloor} width={VIEW.w - WALL.right} height={LEVELS.ground - LEVELS.frontFloor}></rect>
+        <!-- Below the chamber floor -->
         <rect class="floor-cut" x={WALL.inner} y={LEVELS.frontFloor} width={WALL.rightInner - WALL.inner} height={LEVELS.ground - LEVELS.frontFloor}></rect>
       </svg>
       <div class="cue" aria-hidden="true"></div>
@@ -335,7 +377,7 @@ const f = (n: number) => n.toFixed(1);
             {
               BELLS.map((_, i) => (
                 <label>
-                  <input type="radio" name="bell" value={i + 1} checked={i === 2} />
+                  <input type="radio" name="bell" value={i + 1} checked={i === 1} />
                   <span class="no">{i + 1}</span>
                   <span class="nm">{bellName(i)}</span>
                   <span class="who" data-who={i}>
@@ -382,7 +424,7 @@ const f = (n: number) => n.toFixed(1);
 
       <section class="live" hidden>
         <div class="status">
-          <p class="where"><span class="place">-</span> <span class="follow"></span></p>
+          <p class="where"><span class="place-note">-</span> <span class="follow-note"></span></p>
           <p class="last" aria-live="polite"></p>
         </div>
         <div class="charts">
@@ -461,6 +503,7 @@ const f = (n: number) => n.toFixed(1);
     padding: 12px;
     height: 100vh;
     height: 100dvh;
+    overflow: hidden;
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
@@ -470,6 +513,7 @@ const f = (n: number) => n.toFixed(1);
     width: 100%;
     height: 100%;
     max-height: calc(100dvh - 24px);
+    overflow: visible;
   }
 
   /* Drawing */
@@ -513,43 +557,56 @@ const f = (n: number) => n.toFixed(1);
   }
   .tower .bell .headstock {
     fill: #4a4e58;
+    stroke: #2c2f36;
+    stroke-width: 0.6;
   }
-  .tower .bell .body {
+  .tower .bell .inside {
+    fill: url(#rs-bell-in);
+  }
+  .tower .bell .wall {
     fill: url(#rs-bronze);
     stroke: #2a1a08;
-    stroke-width: 0.8;
-  }
-  .tower .bell .bow {
-    fill: #6e4b1f;
-    opacity: 0.55;
-  }
-  .tower .bell .shine {
-    fill: none;
-    stroke: #fff2c8;
-    stroke-width: 1.4;
-    stroke-linecap: round;
-    opacity: 0.35;
+    stroke-width: 0.6;
   }
   .tower .bell .clapper line {
-    stroke: #26282d;
-    stroke-width: 2.4;
+    stroke: #17181c;
+    stroke-width: 2.2;
   }
   .tower .bell .clapper ellipse {
-    fill: #26282d;
+    fill: #17181c;
   }
   .tower .bell .gudgeon {
     fill: #9aa0ab;
   }
-  .tower .bell .bell-no {
-    font-family: var(--font-rs-board);
-    font-size: 12px;
-    fill: #8d93a8;
+  .tower .plaque rect {
+    fill: #1a1f30;
+    stroke: #3c4258;
   }
-  .tower .bell.mine .bell-no {
+  .tower .plaque text {
+    font-family: var(--font-rs-board);
+    font-size: 11px;
+    fill: #9aa0b4;
+  }
+  .tower .bell.mine ~ .plaque text,
+  .tower .plaque.mine text {
     fill: var(--gilt);
   }
-  .tower .bell.follow .bell-no {
-    fill: #9fc0ff;
+  .tower .plaque.mine rect {
+    stroke: var(--gilt);
+  }
+  .tower .plaque.follow rect {
+    stroke: #9fc0ff;
+  }
+  .tower .plaque.follow text {
+    fill: #cfe0ff;
+  }
+  .tower .brace {
+    fill: none;
+    stroke: #33271e;
+    stroke-width: 5;
+  }
+  .tower .yew {
+    fill: #0b1018;
   }
   .tower .floor-cut {
     fill: #2c2520;
@@ -605,8 +662,8 @@ const f = (n: number) => n.toFixed(1);
   }
   .tower .rope-runs line {
     stroke: #c9b78e;
-    stroke-width: 1.3;
-    opacity: 0.75;
+    stroke-width: 1.4;
+    opacity: 0.6;
   }
   .tower .plaster {
     fill: url(#rs-lamp);
@@ -719,6 +776,19 @@ const f = (n: number) => n.toFixed(1);
     fill: #6b2b26;
     opacity: 0.5;
   }
+  .rs :global(.spots ellipse) {
+    fill: #2a1a12;
+    opacity: 0.55;
+  }
+  .rs :global(.spots ellipse.mine) {
+    fill: #e0bd6a;
+    opacity: 0.35;
+  }
+  .rs :global(.bosses ellipse) {
+    fill: #6b5139;
+    stroke: #3e2e20;
+    stroke-width: 0.8;
+  }
   .tower .lamp-flex {
     stroke: #222;
     stroke-width: 1;
@@ -740,7 +810,7 @@ const f = (n: number) => n.toFixed(1);
   .caption {
     position: absolute;
     left: 50%;
-    top: 49%;
+    top: 37%;
     transform: translateX(-50%);
     margin: 0;
     pointer-events: none;
@@ -757,7 +827,7 @@ const f = (n: number) => n.toFixed(1);
   .caption.on {
     opacity: 1;
   }
-  .caption small {
+  .caption :global(small) {
     display: block;
     font-family: var(--font-rs-text);
     font-size: 0.42em;
@@ -956,7 +1026,7 @@ const f = (n: number) => n.toFixed(1);
     font-family: var(--font-rs-board);
     font-size: 22px;
   }
-  .follow {
+  .follow-note {
     font-family: var(--font-rs-text);
     font-size: 14px;
     color: #9fc0ff;
@@ -968,8 +1038,7 @@ const f = (n: number) => n.toFixed(1);
   }
   .charts {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 14px;
   }
   .charts figure {
     margin: 0;
@@ -977,7 +1046,7 @@ const f = (n: number) => n.toFixed(1);
   .charts canvas {
     width: 100%;
     height: auto;
-    aspect-ratio: 1;
+    aspect-ratio: 16 / 9;
     display: block;
     background: #0f1220;
     border-radius: 8px;

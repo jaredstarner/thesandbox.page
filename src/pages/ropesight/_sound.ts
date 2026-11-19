@@ -32,6 +32,54 @@ const PARTIALS: Partial[] = [
 ];
 
 const LENGTH = 7; // seconds rendered per bell
+const RATE = 48000;
+
+/** Cast one bell offline: a sine per partial (two for a doublet), each dying away at its own rate. */
+async function cast(i: number): Promise<AudioBuffer> {
+  const off = new OfflineAudioContext(1, RATE * LENGTH, RATE);
+  const f = NOMINALS[i];
+  // Smaller bells ring shorter.
+  const size = Math.pow(NOMINALS[NOMINALS.length - 1] / f, 0.8);
+  const out = off.createGain();
+  out.gain.setValueAtTime(0, 0);
+  out.gain.linearRampToValueAtTime(1, 0.0006);
+  out.connect(off.destination);
+  const voice = (freq: number, amp: number, tau: number, phase: number) => {
+    const osc = off.createOscillator();
+    osc.frequency.value = freq;
+    const g = off.createGain();
+    g.gain.setValueAtTime(amp, 0);
+    g.gain.setTargetAtTime(0, 0, tau);
+    osc.connect(g).connect(out);
+    osc.start(phase);
+    osc.stop(Math.min(LENGTH, tau * 9.5));
+  };
+  PARTIALS.forEach((p, k) => {
+    const tau = p.tau * size;
+    // A hair of start offset per partial stands in for random phase.
+    const phase = ((i * 7 + k * 3) % 11) * 0.00002;
+    if (p.split) {
+      voice(f * p.ratio, p.amp * 0.62, tau, phase);
+      voice(f * p.ratio + p.split, p.amp * 0.38, tau, phase);
+    } else {
+      voice(f * p.ratio, p.amp, tau, phase);
+    }
+  });
+  // The clapper's contact: a few milliseconds of bright, quickly damped clang.
+  voice(f * 3.9, 0.16, 0.0028, 0);
+  voice(f * 5.7, 0.11, 0.0022, 0);
+  const buf = await off.startRendering();
+  const d = buf.getChannelData(0);
+  let peak = 0;
+  for (let n = 0; n < d.length; n++) peak = Math.max(peak, Math.abs(d[n]));
+  if (peak > 0) for (let n = 0; n < d.length; n++) d[n] /= peak;
+  return buf;
+}
+
+/** All six bells, cast in parallel; no sound plays and no permission is needed to do this. */
+export function castRing(): Promise<AudioBuffer[]> {
+  return Promise.all(NOMINALS.map((_, i) => cast(i)));
+}
 
 export class Ring {
   readonly ctx: AudioContext;
@@ -39,8 +87,9 @@ export class Ring {
   private input: GainNode;
   private master: GainNode;
 
-  constructor(ctx: AudioContext) {
+  constructor(ctx: AudioContext, buffers: AudioBuffer[]) {
     this.ctx = ctx;
+    this.buffers = buffers;
     this.master = ctx.createGain();
     this.master.gain.value = 0.55;
     const comp = ctx.createDynamicsCompressor();
@@ -66,7 +115,6 @@ export class Ring {
     floor.connect(dry).connect(this.master);
     floor.connect(verb).connect(wet).connect(this.master);
 
-    for (let i = 0; i < NOMINALS.length; i++) this.buffers.push(this.render(i));
   }
 
   /** A stone room's reverberation: decaying, darkening diffuse noise, the usual synthetic impulse. */
@@ -90,44 +138,6 @@ export class Ring {
         d[i] = lp * Math.exp(-t * 3.1) * (t < 0.012 ? t / 0.012 : 1);
       }
     }
-    return buf;
-  }
-
-  private render(i: number): AudioBuffer {
-    const sr = this.ctx.sampleRate;
-    const len = Math.floor(sr * LENGTH);
-    const buf = this.ctx.createBuffer(1, len, sr);
-    const d = buf.getChannelData(0);
-    const f = NOMINALS[i];
-    // Smaller bells ring shorter.
-    const size = Math.pow(NOMINALS[NOMINALS.length - 1] / f, 0.8);
-    for (const p of PARTIALS) {
-      const freq = f * p.ratio;
-      const tau = p.tau * size;
-      const phase = (i * 1.7 + p.ratio * 5.3) % (Math.PI * 2);
-      const w = (2 * Math.PI * freq) / sr;
-      const w2 = p.split ? (2 * Math.PI * (freq + p.split)) / sr : 0;
-      for (let n = 0; n < len; n++) {
-        const t = n / sr;
-        const env = Math.exp(-t / tau);
-        if (env < 1e-4) break;
-        let s = Math.sin(w * n + phase);
-        if (p.split) s = 0.62 * s + 0.38 * Math.sin(w2 * n + phase * 1.3);
-        d[n] += p.amp * env * s;
-      }
-    }
-    // The clapper's contact: a few milliseconds of bright, quickly damped clang.
-    for (let n = 0; n < sr * 0.012; n++) {
-      const t = n / sr;
-      d[n] += 0.22 * Math.exp(-t / 0.0025) * Math.sin(2 * Math.PI * f * 3.9 * t) * Math.sin(2 * Math.PI * f * 5.7 * t);
-    }
-    // Soft onset over half a millisecond so the attack doesn't click, then normalise.
-    let peak = 0;
-    for (let n = 0; n < len; n++) {
-      if (n < 24) d[n] *= n / 24;
-      peak = Math.max(peak, Math.abs(d[n]));
-    }
-    for (let n = 0; n < len; n++) d[n] /= peak;
     return buf;
   }
 
