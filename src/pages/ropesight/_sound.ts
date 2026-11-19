@@ -32,6 +32,8 @@ const PARTIALS: Partial[] = [
 ];
 
 const LENGTH = 7; // seconds rendered per bell
+/** Master level: a band in full swing sits around -22 dBFS RMS, comfortable beside other tabs. */
+const LEVEL = 1.25;
 const RATE = 48000;
 
 /** Cast one bell offline: a sine per partial (two for a doublet), each dying away at its own rate. */
@@ -91,9 +93,9 @@ export class Ring {
     this.ctx = ctx;
     this.buffers = buffers;
     this.master = ctx.createGain();
-    this.master.gain.value = 0.55;
+    this.master.gain.value = LEVEL;
     const comp = ctx.createDynamicsCompressor();
-    comp.threshold.value = -16;
+    comp.threshold.value = -14;
     comp.ratio.value = 3;
     comp.attack.value = 0.004;
     comp.release.value = 0.25;
@@ -166,6 +168,6 @@ export class Ring {
     const t = this.ctx.currentTime;
     this.master.gain.cancelScheduledValues(t);
     this.master.gain.setValueAtTime(this.master.gain.value, t);
-    this.master.gain.linearRampToValueAtTime(0.55, t + 0.05);
+    this.master.gain.linearRampToValueAtTime(LEVEL, t + 0.05);
   }
 }
