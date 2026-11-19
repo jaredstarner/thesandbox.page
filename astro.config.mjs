@@ -796,5 +796,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['cursive'],
     },
+    // /ropesight/: Castoro for the gilded peal boards and the tower's notices, Commissioner for the ringing chart.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Castoro',
+      cssVariable: '--font-rs-board',
+      weights: [400],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Commissioner',
+      cssVariable: '--font-rs-text',
+      weights: ['300 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
+    },
   ],
 });

@@ -1,0 +1,21 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+
+const description =
+  "A church tower's ringing chamber on practice night: take hold of a rope and ring with the band as the order of the bells changes at every blow.";
+---
+
+<Bare title="Ropesight" {description}>
+  <Font cssVariable="--font-rs-board" slot="head" />
+  <Font cssVariable="--font-rs-text" slot="head" />
+  <main class="ropesight">
+    <h1>Ropesight</h1>
+  </main>
+</Bare>
+
+<style>
+  .ropesight {
+    font-family: var(--font-rs-text);
+  }
+</style>
