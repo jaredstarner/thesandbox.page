@@ -409,11 +409,11 @@ export function start(root: HTMLElement): void {
     else {
       const late = s.mean > 0.02 ? ' You were running a little late on average: pull fractionally sooner.' : s.mean < -0.02 ? ' You were running a little early on average: let the rope in front go first.' : '';
       const q =
-        s.rms < 0.03
+        s.rms < 0.025
           ? 'Beautifully struck. The band would have you back any week.'
-          : s.rms < 0.055
+          : s.rms < 0.04
             ? 'Well struck: good, steady ringing.'
-            : s.rms < 0.09
+            : s.rms < 0.075
               ? 'A decent touch. A few blows wandered, but it came round.'
               : 'Rough in places, but you kept going and it came round. That counts.';
       text = `${q} ${s.good} of ${s.blows} blows within 45 ms of the beat${s.missed ? `, ${s.missed} missed` : ''}.${late}`;
