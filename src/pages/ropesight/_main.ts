@@ -74,6 +74,8 @@ export function start(root: HTMLElement): void {
   let lastRow = -2;
   let lookTo: { at: number; text: string; who: string }[] = [];
   let startedAt = 0;
+  /** When each bell was last heard, to light its plaque in the frame. */
+  const heardAt = [-9, -9, -9, -9, -9, -9];
 
   // The simulation keeps the page's clock, which runs whether or not sound has been allowed to start; each
   // blow is mapped onto the audio clock as it is scheduled.
@@ -226,6 +228,8 @@ export function start(root: HTMLElement): void {
       clappers[i].setAttribute('transform', `translate(${cx.toFixed(2)} ${cy.toFixed(2)}) rotate(${((-phi * 180) / Math.PI).toFixed(2)})`);
       bellGroups[i].classList.toggle('follow', i === follow);
       plaques[i]?.classList.toggle('follow', i === follow);
+      const since = now - heardAt[i];
+      plaques[i]?.classList.toggle('struck', since >= 0 && since < 0.16);
     }
     for (const r of ropes) {
       renderRope(r, bells[r.k].rope(), now, r.cue ? cueAt : null);
@@ -306,7 +310,10 @@ export function start(root: HTMLElement): void {
     const cond = conductor(mine);
     const treble = mine === 1 && !listenOnly ? 'You' : BAND[0].name;
     perf = new Performance(plan, mine - 1, gap, now, now + 2.6, Math.floor(Math.random() * 1e6), listenOnly);
-    perf.onStrike = (i, at, speed) => ring?.strike(i, toAudio(at + LATENCY), 0.45 + speed / 10);
+    perf.onStrike = (i, at, speed) => {
+      ring?.strike(i, toAudio(at + LATENCY), 0.45 + speed / 10);
+      heardAt[i] = at + LATENCY;
+    };
     perf.onJudge = judged;
     startedAt = now;
     lookTo = [

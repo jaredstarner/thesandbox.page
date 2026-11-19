@@ -425,6 +425,20 @@ const pit = (WALL.rightInner - WALL.inner) / 6;
           <button type="button" class="listen">Just listen</button>
         </div>
         <p class="keys">Pull with <kbd>Space</kbd>, or tap the tower.</p>
+        <details class="about">
+          <summary>How change ringing works</summary>
+          <p>
+            English church bells are hung to swing full circle. Each rests mouth up against a wooden stay, and a pull
+            on its rope sends it right round to rest mouth up on the other side, sounding once on the way: handstroke
+            when you pull the striped sally, backstroke when you pull the tail end.
+          </p>
+          <p>
+            A bell that heavy can only be held back or hurried by a fraction of a beat, so it can only swap places
+            with a neighbour from one row to the next. Instead of tunes, the band ring changes: every bell sounds once
+            in each row, pairs swap by a pattern called a method, and the conductor calls bobs and singles to vary it,
+            until the bells come back into rounds. The pause before each handstroke row is the handstroke gap.
+          </p>
+        </details>
       </form>
 
       <section class="live" hidden>
@@ -598,6 +612,12 @@ const pit = (WALL.rightInner - WALL.inner) / 6;
   }
   .tower .plaque.mine rect {
     stroke: var(--gilt);
+  }
+  .tower .plaque.struck rect {
+    fill: #5b4a22;
+  }
+  .tower .plaque.struck text {
+    fill: #fff1c4;
   }
   .tower .plaque.follow rect {
     stroke: #9fc0ff;
@@ -1008,6 +1028,20 @@ const pit = (WALL.rightInner - WALL.inner) / 6;
     font-weight: 600;
     font-size: 16px;
     padding: 12px 30px;
+  }
+  .about {
+    margin-top: 22px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+    color: #c4bdab;
+    font-size: 13.5px;
+  }
+  .about summary {
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .about p {
+    margin: 10px 0 0;
   }
   .keys {
     margin: 10px 0 0;
