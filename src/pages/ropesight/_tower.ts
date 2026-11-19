@@ -85,7 +85,7 @@ const OUTER: Pt[] = [
   [0.625, 0.93],
   [0.64, 0.96],
   [0.64, 1.0],
-]
+];
 
 /** Wall thickness at a given depth: thin at the waist, thickest at the soundbow where the clapper strikes. */
 function wall(y: number): number {

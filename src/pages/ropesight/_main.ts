@@ -207,7 +207,8 @@ export function start(root: HTMLElement): void {
         r.cue.setAttribute('cx', r.x.toFixed(1));
         r.cue.setAttribute('cy', handY.toFixed(1));
         r.cue.setAttribute('r', (9 + 34 * k).toFixed(1));
-        r.cue.style.opacity = left > 0.9 || left < -0.25 ? '0' : left < 0 ? String(1 + left * 4) : String(0.35 + 0.65 * (1 - k));
+        r.cue.style.opacity =
+          left > 0.9 || left < -0.25 ? '0' : left < 0 ? String(1 + left * 4) : String(0.35 + 0.65 * (1 - k));
         r.cue.classList.toggle('now', left <= 0.04);
       }
     }
@@ -225,7 +226,10 @@ export function start(root: HTMLElement): void {
       const cy = Math.cos(b.theta) * crown;
       // The drawn clapper swings a little wider than the model's so its ball visibly meets the soundbow.
       const phi = b.theta + (b.phi - b.theta) * 1.4;
-      clappers[i].setAttribute('transform', `translate(${cx.toFixed(2)} ${cy.toFixed(2)}) rotate(${((-phi * 180) / Math.PI).toFixed(2)})`);
+      clappers[i].setAttribute(
+        'transform',
+        `translate(${cx.toFixed(2)} ${cy.toFixed(2)}) rotate(${((-phi * 180) / Math.PI).toFixed(2)})`,
+      );
       bellGroups[i].classList.toggle('follow', i === follow);
       plaques[i]?.classList.toggle('follow', i === follow);
       const since = now - heardAt[i];
@@ -377,7 +381,12 @@ export function start(root: HTMLElement): void {
     const touchName = plan.def.id === 'rounds' ? 'ROUNDS' : `${plan.changes} ${plan.def.name.toUpperCase()}`;
     board.hidden = !complete || perf.listen;
     if (complete && !perf.listen) {
-      const date = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+      const date = new Intl.DateTimeFormat('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }).format(new Date());
       board.querySelector('.pb-date')!.textContent = `On ${date}`;
       board.querySelector('.pb-was')!.textContent = plan.def.id === 'rounds' ? 'were rung' : 'was rung a touch of';
       board.querySelector('.pb-touch')!.textContent = touchName;
@@ -407,7 +416,12 @@ export function start(root: HTMLElement): void {
     else if (!complete) text = why || 'The band stood.';
     else if (s.blows === 0) text = 'That came round.';
     else {
-      const late = s.mean > 0.02 ? ' You were running a little late on average: pull fractionally sooner.' : s.mean < -0.02 ? ' You were running a little early on average: let the rope in front go first.' : '';
+      const late =
+        s.mean > 0.02
+          ? ' You were running a little late on average: pull fractionally sooner.'
+          : s.mean < -0.02
+            ? ' You were running a little early on average: let the rope in front go first.'
+            : '';
       const q =
         s.rms < 0.025
           ? 'Beautifully struck. The band would have you back any week.'
@@ -497,7 +511,9 @@ export function start(root: HTMLElement): void {
         } else {
           // At lead you follow the last bell of the row before, over the handstroke gap or straight on.
           follow = prev ? prev - 1 : -1;
-          followEl.textContent = prev ? `after the ${BELL_NAMES[prev - 1]}${next.stroke === 'hand' ? ', over the gap' : ''}` : '';
+          followEl.textContent = prev
+            ? `after the ${BELL_NAMES[prev - 1]}${next.stroke === 'hand' ? ', over the gap' : ''}`
+            : '';
         }
         if (!perf.listen) cueAt = next.ideal - perf.delay;
       } else {

@@ -116,7 +116,6 @@ export class Ring {
     this.input.connect(floor);
     floor.connect(dry).connect(this.master);
     floor.connect(verb).connect(wet).connect(this.master);
-
   }
 
   /** A stone room's reverberation: decaying, darkening diffuse noise, the usual synthetic impulse. */
