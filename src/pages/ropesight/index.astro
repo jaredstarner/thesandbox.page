@@ -1115,12 +1115,12 @@ const pit = (WALL.rightInner - WALL.inner) / 6;
     text-align: left;
     font-size: 15px;
   }
-  .pb-band li {
+  .pb-band :global(li) {
     display: flex;
     justify-content: space-between;
     gap: 10px;
   }
-  .pb-band li.you {
+  .pb-band :global(li.you) {
     color: #f6e2a0;
   }
   .verdict {

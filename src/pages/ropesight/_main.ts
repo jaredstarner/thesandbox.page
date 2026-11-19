@@ -490,7 +490,7 @@ export function start(root: HTMLElement): void {
         } else {
           // At lead you follow the last bell of the row before, over the handstroke gap or straight on.
           follow = prev ? prev - 1 : -1;
-          followEl.textContent = prev ? `lead, after the ${BELL_NAMES[prev - 1]}` : 'lead';
+          followEl.textContent = prev ? `after the ${BELL_NAMES[prev - 1]}${next.stroke === 'hand' ? ', over the gap' : ''}` : '';
         }
         if (!perf.listen) cueAt = next.ideal - perf.delay;
       } else {
