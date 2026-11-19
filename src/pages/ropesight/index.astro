@@ -1,21 +1,1100 @@
 ---
 import { Font } from 'astro:assets';
 import Bare from '../../layouts/Bare.astro';
+import { METHODS } from './_method';
+import { BAND } from './_band';
+import { BELLS, LEVELS, VIEW, WALL, bellPath, bowPath, ropeDrop, CROWN_FRAC } from './_tower';
 
 const description =
   "A church tower's ringing chamber on practice night: take hold of a rope and ring with the band as the order of the bells changes at every blow.";
+
+const bellName = (i: number) => (i === 0 ? 'Treble' : i === 5 ? 'Tenor' : `${['', '2nd', '3rd', '4th', '5th'][i]}`);
+
+// Night sky: a fixed scatter of stars so every build draws the same sky.
+let seed = 7;
+const rnd = () => {
+  seed = (seed * 16807) % 2147483647;
+  return seed / 2147483647;
+};
+const stars = Array.from({ length: 70 }, () => {
+  const x = rnd() * VIEW.w;
+  const y = rnd() * 520;
+  const r = 0.4 + rnd() * rnd() * 1.3;
+  return { x, y, r, o: 0.35 + rnd() * 0.6 };
+}).filter((s) => s.x < WALL.outer - 4 || s.x > WALL.right + 4 || s.y < LEVELS.parapet - 30);
+
+// Stone courses on the cut walls.
+const courses: number[] = [];
+for (let y = LEVELS.parapet + 6; y < LEVELS.ground; y += 15) courses.push(y);
+
+// Louvres in the two belfry lancets.
+const lancets = [176, 464];
+const louvres = Array.from({ length: 9 }, (_, i) => 120 + i * 21);
+
+// Chamber floorboards converge on the rope circle's far side.
+const boards = Array.from({ length: 15 }, (_, i) => i);
+
+const f = (n: number) => n.toFixed(1);
 ---
 
 <Bare title="Ropesight" {description}>
   <Font cssVariable="--font-rs-board" slot="head" />
   <Font cssVariable="--font-rs-text" slot="head" />
-  <main class="ropesight">
-    <h1>Ropesight</h1>
+  <main class="rs" data-state="idle">
+    <div class="tower-wrap">
+      <svg
+        class="tower"
+        viewBox={`0 0 ${VIEW.w} ${VIEW.h}`}
+        role="img"
+        aria-label="A church tower cut open: six bells in their frame at the top, a turret clock below them, and the ringing chamber at the bottom, where six ropes hang in a circle."
+      >
+        <defs>
+          <linearGradient id="rs-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#0b1022"></stop>
+            <stop offset="0.7" stop-color="#18213d"></stop>
+            <stop offset="1" stop-color="#26304d"></stop>
+          </linearGradient>
+          <linearGradient id="rs-belfry" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#151b2e"></stop>
+            <stop offset="1" stop-color="#1d2438"></stop>
+          </linearGradient>
+          <linearGradient id="rs-clockroom" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#1c1f2c"></stop>
+            <stop offset="1" stop-color="#2a2a33"></stop>
+          </linearGradient>
+          <radialGradient id="rs-lamp" cx="0.5" cy="0.18" r="0.85">
+            <stop offset="0" stop-color="#f6dcae"></stop>
+            <stop offset="0.45" stop-color="#d9b483"></stop>
+            <stop offset="1" stop-color="#7d6248"></stop>
+          </radialGradient>
+          <linearGradient id="rs-floor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#5a3f2a"></stop>
+            <stop offset="1" stop-color="#3a281b"></stop>
+          </linearGradient>
+          <linearGradient id="rs-bronze" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#5a3c18"></stop>
+            <stop offset="0.28" stop-color="#b88a45"></stop>
+            <stop offset="0.42" stop-color="#e4c07a"></stop>
+            <stop offset="0.6" stop-color="#9a6d31"></stop>
+            <stop offset="1" stop-color="#3f2a12"></stop>
+          </linearGradient>
+          <linearGradient id="rs-moonbeam" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#a9c2ff" stop-opacity="0.2"></stop>
+            <stop offset="1" stop-color="#a9c2ff" stop-opacity="0"></stop>
+          </linearGradient>
+          <linearGradient id="rs-board" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#1b1a1d"></stop>
+            <stop offset="1" stop-color="#0e0e10"></stop>
+          </linearGradient>
+          <linearGradient id="rs-gilt" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#f3dc92"></stop>
+            <stop offset="0.5" stop-color="#c79a3d"></stop>
+            <stop offset="1" stop-color="#8f6a22"></stop>
+          </linearGradient>
+          <pattern id="rs-sally" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(32)">
+            <rect width="14" height="14" fill="#b4282e"></rect>
+            <rect y="4.6" width="14" height="4.6" fill="#ece3cf"></rect>
+            <rect y="9.3" width="14" height="4.7" fill="#23407a"></rect>
+          </pattern>
+          <clipPath id="rs-chamber-clip">
+            <rect x={WALL.inner} y={LEVELS.chamberTop} width={WALL.rightInner - WALL.inner} height={LEVELS.frontFloor - LEVELS.chamberTop}></rect>
+          </clipPath>
+        </defs>
+
+        <!-- Night outside -->
+        <rect width={VIEW.w} height={VIEW.h} fill="url(#rs-sky)"></rect>
+        {stars.map((s) => <circle cx={f(s.x)} cy={f(s.y)} r={f(s.r)} fill="#e8ecff" opacity={s.o.toFixed(2)} />)}
+        <g class="moon">
+          <circle cx="590" cy="24" r="13" fill="#f2efe1"></circle>
+          <circle cx="595" cy="20" r="11.5" fill="#0d1226" opacity="0.9"></circle>
+        </g>
+
+        <!-- The tower's cut walls: coursed stone either side, battlements at the top -->
+        <g class="stone">
+          <rect x={WALL.outer} y={LEVELS.parapet} width={WALL.inner - WALL.outer} height={LEVELS.ground - LEVELS.parapet}></rect>
+          <rect x={WALL.rightInner} y={LEVELS.parapet} width={WALL.right - WALL.rightInner} height={LEVELS.ground - LEVELS.parapet}></rect>
+          {
+            [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <rect x={WALL.outer + i * 71} y={LEVELS.parapet - 22} width="34" height="24" />
+            ))
+          }
+          <rect x={WALL.outer} y={LEVELS.parapet} width={WALL.right - WALL.outer} height={LEVELS.belfryTop - LEVELS.parapet}></rect>
+        </g>
+        <g class="courses">
+          {
+            courses.map((y, i) => (
+              <>
+                <line x1={WALL.outer} y1={y} x2={WALL.inner} y2={y} />
+                <line x1={WALL.rightInner} y1={y} x2={WALL.right} y2={y} />
+                <line x1={WALL.outer + (i % 2 ? 10 : 19)} y1={y} x2={WALL.outer + (i % 2 ? 10 : 19)} y2={y + 15} />
+                <line x1={WALL.rightInner + (i % 2 ? 17 : 8)} y1={y} x2={WALL.rightInner + (i % 2 ? 17 : 8)} y2={y + 15} />
+              </>
+            ))
+          }
+          {
+            [LEVELS.parapet + 10, LEVELS.parapet + 21].map((y) => (
+              <line x1={WALL.outer} y1={y} x2={WALL.right} y2={y} />
+            ))
+          }
+        </g>
+
+        <!-- Belfry -->
+        <rect class="belfry" x={WALL.inner} y={LEVELS.belfryTop} width={WALL.rightInner - WALL.inner} height={LEVELS.belfryFloor - LEVELS.belfryTop}></rect>
+        {
+          lancets.map((x) => (
+            <g class="lancet">
+              <path d={`M ${x - 34} 300 L ${x - 34} 128 Q ${x - 34} 96 ${x} 84 Q ${x + 34} 96 ${x + 34} 128 L ${x + 34} 300 Z`} class="lancet-sky" />
+              {louvres.map((y) => (
+                <path d={`M ${x - 34} ${y} L ${x + 34} ${y} L ${x + 34} ${y + 9} L ${x - 34} ${y + 13} Z`} class="louvre" />
+              ))}
+              <path d={`M ${x + 30} 110 L ${x + 150} 352 L ${x - 10} 352 L ${x - 30} 140 Z`} fill="url(#rs-moonbeam)" />
+            </g>
+          ))
+        }
+        <!-- The bell frame: a long beam at the bearings, posts and braces to the floor -->
+        <g class="frame">
+          <rect x={WALL.inner} y={LEVELS.axis + 6} width={WALL.rightInner - WALL.inner} height="9"></rect>
+          <rect x={WALL.inner} y={LEVELS.belfryFloor - 32} width={WALL.rightInner - WALL.inner} height="10"></rect>
+          {
+            [0, 1, 2, 3, 4, 5, 6].map((i) => {
+              const x = WALL.inner + ((WALL.rightInner - WALL.inner) / 6) * i;
+              return <rect x={x - 4} y={LEVELS.axis + 6} width="8" height={LEVELS.belfryFloor - LEVELS.axis - 6} />;
+            })
+          }
+        </g>
+
+        {
+          BELLS.map((b, i) => (
+            <g class="bell" data-bell={i} transform={`translate(${f(b.x)} ${f(b.y)})`}>
+              <g class="swing">
+                <g class="wheel">
+                  <circle r={f(b.r)} class="rim" />
+                  <circle r={f(b.r - 3.2)} class="rim-inner" />
+                  {[0, 1, 2, 3, 4, 5].map((k) => {
+                    const a = (k * Math.PI) / 3;
+                    return <line x1="0" y1="0" x2={f(Math.cos(a) * (b.r - 2))} y2={f(Math.sin(a) * (b.r - 2))} />;
+                  })}
+                </g>
+                <rect class="stay" x="-2.2" y={f(-b.h * 0.95)} width="4.4" height={f(b.h * 0.95)} rx="1.5" />
+                <rect class="headstock" x={f(-b.h * 0.34)} y={f(-b.h * 0.07)} width={f(b.h * 0.68)} height={f(b.h * (0.07 + CROWN_FRAC + 0.02))} rx="2" />
+                <path class="body" d={bellPath(b.h)} />
+                <path class="bow" d={bowPath(b.h)} />
+                <path class="shine" d={`M ${f(-b.h * 0.12)} ${f(b.h * (CROWN_FRAC + 0.08))} C ${f(-b.h * 0.14)} ${f(b.h * (CROWN_FRAC + 0.4))} ${f(-b.h * 0.2)} ${f(b.h * (CROWN_FRAC + 0.66))} ${f(-b.h * 0.3)} ${f(b.h * (CROWN_FRAC + 0.82))}`} />
+              </g>
+              <g class="clapper">
+                <line x1="0" y1="0" x2="0" y2={f(b.h * 0.7)} />
+                <ellipse cx="0" cy={f(b.h * 0.7)} rx={f(b.h * 0.075)} ry={f(b.h * 0.1)} />
+              </g>
+              <circle class="gudgeon" r="2.4" />
+              <text class="bell-no" y={f(-b.r - 9)} text-anchor="middle">{i + 1}</text>
+            </g>
+          ))
+        }
+
+        <!-- Belfry floor, in section -->
+        <rect class="floor-cut" x={WALL.inner} y={LEVELS.belfryFloor} width={WALL.rightInner - WALL.inner} height="12"></rect>
+
+        <!-- Clock room: the turret clock on its stool, pendulum swinging below -->
+        <rect class="clockroom" x={WALL.inner} y={LEVELS.belfryFloor + 12} width={WALL.rightInner - WALL.inner} height={LEVELS.clockFloor - LEVELS.belfryFloor - 12}></rect>
+        <g class="turret-clock" transform="translate(470 408)">
+          <rect x="-46" y="20" width="92" height="7" class="stool"></rect>
+          <rect x="-40" y="27" width="6" height="40" class="stool"></rect>
+          <rect x="34" y="27" width="6" height="40" class="stool"></rect>
+          <rect x="-44" y="-22" width="88" height="42" rx="3" class="clock-frame"></rect>
+          <circle cx="-18" cy="-2" r="14" class="clock-wheel"></circle>
+          <circle cx="12" cy="4" r="9" class="clock-wheel"></circle>
+          <circle cx="28" cy="-8" r="6" class="clock-wheel"></circle>
+          <line x1="-18" y1="-22" x2="-18" y2="-34" class="clock-rod"></line>
+          <line x1="-18" y1="-34" x2="-108" y2="-34" class="clock-rod"></line>
+          <g class="pendulum">
+            <line x1="0" y1="20" x2="0" y2="84" class="clock-rod"></line>
+            <circle cx="0" cy="84" r="8" class="bob"></circle>
+          </g>
+        </g>
+        <!-- The dial on the tower's face, telling the real time -->
+        <g class="dial" transform={`translate(${WALL.outer - 2} 430)`}>
+          <circle r="27" class="dial-face"></circle>
+          <circle r="22.5" class="dial-ring"></circle>
+          {
+            Array.from({ length: 12 }, (_, k) => {
+              const a = (k * Math.PI) / 6;
+              return (
+                <line
+                  x1={f(Math.sin(a) * 18.5)}
+                  y1={f(-Math.cos(a) * 18.5)}
+                  x2={f(Math.sin(a) * 22)}
+                  y2={f(-Math.cos(a) * 22)}
+                  class="dial-tick"
+                />
+              );
+            })
+          }
+          <line class="hand hour" x1="0" y1="2" x2="0" y2="-12"></line>
+          <line class="hand minute" x1="0" y1="3" x2="0" y2="-19"></line>
+          <circle r="1.8" class="dial-boss"></circle>
+        </g>
+
+        <!-- Ropes through the clock room: from each wheel's garter hole to its place in the circle below -->
+        <g class="rope-runs">
+          {BELLS.map((b, i) => <line data-run={i} x1={f(ropeDrop(i))} y1={f(b.y)} x2={f(ropeDrop(i))} y2={LEVELS.chamberTop} />)}
+        </g>
+
+        <!-- Ringing chamber ceiling, in section -->
+        <rect class="floor-cut" x={WALL.inner} y={LEVELS.clockFloor} width={WALL.rightInner - WALL.inner} height={LEVELS.chamberTop - LEVELS.clockFloor}></rect>
+
+        <!-- The ringing chamber -->
+        <g clip-path="url(#rs-chamber-clip)">
+          <rect class="plaster" x={WALL.inner} y={LEVELS.chamberTop} width={WALL.rightInner - WALL.inner} height={LEVELS.backFloor - LEVELS.chamberTop}></rect>
+          <!-- The ceiling's underside, boarded, receding to the back wall -->
+          <rect class="ceiling" x={WALL.inner} y={LEVELS.chamberTop} width={WALL.rightInner - WALL.inner} height="34"></rect>
+          {[0, 1, 2, 3].map((k) => <line class="ceiling-joist" x1={WALL.inner} y1={LEVELS.chamberTop + 6 + k * 8.5 - k * k * 0.6} x2={WALL.rightInner} y2={LEVELS.chamberTop + 6 + k * 8.5 - k * k * 0.6} />)}
+          <!-- North window, dark at this hour -->
+          <path class="window" d="M 296 708 L 296 610 Q 296 586 320 576 Q 344 586 344 610 L 344 708 Z"></path>
+          <path class="window-bars" d="M 320 578 L 320 708 M 296 644 L 344 644"></path>
+          <rect class="sill" x="290" y="707" width="60" height="6"></rect>
+          <!-- Peal boards: two old ones, and one waiting -->
+          <g class="board old" transform="translate(92 560)">
+            <rect width="132" height="94" rx="2"></rect>
+            <rect x="5" y="5" width="122" height="84" class="board-line"></rect>
+            <text x="66" y="22" text-anchor="middle" class="board-head">THIS TOWER</text>
+            <text x="66" y="36" text-anchor="middle" class="board-small">on Saturday 4 June 1955</text>
+            <text x="66" y="50" text-anchor="middle" class="board-small">was rung a peal of</text>
+            <text x="66" y="64" text-anchor="middle" class="board-head">5040 PLAIN BOB MINOR</text>
+            <text x="66" y="78" text-anchor="middle" class="board-small">in 2 hours 51 minutes</text>
+          </g>
+          <g class="board old" transform="translate(416 560)">
+            <rect width="132" height="94" rx="2"></rect>
+            <rect x="5" y="5" width="122" height="84" class="board-line"></rect>
+            <text x="66" y="22" text-anchor="middle" class="board-head">TO MARK</text>
+            <text x="66" y="36" text-anchor="middle" class="board-small">the Coronation, 2 June 1953</text>
+            <text x="66" y="50" text-anchor="middle" class="board-small">the bells were rung</text>
+            <text x="66" y="64" text-anchor="middle" class="board-head">1260 GRANDSIRE</text>
+            <text x="66" y="78" text-anchor="middle" class="board-small">DOUBLES</text>
+          </g>
+          <g class="board yours" transform="translate(92 664)">
+            <rect width="132" height="40" rx="2"></rect>
+            <rect x="5" y="5" width="122" height="30" class="board-line"></rect>
+            <text x="66" y="24" text-anchor="middle" class="board-small" data-yours>Your touch goes here</text>
+          </g>
+          <!-- The practice notice, pinned up -->
+          <g class="notice" transform="translate(440 666) rotate(-2)">
+            <rect width="84" height="60"></rect>
+            <text x="42" y="16" text-anchor="middle" class="notice-head">PRACTICE</text>
+            <text x="42" y="28" text-anchor="middle">Thursdays 7.30</text>
+            <text x="42" y="40" text-anchor="middle">Learners welcome</text>
+            <text x="42" y="51" text-anchor="middle">Please stand bells</text>
+            <circle cx="42" cy="4" r="1.6" class="pin"></circle>
+          </g>
+          <!-- A bench along the back wall, and the lamp overhead -->
+          <rect class="bench" x="74" y="760" width="160" height="7" rx="2"></rect>
+          <rect class="bench" x="406" y="760" width="160" height="7" rx="2"></rect>
+          <rect class="bench-leg" x="84" y="767" width="5" height="40"></rect>
+          <rect class="bench-leg" x="220" y="767" width="5" height="40"></rect>
+          <rect class="bench-leg" x="416" y="767" width="5" height="40"></rect>
+          <rect class="bench-leg" x="552" y="767" width="5" height="40"></rect>
+          <!-- Floor -->
+          <path class="floor" d={`M ${WALL.inner} ${LEVELS.backFloor} L ${WALL.rightInner} ${LEVELS.backFloor} L ${WALL.rightInner} ${LEVELS.frontFloor} L ${WALL.inner} ${LEVELS.frontFloor} Z`}></path>
+          {
+            boards.map((k) => {
+              const t = k / (boards.length - 1);
+              const xb = 140 + t * 360;
+              const xf = -60 + t * 760;
+              return <line class="board-gap" x1={f(xb)} y1={LEVELS.backFloor} x2={f(xf)} y2={LEVELS.frontFloor} />;
+            })
+          }
+          <ellipse class="mat" cx="320" cy="858" rx="210" ry="30"></ellipse>
+          <g class="ropes"></g>
+          <line class="lamp-flex" x1="320" y1={LEVELS.chamberTop} x2="320" y2="548"></line>
+          <path class="lamp-shade" d="M 304 560 L 336 560 L 328 548 L 312 548 Z"></path>
+          <ellipse class="lamp-bulb" cx="320" cy="561" rx="5" ry="3"></ellipse>
+        </g>
+
+        <!-- Ground outside -->
+        <rect class="ground" x="0" y={LEVELS.frontFloor} width={WALL.outer} height={LEVELS.ground - LEVELS.frontFloor}></rect>
+        <rect class="ground" x={WALL.right} y={LEVELS.frontFloor} width={VIEW.w - WALL.right} height={LEVELS.ground - LEVELS.frontFloor}></rect>
+        <rect class="floor-cut" x={WALL.inner} y={LEVELS.frontFloor} width={WALL.rightInner - WALL.inner} height={LEVELS.ground - LEVELS.frontFloor}></rect>
+      </svg>
+      <div class="cue" aria-hidden="true"></div>
+      <p class="caption" aria-live="assertive"></p>
+    </div>
+
+    <aside class="panel">
+      <header>
+        <p class="kicker">St Michael &amp; All Angels · Thursday practice</p>
+        <h1>Ropesight</h1>
+        <p class="lede">
+          Six bells are up and the band are stood at their ropes. Take one. Each blow sounds about a second after you
+          pull, so you ring by watching the rope you follow and pulling just after it moves.
+        </p>
+      </header>
+
+      <form class="setup">
+        <fieldset class="pick-bell">
+          <legend>Your rope</legend>
+          <div class="bells">
+            {
+              BELLS.map((_, i) => (
+                <label>
+                  <input type="radio" name="bell" value={i + 1} checked={i === 2} />
+                  <span class="no">{i + 1}</span>
+                  <span class="nm">{bellName(i)}</span>
+                  <span class="who" data-who={i}>
+                    {BAND[i].name}
+                  </span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+
+        <fieldset class="pick-method">
+          <legend>Ring</legend>
+          {
+            METHODS.map((m, k) => (
+              <label>
+                <input type="radio" name="method" value={m.id} checked={k === 0} />
+                <span class="mname">{m.name}</span>
+                <span class="mblurb">{m.blurb}</span>
+              </label>
+            ))
+          }
+        </fieldset>
+
+        <div class="row">
+          <label class="touch">
+            <span>Touch</span>
+            <select name="touch"></select>
+          </label>
+          <fieldset class="speed">
+            <legend>Pace</legend>
+            <label><input type="radio" name="speed" value="steady" checked /> Steady</label>
+            <label><input type="radio" name="speed" value="brisk" /> Brisk</label>
+          </fieldset>
+        </div>
+        <label class="guide"><input type="checkbox" name="guide" checked /> Show me when to pull</label>
+
+        <div class="go-row">
+          <button type="submit" class="go">Look to</button>
+          <button type="button" class="listen">Just listen</button>
+        </div>
+        <p class="keys">Pull with <kbd>Space</kbd>, or tap the tower.</p>
+      </form>
+
+      <section class="live" hidden>
+        <div class="status">
+          <p class="where"><span class="place">-</span> <span class="follow"></span></p>
+          <p class="last" aria-live="polite"></p>
+        </div>
+        <div class="charts">
+          <figure class="line">
+            <canvas class="blue-line" width="300" height="300"></canvas>
+            <figcaption>Your line through the changes</figcaption>
+          </figure>
+          <figure class="strike">
+            <canvas class="striking" width="300" height="300"></canvas>
+            <figcaption>Striking: every blow against an even beat</figcaption>
+          </figure>
+        </div>
+        <div class="live-actions">
+          <button type="button" class="pull">Pull</button>
+          <button type="button" class="stand">Stand</button>
+        </div>
+      </section>
+
+      <section class="result" hidden>
+        <div class="peal-board">
+          <p class="pb-tower">St Michael &amp; All Angels</p>
+          <p class="pb-date"></p>
+          <p class="pb-was">was rung a touch of</p>
+          <p class="pb-touch"></p>
+          <p class="pb-time"></p>
+          <ol class="pb-band"></ol>
+          <p class="pb-note"></p>
+        </div>
+        <p class="verdict"></p>
+        <div class="result-actions">
+          <button type="button" class="again">Ring again</button>
+        </div>
+      </section>
+    </aside>
   </main>
 </Bare>
 
 <style>
-  .ropesight {
+  .rs {
+    --night: #0e1222;
+    --ink: #e9e2d0;
+    --muted: #a7a191;
+    --gilt: #e0bd6a;
+    --blue: #4f7fe0;
+    --red: #d24a3f;
+    --panel: #151826;
+    --line: #2b3047;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(330px, 420px);
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--night);
+    color: var(--ink);
     font-family: var(--font-rs-text);
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  :global(body:has(.rs)) {
+    margin: 0;
+    background: #0e1222;
+  }
+  .rs *,
+  .rs *::before,
+  .rs *::after {
+    box-sizing: border-box;
+  }
+  .rs [hidden] {
+    display: none !important;
+  }
+
+  .tower-wrap {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 12px;
+    height: 100vh;
+    height: 100dvh;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+  }
+  .tower {
+    width: 100%;
+    height: 100%;
+    max-height: calc(100dvh - 24px);
+  }
+
+  /* Drawing */
+  .tower .stone rect {
+    fill: #3b3a45;
+  }
+  .tower .courses line {
+    stroke: #2b2a33;
+    stroke-width: 1;
+  }
+  .tower .belfry {
+    fill: url(#rs-belfry);
+  }
+  .tower .lancet-sky {
+    fill: #0b1124;
+    stroke: #2c3044;
+    stroke-width: 3;
+  }
+  .tower .louvre {
+    fill: #262a3b;
+  }
+  .tower .frame rect {
+    fill: #3a2c22;
+  }
+  .tower .bell .rim {
+    fill: none;
+    stroke: #7a5a3c;
+    stroke-width: 3.2;
+  }
+  .tower .bell .rim-inner {
+    fill: none;
+    stroke: #5b412b;
+    stroke-width: 1;
+  }
+  .tower .bell .wheel line {
+    stroke: #6b4e33;
+    stroke-width: 2;
+  }
+  .tower .bell .stay {
+    fill: #8a6a48;
+  }
+  .tower .bell .headstock {
+    fill: #4a4e58;
+  }
+  .tower .bell .body {
+    fill: url(#rs-bronze);
+    stroke: #2a1a08;
+    stroke-width: 0.8;
+  }
+  .tower .bell .bow {
+    fill: #6e4b1f;
+    opacity: 0.55;
+  }
+  .tower .bell .shine {
+    fill: none;
+    stroke: #fff2c8;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    opacity: 0.35;
+  }
+  .tower .bell .clapper line {
+    stroke: #26282d;
+    stroke-width: 2.4;
+  }
+  .tower .bell .clapper ellipse {
+    fill: #26282d;
+  }
+  .tower .bell .gudgeon {
+    fill: #9aa0ab;
+  }
+  .tower .bell .bell-no {
+    font-family: var(--font-rs-board);
+    font-size: 12px;
+    fill: #8d93a8;
+  }
+  .tower .bell.mine .bell-no {
+    fill: var(--gilt);
+  }
+  .tower .bell.follow .bell-no {
+    fill: #9fc0ff;
+  }
+  .tower .floor-cut {
+    fill: #2c2520;
+  }
+  .tower .clockroom {
+    fill: url(#rs-clockroom);
+  }
+  .tower .stool {
+    fill: #3b2e24;
+  }
+  .tower .clock-frame {
+    fill: #2e3a35;
+    stroke: #48574f;
+  }
+  .tower .clock-wheel {
+    fill: none;
+    stroke: #b39a5a;
+    stroke-width: 2;
+  }
+  .tower .clock-rod {
+    stroke: #6c7377;
+    stroke-width: 1.6;
+  }
+  .tower .bob {
+    fill: #9c8a5c;
+  }
+  .tower .dial-face {
+    fill: #1d3156;
+    stroke: #c7a250;
+    stroke-width: 2;
+  }
+  .tower .dial-ring {
+    fill: none;
+    stroke: #c7a250;
+    stroke-width: 0.6;
+  }
+  .tower .dial-tick {
+    stroke: #e3c477;
+    stroke-width: 1.6;
+  }
+  .tower .hand {
+    stroke: #f0d58c;
+    stroke-linecap: round;
+  }
+  .tower .hand.hour {
+    stroke-width: 2.4;
+  }
+  .tower .hand.minute {
+    stroke-width: 1.5;
+  }
+  .tower .dial-boss {
+    fill: #f0d58c;
+  }
+  .tower .rope-runs line {
+    stroke: #c9b78e;
+    stroke-width: 1.3;
+    opacity: 0.75;
+  }
+  .tower .plaster {
+    fill: url(#rs-lamp);
+  }
+  .tower .window {
+    fill: #142041;
+    stroke: #6d5a45;
+    stroke-width: 4;
+  }
+  .tower .window-bars {
+    stroke: #5a4936;
+    stroke-width: 1.6;
+    fill: none;
+  }
+  .tower .sill {
+    fill: #a58f72;
+  }
+  .tower .board rect:first-child {
+    fill: url(#rs-board);
+    stroke: #6a4a24;
+    stroke-width: 3;
+  }
+  .tower .board-line {
+    fill: none;
+    stroke: url(#rs-gilt);
+    stroke-width: 0.8;
+  }
+  .tower .board-head {
+    font-family: var(--font-rs-board);
+    font-size: 8.4px;
+    letter-spacing: 0.06em;
+    fill: url(#rs-gilt);
+  }
+  .tower .board-small {
+    font-family: var(--font-rs-board);
+    font-style: italic;
+    font-size: 7.6px;
+    fill: #d6b468;
+  }
+  .tower .board.yours text {
+    font-size: 7px;
+  }
+  .tower .ceiling {
+    fill: #4a3a2c;
+  }
+  .tower .ceiling-joist {
+    stroke: #33271d;
+    stroke-width: 2;
+  }
+  .tower .notice rect {
+    fill: #e9e1cc;
+  }
+  .tower .notice text {
+    font-family: var(--font-rs-text);
+    font-size: 6.4px;
+    fill: #3a3326;
+  }
+  .tower .notice .notice-head {
+    font-family: var(--font-rs-board);
+    font-size: 8px;
+    letter-spacing: 0.1em;
+  }
+  .tower .notice .pin {
+    fill: #b4282e;
+  }
+  /* Ropes are built by the script. */
+  .rs :global(.rope .hemp),
+  .rs :global(.rope .tail) {
+    stroke: #d8c79f;
+    fill: none;
+    stroke-linecap: round;
+  }
+  .rs :global(.rope .sally) {
+    fill: url(#rs-sally);
+    stroke: rgb(0 0 0 / 0.35);
+    stroke-width: 0.6;
+  }
+  .rs :global(.rope.mine .sally) {
+    stroke: #f0cf7a;
+    stroke-width: 1.6;
+  }
+  .rs :global(.rope.follow .sally) {
+    stroke: #9fc0ff;
+    stroke-width: 1.6;
+  }
+  .rs :global(.rope .cue-ring) {
+    fill: none;
+    stroke: #f0cf7a;
+    stroke-width: 1.6;
+    opacity: 0;
+  }
+  .rs :global(.rope .cue-ring.now) {
+    stroke-width: 3;
+    stroke: #fff1c4;
+  }
+  .tower .bench {
+    fill: #5d4330;
+  }
+  .tower .bench-leg {
+    fill: #4a3424;
+  }
+  .tower .floor {
+    fill: url(#rs-floor);
+  }
+  .tower .board-gap {
+    stroke: #2c1e14;
+    stroke-width: 0.8;
+  }
+  .tower .mat {
+    fill: #6b2b26;
+    opacity: 0.5;
+  }
+  .tower .lamp-flex {
+    stroke: #222;
+    stroke-width: 1;
+  }
+  .tower .lamp-shade {
+    fill: #2c4a3b;
+  }
+  .tower .lamp-bulb {
+    fill: #fff3cc;
+  }
+  .tower .ground {
+    fill: #10141f;
+  }
+
+  .cue {
+    position: absolute;
+    pointer-events: none;
+  }
+  .caption {
+    position: absolute;
+    left: 50%;
+    top: 49%;
+    transform: translateX(-50%);
+    margin: 0;
+    pointer-events: none;
+    font-family: var(--font-rs-board);
+    font-size: clamp(20px, 3vw, 34px);
+    color: #fff4d6;
+    text-shadow:
+      0 2px 12px rgb(0 0 0 / 0.8),
+      0 0 2px rgb(0 0 0 / 0.9);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .caption.on {
+    opacity: 1;
+  }
+  .caption small {
+    display: block;
+    font-family: var(--font-rs-text);
+    font-size: 0.42em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #d8cdb2;
+    text-align: center;
+  }
+
+  /* Panel */
+  .panel {
+    background: var(--panel);
+    border-left: 1px solid var(--line);
+    padding: 28px 26px 32px;
+    overflow-y: auto;
+    max-height: 100vh;
+    max-height: 100dvh;
+  }
+  .kicker {
+    margin: 0 0 4px;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .panel h1 {
+    margin: 0 0 10px;
+    font-family: var(--font-rs-board);
+    font-weight: 400;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--gilt);
+  }
+  .lede {
+    margin: 0 0 22px;
+    color: #cfc8b6;
+  }
+  fieldset {
+    border: 0;
+    margin: 0 0 18px;
+    padding: 0;
+    min-width: 0;
+  }
+  legend,
+  .touch > span {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0;
+  }
+  .bells {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .bells label {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    padding: 8px 2px 7px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .bells input,
+  .pick-method input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .bells .no {
+    font-family: var(--font-rs-board);
+    font-size: 24px;
+    line-height: 1;
+  }
+  .bells .nm {
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+  .bells .who {
+    font-size: 10px;
+    color: #7f7a6d;
+    line-height: 1.2;
+    margin-top: 3px;
+  }
+  .bells label:has(input:checked) {
+    border-color: var(--gilt);
+    background: rgb(224 189 106 / 0.1);
+  }
+  .bells label:has(input:checked) .who {
+    color: var(--gilt);
+  }
+  .bells label:has(input:focus-visible),
+  .pick-method label:has(input:focus-visible) {
+    outline: 2px solid #9fc0ff;
+    outline-offset: 2px;
+  }
+  .pick-method {
+    display: grid;
+    gap: 6px;
+  }
+  .pick-method label {
+    position: relative;
+    display: grid;
+    padding: 9px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .pick-method label:has(input:checked) {
+    border-color: var(--gilt);
+    background: rgb(224 189 106 / 0.08);
+  }
+  .mname {
+    font-family: var(--font-rs-board);
+    font-size: 17px;
+  }
+  .mblurb {
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .touch {
+    flex: 1 1 180px;
+    margin-bottom: 18px;
+  }
+  .touch select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: #0f1220;
+    color: var(--ink);
+    font: inherit;
+  }
+  .speed label {
+    margin-right: 12px;
+    cursor: pointer;
+  }
+  .guide {
+    display: block;
+    margin: 0 0 20px;
+    cursor: pointer;
+  }
+  .rs button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 999px;
+    padding: 11px 22px;
+    border: 1px solid var(--line);
+    background: #20253a;
+    color: var(--ink);
+  }
+  .go-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .rs button.go,
+  .rs button.again {
+    background: var(--gilt);
+    border-color: var(--gilt);
+    color: #1b1407;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 12px 30px;
+  }
+  .keys {
+    margin: 10px 0 0;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  kbd {
+    font-family: inherit;
+    font-size: 11px;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+
+  .status {
+    margin-bottom: 14px;
+  }
+  .where {
+    margin: 0;
+    font-family: var(--font-rs-board);
+    font-size: 22px;
+  }
+  .follow {
+    font-family: var(--font-rs-text);
+    font-size: 14px;
+    color: #9fc0ff;
+  }
+  .last {
+    margin: 2px 0 0;
+    min-height: 1.4em;
+    color: var(--muted);
+  }
+  .charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .charts figure {
+    margin: 0;
+  }
+  .charts canvas {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    display: block;
+    background: #0f1220;
+    border-radius: 8px;
+  }
+  .charts figcaption {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+  .live-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .rs button.pull {
+    display: none;
+  }
+
+  .peal-board {
+    background: linear-gradient(#1b1a1d, #0d0d0f);
+    border: 6px solid #6a4a24;
+    outline: 1px solid #8a6631;
+    outline-offset: -12px;
+    border-radius: 4px;
+    padding: 26px 22px 24px;
+    text-align: center;
+    font-family: var(--font-rs-board);
+    color: #d9b86c;
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.5);
+  }
+  .peal-board p {
+    margin: 0;
+  }
+  .pb-tower,
+  .pb-touch {
+    background: linear-gradient(#f6e2a0, #c99a3c 55%, #95701f);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .pb-tower {
+    font-size: 19px;
+  }
+  .pb-date,
+  .pb-was,
+  .pb-time,
+  .pb-note {
+    font-style: italic;
+    font-size: 15px;
+  }
+  .pb-date {
+    margin-top: 6px !important;
+  }
+  .pb-touch {
+    font-size: 24px;
+    line-height: 1.15;
+    margin: 4px 0 !important;
+  }
+  .pb-band {
+    list-style: none;
+    padding: 0;
+    margin: 14px auto !important;
+    max-width: 260px;
+    text-align: left;
+    font-size: 15px;
+  }
+  .pb-band li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .pb-band li.you {
+    color: #f6e2a0;
+  }
+  .verdict {
+    margin: 16px 0;
+    color: #cfc8b6;
+  }
+
+  @media (max-width: 860px) {
+    .rs {
+      grid-template-columns: 1fr;
+    }
+    .tower-wrap {
+      height: auto;
+      padding: 8px 8px 0;
+    }
+    .tower {
+      height: auto;
+      max-height: 68dvh;
+    }
+    .panel {
+      border-left: 0;
+      border-top: 1px solid var(--line);
+      max-height: none;
+      padding: 22px 16px 28px;
+    }
+    .panel h1 {
+      font-size: 38px;
+    }
+    .rs[data-state='ringing'] .tower {
+      max-height: 58dvh;
+    }
+    .rs button.pull {
+      display: block;
+      flex: 1;
+      padding: 18px;
+      font-size: 18px;
+      background: #2a3150;
+    }
   }
 </style>
+
+<script>
+  import { start } from './_main';
+  const root = document.querySelector<HTMLElement>('.rs');
+  if (root) start(root);
+</script>
