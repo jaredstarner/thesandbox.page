@@ -506,7 +506,7 @@ export function start(root: HTMLElement): void {
     if (par) levelArm(par.arm);
   });
   $('.wt-done').addEventListener('click', () => openBench(null));
-  root.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && sel && !cutDialog.open) openBench(null);
   });
 
