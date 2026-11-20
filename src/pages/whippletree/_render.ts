@@ -2,7 +2,7 @@
 // so the wall maps to the screen by a plain scale and shift and every shadow can be drawn flat.
 
 import { arcY, PAINTS } from './_model';
-import { CEILING, type ArmState, type Mobile, type PlateState, type V3 } from './_sim';
+import type { ArmState, Mobile, PlateState, V3 } from './_sim';
 
 export interface Camera {
   /** CSS pixel size of the view. */
@@ -70,15 +70,17 @@ const unit = (a: V3): V3 => {
 
 const WALL_TEX_X0 = -6;
 const WALL_TEX_W = 12;
-const TEX_PPM = 90;
-const LIGHT_COLOR: V3 = [1.0, 0.93, 0.82];
-const AMBIENT: V3 = [0.36, 0.37, 0.4];
-const SHADE = 'rgb(140, 136, 134)';
+const TEX_PPM = 50;
+const WALL_TEX_H = 8;
+const LIGHT_COLOR: V3 = [1.0, 0.94, 0.84];
+const AMBIENT: V3 = [0.5, 0.51, 0.54];
+const SHADE = 'rgb(166, 161, 157)';
 
 export class Renderer {
   private shade = document.createElement('canvas');
   private sctx: CanvasRenderingContext2D;
   private wallTex: HTMLCanvasElement;
+  private grain: CanvasPattern | null;
   hits: Hits = { plates: [], arms: [] };
 
   constructor(
@@ -87,6 +89,7 @@ export class Renderer {
   ) {
     this.sctx = this.shade.getContext('2d')!;
     this.wallTex = makeWallTexture();
+    this.grain = ctx.createPattern(makeGrain(), 'repeat');
   }
 
   resize(c: Camera): void {
@@ -109,26 +112,28 @@ export class Renderer {
     const a = c.f / Dw;
     const wx = (X: number) => (c.cx + a * (X - c.camX)) * k;
     const wy = (Y: number) => (c.cy - c.f * ((Y - c.camY) / Dw - c.k0)) * k;
-    const wallTop = wy(CEILING);
+    const wallTop = Math.min(0, wy(WALL_TEX_H));
     const wallBottom = wy(0);
     const Wpx = this.canvas.width;
     const Hpx = this.canvas.height;
-
-    // Ceiling.
-    const cg = ctx.createLinearGradient(0, 0, 0, Math.max(1, wallTop));
-    cg.addColorStop(0, '#8f8a83');
-    cg.addColorStop(1, '#b4ada3');
-    ctx.fillStyle = cg;
-    ctx.fillRect(0, 0, Wpx, Math.max(0, wallTop));
 
     // Wall: limewash, then the light.
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, wallTop, Wpx, wallBottom - wallTop);
     ctx.clip();
-    ctx.setTransform((a * k) / TEX_PPM, 0, 0, (a * k) / TEX_PPM, wx(WALL_TEX_X0), wallTop);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.setTransform((a * k) / TEX_PPM, 0, 0, (a * k) / TEX_PPM, wx(WALL_TEX_X0), wy(WALL_TEX_H));
     ctx.drawImage(this.wallTex, 0, 0);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    // Fine grain of the plaster, at screen resolution so it never shows as a grid.
+    if (this.grain) {
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = this.grain;
+      ctx.fillRect(0, wallTop, Wpx, wallBottom - wallTop);
+      ctx.globalAlpha = 1;
+    }
     // Skirting.
     const sk = wy(0.1);
     ctx.fillStyle = '#efe9df';
@@ -180,21 +185,15 @@ export class Renderer {
     ctx.drawImage(this.shade, 0, 0);
     ctx.globalCompositeOperation = 'source-over';
 
-    // The ceiling fitting and the thread down to the top arm.
-    const anchor: V3 = [0, CEILING, 0];
-    const pa = project(c, anchor);
+    // The thread up to a ceiling far out of frame.
+    const pa = project(c, [m.root.H[0], m.root.H[1] + 6, m.root.H[2]]);
     const top = project(c, m.root.H);
-    ctx.strokeStyle = 'rgba(40, 36, 32, 0.55)';
-    ctx.lineWidth = Math.max(0.6, 0.7 * k);
+    ctx.strokeStyle = 'rgba(40, 36, 32, 0.6)';
+    ctx.lineWidth = Math.max(0.7, 0.75 * k);
     ctx.beginPath();
     ctx.moveTo(pa[0] * k, pa[1] * k);
     ctx.lineTo(top[0] * k, top[1] * k);
     ctx.stroke();
-    const cupR = (0.035 * c.f * k) / pa[2];
-    ctx.fillStyle = '#d9d3c9';
-    ctx.beginPath();
-    ctx.ellipse(pa[0] * k, pa[1] * k, cupR, cupR * 0.32, 0, 0, Math.PI * 2);
-    ctx.fill();
 
     // The mobile, back to front.
     type Item = { depth: number; draw: () => void };
@@ -219,7 +218,7 @@ export class Renderer {
           ctx.fill();
           ctx.lineJoin = 'round';
           ctx.strokeStyle = col.edge;
-          ctx.lineWidth = Math.max(1, ((0.0016 * c.f) / depth) * k * 1.4);
+          ctx.lineWidth = Math.max(0.8 * k, ((0.0016 * c.f) / depth) * k);
           ctx.stroke();
           if (selected) {
             ctx.save();
@@ -338,7 +337,8 @@ export class Renderer {
     // The pool of light: aimed at the mobile, landing on the wall a little right of it and lower.
     const L = room.light;
     const aim: V3 = [m.root.H[0], (m.root.H[1] + m.reachCache.bottom) / 2, 0];
-    const pool = onWall(L, aim, room.wallZ);
+    const cast = onWall(L, aim, room.wallZ);
+    const pool: V3 = [(aim[0] + cast[0]) / 2, (aim[1] + cast[1]) / 2, room.wallZ];
     const Dw = c.camZ - room.wallZ;
     const a = (c.f / Dw) * k;
     const px = wx(pool[0]);
@@ -346,12 +346,12 @@ export class Renderer {
     s.globalCompositeOperation = 'destination-out';
     s.save();
     s.translate(px, py);
-    s.scale(1.18, 1);
-    const R = a * Math.max(1.45, m.reachCache.radius * 1.9);
+    s.scale(1.25, 1);
+    const R = a * Math.max(1.3, m.reachCache.typical * 2.3);
     const g = s.createRadialGradient(0, 0, 0, 0, 0, R);
     g.addColorStop(0, 'rgba(0,0,0,1)');
-    g.addColorStop(0.55, 'rgba(0,0,0,0.93)');
-    g.addColorStop(0.8, 'rgba(0,0,0,0.5)');
+    g.addColorStop(0.45, 'rgba(0,0,0,0.96)');
+    g.addColorStop(0.75, 'rgba(0,0,0,0.55)');
     g.addColorStop(1, 'rgba(0,0,0,0)');
     s.fillStyle = g;
     s.beginPath();
@@ -399,7 +399,7 @@ export class Renderer {
         else s.moveTo(x - OFF, y);
       });
       // Its link up to the arm above, or the thread to the ceiling.
-      const up: V3 = arm.parent ? arm.parent.ends[arm.side] : [0, CEILING, 0];
+      const up: V3 = arm.parent ? arm.parent.ends[arm.side] : [arm.H[0], arm.H[1] + 6, arm.H[2]];
       const [hx, hy] = toScreen(arm.H);
       const [ux, uy] = toScreen(up);
       s.moveTo(hx - OFF, hy);
@@ -453,54 +453,85 @@ function shadePlate(ps: PlateState, L: V3, eye: V3): { fill: string; edge: strin
   const rv = Math.max(0, dot(r, v));
   const metal = paint.metal;
   const spec = diff > 0 ? (metal ? 0.9 * rv ** 14 : 0.18 * rv ** 30) : 0;
-  const kd = metal ? 0.55 : 0.92;
+  const kd = metal ? 0.5 : 0.78;
   const out: V3 = [0, 0, 0];
   for (let i = 0; i < 3; i++) {
     const tint = metal ? alb[i]! : 1;
-    out[i] = alb[i]! * (AMBIENT[i]! * 0.9 + kd * diff * LIGHT_COLOR[i]!) + spec * tint * LIGHT_COLOR[i]!;
+    out[i] = alb[i]! * (AMBIENT[i]! + kd * diff * LIGHT_COLOR[i]!) + spec * tint * LIGHT_COLOR[i]!;
     // A little skylight from the room on the face the lamp misses, so dark faces read as metal, not holes.
     out[i] += alb[i]! * 0.06 * Math.max(0, n[1]);
   }
   const fill = rgb(out[0], out[1], out[2]);
-  const edge = rgb(out[0] * 0.55, out[1] * 0.55, out[2] * 0.55);
+  const edge = rgb(out[0] * 0.78, out[1] * 0.78, out[2] * 0.78);
   return { fill, edge };
 }
 
 function makeWallTexture(): HTMLCanvasElement {
+  // Limewash: a few octaves of smooth value noise, nudging the white warmer or cooler,
+  // lighter or darker by a hair. Computed per texel, so nothing dithers when it is enlarged.
   const w = WALL_TEX_W * TEX_PPM;
-  const h = Math.ceil(CEILING * TEX_PPM);
+  const h = WALL_TEX_H * TEX_PPM;
   const cv = document.createElement('canvas');
   cv.width = w;
   cv.height = h;
   const g = cv.getContext('2d')!;
-  g.fillStyle = '#ebe5da';
-  g.fillRect(0, 0, w, h);
+  const img = g.createImageData(w, h);
+  const N = 64;
+  const lattice: number[] = [];
   let seed = 11;
+  for (let i = 0; i < N * N; i++) {
+    seed = (seed * 16807) % 2147483647;
+    lattice.push(seed / 2147483647);
+  }
+  const at = (x: number, y: number) => lattice[(((y % N) + N) % N) * N + (((x % N) + N) % N)]!;
+  const smooth = (t: number) => t * t * (3 - 2 * t);
+  const noise = (x: number, y: number) => {
+    const xi = Math.floor(x);
+    const yi = Math.floor(y);
+    const fx = smooth(x - xi);
+    const fy = smooth(y - yi);
+    const a = at(xi, yi) + (at(xi + 1, yi) - at(xi, yi)) * fx;
+    const b = at(xi, yi + 1) + (at(xi + 1, yi + 1) - at(xi, yi + 1)) * fx;
+    return a + (b - a) * fy;
+  };
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const u = x / TEX_PPM;
+      const v = y / TEX_PPM;
+      const n = noise(u * 1.3, v * 1.3) * 0.55 + noise(u * 3.7 + 9, v * 3.7) * 0.3 + noise(u * 9 + 3, v * 9 + 5) * 0.15;
+      const t = noise(u * 0.6 + 20, v * 0.6 + 7);
+      const d = (n - 0.5) * 9;
+      const i = (y * w + x) * 4;
+      img.data[i] = 235 + d + (t - 0.5) * 3;
+      img.data[i + 1] = 229 + d;
+      img.data[i + 2] = 218 + d - (t - 0.5) * 3;
+      img.data[i + 3] = 255;
+    }
+  }
+  g.putImageData(img, 0, 0);
+  return cv;
+}
+
+/** A tile of fine, soft noise: light and dark specks at very low contrast. */
+function makeGrain(): HTMLCanvasElement {
+  const n = 160;
+  const cv = document.createElement('canvas');
+  cv.width = n;
+  cv.height = n;
+  const g = cv.getContext('2d')!;
+  const img = g.createImageData(n, n);
+  let seed = 23;
   const rnd = () => {
     seed = (seed * 16807) % 2147483647;
     return seed / 2147483647;
   };
-  // Limewash: broad, faint clouds of lighter and darker wash.
-  for (let i = 0; i < 260; i++) {
-    const x = rnd() * w;
-    const y = rnd() * h;
-    const r = 30 + rnd() * 160;
-    const dark = rnd() < 0.5;
-    const grd = g.createRadialGradient(x, y, 0, x, y, r);
-    const al = 0.025 + rnd() * 0.035;
-    grd.addColorStop(0, dark ? `rgba(150,130,105,${al})` : `rgba(255,252,246,${al * 1.4})`);
-    grd.addColorStop(1, 'rgba(0,0,0,0)');
-    g.fillStyle = grd;
-    g.fillRect(x - r, y - r, r * 2, r * 2);
-  }
-  // Fine grain.
-  const img = g.getImageData(0, 0, w, h);
-  const d = img.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const n = (rnd() - 0.5) * 7;
-    d[i] = d[i]! + n;
-    d[i + 1] = d[i + 1]! + n;
-    d[i + 2] = d[i + 2]! + n;
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = rnd();
+    const light = v > 0.5;
+    img.data[i] = light ? 255 : 90;
+    img.data[i + 1] = light ? 252 : 80;
+    img.data[i + 2] = light ? 246 : 70;
+    img.data[i + 3] = Math.round(Math.abs(v - 0.5) * 2 * 22);
   }
   g.putImageData(img, 0, 0);
   return cv;

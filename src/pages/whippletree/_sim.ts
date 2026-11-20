@@ -17,7 +17,7 @@ import {
 
 export type V3 = [number, number, number];
 
-export const CEILING = 3.05;
+export const CEILING = 3.4;
 const G = 9.81;
 const RHO = 1.2; // air, kg/m^3
 const CD = 1.15; // drag coefficient of a flat plate face-on
@@ -73,6 +73,13 @@ export interface ArmState {
   torque: number;
 }
 
+export interface Reach {
+  radius: number;
+  typical: number;
+  top: number;
+  bottom: number;
+}
+
 export interface Contact {
   a: PlateState;
   b: PlateState;
@@ -103,7 +110,7 @@ export class Mobile {
   private touching = new Set<string>();
   t = 0;
   /** Reach and height, measured once when the mobile is put together. */
-  reachCache: { radius: number; top: number; bottom: number } = { radius: 0.5, top: 2.7, bottom: 1.6 };
+  reachCache: Reach = { radius: 0.5, typical: 0.4, top: 2.7, bottom: 1.6 };
 
   constructor(
     top: Arm,
@@ -394,17 +401,20 @@ export class Mobile {
     return count;
   }
 
-  /** Horizontal extent the mobile can reach if every arm lines up, and its lowest point at rest. */
-  reach(): { radius: number; top: number; bottom: number } {
-    const walk = (s: ArmState): number => {
+  /**
+   * How far the mobile reaches from its thread: `radius` if every arm lined up, `typical` as
+   * arms at random angles add (in quadrature), and its top and lowest point at rest.
+   */
+  reach(): Reach {
+    const walk = (s: ArmState, typical: boolean): number => {
       let r = 0;
       for (const e of [0, 1] as const) {
         const arm = s.arm;
         const lever = e === 0 ? s.xh : arm.len - s.xh;
         const ch = s.children[e];
         const plate = s.plates.find((p) => p.side === e);
-        const extra = ch ? walk(ch) : plate ? plate.plate.size : 0;
-        r = Math.max(r, lever + extra);
+        const extra = ch ? walk(ch, typical) : plate ? plate.plate.size : 0;
+        r = Math.max(r, typical ? Math.hypot(lever, extra) : lever + extra);
       }
       return r;
     };
@@ -415,7 +425,7 @@ export class Mobile {
       for (const e of s.ends) bottom = Math.min(bottom, e[1]);
     }
     for (const p of this.platesList) for (const q of p.outline) bottom = Math.min(bottom, q[1]);
-    return { radius: walk(this.root), top, bottom };
+    return { radius: walk(this.root, false), typical: walk(this.root, true), top, bottom };
   }
 }
 

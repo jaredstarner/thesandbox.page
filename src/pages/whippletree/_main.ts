@@ -79,7 +79,7 @@ export function start(root: HTMLElement): void {
 
   // The room.
   const cam: Camera = { W: 1, H: 1, dpr: 1, f: 900, camX: 0.25, camY: 1.55, camZ: 4.2, k0: 0, cx: 0, cy: 0 };
-  const room: Room = { wallZ: -1, light: [-1.75, 2.95, 2.5], lightRadius: 0.055 };
+  const room: Room = { wallZ: -1, light: [-1.15, 3.2, 3.6], lightRadius: 0.035 };
   const target = { f: 900, k0: 0, cx: 0, wallZ: -1 };
   let framed = false;
 
@@ -174,7 +174,7 @@ export function start(root: HTMLElement): void {
     const H = cam.H;
     const phone = W < 720;
     const r = mobile.reachCache;
-    const R = Math.max(0.28, r.radius * 0.86);
+    const R = Math.max(0.28, r.typical * 1.15);
     const benchW = sel && !phone ? 344 : 0;
     const benchH = sel && phone ? H * 0.5 : 0;
     const topPad = phone ? 112 : 70;
@@ -190,7 +190,7 @@ export function start(root: HTMLElement): void {
     const yC = (r.top + 0.1 + r.bottom - 0.12) / 2;
     const screenY = topPad + availH / 2;
     target.k0 = (yC - cam.camY) / cam.camZ + (screenY - H / 2) / target.f;
-    target.wallZ = -Math.max(0.85, R + 0.3);
+    target.wallZ = -Math.max(0.85, r.radius * 0.8 + 0.25);
     if (!framed) {
       cam.f = target.f;
       cam.k0 = target.k0;
@@ -216,7 +216,7 @@ export function start(root: HTMLElement): void {
     const grams = Math.round(mass(tree) * 1000);
     const r = mobile.reachCache;
     const h = Math.round((r.top - r.bottom) * 100);
-    const w = Math.round(r.radius * 2 * 100);
+    const w = Math.round(r.typical * 2 * 100);
     dimsEl.textContent = `${h} × ${w} cm · ${ps.length} plates · ${grams} g`;
     const used = new Set(ps.map((p) => p.paint));
     const parts: string[] = [];
@@ -240,17 +240,23 @@ export function start(root: HTMLElement): void {
       return;
     }
     labelEl.style.bottom = 'auto';
-    // Eye height, to the left of the work.
-    const R = mobile.reachCache.radius * 0.86;
-    const p = project(cam, [-(R + 0.12), 1.48, room.wallZ]);
-    const scale = Math.min(1.25, Math.max(0.85, ((cam.f / (cam.camZ - room.wallZ)) * 0.0105) / 13));
+    // On the wall to the left of the work, level with its lowest plates.
+    const r = mobile.reachCache;
+    const p = project(cam, [-(r.typical * 1.1 + 0.1), r.bottom + 0.08, room.wallZ]);
+    const scale = Math.min(1.2, Math.max(1, ((cam.f / (cam.camZ - room.wallZ)) * 0.011) / 13));
     const wpx = labelEl.offsetWidth * scale;
+    const hpx = labelEl.offsetHeight * scale;
     let x = p[0] - wpx;
-    x = Math.max(16, x);
-    const y = Math.max(cam.H * 0.32, Math.min(cam.H - 200, p[1]));
+    x = Math.max(clampLeft(), x);
+    const y = Math.max(cam.H * 0.3, Math.min(cam.H - 110 - hpx, p[1]));
     labelEl.style.left = '0px';
     labelEl.style.top = '0px';
     labelEl.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) scale(${scale.toFixed(3)})`;
+  }
+
+  /** The label never runs off the wall or under the header. */
+  function clampLeft(): number {
+    return Math.max(16, Math.min(44, cam.W * 0.03));
   }
 
   // Bench.
@@ -878,6 +884,10 @@ export function start(root: HTMLElement): void {
     cam.k0 += (target.k0 - cam.k0) * ease;
     cam.cx += (target.cx - cam.cx) * ease;
     room.wallZ += (target.wallZ - room.wallZ) * ease;
+    // The lamp is trained on the mobile from in front, up and to the left.
+    const rc = mobile.reachCache;
+    const lampY = (rc.top + rc.bottom) / 2 + 0.95;
+    room.light[1] += (lampY - room.light[1]) * ease;
     airLevel += (AIR[air]! - airLevel) * (1 - Math.exp(-dt * 0.5));
     blow.level += (blow.want - blow.level) * (1 - Math.exp(-dt * (blow.want > blow.level ? 5 : 2.2)));
     const steadyWant = sel ? 1 : 0;
