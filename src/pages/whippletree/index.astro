@@ -1,0 +1,708 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { PAINTS, PAINT_KEYS, PRESETS, SHAPE_KEYS, SHAPE_NAMES, unitOutline, type ShapeKey } from './_model';
+
+const description =
+  'A hanging mobile under a gallery spotlight: hang painted plates on wire arms, slide each loop until its arm hangs level, and watch it turn in the draught with its shadow on the wall.';
+
+// Shape tray icons, drawn from the same outlines the plates are cut from.
+const iconPath = (key: ShapeKey) => {
+  const pts = unitOutline(key);
+  return (
+    'M' +
+    pts
+      .map(([u, v]) => `${(5 + u * 30).toFixed(1)} ${(20 - v * 30).toFixed(1)}`)
+      .join('L') +
+    'Z'
+  );
+};
+const swatch = (rgb: [number, number, number]) => `rgb(${rgb.join(', ')})`;
+---
+
+<Bare title="Whippletree" {description}>
+  <Font cssVariable="--font-wt" slot="head" />
+  <main class="wt">
+    <canvas
+      class="wt-room"
+      role="img"
+      aria-label="A hanging mobile of painted plates on black wire arms, turning slowly under a spotlight, with its shadow on the wall behind it."
+    ></canvas>
+
+    <header class="wt-head">
+      <a class="wt-home" href="/">thesandbox.page</a>
+      <h1>Whippletree</h1>
+      <p>A mobile you balance by hand, the way they are made: from the bottom up.</p>
+    </header>
+
+    <figure class="wt-label">
+      <label class="wt-title">
+        <span class="wt-vh">Title of the work</span>
+        <input type="text" maxlength="60" value="Seven Leaves Falling" spellcheck="false" autocomplete="off" />
+      </label>
+      <p class="wt-year">2026</p>
+      <p class="wt-medium">Painted aluminium and steel wire</p>
+      <p class="wt-dims"></p>
+    </figure>
+
+    <p class="wt-hint">Push a plate to set it turning. Click a plate or a wire to work on it. Hold the air to blow.</p>
+
+    <nav class="wt-bar" aria-label="The mobile">
+      <label class="wt-presets">
+        <span class="wt-vh">Mobile</span>
+        <select>
+          {PRESETS.map((p) => <option value={p.key}>{p.title}</option>)}
+        </select>
+      </label>
+      <div class="wt-air" role="radiogroup" aria-label="Air in the room">
+        <button type="button" role="radio" aria-checked="true" data-air="0">Still</button>
+        <button type="button" role="radio" aria-checked="false" data-air="1"><span class="wt-long">Window </span>ajar</button>
+        <button type="button" role="radio" aria-checked="false" data-air="2">Breezy</button>
+      </div>
+      <button type="button" class="wt-blow">Hold to blow</button>
+      <button type="button" class="wt-balance">Balance all</button>
+      <button type="button" class="wt-share">Copy link</button>
+      <button type="button" class="wt-sound" aria-pressed="true" title="Sound">
+        <svg viewBox="0 0 20 20" aria-hidden="true"
+          ><path d="M3 8h3l4-3.5v11L6 12H3z" fill="currentColor"></path><path
+            class="wt-waves"
+            d="M13 7.2a4 4 0 0 1 0 5.6M15.2 5a7 7 0 0 1 0 10"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"></path><path
+            class="wt-x"
+            d="M13.5 7.5l5 5M18.5 7.5l-5 5"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"></path></svg
+        >
+        <span class="wt-vh">Sound</span>
+      </button>
+    </nav>
+
+    <aside class="wt-bench" hidden aria-labelledby="wt-bench-title">
+      <header class="wt-bench-head">
+        <div>
+          <h2 id="wt-bench-title">Plate</h2>
+          <p class="wt-bench-note"></p>
+        </div>
+        <button type="button" class="wt-done">Done</button>
+      </header>
+
+      <section class="wt-for-plate">
+        <h3>Shape</h3>
+        <div class="wt-shapes">
+          {
+            SHAPE_KEYS.map((k) => (
+              <button type="button" data-shape={k} title={SHAPE_NAMES[k]} aria-label={SHAPE_NAMES[k]}>
+                <svg viewBox="0 0 40 40" aria-hidden="true">
+                  <path d={iconPath(k)} />
+                </svg>
+              </button>
+            ))
+          }
+          <button type="button" class="wt-cut-open" title="Cut your own" aria-label="Cut your own">
+            <svg viewBox="0 0 40 40" aria-hidden="true">
+              <circle cx="12" cy="28" r="4.2"></circle>
+              <circle cx="24" cy="30" r="4.2"></circle>
+              <path d="M14.5 25L30 8M21.5 26.5L17 9"></path>
+            </svg>
+          </button>
+        </div>
+
+        <h3>Paint</h3>
+        <div class="wt-paints">
+          {
+            PAINT_KEYS.map((k) => (
+              <button
+                type="button"
+                data-paint={k}
+                title={PAINTS[k].name}
+                aria-label={PAINTS[k].name}
+                class:list={[{ metal: PAINTS[k].metal }]}
+                style={`--sw: ${swatch(PAINTS[k].rgb)}`}
+              />
+            ))
+          }
+        </div>
+
+        <label class="wt-range">
+          <span>Size <output data-out="size"></output></span>
+          <input type="range" data-edit="size" min="5" max="30" step="0.5" />
+        </label>
+        <label class="wt-range">
+          <span>Turn on the wire <output data-out="roll"></output></span>
+          <input type="range" data-edit="roll" min="-90" max="90" step="1" />
+        </label>
+        <div class="wt-actions">
+          <button type="button" data-act="branch">Hang an arm here</button>
+          <button type="button" data-act="remove-plate">Take it off</button>
+        </div>
+      </section>
+
+      <section class="wt-for-arm">
+        <p class="wt-tip">Drag the loop along the wire, or move it here, until the arm hangs level.</p>
+        <label class="wt-range">
+          <span>Loop <output data-out="hook"></output></span>
+          <input type="range" data-edit="hook" min="2" max="98" step="0.25" />
+        </label>
+        <label class="wt-range">
+          <span>Length <output data-out="len"></output></span>
+          <input type="range" data-edit="len" min="14" max="95" step="0.5" />
+        </label>
+        <label class="wt-range">
+          <span>Curve <output data-out="sag"></output></span>
+          <input type="range" data-edit="sag" min="2" max="16" step="0.25" />
+        </label>
+        <label class="wt-range">
+          <span><span class="wt-drop-name">Hangs by</span> <output data-out="drop"></output></span>
+          <input type="range" data-edit="drop" min="5" max="60" step="0.5" />
+        </label>
+        <div class="wt-actions">
+          <button type="button" data-act="level">Balance this arm</button>
+          <button type="button" data-act="remove-arm">Take it off</button>
+        </div>
+      </section>
+
+      <p class="wt-above" hidden>
+        The arm above hangs off level now.
+        <button type="button" data-act="level-up">Balance it</button>
+      </p>
+    </aside>
+
+    <dialog class="wt-cut" aria-labelledby="wt-cut-title">
+      <form method="dialog">
+        <h2 id="wt-cut-title">Cut a plate</h2>
+        <p>Draw the outline in one stroke. The wire meets the plate at its left-most point.</p>
+        <canvas class="wt-sheet" width="840" height="560"></canvas>
+        <div class="wt-actions">
+          <button value="cancel">Cancel</button>
+          <button type="button" class="wt-cut-clear">Clear</button>
+          <button value="cut" class="wt-cut-do" disabled>Cut it out</button>
+        </div>
+      </form>
+    </dialog>
+  </main>
+</Bare>
+
+<style>
+  .wt {
+    --ink: #2a2622;
+    --muted: #6c6359;
+    --paper: #f7f3ec;
+    --line: #d9d0c2;
+    --dark: #1e1914;
+    --bar-ink: #f3ede3;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: #b4ada3;
+    color: var(--ink);
+    font-family: var(--font-wt);
+    font-size: 15px;
+    line-height: 1.4;
+    -webkit-tap-highlight-color: transparent;
+  }
+  :global(body:has(.wt)) {
+    margin: 0;
+    background: #b4ada3;
+    overflow: hidden;
+  }
+  .wt *,
+  .wt *::before,
+  .wt *::after {
+    box-sizing: border-box;
+  }
+  .wt [hidden] {
+    display: none !important;
+  }
+  .wt-vh {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .wt-room {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+    cursor: grab;
+  }
+  .wt-room.over-part {
+    cursor: pointer;
+  }
+  .wt-room.over-hook {
+    cursor: ew-resize;
+  }
+  .wt-room.dragging {
+    cursor: grabbing;
+  }
+
+  /* Vinyl lettering on the gallery wall. */
+  .wt-head {
+    position: absolute;
+    left: clamp(16px, 3vw, 44px);
+    top: clamp(14px, 3.2vh, 38px);
+    max-width: 30ch;
+    pointer-events: none;
+  }
+  .wt-home {
+    pointer-events: auto;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .wt-home:hover {
+    color: var(--ink);
+  }
+  .wt-head h1 {
+    margin: 8px 0 6px;
+    font-weight: 600;
+    font-size: clamp(32px, 4.2vw, 56px);
+    letter-spacing: -0.025em;
+    line-height: 0.95;
+  }
+  .wt-head p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.35;
+  }
+
+  /* The wall label: placed beside the work by script, at eye height. */
+  .wt-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    width: 15.5em;
+    font-size: 13px;
+    line-height: 1.38;
+    color: var(--ink);
+    transform-origin: 0 0;
+  }
+  .wt-label p {
+    margin: 0;
+  }
+  .wt-title input {
+    display: block;
+    width: 100%;
+    margin: 0 0 1px;
+    padding: 0 0 1px;
+    border: 0;
+    border-bottom: 1px dashed transparent;
+    background: transparent;
+    color: inherit;
+    font: italic 600 1.18em/1.25 var(--font-wt);
+    letter-spacing: -0.005em;
+  }
+  .wt-title input:hover {
+    border-bottom-color: rgba(42, 38, 34, 0.35);
+  }
+  .wt-title input:focus {
+    outline: none;
+    border-bottom-color: var(--ink);
+  }
+  .wt-year {
+    font-weight: 500;
+  }
+  .wt-medium,
+  .wt-dims {
+    color: #4a433c;
+  }
+  .wt-dims {
+    margin-top: 0.45em !important;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wt-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 82px;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 0 16px;
+    width: max-content;
+    max-width: 100%;
+    text-align: center;
+    font-size: 14px;
+    color: #f6f0e6;
+    text-shadow: 0 1px 2px rgba(20, 12, 4, 0.6);
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+  }
+  .wt-hint.gone {
+    opacity: 0;
+  }
+
+  /* The controls sit on the floor, in front of the work. */
+  .wt-bar {
+    position: absolute;
+    left: 50%;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px;
+    width: max-content;
+    max-width: calc(100% - 24px);
+    border-radius: 999px;
+    background: rgba(26, 20, 15, 0.66);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--bar-ink);
+    box-shadow: 0 8px 30px rgba(20, 12, 6, 0.3);
+  }
+  .wt-bar button,
+  .wt-bar select {
+    font: 500 14px/1 var(--font-wt);
+    color: inherit;
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    padding: 10px 14px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .wt-bar select {
+    appearance: none;
+    padding-right: 30px;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+      linear-gradient(-45deg, transparent 50%, currentColor 50%);
+    background-position:
+      calc(100% - 17px) 52%,
+      calc(100% - 12px) 52%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+  }
+  .wt-bar select option {
+    color: #1e1914;
+  }
+  .wt-bar button:hover,
+  .wt-bar select:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  .wt-bar button:focus-visible,
+  .wt-bar select:focus-visible,
+  .wt-bench button:focus-visible,
+  .wt-bench input:focus-visible {
+    outline: 2px solid #f3ede3;
+    outline-offset: 1px;
+  }
+  .wt-air {
+    display: flex;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+  }
+  .wt-air button[aria-checked='true'] {
+    background: var(--bar-ink);
+    color: var(--dark);
+  }
+  .wt-blow.on {
+    background: var(--bar-ink);
+    color: var(--dark);
+  }
+  .wt-sound {
+    display: grid;
+    place-items: center;
+    padding: 8px 11px !important;
+  }
+  .wt-sound svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+  .wt-sound .wt-x {
+    display: none;
+  }
+  .wt-sound[aria-pressed='false'] .wt-x {
+    display: inline;
+  }
+  .wt-sound[aria-pressed='false'] .wt-waves {
+    display: none;
+  }
+
+  /* The workbench: a sheet of card beside the work. */
+  .wt-bench {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    bottom: 86px;
+    width: 312px;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 16px 18px 18px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 14px 44px rgba(30, 20, 10, 0.28);
+    color: var(--ink);
+  }
+  .wt-bench-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .wt-bench h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .wt-bench-note {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .wt-bench h3 {
+    margin: 16px 0 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .wt-bench button {
+    font: 500 14px/1 var(--font-wt);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .wt-done {
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+  }
+  .wt-done:hover {
+    border-color: #b8ad9d;
+  }
+  .wt-shapes {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+  .wt-shapes button {
+    aspect-ratio: 1;
+    padding: 4px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+  }
+  .wt-shapes button:hover {
+    border-color: #b8ad9d;
+  }
+  .wt-shapes button[aria-pressed='true'] {
+    border-color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--ink);
+  }
+  .wt-shapes svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .wt-shapes path {
+    fill: var(--ink);
+  }
+  .wt-cut-open svg circle,
+  .wt-cut-open svg path {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  .wt-paints {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+  .wt-paints button {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 0;
+    background: var(--sw);
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+      0 0 0 3px var(--paper),
+      0 0 0 3px transparent;
+  }
+  .wt-paints button.metal {
+    background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.75), transparent 45%), var(--sw);
+  }
+  .wt-paints button[aria-pressed='true'] {
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+      0 0 0 3px var(--paper),
+      0 0 0 5px var(--ink);
+  }
+  .wt-range {
+    display: block;
+    margin-top: 14px;
+    font-size: 14px;
+  }
+  .wt-range > span {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .wt-range output {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .wt-range input {
+    display: block;
+    width: 100%;
+    margin: 6px 0 0;
+    accent-color: var(--ink);
+  }
+  .wt-tip {
+    margin: 10px 0 0;
+    font-size: 14px;
+    color: #4a433c;
+  }
+  .wt-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+  }
+  .wt-actions button {
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .wt-actions button + button {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .wt-actions button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .wt-above {
+    margin: 18px 0 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #efe6d6;
+    font-size: 14px;
+  }
+  .wt-above button {
+    margin-left: 4px;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Cutting a plate from a sheet. */
+  .wt-cut {
+    width: min(640px, calc(100% - 24px));
+    padding: 18px 20px 20px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-wt);
+    box-shadow: 0 20px 60px rgba(20, 12, 6, 0.4);
+  }
+  .wt-cut::backdrop {
+    background: rgba(30, 24, 18, 0.45);
+  }
+  .wt-cut h2 {
+    margin: 0 0 4px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .wt-cut p {
+    margin: 0 0 12px;
+    font-size: 14px;
+    color: #4a433c;
+  }
+  .wt-sheet {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    border-radius: 6px;
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .wt-cut .wt-actions {
+    justify-content: flex-end;
+  }
+  .wt-cut .wt-actions button {
+    font: 500 14px/1 var(--font-wt);
+    cursor: pointer;
+  }
+  .wt-cut .wt-actions button:first-child {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .wt-cut .wt-actions .wt-cut-do {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  @media (max-width: 720px) {
+    .wt-head h1 {
+      font-size: 30px;
+    }
+    .wt-head p {
+      font-size: 13px;
+      max-width: 24ch;
+    }
+    .wt-long {
+      display: none;
+    }
+    .wt-bar {
+      flex-wrap: wrap;
+      justify-content: center;
+      border-radius: 20px;
+      row-gap: 2px;
+    }
+    .wt-bar button,
+    .wt-bar select {
+      padding: 9px 11px;
+    }
+    .wt-hint {
+      bottom: 128px;
+      font-size: 13px;
+      width: auto;
+    }
+    .wt-bench {
+      top: auto;
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      width: auto;
+      max-height: 54dvh;
+    }
+    .wt-label {
+      font-size: 11.5px;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_main';
+  const root = document.querySelector<HTMLElement>('.wt');
+  if (root) start(root);
+</script>

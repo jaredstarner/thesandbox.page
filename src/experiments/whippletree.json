@@ -1,0 +1,8 @@
+{
+  "title": "Whippletree",
+  "summary": "A hanging mobile under a gallery spotlight: hang painted plates on wire arms, slide each loop until its arm hangs level, and watch the whole thing turn in the draught with its shadow on the wall.",
+  "date": "2026-11-20",
+  "tags": ["canvas", "pointer-events", "physics", "statics", "kinetic-sculpture", "web-audio", "compression-streams"],
+  "requires": ["canvas"],
+  "plot": 50
+}

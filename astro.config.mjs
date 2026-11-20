@@ -815,5 +815,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
     },
+    // /whippletree/: a plain grotesk for the wall label and the workbench, with an italic for titles.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Albert Sans',
+      cssVariable: '--font-wt',
+      weights: ['300 700'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
+    },
   ],
 });

@@ -574,6 +574,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   'interactive-fiction': { label: 'Interactive fiction' },
   'change-ringing': { label: 'Change ringing' },
   'place-notation': { label: 'Place notation' },
+  'kinetic-sculpture': { label: 'Kinetic sculpture' },
+  statics: { label: 'Statics' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
