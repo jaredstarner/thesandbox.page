@@ -212,6 +212,8 @@ export class Renderer {
       const css = poly.map(([x, y]): [number, number] => [x, y]);
       this.hits.plates.push({ ps, poly: css, depth });
       const col = shadePlate(ps, toLight, eye);
+      const gl = glint(ps, toLight, eye);
+      const glintAt = gl ? project(c, gl.at) : null;
       const selected = sel.plate === ps;
       items.push({
         depth,
@@ -221,6 +223,21 @@ export class Renderer {
           ctx.closePath();
           ctx.fillStyle = col.fill;
           ctx.fill();
+          // The lamp's reflection, where the sheet would mirror it to the eye.
+          if (gl && glintAt) {
+            const r = ((gl.radius * c.f) / glintAt[2]) * k;
+            const gx = glintAt[0] * k;
+            const gy = glintAt[1] * k;
+            const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, r);
+            g.addColorStop(0, `rgba(255, 248, 236, ${gl.alpha})`);
+            g.addColorStop(0.4, `rgba(255, 248, 236, ${gl.alpha * 0.45})`);
+            g.addColorStop(1, 'rgba(255, 248, 236, 0)');
+            ctx.save();
+            ctx.clip();
+            ctx.fillStyle = g;
+            ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
+            ctx.restore();
+          }
           ctx.lineJoin = 'round';
           ctx.strokeStyle = col.edge;
           ctx.lineWidth = Math.max(0.8 * k, ((0.0016 * c.f) / depth) * k);
@@ -449,6 +466,26 @@ export function armPolyline(s: ArmState, n: number): V3[] {
     out.push(armPoint(s, x, arcY(s.arm, x)));
   }
   return out;
+}
+
+/** Where the lamp mirrors in a plate, if the eye and the lamp are on the same side of it. */
+function glint(ps: PlateState, L: V3, eye: V3): { at: V3; radius: number; alpha: number } | null {
+  const n = ps.n;
+  const dl = dot(sub(L, ps.C), n);
+  const de = dot(sub(eye, ps.C), n);
+  if (dl * de <= 0) return null;
+  const t = de / (dl + de);
+  const Lm: V3 = [L[0] - 2 * dl * n[0], L[1] - 2 * dl * n[1], L[2] - 2 * dl * n[2]];
+  const at: V3 = [eye[0] + t * (Lm[0] - eye[0]), eye[1] + t * (Lm[1] - eye[1]), eye[2] + t * (Lm[2] - eye[2])];
+  // Too far off the plate to show at all.
+  const off = len(sub(at, ps.C));
+  const metal = PAINTS[ps.plate.paint].metal;
+  const radius = metal ? 0.05 : 0.1;
+  if (off > ps.geom.radius + radius) return null;
+  // Grazing angles show a brighter sheen, face-on a softer one.
+  const cos = Math.abs(de) / (len(sub(eye, ps.C)) || 1);
+  const alpha = (metal ? 0.6 : 0.24) * (0.6 + 0.4 * (1 - cos));
+  return { at, radius, alpha };
 }
 
 function shadePlate(ps: PlateState, L: V3, eye: V3): { fill: string; edge: string } {

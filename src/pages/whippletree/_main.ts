@@ -295,6 +295,7 @@ export function start(root: HTMLElement): void {
   // Bench.
   function openBench(next: Sel): void {
     sel = next;
+    root.toggleAttribute('data-editing', !!sel);
     if (!sel) {
       bench.hidden = true;
       env.face = null;

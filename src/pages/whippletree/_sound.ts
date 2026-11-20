@@ -45,7 +45,8 @@ export class Clink {
     this.last = now;
     const level = Math.min(1, speed / 0.25) ** 0.8;
     if (level < 0.04) return;
-    const f0 = 900 + 220 / Math.max(0.04, size);
+    // A 10 cm plate rings near 1.5 kHz; bigger sheets lower.
+    const f0 = 600 + 90 / Math.max(0.04, size);
     const bus = ctx.createGain();
     bus.gain.value = 0.5 * level;
     // A plate rings longer than it buzzes: a little lowpass that opens with the strike.
