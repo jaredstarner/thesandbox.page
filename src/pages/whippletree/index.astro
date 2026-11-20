@@ -142,7 +142,7 @@ const swatch = (rgb: [number, number, number]) => `rgb(${rgb.join(', ')})`;
       </section>
 
       <section class="wt-for-arm">
-        <p class="wt-tip">Drag the loop along the wire, or move it here, until the arm hangs level.</p>
+        <p class="wt-tip">Drag the loop to slide the wire through it, or move it here, until the arm hangs level.</p>
         <label class="wt-range">
           <span>Loop <output data-out="hook"></output></span>
           <input type="range" data-edit="hook" min="2" max="98" step="0.25" />
@@ -666,7 +666,7 @@ const swatch = (rgb: [number, number, number]) => `rgb(${rgb.join(', ')})`;
     }
     .wt-head p {
       font-size: 13px;
-      max-width: 24ch;
+      max-width: 34ch;
     }
     .wt-long {
       display: none;
@@ -681,10 +681,19 @@ const swatch = (rgb: [number, number, number]) => `rgb(${rgb.join(', ')})`;
     .wt-bar select {
       padding: 9px 11px;
     }
+    .wt-bar select {
+      padding-right: 28px;
+    }
     .wt-hint {
-      bottom: 128px;
+      left: 16px;
+      right: 16px;
+      top: 128px;
+      bottom: auto;
+      transform: none;
+      padding: 0;
       font-size: 13px;
       width: auto;
+      text-align: left;
     }
     .wt-bench {
       top: auto;

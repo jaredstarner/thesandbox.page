@@ -186,9 +186,13 @@ export class Renderer {
     ctx.globalCompositeOperation = 'source-over';
 
     // The thread up to a ceiling far out of frame.
-    const pa = project(c, [m.root.H[0], m.root.H[1] + 6, m.root.H[2]]);
+    const pa = project(c, [m.root.H[0], m.root.H[1] + 0.7, m.root.H[2]]);
     const top = project(c, m.root.H);
-    ctx.strokeStyle = 'rgba(40, 36, 32, 0.6)';
+    const tg = ctx.createLinearGradient(0, pa[1] * k, 0, top[1] * k);
+    tg.addColorStop(0, 'rgba(40, 36, 32, 0)');
+    tg.addColorStop(0.6, 'rgba(40, 36, 32, 0.45)');
+    tg.addColorStop(1, 'rgba(40, 36, 32, 0.65)');
+    ctx.strokeStyle = tg;
     ctx.lineWidth = Math.max(0.7, 0.75 * k);
     ctx.beginPath();
     ctx.moveTo(pa[0] * k, pa[1] * k);
@@ -198,6 +202,7 @@ export class Renderer {
     // The mobile, back to front.
     type Item = { depth: number; draw: () => void };
     const items: Item[] = [];
+    const after: (() => void)[] = [];
     this.hits = { plates: [], arms: [] };
     const toLight = room.light;
     const eye: V3 = [c.camX, c.camY, c.camZ];
@@ -220,18 +225,23 @@ export class Renderer {
           ctx.strokeStyle = col.edge;
           ctx.lineWidth = Math.max(0.8 * k, ((0.0016 * c.f) / depth) * k);
           ctx.stroke();
-          if (selected) {
-            ctx.save();
-            ctx.setLineDash([5 * k, 4 * k]);
-            ctx.lineWidth = 1.6 * k;
-            ctx.strokeStyle = '#ffffff';
-            ctx.shadowColor = 'rgba(0,0,0,0.6)';
-            ctx.shadowBlur = 3 * k;
-            ctx.stroke();
-            ctx.restore();
-          }
         },
       });
+      if (selected) {
+        after.push(() => {
+          ctx.save();
+          ctx.beginPath();
+          poly.forEach(([x, y], i) => (i ? ctx.lineTo(x * k, y * k) : ctx.moveTo(x * k, y * k)));
+          ctx.closePath();
+          ctx.setLineDash([5 * k, 4 * k]);
+          ctx.lineWidth = 1.6 * k;
+          ctx.strokeStyle = '#ffffff';
+          ctx.shadowColor = 'rgba(0,0,0,0.65)';
+          ctx.shadowBlur = 3 * k;
+          ctx.stroke();
+          ctx.restore();
+        });
+      }
     }
     for (const s of m.armsList) {
       const pts = armPolyline(s, 24);
@@ -292,6 +302,7 @@ export class Renderer {
     }
     items.sort((p, q) => q.depth - p.depth);
     for (const it of items) it.draw();
+    for (const f of after) f();
 
     // The balance mark on a selected arm: a small fulcrum where the hook would make it hang level.
     if (sel.arm && sel.balance !== null) {
@@ -346,7 +357,8 @@ export class Renderer {
     s.globalCompositeOperation = 'destination-out';
     s.save();
     s.translate(px, py);
-    s.scale(1.25, 1);
+    // A wider pool on a wide screen, a taller one on a tall screen.
+    s.scale(1.25, Math.max(1, (c.H / c.W) * 0.95));
     const R = a * Math.max(1.3, m.reachCache.typical * 2.3);
     const g = s.createRadialGradient(0, 0, 0, 0, 0, R);
     g.addColorStop(0, 'rgba(0,0,0,1)');

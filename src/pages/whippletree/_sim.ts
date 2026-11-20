@@ -21,7 +21,7 @@ export const CEILING = 3.4;
 const G = 9.81;
 const RHO = 1.2; // air, kg/m^3
 const CD = 1.15; // drag coefficient of a flat plate face-on
-const TILT_ZETA = 0.11;
+const TILT_ZETA = 0.17;
 const MAX_TILT = 1.35;
 const MAX_SPIN = 5;
 
@@ -71,6 +71,8 @@ export interface ArmState {
   sfx: number;
   sfz: number;
   torque: number;
+  /** While a finger holds the wire: the spin it is being turned at, for this step only. */
+  spin: number | null;
 }
 
 export interface Reach {
@@ -155,6 +157,7 @@ export class Mobile {
       sfx: 0,
       sfz: 0,
       torque: 0,
+      spin: null,
     };
     s.rest = was ? was.rest : parent ? wrap(s.theta - parent.theta) : s.theta;
     this.armsList.push(s);
@@ -299,6 +302,10 @@ export class Mobile {
       const mu = I * 0.02;
       let tq = s.torque + kappa * wrap(pTheta + s.rest - s.theta) + mu * (pOmega - s.omega);
       tq -= I * (0.012 + env.steady * 1.6) * s.omega;
+      if (s.spin !== null) {
+        tq += I * 6 * (s.spin - s.omega);
+        s.spin = null;
+      }
       if (env.face === s) {
         const target = Math.abs(wrap(s.theta)) < Math.PI / 2 ? 0 : Math.PI;
         tq += I * 2.2 * wrap(target - s.theta) - I * 2.4 * s.omega;

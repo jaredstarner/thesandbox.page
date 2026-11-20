@@ -26,6 +26,7 @@ import { Renderer, project, type Camera, type Room } from './_render';
 import { Clink } from './_sound';
 
 const DT = 1 / 120;
+const LAMP_RISE = 0.75;
 const AIR = [0.07, 0.26, 0.62];
 
 type Sel = { kind: 'plate'; plate: Plate } | { kind: 'arm'; arm: Arm } | null;
@@ -33,7 +34,7 @@ type Sel = { kind: 'plate'; plate: Plate } | { kind: 'arm'; arm: Arm } | null;
 type Drag =
   | { kind: 'push'; ps: PlateState; x: number; y: number; t: number; vx: number; moved: boolean; id: number }
   | { kind: 'wire'; s: ArmState; x: number; y: number; t: number; vx: number; moved: boolean; id: number }
-  | { kind: 'hook'; s: ArmState; id: number }
+  | { kind: 'slide'; s: ArmState; id: number; x0: number; y0: number; hook0: number; dir: [number, number]; span: number }
   | { kind: 'empty'; x: number; y: number; t0: number; moved: boolean; id: number };
 
 interface Tween {
@@ -79,9 +80,11 @@ export function start(root: HTMLElement): void {
 
   // The room.
   const cam: Camera = { W: 1, H: 1, dpr: 1, f: 900, camX: 0.25, camY: 1.55, camZ: 4.2, k0: 0, cx: 0, cy: 0 };
-  const room: Room = { wallZ: -1, light: [-1.15, 3.2, 3.6], lightRadius: 0.035 };
-  const target = { f: 900, k0: 0, cx: 0, wallZ: -1 };
+  const room: Room = { wallZ: -1, light: [-1.15, 3.0, 3.6], lightRadius: 0.035 };
+  const target = { f: 900, k0: 0, cx: 0, camX: 0.2, wallZ: -1 };
   let framed = false;
+  /** The furthest any plate has swung from the thread lately; the frame widens to keep it in. */
+  let seenR = 0;
 
   // Air.
   let air = 0;
@@ -174,30 +177,57 @@ export function start(root: HTMLElement): void {
     const H = cam.H;
     const phone = W < 720;
     const r = mobile.reachCache;
-    const R = Math.max(0.28, r.typical * 1.15);
+    const R = Math.max(0.28, r.typical * 1.05, seenR);
     const benchW = sel && !phone ? 344 : 0;
-    const benchH = sel && phone ? H * 0.5 : 0;
-    const topPad = phone ? 112 : 70;
-    const botPad = phone ? (sel ? 16 : 126) : 92;
+    const benchH = sel && phone ? H * 0.54 : 0;
+    const topPad = phone ? (sel ? 16 : 176) : 56;
+    const botPad = phone ? (sel ? 10 : 222) : 96;
     const availW = W - benchW;
-    const availH = Math.max(160, H - topPad - botPad - benchH);
-    const spanX = 2 * R + (phone ? 0.3 : 0.6);
-    const spanY = r.top + 0.1 - (r.bottom - 0.12);
-    const fH = (0.94 * availW * cam.camZ) / spanX;
-    const fV = (0.92 * availH * cam.camZ) / spanY;
+    const availH = Math.max(140, H - topPad - botPad - benchH);
+    const wallZ = -Math.max(0.85, r.radius * 0.8 + 0.25);
+    // Where the shadow falls, brought forward to the mobile's depth so it frames with it.
+    const L = room.light;
+    const lampY = (r.top + r.bottom) / 2 + LAMP_RISE;
+    const Dw = cam.camZ - wallZ;
+    const t0 = (wallZ - L[2]) / -L[2];
+    const fwd = (v: number, c0: number) => c0 + ((v - c0) * cam.camZ) / Dw;
+    const shBottom = fwd(lampY + t0 * (r.bottom - lampY), cam.camY);
+    const shRight = fwd(L[0] + t0 * (R * 0.8 - L[0]), cam.camX);
+    const left = -R;
+    const right = phone ? R : Math.max(R, shRight);
+    const top = r.top + 0.08;
+    const bottom = Math.min(r.bottom - 0.1, shBottom + 0.1);
+    const fH = (0.95 * availW * cam.camZ) / (right - left);
+    const fV = (0.94 * availH * cam.camZ) / (top - bottom);
     target.f = Math.min(fH, fV);
     target.cx = availW / 2;
-    const yC = (r.top + 0.1 + r.bottom - 0.12) / 2;
+    target.camX = (left + right) / 2;
+    const yC = (top + bottom) / 2;
     const screenY = topPad + availH / 2;
     target.k0 = (yC - cam.camY) / cam.camZ + (screenY - H / 2) / target.f;
-    target.wallZ = -Math.max(0.85, r.radius * 0.8 + 0.25);
+    target.wallZ = wallZ;
     if (!framed) {
       cam.f = target.f;
       cam.k0 = target.k0;
       cam.cx = target.cx;
+      cam.camX = target.camX;
       room.wallZ = target.wallZ;
+      room.light[1] = lampY;
       framed = true;
     }
+  }
+
+  function measureReach(): number {
+    let reach = 0;
+    const ax = mobile.root.H[0];
+    const az = mobile.root.H[2];
+    for (const p of mobile.platesList) {
+      for (let i = 0; i < p.outline.length; i += 4) {
+        const q = p.outline[i]!;
+        reach = Math.max(reach, Math.hypot(q[0] - ax, q[2] - az));
+      }
+    }
+    return reach;
   }
 
   function resize(): void {
@@ -235,7 +265,7 @@ export function start(root: HTMLElement): void {
     if (phone) {
       labelEl.style.transform = sel ? 'translate(-9999px, 0)' : 'none';
       labelEl.style.top = 'auto';
-      labelEl.style.bottom = '138px';
+      labelEl.style.bottom = `${barHeight() + 26}px`;
       labelEl.style.left = '16px';
       return;
     }
@@ -253,6 +283,9 @@ export function start(root: HTMLElement): void {
     labelEl.style.top = '0px';
     labelEl.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) scale(${scale.toFixed(3)})`;
   }
+
+  const barEl = $<HTMLElement>('.wt-bar');
+  const barHeight = () => barEl.offsetHeight + 16;
 
   /** The label never runs off the wall or under the header. */
   function clampLeft(): number {
@@ -547,6 +580,7 @@ export function start(root: HTMLElement): void {
     tweens = [];
     mobile = new Mobile(tree);
     settle();
+    seenR = measureReach();
     framed = false;
     frameTargets();
     updateLabel();
@@ -566,6 +600,11 @@ export function start(root: HTMLElement): void {
       if (inside(hp.poly, x, y) && (!best || hp.depth < best.depth)) best = { ps: hp.ps, depth: hp.depth };
     }
     if (best) return { ps: best.ps };
+    // Anywhere along the arm being worked on slides its wire through the loop.
+    if (sa) {
+      const line = renderer.hits.arms.find((ha) => ha.s === sa)?.line;
+      if (line && distToLine(line, x, y) < 10) return { hook: sa };
+    }
     let wire: { s: ArmState; d: number } | null = null;
     for (const ha of renderer.hits.arms) {
       const d = distToLine(ha.line, x, y);
@@ -591,7 +630,15 @@ export function start(root: HTMLElement): void {
     const y = e.offsetY;
     const h = hitTest(x, y);
     const t = performance.now();
-    if (h.hook) drag = { kind: 'hook', s: h.hook, id: e.pointerId };
+    if (h.hook) {
+      // Slide the wire through its loop: the point under the finger stays under the finger.
+      const line = renderer.hits.arms.find((a) => a.s === h.hook)?.line;
+      const first = line?.[0] ?? [x - 1, y];
+      const last = line?.[line.length - 1] ?? [x + 1, y];
+      const span = Math.max(20, Math.hypot(last[0] - first[0], last[1] - first[1]));
+      const dir: [number, number] = [(last[0] - first[0]) / span, (last[1] - first[1]) / span];
+      drag = { kind: 'slide', s: h.hook, id: e.pointerId, x0: x, y0: y, hook0: h.hook.arm.hook, dir, span };
+    }
     else if (h.ps) drag = { kind: 'push', ps: h.ps, x, y, t, vx: 0, moved: false, id: e.pointerId };
     else if (h.s) drag = { kind: 'wire', s: h.s, x, y, t, vx: 0, moved: false, id: e.pointerId };
     else drag = { kind: 'empty', x, y, t0: t, moved: false, id: e.pointerId };
@@ -615,19 +662,15 @@ export function start(root: HTMLElement): void {
         drag.y = y;
         drag.t = t;
       }
-    } else if (drag.kind === 'hook') {
-      const held = drag.s.arm;
-      const hit = renderer.hits.arms.find((a) => a.s.arm === held);
-      if (hit) {
-        const u = paramOnLine(hit.line, x, y);
-        const a = hit.s.arm;
-        tweens = tweens.filter((tw) => tw.arm !== a);
-        a.hook = Math.min(0.98, Math.max(0.02, u));
-        rebuild();
-        syncBench();
-        const ns = mobile.armsList.find((s) => s.arm === a);
-        if (ns) drag.s = ns;
-      }
+    } else if (drag.kind === 'slide') {
+      const a = drag.s.arm;
+      const along = (x - drag.x0) * drag.dir[0] + (y - drag.y0) * drag.dir[1];
+      tweens = tweens.filter((tw) => tw.arm !== a);
+      a.hook = Math.min(0.98, Math.max(0.02, drag.hook0 - along / drag.span));
+      rebuild();
+      syncBench();
+      const ns = mobile.armsList.find((s) => s.arm === a);
+      if (ns) drag.s = ns;
     } else if (drag.kind === 'empty') {
       if (!drag.moved && Math.hypot(x - drag.x, y - drag.y) > 6) drag.moved = true;
       blow.x = x;
@@ -677,26 +720,31 @@ export function start(root: HTMLElement): void {
       drag.ps = fresh;
       const D = project(cam, fresh.C)[2];
       const vWant = (vScreen * D) / cam.f;
+      // Push the plate round its thread the way the finger goes. A plate on the near side of
+      // its thread moves the way it is pushed; one on the far side moves the other way round.
       const s = fresh.owner;
-      const vNow = -(fresh.C[2] - s.H[2]) * s.omega;
-      const f = Math.max(-0.08, Math.min(0.08, 0.5 * (vWant - vNow)));
-      fresh.px += f;
+      const rx = fresh.C[0] - s.H[0];
+      const rz = fresh.C[2] - s.H[2];
+      const r = Math.max(0.05, Math.hypot(rx, rz));
+      const tx = -rz / r;
+      const tz = rx / r;
+      const sense = rz >= -0.25 * r ? -1 : 1;
+      const want = vWant * sense;
+      const now = s.omega * r;
+      const f = Math.max(-0.12, Math.min(0.12, 0.6 * (want - now)));
+      fresh.px += f * tx;
+      fresh.pz += f * tz;
     } else {
       const held = drag.s.arm;
       const s = mobile.armsList.find((q) => q.arm === held);
       if (!s) return;
       drag.s = s;
-      // Push at whichever end of the wire is nearer the finger.
+      // Turn the arm by its wire, at the speed the finger moves across it.
       const D = project(cam, s.H)[2];
       const vWant = (vScreen * D) / cam.f;
-      const pick = s.plates[0];
-      if (pick) {
-        const vNow = -(pick.C[2] - s.H[2]) * s.omega;
-        pick.px += Math.max(-0.08, Math.min(0.08, 0.5 * (vWant - vNow)));
-      } else {
-        const lever = Math.max(0.05, s.arm.len / 2);
-        s.omega += ((vWant / lever - s.omega) * 0.15) / 1;
-      }
+      const lever = Math.max(0.08, s.arm.len / 2);
+      // As with a plate, the near side of the wire follows the finger.
+      s.spin = (-vWant / lever) * 0.6;
     }
   }
 
@@ -844,7 +892,16 @@ export function start(root: HTMLElement): void {
         airLevel = AIR[n]!;
       },
       run: (seconds: number) => {
-        for (let i = 0; i < seconds * 120; i++) mobile.step(DT, env);
+        let contacts = 0;
+        for (let i = 0; i < seconds * 120; i++) {
+          mobile.step(DT, env);
+          contacts += mobile.contacts.length;
+        }
+        return contacts;
+      },
+      screen: (kind: 'plate' | 'hook', i: number) => {
+        const P = kind === 'plate' ? mobile.platesList[i]!.C : mobile.armsList[i]!.H;
+        return project(cam, P);
       },
       blow: (x: number, y: number, level: number) => {
         blow.x = x;
@@ -858,6 +915,7 @@ export function start(root: HTMLElement): void {
 
   // Frame loop.
   resize();
+  seenR = measureReach();
   frameTargets();
   updateLabel();
   window.addEventListener('resize', () => {
@@ -879,15 +937,17 @@ export function start(root: HTMLElement): void {
       syncBench();
     }
     frameTargets();
-    const ease = 1 - Math.exp(-dt * 3);
+    const ease = 1 - Math.exp(-dt * 1.6);
     cam.f += (target.f - cam.f) * ease;
     cam.k0 += (target.k0 - cam.k0) * ease;
     cam.cx += (target.cx - cam.cx) * ease;
+    cam.camX += (target.camX - cam.camX) * ease;
     room.wallZ += (target.wallZ - room.wallZ) * ease;
     // The lamp is trained on the mobile from in front, up and to the left.
     const rc = mobile.reachCache;
-    const lampY = (rc.top + rc.bottom) / 2 + 0.95;
-    room.light[1] += (lampY - room.light[1]) * ease;
+    room.light[1] += ((rc.top + rc.bottom) / 2 + LAMP_RISE - room.light[1]) * ease;
+    // How far the plates reach right now, remembered for a while.
+    seenR = Math.max(measureReach(), seenR * Math.exp(-dt / 40));
     airLevel += (AIR[air]! - airLevel) * (1 - Math.exp(-dt * 0.5));
     blow.level += (blow.want - blow.level) * (1 - Math.exp(-dt * (blow.want > blow.level ? 5 : 2.2)));
     const steadyWant = sel ? 1 : 0;
@@ -938,27 +998,6 @@ function distToLine(line: [number, number][], x: number, y: number): number {
     best = Math.min(best, Math.hypot(ax + t * dx - x, ay + t * dy - y));
   }
   return best;
-}
-
-/** Where along a polyline (0 to 1, by index) a point falls nearest. */
-function paramOnLine(line: [number, number][], x: number, y: number): number {
-  let best = Infinity;
-  let at = 0.5;
-  const n = line.length - 1;
-  for (let i = 0; i < n; i++) {
-    const [ax, ay] = line[i]!;
-    const [bx, by] = line[i + 1]!;
-    const dx = bx - ax;
-    const dy = by - ay;
-    const l2 = dx * dx + dy * dy || 1;
-    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / l2));
-    const d = Math.hypot(ax + t * dx - x, ay + t * dy - y);
-    if (d < best) {
-      best = d;
-      at = (i + t) / n;
-    }
-  }
-  return at;
 }
 
 function polyArea(pts: Pt[]): number {
