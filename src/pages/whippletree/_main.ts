@@ -34,7 +34,16 @@ type Sel = { kind: 'plate'; plate: Plate } | { kind: 'arm'; arm: Arm } | null;
 type Drag =
   | { kind: 'push'; ps: PlateState; x: number; y: number; t: number; vx: number; moved: boolean; id: number }
   | { kind: 'wire'; s: ArmState; x: number; y: number; t: number; vx: number; moved: boolean; id: number }
-  | { kind: 'slide'; s: ArmState; id: number; x0: number; y0: number; hook0: number; dir: [number, number]; span: number }
+  | {
+      kind: 'slide';
+      s: ArmState;
+      id: number;
+      x0: number;
+      y0: number;
+      hook0: number;
+      dir: [number, number];
+      span: number;
+    }
   | { kind: 'empty'; x: number; y: number; t0: number; moved: boolean; id: number };
 
 interface Tween {
@@ -316,10 +325,16 @@ export function start(root: HTMLElement): void {
       const g = plateGeom(p);
       benchTitle.textContent = typeof p.shape === 'string' ? SHAPE_NAMES[p.shape] : 'Your own cut';
       benchNote.textContent = `${PAINTS[p.paint].name} · ${Math.round(g.mass * 1000)} g`;
-      for (const b of $$<HTMLButtonElement>('[data-shape]')) b.setAttribute('aria-pressed', String(b.dataset.shape === p.shape));
-      for (const b of $$<HTMLButtonElement>('[data-paint]')) b.setAttribute('aria-pressed', String(b.dataset.paint === p.paint));
+      for (const b of $$<HTMLButtonElement>('[data-shape]'))
+        b.setAttribute('aria-pressed', String(b.dataset.shape === p.shape));
+      for (const b of $$<HTMLButtonElement>('[data-paint]'))
+        b.setAttribute('aria-pressed', String(b.dataset.paint === p.paint));
       setRange('size', p.size * 100, `${(p.size * 100).toFixed(1)} cm`);
-      setRange('roll', p.roll, Math.abs(p.roll) < 3 ? 'upright' : Math.abs(p.roll) > 85 ? 'flat' : `${Math.round(p.roll)}°`);
+      setRange(
+        'roll',
+        p.roll,
+        Math.abs(p.roll) < 3 ? 'upright' : Math.abs(p.roll) > 85 ? 'flat' : `${Math.round(p.roll)}°`,
+      );
       const par = parentOf(p);
       const removable = !!par && (par.arm !== tree || par.arm.ends[1 - par.side]!.kind === 'arm');
       $<HTMLButtonElement>('[data-act="remove-plate"]').disabled = !removable;
@@ -639,8 +654,7 @@ export function start(root: HTMLElement): void {
       const span = Math.max(20, Math.hypot(last[0] - first[0], last[1] - first[1]));
       const dir: [number, number] = [(last[0] - first[0]) / span, (last[1] - first[1]) / span];
       drag = { kind: 'slide', s: h.hook, id: e.pointerId, x0: x, y0: y, hook0: h.hook.arm.hook, dir, span };
-    }
-    else if (h.ps) drag = { kind: 'push', ps: h.ps, x, y, t, vx: 0, moved: false, id: e.pointerId };
+    } else if (h.ps) drag = { kind: 'push', ps: h.ps, x, y, t, vx: 0, moved: false, id: e.pointerId };
     else if (h.s) drag = { kind: 'wire', s: h.s, x, y, t, vx: 0, moved: false, id: e.pointerId };
     else drag = { kind: 'empty', x, y, t0: t, moved: false, id: e.pointerId };
     canvas.classList.add('dragging');
@@ -1052,4 +1066,3 @@ function rdp(pts: Pt[], eps: number): Pt[] {
   const right = rdp(pts.slice(wi), eps);
   return [...left.slice(0, -1), ...right];
 }
-

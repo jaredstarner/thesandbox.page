@@ -298,7 +298,7 @@ export class Mobile {
       // Yaw: the swivel twists a little and rubs a little against the arm above.
       const pTheta = s.parent ? s.parent.theta : 0;
       const pOmega = s.parent ? s.parent.omega : 0;
-      const kappa = I * (Math.PI * 2 / 70) ** 2;
+      const kappa = I * ((Math.PI * 2) / 70) ** 2;
       const mu = I * 0.02;
       let tq = s.torque + kappa * wrap(pTheta + s.rest - s.theta) + mu * (pOmega - s.omega);
       tq -= I * (0.012 + env.steady * 1.6) * s.omega;

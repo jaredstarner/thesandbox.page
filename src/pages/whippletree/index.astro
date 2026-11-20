@@ -9,13 +9,7 @@ const description =
 // Shape tray icons, drawn from the same outlines the plates are cut from.
 const iconPath = (key: ShapeKey) => {
   const pts = unitOutline(key);
-  return (
-    'M' +
-    pts
-      .map(([u, v]) => `${(5 + u * 30).toFixed(1)} ${(20 - v * 30).toFixed(1)}`)
-      .join('L') +
-    'Z'
-  );
+  return 'M' + pts.map(([u, v]) => `${(5 + u * 30).toFixed(1)} ${(20 - v * 30).toFixed(1)}`).join('L') + 'Z';
 };
 const swatch = (rgb: [number, number, number]) => `rgb(${rgb.join(', ')})`;
 ---
@@ -30,7 +24,9 @@ const swatch = (rgb: [number, number, number]) => `rgb(${rgb.join(', ')})`;
     ></canvas>
 
     <header class="wt-head">
-      <a class="wt-home" href="/">thesandbox.page</a>
+      <a class="wt-home" href="/">
+        thesandbox.page
+      </a>
       <h1>Whippletree</h1>
       <p>A mobile you balance by hand, the way they are made: from the bottom up.</p>
     </header>
@@ -45,38 +41,58 @@ const swatch = (rgb: [number, number, number]) => `rgb(${rgb.join(', ')})`;
       <p class="wt-dims"></p>
     </figure>
 
-    <p class="wt-hint">Push a plate to set it turning. Click a plate or a wire to work on it. Press and hold on the wall to blow.</p>
+    <p class="wt-hint">
+      Push a plate to set it turning. Click a plate or a wire to work on it. Press and hold on the wall to blow.
+    </p>
 
     <nav class="wt-bar" aria-label="The mobile">
       <label class="wt-presets">
         <span class="wt-vh">Mobile</span>
         <select>
-          {PRESETS.map((p) => <option value={p.key}>{p.title}</option>)}
+          {PRESETS.map((p) => (
+            <option value={p.key}>{p.title}</option>
+          ))}
         </select>
       </label>
       <div class="wt-air" role="radiogroup" aria-label="Air in the room">
-        <button type="button" role="radio" aria-checked="true" data-air="0">Still</button>
-        <button type="button" role="radio" aria-checked="false" data-air="1"><span class="wt-long">Window </span>ajar</button>
-        <button type="button" role="radio" aria-checked="false" data-air="2">Breezy</button>
+        <button type="button" role="radio" aria-checked="true" data-air="0">
+          Still
+        </button>
+        <button type="button" role="radio" aria-checked="false" data-air="1">
+          <span class="wt-long">Window </span>ajar
+        </button>
+        <button type="button" role="radio" aria-checked="false" data-air="2">
+          Breezy
+        </button>
       </div>
-      <button type="button" class="wt-blow">Hold to blow</button>
-      <button type="button" class="wt-balance">Balance all</button>
-      <button type="button" class="wt-share">Copy link</button>
+      <button type="button" class="wt-blow">
+        Hold to blow
+      </button>
+      <button type="button" class="wt-balance">
+        Balance all
+      </button>
+      <button type="button" class="wt-share">
+        Copy link
+      </button>
       <button type="button" class="wt-sound" aria-pressed="true" title="Sound">
-        <svg viewBox="0 0 20 20" aria-hidden="true"
-          ><path d="M3 8h3l4-3.5v11L6 12H3z" fill="currentColor"></path><path
+        <svg viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M3 8h3l4-3.5v11L6 12H3z" fill="currentColor"></path>
+          <path
             class="wt-waves"
             d="M13 7.2a4 4 0 0 1 0 5.6M15.2 5a7 7 0 0 1 0 10"
             fill="none"
             stroke="currentColor"
             stroke-width="1.5"
-            stroke-linecap="round"></path><path
+            stroke-linecap="round"
+          ></path>
+          <path
             class="wt-x"
             d="M13.5 7.5l5 5M18.5 7.5l-5 5"
             stroke="currentColor"
             stroke-width="1.5"
-            stroke-linecap="round"></path></svg
-        >
+            stroke-linecap="round"
+          ></path>
+        </svg>
         <span class="wt-vh">Sound</span>
       </button>
     </nav>
@@ -87,21 +103,21 @@ const swatch = (rgb: [number, number, number]) => `rgb(${rgb.join(', ')})`;
           <h2 id="wt-bench-title">Plate</h2>
           <p class="wt-bench-note"></p>
         </div>
-        <button type="button" class="wt-done">Done</button>
+        <button type="button" class="wt-done">
+          Done
+        </button>
       </header>
 
       <section class="wt-for-plate">
         <h3>Shape</h3>
         <div class="wt-shapes">
-          {
-            SHAPE_KEYS.map((k) => (
-              <button type="button" data-shape={k} title={SHAPE_NAMES[k]} aria-label={SHAPE_NAMES[k]}>
-                <svg viewBox="0 0 40 40" aria-hidden="true">
-                  <path d={iconPath(k)} />
-                </svg>
-              </button>
-            ))
-          }
+          {SHAPE_KEYS.map((k) => (
+            <button type="button" data-shape={k} title={SHAPE_NAMES[k]} aria-label={SHAPE_NAMES[k]}>
+              <svg viewBox="0 0 40 40" aria-hidden="true">
+                <path d={iconPath(k)} />
+              </svg>
+            </button>
+          ))}
           <button type="button" class="wt-cut-open" title="Cut your own" aria-label="Cut your own">
             <svg viewBox="0 0 40 40" aria-hidden="true">
               <circle cx="12" cy="28" r="4.2"></circle>
@@ -113,61 +129,81 @@ const swatch = (rgb: [number, number, number]) => `rgb(${rgb.join(', ')})`;
 
         <h3>Paint</h3>
         <div class="wt-paints">
-          {
-            PAINT_KEYS.map((k) => (
-              <button
-                type="button"
-                data-paint={k}
-                title={PAINTS[k].name}
-                aria-label={PAINTS[k].name}
-                class:list={[{ metal: PAINTS[k].metal }]}
-                style={`--sw: ${swatch(PAINTS[k].rgb)}`}
-              />
-            ))
-          }
+          {PAINT_KEYS.map((k) => (
+            <button
+              type="button"
+              data-paint={k}
+              title={PAINTS[k].name}
+              aria-label={PAINTS[k].name}
+              class:list={[{ metal: PAINTS[k].metal }]}
+              style={`--sw: ${swatch(PAINTS[k].rgb)}`}
+            />
+          ))}
         </div>
 
         <label class="wt-range">
-          <span>Size <output data-out="size"></output></span>
+          <span>
+            Size <output data-out="size"></output>
+          </span>
           <input type="range" data-edit="size" min="5" max="30" step="0.5" />
         </label>
         <label class="wt-range">
-          <span>Turn on the wire <output data-out="roll"></output></span>
+          <span>
+            Turn on the wire <output data-out="roll"></output>
+          </span>
           <input type="range" data-edit="roll" min="-90" max="90" step="1" />
         </label>
         <div class="wt-actions">
-          <button type="button" data-act="branch">Hang an arm here</button>
-          <button type="button" data-act="remove-plate">Take it off</button>
+          <button type="button" data-act="branch">
+            Hang an arm here
+          </button>
+          <button type="button" data-act="remove-plate">
+            Take it off
+          </button>
         </div>
       </section>
 
       <section class="wt-for-arm">
         <p class="wt-tip">Drag the loop to slide the wire through it, or move it here, until the arm hangs level.</p>
         <label class="wt-range">
-          <span>Loop <output data-out="hook"></output></span>
+          <span>
+            Loop <output data-out="hook"></output>
+          </span>
           <input type="range" data-edit="hook" min="2" max="98" step="0.25" />
         </label>
         <label class="wt-range">
-          <span>Length <output data-out="len"></output></span>
+          <span>
+            Length <output data-out="len"></output>
+          </span>
           <input type="range" data-edit="len" min="14" max="95" step="0.5" />
         </label>
         <label class="wt-range">
-          <span>Curve <output data-out="sag"></output></span>
+          <span>
+            Curve <output data-out="sag"></output>
+          </span>
           <input type="range" data-edit="sag" min="2" max="16" step="0.25" />
         </label>
         <label class="wt-range">
-          <span><span class="wt-drop-name">Hangs by</span> <output data-out="drop"></output></span>
+          <span>
+            <span class="wt-drop-name">Hangs by</span> <output data-out="drop"></output>
+          </span>
           <input type="range" data-edit="drop" min="5" max="60" step="0.5" />
         </label>
         <div class="wt-actions">
-          <button type="button" data-act="level">Balance this arm</button>
-          <button type="button" data-act="remove-arm">Take it off</button>
+          <button type="button" data-act="level">
+            Balance this arm
+          </button>
+          <button type="button" data-act="remove-arm">
+            Take it off
+          </button>
         </div>
       </section>
 
       <p class="wt-above" hidden>
         The arm above hangs off level now.
-        <button type="button" data-act="level-up">Balance it</button>
+        <button type="button" data-act="level-up">
+          Balance it
+        </button>
       </p>
     </aside>
 
@@ -178,8 +214,12 @@ const swatch = (rgb: [number, number, number]) => `rgb(${rgb.join(', ')})`;
         <canvas class="wt-sheet" width="840" height="560"></canvas>
         <div class="wt-actions">
           <button value="cancel">Cancel</button>
-          <button type="button" class="wt-cut-clear">Clear</button>
-          <button value="cut" class="wt-cut-do" disabled>Cut it out</button>
+          <button type="button" class="wt-cut-clear">
+            Clear
+          </button>
+          <button value="cut" class="wt-cut-do" disabled>
+            Cut it out
+          </button>
         </div>
       </form>
     </dialog>
@@ -377,7 +417,8 @@ const swatch = (rgb: [number, number, number]) => `rgb(${rgb.join(', ')})`;
   .wt-bar select {
     appearance: none;
     padding-right: 30px;
-    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    background-image:
+      linear-gradient(45deg, transparent 50%, currentColor 50%),
       linear-gradient(-45deg, transparent 50%, currentColor 50%);
     background-position:
       calc(100% - 17px) 52%,

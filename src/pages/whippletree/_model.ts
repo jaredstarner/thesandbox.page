@@ -466,7 +466,9 @@ export function presetByKey(key: string): Preset {
 }
 
 // A share link carries the whole mobile in the URL fragment.
-type Packed = { p: string | number[]; s: number; c: string; r: number } | { l: number; h: number; g: number; d: number; e: [Packed, Packed] };
+type Packed =
+  | { p: string | number[]; s: number; c: string; r: number }
+  | { l: number; h: number; g: number; d: number; e: [Packed, Packed] };
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000;
 
