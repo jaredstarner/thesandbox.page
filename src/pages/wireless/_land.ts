@@ -1,7 +1,8 @@
-// Build time only: Natural Earth's land (via world-atlas) packed into a one-degree bitmap for the
-// readout's little globe, so the page ships about eleven kilobytes instead of a coastline.
+// Build time only: Natural Earth's land (via world-atlas) packed into a half-degree bitmap for the
+// readout's little globe, so the page ships about forty kilobytes instead of a coastline.
 
 import topo from 'world-atlas/land-110m.json';
+import { LAND_PER_DEGREE } from './_globe';
 
 type Ring = [number, number][];
 
@@ -34,17 +35,43 @@ function rings(t: Topology): Ring[] {
   const all: Ring[] = [];
   for (const g of t.objects.land.geometries) {
     const polys = (g.type === 'Polygon' ? [g.arcs] : g.arcs) as number[][][];
-    for (const poly of polys) for (const r of poly) all.push(ring(r));
+    for (const poly of polys) for (const r of poly) all.push(unwrap(ring(r)));
   }
   return all;
 }
 
-/** Base64 bitmap of land, 360 by 180 one-degree cells, rows from the north, west to east. */
+/**
+ * Natural Earth joins some rings across the antimeridian (Chukotka, Fiji, Antarctica), stepping from
+ * 180 to -180. Unwrap each ring so it runs on past 180 instead, and close one that circles a pole
+ * along the pole itself.
+ */
+function unwrap(r: Ring): Ring {
+  const out: Ring = [];
+  let shift = 0;
+  for (let i = 0; i < r.length; i++) {
+    if (i > 0) {
+      const d = r[i][0] - r[i - 1][0];
+      if (d > 180) shift -= 360;
+      if (d < -180) shift += 360;
+    }
+    out.push([r[i][0] + shift, r[i][1]]);
+  }
+  if (Math.abs(out[out.length - 1][0] - out[0][0]) > 180) {
+    const pole = out.reduce((t, p) => t + p[1], 0) < 0 ? -90 : 90;
+    out.push([out[out.length - 1][0], pole], [out[0][0], pole]);
+  }
+  return out;
+}
+
+/** Base64 bitmap of land, rows from the north, west to east, LAND_PER_DEGREE cells to a degree. */
 export function landBitmap(): string {
   const all = rings(topo as unknown as Topology);
-  const bytes = new Uint8Array((360 * 180) / 8);
-  for (let row = 0; row < 180; row++) {
-    const lat = 89.5 - row;
+  const step = 1 / LAND_PER_DEGREE;
+  const cols = 360 * LAND_PER_DEGREE;
+  const rows = 180 * LAND_PER_DEGREE;
+  const bytes = new Uint8Array((cols * rows) / 8);
+  for (let row = 0; row < rows; row++) {
+    const lat = 90 - step / 2 - row * step;
     // Even-odd scanline: every ring edge that crosses this latitude, sorted west to east.
     const xs: number[] = [];
     for (const r of all) {
@@ -55,16 +82,22 @@ export function landBitmap(): string {
       }
     }
     xs.sort((a, b) => a - b);
-    for (let col = 0; col < 360; col++) {
-      const lon = -179.5 + col;
+    for (let col = 0; col < cols; col++) {
+      const lon = -180 + step / 2 + col * step;
       let inside = lat < -80;
       if (!inside) {
+        // Count crossings for this longitude in all three copies of the world together, since an
+        // unwrapped ring can reach into the next copy.
         let n = 0;
-        for (const x of xs) if (x < lon) n++;
+        for (const x of xs) {
+          if (x < lon - 360) n++;
+          if (x < lon) n++;
+          if (x < lon + 360) n++;
+        }
         inside = n % 2 === 1;
       }
       if (inside) {
-        const i = row * 360 + col;
+        const i = row * cols + col;
         bytes[i >> 3] |= 1 << (7 - (i & 7));
       }
     }

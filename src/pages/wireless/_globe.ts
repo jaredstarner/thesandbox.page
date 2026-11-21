@@ -2,6 +2,10 @@
 // the real day and night on it right now and a spark for every city on the dial.
 
 const RAD = Math.PI / 180;
+/** Cells per degree in the land bitmap the page is built with. */
+export const LAND_PER_DEGREE = 2;
+const COLS = 360 * LAND_PER_DEGREE;
+const ROWS = 180 * LAND_PER_DEGREE;
 
 export interface Dot {
   lat: number;
@@ -60,23 +64,24 @@ export class Globe {
 
   private bit(row: number, col: number): number {
     if (row < 0) row = 0;
-    if (row > 179) row = 179;
-    col = ((col % 360) + 360) % 360;
-    const i = row * 360 + col;
+    if (row > ROWS - 1) row = ROWS - 1;
+    col = ((col % COLS) + COLS) % COLS;
+    const i = row * COLS + col;
     return (this.land[i >> 3] >> (7 - (i & 7))) & 1;
   }
 
-  /** How much of the one-degree cells around this point are land, blended for soft coasts. */
+  /** How much of the cells around this point are land, blended, then sharpened into a smooth coast. */
   private landAt(lat: number, lon: number): number {
-    const r = 89.5 - lat;
-    const c = lon + 179.5;
+    const r = (90 - lat) * LAND_PER_DEGREE - 0.5;
+    const c = (lon + 180) * LAND_PER_DEGREE - 0.5;
     const r0 = Math.floor(r);
     const c0 = Math.floor(c);
     const fr = r - r0;
     const fc = c - c0;
     const a = this.bit(r0, c0) * (1 - fc) + this.bit(r0, c0 + 1) * fc;
     const b = this.bit(r0 + 1, c0) * (1 - fc) + this.bit(r0 + 1, c0 + 1) * fc;
-    return a * (1 - fr) + b * fr;
+    const v = Math.min(1, Math.max(0, (a * (1 - fr) + b * fr - 0.3) / 0.4));
+    return v * v * (3 - 2 * v);
   }
 
   draw(lon0: number, lat0: number, now: Date, here: Dot | null) {
