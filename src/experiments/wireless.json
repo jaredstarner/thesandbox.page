@@ -1,0 +1,8 @@
+{
+  "title": "Wireless",
+  "summary": "A valve wireless set whose dial is printed with the world instead of wavelengths: turn it west to east through the static and pick up live stations from seventy-three cities, each heard at whatever hour it is there, with a magic eye that closes when you have one tuned.",
+  "date": "2026-11-21",
+  "tags": ["web-audio", "live-data", "media-session", "canvas", "svg", "pointer-events", "radio-browser"],
+  "requires": ["web-audio"],
+  "plot": 51
+}
