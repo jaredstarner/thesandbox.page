@@ -85,7 +85,7 @@ const land = landBitmap();
               {
                 marks.map((c) => (
                   <g>
-                    <line class="city" x1={x(c.lon)} x2={x(c.lon)} y1="238" y2="252" />
+                    <line class="mark" x1={x(c.lon)} x2={x(c.lon)} y1="238" y2="252" />
                     {c.carriers.map((lon, i) => (
                       <circle class="carrier" data-carrier={c.first + i} cx={x(lon)} cy="264" r="2.4" />
                     ))}
@@ -191,6 +191,7 @@ const land = landBitmap();
     min-height: 100dvh;
     padding: 18px 24px 16px;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto auto auto 1fr;
     justify-items: center;
     align-content: start;
@@ -200,7 +201,7 @@ const land = landBitmap();
     background:
       radial-gradient(ellipse 70% 55% at 30% 18%, rgb(120 80 52 / 0.35), transparent 70%),
       radial-gradient(ellipse 90% 70% at 70% 100%, rgb(0 0 0 / 0.5), transparent 70%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.24 0 0 0 0 0.15 0 0 0 0 0.09 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.2 0 0 0 0 0.12 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"),
       var(--bakelite);
     overflow: clip;
   }
@@ -311,6 +312,7 @@ const land = landBitmap();
   /* The dial glass */
   .glass {
     width: 100%;
+    min-width: 0;
     padding: 9px;
     border-radius: 20px;
     background: linear-gradient(180deg, #e4c78a, #8f6c37 30%, #c9a462 55%, #6e5229 80%, #a9874c);
@@ -398,7 +400,7 @@ const land = landBitmap();
   .strip .tick.red {
     stroke: var(--red);
   }
-  .strip .city {
+  .strip .mark {
     stroke: var(--cream);
     stroke-width: 1.4;
     opacity: 0.85;
