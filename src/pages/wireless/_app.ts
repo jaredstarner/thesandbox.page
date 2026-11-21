@@ -180,7 +180,8 @@ export function start(root: HTMLElement) {
   engine.setVolume(volume);
   engine.setTone(tone);
 
-  const turn = (knob: HTMLElement, deg: number) => knob.querySelector<HTMLElement>('.turn')!.style.setProperty('--turn', `${deg}deg`);
+  const turn = (knob: HTMLElement, deg: number) =>
+    knob.querySelector<HTMLElement>('.turn')!.style.setProperty('--turn', `${deg}deg`);
   const showVolume = () => {
     turn(volKnob, -135 + 270 * volume);
     volKnob.setAttribute('aria-valuenow', String(Math.round(volume * 100)));
@@ -509,10 +510,7 @@ export function start(root: HTMLElement) {
         line = st.tags.length ? `${st.name} · ${st.tags.join(', ')}` : st.name;
       } else {
         const live = carriers.filter((k) => k.city === ci && !k.dead).length;
-        line =
-          live === 0
-            ? 'Nothing on air'
-            : `${live} ${live === 1 ? 'station' : 'stations'} on the dial here`;
+        line = live === 0 ? 'Nothing on air' : `${live} ${live === 1 ? 'station' : 'stations'} on the dial here`;
       }
       stationEl.textContent = on || onCarrier === null ? line : `${line}`;
     } else {
@@ -555,8 +553,7 @@ export function start(root: HTMLElement) {
     field = { s, d: n ? n.d : 0, has: !!n && Math.abs(n.d) < 1.2, calm };
 
     if (on) {
-      const moving =
-        drag !== null || Math.abs(vel) > 2.5 || (target !== null && Math.abs(towards(pos, target)) > 0.3);
+      const moving = drag !== null || Math.abs(vel) > 2.5 || (target !== null && Math.abs(towards(pos, target)) > 0.3);
       settle = n && Math.abs(n.d) < 0.42 && !moving ? settle + dt : 0;
       const warm = t - warmFrom > 1800;
       if (n && warm && settle > 0.2 && current !== n.k) tune(n.k);

@@ -20,7 +20,11 @@ const cities = data.cities.map((c) => ({
   carriers: c.stations.map((_, i) => carrierLon(c.lon, i, c.stations.length)),
 }));
 let carrierIndex = 0;
-const marks = cities.map((c) => ({ ...c, first: carrierIndex, n: (carrierIndex += c.carriers.length) - c.carriers.length }));
+const marks = cities.map((c) => ({
+  ...c,
+  first: carrierIndex,
+  n: (carrierIndex += c.carriers.length) - c.carriers.length,
+}));
 
 const degrees = Array.from({ length: 360 }, (_, i) => i - 180);
 const fmtLon = (d: number) => (d === 0 ? '0°' : d === -180 ? '180°' : `${Math.abs(d)}°${d < 0 ? 'W' : 'E'}`);
@@ -39,12 +43,20 @@ const land = landBitmap();
 
   <main class="wireless" data-state="off">
     <header class="plate">
-      <a class="home" href="/">thesandbox.page</a>
-      <p class="maker"><span>Wireless</span><small>World receiver · seven valves</small></p>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
+      <p class="maker">
+        <span>Wireless</span>
+        <small>World receiver · seven valves</small>
+      </p>
     </header>
 
     <div class="eye-mount" aria-hidden="true">
-      <div class="eye"><div class="eye-face"></div><div class="eye-cap"></div></div>
+      <div class="eye">
+        <div class="eye-face"></div>
+        <div class="eye-cap"></div>
+      </div>
     </div>
 
     <section class="glass" aria-label="Tuning dial">
@@ -61,63 +73,55 @@ const land = landBitmap();
         <div class="drum">
           <div class="print">
             <svg class="strip" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
-              {
-                meridians.map((d, i) => (
-                  <rect class={i % 2 ? 'zone' : 'zone alt'} x={x(d - 7.5)} y="40" width={15 * K} height="208" />
-                ))
-              }
+              {meridians.map((d, i) => (
+                <rect class={i % 2 ? 'zone' : 'zone alt'} x={x(d - 7.5)} y="40" width={15 * K} height="208" />
+              ))}
               <rect class="zone alt" x={x(172.5)} y="40" width={7.5 * K} height="208" />
               <line class="rule" x1="0" x2={W} y1="40" y2="40" />
               <line class="rule" x1="0" x2={W} y1="248" y2="248" />
               <line class="rule thin" x1="0" x2={W} y1="252" y2="252" />
-              {
-                degrees.map((d) => {
-                  const len = d % 15 === 0 ? 20 : d % 5 === 0 ? 11 : 5;
-                  return <line class="tick" x1={x(d)} x2={x(d)} y1={40 - len} y2="40" />;
-                })
-              }
-              {
-                degrees
-                  .filter((d) => d % 15 === 0 || (d % 15) % 7.5 === 0)
-                  .map((d) => <line class="tick" x1={x(d)} x2={x(d)} y1="252" y2="264" />)
-              }
-              {meridians.map((d) => <line class="tick red" x1={x(d + 7.5)} x2={x(d + 7.5)} y1="252" y2="258" />)}
-              {
-                marks.map((c) => (
-                  <g>
-                    <line class="mark" x1={x(c.lon)} x2={x(c.lon)} y1="196" y2="210" />
-                    {c.carriers.map((lon, i) => (
-                      <circle class="carrier" data-carrier={c.first + i} cx={x(lon)} cy="222" r="2.4" />
-                    ))}
-                  </g>
-                ))
-              }
+              {degrees.map((d) => {
+                const len = d % 15 === 0 ? 20 : d % 5 === 0 ? 11 : 5;
+                return <line class="tick" x1={x(d)} x2={x(d)} y1={40 - len} y2="40" />;
+              })}
+              {degrees
+                .filter((d) => d % 15 === 0 || (d % 15) % 7.5 === 0)
+                .map((d) => (
+                  <line class="tick" x1={x(d)} x2={x(d)} y1="252" y2="264" />
+                ))}
+              {meridians.map((d) => (
+                <line class="tick red" x1={x(d + 7.5)} x2={x(d + 7.5)} y1="252" y2="258" />
+              ))}
+              {marks.map((c) => (
+                <g>
+                  <line class="mark" x1={x(c.lon)} x2={x(c.lon)} y1="196" y2="210" />
+                  {c.carriers.map((lon, i) => (
+                    <circle class="carrier" data-carrier={c.first + i} cx={x(lon)} cy="222" r="2.4" />
+                  ))}
+                </g>
+              ))}
             </svg>
-            {
-              meridians.map((d) => (
-                <span class="deg" style={`left:${pct(d)}`}>
-                  {fmtLon(d)}
-                </span>
-              ))
-            }
-            {
-              meridians.map((d) => (
-                <span class="zonelabel" style={`left:${pct(d)}`}>
-                  {fmtZone(d / 15)}
-                </span>
-              ))
-            }
-            {
-              marks.map((c) => (
-                <span class="name" style={`left:${pct(c.lon)}`}>
-                  {c.name}
-                </span>
-              ))
-            }
+            {meridians.map((d) => (
+              <span class="deg" style={`left:${pct(d)}`}>
+                {fmtLon(d)}
+              </span>
+            ))}
+            {meridians.map((d) => (
+              <span class="zonelabel" style={`left:${pct(d)}`}>
+                {fmtZone(d / 15)}
+              </span>
+            ))}
+            {marks.map((c) => (
+              <span class="name" style={`left:${pct(c.lon)}`}>
+                {c.name}
+              </span>
+            ))}
           </div>
         </div>
         <div class="shade"></div>
-        <div class="needle"><i></i></div>
+        <div class="needle">
+          <i></i>
+        </div>
         <div class="sheen"></div>
       </div>
     </section>
@@ -125,14 +129,30 @@ const land = landBitmap();
     <section class="console">
       <div class="controls left">
         <button class="power" type="button" aria-pressed="false">
-          <span class="jewel"></span><span class="label">On</span>
+          <span class="jewel"></span>
+          <span class="label">On</span>
         </button>
-        <div class="knob small volume" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100">
-          <div class="cap"><div class="turn"><i></i></div></div>
+        <div
+          class="knob small volume"
+          role="slider"
+          tabindex="0"
+          aria-label="Volume"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div class="cap">
+            <div class="turn">
+              <i></i>
+            </div>
+          </div>
           <span class="caption">Volume</span>
         </div>
         <div class="knob small tone" role="slider" tabindex="0" aria-label="Tone" aria-valuemin="0" aria-valuemax="100">
-          <div class="cap"><div class="turn"><i></i></div></div>
+          <div class="cap">
+            <div class="turn">
+              <i></i>
+            </div>
+          </div>
           <span class="caption">Tone</span>
         </div>
       </div>
@@ -149,22 +169,32 @@ const land = landBitmap();
 
       <div class="controls right">
         <div class="knob tuning" role="slider" tabindex="0" aria-label="Tuning knob">
-          <div class="cap"><div class="turn"><i></i></div></div>
+          <div class="cap">
+            <div class="turn">
+              <i></i>
+            </div>
+          </div>
           <span class="caption">Tuning</span>
         </div>
         <div class="seek">
-          <button type="button" class="west" aria-label="Seek west">◂<span> West</span></button>
-          <button type="button" class="east" aria-label="Seek east"><span>East </span>▸</button>
+          <button type="button" class="west" aria-label="Seek west">
+            ◂<span> West</span>
+          </button>
+          <button type="button" class="east" aria-label="Seek east">
+            <span>East </span>▸
+          </button>
         </div>
       </div>
     </section>
 
-    <noscript><p class="noscript">The dial scrolls without JavaScript, but the set needs it to play.</p></noscript>
+    <noscript>
+      <p class="noscript">The dial scrolls without JavaScript, but the set needs it to play.</p>
+    </noscript>
 
     <footer class="credit">
       <p>
-        Stations from the <a href="https://www.radio-browser.info/">Radio Browser</a> community directory, each one live from
-        its broadcaster, so some will be off air. Land from Natural Earth.
+        Stations from the <a href="https://www.radio-browser.info/">Radio Browser</a> community directory, each one live
+        from its broadcaster, so some will be off air. Land from Natural Earth.
       </p>
     </footer>
 
@@ -460,7 +490,15 @@ const land = landBitmap();
     inset: 0;
     pointer-events: none;
     background:
-      linear-gradient(90deg, rgb(5 3 2 / 0.86), rgb(5 3 2 / 0.25) 22%, transparent 38%, transparent 62%, rgb(5 3 2 / 0.25) 78%, rgb(5 3 2 / 0.86)),
+      linear-gradient(
+        90deg,
+        rgb(5 3 2 / 0.86),
+        rgb(5 3 2 / 0.25) 22%,
+        transparent 38%,
+        transparent 62%,
+        rgb(5 3 2 / 0.25) 78%,
+        rgb(5 3 2 / 0.86)
+      ),
       rgb(5 3 2 / var(--dark, 0.62));
     transition: --dark 2.6s;
   }
@@ -568,7 +606,12 @@ const land = landBitmap();
     border-radius: 50%;
     background: repeating-conic-gradient(from -136deg, var(--gold) 0 2deg, transparent 2deg 27deg);
     mask:
-      radial-gradient(closest-side, transparent calc(100% - 6px), #000 calc(100% - 5px) calc(100% - 1px), transparent 100%),
+      radial-gradient(
+        closest-side,
+        transparent calc(100% - 6px),
+        #000 calc(100% - 5px) calc(100% - 1px),
+        transparent 100%
+      ),
       conic-gradient(from -137deg, #000 0 274deg, transparent 274deg);
     mask-composite: intersect;
     opacity: 0.75;
