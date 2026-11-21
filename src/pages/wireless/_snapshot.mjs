@@ -4,10 +4,12 @@
 // address each time a station is tuned.
 //
 // For every candidate city (in priority order) it asks the Radio Browser directory for HTTPS
-// stations from that country within 40 km, then opens each stream just long enough to read its
-// headers: it must answer 200 with an audio type, and stations that send CORS headers (so the set
-// can run them through its own valve tone) are kept first. A city goes on the dial if it has at
-// least one working station and sits far enough from the cities already placed.
+// stations from that country listed within 40 km or in a region named for the city; a country's
+// first city with too few of those also takes the country's most played stations. Then it opens
+// each stream just long enough to read its headers: it must answer 200 with an audio type, and
+// stations that send CORS headers (so the set can run them through its own valve tone) are kept
+// first. A city goes on the dial if it has at least one working station, none already used by
+// another city, and sits far enough from the cities already placed.
 
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
