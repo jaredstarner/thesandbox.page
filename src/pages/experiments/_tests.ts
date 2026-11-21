@@ -504,6 +504,12 @@ export const TECHNIQUES: Record<string, Technique> = {
     handling: 'Can save what it shows as a video file.',
     test: () => present(typeof MediaRecorder === 'function', 'MediaRecorder present', 'MediaRecorder missing'),
   },
+  'media-session': {
+    label: 'Media Session',
+    webFeature: 'media-session',
+    test: () =>
+      present('mediaSession' in navigator, 'navigator.mediaSession present', 'no Media Session; media keys do nothing'),
+  },
   geolocation: {
     label: 'Geolocation',
     webFeature: 'geolocation',
@@ -575,6 +581,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   'change-ringing': { label: 'Change ringing' },
   'place-notation': { label: 'Place notation' },
   'kinetic-sculpture': { label: 'Kinetic sculpture' },
+  'radio-browser': { label: 'Radio Browser directory' },
   statics: { label: 'Statics' },
 };
 

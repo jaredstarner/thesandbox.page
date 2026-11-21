@@ -825,5 +825,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
     },
+    // /wireless/: a condensed face for the station names printed on the dial glass, and a deco face for the set.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Antonio',
+      cssVariable: '--font-wl-dial',
+      weights: ['100 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Arial Narrow', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Federo',
+      cssVariable: '--font-wl-plate',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
   ],
 });

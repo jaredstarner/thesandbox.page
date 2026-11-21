@@ -1,0 +1,949 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import data from './_stations.json';
+import { landBitmap } from './_land';
+import { carrierLon } from './_tuning';
+
+// The dial is printed once at build time, so it reads (and scrolls) without JavaScript.
+const W = 4320; // the strip's width in its own units: 12 per degree of longitude
+const H = 290;
+const K = W / 360;
+const x = (lon: number) => (lon + 180) * K;
+const pct = (lon: number) => `${(((lon + 180) / 360) * 100).toFixed(4)}%`;
+const regions = new Intl.DisplayNames(['en'], { type: 'region' });
+
+const cities = data.cities.map((c) => ({
+  name: c.name,
+  country: regions.of(c.cc) ?? c.cc,
+  lon: c.lon,
+  carriers: c.stations.map((_, i) => carrierLon(c.lon, i, c.stations.length)),
+}));
+let carrierIndex = 0;
+const marks = cities.map((c) => ({
+  ...c,
+  first: carrierIndex,
+  n: (carrierIndex += c.carriers.length) - c.carriers.length,
+}));
+
+const degrees = Array.from({ length: 360 }, (_, i) => i - 180);
+const fmtLon = (d: number) => (d === 0 ? '0°' : d === -180 ? '180°' : `${Math.abs(d)}°${d < 0 ? 'W' : 'E'}`);
+const fmtZone = (h: number) => (h === 0 ? 'GMT' : Math.abs(h) === 12 ? '±12' : `${h > 0 ? '+' : '−'}${Math.abs(h)}`);
+const meridians = degrees.filter((d) => d % 15 === 0);
+
+const land = landBitmap();
+---
+
+<Bare
+  title="Wireless"
+  description="A valve wireless set whose dial is printed with the world: turn it west to east and pick up live stations from seventy-three cities, through the static, at whatever hour it is there."
+>
+  <Font cssVariable="--font-wl-dial" slot="head" />
+  <Font cssVariable="--font-wl-plate" slot="head" />
+
+  <main class="wireless" data-state="off">
+    <header class="plate">
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
+      <p class="maker">
+        <span>Wireless</span>
+        <small>World receiver · seven valves</small>
+      </p>
+    </header>
+
+    <div class="eye-mount" aria-hidden="true">
+      <div class="eye">
+        <div class="eye-face"></div>
+        <div class="eye-cap"></div>
+      </div>
+    </div>
+
+    <section class="glass" aria-label="Tuning dial">
+      <div
+        class="window"
+        role="slider"
+        tabindex="0"
+        aria-label="Tuning"
+        aria-valuemin="-180"
+        aria-valuemax="180"
+        aria-valuenow="0"
+      >
+        <div class="backlight"></div>
+        <div class="drum">
+          <div class="print">
+            <svg class="strip" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
+              {meridians.map((d, i) => (
+                <rect class={i % 2 ? 'zone' : 'zone alt'} x={x(d - 7.5)} y="40" width={15 * K} height="208" />
+              ))}
+              <rect class="zone alt" x={x(172.5)} y="40" width={7.5 * K} height="208" />
+              <line class="rule" x1="0" x2={W} y1="40" y2="40" />
+              <line class="rule" x1="0" x2={W} y1="248" y2="248" />
+              <line class="rule thin" x1="0" x2={W} y1="252" y2="252" />
+              {degrees.map((d) => {
+                const len = d % 15 === 0 ? 20 : d % 5 === 0 ? 11 : 5;
+                return <line class="tick" x1={x(d)} x2={x(d)} y1={40 - len} y2="40" />;
+              })}
+              {degrees
+                .filter((d) => d % 15 === 0 || (d % 15) % 7.5 === 0)
+                .map((d) => (
+                  <line class="tick" x1={x(d)} x2={x(d)} y1="252" y2="264" />
+                ))}
+              {meridians.map((d) => (
+                <line class="tick red" x1={x(d + 7.5)} x2={x(d + 7.5)} y1="252" y2="258" />
+              ))}
+              {marks.map((c) => (
+                <g>
+                  <line class="mark" x1={x(c.lon)} x2={x(c.lon)} y1="196" y2="210" />
+                  {c.carriers.map((lon, i) => (
+                    <circle class="carrier" data-carrier={c.first + i} cx={x(lon)} cy="222" r="2.4" />
+                  ))}
+                </g>
+              ))}
+            </svg>
+            {meridians.map((d) => (
+              <span class="deg" style={`left:${pct(d)}`}>
+                {fmtLon(d)}
+              </span>
+            ))}
+            {meridians.map((d) => (
+              <span class="zonelabel" style={`left:${pct(d)}`}>
+                {fmtZone(d / 15)}
+              </span>
+            ))}
+            {marks.map((c) => (
+              <span class="name" style={`left:${pct(c.lon)}`}>
+                {c.name}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div class="shade"></div>
+        <div class="needle">
+          <i></i>
+        </div>
+        <div class="sheen"></div>
+      </div>
+    </section>
+
+    <section class="console">
+      <div class="controls left">
+        <button class="power" type="button" aria-pressed="false">
+          <span class="jewel"></span>
+          <span class="label">On</span>
+        </button>
+        <div
+          class="knob small volume"
+          role="slider"
+          tabindex="0"
+          aria-label="Volume"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div class="cap">
+            <div class="turn">
+              <i></i>
+            </div>
+          </div>
+          <span class="caption">Volume</span>
+        </div>
+        <div class="knob small tone" role="slider" tabindex="0" aria-label="Tone" aria-valuemin="0" aria-valuemax="100">
+          <div class="cap">
+            <div class="turn">
+              <i></i>
+            </div>
+          </div>
+          <span class="caption">Tone</span>
+        </div>
+      </div>
+
+      <div class="readout" aria-live="polite">
+        <canvas class="globe" width="240" height="240" data-land={land} aria-hidden="true"></canvas>
+        <div class="card">
+          <p class="status">Switched off</p>
+          <h1 class="city">Wireless</h1>
+          <p class="where">Seventy-three cities on the glass</p>
+          <p class="station">Switch on, then turn the dial</p>
+        </div>
+      </div>
+
+      <div class="controls right">
+        <div class="knob tuning" role="slider" tabindex="0" aria-label="Tuning knob">
+          <div class="cap">
+            <div class="turn">
+              <i></i>
+            </div>
+          </div>
+          <span class="caption">Tuning</span>
+        </div>
+        <div class="seek">
+          <button type="button" class="west" aria-label="Seek west">
+            ◂<span> West</span>
+          </button>
+          <button type="button" class="east" aria-label="Seek east">
+            <span>East </span>▸
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <noscript>
+      <p class="noscript">The dial scrolls without JavaScript, but the set needs it to play.</p>
+    </noscript>
+
+    <footer class="credit">
+      <p>
+        Stations from the <a href="https://www.radio-browser.info/">Radio Browser</a> community directory, each one live
+        from its broadcaster, so some will be off air. Land from Natural Earth.
+      </p>
+    </footer>
+
+    <audio class="feed" crossorigin="anonymous" preload="none"></audio>
+    <audio class="feed-raw" preload="none"></audio>
+  </main>
+</Bare>
+
+<style>
+  .wireless {
+    --bakelite: #1c130d;
+    --bakelite-hi: #3b2a1e;
+    --cream: #f4e4c1;
+    --gold: #d6a650;
+    --brass: #b8914f;
+    --red: #e2593a;
+    --eye: #79f7a3;
+    --dial: var(--font-wl-dial), 'Arial Narrow', sans-serif;
+    --plate: var(--font-wl-plate), Georgia, serif;
+
+    position: relative;
+    isolation: isolate;
+    box-sizing: border-box;
+    min-height: 100dvh;
+    padding: 18px 24px 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto auto auto auto auto 1.3fr auto;
+    justify-items: center;
+    align-content: start;
+    gap: 14px;
+    color: var(--cream);
+    font-family: var(--dial);
+    background:
+      radial-gradient(ellipse 70% 55% at 30% 18%, rgb(120 80 52 / 0.35), transparent 70%),
+      radial-gradient(ellipse 90% 70% at 70% 100%, rgb(0 0 0 / 0.5), transparent 70%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.2 0 0 0 0 0.12 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"),
+      var(--bakelite);
+    overflow: clip;
+  }
+  :global(body:has(.wireless)) {
+    margin: 0;
+    background: #1c130d;
+  }
+  .wireless *,
+  .wireless *::before,
+  .wireless *::after {
+    box-sizing: border-box;
+  }
+  .wireless [hidden] {
+    display: none !important;
+  }
+
+  /* The maker's plate */
+  .plate {
+    display: contents;
+  }
+  .home {
+    grid-row: 1;
+    justify-self: start;
+    font-family: var(--plate);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: rgb(244 228 193 / 0.55);
+    text-decoration: none;
+  }
+  .home:hover,
+  .home:focus-visible {
+    color: var(--cream);
+  }
+  .maker {
+    grid-row: 3;
+    margin: 0;
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    font-family: var(--plate);
+    color: var(--gold);
+    text-shadow:
+      0 1px 0 rgb(0 0 0 / 0.7),
+      0 -1px 0 rgb(255 230 170 / 0.15);
+  }
+  .maker span {
+    font-size: 26px;
+    letter-spacing: 0.42em;
+    margin-right: -0.42em;
+    text-transform: uppercase;
+  }
+  .maker small {
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgb(214 166 80 / 0.7);
+  }
+
+  /* The magic eye: an EM34-style tuning indicator whose dark wedge closes on a station */
+  .eye-mount {
+    grid-row: 4;
+    padding: 7px;
+    border-radius: 50%;
+    background: conic-gradient(from 200deg, #6d5530, #e6c88a, #8a6a3a, #3b2c16, #c9a463, #6d5530);
+    box-shadow:
+      0 6px 14px rgb(0 0 0 / 0.55),
+      inset 0 0 0 1px rgb(0 0 0 / 0.4);
+  }
+  .eye {
+    --gap: 110deg;
+    --glow: 0;
+    position: relative;
+    width: 72px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, #0b120d 0 55%, #020403 100%);
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgb(0 0 0 / 0.9);
+  }
+  .eye-face {
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background:
+      repeating-conic-gradient(rgb(0 0 0 / 0.16) 0 1.4deg, transparent 1.4deg 4deg),
+      radial-gradient(circle, transparent 0 30%, rgb(0 30 12 / 0.55) 80%),
+      conic-gradient(
+        from calc(var(--gap) / -2),
+        #04100a 0deg var(--gap),
+        #b8ffd0 calc(var(--gap) + 1.5deg),
+        #4fe388 calc(var(--gap) + 18deg),
+        #36c46e 50%,
+        #4fe388 calc(342deg),
+        #b8ffd0 358.5deg,
+        #04100a 360deg
+      );
+    opacity: calc(0.07 + 0.93 * var(--glow));
+    filter: drop-shadow(0 0 calc(6px * var(--glow)) rgb(100 255 160 / 0.7));
+  }
+  .eye-cap {
+    position: absolute;
+    inset: 34%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #3a3a36, #0b0b0a 70%);
+    box-shadow: 0 0 6px rgb(0 0 0 / 0.9);
+  }
+
+  /* The dial glass */
+  .glass {
+    grid-row: 5;
+    width: 100%;
+    min-width: 0;
+    padding: 9px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #e4c78a, #8f6c37 30%, #c9a462 55%, #6e5229 80%, #a9874c);
+    box-shadow:
+      0 18px 40px rgb(0 0 0 / 0.6),
+      0 2px 0 rgb(255 240 200 / 0.25) inset;
+  }
+  .window {
+    position: relative;
+    height: 290px;
+    border-radius: 12px;
+    overflow: auto hidden;
+    background: #090604;
+    box-shadow:
+      inset 0 0 0 1px rgb(0 0 0 / 0.8),
+      inset 0 10px 24px rgb(0 0 0 / 0.75);
+    touch-action: pan-y;
+    cursor: grab;
+    outline: none;
+    scrollbar-width: none;
+  }
+  .wireless[data-js] .window {
+    overflow: hidden;
+  }
+  .window:focus-visible {
+    box-shadow:
+      inset 0 0 0 2px var(--gold),
+      inset 0 10px 24px rgb(0 0 0 / 0.75);
+  }
+  .window.dragging {
+    cursor: grabbing;
+  }
+  .backlight {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 38% 95% at 50% 58%, rgb(255 176 92 / 0.34), rgb(140 70 25 / 0.1) 62%, transparent 85%),
+      radial-gradient(ellipse 22% 70% at 4% 60%, rgb(255 160 80 / 0.12), transparent 80%),
+      radial-gradient(ellipse 22% 70% at 96% 60%, rgb(255 160 80 / 0.12), transparent 80%);
+    opacity: var(--lamp, 0.12);
+    transition: opacity 2.6s cubic-bezier(0.5, 0, 0.3, 1);
+  }
+  .wireless[data-state='on'] .backlight {
+    --lamp: 1;
+  }
+  .drum {
+    position: relative;
+    display: flex;
+    width: max-content;
+    height: 100%;
+    will-change: transform;
+  }
+  .print {
+    position: relative;
+    flex: none;
+    width: 4320px;
+    height: 100%;
+  }
+  .strip {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .strip .zone {
+    fill: rgb(244 228 193 / 0.02);
+  }
+  .strip .zone.alt {
+    fill: rgb(214 166 80 / 0.055);
+  }
+  .strip .rule {
+    stroke: var(--gold);
+    stroke-width: 1.4;
+    opacity: 0.85;
+  }
+  .strip .rule.thin {
+    stroke-width: 0.8;
+    opacity: 0.5;
+  }
+  .strip .tick {
+    stroke: var(--gold);
+    stroke-width: 1.1;
+    opacity: 0.8;
+  }
+  .strip .tick.red {
+    stroke: var(--red);
+  }
+  .strip .mark {
+    stroke: var(--cream);
+    stroke-width: 1.4;
+    opacity: 0.85;
+  }
+  .strip .carrier {
+    fill: var(--cream);
+    opacity: 0.75;
+    transition:
+      fill 0.3s,
+      opacity 0.3s;
+  }
+  .strip .carrier.live {
+    fill: #ffd27a;
+    opacity: 1;
+  }
+  .strip .carrier.dead {
+    fill: #6b5a48;
+    opacity: 0.5;
+  }
+  .deg,
+  .zonelabel,
+  .name {
+    position: absolute;
+    translate: -50% 0;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .deg {
+    top: 4px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+  }
+  .zonelabel {
+    top: 266px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--red);
+  }
+  .name {
+    bottom: 98px;
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--cream);
+    text-shadow:
+      0 0 6px rgb(255 190 110 / 0.5),
+      0 0 1px rgb(255 220 160 / 0.6);
+  }
+  .shade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        90deg,
+        rgb(5 3 2 / 0.86),
+        rgb(5 3 2 / 0.25) 22%,
+        transparent 38%,
+        transparent 62%,
+        rgb(5 3 2 / 0.25) 78%,
+        rgb(5 3 2 / 0.86)
+      ),
+      rgb(5 3 2 / var(--dark, 0.62));
+    transition: --dark 2.6s;
+  }
+  .wireless[data-state='on'] .shade {
+    --dark: 0;
+  }
+  @property --dark {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0.62;
+  }
+  .needle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    translate: -50% 0;
+    background: linear-gradient(180deg, transparent, #ff6a3a 4%, #ff7b46 50%, #ff6a3a 96%, transparent);
+    box-shadow: 0 0 10px rgb(255 100 50 / 0.55);
+    pointer-events: none;
+  }
+  .needle::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    translate: 7px 0;
+    background: rgb(0 0 0 / 0.55);
+    filter: blur(2px);
+    z-index: -1;
+  }
+  .needle i {
+    position: absolute;
+    left: 50%;
+    top: -2px;
+    width: 15px;
+    height: 12px;
+    translate: -50% 0;
+    background: linear-gradient(180deg, #2a1a10, #120a05);
+    border: 1px solid #8a6a3a;
+    border-radius: 0 0 6px 6px;
+  }
+  .sheen {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        104deg,
+        transparent 0 18%,
+        rgb(255 245 225 / 0.07) 22%,
+        transparent 30%,
+        transparent 64%,
+        rgb(255 245 225 / 0.045) 68%,
+        transparent 73%
+      ),
+      linear-gradient(180deg, rgb(255 245 225 / 0.06), transparent 22%);
+  }
+
+  /* The console: power, volume, tone, the station indicator, and the tuning knob */
+  .console {
+    grid-row: 6;
+    width: min(1180px, 100%);
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 560px) 1fr;
+    align-items: center;
+    gap: 24px;
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+  .controls.left {
+    justify-self: end;
+  }
+  .controls.right {
+    justify-self: start;
+  }
+  .knob {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    outline: none;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+  }
+  .knob .cap {
+    position: relative;
+    width: 112px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #1a1009;
+    box-shadow:
+      0 0 0 3px #7a5c2e,
+      0 0 0 5px rgb(0 0 0 / 0.5),
+      0 12px 20px rgb(0 0 0 / 0.6);
+  }
+  /* A printed scale round the small knobs, from nought to full */
+  .knob.small .cap::before {
+    content: '';
+    position: absolute;
+    inset: -15px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from -136deg, var(--gold) 0 2deg, transparent 2deg 27deg);
+    mask:
+      radial-gradient(
+        closest-side,
+        transparent calc(100% - 6px),
+        #000 calc(100% - 5px) calc(100% - 1px),
+        transparent 100%
+      ),
+      conic-gradient(from -137deg, #000 0 274deg, transparent 274deg);
+    mask-composite: intersect;
+    opacity: 0.75;
+  }
+  /* The knob turns; its highlight and shadow stay where the light is. */
+  .knob .turn {
+    --turn: 0deg;
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    rotate: var(--turn);
+    background:
+      radial-gradient(circle, #3a281b 0 56%, #22160d 57% 59%, transparent 60%),
+      repeating-conic-gradient(#24170e 0 4deg, #4a3322 4deg 6deg, #24170e 6deg 10deg);
+  }
+  .knob .turn i {
+    position: absolute;
+    left: 50%;
+    top: 9%;
+    width: 4px;
+    height: 30%;
+    border-radius: 2px;
+    translate: -50% 0;
+    background: var(--cream);
+    box-shadow: 0 0 4px rgb(255 220 160 / 0.4);
+  }
+  .knob .cap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle at 36% 28%, rgb(255 232 196 / 0.24), transparent 42%);
+    box-shadow:
+      inset 0 2px 2px rgb(255 220 170 / 0.18),
+      inset 0 -4px 8px rgb(0 0 0 / 0.5);
+  }
+  .knob.small .cap {
+    width: 74px;
+  }
+  .knob:focus-visible .cap {
+    box-shadow:
+      0 0 0 3px var(--gold),
+      0 0 0 5px rgb(0 0 0 / 0.5),
+      0 12px 20px rgb(0 0 0 / 0.6);
+  }
+  .caption {
+    font-family: var(--plate);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .power {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--gold);
+    cursor: pointer;
+    font: inherit;
+  }
+  .power .jewel {
+    width: 46px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 38% 32%, rgb(255 255 255 / 0.35), transparent 30%),
+      radial-gradient(circle, #5a1b10, #2a0a05 70%);
+    box-shadow:
+      0 0 0 4px #6e5229,
+      0 0 0 6px rgb(0 0 0 / 0.5),
+      0 8px 14px rgb(0 0 0 / 0.6);
+    transition:
+      background 0.6s,
+      box-shadow 0.6s;
+  }
+  .wireless[data-state='off'] .power .jewel {
+    animation: wl-invite 2.8s ease-in-out infinite;
+  }
+  @keyframes wl-invite {
+    50% {
+      box-shadow:
+        0 0 0 4px #6e5229,
+        0 0 0 6px rgb(0 0 0 / 0.5),
+        0 0 20px rgb(255 120 70 / 0.4),
+        0 8px 14px rgb(0 0 0 / 0.6);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wireless[data-state='off'] .power .jewel {
+      animation: none;
+    }
+  }
+  .power[aria-pressed='true'] .jewel {
+    background:
+      radial-gradient(circle at 38% 32%, rgb(255 255 255 / 0.6), transparent 30%),
+      radial-gradient(circle, #ffb08a, #e2482a 45%, #8a1c0c 80%);
+    box-shadow:
+      0 0 0 4px #6e5229,
+      0 0 0 6px rgb(0 0 0 / 0.5),
+      0 0 22px rgb(255 90 50 / 0.6),
+      0 8px 14px rgb(0 0 0 / 0.6);
+  }
+  .power .label {
+    font-family: var(--plate);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+  .power:focus-visible {
+    outline: none;
+  }
+  .power:focus-visible .jewel {
+    outline: 3px solid var(--gold);
+    outline-offset: 6px;
+  }
+  .seek {
+    display: grid;
+    gap: 8px;
+  }
+  .seek button {
+    padding: 8px 12px;
+    border: 1px solid rgb(0 0 0 / 0.6);
+    border-radius: 6px;
+    background: linear-gradient(180deg, #3a281b, #1e130b);
+    color: var(--cream);
+    font-family: var(--plate);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow:
+      0 4px 8px rgb(0 0 0 / 0.5),
+      inset 0 1px 0 rgb(255 220 170 / 0.15);
+  }
+  .seek button:active {
+    translate: 0 1px;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 0.5);
+  }
+  .seek button:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  /* The station indicator: a second, smaller window with the globe */
+  .readout {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 18px;
+    padding: 14px 20px 14px 14px;
+    border-radius: 14px;
+    background: radial-gradient(ellipse 80% 120% at 30% 50%, #1a110a, #0a0604);
+    box-shadow:
+      0 0 0 6px #6e5229,
+      0 0 0 8px rgb(0 0 0 / 0.5),
+      inset 0 6px 16px rgb(0 0 0 / 0.8),
+      0 14px 26px rgb(0 0 0 / 0.5);
+    min-width: 0;
+  }
+  .globe {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    transition: filter 2.4s;
+  }
+  /* Unlit, the indicator reads by the room's light alone. */
+  .wireless[data-state='off'] .globe {
+    filter: brightness(0.42) saturate(0.5);
+  }
+  .wireless[data-state='off'] :is(.city, .where) {
+    color: rgb(244 228 193 / 0.5);
+    text-shadow: none;
+  }
+  .card {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+  }
+  .card p,
+  .card h1 {
+    margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .status {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .status[data-on-air] {
+    color: var(--eye);
+  }
+  .city {
+    font-family: var(--plate);
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: 0.03em;
+    color: var(--cream);
+    text-shadow: 0 0 10px rgb(255 190 110 / 0.35);
+  }
+  .where {
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    color: rgb(244 228 193 / 0.8);
+  }
+  .station {
+    font-size: 16px;
+    font-weight: 300;
+    letter-spacing: 0.03em;
+    color: rgb(244 228 193 / 0.92);
+  }
+  .noscript {
+    grid-row: 7;
+    margin: 0;
+    font-size: 15px;
+    color: var(--gold);
+  }
+  .credit {
+    grid-row: 9;
+    align-self: end;
+    max-width: 760px;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+    color: rgb(244 228 193 / 0.42);
+  }
+  .credit p {
+    margin: 0;
+  }
+  .credit a {
+    color: inherit;
+  }
+
+  @media (max-width: 900px) {
+    .console {
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        'readout readout'
+        'left right';
+      gap: 18px 12px;
+    }
+    .readout {
+      grid-area: readout;
+    }
+    .controls.left {
+      grid-area: left;
+      justify-self: start;
+    }
+    .controls.right {
+      grid-area: right;
+      justify-self: end;
+    }
+  }
+  @media (max-width: 600px) {
+    .wireless {
+      padding: 12px 12px 14px;
+      gap: 12px;
+    }
+    .home {
+      justify-self: center;
+      font-size: 12px;
+    }
+    .maker span {
+      font-size: 22px;
+    }
+    .glass {
+      padding: 7px;
+    }
+    .console {
+      grid-template-columns: auto auto;
+      justify-content: space-between;
+    }
+    .controls {
+      gap: 13px;
+    }
+    .controls.right {
+      gap: 9px;
+    }
+    .knob .cap {
+      width: 80px;
+    }
+    .knob.small .cap {
+      width: 46px;
+    }
+    .knob.small .cap::before {
+      inset: -10px;
+    }
+    .caption,
+    .power .label {
+      font-size: 10px;
+      letter-spacing: 0.16em;
+    }
+    .power .jewel {
+      width: 30px;
+    }
+    .readout {
+      gap: 12px;
+      padding: 10px 14px 10px 10px;
+    }
+    .globe {
+      width: 84px;
+      height: 84px;
+    }
+    .city {
+      font-size: 24px;
+    }
+    .where,
+    .station {
+      font-size: 14px;
+    }
+    .seek button {
+      padding: 8px 11px;
+      font-size: 13px;
+    }
+    .seek button span {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+  const root = document.querySelector<HTMLElement>('.wireless');
+  if (root) start(root);
+</script>

@@ -1,0 +1,2062 @@
+{
+  "printed": "2026-11-21",
+  "cities": [
+    {
+      "name": "Honolulu",
+      "cc": "US",
+      "lat": 21.307,
+      "lon": -157.858,
+      "tz": "Pacific/Honolulu",
+      "stations": [
+        {
+          "id": "f6d9dbce-fef1-4471-8ecb-b5b744b2ce0f",
+          "name": "The Wave 105.9 FM",
+          "url": "https://pacificmedia.cdnstream1.com/2781_64.aac",
+          "tags": ["hawaiian", "jazz"],
+          "cors": true
+        },
+        {
+          "id": "ffdc61eb-f320-4e08-ad8c-16da58c96dc0",
+          "name": "KTUH.org",
+          "url": "https://stream.ktuh.org:8001/stream",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "04193bc3-de60-46b1-a85b-b10a4c044cb3",
+          "name": "Da Bomb FM 102.7",
+          "url": "https://pacificmedia.cdnstream1.com/2782_64.aac",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Anchorage",
+      "cc": "US",
+      "lat": 61.218,
+      "lon": -149.9,
+      "tz": "America/Anchorage",
+      "stations": [
+        {
+          "id": "665d2ea3-26cb-48a2-a96d-8f31fc47106e",
+          "name": "Meowchanica Cosmic Cafe Radio",
+          "url": "https://streaming.live365.com/a58485",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Whitehorse",
+      "cc": "CA",
+      "lat": 60.721,
+      "lon": -135.057,
+      "tz": "America/Whitehorse",
+      "stations": [
+        {
+          "id": "3deeacd6-f25f-4c65-aaf2-408f28cb46bb",
+          "name": "CBC Radio One - Whitehorse",
+          "url": "https://22983.live.streamtheworld.com/CFWH_CBC_SC",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Vancouver",
+      "cc": "CA",
+      "lat": 49.283,
+      "lon": -123.121,
+      "tz": "America/Vancouver",
+      "stations": [
+        {
+          "id": "e3cebe3a-feaf-4f15-955f-3efbf9b8e6e0",
+          "name": "CBC Music Pacific (Vancouver)",
+          "url": "https://26733.live.streamtheworld.com/CBUFM_CBC_SC",
+          "tags": ["blues", "classical"],
+          "cors": true
+        },
+        {
+          "id": "a434678c-3198-4293-9819-707b183c0215",
+          "name": "CBC Radio One - Vancouver, BC",
+          "url": "https://27033.live.streamtheworld.com/CBU2FM_CBC_SC",
+          "tags": ["features", "news"],
+          "cors": true
+        },
+        {
+          "id": "6509a08d-1b3c-4725-8449-85024b5a64bd",
+          "name": "SHER E PUNJAB AM 600",
+          "url": "https://ais-sa1.streamon.fm/7676_48k.aac",
+          "tags": ["abbotsford", "punjab"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Los Angeles",
+      "cc": "US",
+      "lat": 34.052,
+      "lon": -118.244,
+      "tz": "America/Los_Angeles",
+      "stations": [
+        {
+          "id": "b449c3c0-db5f-4f01-a81e-3bc1c769e188",
+          "name": "West Coast – G-Funk & Hip-Hop",
+          "url": "https://r.bgp.rodeo/listen/west_coast/radio.mp3",
+          "tags": ["g-funk", "gangsta rap"],
+          "cors": true
+        },
+        {
+          "id": "2d0403e9-2d8f-4a6a-8a55-0720bb80bfb8",
+          "name": "Indie X FM",
+          "url": "https://kathy.torontocast.com:2695/stream",
+          "tags": ["alternative rock", "alternative wave"],
+          "cors": true
+        },
+        {
+          "id": "c6e6f4b9-dfb7-423c-b416-12d2c34b81a2",
+          "name": "senshiphop",
+          "url": "https://sensihiphop.radioca.st/stream",
+          "tags": ["hip hop", "hip-hop"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Phoenix",
+      "cc": "US",
+      "lat": 33.448,
+      "lon": -112.074,
+      "tz": "America/Phoenix",
+      "stations": [
+        {
+          "id": "5a072448-c1be-4bc7-9c68-4136fabf0a63",
+          "name": "KWSS 93.9 - Scottsdale/Phoenix, Arizona",
+          "url": "https://cast5.asurahosting.com/proxy/kwssradi/stream",
+          "tags": ["community radio", "variety"],
+          "cors": true
+        },
+        {
+          "id": "a386f2af-2025-4405-b8f0-fe5350ef5498",
+          "name": "Progressive Rock AZUSA",
+          "url": "https://streaming.live365.com/a38225",
+          "tags": ["ambient", "electronic"],
+          "cors": true
+        },
+        {
+          "id": "67103a36-bc54-4ef4-95a3-6fe64139358c",
+          "name": "SimCaster Radio",
+          "url": "https://radio.simcaster.net/",
+          "tags": ["ambient", "chillout"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Denver",
+      "cc": "US",
+      "lat": 39.739,
+      "lon": -104.99,
+      "tz": "America/Denver",
+      "stations": [
+        {
+          "id": "79e6d16c-9392-46a8-9ffe-b8d92307d242",
+          "name": "The Implosion FM - The Blast",
+          "url": "https://mediacp.theblast.fm:8004/128",
+          "tags": ["hardcore", "metal"],
+          "cors": true
+        },
+        {
+          "id": "0415274f-7dae-4410-8b2a-ed5913ba23fa",
+          "name": "Plush Recordings - 24/7 Deep, Atmospheric DnB via @plushrecs",
+          "url": "https://azura.drmnbss.org/listen/plushrecs/radio.mp3",
+          "tags": ["bass music", "chill"],
+          "cors": true
+        },
+        {
+          "id": "f484c318-7dd3-47f5-8bb8-10dda954fba0",
+          "name": "Colorado Public Radio News",
+          "url": "https://stream1.cprnetwork.org/cpr1_lo",
+          "tags": ["news", "npr"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Mexico City",
+      "cc": "MX",
+      "lat": 19.433,
+      "lon": -99.133,
+      "tz": "America/Mexico_City",
+      "stations": [
+        {
+          "id": "62633b87-8938-43c0-94e6-324b944eb138",
+          "name": "EL FONÓGRAFO - 690 AM - XEN-AM - Grupo Radio Centro - Ciudad de México",
+          "url": "https://29309.live.streamtheworld.com:443/XEN_AMAAC.aac",
+          "tags": ["am", "cdmx"],
+          "cors": true
+        },
+        {
+          "id": "0f5f1741-70a5-4075-8995-836d059fff8e",
+          "name": "ROCK EN ESPAÑOL: Rock de México, España y Argentina",
+          "url": "https://18193.live.streamtheworld.com:443/ACIR20_S01AAC.aac",
+          "tags": ["acir", "acir online"],
+          "cors": true
+        },
+        {
+          "id": "9c62a188-6155-486c-adb9-6b1744b32cc0",
+          "name": "SOFT JAZZ: Sax, piano, guitarra y voz: cool jazz",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/ACIR22_s01AAC.aac",
+          "tags": ["acir", "acir online"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Minneapolis",
+      "cc": "US",
+      "lat": 44.978,
+      "lon": -93.265,
+      "tz": "America/Chicago",
+      "stations": [
+        {
+          "id": "0349022e-c22a-43c8-b1fc-1e51b113c1b4",
+          "name": "Radio K - Real College Radio (KUOM)",
+          "url": "https://radiok.broadcasttool.stream/play_256",
+          "tags": ["college radio", "diy"],
+          "cors": true
+        },
+        {
+          "id": "d5961721-55f8-4d38-b5a7-a14d29caa87d",
+          "name": "AM 950 The Progressive Voice of Minnesota",
+          "url": "https://ice25.securenetsystems.net/KTNF",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "5cbe6727-6f0d-4aa5-ae59-22b0d19b34c9",
+          "name": "MPR Classical 24/7",
+          "url": "https://cms.stream.publicradio.org/cms.mp3",
+          "tags": ["classical music"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "New Orleans",
+      "cc": "US",
+      "lat": 29.951,
+      "lon": -90.072,
+      "tz": "America/Chicago",
+      "stations": [
+        {
+          "id": "959724a6-4be0-486d-a8fa-7b1176b9e1a6",
+          "name": "Sonshine 800",
+          "url": "https://s8.yesstreaming.net:7093/stream",
+          "tags": ["christian", "radio"],
+          "cors": true
+        },
+        {
+          "id": "9688e8bd-005b-4820-9568-cad1a7ea335f",
+          "name": "Radio is a Foreign Country",
+          "url": "https://s5.radio.co/s20251311a/listen",
+          "tags": ["field recordings", "global"],
+          "cors": true
+        },
+        {
+          "id": "e0669706-c87b-468b-9e16-0a344ca63ecf",
+          "name": "WTUL New Orleans",
+          "url": "https://stream.wtulneworleans.com/",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Chicago",
+      "cc": "US",
+      "lat": 41.878,
+      "lon": -87.63,
+      "tz": "America/Chicago",
+      "stations": [
+        {
+          "id": "aa9282e9-1821-4b22-8b25-f4fc1b542bcc",
+          "name": "011.fm – House of Hair",
+          "url": "https://listen.011fm.com/stream16",
+          "tags": ["hair metal"],
+          "cors": true
+        },
+        {
+          "id": "55022ba0-465f-47d8-91bc-709b208afa0c",
+          "name": "91.5 WBEZ-FM",
+          "url": "https://stream.wbez.org/wbez64-web.aac",
+          "tags": ["public radio"],
+          "cors": true
+        },
+        {
+          "id": "c083ba73-e051-4716-92f7-c4b68066c223",
+          "name": "animePOP! Online Anime Radio",
+          "url": "https://stream.zeno.fm/1peyavabbl1tv",
+          "tags": ["anime radio"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Havana",
+      "cc": "CU",
+      "lat": 23.113,
+      "lon": -82.366,
+      "tz": "America/Havana",
+      "stations": [
+        {
+          "id": "995d2b4f-bf51-45df-89bf-9a50be55f3d5",
+          "name": "CMBF – Radio Musical Nacional",
+          "url": "https://securestreams7.autopo.st/?uri=https://icecast.teveo.cu/Nbtz7HT3",
+          "tags": ["cuban music"],
+          "cors": true
+        },
+        {
+          "id": "c486f7d9-0033-476c-aeba-7110cafbb774",
+          "name": "Cadena Roja",
+          "url": "https://stream.cadenaroja.com/radio.mp3",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Toronto",
+      "cc": "CA",
+      "lat": 43.653,
+      "lon": -79.383,
+      "tz": "America/Toronto",
+      "stations": [
+        {
+          "id": "7afae7e3-8d06-42f5-b59e-a52d6e09e60e",
+          "name": "RdMix Classic Rock 70s 80s 90s",
+          "url": "https://cast1.torontocast.com:4610/stream",
+          "tags": ["blues", "blues rock"],
+          "cors": true
+        },
+        {
+          "id": "d0df2a51-9cd3-4f3e-977d-aab92ddef7a3",
+          "name": "100 GREATEST HEAVY METAL",
+          "url": "https://cast1.torontocast.com:4660/stream",
+          "tags": ["black metal", "classic hits"],
+          "cors": true
+        },
+        {
+          "id": "cf14b5ee-f03e-4468-8ce1-379f171fd8c4",
+          "name": "70s 80s 90s RdMix Network",
+          "url": "https://cast1.torontocast.com:1830/stream",
+          "tags": ["charts", "classic hits"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Lima",
+      "cc": "PE",
+      "lat": -12.046,
+      "lon": -77.043,
+      "tz": "America/Lima",
+      "stations": [
+        {
+          "id": "294f274d-e3cc-4334-89c8-6f4e3ddf4218",
+          "name": "Radio Cumbia Mix",
+          "url": "https://mdstrm.com/audio/6598b6ab95a235085823b24f/icecast.audio",
+          "tags": ["cumbia peruana", "merengue"],
+          "cors": true
+        },
+        {
+          "id": "d9e2d981-f982-42a9-a03d-edb76dba8167",
+          "name": "Nuevaolera",
+          "url": "https://stream.zeno.fm/4q99spjike0uv",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "8b99f044-43de-4e20-9dd9-ba6cf92c000a",
+          "name": "Top Latino Radio",
+          "url": "https://online.radiodifusion.net:8028/stream",
+          "tags": ["latin"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "New York",
+      "cc": "US",
+      "lat": 40.713,
+      "lon": -74.006,
+      "tz": "America/New_York",
+      "stations": [
+        {
+          "id": "6b500823-fc4e-4bf7-8bde-c2c08cd51fed",
+          "name": "101.5 Kiss FM",
+          "url": "https://stream.zeno.fm/q0si4olfobwvv",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "3c7211bd-8bf4-4c58-a241-496125597c07",
+          "name": "Bushwick Radio",
+          "url": "https://streaming.live365.com/a62613",
+          "tags": ["brooklyn", "dembow"],
+          "cors": true
+        },
+        {
+          "id": "a6381986-1c6e-400f-a57e-0bce3ccc1214",
+          "name": "WQHT Hot 97",
+          "url": "https://18313.live.streamtheworld.com/WQHTFMAAC.aac",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Santiago",
+      "cc": "CL",
+      "lat": -33.449,
+      "lon": -70.669,
+      "tz": "America/Santiago",
+      "stations": [
+        {
+          "id": "95adc04f-2a0d-4ae4-b3ce-572c8ace6513",
+          "name": "LOS40 Chile",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_CHILEAAC.aac",
+          "tags": ["chile", "entretenimiento"],
+          "cors": true
+        },
+        {
+          "id": "c73f6fd5-1f1b-47db-a20d-eda9af36e4b9",
+          "name": "100.9 Play FM",
+          "url": "https://mdstrm.com/audio/5c8d6406f98fbf269f57c82c/icecast.audio",
+          "tags": ["hits", "pop"],
+          "cors": true
+        },
+        {
+          "id": "2b957d50-4a98-4f70-a9e4-5860ddb6dc68",
+          "name": "Super45.fm",
+          "url": "https://s4.radio.co/s421105570/listen",
+          "tags": ["indie electronic", "jazz fusion"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "San Juan",
+      "cc": "PR",
+      "lat": 18.466,
+      "lon": -66.106,
+      "tz": "America/Puerto_Rico",
+      "stations": [
+        {
+          "id": "d2e3cc66-198e-4d0d-99f4-c96ce00567c8",
+          "name": "La X",
+          "url": "https://stream.eleden.com:8230/lax.aac",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "d2c27710-48c0-4a5a-8ed7-b5e127cdcde2",
+          "name": "WRPG-DB Pura Gracia",
+          "url": "https://26343.live.streamtheworld.com:443/SAM05AAC459_SC",
+          "tags": ["cristiana", "musica cristiana"],
+          "cors": true
+        },
+        {
+          "id": "2e1e1698-f552-4ce3-b7aa-28d9270aa668",
+          "name": "WIAC 740 AM",
+          "url": "https://sp.unoredcdn.net:8044/stream",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Halifax",
+      "cc": "CA",
+      "lat": 44.649,
+      "lon": -63.575,
+      "tz": "America/Halifax",
+      "stations": [
+        {
+          "id": "2c73ee77-c681-42b2-b2c4-ccb8712ab9da",
+          "name": "CBC Music Atlantic (Halifax)",
+          "url": "https://26183.live.streamtheworld.com/CBH_CBC_SC",
+          "tags": ["blues", "classical"],
+          "cors": true
+        },
+        {
+          "id": "a5bdebc6-2103-4c59-bf22-5569b6abcd2e",
+          "name": "CJLU 93.9 \"Nova Scotia's Inspire FM\" Dartmouth/Halifax, Nova Scotia",
+          "url": "https://harvestersfm.radioca.st/CJLU",
+          "tags": ["gospel music"],
+          "cors": true
+        },
+        {
+          "id": "7772f7a0-42bd-4010-a34a-4c58b2e322ed",
+          "name": "Seaside FM 105.9 - CFEP-FM - Eastern Passage",
+          "url": "https://seasidefm1059.radioca.st/;",
+          "tags": ["community radio"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Buenos Aires",
+      "cc": "AR",
+      "lat": -34.604,
+      "lon": -58.382,
+      "tz": "America/Argentina/Buenos_Aires",
+      "stations": [
+        {
+          "id": "7b03996e-6ea0-4db5-8168-ddd1463faec2",
+          "name": "La 100 - 99.9 FM - Grupo Clarín - Buenos Aires, Argentina",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/FM999_56.mp3",
+          "tags": ["argentina", "buenos aires"],
+          "cors": true
+        },
+        {
+          "id": "4ff249e9-131b-4fae-88f0-d93c744240ee",
+          "name": "Metro 95.1",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/METRO.mp3",
+          "tags": ["argentina", "buenos aires"],
+          "cors": true
+        },
+        {
+          "id": "f7e0fcd1-1f1f-4277-936a-f511d536a56c",
+          "name": "AM750",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AM750.mp3",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Montevideo",
+      "cc": "UY",
+      "lat": -34.901,
+      "lon": -56.165,
+      "tz": "America/Montevideo",
+      "stations": [
+        {
+          "id": "2571cb2c-ef3c-4c9b-b475-ff308df9d29f",
+          "name": "Cosquin Rock Radio Uruguay",
+          "url": "https://icecast15.innovanexo.com:9000/radiocero.mp3",
+          "tags": ["chat", "fun"],
+          "cors": true
+        },
+        {
+          "id": "698580f9-d316-43bf-aa65-6cf6760353a3",
+          "name": "Oceano FM",
+          "url": "https://oceano-2.nty.uy/",
+          "tags": ["music"],
+          "cors": true
+        },
+        {
+          "id": "1c4580fd-2784-46a4-aa76-dc66346d9919",
+          "name": "Babel FM 97.1",
+          "url": "https://radios.iwstreaming.uy/8030/stream",
+          "tags": ["classical", "instrumental"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "St. John's",
+      "cc": "CA",
+      "lat": 47.561,
+      "lon": -52.713,
+      "tz": "America/St_Johns",
+      "stations": [
+        {
+          "id": "4ffed054-89e0-4fe9-a8c8-c73a2bd456bb",
+          "name": "Coast 101.1",
+          "url": "https://coast-broadcasting-limited.streamb.live/SB00357",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "e91c6cd1-491e-47b4-bf0c-599796934c2f",
+          "name": "K-Rock 975",
+          "url": "https://stingray.leanstream.co/VOCMFM?args=web_01&uid=7be41d13-aefe-4a00-897f-bb1bcdf4ceb3&user_hash=WrTpTctZfd0OzP0fyM9fT4YTkv38e4aM&aw_0_req.gdpr=true&gdpr=true",
+          "tags": ["classic rock"],
+          "cors": true
+        },
+        {
+          "id": "0ae5f121-52b4-4f0f-aa38-12f605f3a1e7",
+          "name": "CBC Radio One - St. John's, NL",
+          "url": "https://26183.live.streamtheworld.com/CBN1_CBC_SC",
+          "tags": ["features", "news"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "São Paulo",
+      "cc": "BR",
+      "lat": -23.551,
+      "lon": -46.633,
+      "tz": "America/Sao_Paulo",
+      "stations": [
+        {
+          "id": "2442fea9-64ca-4a6d-a942-8abfd7cb42f5",
+          "name": "Kiss FM 92.5",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_KISSFM_ADP.aac",
+          "tags": ["alternative rock", "classic rock"],
+          "cors": true
+        },
+        {
+          "id": "93f9e862-190a-4a2c-a7c9-ea4201a5e764",
+          "name": "Studio94 Samba & Pagode",
+          "url": "https://s2.tgastream.com.br:16171/stream",
+          "tags": ["pagode", "samba"],
+          "cors": true
+        },
+        {
+          "id": "2828075f-61d3-4e00-9a99-a06164cee914",
+          "name": "Brega Hits",
+          "url": "https://stream.zeno.fm/m3h4eakvsy8uv",
+          "tags": ["brega", "mpb"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Rio de Janeiro",
+      "cc": "BR",
+      "lat": -22.907,
+      "lon": -43.173,
+      "tz": "America/Sao_Paulo",
+      "stations": [
+        {
+          "id": "a49ae0e2-978d-4a50-a43b-150693abb00f",
+          "name": "Planeta Reggae",
+          "url": "https://stream3.svrdedicado.org:8302/stream",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "15791798-2591-4cc2-aa38-dd680da995e1",
+          "name": "Hitmix Brasil",
+          "url": "https://radio.stmsrv.com:8464/stream",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "5a45dd8c-9269-435b-8395-fde4f5c80f63",
+          "name": "Roberto Carlos Web",
+          "url": "https://centova5.transmissaodigital.com:20032/stream",
+          "tags": ["mpb", "romantica"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Salvador",
+      "cc": "BR",
+      "lat": -12.977,
+      "lon": -38.501,
+      "tz": "America/Bahia",
+      "stations": [
+        {
+          "id": "7b630dda-fb58-4c39-ba30-2f6eed3361ef",
+          "name": "Piatã FM",
+          "url": "https://streaming.livespanel.com:9430/stream",
+          "tags": ["local music", "local news"],
+          "cors": true
+        },
+        {
+          "id": "62f3f2d6-adcf-4eab-a700-7e02e0b3fc5d",
+          "name": "Jovem Pan FM",
+          "url": "https://stream-280.surfernetwork.com/c45wbq2us3buv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJjNDV3YnEydXMzYnV2IiwiaG9zdCI6InN0cmVhbS0yODAuc3VyZmVybmV0d29yay5jb20iLCJ0bSI6ZmFsc2UsInJ0dGwiOjUsImp0aSI6Ilo4Qzl3MFYxUm1tX3l2b2p6elE5R3ciLCJpYXQiOjE3OTI2NDQyNDUsImV4cCI6MTc5MjY0NDMwNX0.vimk_dUGx3HfUkCbO08d4S43xox0Iqnw52t5Ymw2XzU",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "227aa3fe-38f6-4ae0-89aa-2857f2fe86ab",
+          "name": "BandNews Salvador",
+          "url": "https://server23.srvsh.com.br:7918/live.mp3",
+          "tags": ["news", "noticias"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Recife",
+      "cc": "BR",
+      "lat": -8.048,
+      "lon": -34.877,
+      "tz": "America/Recife",
+      "stations": [
+        {
+          "id": "ceda4928-608c-4db7-99c7-f4658d4b24cb",
+          "name": "RadioYAH",
+          "url": "https://cp-1.owh.radio.br/listen/owh_s35277/radio-mp3",
+          "tags": ["tshuvah"],
+          "cors": true
+        },
+        {
+          "id": "84336e3e-a093-4259-841f-cb94d29b0b3e",
+          "name": "Capitania",
+          "url": "https://sv15.hdradios.net:9140/stream",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "541f6bfb-961a-4453-a22b-7cc27e596355",
+          "name": "Frei Caneca FM",
+          "url": "https://centova3.transmissaodigital.com/proxy/freicaneca/stream",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Reykjavík",
+      "cc": "IS",
+      "lat": 64.147,
+      "lon": -21.942,
+      "tz": "Atlantic/Reykjavik",
+      "stations": [
+        {
+          "id": "4123d652-36c9-41fd-b780-238cd3717f43",
+          "name": "Útvarp Saga",
+          "url": "https://stream.utvarpsaga.is/Hljodver",
+          "tags": ["news talk", "talk & speech"],
+          "cors": false
+        }
+      ]
+    },
+    {
+      "name": "Dakar",
+      "cc": "SN",
+      "lat": 14.716,
+      "lon": -17.467,
+      "tz": "Africa/Dakar",
+      "stations": [
+        {
+          "id": "118a5501-b15d-4fb3-b010-fd0e4ffda525",
+          "name": "Radio Fulbe FM 102.6 Dakar",
+          "url": "https://stream.zeno.fm/e0grbn8e3rquv",
+          "tags": ["african music", "talk"],
+          "cors": true
+        },
+        {
+          "id": "fb565b3b-2bd4-4b23-b9b5-6d705b3e29ff",
+          "name": "Or FM 89.6 Orkadiéré",
+          "url": "https://stream.zeno.fm/gy7fpc2am1duv",
+          "tags": ["community radio"],
+          "cors": true
+        },
+        {
+          "id": "6ed6fe06-5a9a-4e95-bc35-8e92f1441cfd",
+          "name": "FM Sénégal 103.1 Dakar",
+          "url": "https://stream-154.zeno.fm/t8gcyq6ts0quv",
+          "tags": ["african music"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Lisbon",
+      "cc": "PT",
+      "lat": 38.722,
+      "lon": -9.139,
+      "tz": "Europe/Lisbon",
+      "stations": [
+        {
+          "id": "cc461784-3150-4a34-81c5-2116fe024740",
+          "name": "TSF Rádio Notícias",
+          "url": "https://directo.tsf.pt/tsfdirecto.mp3",
+          "tags": ["desporto", "futebol"],
+          "cors": true
+        },
+        {
+          "id": "a08d74ca-2172-447a-941a-b5c5c20afdd6",
+          "name": "M80 Rádio – Ballads",
+          "url": "https://stream-icy.bauermedia.pt/m80ballads.aac",
+          "tags": ["romantic"],
+          "cors": true
+        },
+        {
+          "id": "ae8f651c-f768-4243-83a0-7d535a5d4d8b",
+          "name": "M80 Rádio – Portugal",
+          "url": "https://stream-icy.bauermedia.pt/m80nacional.aac",
+          "tags": ["portuguese music", "portuguese pop"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Dublin",
+      "cc": "IE",
+      "lat": 53.35,
+      "lon": -6.26,
+      "tz": "Europe/Dublin",
+      "stations": [
+        {
+          "id": "6650bb57-12aa-41d3-8ae4-ed5dcf0909cd",
+          "name": "8Radio",
+          "url": "https://stream.rcast.net/66127",
+          "tags": ["alternative", "indie rock"],
+          "cors": true
+        },
+        {
+          "id": "52637865-3e18-49af-b28d-191f4ff201eb",
+          "name": "Newstalk Ireland",
+          "url": "https://live-bauerie.sharp-stream.com/NTAAC",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "32e96359-9dbb-4cc8-adf9-7d5a948223db",
+          "name": "Spin1038",
+          "url": "https://live-bauerie.sharp-stream.com/SP",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Madrid",
+      "cc": "ES",
+      "lat": 40.417,
+      "lon": -3.704,
+      "tz": "Europe/Madrid",
+      "stations": [
+        {
+          "id": "6f865173-8dc8-48e7-bbb8-c30a0261c074",
+          "name": "Kiss FM España",
+          "url": "https://adhandler.kissfmradio.cires21.com/get_link?url=https://bbkissfm.kissfmradio.cires21.com/bbkissfm.mp3",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "4a3bd909-1245-43bd-b77d-58053ad16f50",
+          "name": "80 EXITOS",
+          "url": "https://80sexitos.stream.laut.fm/80sexitos",
+          "tags": ["dance", "disco"],
+          "cors": true
+        },
+        {
+          "id": "42a4db83-741f-49f4-892f-79776d35f8b4",
+          "name": "Los 40 classic",
+          "url": "https://22543.live.streamtheworld.com/LOS40_CLASSIC.mp3",
+          "tags": ["classic hits"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "London",
+      "cc": "GB",
+      "lat": 51.507,
+      "lon": -0.128,
+      "tz": "Europe/London",
+      "stations": [
+        {
+          "id": "4ad5bdc7-01e5-47c9-a1f9-751671b4707e",
+          "name": "CAPITAL - The UK's No.1 Hit Music Station",
+          "url": "https://media-ssl.musicradio.com/CapitalUK",
+          "tags": ["capital", "capital fm"],
+          "cors": true
+        },
+        {
+          "id": "0f1a8621-d35a-4073-83d3-7ee14207a9a9",
+          "name": "KISS - The Best Vibes & Energy",
+          "url": "https://live-bauerkiss.sharp-stream.com/kissnational.aac?direct=true&aw_0_1st.skey=1602676850&rp_source=1&=&&___cb=60456375243858",
+          "tags": ["dab", "dance"],
+          "cors": true
+        },
+        {
+          "id": "dec031e0-4419-45d2-9f3e-76e91d876c40",
+          "name": "PLANET ROCK: Where Rock Lives",
+          "url": "https://stream-mz.hellorayo.co.uk/planetrock.aac?direct=true&aw_0_1st.playerid=BMUK_Airable&aw_0_1st.skey=6778249992",
+          "tags": ["bauer radio", "classic rock"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Paris",
+      "cc": "FR",
+      "lat": 48.857,
+      "lon": 2.352,
+      "tz": "Europe/Paris",
+      "stations": [
+        {
+          "id": "d39ab442-6c34-4097-afd0-e298ac21e50c",
+          "name": "Nostalgie",
+          "url": "https://streaming.nrjaudio.fm/oua8a3w2dqao?origine=playernostalgie&aw_0_req.userConsentV2=&aw_0_1st.station=",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "a781a6da-a41f-498d-92f5-aede46952d54",
+          "name": "RFI-Chinese",
+          "url": "https://rfienchinois64k.ice.infomaniak.ch/rfienchinois-64.mp3",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "53adaf12-1dd1-4700-852b-f55da044ee7f",
+          "name": "Rire et Chansons Canulars",
+          "url": "https://streaming.nrjaudio.fm/ouwgjmsk6j4d?aw_0_1st.station=Rire-Chansons-CANULARS&origine=mytuner",
+          "tags": ["comedy"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Amsterdam",
+      "cc": "NL",
+      "lat": 52.368,
+      "lon": 4.904,
+      "tz": "Europe/Amsterdam",
+      "stations": [
+        {
+          "id": "f4aea998-df4a-437b-ad2d-d160c821f91b",
+          "name": "Radio 10",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO10.mp3?dist=radio10_web&amp;ttag=talpa_consent:0&amp;gdpr=1&amp;gdpr_consent=CPR8CQMPR8CRCADABCNLB7CgAAAAAEJAAAAAAAAMEgKgAVAAuACAAGQARAAmgBPADEAH4AQAAjABXADvAIQARYAjgBOwCsgIpAXmAwQAsJAJAAqACAAGQARAAmABPAHeARwBeY6AWABUAEAAMgAiABMACeAGIAd4BFgCOALzHAAwALgCuAIQUgFgAVABAADIAIgATAAngBiAHeARYAjgC8ygAIAC4BOyQAEAC5KAMAEQAJgAYgB3gEcAXmQgCABMADEAO8AjgYACAK4VADACYARwBeYyAGAEwAjgC8w.YAAAAAAAA4AA",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "da5d71d1-d8cc-4301-9f86-b6abaa1201bd",
+          "name": "BNR Nieuwsradio",
+          "url": "https://stream.bnr.nl/bnr_mp3_128_20",
+          "tags": ["business", "news"],
+          "cors": true
+        },
+        {
+          "id": "f0ab0c5c-7125-476c-97a4-2eabc14f5f05",
+          "name": "538 Radio",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO538.mp3",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Zürich",
+      "cc": "CH",
+      "lat": 47.377,
+      "lon": 8.541,
+      "tz": "Europe/Zurich",
+      "stations": [
+        {
+          "id": "a7a61f38-61e3-4491-a7ba-8c978fe51935",
+          "name": "Vintageradio.ch",
+          "url": "https://vintageradio.ice.infomaniak.ch/vintageradio-high.mp3",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "495a3710-7aae-4122-83b5-a49757c0a812",
+          "name": "Radio Zürisee",
+          "url": "https://mp3.radio.ch/radiozuerisee256k",
+          "tags": ["classic hits", "classic rock"],
+          "cors": true
+        },
+        {
+          "id": "1eaa7a2e-8fbe-4936-b71c-18190cfb25e8",
+          "name": "Bachata Nation Radio",
+          "url": "https://stream.zeno.fm/vwcq5n2rruhvv",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Oslo",
+      "cc": "NO",
+      "lat": 59.914,
+      "lon": 10.752,
+      "tz": "Europe/Oslo",
+      "stations": [
+        {
+          "id": "17be0284-0ab4-453f-9e98-f674df46a919",
+          "name": "NRK P3",
+          "url": "https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p3_mp3_h",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "ebc6ab9f-57be-4ee8-9209-327ee71c7a86",
+          "name": "Nrk P1 Stor-Oslo",
+          "url": "https://cdn0-47115-liveicecast0.dna.contentdelivery.net/p1_mp3_h",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "02dc8fb4-b5cd-425d-ae6a-2053e210e7af",
+          "name": "NRK",
+          "url": "https://cdn0-47115-liveicecast0.dna.contentdelivery.net/mp3_mp3_h",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Berlin",
+      "cc": "DE",
+      "lat": 52.52,
+      "lon": 13.405,
+      "tz": "Europe/Berlin",
+      "stations": [
+        {
+          "id": "1c3e8be2-5b14-4933-bad3-87cbc227cba4",
+          "name": "Deutschlandfunk | DLF",
+          "url": "https://st01.sslstream.dlf.de/dlf/01/128/mp3/stream.mp3?aggregator=web",
+          "tags": ["culture", "news"],
+          "cors": true
+        },
+        {
+          "id": "10f16cf6-bc45-4b67-8f17-9758f249a61a",
+          "name": "Deutschlandfunk Kultur | DLF",
+          "url": "https://st02.sslstream.dlf.de/dlf/02/128/mp3/stream.mp3?aggregator=web",
+          "tags": ["culture", "news"],
+          "cors": true
+        },
+        {
+          "id": "3f4be720-c996-439f-be3b-cce594ea2852",
+          "name": "0R - MUSIC FOR SLEEP | Sleep, Relax, Calm, Meditation, Nature, Ambient, Soft Mus",
+          "url": "https://0nlineradio.radioho.st/classical-classical-music-for-sleep?ref=radio-browser26",
+          "tags": ["ambient", "background"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Stockholm",
+      "cc": "SE",
+      "lat": 59.329,
+      "lon": 18.069,
+      "tz": "Europe/Stockholm",
+      "stations": [
+        {
+          "id": "0772676d-9fe4-4945-b63f-3e88e5aeb374",
+          "name": "Mix Megapol 104,3",
+          "url": "https://live-bauerse-fm.sharp-stream.com/mixmegapol_instream_se_mp3",
+          "tags": ["pop"],
+          "cors": true
+        },
+        {
+          "id": "ac551e97-29fe-4eb2-979f-7438ad647d15",
+          "name": "Sveriges Radio P4 Stockholm",
+          "url": "https://edge1.sr.se/p4sth-aac-320",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "af0682ee-3a81-40d6-b474-70e3f2ce5468",
+          "name": "Sveriges Radio P2",
+          "url": "https://live1.sr.se/p2-aac-128",
+          "tags": ["classical", "classical music"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Warsaw",
+      "cc": "PL",
+      "lat": 52.23,
+      "lon": 21.012,
+      "tz": "Europe/Warsaw",
+      "stations": [
+        {
+          "id": "7a2f5726-23ff-4cce-a3ab-14e64bbce8ce",
+          "name": "VOX FM Polska",
+          "url": "https://ic2.smcdn.pl/3990-1.mp3",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "68c4dc06-824c-4a00-9f76-a13e181c6f2d",
+          "name": "Radio Party - Kanał Główny",
+          "url": "https://s2.radioparty.pl:8015/stream?nocache=4171",
+          "tags": ["electronic", "party"],
+          "cors": true
+        },
+        {
+          "id": "86329383-66ef-4156-ba8d-6ac8d3778cc5",
+          "name": "Rmf Fm Polska",
+          "url": "https://rs101-krk-cyfronet.rmfstream.pl/RMFFM48",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Athens",
+      "cc": "GR",
+      "lat": 37.984,
+      "lon": 23.728,
+      "tz": "Europe/Athens",
+      "stations": [
+        {
+          "id": "b7e57990-b3ad-44a9-9458-2f8f58dcbde2",
+          "name": "Rock FM 96.9",
+          "url": "https://az10.yesstreaming.net:8060/radio.mp3",
+          "tags": ["alternative rock", "classic rock"],
+          "cors": true
+        },
+        {
+          "id": "937de10c-0885-4041-aa36-2c5198d2d762",
+          "name": "1st Greek Jazz FLAC Radio AAC+",
+          "url": "https://stream.newageradio.gr/listen/jazz/radio.aac",
+          "tags": ["blues", "classic jazz"],
+          "cors": true
+        },
+        {
+          "id": "85329749-f9f0-437f-a4d4-8d1e772f8485",
+          "name": "1st Greek New Age FLAC Radio",
+          "url": "https://stream.newageradio.gr/listen/hq/radio.flac",
+          "tags": ["ambient", "audiophile radio"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Johannesburg",
+      "cc": "ZA",
+      "lat": -26.204,
+      "lon": 28.047,
+      "tz": "Africa/Johannesburg",
+      "stations": [
+        {
+          "id": "fbf0bb38-272f-438a-b8f3-d325b2232df8",
+          "name": "salaammedia",
+          "url": "https://iceant.antfarm.co.za/Salaam",
+          "tags": ["humanitarian", "islam"],
+          "cors": true
+        },
+        {
+          "id": "114a917e-e246-4353-96c5-402227931916",
+          "name": "Soweto Underground",
+          "url": "https://radio.d3kani.com/listen/soweto_underground/radio.mp3",
+          "tags": ["amapiano"],
+          "cors": true
+        },
+        {
+          "id": "baecc41d-5879-4294-aa09-0adefefb141f",
+          "name": "Jacaranda FM",
+          "url": "https://live.jacarandafm.com/jacarandahigh.mp3",
+          "tags": ["smooth"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Cairo",
+      "cc": "EG",
+      "lat": 30.044,
+      "lon": 31.236,
+      "tz": "Africa/Cairo",
+      "stations": [
+        {
+          "id": "d792c407-26af-4bd4-9ad5-6a9c23c704f7",
+          "name": "OM Kalthom",
+          "url": "https://stream.zeno.fm/zsgrfxg71s8uv",
+          "tags": ["arabic", "classics"],
+          "cors": true
+        },
+        {
+          "id": "047fcfb5-9e59-478e-9e6a-a006cc401868",
+          "name": "Nogoum FM",
+          "url": "https://stream-159.zeno.fm/qb1zvsykm98uv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJxYjF6dnN5a205OHV2IiwiaG9zdCI6InN0cmVhbS0xNTkuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6Ild2WTItbVhJU2Z5VlBEOHc3a2J1X0EiLCJpYXQiOjE3NzA5ODcyOTUsImV4cCI6MTc3MDk4NzM1NX0.ob8jdjoAgAzIcrxMk5b127wgaxpnJHEASSChnE5v5ro",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "17e85b1e-1eaf-465e-8753-4178e605f7b9",
+          "name": "Arab Mix 256",
+          "url": "https://stream.zeno.fm/wvqgc9kb1d0uv",
+          "tags": ["classic hits", "hits"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Tel Aviv",
+      "cc": "IL",
+      "lat": 32.085,
+      "lon": 34.782,
+      "tz": "Asia/Jerusalem",
+      "stations": [
+        {
+          "id": "e8c19fc3-7409-4999-a9dd-b3d81cf934ed",
+          "name": "KAN Gimel כאן גימל",
+          "url": "https://27873.live.streamtheworld.com/KAN_GIMMEL.mp3",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "45700958-16ab-422a-85bb-d402722463f0",
+          "name": "Galgalatz",
+          "url": "https://glzwizzlv.bynetcdn.com/glglz_mp3?awCollectionId=misc&awEpisodeId=glglz",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "13d86ff8-058f-44e6-ba21-ccd065fb5dca",
+          "name": "joint radio Blues Rock",
+          "url": "https://jointil.com/stream-blues",
+          "tags": ["alternative rock", "bluegrass"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Moscow",
+      "cc": "RU",
+      "lat": 55.756,
+      "lon": 37.617,
+      "tz": "Europe/Moscow",
+      "stations": [
+        {
+          "id": "dc3592d3-3ada-4aae-ae41-0e4a1f5096ef",
+          "name": "101.RU - Дискотека СССР",
+          "url": "https://pub0201.101.ru/stream/pro/aac/64/144",
+          "tags": ["nostalgia", "retro"],
+          "cors": true
+        },
+        {
+          "id": "1055f30a-bde4-46c7-a233-4668fcdc8781",
+          "name": "Relax FM Instrumental",
+          "url": "https://pub0201.101.ru/stream/pro/aac/64/28?",
+          "tags": ["instrumental"],
+          "cors": true
+        },
+        {
+          "id": "39094c88-fc5d-4628-b5e7-5884b58ba8a5",
+          "name": "Звезда",
+          "url": "https://icecast-zvezda.mediacdn.ru/radio/zvezda/zvezda_128",
+          "tags": ["news", "russian"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Tbilisi",
+      "cc": "GE",
+      "lat": 41.716,
+      "lon": 44.783,
+      "tz": "Asia/Tbilisi",
+      "stations": [
+        {
+          "id": "561665cf-3adf-41b5-b94b-1e9d8d534bdf",
+          "name": "რადიო სივრცე (Radio Sivrce)",
+          "url": "https://proxy.streamer.mediabox.ge/ice/8000/sivrce",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "406e74cf-2897-442e-a4f1-1c300583fdc1",
+          "name": "Vikentis Radio",
+          "url": "https://servidor33-3.brlogic.com:7210/live",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "f040eba8-1cef-45e7-a20d-8134bb5ea7e8",
+          "name": "Mutant Radio",
+          "url": "https://listen.radioking.com/radio/282820/stream/328621",
+          "tags": ["community radio", "culture"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Antananarivo",
+      "cc": "MG",
+      "lat": -18.879,
+      "lon": 47.508,
+      "tz": "Indian/Antananarivo",
+      "stations": [
+        {
+          "id": "abe69451-46d7-405f-b775-84562e809ac8",
+          "name": "Fiderana Web Radio",
+          "url": "https://a9.asurahosting.com/listen/fiderana/radio.mp3",
+          "tags": ["christian", "gospel"],
+          "cors": true
+        },
+        {
+          "id": "14e39ca9-6bf4-4273-96c2-dd00ee862828",
+          "name": "Hopefy Radio MG",
+          "url": "https://hopefy.fanantenanahoanao.org/listen/hopefy_radio_mg/radio.mp3",
+          "tags": ["christian", "gospel"],
+          "cors": true
+        },
+        {
+          "id": "b5fe26d1-ef12-4a65-8761-80f7678693da",
+          "name": "ESDES Radio",
+          "url": "https://esdesradio.netpro.tv/listen/esdes_radio/radio.mp3",
+          "tags": ["educational", "hits"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Tehran",
+      "cc": "IR",
+      "lat": 35.689,
+      "lon": 51.389,
+      "tz": "Asia/Tehran",
+      "stations": [
+        {
+          "id": "aa408a3b-3d07-415d-8af1-a60b64e07043",
+          "name": "Radio Navahang",
+          "url": "https://navairan.com/;stream.nsv",
+          "tags": ["pop"],
+          "cors": true
+        },
+        {
+          "id": "216ac46a-1e79-4683-8d5d-832e65876b4a",
+          "name": "Radio Yar Plus2",
+          "url": "https://stream-163.zeno.fm/yxemzpoaocavv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJ5eGVtenBvYW9jYXZ2IiwiaG9zdCI6InN0cmVhbS0xNjMuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6InhKNHZlRTRtVFFPQTZ6RWJwMy1MOXciLCJpYXQiOjE3NTc2MzE3MDEsImV4cCI6MTc1NzYzMTc2MX0.KyIREwfc-nOvruWM_wiFaNS-xCgh1CfF2i8PE-xSm9E",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "cf10fd7a-1d28-4fa2-b5dd-630c4781e1c8",
+          "name": "Radio Gachsaran",
+          "url": "https://radio.gachsaran.org/gach",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Dubai",
+      "cc": "AE",
+      "lat": 25.205,
+      "lon": 55.271,
+      "tz": "Asia/Dubai",
+      "stations": [
+        {
+          "id": "babc5512-1063-452e-92ce-36aaa9d44da4",
+          "name": "Exclusively Pink Floyd - HITS",
+          "url": "https://streaming.exclusive.radio/er-app/pinkfloydhits/icecast.audio",
+          "tags": ["progressive rock"],
+          "cors": true
+        },
+        {
+          "id": "48ae1490-5094-46ca-8148-d15ba501ffca",
+          "name": "Greatest Hits Motown",
+          "url": "https://drive.uber.radio/uber/starboxmotown/icecast.audio",
+          "tags": ["disco", "motown"],
+          "cors": true
+        },
+        {
+          "id": "a7633680-8e05-448e-8a73-bc87d2aec697",
+          "name": "Exclusively Gary Moore",
+          "url": "https://nl4.mystreaming.net/er/garymoore/icecast.audio",
+          "tags": ["blues", "rock"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Muscat",
+      "cc": "OM",
+      "lat": 23.588,
+      "lon": 58.383,
+      "tz": "Asia/Muscat",
+      "stations": [
+        {
+          "id": "e06ee212-1fc0-4e10-aff8-6c97966e2b9e",
+          "name": "JazzWave Radio",
+          "url": "https://servidor19.brlogic.com:7126/live",
+          "tags": ["jazz", "smooth jazz"],
+          "cors": true
+        },
+        {
+          "id": "26eb1c40-f314-4976-8969-a70d1fcce1fc",
+          "name": "Hala FM",
+          "url": "https://listen-halafm.sharp-stream.com/halafmlow.mp3",
+          "tags": ["arabic", "arabic music"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Karachi",
+      "cc": "PK",
+      "lat": 24.861,
+      "lon": 67.01,
+      "tz": "Asia/Karachi",
+      "stations": [
+        {
+          "id": "a754b1cb-4a13-47ab-9215-10473d5a13c8",
+          "name": "Hum FM 106.2",
+          "url": "https://server.mediacast4u.stream/8002/stream",
+          "tags": ["bollywood"],
+          "cors": true
+        },
+        {
+          "id": "755d2c71-1bdd-45b0-a526-02f0e4754af5",
+          "name": "Radio Pakistan Islamabad",
+          "url": "https://whmsonic.radio.gov.pk:7003/stream",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "82d0c589-9c97-4ca1-896a-1653e351ec93",
+          "name": "Mera FM 107.4",
+          "url": "https://samaakhi107-itelservices.radioca.st/stream",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Tashkent",
+      "cc": "UZ",
+      "lat": 41.3,
+      "lon": 69.24,
+      "tz": "Asia/Tashkent",
+      "stations": [
+        {
+          "id": "8d542c3e-a374-41a0-8daf-b7eb342fba53",
+          "name": "Radio O'zbegim Taronasi",
+          "url": "https://fm101.uz:9943/fm101_low.aac",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "5cbb8e6a-aafb-4ded-af9d-eac0bda06a6e",
+          "name": "Truck FM",
+          "url": "https://fm.truckfm.uz:8000/64",
+          "tags": ["music"],
+          "cors": true
+        },
+        {
+          "id": "5f23a96a-afda-40b4-881f-fef95d0328e5",
+          "name": "Mars FM Uzbekistan",
+          "url": "https://marsfm.uz/stream.php",
+          "tags": ["music", "online radio"],
+          "cors": false
+        }
+      ]
+    },
+    {
+      "name": "Mumbai",
+      "cc": "IN",
+      "lat": 19.076,
+      "lon": 72.878,
+      "tz": "Asia/Kolkata",
+      "stations": [
+        {
+          "id": "1bbb4664-d187-49f1-b328-b2f3888fef36",
+          "name": "New Hits Of Bollywood",
+          "url": "https://stream-146.zeno.fm/rqqps6cbe3quv?zs=loHp_DNyRPiAxC52AL95hg",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "8e30841f-01e0-4e5a-90a7-fd629f26beb5",
+          "name": "Pew Hits Desi",
+          "url": "https://pewhits.duckdns.org/stream/pewhitsdesi",
+          "tags": ["bollywood"],
+          "cors": true
+        },
+        {
+          "id": "29c8c2aa-06e5-414f-ae4a-b15dc5589186",
+          "name": "Chillwave Radio",
+          "url": "https://radio.rklab.co.in/stream.mp3",
+          "tags": ["calm", "chillout"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Delhi",
+      "cc": "IN",
+      "lat": 28.614,
+      "lon": 77.209,
+      "tz": "Asia/Kolkata",
+      "stations": [
+        {
+          "id": "f1d7a979-b94d-4929-a4ca-758901029ecb",
+          "name": "Free FM Top 100 India",
+          "url": "https://stream.zeno.fm/a5h7vfret68uv",
+          "tags": ["top hits"],
+          "cors": true
+        },
+        {
+          "id": "de7b0868-91ab-4b25-a8dc-9d5f82314212",
+          "name": "Radio Udaan",
+          "url": "https://stream.radioudaan.com/listen/radio_udaan/radio.mp3",
+          "tags": ["bollywood", "culture"],
+          "cors": true
+        },
+        {
+          "id": "e5614d86-0593-4cb6-b964-3a0ad346efe3",
+          "name": "Radio Maharani",
+          "url": "https://streamasiacdn.atc-labs.com/radiomaharani.aac",
+          "tags": ["added by shivam", "hindi"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Chennai",
+      "cc": "IN",
+      "lat": 13.083,
+      "lon": 80.27,
+      "tz": "Asia/Kolkata",
+      "stations": [
+        {
+          "id": "68909f10-e33d-4979-831f-7a5113c61cbe",
+          "name": "Tamil Catholic Radio தமிழ் கத்தோலிக்க வானொலி",
+          "url": "https://listen.radioking.com/radio/224683/stream/268186",
+          "tags": ["catholic", "catholic radio"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Novosibirsk",
+      "cc": "RU",
+      "lat": 55.008,
+      "lon": 82.935,
+      "tz": "Asia/Novosibirsk",
+      "stations": [
+        {
+          "id": "686b643c-b9bf-4a2c-a7d8-4185df53e812",
+          "name": "RTFM.fm",
+          "url": "https://stream.rtfm.fm/aac256",
+          "tags": ["alternative rock", "downtempo"],
+          "cors": false
+        }
+      ]
+    },
+    {
+      "name": "Kathmandu",
+      "cc": "NP",
+      "lat": 27.717,
+      "lon": 85.324,
+      "tz": "Asia/Kathmandu",
+      "stations": [
+        {
+          "id": "5638e14e-6971-4b21-9626-6a9404ed7b56",
+          "name": "Radio Audio",
+          "url": "https://stream.zeno.fm/fvrx47wpg0quv",
+          "tags": ["entertainment", "music"],
+          "cors": true
+        },
+        {
+          "id": "3e78590f-ab9c-4e13-a512-189a17a54965",
+          "name": "CIN Khabar",
+          "url": "https://streaming.softnep.net:10996/;stream.nsv&type=mp3&volume=60",
+          "tags": ["entertainment", "news"],
+          "cors": true
+        },
+        {
+          "id": "36d94d0a-c866-4e06-bbc2-3cf6f7dddea3",
+          "name": "KOOL FM 90.3",
+          "url": "https://streaming.softnep.net:10944/;stream.nsv&type=mp3&volume=70",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Dhaka",
+      "cc": "BD",
+      "lat": 23.811,
+      "lon": 90.413,
+      "tz": "Asia/Dhaka",
+      "stations": [
+        {
+          "id": "58940095-dc8b-477f-a7e1-cbac01932f5c",
+          "name": "Mellow Bangla",
+          "url": "https://radio.mellowbangla.com/stream",
+          "tags": ["bangla", "bangla fm"],
+          "cors": true
+        },
+        {
+          "id": "953034fd-4289-41d3-8836-6de4e3577646",
+          "name": "Radio Bhumi",
+          "url": "https://stream-156.zeno.fm/be5bqmk1k18uv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJiZTVicW1rMWsxOHV2IiwiaG9zdCI6InN0cmVhbS0xNTYuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6IjB1c0x1ZURGVEhTR0EwSDE1N2VBVmciLCJpYXQiOjE3MzU0NTM5MjQsImV4cCI6MTczNTQ1Mzk4NH0.vjlgqsHzQRt-_2T0LIHscJkAVHXd8hYV8Z6NDvvEWYk",
+          "tags": ["bangla", "bangla fm"],
+          "cors": true
+        },
+        {
+          "id": "d41bb3e8-ebb1-4931-964f-0d9959c1f4cf",
+          "name": "Radio Today",
+          "url": "https://stream-285.surfernetwork.com/8wv4d8g4344tv",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Yangon",
+      "cc": "MM",
+      "lat": 16.84,
+      "lon": 96.173,
+      "tz": "Asia/Yangon",
+      "stations": [
+        {
+          "id": "a47a4545-4af2-4e27-ba03-c254519a5fd7",
+          "name": "Padamyar FM",
+          "url": "https://stream.zeno.fm/og9btsnj00tuv",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "b84ffeeb-29ba-4fa2-ba93-73f11a1c00c9",
+          "name": "Cherry FM",
+          "url": "https://cherry.akiyaresearch.com:444/stream/89/",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Bangkok",
+      "cc": "TH",
+      "lat": 13.756,
+      "lon": 100.502,
+      "tz": "Asia/Bangkok",
+      "stations": [
+        {
+          "id": "1e1113a5-7de2-4b9f-922c-ff56026f8759",
+          "name": "BKK.FM",
+          "url": "https://rsas.bkk.fm/radio",
+          "tags": ["alternative", "alternative rock"],
+          "cors": true
+        },
+        {
+          "id": "ee83c0ba-99cf-430f-80a3-c0f7a1957d81",
+          "name": "93.5 Top Radio FM",
+          "url": "https://a10.asurahosting.com:8250/radio.mp3",
+          "tags": ["oldies"],
+          "cors": true
+        },
+        {
+          "id": "1c6c7fe1-155a-4e62-8aa9-ea51fb977aab",
+          "name": "วิทยุเสียงอิสลาม",
+          "url": "https://radio12.plathong.net/7234/;stream.mp3",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Singapore",
+      "cc": "SG",
+      "lat": 1.352,
+      "lon": 103.82,
+      "tz": "Asia/Singapore",
+      "stations": [
+        {
+          "id": "eef37dac-e2b2-4f37-bb86-81ac3fe65135",
+          "name": "CAPITAL 958",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/CAPITAL958FM_PREM.aac",
+          "tags": ["melisten"],
+          "cors": true
+        },
+        {
+          "id": "8153ae5a-0cb6-4ed2-b54d-6e24ca5be5b6",
+          "name": "LOVE 972",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/LOVE972FM_PREM.aac",
+          "tags": ["melisten"],
+          "cors": true
+        },
+        {
+          "id": "f699e43f-b717-41d1-8d05-b5e07506a2d0",
+          "name": "WARNA 942",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WARNA942FM_PREM.aac",
+          "tags": ["melisten"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Jakarta",
+      "cc": "ID",
+      "lat": -6.208,
+      "lon": 106.846,
+      "tz": "Asia/Jakarta",
+      "stations": [
+        {
+          "id": "30ba9673-6034-40ff-966d-b8a8b3da2536",
+          "name": "Mettaswara Koplo",
+          "url": "https://mettaswara.com:8700//koplo",
+          "tags": ["koplo"],
+          "cors": true
+        },
+        {
+          "id": "497196f2-a3be-4376-a6ea-f074306e5b51",
+          "name": "Heartline Tangerang",
+          "url": "https://stream.heartline.co.id:8443/heartline_tangerang",
+          "tags": ["family"],
+          "cors": true
+        },
+        {
+          "id": "be3b8862-6746-486a-8dff-ef4c159b94d1",
+          "name": "GOLDEN HITS FM",
+          "url": "https://i.klikhost.com:9134/stream",
+          "tags": ["golden"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Hong Kong",
+      "cc": "HK",
+      "lat": 22.32,
+      "lon": 114.169,
+      "tz": "Asia/Hong_Kong",
+      "stations": [
+        {
+          "id": "93b7ad6f-abdc-4a24-a947-f87dec018269",
+          "name": "大嶼山廣播電台 RADIO LANTAU",
+          "url": "https://radio.dripfeed.net/listen/radiolantau/radio.mp3",
+          "tags": ["alternative rock", "classic rock"],
+          "cors": true
+        },
+        {
+          "id": "c6c450a9-84cc-4592-a27a-412879c15878",
+          "name": "華語 HITS",
+          "url": "https://das-edge14-live365-dal02.cdnstream.com/a57743_2",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "7c426f02-1c08-409c-8068-3a0d82bb1ea3",
+          "name": "ZENO FM 良友同行频道",
+          "url": "https://stream.zeno.fm/2uvcyzjw38ivv",
+          "tags": ["religion"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Beijing",
+      "cc": "CN",
+      "lat": 39.904,
+      "lon": 116.407,
+      "tz": "Asia/Shanghai",
+      "stations": [
+        {
+          "id": "a7fab695-c64c-4513-834e-546eea499283",
+          "name": "北京古典音乐广播",
+          "url": "https://stream.zeno.fm/qa9punk6ynhvv",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "3fa9f0d8-1cd1-4bc3-9492-50e949d41baa",
+          "name": "爵士乐",
+          "url": "https://ec3.yesstreaming.net:3455/stream",
+          "tags": ["jazz"],
+          "cors": true
+        },
+        {
+          "id": "8e75147d-2a70-475b-8bee-2685e3a3c33b",
+          "name": "和谐铁路之声",
+          "url": "https://stream.zeno.fm/gzsk9r47sc9uv",
+          "tags": ["music"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Manila",
+      "cc": "PH",
+      "lat": 14.6,
+      "lon": 120.984,
+      "tz": "Asia/Manila",
+      "stations": [
+        {
+          "id": "490f5ee9-ac98-4200-99a3-3a5f3c6e1c7d",
+          "name": "101.7 Your Love FM",
+          "url": "https://radio.1017yourlovefm.com/listen/sanibpwersa/radio.mp3",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "61f3e420-c65f-462f-8b4d-922261eff663",
+          "name": "MBS Radio",
+          "url": "https://stream-171.zeno.fm/67srwcmawgqtv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiI2N3Nyd2NtYXdncXR2IiwiaG9zdCI6InN0cmVhbS0xNzEuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6Im9JOGhDX0VfU0c2SXNBcDZmM1JzNnciLCJpYXQiOjE3MTU5NTQ1NzUsImV4cCI6MTcxNTk1NDYzNX0.VriCaRn4HyN7yDVnwXeryLgfMKkV4y_aJzugoJJ9Yeg",
+          "tags": ["music", "news"],
+          "cors": true
+        },
+        {
+          "id": "4f631022-c4f6-4a19-9ce7-7ee754e440e4",
+          "name": "102.7 Star FM - DWSM",
+          "url": "https://stream-288.surfernetwork.com/g1pmt17nz9duv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJnMXBtdDE3bno5ZHV2IiwiaG9zdCI6InN0cmVhbS0yODguc3VyZmVybmV0d29yay5jb20iLCJydHRsIjo1LCJqdGkiOiJMaXZRVVVnMVJBNllJVm1CMzZweXlRIiwiaWF0IjoxNzgxNjc4NzM0LCJleHAiOjE3ODE2Nzg3OTR9.5G1wZmONFqXySurSj1Oj6_UtSmcJMwlc6JJy2oL7fX8",
+          "tags": ["information", "news"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Cebu",
+      "cc": "PH",
+      "lat": 10.316,
+      "lon": 123.885,
+      "tz": "Asia/Manila",
+      "stations": [
+        {
+          "id": "b5704b74-2f3f-480c-8487-65796290eadc",
+          "name": "Star FM 95.5 Cebu",
+          "url": "https://stream-146.zeno.fm/60cb36c29heuv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiI2MGNiMzZjMjloZXV2IiwiaG9zdCI6InN0cmVhbS0xNDYuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6ImJMWEdONUVnUWFpUG1ETU1EeUhYX2ciLCJpYXQiOjE3NDE0MzA4NjIsImV4cCI6MTc0MTQzMDkyMn0.4qElo5I_0GF5A3aE5mUfF6T44wqKi0drur2zii2Q0KA",
+          "tags": ["music", "news"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Seoul",
+      "cc": "KR",
+      "lat": 37.567,
+      "lon": 126.978,
+      "tz": "Asia/Seoul",
+      "stations": [
+        {
+          "id": "2b1b77a5-16d9-49eb-9359-38341f5674e4",
+          "name": "Fred Film Radio(한국어)",
+          "url": "https://s10.webradio-hosting.com/proxy/fredradiokr/stream",
+          "tags": ["culture", "film"],
+          "cors": true
+        },
+        {
+          "id": "7a72aa80-3902-4d73-a548-db81ac780240",
+          "name": "Big B Radio - Kpop",
+          "url": "https://antares.dribbcast.com/proxy/kpop?mp=/s",
+          "tags": ["music", "pop"],
+          "cors": true
+        },
+        {
+          "id": "6f6ea925-4bc3-4dbc-8990-7f48c6f24cb9",
+          "name": "REPLAY NEWS - 한국어 5분마다 뉴스 라디오",
+          "url": "https://replaynewskr.ice.infomaniak.ch/replaynewskr-128.mp3",
+          "tags": ["news"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Osaka",
+      "cc": "JP",
+      "lat": 34.694,
+      "lon": 135.502,
+      "tz": "Asia/Tokyo",
+      "stations": [
+        {
+          "id": "1bca74bf-82e7-4631-87b6-1e96be3bae43",
+          "name": "SOUND UP STATION NFRS",
+          "url": "https://stream2.rcast.net/70945",
+          "tags": ["indie", "jpop"],
+          "cors": true
+        },
+        {
+          "id": "57cf528a-02be-4805-a510-6d05bb0ff996",
+          "name": "REPLAY NEWS - 日本語 5分ごとのニュースラジオ",
+          "url": "https://replaynewsja.ice.infomaniak.ch/replaynewsja-128.mp3",
+          "tags": ["information", "news"],
+          "cors": true
+        },
+        {
+          "id": "149b595b-9490-4cf9-9e25-8bc46806d75a",
+          "name": "NFRS Radio",
+          "url": "https://securestreams.autopo.st:2592/stream?t=1769818665235",
+          "tags": ["country", "dj sets"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Tokyo",
+      "cc": "JP",
+      "lat": 35.69,
+      "lon": 139.692,
+      "tz": "Asia/Tokyo",
+      "stations": [
+        {
+          "id": "c1792128-4c6a-4fd6-8f16-4115607c0f1b",
+          "name": "Retro-Ko Radio",
+          "url": "https://radio.retroko.com/listen/retroko/radio.mp3",
+          "tags": ["electronic"],
+          "cors": true
+        },
+        {
+          "id": "5a2cbfe7-0518-44e9-aca6-0fd41e466ff0",
+          "name": "Fred Film Radio(日本語)",
+          "url": "https://s10.webradio-hosting.com/proxy/fredradiojp/stream",
+          "tags": ["culture", "film"],
+          "cors": true
+        },
+        {
+          "id": "5a4eb5bc-7fbd-43fb-a6a4-cc4517ce6ac4",
+          "name": "J1 HITS",
+          "url": "https://jenny.torontocast.com:2000/stream/J1HITS?_=184325",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Melbourne",
+      "cc": "AU",
+      "lat": -37.814,
+      "lon": 144.963,
+      "tz": "Australia/Melbourne",
+      "stations": [
+        {
+          "id": "abf0d086-aeaa-4c06-9196-bc9a0721b8b8",
+          "name": "PBS 106.7FM",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/3PBS_FMAACHIGH.aac",
+          "tags": ["australian music", "blues"],
+          "cors": true
+        },
+        {
+          "id": "daf5768f-048b-4c70-8084-a795fae32eb1",
+          "name": "World Buddhist Radio",
+          "url": "https://26343.live.streamtheworld.com/SAM11AAC025.mp3",
+          "tags": ["buddhism", "meditation"],
+          "cors": true
+        },
+        {
+          "id": "10552471-1f9c-4486-b7b9-93987ddd37ad",
+          "name": "Golden Days Radio",
+          "url": "https://a2.asurahosting.com:6350/radio.aac",
+          "tags": ["gold", "golden oldies"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Hobart",
+      "cc": "AU",
+      "lat": -42.882,
+      "lon": 147.327,
+      "tz": "Australia/Hobart",
+      "stations": [
+        {
+          "id": "36108a02-ecdd-4fb7-ab90-70967ea4089a",
+          "name": "Edge Radio 99.3",
+          "url": "https://streaming.alastair.tech/listen/edgeradio/live",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Sydney",
+      "cc": "AU",
+      "lat": -33.869,
+      "lon": 151.209,
+      "tz": "Australia/Sydney",
+      "stations": [
+        {
+          "id": "7078d270-62b8-49c3-a729-ad325d60d29c",
+          "name": "SBS PopAsia",
+          "url": "https://sbs-ice.streamguys1.com/sbs-popasia-sbs-web",
+          "tags": ["c-pop", "cantonese"],
+          "cors": true
+        },
+        {
+          "id": "71a8ea7b-860a-40b9-85cb-e9efcd8b4ca0",
+          "name": "Radio Trainwreck Live",
+          "url": "https://stream.radiotrainwreck.live/live",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "277ec83d-4628-45ae-b436-e474f8505440",
+          "name": "NexisFM Radio",
+          "url": "https://admin.nexisfm.xyz/listen/nexisfm/radio.mp3",
+          "tags": [],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Nouméa",
+      "cc": "NC",
+      "lat": -22.276,
+      "lon": 166.458,
+      "tz": "Pacific/Noumea",
+      "stations": [
+        {
+          "id": "1cc1a872-5afa-4528-9a5a-7ec465472d4b",
+          "name": "Radio Rythme Bleu",
+          "url": "https://webradio.lagoon.nc/rrb",
+          "tags": [],
+          "cors": true
+        },
+        {
+          "id": "3deff1ed-3854-11e9-9b4e-52543be04c81",
+          "name": "Nouvelle-Calédonie La Première",
+          "url": "https://nouvelle-caledonie.ice.infomaniak.ch/nouvelle-caledonie-128.mp3",
+          "tags": ["music", "talk"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Auckland",
+      "cc": "NZ",
+      "lat": -36.848,
+      "lon": 174.763,
+      "tz": "Pacific/Auckland",
+      "stations": [
+        {
+          "id": "bc9ac88d-9af6-4564-9cb4-57edf4d36865",
+          "name": "The Rock - NZ's #1 rock radio station",
+          "url": "https://digitalstreams.mediaworks.nz/rock_net_icy",
+          "tags": ["alternative rock", "classic rock"],
+          "cors": true
+        },
+        {
+          "id": "89d7bca7-76a0-43ce-8546-7028022b21e9",
+          "name": "Vinyl Radio NZ",
+          "url": "https://s40.myradiostream.com:17794/listen.aac?",
+          "tags": ["classic rock", "hits"],
+          "cors": true
+        },
+        {
+          "id": "d7c29592-79f0-4067-9886-90d1915fd52a",
+          "name": "Flava",
+          "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/NZME_08AAC.aac",
+          "tags": ["hip hop", "rnb"],
+          "cors": true
+        }
+      ]
+    },
+    {
+      "name": "Suva",
+      "cc": "FJ",
+      "lat": -18.142,
+      "lon": 178.441,
+      "tz": "Pacific/Fiji",
+      "stations": [
+        {
+          "id": "e25c2208-699b-47c7-b7ea-b2548b9146eb",
+          "name": "Life FM",
+          "url": "https://streams3.vision.org.au/fiji.aac",
+          "tags": ["christian", "christmas music"],
+          "cors": true
+        },
+        {
+          "id": "3cd559c0-c875-4eeb-96d0-a70f07fecf6a",
+          "name": "Life Worship",
+          "url": "https://streams3.vision.org.au/worshipap.aac",
+          "tags": ["christian", "christian music"],
+          "cors": true
+        }
+      ]
+    }
+  ]
+}
