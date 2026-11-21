@@ -168,7 +168,9 @@ export function start(root: HTMLElement) {
   let away = 0;
   let eyeGap = 110;
   let glow = 0;
-  let field = { s: 0, d: 0, has: false };
+  let field = { s: 0, d: 0, has: false, calm: 1 };
+  let still = 0;
+  let lastPos = pos;
   let savedPos = pos;
   let lastSave = 0;
   let lastReadout = 0;
@@ -474,7 +476,7 @@ export function start(root: HTMLElement) {
 
   document.addEventListener('visibilitychange', () => {
     engine.setHidden(document.hidden);
-    engine.field(field.s, field.d, field.has);
+    engine.field(field.s, field.d, field.has, field.calm);
   });
 
   addEventListener('resize', () => {
@@ -546,7 +548,11 @@ export function start(root: HTMLElement) {
 
     const n = nearest(pos);
     const s = n ? Math.exp(-((n.d / SIGMA) ** 2)) : 0;
-    field = { s, d: n ? n.d : 0, has: !!n && Math.abs(n.d) < 1.2 };
+    // Left alone between stations, the hiss settles to a murmur after a while; a touch brings it back.
+    still = pos === lastPos ? still + dt : 0;
+    lastPos = pos;
+    const calm = still < 15 ? 1 : Math.max(0.3, 1 - ((still - 15) / 12) * 0.7);
+    field = { s, d: n ? n.d : 0, has: !!n && Math.abs(n.d) < 1.2, calm };
 
     if (on) {
       const moving =
@@ -562,7 +568,7 @@ export function start(root: HTMLElement) {
           current = null;
         }
       }
-      engine.field(field.s, field.d, field.has);
+      engine.field(field.s, field.d, field.has, field.calm);
     }
 
     // The eye: its cathode warms over a few seconds, then its shadow closes on a carrier.

@@ -232,21 +232,22 @@ export class Engine {
 
   /**
    * The field at the needle, each frame: `s` is how squarely a carrier is tuned (0 to 1), `d` how far
-   * off it is in degrees, and `carrier` whether there is one near at all.
+   * off it is in degrees, `carrier` whether there is one near at all, and `calm` (1 down to about
+   * 0.3) how far the hiss has settled while the dial sits untouched between stations.
    */
-  field(s: number, d: number, carrier: boolean) {
+  field(s: number, d: number, carrier: boolean, calm = 1) {
     if (!this.ctx || !this.powered) return;
     const t = this.ctx.currentTime;
     const live = this.onAir === 'playing';
     // Static gives way as a live station comes in, and only partly while one is still connecting.
     const capture = live ? s : s * 0.35;
-    let hiss = 0.16 * (1 - capture) * (1 - capture);
+    let hiss = 0.16 * (1 - capture) * (1 - capture) * (live ? 1 : calm);
     // A background tab between stations goes quiet; a station keeps playing.
     if (this.hidden && !live) hiss = 0;
     this.staticGain.gain.setTargetAtTime(hiss, t, 0.05);
 
     const ad = Math.abs(d);
-    let w = carrier ? 0.05 * (1 - Math.exp(-((ad / 0.035) ** 2))) * Math.exp(-((ad / 0.42) ** 2)) : 0;
+    let w = carrier ? 0.032 * (1 - Math.exp(-((ad / 0.035) ** 2))) * Math.exp(-((ad / 0.42) ** 2)) : 0;
     if (this.hidden) w = 0;
     this.whistleGain.gain.setTargetAtTime(w, t, 0.03);
     this.whistle.frequency.setTargetAtTime(40 + ad * 7800, t, 0.02);
