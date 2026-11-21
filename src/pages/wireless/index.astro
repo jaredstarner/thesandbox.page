@@ -24,7 +24,7 @@ const marks = cities.map((c) => ({ ...c, first: carrierIndex, n: (carrierIndex +
 
 const degrees = Array.from({ length: 360 }, (_, i) => i - 180);
 const fmtLon = (d: number) => (d === 0 ? '0°' : d === -180 ? '180°' : `${Math.abs(d)}°${d < 0 ? 'W' : 'E'}`);
-const fmtZone = (h: number) => (h === 0 ? 'GMT' : `${h > 0 ? '+' : '−'}${Math.abs(h)}`);
+const fmtZone = (h: number) => (h === 0 ? 'GMT' : Math.abs(h) === 12 ? '±12' : `${h > 0 ? '+' : '−'}${Math.abs(h)}`);
 const meridians = degrees.filter((d) => d % 15 === 0);
 
 const land = landBitmap();
@@ -32,7 +32,7 @@ const land = landBitmap();
 
 <Bare
   title="Wireless"
-  description="A valve wireless set whose dial is printed with the world: turn it west to east and pick up live stations from seventy cities, through the static, at whatever hour it is there."
+  description="A valve wireless set whose dial is printed with the world: turn it west to east and pick up live stations from seventy-three cities, through the static, at whatever hour it is there."
 >
   <Font cssVariable="--font-wl-dial" slot="head" />
   <Font cssVariable="--font-wl-plate" slot="head" />
@@ -153,8 +153,8 @@ const land = landBitmap();
           <span class="caption">Tuning</span>
         </div>
         <div class="seek">
-          <button type="button" class="west" aria-label="Seek west">◂ West</button>
-          <button type="button" class="east" aria-label="Seek east">East ▸</button>
+          <button type="button" class="west" aria-label="Seek west">◂<span> West</span></button>
+          <button type="button" class="east" aria-label="Seek east"><span>East </span>▸</button>
         </div>
       </div>
     </section>
@@ -847,17 +847,32 @@ const land = landBitmap();
     .glass {
       padding: 7px;
     }
+    .console {
+      grid-template-columns: auto auto;
+      justify-content: space-between;
+    }
     .controls {
-      gap: 12px;
+      gap: 13px;
+    }
+    .controls.right {
+      gap: 9px;
     }
     .knob .cap {
-      width: 92px;
+      width: 80px;
     }
     .knob.small .cap {
-      width: 52px;
+      width: 46px;
+    }
+    .knob.small .cap::before {
+      inset: -10px;
+    }
+    .caption,
+    .power .label {
+      font-size: 10px;
+      letter-spacing: 0.16em;
     }
     .power .jewel {
-      width: 34px;
+      width: 30px;
     }
     .readout {
       gap: 12px;
@@ -875,9 +890,11 @@ const land = landBitmap();
       font-size: 14px;
     }
     .seek button {
-      padding: 7px 9px;
-      font-size: 11px;
-      letter-spacing: 0.1em;
+      padding: 8px 11px;
+      font-size: 13px;
+    }
+    .seek button span {
+      display: none;
     }
   }
 </style>
