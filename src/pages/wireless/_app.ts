@@ -495,6 +495,7 @@ export function start(root: HTMLElement) {
     else if (engine.onAir === 'playing' && field.s > 0.3) status = 'On air';
     else status = 'Between stations';
     statusEl.textContent = status;
+    statusEl.toggleAttribute('data-on-air', status === 'On air');
 
     if (ci !== null) {
       const c = cities[ci];

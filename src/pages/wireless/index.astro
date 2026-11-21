@@ -7,7 +7,7 @@ import { carrierLon } from './_tuning';
 
 // The dial is printed once at build time, so it reads (and scrolls) without JavaScript.
 const W = 4320; // the strip's width in its own units: 12 per degree of longitude
-const H = 330;
+const H = 290;
 const K = W / 360;
 const x = (lon: number) => (lon + 180) * K;
 const pct = (lon: number) => `${(((lon + 180) / 360) * 100).toFixed(4)}%`;
@@ -63,31 +63,31 @@ const land = landBitmap();
             <svg class="strip" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
               {
                 meridians.map((d, i) => (
-                  <rect class={i % 2 ? 'zone' : 'zone alt'} x={x(d - 7.5)} y="44" width={15 * K} height="246" />
+                  <rect class={i % 2 ? 'zone' : 'zone alt'} x={x(d - 7.5)} y="40" width={15 * K} height="208" />
                 ))
               }
-              <rect class="zone alt" x={x(172.5)} y="44" width={7.5 * K} height="246" />
-              <line class="rule" x1="0" x2={W} y1="44" y2="44" />
-              <line class="rule" x1="0" x2={W} y1="290" y2="290" />
-              <line class="rule thin" x1="0" x2={W} y1="294" y2="294" />
+              <rect class="zone alt" x={x(172.5)} y="40" width={7.5 * K} height="208" />
+              <line class="rule" x1="0" x2={W} y1="40" y2="40" />
+              <line class="rule" x1="0" x2={W} y1="248" y2="248" />
+              <line class="rule thin" x1="0" x2={W} y1="252" y2="252" />
               {
                 degrees.map((d) => {
                   const len = d % 15 === 0 ? 20 : d % 5 === 0 ? 11 : 5;
-                  return <line class="tick" x1={x(d)} x2={x(d)} y1={44 - len} y2="44" />;
+                  return <line class="tick" x1={x(d)} x2={x(d)} y1={40 - len} y2="40" />;
                 })
               }
               {
                 degrees
                   .filter((d) => d % 15 === 0 || (d % 15) % 7.5 === 0)
-                  .map((d) => <line class="tick" x1={x(d)} x2={x(d)} y1="294" y2="306" />)
+                  .map((d) => <line class="tick" x1={x(d)} x2={x(d)} y1="252" y2="264" />)
               }
-              {meridians.map((d) => <line class="tick red" x1={x(d + 7.5)} x2={x(d + 7.5)} y1="294" y2="300" />)}
+              {meridians.map((d) => <line class="tick red" x1={x(d + 7.5)} x2={x(d + 7.5)} y1="252" y2="258" />)}
               {
                 marks.map((c) => (
                   <g>
-                    <line class="mark" x1={x(c.lon)} x2={x(c.lon)} y1="238" y2="252" />
+                    <line class="mark" x1={x(c.lon)} x2={x(c.lon)} y1="196" y2="210" />
                     {c.carriers.map((lon, i) => (
-                      <circle class="carrier" data-carrier={c.first + i} cx={x(lon)} cy="264" r="2.4" />
+                      <circle class="carrier" data-carrier={c.first + i} cx={x(lon)} cy="222" r="2.4" />
                     ))}
                   </g>
                 ))
@@ -192,7 +192,7 @@ const land = landBitmap();
     padding: 18px 24px 16px;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto auto 1fr;
+    grid-template-rows: auto 1fr auto auto auto 1.3fr auto;
     justify-items: center;
     align-content: start;
     gap: 14px;
@@ -220,6 +220,7 @@ const land = landBitmap();
 
   /* The maker's plate */
   .plate {
+    grid-row: 1;
     width: 100%;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -263,6 +264,7 @@ const land = landBitmap();
 
   /* The magic eye: an EM34-style tuning indicator whose dark wedge closes on a station */
   .eye-mount {
+    grid-row: 3;
     padding: 7px;
     border-radius: 50%;
     background: conic-gradient(from 200deg, #6d5530, #e6c88a, #8a6a3a, #3b2c16, #c9a463, #6d5530);
@@ -274,7 +276,7 @@ const land = landBitmap();
     --gap: 110deg;
     --glow: 0;
     position: relative;
-    width: 62px;
+    width: 72px;
     aspect-ratio: 1;
     border-radius: 50%;
     background: radial-gradient(circle, #0b120d 0 55%, #020403 100%);
@@ -311,6 +313,7 @@ const land = landBitmap();
 
   /* The dial glass */
   .glass {
+    grid-row: 4;
     width: 100%;
     min-width: 0;
     padding: 9px;
@@ -322,7 +325,7 @@ const land = landBitmap();
   }
   .window {
     position: relative;
-    height: 330px;
+    height: 290px;
     border-radius: 12px;
     overflow: auto hidden;
     background: #090604;
@@ -435,17 +438,17 @@ const land = landBitmap();
     color: var(--gold);
   }
   .zonelabel {
-    top: 308px;
+    top: 266px;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.08em;
     color: var(--red);
   }
   .name {
-    bottom: 96px;
+    bottom: 98px;
     writing-mode: vertical-rl;
     rotate: 180deg;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
     letter-spacing: 0.09em;
     text-transform: uppercase;
@@ -476,7 +479,7 @@ const land = landBitmap();
     top: 0;
     bottom: 0;
     left: 50%;
-    width: 3px;
+    width: 2px;
     translate: -50% 0;
     background: linear-gradient(180deg, transparent, #ff6a3a 4%, #ff7b46 50%, #ff6a3a 96%, transparent);
     box-shadow: 0 0 10px rgb(255 100 50 / 0.55);
@@ -521,6 +524,7 @@ const land = landBitmap();
 
   /* The console: power, volume, tone, the station indicator, and the tuning knob */
   .console {
+    grid-row: 5;
     width: min(1180px, 100%);
     display: grid;
     grid-template-columns: 1fr minmax(0, 560px) 1fr;
@@ -647,6 +651,9 @@ const land = landBitmap();
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
+  .power:focus-visible {
+    outline: none;
+  }
   .power:focus-visible .jewel {
     outline: 3px solid var(--gold);
     outline-offset: 6px;
@@ -720,7 +727,7 @@ const land = landBitmap();
     text-transform: uppercase;
     color: var(--gold);
   }
-  .wireless[data-air='playing'] .status {
+  .status[data-on-air] {
     color: var(--eye);
   }
   .city {
@@ -744,11 +751,13 @@ const land = landBitmap();
     color: rgb(244 228 193 / 0.92);
   }
   .noscript {
+    grid-row: 6;
     margin: 0;
     font-size: 15px;
     color: var(--gold);
   }
   .credit {
+    grid-row: 7;
     align-self: end;
     max-width: 760px;
     text-align: center;
@@ -800,9 +809,6 @@ const land = landBitmap();
     }
     .maker span {
       font-size: 22px;
-    }
-    .window {
-      height: 300px;
     }
     .glass {
       padding: 7px;
