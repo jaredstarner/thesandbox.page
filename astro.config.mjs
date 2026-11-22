@@ -844,5 +844,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Georgia', 'serif'],
     },
+    // /waggle/: a warm, round serif for the headings, and a friendly grotesk for the field notes.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Young Serif',
+      cssVariable: '--font-wg-head',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Figtree',
+      cssVariable: '--font-wg-text',
+      weights: ['300 800'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
+    },
   ],
 });

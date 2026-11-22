@@ -22,6 +22,7 @@
     "@chenglou/pretext": "0.0.9",
     "astro": "^7.4.12",
     "clipper-lib": "6.4.2",
+    "d3-delaunay": "6.0.4",
     "opentype.js": "2.0.0",
     "satellite.js": "6.0.2"
   },
@@ -30,6 +31,7 @@
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@eslint/js": "^10.0.1",
+    "@types/d3-delaunay": "6.0.4",
     "eslint": "^10.15.0",
     "eslint-plugin-astro": "^3.2.1",
     "globals": "^17.14.0",
