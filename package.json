@@ -24,7 +24,7 @@
     "clipper-lib": "6.4.2",
     "d3-delaunay": "6.0.4",
     "opentype.js": "2.0.0",
-    "satellite.js": "6.0.2"
+    "satellite.js": "7.2.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
