@@ -57,6 +57,7 @@ export class MapView {
       c.height = Math.max(1, Math.round(h * dpr));
     }
     this.tiles.clear();
+    this.relief = null;
     this.renderBase();
     this.sunKey = '';
   }
@@ -547,10 +548,46 @@ export class MapView {
     }
   }
 
+  private relief: { cols: number; rows: number; nx: Float32Array; ny: Float32Array; nz: Float32Array; wet: Uint8Array } | null =
+    null;
+
+  /** Surface normals on a coarse grid, worked out once per size; only the lighting changes with the sun. */
+  private reliefGrid() {
+    if (this.relief) return this.relief;
+    const cols = 110;
+    const rows = Math.max(1, Math.round((cols * this.h) / this.w));
+    const n = cols * rows;
+    const nx = new Float32Array(n);
+    const ny = new Float32Array(n);
+    const nz = new Float32Array(n);
+    const wet = new Uint8Array(n);
+    const e = this.land.elevation;
+    const relief = 420;
+    const step = 40;
+    for (let j = 0; j < rows; j++) {
+      for (let i = 0; i < cols; i++) {
+        const [x, y] = this.toWorld(((i + 0.5) / cols) * this.w, ((j + 0.5) / rows) * this.h);
+        const o = j * cols + i;
+        if (this.land.isWater(x, y)) {
+          wet[o] = 1;
+          continue;
+        }
+        const dzdx = ((e(x + step, y) - e(x - step, y)) * relief) / (2 * step);
+        const dzdy = ((e(x, y + step) - e(x, y - step)) * relief) / (2 * step);
+        const len = Math.hypot(dzdx, dzdy, 1);
+        nx[o] = -dzdx / len;
+        ny[o] = -dzdy / len;
+        nz[o] = 1 / len;
+      }
+    }
+    this.relief = { cols, rows, nx, ny, nz, wet };
+    return this.relief;
+  }
+
   /** Relief lit by the real sun: slopes facing it brighten, slopes away from it darken. */
   private hillshade(ctx: CanvasRenderingContext2D, sun: Sun): void {
-    const cols = 110;
-    const rows = Math.round((cols * this.h) / this.w);
+    const g0 = this.reliefGrid();
+    const { cols, rows } = g0;
     const c = document.createElement('canvas');
     c.width = cols;
     c.height = rows;
@@ -561,30 +598,20 @@ export class MapView {
     const lx = Math.sin(az) * Math.cos(alt);
     const ly = -Math.cos(az) * Math.cos(alt);
     const lz = Math.sin(alt);
-    const relief = 420;
-    const step = 40;
-    for (let j = 0; j < rows; j++) {
-      for (let i = 0; i < cols; i++) {
-        const [x, y] = this.toWorld(((i + 0.5) / cols) * this.w, ((j + 0.5) / rows) * this.h);
-        const o = (j * cols + i) * 4;
-        if (this.land.isWater(x, y)) continue;
-        const e = this.land.elevation;
-        const dzdx = ((e(x + step, y) - e(x - step, y)) * relief) / (2 * step);
-        const dzdy = ((e(x, y + step) - e(x, y - step)) * relief) / (2 * step);
-        const len = Math.hypot(dzdx, dzdy, 1);
-        const lambert = (-dzdx * lx - dzdy * ly + lz) / len;
-        const v = lambert - lz;
-        if (v < 0) {
-          img.data[o] = 28;
-          img.data[o + 1] = 32;
-          img.data[o + 2] = 60;
-          img.data[o + 3] = Math.min(115, -v * 520);
-        } else {
-          img.data[o] = 255;
-          img.data[o + 1] = 246;
-          img.data[o + 2] = 214;
-          img.data[o + 3] = Math.min(40, v * 300);
-        }
+    for (let o = 0; o < cols * rows; o++) {
+      if (g0.wet[o]) continue;
+      const v = g0.nx[o] * lx + g0.ny[o] * ly + g0.nz[o] * lz - lz;
+      const q = o * 4;
+      if (v < 0) {
+        img.data[q] = 28;
+        img.data[q + 1] = 32;
+        img.data[q + 2] = 60;
+        img.data[q + 3] = Math.min(115, -v * 520);
+      } else {
+        img.data[q] = 255;
+        img.data[q + 1] = 246;
+        img.data[q + 2] = 214;
+        img.data[q + 3] = Math.min(40, v * 300);
       }
     }
     g.putImageData(img, 0, 0);
