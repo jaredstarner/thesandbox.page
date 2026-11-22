@@ -1,0 +1,8 @@
+{
+  "title": "Waggle",
+  "summary": "A honeybee colony's dance floor and the valley around the hive in high summer: read a forager's waggle dance, where the run's angle from straight up is the bearing from the sun and its length is the distance, mark the map, send a bee to see if you were right, then dance for the flowers you found and watch your sisters follow.",
+  "date": "2026-11-22",
+  "tags": ["canvas", "pointer-events", "web-audio", "game", "waggle-dance", "sun-compass", "voronoi"],
+  "requires": ["canvas"],
+  "plot": 52
+}

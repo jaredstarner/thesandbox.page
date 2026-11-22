@@ -583,6 +583,9 @@ export const TECHNIQUES: Record<string, Technique> = {
   'kinetic-sculpture': { label: 'Kinetic sculpture' },
   'radio-browser': { label: 'Radio Browser directory' },
   statics: { label: 'Statics' },
+  'waggle-dance': { label: 'Waggle dance' },
+  'sun-compass': { label: 'Sun compass' },
+  voronoi: { label: 'Voronoi diagram' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
