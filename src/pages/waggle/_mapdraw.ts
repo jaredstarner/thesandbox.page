@@ -668,7 +668,13 @@ export class MapView {
         ctx.restore();
       }
       this.outline(ctx, patch.ring, colour, good ? [] : [6, 4], 2.6);
-      label(ctx, patch.plant.name, px, py - this.ringRadius(patch.ring) * this.s - 12, '#2b1d0e', true);
+      if (patch.id >= 0) {
+        const d = Math.hypot(patch.center[0], patch.center[1]) || 1;
+        const off = this.ringRadius(patch.ring) * this.s + 16;
+        const lx = px + (patch.center[0] / d) * off;
+        const ly = py + (patch.center[1] / d) * off + 4;
+        label(ctx, patch.plant.name, lx, ly, '#2b1d0e', true);
+      }
     }
 
     // The mark, its line from the hive, and the angle it makes with the sun.
