@@ -103,13 +103,13 @@ export class Sound {
 
   private applyHum(): void {
     if (!this.ctx || !this.hum) return;
-    this.hum.gain.setTargetAtTime(0.05 * this.humLevel, this.ctx.currentTime, 0.6);
+    this.hum.gain.setTargetAtTime(0.07 * this.humLevel, this.ctx.currentTime, 0.6);
   }
 
   setWaggle(on: boolean, slow: boolean): void {
     if (!this.ctx || !this.buzz || !this.pulseRate) return;
     const t = this.ctx.currentTime;
-    this.buzz.gain.setTargetAtTime(on ? 0.11 : 0, t, on ? 0.02 : 0.05);
+    this.buzz.gain.setTargetAtTime(on ? 0.055 : 0, t, on ? 0.02 : 0.05);
     this.pulseRate.frequency.setTargetAtTime(slow ? 13 / 4 : 13, t, 0.05);
   }
 
