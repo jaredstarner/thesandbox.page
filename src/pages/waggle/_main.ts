@@ -216,8 +216,8 @@ export function start(root: HTMLElement): void {
     if (stage !== 'watch' || !mark) return;
     const { dist, theta, ms } = describeMark(mark);
     ui.readout.innerHTML =
-      `<b>${Math.abs(Math.round(theta))}°</b> ${sideOf(theta)} of the sun, <b>${fmtDist(dist)}</b> out.<br>` +
-      `Danced as a run about <b>${fmtSecs(ms)}</b> long, ${Math.abs(Math.round(theta))}° ${sideOf(theta)} of straight up.`;
+      `<b>${Math.abs(Math.round(theta))}°</b> ${sideOf(theta)} of the sun, <b>${fmtDist(dist)}</b> out<br>` +
+      `danced as a <b>${fmtSecs(ms)}</b> run`;
   };
 
   // ---------- rounds ----------
@@ -496,15 +496,8 @@ export function start(root: HTMLElement): void {
     }
     playerPatch = hit && !wasTutorial ? hit : null;
     ui.next.textContent = clock >= DAY_END - 20 ? 'End the day' : 'Next forager';
-    placeResult(target);
     setStage('result');
     say(hit ? 'She is home with a full crop.' : 'She is home with nothing.');
-  };
-
-  /** Keep the result card off the flowers it is talking about. */
-  const placeResult = (p: Patch) => {
-    const [, y] = map.toScreen(p.center[0], p.center[1]);
-    ui.result.dataset.at = y > map.h * 0.5 ? 'top' : 'bottom';
   };
 
   const closestPatch = (patches: Patch[], m: Pt) => {
@@ -533,9 +526,9 @@ export function start(root: HTMLElement): void {
     const theta = angleDiff(p.bearing, s.azimuth);
     const ms = durationFor(land, p.center[0], p.center[1]);
     ui.readout.innerHTML =
-      `The ${p.plant.noun}: <b>${Math.abs(Math.round(theta))}°</b> ${sideOf(theta)} of the sun, <b>${fmtDist(p.distance)}</b> out.<br>` +
-      `Dance runs about <b>${fmtSecs(ms)}</b> long.`;
-    say('Your turn. Press on the comb and drag the way the run should point, measured from straight up; hold as long as the run should last, then let go to loop back. Dance three runs.');
+      `<b>${Math.abs(Math.round(theta))}°</b> ${sideOf(theta)} of the sun, <b>${fmtDist(p.distance)}</b> out<br>` +
+      `dance <b>${fmtSecs(ms)}</b> runs`;
+    say('Your turn. Press on the comb and drag the way to run, measured from straight up. Hold as long as the run should last, and let go to loop back. Three runs.');
   };
 
   const onPlayerRun = (run: Run) => {
@@ -599,7 +592,6 @@ export function start(root: HTMLElement): void {
       diary.push({ time: clock, text: `Danced for ${patch.plant.noun}: ${hits} of ${n} followed`, ok: hits > n / 2 });
       playerPatch = null;
       ui.next.textContent = clock >= DAY_END - 20 ? 'End the day' : 'Next forager';
-      placeResult(patch);
       setStage('result');
       say(hits > n / 2 ? 'Your sisters are working your flowers.' : 'Most of them came back with nothing.');
     };

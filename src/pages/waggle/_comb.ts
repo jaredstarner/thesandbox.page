@@ -623,11 +623,11 @@ export class Comb {
         const fy = cy / this.H + gauss(rng) * 0.025;
         const r = R - wall;
         hex(g, cx, cy, r);
-        let kind: 'honey' | 'pollen' | 'brood' | 'larva' | 'nectar' | 'empty';
+        let kind: 'honey' | 'pollen' | 'brood' | 'nectar' | 'empty';
         const roll = rng();
         if (fy < 0.13) kind = roll < 0.9 ? 'honey' : 'nectar';
         else if (fy < 0.27) kind = roll < 0.78 ? 'pollen' : roll < 0.9 ? 'nectar' : 'empty';
-        else if (fy < 0.45) kind = roll < 0.75 ? 'brood' : roll < 0.88 ? 'larva' : 'empty';
+        else if (fy < 0.45) kind = roll < 0.82 ? 'brood' : 'empty';
         else kind = roll < 0.06 ? 'nectar' : roll < 0.08 ? 'pollen' : 'empty';
         if (kind === 'honey') {
           const gr = g.createRadialGradient(cx - r * 0.25, cy - r * 0.3, 0, cx, cy, r);
@@ -666,16 +666,6 @@ export class Comb {
             g.beginPath();
             g.ellipse(cx - r * 0.25, cy - r * 0.15, r * 0.22, r * 0.12, -0.5, 0, Math.PI * 2);
             g.fill();
-          } else if (kind === 'larva') {
-            g.fillStyle = 'rgba(255, 248, 225, 0.16)';
-            hex(g, cx, cy, r * 0.7);
-            g.fill();
-            g.strokeStyle = 'rgba(244, 236, 214, 0.75)';
-            g.lineWidth = r * 0.3;
-            g.lineCap = 'round';
-            g.beginPath();
-            g.arc(cx + r * 0.08, cy + r * 0.1, r * 0.3, 0.9, Math.PI * 1.75);
-            g.stroke();
           } else {
             g.fillStyle = 'rgba(255, 220, 160, 0.10)';
             g.beginPath();

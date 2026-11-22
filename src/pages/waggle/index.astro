@@ -43,13 +43,6 @@ const description =
           <span class="watch-text"><span data-watch-label>Hold to time a run</span><b data-watch-read>0.00 s</b></span>
         </button>
         <p class="you" data-you hidden></p>
-      </section>
-
-      <section class="pane map-pane" aria-label="The valley around the hive, seen from above">
-        <canvas class="map" data-map></canvas>
-        <p class="pane-label">The valley</p>
-        <p class="readout" data-readout hidden></p>
-        <button type="button" class="send" data-send hidden>Send a bee</button>
         <div class="result" data-result hidden>
           <h2 data-result-title></h2>
           <p data-result-line></p>
@@ -59,6 +52,13 @@ const description =
             <button type="button" class="go quiet" data-next>Next forager</button>
           </div>
         </div>
+      </section>
+
+      <section class="pane map-pane" aria-label="The valley around the hive, seen from above">
+        <canvas class="map" data-map></canvas>
+        <p class="pane-label">The valley</p>
+        <p class="readout" data-readout hidden></p>
+        <button type="button" class="send" data-send hidden>Send a bee</button>
       </section>
     </div>
 
@@ -93,9 +93,11 @@ const description =
           <line class="up" x1="120" y1="190" x2="120" y2="40"></line>
           <path class="up-head" d="M114 50 120 38 126 50"></path>
           <text x="120" y="30" text-anchor="middle">straight up</text>
-          <path class="run" d="M120 170 L184 94"></path>
-          <path class="loop" d="M184 94 C 222 132, 176 190, 120 170"></path>
-          <path class="loop" d="M184 94 C 132 70, 96 132, 120 170"></path>
+          <path class="loop" d="M184 94 C 226 128, 186 196, 120 170"></path>
+          <path class="loop" d="M184 94 C 128 66, 92 134, 120 170"></path>
+          <path class="wag" d="M120 170 l9.5 -6.5 l-1.5 -7.6 l9.5 -6.5 l-1.5 -7.6 l9.5 -6.5 l-1.5 -7.6 l9.5 -6.5 l-1.5 -7.6 l9.5 -6.5 l-1.5 -7.6 l9.5 -6.5 l-1.5 -7.6 l9.6 -6.6"
+          ></path>
+          <path class="dir" d="M176 92 L186 92 L184 102"></path>
           <path class="arc" d="M120 110 A 60 60 0 0 1 158.6 124"></path>
           <text class="deg" x="150" y="108">40°</text>
           <text x="120" y="212" text-anchor="middle">on the comb</text>
@@ -531,11 +533,6 @@ const description =
     box-shadow: 0 6px 24px rgba(43, 29, 14, 0.22);
   }
 
-  .result[data-at='top'] {
-    top: 52px;
-    bottom: auto;
-  }
-
   .result h2 {
     margin: 0 0 4px;
     font-family: var(--head);
@@ -746,6 +743,22 @@ const description =
     fill: none;
   }
 
+  .fig-comb .wag {
+    stroke: var(--honey);
+    stroke-width: 2.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    fill: none;
+  }
+
+  .fig-comb .dir {
+    stroke: var(--honey);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+  }
+
   .fig-map .run {
     stroke: var(--mark);
     stroke-width: 3;
@@ -784,13 +797,19 @@ const description =
 
   @media (max-width: 860px) {
     .waggle {
-      padding: 10px 12px 16px;
-      gap: 8px;
+      padding: 8px 12px 14px;
+      gap: 6px;
       min-height: auto;
+      font-size: 14px;
     }
 
     .bar {
-      gap: 8px 12px;
+      gap: 4px 10px;
+    }
+
+    .home {
+      font-size: 12px;
+      flex-basis: 100%;
     }
 
     .title {
@@ -799,27 +818,48 @@ const description =
 
     .sky {
       margin-left: auto;
+      gap: 5px;
+    }
+
+    .sky p {
+      font-size: 14px;
+    }
+
+    .sun-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .loads {
+      font-size: 13px;
     }
 
     .tools {
       width: 100%;
+      gap: 5px;
     }
 
     .tool {
-      flex: 1;
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+
+    .tool:first-child {
+      margin-right: auto;
     }
 
     .prompt {
-      font-size: 15px;
+      font-size: 14px;
+      line-height: 1.35;
     }
 
     .stage {
       grid-template-columns: minmax(0, 1fr);
-      gap: 12px;
+      gap: 10px;
     }
 
     .comb-pane {
-      height: clamp(280px, 42svh, 380px);
+      height: clamp(260px, 38svh, 340px);
       margin: 6px;
     }
 
@@ -827,13 +867,74 @@ const description =
       aspect-ratio: 1;
     }
 
+    .pane-label {
+      top: 8px;
+      left: 10px;
+      font-size: 10px;
+    }
+
+    .watch {
+      left: 8px;
+      bottom: 8px;
+      padding: 5px 10px 5px 5px;
+      gap: 7px;
+    }
+
+    .watch .face {
+      width: 24px;
+      height: 24px;
+    }
+
+    .watch-text b {
+      font-size: 14px;
+    }
+
     .readout {
-      max-width: calc(100% - 24px);
-      bottom: 64px;
+      left: 8px;
+      bottom: 8px;
+      max-width: calc(100% - 132px);
+      padding: 6px 9px;
+      font-size: 12px;
+    }
+
+    .send {
+      right: 8px;
+      bottom: 8px;
+      padding: 9px 14px;
+      font-size: 14px;
+    }
+
+    .result {
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      padding: 10px 12px;
+    }
+
+    .result h2 {
+      font-size: 18px;
+    }
+
+    .result p {
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .result .lesson {
+      font-size: 12.5px;
+    }
+
+    .go {
+      padding: 8px 14px;
     }
 
     .card {
       position: fixed;
+      padding: 20px 20px 18px;
+    }
+
+    .card h2 {
+      font-size: 24px;
     }
   }
 </style>

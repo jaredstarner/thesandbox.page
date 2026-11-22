@@ -669,7 +669,7 @@ export function makeLand(seed = 1949): Land {
       if (len < 50) continue;
       const eastWest = Math.abs(by - ay) < Math.abs(bx - ax) * 0.55;
       const roll = rng();
-      if (eastWest && roll < 0.42) {
+      if (eastWest && roll < 0.24) {
         for (let t = 6; t < len - 6; t += 8.5) {
           const x = ax + ((bx - ax) * t) / len;
           const y = ay + ((by - ay) * t) / len;

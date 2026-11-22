@@ -578,12 +578,12 @@ export class MapView {
           img.data[o] = 28;
           img.data[o + 1] = 32;
           img.data[o + 2] = 60;
-          img.data[o + 3] = Math.min(150, -v * 600);
+          img.data[o + 3] = Math.min(115, -v * 520);
         } else {
           img.data[o] = 255;
           img.data[o + 1] = 246;
           img.data[o + 2] = 214;
-          img.data[o + 3] = Math.min(70, v * 380);
+          img.data[o + 3] = Math.min(40, v * 300);
         }
       }
     }
@@ -854,11 +854,11 @@ export class MapView {
   private scaleBar(ctx: CanvasRenderingContext2D): void {
     const m = 1000;
     const len = m * this.s;
-    const x = this.w - 18 - len;
+    const x = this.w - 30 - len;
     const y = 26;
     ctx.save();
     ctx.fillStyle = 'rgba(255, 250, 238, 0.85)';
-    roundRect(ctx, x - 40, y - 15, len + 50, 30, 8);
+    roundRect(ctx, x - 40, y - 15, len + 62, 30, 8);
     ctx.fill();
     ctx.fillStyle = '#2b1d0e';
     ctx.fillRect(x, y, len / 2, 4);
