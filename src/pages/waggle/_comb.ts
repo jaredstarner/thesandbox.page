@@ -739,8 +739,8 @@ export class Comb {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalCompositeOperation = 'lighter';
     const pools: [number, number, number][] = this.player
-      ? [[...this.spots(1)[0], 0.2]]
-      : this.dances.map((d, i) => [d.spot[0], d.spot[1], i === this.selected ? 0.2 : 0.12] as [number, number, number]);
+      ? [[...this.spots(1)[0], 0.3]]
+      : this.dances.map((d, i) => [d.spot[0], d.spot[1], i === this.selected ? 0.3 : 0.2] as [number, number, number]);
     for (const [px, py, a] of pools) {
       const cx = px * k;
       const cy = py * k;
@@ -760,15 +760,17 @@ export class Comb {
       ctx.lineCap = 'round';
       this.dances.forEach((d, i) => {
         for (const tr of d.trace) {
-          const alpha = Math.max(0, 1 - tr.age / 9000) * (i === this.selected || this.dances.length === 1 ? 0.5 : 0.25);
-          ctx.strokeStyle = `rgba(255, 214, 120, ${alpha})`;
-          ctx.lineWidth = 1.1;
+          const alpha = Math.max(0, 1 - tr.age / 9000) * (i === this.selected || this.dances.length === 1 ? 0.75 : 0.4);
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = d.spec.paint;
+          ctx.lineWidth = 0.9;
           ctx.beginPath();
           ctx.moveTo(tr.a[0], tr.a[1]);
           ctx.lineTo(tr.b[0], tr.b[1]);
           ctx.stroke();
         }
       });
+      ctx.globalAlpha = 1;
     }
 
     const order: Bee[] = [];
@@ -776,6 +778,33 @@ export class Comb {
     for (const b of this.bees) if (b.mode === 'follow') order.push(b);
     for (const d of this.dances) order.push(d.bee);
     if (this.player) order.push(this.player.bee);
+
+    // A faint ring in each dancer's paint colour, so she can be followed through the crowd.
+    for (const d of this.dances) {
+      const sel = this.dances.length === 1 || d === this.dances[this.selected];
+      ctx.setTransform(k, 0, 0, k, 0, 0);
+      ctx.beginPath();
+      ctx.arc(d.bee.x, d.bee.y, 9.5, 0, Math.PI * 2);
+      ctx.globalAlpha = sel ? 0.8 : 0.5;
+      ctx.strokeStyle = d.spec.paint;
+      ctx.lineWidth = 0.6;
+      ctx.setLineDash([1.6, 1.4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+    }
+    if (this.player) {
+      ctx.setTransform(k, 0, 0, k, 0, 0);
+      ctx.beginPath();
+      ctx.arc(this.player.bee.x, this.player.bee.y, 9.5, 0, Math.PI * 2);
+      ctx.globalAlpha = 0.85;
+      ctx.strokeStyle = PAINT.blue;
+      ctx.lineWidth = 0.6;
+      ctx.setLineDash([1.6, 1.4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+    }
 
     for (const b of order) {
       const dance = b.dance && b.mode === 'dance' ? b.dance : null;

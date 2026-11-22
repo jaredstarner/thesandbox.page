@@ -870,12 +870,15 @@ export function chooseDay(land: Land, day: number): Patch[] {
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
   const chosen: Patch[] = [];
-  const ok = (p: Patch) =>
-    chosen.every(
-      (q) =>
-        Math.hypot(p.center[0] - q.center[0], p.center[1] - q.center[1]) > 380 &&
-        (q.plant !== p.plant || p.plant === PLANTS.lavender || rng() < 0.4),
-    );
+  const ok = (p: Patch) => {
+    const same = chosen.filter((q) => q.plant === p.plant).length;
+    if (same >= (p.plant === PLANTS.lavender ? 3 : 2)) return false;
+    return chosen.every((q) => {
+      const apart = Math.hypot(p.center[0] - q.center[0], p.center[1] - q.center[1]);
+      const turn = Math.abs(((p.bearing - q.bearing + 540) % 360) - 180);
+      return apart > 420 && (turn > 14 || Math.abs(p.distance - q.distance) > 600);
+    });
+  };
   const lime = pool.find((p) => p.plant === PLANTS.lime);
   if (lime && day % 2 === 1) chosen.push(lime);
   const wet = pool.filter((p) => p.water > 250 && p.distance > 1300);

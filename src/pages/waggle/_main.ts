@@ -234,7 +234,7 @@ export function start(root: HTMLElement): void {
     };
   };
 
-  const startRound = () => {
+  const startRound = (forced?: Patch[]) => {
     mark = null;
     reveal = null;
     trips = [];
@@ -277,14 +277,14 @@ export function start(root: HTMLElement): void {
       return options[idx];
     };
     const first = pickOne(null);
-    const patches = two ? [first, pickOne(first)] : [first];
+    const patches = forced ?? (two ? [first, pickOne(first)] : [first]);
     const paints = roundNo % 2 ? [PAINT.red, PAINT.yellow] : [PAINT.green, PAINT.white];
     const specs = patches.map((p, i) => specFor(p, paints[i]));
     round = { feeder: false, patches, specs, sunAz: s.azimuth };
     comb.setDances(specs);
     renderDancerChips();
     setStage('watch');
-    if (two) {
+    if (patches.length > 1) {
       say('Two foragers are dancing for different flowers. Read either one: tap a dancer to line your mark up against her.');
     } else if (roundNo === 1) {
       say('A forager is back from flowers nobody has seen yet. Time her straight runs, tap the map where you think she means, and line the blue arrow up with her runs.');
@@ -899,6 +899,7 @@ export function start(root: HTMLElement): void {
         },
         next: () => ui.next.click(),
         dance: startPlayerDance,
+        force: (idx: number[]) => startRound(idx.map((i) => todays[i])),
         endDay,
         get tutorial() {
           return tutorial;

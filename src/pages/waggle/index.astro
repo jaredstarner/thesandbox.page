@@ -440,7 +440,7 @@ const description =
     gap: 6px;
   }
 
-  .dancers button {
+  .dancers :global(button) {
     font: inherit;
     font-size: 12px;
     font-weight: 600;
@@ -455,12 +455,12 @@ const description =
     cursor: pointer;
   }
 
-  .dancers button[aria-pressed='true'] {
+  .dancers :global(button[aria-pressed='true']) {
     background: rgba(246, 226, 176, 0.95);
     color: var(--ink);
   }
 
-  .dancers .dot {
+  .dancers :global(.dot) {
     width: 12px;
     height: 12px;
     border-radius: 50%;
@@ -496,7 +496,7 @@ const description =
     box-shadow: 0 2px 10px rgba(43, 29, 14, 0.15);
   }
 
-  .readout b {
+  .readout :global(b) {
     font-variant-numeric: tabular-nums;
   }
 
@@ -630,7 +630,7 @@ const description =
     overflow: auto;
   }
 
-  .diary li {
+  .diary :global(li) {
     display: grid;
     grid-template-columns: 3.4em 1fr auto;
     gap: 10px;
@@ -639,17 +639,17 @@ const description =
     font-size: 14px;
   }
 
-  .diary .t {
+  .diary :global(.t) {
     font-variant-numeric: tabular-nums;
     color: var(--ink-soft);
   }
 
-  .diary .ok {
+  .diary :global(.ok) {
     color: var(--found);
     font-weight: 700;
   }
 
-  .diary .no {
+  .diary :global(.no) {
     color: var(--miss);
     font-weight: 700;
   }
