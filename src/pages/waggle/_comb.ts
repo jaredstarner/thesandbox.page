@@ -370,7 +370,8 @@ export class Comb {
     if (this.recruitClock > 350) {
       this.recruitClock = 0;
       const targets = this.dances.map((d) => d.bee);
-      if (this.player && this.player.runs.length + (this.player.phase === 'run' ? 1 : 0) > 0) targets.push(this.player.bee);
+      if (this.player && this.player.runs.length + (this.player.phase === 'run' ? 1 : 0) > 0)
+        targets.push(this.player.bee);
       for (const db of targets) {
         const followers = this.bees.filter((b) => b.mode === 'follow' && b.dance && b.dance.bee === db).length;
         const followersP = this.bees.filter((b) => b.mode === 'follow' && b.dance === null && b.slot >= 100).length;
@@ -718,7 +719,10 @@ export class Comb {
     g.fillRect(W / 2 - gap / 2, H - barH * 0.8, gap, barH * 0.8);
   }
 
-  draw(ctx: CanvasRenderingContext2D, opts: { ghost: Ghost | null; showUp: boolean; trace: boolean; time: number }): void {
+  draw(
+    ctx: CanvasRenderingContext2D,
+    opts: { ghost: Ghost | null; showUp: boolean; trace: boolean; time: number },
+  ): void {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.drawImage(this.bg, 0, 0);
     const k = this.ppm * this.dpr;
@@ -809,7 +813,7 @@ export class Comb {
         wob = [s * 0.95, s * 0.22];
         waggling = true;
       }
-      const phase = Math.floor(((b.legT % 1) + 1) % 1 * PHASE_COUNT) % PHASE_COUNT;
+      const phase = Math.floor((((b.legT % 1) + 1) % 1) * PHASE_COUNT) % PHASE_COUNT;
       const img = waggling ? sp.buzzing[phase] : sp.folded[phase];
       const stamp = (lat: number, yaw: number, alpha: number) => {
         const a = b.a + yaw;

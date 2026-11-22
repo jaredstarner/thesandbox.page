@@ -6,7 +6,18 @@
 
 import { Comb, PAINT, type DanceSpec, type Run } from './_comb';
 import { durationFor, flyDance, landDuration, searchRadius } from './_dance';
-import { bearingOf, chooseDay, distToRing, EXTENT, fromBearing, makeLand, PLANTS, type Patch, type Pt, type Ring } from './_land';
+import {
+  bearingOf,
+  chooseDay,
+  distToRing,
+  EXTENT,
+  fromBearing,
+  makeLand,
+  PLANTS,
+  type Patch,
+  type Pt,
+  type Ring,
+} from './_land';
 import { MapView, type Flyer, type Overlay } from './_mapdraw';
 import { Sound } from './_sound';
 import { angleDiff, FIRST_DAY, formatClock, sunAt, type Sun } from './_sun';
@@ -50,7 +61,8 @@ const STORE = 'waggle:v1';
 
 const COMPASS = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
 const compass = (b: number) => COMPASS[Math.round(b / 45) % 8];
-const fmtDist = (m: number) => (m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(m < 3000 ? 2 : 1)} km`);
+const fmtDist = (m: number) =>
+  m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(m < 3000 ? 2 : 1)} km`;
 const fmtSecs = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
 const sideOf = (deg: number) => (deg >= 0 ? 'right' : 'left');
 const PAINT_NAMES: Record<string, string> = {
@@ -285,9 +297,13 @@ export function start(root: HTMLElement): void {
     renderDancerChips();
     setStage('watch');
     if (patches.length > 1) {
-      say('Two foragers are dancing for different flowers. Read either one: tap a dancer to line your mark up against her.');
+      say(
+        'Two foragers are dancing for different flowers. Read either one: tap a dancer to line your mark up against her.',
+      );
     } else if (roundNo === 1) {
-      say('A forager is back from flowers nobody has seen yet. Time her straight runs, tap the map where you think she means, and line the blue arrow up with her runs.');
+      say(
+        'A forager is back from flowers nobody has seen yet. Time her straight runs, tap the map where you think she means, and line the blue arrow up with her runs.',
+      );
     } else {
       say('Another forager is dancing. Read her straight runs, mark the map, and send a bee.');
     }
@@ -445,7 +461,9 @@ export function start(root: HTMLElement): void {
       ui.resultTitle.textContent = wasTutorial ? 'Found the feeder' : `Found: ${hit.plant.name.toLowerCase()}`;
       ui.resultLine.textContent =
         `${fmtDist(dist)} out, ${Math.abs(Math.round(theta))}° ${sideOf(theta)} of the sun. ` +
-        (err === 0 ? 'Your mark landed right on them.' : `Your mark was ${fmtDist(err)} off, close enough to catch the scent.`) +
+        (err === 0
+          ? 'Your mark landed right on them.'
+          : `Your mark was ${fmtDist(err)} off, close enough to catch the scent.`) +
         ` +${gained} ${gained === 1 ? 'load' : 'loads'}.`;
       if (wasTutorial) {
         ui.resultLesson.hidden = false;
@@ -486,7 +504,10 @@ export function start(root: HTMLElement): void {
       } else if (angleOff > 18) {
         lesson = `Your mark was ${Math.round(angleOff)}° off her direction. Watch which way the straight run points against straight up, and remember the sun has moved since this morning.`;
       } else if (Math.abs(mDist - dist) > r) {
-        lesson = mDist < dist ? 'Right direction, not far enough: her runs were longer than your mark would be danced.' : 'Right direction, too far: her runs were shorter than your mark would be danced.';
+        lesson =
+          mDist < dist
+            ? 'Right direction, not far enough: her runs were longer than your mark would be danced.'
+            : 'Right direction, too far: her runs were shorter than your mark would be danced.';
       }
       if (lesson) {
         ui.resultLesson.hidden = false;
@@ -528,7 +549,9 @@ export function start(root: HTMLElement): void {
     ui.readout.innerHTML =
       `<b>${Math.abs(Math.round(theta))}°</b> ${sideOf(theta)} of the sun, <b>${fmtDist(p.distance)}</b> out<br>` +
       `dance <b>${fmtSecs(ms)}</b> runs`;
-    say('Your turn. Press on the comb and drag the way to run, measured from straight up. Hold as long as the run should last, and let go to loop back. Three runs.');
+    say(
+      'Your turn. Press on the comb and drag the way to run, measured from straight up. Hold as long as the run should last, and let go to loop back. Three runs.',
+    );
   };
 
   const onPlayerRun = (run: Run) => {
@@ -536,7 +559,9 @@ export function start(root: HTMLElement): void {
     if (!p) return;
     sound.tick();
     const n = p.runs.length;
-    ui.you.textContent = `Run ${n}: ${Math.abs(Math.round(run.angle))}° ${sideOf(run.angle)} of up, ${fmtSecs(run.ms)}` + (n < 3 ? ` · run ${n + 1} of 3 next` : '');
+    ui.you.textContent =
+      `Run ${n}: ${Math.abs(Math.round(run.angle))}° ${sideOf(run.angle)} of up, ${fmtSecs(run.ms)}` +
+      (n < 3 ? ` · run ${n + 1} of 3 next` : '');
     if (n >= 3) setTimeout(() => launchRecruits(p.runs.slice()), 900);
   };
 
@@ -609,7 +634,9 @@ export function start(root: HTMLElement): void {
     const ok = diary.filter((d) => d.ok).length;
     ui.duskLine.textContent =
       `${loads} ${loads === 1 ? 'load' : 'loads'} of nectar came home today, from ${found.length} ${found.length === 1 ? 'patch' : 'patches'} you read right. ` +
-      (ok === diary.length && diary.length > 0 ? 'Not a wasted flight all day.' : 'The foragers will dance again at first light.');
+      (ok === diary.length && diary.length > 0
+        ? 'Not a wasted flight all day.'
+        : 'The foragers will dance again at first light.');
     ui.diary.replaceChildren(
       ...diary.map((d) => {
         const li = document.createElement('li');
@@ -812,7 +839,8 @@ export function start(root: HTMLElement): void {
     updateHeader();
 
     const s = sun();
-    const inHive = stage === 'watch' || stage === 'dance' || stage === 'recruits' || stage === 'flight' || stage === 'result';
+    const inHive =
+      stage === 'watch' || stage === 'dance' || stage === 'recruits' || stage === 'flight' || stage === 'result';
     sound.setHum(inHive ? (stage === 'watch' || stage === 'dance' ? 1 : 0.55) : 0);
     sound.setWaggle(comb.waggling && (stage === 'watch' || stage === 'dance'), comb.slow);
 
@@ -832,11 +860,13 @@ export function start(root: HTMLElement): void {
     const overlay: Overlay = {
       sun: s,
       mark: stage === 'dance' && targetForDance ? targetForDance.center : mark,
-      searchRadius: stage === 'flight' || stage === 'result' ? (mark ? searchRadius(Math.hypot(mark[0], mark[1])) : 0) : 0,
+      searchRadius:
+        stage === 'flight' || stage === 'result' ? (mark ? searchRadius(Math.hypot(mark[0], mark[1])) : 0) : 0,
       feeder: feederPt,
-      flyers: trips.filter((t) => !t.done && t.delay <= 0).map((t) => t.flyer).concat(
-        stage === 'result' ? trips.filter((t) => t.done).map((t) => ({ ...t.flyer, x: 0, y: 0 })) : [],
-      ),
+      flyers: trips
+        .filter((t) => !t.done && t.delay <= 0)
+        .map((t) => t.flyer)
+        .concat(stage === 'result' ? trips.filter((t) => t.done).map((t) => ({ ...t.flyer, x: 0, y: 0 })) : []),
       found: found.filter((p) => !reveal || p !== reveal.patch),
       reveal: stage === 'dance' && targetForDance ? { patch: targetForDance, good: true } : reveal,
       target: null,

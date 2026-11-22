@@ -653,7 +653,8 @@ export function makeLand(seed = 1949): Land {
       for (let n = 0; n < 9; n++) {
         const x = f.centroid[0] + between(rng, -110, 110);
         const y = f.centroid[1] + between(rng, -110, 110);
-        if (pointInRing(x, y, ring) && !isWater(x, y)) trees.push({ x, y, r: between(rng, 5, 7.5), h: 10, kind: 'pine' });
+        if (pointInRing(x, y, ring) && !isWater(x, y))
+          trees.push({ x, y, r: between(rng, 5, 7.5), h: 10, kind: 'pine' });
       }
     }
     const farmland = ['sunflower', 'wheat', 'maize', 'hay', 'clover', 'pasture', 'fallow', 'lavender', 'vineyard'];
@@ -694,7 +695,13 @@ export function makeLand(seed = 1949): Land {
       if (rng() < 0.18) continue;
       const tx = x + side * (w + between(rng, 7, 14));
       const kind: TreeKind = rng() < 0.55 ? 'poplar' : 'plane';
-      trees.push({ x: tx, y: y + between(rng, -4, 4), r: kind === 'poplar' ? 4.6 : 7.5, h: kind === 'poplar' ? 22 : 16, kind });
+      trees.push({
+        x: tx,
+        y: y + between(rng, -4, 4),
+        r: kind === 'poplar' ? 4.6 : 7.5,
+        h: kind === 'poplar' ? 22 : 16,
+        kind,
+      });
     }
   }
   for (let k = 0; k < lake.length; k += 1) {
@@ -705,7 +712,8 @@ export function makeLand(seed = 1949): Land {
     const d = Math.hypot(x - cx, y - cy);
     const ox = x + ((x - cx) / d) * between(rng, 14, 40);
     const oy = y + ((y - cy) / d) * between(rng, 14, 40);
-    if (!isWater(ox, oy)) trees.push({ x: ox, y: oy, r: between(rng, 5, 7), h: 11, kind: rng() < 0.6 ? 'pine' : 'oak' });
+    if (!isWater(ox, oy))
+      trees.push({ x: ox, y: oy, r: between(rng, 5, 7), h: 11, kind: rng() < 0.6 ? 'pine' : 'oak' });
   }
 
   // Plane trees along the main road where it passes the village.
@@ -718,7 +726,13 @@ export function makeLand(seed = 1949): Land {
     const ny = (bx - ax) / len;
     for (let t = 0; t < len; t += 21) {
       for (const side of [-1, 1]) {
-        trees.push({ x: ax + ((bx - ax) * t) / len + nx * side * 10, y: ay + ((by - ay) * t) / len + ny * side * 10, r: 7, h: 16, kind: 'plane' });
+        trees.push({
+          x: ax + ((bx - ax) * t) / len + nx * side * 10,
+          y: ay + ((by - ay) * t) / len + ny * side * 10,
+          r: 7,
+          h: 16,
+          kind: 'plane',
+        });
       }
     }
   }

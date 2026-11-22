@@ -64,7 +64,7 @@ function drawBee(g: CanvasRenderingContext2D, phase: number, buzz: boolean, pxPe
   g.lineJoin = 'round';
   for (const side of [-1, 1]) {
     legs.forEach(([bx, kdx, fdx, tripod], i) => {
-      const t = (tripod === 0) === (side > 0) ? swing : -swing;
+      const t = (tripod === 0) === side > 0 ? swing : -swing;
       const off = t * (i === 1 ? 0.9 : 0.7);
       const kx = bx + kdx + off * 0.5;
       const ky = side * (i === 2 ? 3.1 : 2.9);

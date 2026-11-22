@@ -256,11 +256,7 @@ export class MapView {
       const pattern = ctx.createPattern(tile.canvas, 'repeat');
       if (!pattern) continue;
       const [cx, cy] = this.dev(f.origin[0], f.origin[1]);
-      pattern.setTransform(
-        new DOMMatrix()
-          .translateSelf(cx, cy)
-          .rotateSelf(tile.rows ? (f.angle * 180) / Math.PI : 0),
-      );
+      pattern.setTransform(new DOMMatrix().translateSelf(cx, cy).rotateSelf(tile.rows ? (f.angle * 180) / Math.PI : 0));
       this.trace(ctx, f.ring);
       ctx.fillStyle = pattern;
       ctx.fill();
@@ -353,7 +349,13 @@ export class MapView {
 
     // Roads: a darker casing under a pale top.
     const roads = this.land.roads;
-    const drawRoads = (kind: 'road' | 'lane' | 'street' | 'track', casing: number, top: number, cc: string, tc: string) => {
+    const drawRoads = (
+      kind: 'road' | 'lane' | 'street' | 'track',
+      casing: number,
+      top: number,
+      cc: string,
+      tc: string,
+    ) => {
       for (const pass of [0, 1]) {
         for (const r of roads) {
           if (r.kind !== kind) continue;
@@ -533,8 +535,18 @@ export class MapView {
       const half = b.d / 2;
       const ridgeA: Pt = [b.x - (ca * b.w) / 2, b.y - (sa * b.w) / 2];
       const ridgeB: Pt = [b.x + (ca * b.w) / 2, b.y + (sa * b.w) / 2];
-      const plus: Ring = [ridgeA, ridgeB, [ridgeB[0] + nx * half, ridgeB[1] + ny * half], [ridgeA[0] + nx * half, ridgeA[1] + ny * half]];
-      const minus: Ring = [ridgeA, ridgeB, [ridgeB[0] - nx * half, ridgeB[1] - ny * half], [ridgeA[0] - nx * half, ridgeA[1] - ny * half]];
+      const plus: Ring = [
+        ridgeA,
+        ridgeB,
+        [ridgeB[0] + nx * half, ridgeB[1] + ny * half],
+        [ridgeA[0] + nx * half, ridgeA[1] + ny * half],
+      ];
+      const minus: Ring = [
+        ridgeA,
+        ridgeB,
+        [ridgeB[0] - nx * half, ridgeB[1] - ny * half],
+        [ridgeA[0] - nx * half, ridgeA[1] - ny * half],
+      ];
       this.trace(ctx, plus);
       ctx.fillStyle = litPlus ? lit : dark;
       ctx.fill();
@@ -548,8 +560,14 @@ export class MapView {
     }
   }
 
-  private relief: { cols: number; rows: number; nx: Float32Array; ny: Float32Array; nz: Float32Array; wet: Uint8Array } | null =
-    null;
+  private relief: {
+    cols: number;
+    rows: number;
+    nx: Float32Array;
+    ny: Float32Array;
+    nz: Float32Array;
+    wet: Uint8Array;
+  } | null = null;
 
   /** Surface normals on a coarse grid, worked out once per size; only the lighting changes with the sun. */
   private reliefGrid() {
@@ -924,7 +942,14 @@ function fontOf(ctx: CanvasRenderingContext2D): string {
   return cachedFont;
 }
 
-function label(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, colour: string, strong = false): void {
+function label(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  colour: string,
+  strong = false,
+): void {
   ctx.save();
   ctx.font = `${strong ? 700 : 600} ${strong ? 13 : 11}px ${fontOf(ctx)}`;
   ctx.textAlign = 'center';
