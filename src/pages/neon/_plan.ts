@@ -138,6 +138,52 @@ function cut(pts: Pt[], at: number): [Pt[], Pt[]] {
   return [pts, []];
 }
 
+/**
+ * Round every bend to a radius glass can be bent to: no sharper than `maxR`, and never eating more
+ * than a little under half of either side, so a curve drawn in short steps comes out smooth.
+ */
+export function fillet(pts: Pt[], maxR = 1.8): Pt[] {
+  if (pts.length < 3) return pts;
+  const out: Pt[] = [pts[0]];
+  for (let i = 1; i < pts.length - 1; i++) {
+    const a = pts[i - 1];
+    const b = pts[i];
+    const c = pts[i + 1];
+    const la = dist(a, b);
+    const lc = dist(b, c);
+    if (la < 1e-6 || lc < 1e-6) continue;
+    const u = { x: (a.x - b.x) / la, y: (a.y - b.y) / la };
+    const v = { x: (c.x - b.x) / lc, y: (c.y - b.y) / lc };
+    const cos = Math.max(-1, Math.min(1, u.x * v.x + u.y * v.y));
+    const theta = Math.acos(cos);
+    // Straight on, or doubling straight back along itself (a spur, like an E's middle bar): leave it.
+    if (theta > Math.PI - 0.02 || theta < 0.35) {
+      out.push(b);
+      continue;
+    }
+    const tanHalf = Math.tan(theta / 2);
+    const t = Math.min(maxR / tanHalf, 0.45 * la, 0.45 * lc);
+    const r = t * tanHalf;
+    const bis = { x: u.x + v.x, y: u.y + v.y };
+    const bl = Math.hypot(bis.x, bis.y) || 1;
+    const k = r / Math.sin(theta / 2) / bl;
+    const ctr = { x: b.x + bis.x * k, y: b.y + bis.y * k };
+    const p1 = { x: b.x + u.x * t, y: b.y + u.y * t };
+    const p2 = { x: b.x + v.x * t, y: b.y + v.y * t };
+    const a1 = Math.atan2(p1.y - ctr.y, p1.x - ctr.x);
+    let d = Math.atan2(p2.y - ctr.y, p2.x - ctr.x) - a1;
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d < -Math.PI) d += 2 * Math.PI;
+    const n = Math.max(1, Math.ceil(Math.abs(d) / (Math.PI / 14)));
+    for (let j = 0; j <= n; j++) {
+      const ang = a1 + (d * j) / n;
+      out.push({ x: ctr.x + r * Math.cos(ang), y: ctr.y + r * Math.sin(ang) });
+    }
+  }
+  out.push(pts[pts.length - 1]);
+  return out;
+}
+
 /** Route strokes of one glass into tubes, in the order given. */
 function route(strokes: Pt[][], glass: number, units: Unit[], counts: { jumps: number }) {
   let cur: Unit | null = null;
@@ -149,7 +195,7 @@ function route(strokes: Pt[][], glass: number, units: Unit[], counts: { jumps: n
     cur = { pts: pts.map((p, i) => ({ ...p, lit: i > 0 })), glass, length: length(pts) };
   };
   for (let raw of strokes) {
-    raw = atLeast(raw, 1.6);
+    raw = fillet(atLeast(raw, 1.6));
     // A stroke too long for one tube is cut into pieces.
     const pieces: Pt[][] = [];
     while (length(raw) > UNIT_MAX) {

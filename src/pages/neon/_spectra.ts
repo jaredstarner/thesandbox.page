@@ -267,11 +267,12 @@ export function xyzToRgb([x, y, z]: Rgb): Rgb {
   ];
 }
 
-/** Pull a colour back into gamut by adding white until no channel is negative. */
+/**
+ * Pull a colour back into gamut by dropping negative channels. Adding white instead keeps the
+ * hue angle but turns neon's deep reds pink, which no tube does.
+ */
 export function intoGamut(c: Rgb): Rgb {
-  const low = Math.min(c[0], c[1], c[2]);
-  if (low >= 0) return c;
-  return [c[0] - low, c[1] - low, c[2] - low];
+  return [Math.max(0, c[0]), Math.max(0, c[1]), Math.max(0, c[2])];
 }
 
 /** The displayable colour of one wavelength, at the brightness the eye gives it. */

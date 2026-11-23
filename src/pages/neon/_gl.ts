@@ -321,7 +321,7 @@ void main() {
   // What hangs in the window: chains, frame, transformer.
   if (inWindow) {
     vec4 fit = texture(uFittings, uv);
-    col = col * (1.0 - fit.a) + fit.rgb * (amb * 0.4 + light * 6.0);
+    col = col * (1.0 - fit.a) + fit.rgb * (amb * 0.4 + light * 3.2);
     // The street reflected faintly in the plate glass.
     float sheen = 0.5 + 0.5 * sin(wp.x * 0.012 + wp.y * 0.02);
     col += vec3(0.55, 0.65, 0.9) * 0.0035 * sheen;
@@ -358,7 +358,13 @@ void main() {
     col += r * uRain * (light * 1.6 + lamp * 2.2 + amb * 2.5);
   }
 
-  col = 1.0 - exp(-col * uExposure);
+  // Mostly tone map on the brightest channel, so a tube keeps its hue as it brightens; a share of
+  // per-channel mapping lets the hottest cores run on, red towards orange and blue towards white,
+  // the way an overexposed eye or film sees them.
+  float peak = max(max(col.r, col.g), col.b);
+  vec3 keepHue = col * ((1.0 - exp(-peak * uExposure)) / max(peak, 1e-5));
+  vec3 perChannel = 1.0 - exp(-col * uExposure);
+  col = mix(keepHue, perChannel, 0.32);
   col = pow(col, vec3(1.0 / 2.2));
   col += (hash2(px + fract(uTime) * 61.0) - 0.5) / 255.0;
   o = vec4(col, 1.0);

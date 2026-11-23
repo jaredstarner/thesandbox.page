@@ -42,7 +42,7 @@ export interface Box {
 export function frame(w: number, h: number, inset: number, focus?: Box): View {
   const side = inset > 0;
   const areaW = w - inset;
-  let roi: Box = side ? { x0: -152, x1: 152, y0: -96, y1: 330 } : { x0: -128, x1: 128, y0: -66, y1: 300 };
+  let roi: Box = side ? { x0: -152, x1: 152, y0: -96, y1: 330 } : { x0: -128, x1: 128, y0: -66, y1: 318 };
   if (focus) {
     const cx = (focus.x0 + focus.x1) / 2;
     const cy = (focus.y0 + focus.y1) / 2;
@@ -384,7 +384,7 @@ function paintShopfront(p: Painter, family: string) {
   // Gold leaf on the fascia.
   const c = p.c;
   const size = 15 * p.v.s;
-  const text = 'NEON SIGNS  \u00b7  GLASS BENT TO ORDER';
+  const text = 'NEON SIGNS  \u00b7  BENT TO ORDER';
   const setFont = (ctx: Ctx, px: number) => {
     ctx.font = `700 ${px}px ${family}`;
     ctx.textAlign = 'center';
@@ -397,7 +397,7 @@ function paintShopfront(p: Painter, family: string) {
   const chars = [...text];
   const widths = chars.map((ch) => c.measureText(ch).width + spacing);
   const total = widths.reduce((a, b) => a + b, 0) - spacing;
-  let x = p.X(-59) - total / 2;
+  let x = p.X(0) - total / 2;
   const y = p.Y(290);
   const grad = c.createLinearGradient(0, y - size / 2, 0, y + size / 2);
   grad.addColorStop(0, '#f3d98a');
@@ -493,7 +493,7 @@ export function paintFittings(c: Ctx, v: View, plan: Plan) {
   const tx = Math.max(WINDOW.x0 + 24, Math.min(WINDOW.x1 - 24, fx1 - 30));
   p.rect(tx - 16, 63, tx + 16, 77, '#0e0e0f', I);
   p.rect(tx - 16, 76, tx + 16, 77, '#2c2c2e', I);
-  p.rect(tx - 7, 68, tx + 4, 73, '#a39f92', I);
+  p.rect(tx - 7, 68, tx + 4, 73, '#55524b', I);
   c.strokeStyle = '#8d8a83';
   c.lineWidth = Math.max(1, 0.7 * v.s);
   c.beginPath();
