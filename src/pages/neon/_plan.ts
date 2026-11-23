@@ -131,7 +131,10 @@ function cut(pts: Pt[], at: number): [Pt[], Pt[]] {
     if (run + d >= at) {
       const t = (at - run) / d;
       const m = { x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * t, y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * t };
-      return [[...pts.slice(0, i), m], [m, ...pts.slice(i)]];
+      return [
+        [...pts.slice(0, i), m],
+        [m, ...pts.slice(i)],
+      ];
     }
     run += d;
   }

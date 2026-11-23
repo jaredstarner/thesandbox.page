@@ -550,7 +550,9 @@ export class Renderer {
     });
     this.maskFb = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.maskFb);
-    this.masks.forEach((t, i) => gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, gl.TEXTURE_2D, t, 0));
+    this.masks.forEach((t, i) =>
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, gl.TEXTURE_2D, t, 0),
+    );
     gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1, gl.COLOR_ATTACHMENT2, gl.COLOR_ATTACHMENT3]);
     this.e = this.target(w, h, this.e ?? undefined);
     let cw = w;

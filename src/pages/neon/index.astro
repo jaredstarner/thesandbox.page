@@ -32,7 +32,9 @@ const styles = [
         <span class="fine">Click a tube to see the light it gives off.</span>
         <span class="coarse">Tap a tube to see the light it gives off.</span>
       </p>
-      <p class="pen-hint" data-pen-hint hidden>Draw on the glass. Each stroke becomes a tube.</p>
+      <p class="pen-hint" data-pen-hint hidden>
+        Draw on the glass. Each stroke becomes a tube.
+      </p>
       <p class="fallback" data-fallback hidden>
         This window needs WebGL 2 to light up, and this browser didn't offer it.
       </p>
@@ -40,7 +42,9 @@ const styles = [
 
     <aside class="docket" aria-label="Work order">
       <header class="masthead">
-        <p class="home"><a href="/">thesandbox.page</a></p>
+        <p class="home">
+          <a href="/">thesandbox.page</a>
+        </p>
         <h1>Neon</h1>
         <p class="dek">A sign shop's window on a wet night.</p>
       </header>
@@ -50,99 +54,123 @@ const styles = [
           <h2>Work order</h2>
         </header>
 
-        {
-          lines.map((l) => (
-            <div class="line" data-line={l.n}>
-              <label class="lbl" for={`neon-words-${l.n}`}>
-                {l.label}
-              </label>
-              <input
-                id={`neon-words-${l.n}`}
-                class="words"
-                data-text
-                maxlength="18"
-                spellcheck="false"
-                autocomplete="off"
-              />
-              <div class="opts">
-                <div class="styles" role="group" aria-label={`Lettering for the ${l.label.toLowerCase()}`}>
-                  {styles.map((s) => (
-                    <button type="button" class="style" data-style={s.id} aria-pressed="false">
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-                <select class="glass" data-glass aria-label={`Glass for the ${l.label.toLowerCase()}`}>
-                  <button type="button">
-                    <selectedcontent />
+        {lines.map((l) => (
+          <div class="line" data-line={l.n}>
+            <label class="lbl" for={`neon-words-${l.n}`}>
+              {l.label}
+            </label>
+            <input
+              id={`neon-words-${l.n}`}
+              class="words"
+              data-text
+              maxlength="18"
+              spellcheck="false"
+              autocomplete="off"
+            />
+            <div class="opts">
+              <div class="styles" role="group" aria-label={`Lettering for the ${l.label.toLowerCase()}`}>
+                {styles.map((s) => (
+                  <button type="button" class="style" data-style={s.id} aria-pressed="false">
+                    {s.label}
                   </button>
-                  {glasses.map((g) => (
-                    <option value={g.id}>
-                      <span class="sw" style={`--sw: ${g.colour}`} />
-                      <span class="nm">{g.name}</span>
-                    </option>
-                  ))}
-                </select>
+                ))}
               </div>
-            </div>
-          ))
-        }
-
-        <div class="pen">
-          <p class="lbl">Freehand</p>
-          <div class="pen-row">
-            <button type="button" class="ink" data-draw aria-pressed="false">Draw on the glass</button>
-            <select class="glass" data-pen-glass aria-label="Glass for freehand tubes">
-              <button type="button">
-                <selectedcontent />
-              </button>
-              {
-                glasses.map((g) => (
+              <select class="glass" data-glass aria-label={`Glass for the ${l.label.toLowerCase()}`}>
+                <button type="button">
+                  <selectedcontent />
+                </button>
+                {glasses.map((g) => (
                   <option value={g.id}>
                     <span class="sw" style={`--sw: ${g.colour}`} />
                     <span class="nm">{g.name}</span>
                   </option>
-                ))
-              }
+                ))}
+              </select>
+            </div>
+          </div>
+        ))}
+
+        <div class="pen">
+          <p class="lbl">Freehand</p>
+          <div class="pen-row">
+            <button type="button" class="ink" data-draw aria-pressed="false">
+              Draw on the glass
+            </button>
+            <select class="glass" data-pen-glass aria-label="Glass for freehand tubes">
+              <button type="button">
+                <selectedcontent />
+              </button>
+              {glasses.map((g) => (
+                <option value={g.id}>
+                  <span class="sw" style={`--sw: ${g.colour}`} />
+                  <span class="nm">{g.name}</span>
+                </option>
+              ))}
             </select>
           </div>
           <div class="pen-row small">
-            <button type="button" class="plain" data-undo disabled>Undo stroke</button>
-            <button type="button" class="plain" data-clear disabled>Clear freehand</button>
+            <button type="button" class="plain" data-undo disabled>
+              Undo stroke
+            </button>
+            <button type="button" class="plain" data-clear disabled>
+              Clear freehand
+            </button>
           </div>
         </div>
 
         <dl class="tally">
-          <div><dt>Glass</dt><dd data-tally="glass">0.0 m</dd></div>
-          <div><dt>Tubes</dt><dd data-tally="units">0</dd></div>
-          <div><dt>Jumps, blacked out</dt><dd data-tally="jumps">0</dd></div>
-          <div><dt>Electrodes</dt><dd data-tally="electrodes">0</dd></div>
+          <div>
+            <dt>Glass</dt>
+            <dd data-tally="glass">0.0 m</dd>
+          </div>
+          <div>
+            <dt>Tubes</dt>
+            <dd data-tally="units">0</dd>
+          </div>
+          <div>
+            <dt>Jumps, blacked out</dt>
+            <dd data-tally="jumps">0</dd>
+          </div>
+          <div>
+            <dt>Electrodes</dt>
+            <dd data-tally="electrodes">0</dd>
+          </div>
         </dl>
 
         <div class="book">
           <p class="lbl">From the pattern book</p>
           <div class="presets">
-            {
-              PRESETS.map((p, i) => (
-                <button type="button" class="preset" data-preset={i}>
-                  {p.name}
-                </button>
-              ))
-            }
+            {PRESETS.map((p, i) => (
+              <button type="button" class="preset" data-preset={i}>
+                {p.name}
+              </button>
+            ))}
           </div>
         </div>
       </section>
 
       <section class="board" aria-label="Controls">
         <button type="button" class="switch" data-switch aria-pressed="false">
-          <span class="plate" aria-hidden="true"><span class="lever"></span></span>
-          <span class="switch-label">Sign <b data-switch-word>off</b></span>
+          <span class="plate" aria-hidden="true">
+            <span class="lever"></span>
+          </span>
+          <span class="switch-label">
+            Sign <b data-switch-word>off</b>
+          </span>
         </button>
         <div class="chips">
-          <button type="button" class="chip" data-grating aria-pressed="false">Hold up a grating</button>
-          <button type="button" class="chip" data-closer aria-pressed="false">Step closer</button>
-          <button type="button" class="chip" data-rain aria-pressed="true">Rain</button>
-          <button type="button" class="chip" data-sound aria-pressed="true">Sound</button>
+          <button type="button" class="chip" data-grating aria-pressed="false">
+            Hold up a grating
+          </button>
+          <button type="button" class="chip" data-closer aria-pressed="false">
+            Step closer
+          </button>
+          <button type="button" class="chip" data-rain aria-pressed="true">
+            Rain
+          </button>
+          <button type="button" class="chip" data-sound aria-pressed="true">
+            Sound
+          </button>
         </div>
         <label class="spread" data-spread-wrap hidden>
           <span>Grating, near to far</span>
@@ -156,8 +184,8 @@ const styles = [
         <canvas class="strip" data-spectrum aria-label="Emission spectrum of the chosen tube"></canvas>
         <p class="note" data-spec-note></p>
         <p class="how">
-          Every colour in the window is worked out from this: the wavelengths the gas shines at, filtered by the glass or
-          spread by the powder on it, added up the way the eye adds them.
+          Every colour in the window is worked out from this: the wavelengths the gas shines at, filtered by the glass
+          or spread by the powder on it, added up the way the eye adds them.
         </p>
       </section>
 
@@ -349,8 +377,7 @@ const styles = [
     overflow-y: auto;
     background:
       linear-gradient(90deg, rgb(0 0 0 / 55%), transparent 14px),
-      repeating-linear-gradient(0deg, rgb(255 255 255 / 1.2%) 0 2px, transparent 2px 5px),
-      var(--board);
+      repeating-linear-gradient(0deg, rgb(255 255 255 / 1.2%) 0 2px, transparent 2px 5px), var(--board);
     padding: 18px 18px 28px;
     scrollbar-color: #3a3833 transparent;
   }
