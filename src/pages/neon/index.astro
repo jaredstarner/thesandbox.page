@@ -288,6 +288,11 @@ const styles = [
     color: #efe6d2;
   }
 
+  .neon[data-grating='true'] .hint,
+  .neon[data-grating='true'] .pen-hint {
+    visibility: hidden;
+  }
+
   .coarse {
     display: none;
   }
@@ -742,8 +747,8 @@ const styles = [
   }
 
   .chips {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 6px;
   }
 

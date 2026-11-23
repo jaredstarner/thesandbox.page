@@ -51,8 +51,9 @@ export function frame(w: number, h: number, inset: number, focus?: Box): View {
     roi = { x0: cx - hw, x1: cx + hw, y0: cy - hh, y1: cy + hh };
   }
   const s = Math.min(areaW / (roi.x1 - roi.x0), h / (roi.y1 - roi.y0));
+  const cx = (roi.x0 + roi.x1) / 2;
   const cy = (roi.y0 + roi.y1) / 2;
-  return { s, ox: areaW / 2, oy: h / 2 + cy * s, w, h };
+  return { s, ox: areaW / 2 - cx * s, oy: h / 2 + cy * s, w, h };
 }
 
 function rng(seed: number) {

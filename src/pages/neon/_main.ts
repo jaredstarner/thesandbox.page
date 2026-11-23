@@ -355,6 +355,7 @@ export function start(root: HTMLElement) {
     gratingBtn.setAttribute('aria-pressed', String(state.grating));
     mount?.toggleAttribute('hidden', !state.grating);
     spreadWrap?.toggleAttribute('hidden', !state.grating);
+    root.dataset.grating = String(state.grating);
   });
   spread?.addEventListener('input', () => {
     renderer.gratingK = Number(spread.value) || 0.16;
