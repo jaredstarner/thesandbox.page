@@ -1,0 +1,57 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+
+const description =
+  "A sign shop's window on a wet night: letter a sign, fill its tubes with neon, helium, or argon and mercury, flip the switch, and look at it through a diffraction grating.";
+---
+
+<Bare title="Neon" description={description}>
+  <Font cssVariable="--font-neon-print" slot="head" />
+  <Font cssVariable="--font-neon-type" slot="head" />
+  <main class="neon">
+    <canvas class="scene" data-scene aria-label="A shop window at night with a neon sign hung inside it"></canvas>
+    <header class="masthead">
+      <p class="home"><a href="/">thesandbox.page</a></p>
+      <h1>Neon</h1>
+      <p class="dek">A sign shop's window on a wet night.</p>
+    </header>
+  </main>
+</Bare>
+
+<style>
+  :global(body:has(.neon)) {
+    margin: 0;
+    background: #07080b;
+  }
+
+  .neon {
+    --print: var(--font-neon-print), 'Arial Narrow', sans-serif;
+    --type: var(--font-neon-type), ui-monospace, monospace;
+    position: relative;
+    min-height: 100svh;
+    color: #e9e1cf;
+    font-family: var(--type);
+  }
+
+  .scene {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .masthead {
+    position: absolute;
+    top: 18px;
+    left: 22px;
+  }
+
+  .masthead h1 {
+    margin: 0;
+    font: 600 44px/1 var(--print);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+</style>

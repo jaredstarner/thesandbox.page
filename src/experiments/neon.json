@@ -1,0 +1,17 @@
+{
+  "title": "Neon",
+  "summary": "A sign shop's window on a wet night: letter a sign and watch it bent into glass tubes, fill each one with neon, helium, or argon and mercury behind clear, ruby, cobalt, or coated glass, flip the switch, then hold up a diffraction grating and see every colour come apart into the lines of the gas that made it.",
+  "date": "2026-11-23",
+  "tags": [
+    "webgl2",
+    "color-buffer-float",
+    "pointer-events",
+    "web-audio",
+    "customizable-select",
+    "spectroscopy",
+    "gas-discharge",
+    "single-line-fonts"
+  ],
+  "requires": ["webgl2"],
+  "plot": 53
+}
