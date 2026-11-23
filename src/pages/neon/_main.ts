@@ -355,7 +355,7 @@ export function start(root: HTMLElement) {
     spreadWrap?.toggleAttribute('hidden', !state.grating);
   });
   spread?.addEventListener('input', () => {
-    renderer.gratingK = Number(spread.value) || 0.12;
+    renderer.gratingK = Number(spread.value) || 0.16;
   });
   rainBtn?.addEventListener('click', () => {
     state.rain = !state.rain;
@@ -521,15 +521,12 @@ export function start(root: HTMLElement) {
     c.textBaseline = 'alphabetic';
     c.fillStyle = '#d8d0bf';
     for (const { e } of named) {
-      const x = X(e.nm);
-      if (taken.some((t) => Math.abs(t - x) < 46 * dpr)) continue;
+      const label = `${e.source} ${Math.round(e.nm)}`;
+      const half = c.measureText(label).width / 2;
+      const x = Math.min(cw - half - 2 * dpr, Math.max(half + 2 * dpr, X(e.nm)));
+      if (taken.some((t) => Math.abs(t - x) < half * 2 + 6 * dpr)) continue;
       taken.push(x);
-      c.fillText(`${e.source} ${Math.round(e.nm)}`, x, top - 6 * dpr);
-    }
-    if (light.entries.some((e) => e.band) && w > 0.05) {
-      c.textAlign = 'left';
-      c.fillStyle = '#8b8577';
-      c.fillText('powder', pad, top - 6 * dpr);
+      c.fillText(label, x, top - 6 * dpr);
     }
     if (specNote) specNote.textContent = GLASSES[k].note;
   }

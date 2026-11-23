@@ -146,7 +146,7 @@ uniform float uK;
 ${MASK_SAMPLE}
 out vec4 o;
 void main() {
-  vec3 e = colourAt(uv) * 0.22;
+  vec3 e = colourAt(uv) * 0.45;
   for (int i = 0; i < ${TYPES}; i++) {
     if (i >= uTypeCount) break;
     int t = uTypes[i];
@@ -160,7 +160,7 @@ void main() {
       float s = grp < 0.5 ? g.x : (grp < 1.5 ? g.y : g.z);
       if (s <= 0.0) continue;
       vec2 off = vec2(uK * nm, 0.0);
-      e += L.rgb * s * 0.42 * (maskAt(t, uv - off) + maskAt(t, uv + off));
+      e += L.rgb * s * 0.3 * (maskAt(t, uv - off) + maskAt(t, uv + off));
     }
   }
   o = vec4(e * uWrite, 1.0);
@@ -205,6 +205,7 @@ uniform sampler2D uBody;
 uniform sampler2D uE;
 uniform sampler2D uBloom;
 uniform sampler2D uLight;
+uniform sampler2D uStreak;
 uniform vec3 uCol[${TYPES}];
 uniform vec4 uBodyCol[${TYPES}];
 uniform vec3 uView;
@@ -255,26 +256,26 @@ void main() {
   // A street lamp off to the left, and the night.
   vec2 lampPos = vec2(-430.0, 470.0);
   float dl = distance(wp, lampPos);
-  vec3 lamp = vec3(1.0, 0.86, 0.68) * 0.065 / (1.0 + pow(dl / 260.0, 2.0));
-  vec3 amb = vec3(0.0065, 0.0085, 0.015);
+  vec3 lamp = vec3(1.0, 0.86, 0.68) * 0.17 / (1.0 + pow(dl / 300.0, 2.0));
+  vec3 amb = vec3(0.012, 0.016, 0.028);
 
   vec3 col;
   bool inWindow = wp.x > ${WINDOW.x0.toFixed(1)} && wp.x < ${WINDOW.x1.toFixed(1)} && wp.y > ${WINDOW.y0.toFixed(1)} && wp.y < ${WINDOW.y1.toFixed(1)};
   if (cls > 228.0) {
-    col = alb.rgb * (amb + lamp + light * 0.22);
+    col = alb.rgb * (amb + lamp + light * 0.6);
   } else if (cls > 164.0) {
-    col = alb.rgb * (amb + lamp + light * 0.55);
+    col = alb.rgb * (amb + lamp + light * 1.5);
   } else if (cls > 112.0) {
-    col = alb.rgb * (amb * 0.25 + lamp * 0.04 + light * 1.7);
+    col = alb.rgb * (amb * 0.4 + lamp * 0.05 + light * 7.0);
   } else if (cls > 80.0) {
-    col = alb.rgb * (amb + light * 0.3);
+    col = alb.rgb * (amb + light * 0.8);
     col += vec3(0.6, 0.7, 1.0) * 0.004 * (0.6 + 0.4 * noise(px / (40.0 * s)));
   } else {
     // The pavement: diffuse light, then a wet reflection of everything above it.
     float depth = 600.0 - 600.0 / (1.0 - min(wp.y, -0.01) / 160.0);
     vec2 basePx = vec2(px.x, uView.z - ${WINDOW.y0.toFixed(1)} * s);
     vec3 fromSign = texture(uLight, toUv(basePx)).rgb * uRead;
-    vec3 diffuse = amb + lamp * 0.8 + fromSign * 0.9 / (1.0 + pow(depth / 110.0, 2.0));
+    vec3 diffuse = amb + lamp * 0.8 + fromSign * 3.5 / (1.0 + pow(depth / 120.0, 2.0));
     col = alb.rgb * diffuse;
 
     vec2 g = vec2(wp.x, depth);
@@ -296,14 +297,20 @@ void main() {
     mirror += off * s * 1.4 * puddle * uRain;
     float far = clamp((px.y - uView.z) / (uSize.y * 0.5), 0.0, 1.0);
     float fres = mix(0.55, 0.16, far);
+    // Wet paving is rough: each light's reflection is drawn out into a long streak that reaches back
+    // towards the wall, so the sign shows in the pavement even where its mirror image falls past
+    // the bottom of the view.
     vec3 refl = vec3(0.0);
-    float spread = 3.0 + (px.y - uView.z) * 0.22;
-    for (int k = -5; k <= 5; k++) {
-      float fk = float(k);
-      float w = exp(-fk * fk / 12.0);
-      refl += texture(uBloom, toUv(mirror + vec2(0.0, fk * spread))).rgb * w;
+    float wsum2 = 0.0;
+    float reach = 60.0 * s + (px.y - uView.z) * 2.5;
+    float jitter = hash2(floor(px));
+    for (int k = 0; k < 18; k++) {
+      float fk = (float(k) + jitter) / 18.0;
+      float w = exp(-fk * 2.4);
+      refl += texture(uStreak, toUv(mirror - vec2(0.0, fk * fk * reach))).rgb * w;
+      wsum2 += w;
     }
-    refl /= 8.9;
+    refl /= wsum2;
     vec3 sharp = texture(uE, toUv(mirror)).rgb + texture(uBloom, toUv(mirror)).rgb * 0.5;
     vec3 glow = texture(uLight, toUv(mirror)).rgb;
     vec3 r2 = mix(refl * 1.3, sharp, puddle * 0.75) + glow * 0.5;
@@ -314,7 +321,7 @@ void main() {
   // What hangs in the window: chains, frame, transformer.
   if (inWindow) {
     vec4 fit = texture(uFittings, uv);
-    col = col * (1.0 - fit.a) + fit.rgb * (amb * 0.3 + light * 1.8);
+    col = col * (1.0 - fit.a) + fit.rgb * (amb * 0.4 + light * 6.0);
     // The street reflected faintly in the plate glass.
     float sheen = 0.5 + 0.5 * sin(wp.x * 0.012 + wp.y * 0.02);
     col += vec3(0.55, 0.65, 0.9) * 0.0035 * sheen;
@@ -330,7 +337,7 @@ void main() {
             + m1.x * uBodyCol[4] + m1.y * uBodyCol[5] + m1.z * uBodyCol[6] + m1.w * uBodyCol[7]
             + m2.x * uBodyCol[8] + m2.y * uBodyCol[9] + m2.z * uBodyCol[10] + m2.w * uBodyCol[11];
   tint /= max(wsum, 1e-4);
-  vec3 tubeLight = amb + lamp * 0.6 + light * 1.4;
+  vec3 tubeLight = amb + lamp * 0.6 + light * 4.0;
   col = mix(col, vec3(0.004), body.a * 0.95);
   col = mix(col, tint.rgb * tubeLight, body.r * tint.a);
   col = mix(col, vec3(0.003), body.g * 0.96);
@@ -443,7 +450,7 @@ export class Renderer {
   private lineCount = new Int32Array(TYPES);
   private present: number[] = [];
   /** How far, in cm on the window, each nanometre of wavelength moves a line's copy of the sign. */
-  gratingK = 0.12;
+  gratingK = 0.16;
 
   constructor(readonly canvas: HTMLCanvasElement) {
     const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, premultipliedAlpha: false });
@@ -555,14 +562,19 @@ export class Renderer {
     const gl = this.gl;
     gl.bindTexture(gl.TEXTURE_2D, this.albedo);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    // Canvas rows run top down; the shader's run bottom up.
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.SRGB8_ALPHA8, gl.RGBA, gl.UNSIGNED_BYTE, data);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
   }
 
   setFittings(source: HTMLCanvasElement) {
     const gl = this.gl;
     gl.bindTexture(gl.TEXTURE_2D, this.fittings);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.SRGB8_ALPHA8, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
   }
 
@@ -729,6 +741,7 @@ export class Renderer {
     bind('uE', 6, e.tex);
     bind('uBloom', 7, this.ups[0].tex);
     bind('uLight', 8, this.ups[3].tex);
+    bind('uStreak', 9, this.ups[1].tex);
     gl.uniform3fv(c.u.uCol, st.colours);
     gl.uniform4fv(c.u.uBodyCol, this.bodyCol);
     gl.uniform3f(c.u.uView, view.s, view.ox, view.oy);

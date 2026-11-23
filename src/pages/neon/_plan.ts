@@ -45,7 +45,7 @@ export interface Plan {
 }
 
 /** The area of the window the sign may fill. */
-export const SIGN_AREA = { x0: -104, x1: 104, y0: 98, y1: 226 };
+export const SIGN_AREA = { x0: -90, x1: 90, y0: 104, y1: 218 };
 /** The longest tube the shop will bend in one piece. */
 const UNIT_MAX = 240;
 /** Strokes closer than this join without a jump. */
@@ -53,7 +53,7 @@ const JOIN = 1.4;
 /** Longer jumps than this start a new tube instead. */
 const JUMP_MAX = 26;
 /** No letter taller than this, however short the word. */
-const MAX_HEIGHT = 58;
+const MAX_HEIGHT = 48;
 
 interface Glyph {
   adv: number;

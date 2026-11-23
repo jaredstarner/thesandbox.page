@@ -28,11 +28,6 @@ const styles = [
       <div class="mount" data-mount hidden aria-hidden="true">
         <span>Diffraction grating</span>
       </div>
-      <header class="masthead">
-        <p class="home"><a href="/">thesandbox.page</a></p>
-        <h1>Neon</h1>
-        <p class="dek">A sign shop's window on a wet night.</p>
-      </header>
       <p class="hint" data-hint>
         <span class="fine">Click a tube to see the light it gives off.</span>
         <span class="coarse">Tap a tube to see the light it gives off.</span>
@@ -44,6 +39,11 @@ const styles = [
     </div>
 
     <aside class="docket" aria-label="Work order">
+      <header class="masthead">
+        <p class="home"><a href="/">thesandbox.page</a></p>
+        <h1>Neon</h1>
+        <p class="dek">A sign shop's window on a wet night.</p>
+      </header>
       <section class="ticket">
         <header class="ticket-head">
           <p class="shop">Neon signs &middot; Glass bent to order</p>
@@ -145,7 +145,7 @@ const styles = [
         </div>
         <label class="spread" data-spread-wrap hidden>
           <span>Grating, near to far</span>
-          <input type="range" data-spread min="0.04" max="0.3" step="0.005" value="0.12" />
+          <input type="range" data-spread min="0.04" max="0.3" step="0.005" value="0.16" />
         </label>
       </section>
 
@@ -231,15 +231,14 @@ const styles = [
   }
 
   .masthead {
-    position: absolute;
-    top: 18px;
-    left: 24px;
-    pointer-events: none;
-    text-shadow: 0 1px 8px #000;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 12px;
+    margin: 0 0 18px;
   }
 
   .masthead a {
-    pointer-events: auto;
     color: #b9b1a0;
     text-decoration: none;
     font-size: 12px;
@@ -253,19 +252,20 @@ const styles = [
   }
 
   .home {
-    margin: 0 0 2px;
+    flex-basis: 100%;
+    margin: 0;
   }
 
   .masthead h1 {
     margin: 0;
-    font: 700 46px/0.95 var(--print);
+    font: 700 44px/0.95 var(--print);
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: #efe6d2;
   }
 
   .dek {
-    margin: 4px 0 0;
+    margin: 0;
     color: #b9b1a0;
     font-size: 13px;
   }
@@ -310,8 +310,8 @@ const styles = [
 
   .mount {
     position: absolute;
-    inset: 0;
-    right: var(--panel);
+    inset: 26px;
+    right: calc(var(--panel) + 26px);
     pointer-events: none;
     border-radius: 28px;
     box-shadow:
@@ -534,7 +534,15 @@ const styles = [
       color: #d6c9a8;
     }
 
+    .glass selectedcontent {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
     .sw {
+      display: inline-block;
       flex: none;
       width: 26px;
       height: 7px;
@@ -861,19 +869,6 @@ const styles = [
       z-index: 1;
     }
 
-    .masthead {
-      top: 12px;
-      left: 14px;
-    }
-
-    .masthead h1 {
-      font-size: 34px;
-    }
-
-    .dek {
-      display: none;
-    }
-
     .hint,
     .pen-hint {
       left: 14px;
@@ -881,7 +876,7 @@ const styles = [
     }
 
     .mount {
-      right: 0;
+      inset: 14px;
       border-radius: 18px;
       box-shadow:
         0 0 0 14px #191612,

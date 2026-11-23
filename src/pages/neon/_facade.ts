@@ -32,7 +32,7 @@ export const EYE = { h: 160, d: 600 };
 export function frame(w: number, h: number, inset: number): View {
   const side = inset > 0;
   const areaW = w - inset;
-  const roi = side ? { x0: -152, x1: 152, y0: -72, y1: 270 } : { x0: -130, x1: 130, y0: -46, y1: 266 };
+  const roi = side ? { x0: -152, x1: 152, y0: -96, y1: 330 } : { x0: -128, x1: 128, y0: -66, y1: 300 };
   const s = Math.min(areaW / (roi.x1 - roi.x0), h / (roi.y1 - roi.y0));
   const cy = (roi.y0 + roi.y1) / 2;
   return { s, ox: areaW / 2, oy: h / 2 + cy * s, w, h };
@@ -366,7 +366,7 @@ function paintShopfront(p: Painter, family: string) {
 
   // Gold leaf on the fascia.
   const c = p.c;
-  const size = 26 * p.v.s;
+  const size = 15 * p.v.s;
   const text = 'NEON SIGNS  \u00b7  GLASS BENT TO ORDER';
   const setFont = (ctx: Ctx, px: number) => {
     ctx.font = `700 ${px}px ${family}`;
@@ -381,12 +381,12 @@ function paintShopfront(p: Painter, family: string) {
   const widths = chars.map((ch) => c.measureText(ch).width + spacing);
   const total = widths.reduce((a, b) => a + b, 0) - spacing;
   let x = p.X(-59) - total / 2;
-  const y = p.Y(289);
+  const y = p.Y(290);
   const grad = c.createLinearGradient(0, y - size / 2, 0, y + size / 2);
   grad.addColorStop(0, '#f3d98a');
   grad.addColorStop(0.5, '#b8902f');
   grad.addColorStop(1, '#e8c46a');
-  const drop = 0.7 * p.v.s;
+  const drop = 0.45 * p.v.s;
   for (let i = 0; i < chars.length; i++) {
     const cx = x + widths[i] / 2 - spacing / 2;
     const ch = chars[i];
