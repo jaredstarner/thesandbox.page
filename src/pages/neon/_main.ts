@@ -1,7 +1,7 @@
 // The window and its work order: state, controls, drawing on the glass, and the frame loop.
 
 import { GLASSES, GLASS_INDEX, Group, colourAt, glassLight, lineRgb, swatch, type GlassLight } from './_spectra';
-import { plan, smoothStroke, type Plan, type Pt, type Style } from './_plan';
+import { SIGN_AREA, plan, smoothStroke, type Plan, type Pt, type Style } from './_plan';
 import { WINDOW, frame, paintFacade, paintFittings, type View } from './_facade';
 import { Renderer, TYPES } from './_gl';
 import { Sound } from './_sound';
@@ -109,6 +109,7 @@ export function start(root: HTMLElement) {
     on: false,
     grating: false,
     rain: !reduced,
+    closer: false,
     sound: true,
     drawing: false,
     spec: -1,
@@ -154,6 +155,7 @@ export function start(root: HTMLElement) {
   const switchWord = q<HTMLElement>('[data-switch-word]');
   const gratingBtn = q<HTMLButtonElement>('[data-grating]');
   const rainBtn = q<HTMLButtonElement>('[data-rain]');
+  const closerBtn = q<HTMLButtonElement>('[data-closer]');
   const soundBtn = q<HTMLButtonElement>('[data-sound]');
   const spreadWrap = q<HTMLElement>('[data-spread-wrap]');
   const spread = q<HTMLInputElement>('[data-spread]');
@@ -357,6 +359,11 @@ export function start(root: HTMLElement) {
   spread?.addEventListener('input', () => {
     renderer.gratingK = Number(spread.value) || 0.16;
   });
+  closerBtn?.addEventListener('click', () => {
+    state.closer = !state.closer;
+    closerBtn.setAttribute('aria-pressed', String(state.closer));
+    void layout();
+  });
   rainBtn?.addEventListener('click', () => {
     state.rain = !state.rain;
     rainBtn.setAttribute('aria-pressed', String(state.rain));
@@ -548,7 +555,7 @@ export function start(root: HTMLElement) {
     devScale = w / r.width;
     const side = matchMedia('(min-width: 900px)').matches;
     const inset = side ? docket!.getBoundingClientRect().width * devScale : 0;
-    view = frame(w, h, inset);
+    view = frame(w, h, inset, state.closer ? (current.bounds ?? SIGN_AREA) : undefined);
     renderer.resize(w, h);
     for (const c of [albCanvas, clsCanvas, fitCanvas]) {
       c.width = w;

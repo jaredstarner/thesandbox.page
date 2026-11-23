@@ -28,11 +28,28 @@ export const SURFACE = {
 export const WINDOW = { x0: -125, x1: 125, y0: 62, y1: 252, transom: 228 };
 export const EYE = { h: 160, d: 600 };
 
-/** Fit the scene to a canvas, leaving `inset` pixels on the right for the panel. */
-export function frame(w: number, h: number, inset: number): View {
+export interface Box {
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+}
+
+/**
+ * Fit the scene to a canvas, leaving `inset` pixels on the right for the panel. With `focus`, frame
+ * that part of the window instead, as if standing at the glass.
+ */
+export function frame(w: number, h: number, inset: number, focus?: Box): View {
   const side = inset > 0;
   const areaW = w - inset;
-  const roi = side ? { x0: -152, x1: 152, y0: -96, y1: 330 } : { x0: -128, x1: 128, y0: -66, y1: 300 };
+  let roi: Box = side ? { x0: -152, x1: 152, y0: -96, y1: 330 } : { x0: -128, x1: 128, y0: -66, y1: 300 };
+  if (focus) {
+    const cx = (focus.x0 + focus.x1) / 2;
+    const cy = (focus.y0 + focus.y1) / 2;
+    const hw = Math.max(60, (focus.x1 - focus.x0) * 0.58);
+    const hh = Math.max(40, (focus.y1 - focus.y0) * 0.62);
+    roi = { x0: cx - hw, x1: cx + hw, y0: cy - hh, y1: cy + hh };
+  }
   const s = Math.min(areaW / (roi.x1 - roi.x0), h / (roi.y1 - roi.y0));
   const cy = (roi.y0 + roi.y1) / 2;
   return { s, ox: areaW / 2, oy: h / 2 + cy * s, w, h };
