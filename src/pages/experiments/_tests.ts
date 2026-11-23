@@ -340,6 +340,11 @@ export const TECHNIQUES: Record<string, Technique> = {
         'no beforematch event; find in page cannot reveal hidden text',
       ),
   },
+  'customizable-select': {
+    label: 'Customizable <select>',
+    webFeature: 'customizable-select',
+    test: () => supports('appearance: base-select', 'appearance: base-select'),
+  },
   wasm: {
     label: 'WebAssembly',
     webFeature: 'wasm',
@@ -586,6 +591,9 @@ export const TECHNIQUES: Record<string, Technique> = {
   'waggle-dance': { label: 'Waggle dance' },
   'sun-compass': { label: 'Sun compass' },
   voronoi: { label: 'Voronoi diagram' },
+  spectroscopy: { label: 'Spectroscopy' },
+  'gas-discharge': { label: 'Gas discharge' },
+  'single-line-fonts': { label: 'Single-line fonts' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

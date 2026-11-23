@@ -863,5 +863,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
     },
+    // /neon/: a tall gothic for the shop's printing and gold leaf, and a typewriter face for the work order.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Big Shoulders Display',
+      cssVariable: '--font-neon-print',
+      weights: ['100 900'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Arial Narrow', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Sometype Mono',
+      cssVariable: '--font-neon-type',
+      weights: ['400 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'monospace'],
+    },
   ],
 });
