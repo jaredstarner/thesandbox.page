@@ -7,7 +7,7 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { compact, overpassQuery } from './_overpass.mjs';
+import { compact, overpassQuery, pack } from './_overpass.mjs';
 
 const API = 'https://overpass-api.de/api/interpreter';
 const AGENT = 'thesandbox.page-obvious-exits/1.0';
@@ -56,7 +56,7 @@ async function survey(place) {
 for (const place of todo) {
   const raw = await survey(place);
   const town = compact(raw, place.lat, place.lon, radius);
-  const json = JSON.stringify(town);
+  const json = JSON.stringify(pack(town));
   writeFileSync(`${DIR}${place.id}.json`, json + '\n');
   console.log(`${place.id}: ${town.w.length} ways, ${town.p.length} places, ${(json.length / 1024).toFixed(0)} KB`);
   await sleep(5000);

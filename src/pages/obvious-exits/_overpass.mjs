@@ -95,8 +95,100 @@ function trim(tags) {
   /** @type {Tags} */
   const out = {};
   if (!tags) return out;
-  for (const k in tags) if (KEEP.has(k)) out[k] = tags[k];
+  // Tabs and newlines separate tags in the packed form, so none may be left inside a value.
+  for (const k in tags) if (KEEP.has(k)) out[k] = String(tags[k]).replace(/[\t\n\r]+/g, ' ');
   return out;
+}
+
+/**
+ * The form written to disk and to storage: the same town as a few long strings, with coordinates
+ * stored as steps from the node before and every distinct set of tags stored once. It is about
+ * half the size, and a formatter leaves it on a handful of lines.
+ * @typedef {{ v: 2, c: [number, number], r: number, t: string, n: string, w: string, p: string }} Packed
+ */
+
+/** @param {Compact} town @returns {Packed} */
+export function pack(town) {
+  /** @type {Map<string, number>} */
+  const ids = new Map();
+  /** @type {string[]} */
+  const sets = [];
+  const tagId = (/** @type {Tags} */ tags) => {
+    const s = Object.keys(tags)
+      .sort()
+      .map((k) => `${k}=${tags[k]}`)
+      .join('\t');
+    let id = ids.get(s);
+    if (id === undefined) {
+      id = sets.length;
+      ids.set(s, id);
+      sets.push(s);
+    }
+    return id;
+  };
+  /** @type {string[]} */
+  const n = [];
+  let py = 0;
+  let px = 0;
+  for (let i = 0; i < town.n.length; i += 2) {
+    n.push(`${town.n[i] - py},${town.n[i + 1] - px}`);
+    py = town.n[i];
+    px = town.n[i + 1];
+  }
+  const w = town.w.map(([nodes, tags]) => {
+    let prev = 0;
+    const steps = nodes.map((k) => {
+      const d = k - prev;
+      prev = k;
+      return d;
+    });
+    return `${tagId(tags)}:${steps.join(' ')}`;
+  });
+  const p = town.p.map(([y, x, tags]) => `${tagId(tags)}:${y},${x}`);
+  return { v: 2, c: town.c, r: town.r, t: sets.join('\n'), n: n.join(' '), w: w.join('|'), p: p.join('|') };
+}
+
+/** @param {Packed | Compact} packed @returns {Compact} */
+export function unpack(packed) {
+  if (packed.v === 1) return packed;
+  const sets = packed.t.split('\n').map((s) => {
+    /** @type {Tags} */
+    const o = {};
+    if (s)
+      for (const kv of s.split('\t')) {
+        const i = kv.indexOf('=');
+        o[kv.slice(0, i)] = kv.slice(i + 1);
+      }
+    return o;
+  });
+  /** @type {number[]} */
+  const n = [];
+  let y = 0;
+  let x = 0;
+  if (packed.n)
+    for (const pair of packed.n.split(' ')) {
+      const [dy, dx] = pair.split(',');
+      y += Number(dy);
+      x += Number(dx);
+      n.push(y, x);
+    }
+  /** @type {[number[], Tags][]} */
+  const w = packed.w
+    ? packed.w.split('|').map((s) => {
+        const [t, list] = s.split(':');
+        let prev = 0;
+        return [list.split(' ').map((d) => (prev += Number(d))), sets[Number(t)]];
+      })
+    : [];
+  /** @type {[number, number, Tags][]} */
+  const p = packed.p
+    ? packed.p.split('|').map((s) => {
+        const [t, at] = s.split(':');
+        const [py, px] = at.split(',');
+        return [Number(py), Number(px), sets[Number(t)]];
+      })
+    : [];
+  return { v: 1, c: packed.c, r: packed.r, n, w, p };
 }
 
 /**

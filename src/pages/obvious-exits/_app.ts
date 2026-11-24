@@ -5,7 +5,7 @@
 import { COMPASS_WORD, hash } from './_describe';
 import { newGame, run, status, type Block, type Game, type Where } from './_game';
 import { PencilMap } from './_map';
-import { compact, overpassQuery } from './_overpass.mjs';
+import { compact, overpassQuery, pack, unpack, type Packed } from './_overpass.mjs';
 import { PLACES, RADIUS, type Place } from './_places';
 import { clockDigits, lightAt, skyOver, wetOf, type Sky } from './_sky';
 import { buildTown, type Compact, type Town } from './_town';
@@ -26,7 +26,7 @@ interface Saved {
   lon: number;
   begin?: string;
   snapshot?: string;
-  town?: Compact;
+  town?: Packed;
   date: string;
   log: string[];
 }
@@ -65,7 +65,7 @@ function save(s: Session): void {
     lon: s.lon,
     begin: s.begin,
     snapshot: s.snapshot,
-    town: s.snapshot ? undefined : s.compact,
+    town: s.snapshot ? undefined : pack(s.compact),
     date: s.sky.date,
     log: s.log,
   };
@@ -235,7 +235,8 @@ export function start(root: HTMLElement): void {
     map.clear();
     const saved = load();
     resume.hidden = !saved;
-    if (saved) resume.textContent = `Carry on in ${saved.where.name} (${saved.log.length} ${saved.log.length === 1 ? 'command' : 'commands'} in)`;
+    if (saved)
+      resume.textContent = `Carry on in ${saved.where.name} (${saved.log.length} ${saved.log.length === 1 ? 'command' : 'commands'} in)`;
     story.scrollTop = 0;
   }
 
@@ -258,7 +259,8 @@ export function start(root: HTMLElement): void {
         render(out.filter((b) => b.k !== 'ui'));
       }
     });
-    if (replay.length > keepFrom && keepFrom > 0) add('p', 'oe-event', `(The start of your afternoon has been skipped; ${keepFrom} earlier commands.)`);
+    if (replay.length > keepFrom && keepFrom > 0)
+      add('p', 'oe-event', `(The start of your afternoon has been skipped; ${keepFrom} earlier commands.)`);
     refresh();
     save(session);
     scrollDown();
@@ -272,12 +274,28 @@ export function start(root: HTMLElement): void {
     searchStatus.textContent = `Opening ${p.name}…`;
     try {
       const url = dataUrls[`./_data/${p.id}.json`];
-      const [c, sky] = await Promise.all([fetch(url).then((r) => r.json() as Promise<Compact>), skyOver(p.lat, p.lon)]);
+      const [c, sky] = await Promise.all([
+        fetch(url).then(async (r) => unpack((await r.json()) as Packed) as Compact),
+        skyOver(p.lat, p.lon),
+      ]);
       if (my !== token) return;
       const town = buildTown(c, p.begin);
       searchStatus.textContent = '';
       busy = false;
-      begin({ key: p.id, where: { name: p.name, region: p.region, english: p.english }, lat: p.lat, lon: p.lon, begin: p.begin, snapshot: p.id, compact: c, town, sky }, replay);
+      begin(
+        {
+          key: p.id,
+          where: { name: p.name, region: p.region, english: p.english },
+          lat: p.lat,
+          lon: p.lon,
+          begin: p.begin,
+          snapshot: p.id,
+          compact: c,
+          town,
+          sky,
+        },
+        replay,
+      );
     } catch {
       busy = false;
       if (my === token) searchStatus.textContent = `${p.name} wouldn’t open. Try again in a moment.`;
@@ -357,7 +375,9 @@ export function start(root: HTMLElement): void {
     const my = ++token;
     searchStatus.textContent = `Looking for ${name}…`;
     try {
-      const res = await fetch(`${GEOCODER}?name=${encodeURIComponent(name)}&count=5&language=en&format=json`, { signal: AbortSignal.timeout(10000) });
+      const res = await fetch(`${GEOCODER}?name=${encodeURIComponent(name)}&count=5&language=en&format=json`, {
+        signal: AbortSignal.timeout(10000),
+      });
       const j = await res.json();
       if (my !== token) return;
       const hit = j.results?.[0];
@@ -366,9 +386,14 @@ export function start(root: HTMLElement): void {
         return;
       }
       const region = [hit.admin1, hit.country].filter(Boolean).join(', ');
-      await fromLive({ name: hit.name, region, english: hit.country_code === 'US' ? 'us' : 'gb' }, hit.latitude, hit.longitude);
+      await fromLive(
+        { name: hit.name, region, english: hit.country_code === 'US' ? 'us' : 'gb' },
+        hit.latitude,
+        hit.longitude,
+      );
     } catch {
-      if (my === token) searchStatus.textContent = 'The place search didn’t answer. Try again in a moment, or pick a town above.';
+      if (my === token)
+        searchStatus.textContent = 'The place search didn’t answer. Try again in a moment, or pick a town above.';
     }
   });
 
@@ -382,7 +407,11 @@ export function start(root: HTMLElement): void {
       (pos) => {
         const { latitude: lat, longitude: lon } = pos.coords;
         const english = navigator.language === 'en-US' ? 'us' : 'gb';
-        void fromLive({ name: 'Where you are', region: `${fmtDeg(lat, 'N', 'S')}, ${fmtDeg(lon, 'E', 'W')}`, english }, lat, lon);
+        void fromLive(
+          { name: 'Where you are', region: `${fmtDeg(lat, 'N', 'S')}, ${fmtDeg(lon, 'E', 'W')}`, english },
+          lat,
+          lon,
+        );
       },
       () => {
         searchStatus.textContent = 'No location came back. Search for your town instead.';
@@ -396,7 +425,7 @@ export function start(root: HTMLElement): void {
     if (!saved) return;
     const p = saved.snapshot ? PLACES.find((x) => x.id === saved.snapshot) : null;
     if (p) void fromSnapshot(p, saved.log);
-    else if (saved.town) void fromLive(saved.where, saved.lat, saved.lon, saved.town, saved.log);
+    else if (saved.town) void fromLive(saved.where, saved.lat, saved.lon, unpack(saved.town) as Compact, saved.log);
   });
 
   // ---- Playing ---------------------------------------------------------------------------
@@ -414,7 +443,17 @@ export function start(root: HTMLElement): void {
     if (ui && ui.k === 'ui' && ui.action === 'restart') {
       const s = session;
       forget();
-      begin({ key: s.key, where: s.where, lat: s.lat, lon: s.lon, begin: s.begin, snapshot: s.snapshot, compact: s.compact, town: s.town, sky: s.sky });
+      begin({
+        key: s.key,
+        where: s.where,
+        lat: s.lat,
+        lon: s.lon,
+        begin: s.begin,
+        snapshot: s.snapshot,
+        compact: s.compact,
+        town: s.town,
+        sky: s.sky,
+      });
       return;
     }
     if (ui && ui.k === 'ui' && ui.action === 'elsewhere') {
