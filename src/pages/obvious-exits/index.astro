@@ -60,6 +60,9 @@ const description =
               <button class="here" type="button" data-here>
                 Start where I am
               </button>
+              <p class="here-note">
+                Your position goes to OpenStreetMap and Open-Meteo, to fetch the streets around you and the weather.
+              </p>
               <p class="search-status" data-search-status role="status"></p>
             </form>
             <noscript>
@@ -478,6 +481,11 @@ const description =
   .search button:focus-visible {
     border-color: var(--red);
     outline: none;
+  }
+  .here-note {
+    margin: -2px 0 0;
+    font: italic 400 14px/1.4 var(--font-exits-story);
+    color: var(--muted);
   }
   .search-status {
     min-height: 1.4em;
