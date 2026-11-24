@@ -497,7 +497,7 @@ export function buildTown(c: Compact, begin?: string): Town {
     const acrossSquare = main < 0;
     if (acrossSquare) main = r.ways.keys().next().value!;
     const t = ways[main][1];
-    const proto = {
+    const proto: Omit<Edge, 'id' | 'a' | 'b' | 'pts' | 'len'> = {
       name: acrossSquare ? null : wayName(main),
       hw: t.highway === 'pedestrian' && t.area === 'yes' ? 'pedestrian' : (t.highway ?? 'footway'),
       bridge: r.bridge,

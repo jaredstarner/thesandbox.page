@@ -1,0 +1,8 @@
+{
+  "title": "Obvious Exits",
+  "summary": "Any town on Earth turned into a text adventure from OpenStreetMap: walk its real streets by typing north, south, east, and west, get round the shops on your list before they shut, meet a friend at a real pub as the lamps come on, and watch your map of where you have been fill in on squared paper.",
+  "date": "2026-11-24",
+  "tags": ["svg", "live-data", "openstreetmap", "interactive-fiction", "text-parser", "procedural-text", "geolocation"],
+  "requires": [],
+  "plot": 54
+}

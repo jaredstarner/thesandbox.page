@@ -882,5 +882,33 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'monospace'],
     },
+    // /obvious-exits/: a book face for the story, a terminal face for what you type, and a pencil hand for the map.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Alegreya',
+      cssVariable: '--font-exits-story',
+      weights: ['400 800'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Inconsolata',
+      cssVariable: '--font-exits-type',
+      weights: ['400 700'],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['ui-monospace', 'Consolas', 'monospace'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Patrick Hand',
+      cssVariable: '--font-exits-hand',
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['Comic Sans MS', 'cursive'],
+    },
   ],
 });
