@@ -718,7 +718,7 @@ function treat(g: Game, verb: string, words: string[]): Block[] | null {
   const inside = g.inside >= 0 ? g.town.spots[g.inside] : null;
   const here = inside ? [inside, ...spotsHere(g).filter((sp) => sp.id !== inside.id)] : spotsHere(g);
   const want = (re: RegExp, tags: string[]) => re.test(all) && here.find((sp) => tags.includes(sp.kind.tag) && isOpen(g, sp));
-  const coffee = want(/coffee|tea|latte|cappuccino|espresso|cake|bun/, ['amenity=cafe', 'shop=bakery']);
+  const coffee = want(/coffee|tea|latte|cappuccino|espresso|cake|bun|bagel/, ['amenity=cafe', 'shop=bakery', 'amenity=fast_food', 'shop=coffee', 'shop=tea']);
   if (coffee) {
     return [{ k: 'p', text: `You ${verb === 'drink' ? 'drink' : 'buy'} ${/tea/.test(all) ? 'a pot of tea' : /cake|bun/.test(all) ? 'something sticky' : 'a coffee'} standing up at the counter at ${coffee.name ?? `the ${coffee.kind.noun}`}. It helps.` }, ...pass(g, 7)];
   }
