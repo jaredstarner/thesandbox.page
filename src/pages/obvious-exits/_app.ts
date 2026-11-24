@@ -297,14 +297,33 @@ export function start(root: HTMLElement): void {
       if (!c) {
         say(`Surveying the streets of ${where.name} from OpenStreetMap. This can take up to a minute…`);
         root.classList.add('surveying');
-        const res = await fetch(OVERPASS, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ data: overpassQuery(lat, lon, RADIUS) }),
-          signal: AbortSignal.timeout(120000),
-        });
-        if (!res.ok) throw new Error(String(res.status));
-        c = compact(await res.json(), lat, lon, RADIUS);
+        // The public servers turn queries away when they are full and ask for a retry with backoff.
+        const body = new URLSearchParams({ data: overpassQuery(lat, lon, RADIUS) });
+        let raw: { elements: unknown[] } | null = null;
+        for (const wait of [0, 4000, 9000, 16000, 25000]) {
+          if (wait) {
+            say(`The map servers are busy. Trying again in ${wait / 1000} seconds…`);
+            await new Promise((r) => setTimeout(r, wait));
+            if (my !== token) return;
+            say(`Surveying the streets of ${where.name} from OpenStreetMap…`);
+          }
+          try {
+            const res = await fetch(OVERPASS, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body,
+              signal: AbortSignal.timeout(100000),
+            });
+            if (res.ok) {
+              raw = await res.json();
+              break;
+            }
+            if (res.status !== 429 && res.status < 500) break;
+          } catch {}
+          if (my !== token) return;
+        }
+        if (!raw) throw new Error('no survey');
+        c = compact(raw as { elements: [] }, lat, lon, RADIUS);
       }
       const town = buildTown(c);
       const sky = await skyP;
