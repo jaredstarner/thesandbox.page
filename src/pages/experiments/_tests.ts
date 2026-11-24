@@ -594,6 +594,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   spectroscopy: { label: 'Spectroscopy' },
   'gas-discharge': { label: 'Gas discharge' },
   'single-line-fonts': { label: 'Single-line fonts' },
+  'text-parser': { label: 'Text parser' },
+  'procedural-text': { label: 'Procedural text' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
