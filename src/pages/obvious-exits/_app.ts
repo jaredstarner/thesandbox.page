@@ -214,6 +214,7 @@ export function start(root: HTMLElement): void {
       slip.appendChild(li);
     }
     slipBox.hidden = false;
+    map.setTop(slipBox.offsetHeight ? slipBox.offsetTop + slipBox.offsetHeight + 4 : 0);
     map.update(g);
   }
 
