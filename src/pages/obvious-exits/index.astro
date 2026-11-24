@@ -167,6 +167,71 @@ const description =
   .exits[data-wet='fog'] {
     --oe-sky-bottom: color-mix(in oklab, #6b7280 45%, var(--oe-sky-bottom));
   }
+  /* Stars come out over the desk once it is dark, and rain falls behind the paper when it rains. */
+  .exits {
+    position: relative;
+  }
+  .exits > * {
+    position: relative;
+    z-index: 1;
+  }
+  .exits::before,
+  .exits::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 4s ease;
+  }
+  .exits::before {
+    background-image:
+      radial-gradient(1.2px 1.2px at 7% 6%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 19% 3%, #fff 60%, transparent 61%),
+      radial-gradient(1.4px 1.4px at 33% 7%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 46% 2.5%, #fff 60%, transparent 61%),
+      radial-gradient(1.1px 1.1px at 58% 6.5%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 71% 3.5%, #fff 60%, transparent 61%),
+      radial-gradient(1.5px 1.5px at 84% 5%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 93% 2%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 1.2% 30%, #fff 60%, transparent 61%),
+      radial-gradient(1.2px 1.2px at 98.6% 24%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 52% 0.8%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 98.9% 46%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 0.8% 58%, #fff 60%, transparent 61%);
+    mask-image: linear-gradient(180deg, #000, transparent 75%);
+  }
+  .exits[data-light='dark']::before {
+    opacity: 0.75;
+  }
+  .exits::after {
+    background-image: repeating-linear-gradient(
+      104deg,
+      transparent 0 22px,
+      rgba(255, 255, 255, 0.07) 22px 23px,
+      transparent 23px 47px
+    );
+    background-size: 160px 220px;
+  }
+  .exits[data-wet='rain']::after,
+  .exits[data-wet='drizzle']::after,
+  .exits[data-wet='storm']::after {
+    opacity: 1;
+    animation: oe-rain 0.7s linear infinite;
+  }
+  .exits[data-wet='drizzle']::after {
+    opacity: 0.5;
+  }
+  @keyframes oe-rain {
+    to {
+      background-position: -60px 220px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .exits::after {
+      animation: none !important;
+    }
+  }
 
   /* Masthead */
   .mast {
@@ -516,12 +581,17 @@ const description =
     font: 400 1.18em/1.4 var(--font-exits-hand);
   }
   .exits :global(.oe-list li::before),
-  .slip li::before {
-    content: '☐';
+  .exits :global(.slip li::before) {
+    content: '';
     display: inline-block;
-    width: 1.3em;
-    font-family: var(--font-exits-type);
-    color: var(--lead);
+    width: 0.62em;
+    height: 0.62em;
+    margin: 0 0.5em 0 0.1em;
+    border: 1.5px solid var(--lead);
+    border-radius: 1px;
+    vertical-align: 0.02em;
+    transform: rotate(-3deg);
+    text-decoration: none;
   }
   .exits :global(.oe-list li.done),
   .exits :global(.slip li.done) {
@@ -530,7 +600,9 @@ const description =
   }
   .exits :global(.oe-list li.done::before),
   .exits :global(.slip li.done::before) {
-    content: '☑';
+    background:
+      linear-gradient(45deg, transparent 44%, var(--red) 44% 58%, transparent 58%),
+      linear-gradient(-45deg, transparent 44%, var(--red) 44% 58%, transparent 58%);
   }
 
   /* The notebook */
@@ -616,6 +688,13 @@ const description =
   .exits :global(.map .here-lab),
   .exits :global(.map .flag) {
     fill: var(--red);
+  }
+  .exits :global(.map .title) {
+    font-size: 19px;
+  }
+  .exits :global(.map .underline) {
+    stroke-width: 1.4;
+    opacity: 0.7;
   }
   .slip {
     position: absolute;
@@ -705,18 +784,9 @@ const description =
       height: 34dvh;
       box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.55);
     }
+    /* On a phone the list stays in the story (LIST); the small map gets the whole page. */
     .slip {
-      top: 10px;
-      left: 10px;
-      width: min(210px, 56%);
-      padding: 12px 12px 8px;
-    }
-    .slip ol {
-      font-size: 14.5px;
-      line-height: 22px;
-    }
-    .slip-head {
-      font-size: 17px;
+      display: none;
     }
     .story {
       padding: 20px 18px 12px;
