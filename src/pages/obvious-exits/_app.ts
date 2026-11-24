@@ -178,7 +178,8 @@ export function start(root: HTMLElement): void {
             btn.type = 'button';
             const e = session?.town.edges[x.edge];
             const dir = x.dir ? COMPASS_WORD[x.dir] : '';
-            btn.dataset.cmd = x.dir ?? (e?.name ? `go ${e.name}` : '');
+            btn.dataset.cmd = x.dir ?? `#e${x.edge}`;
+            btn.dataset.say = x.dir ?? `go ${e?.name ?? x.how.replace(/^(along|by|on|through|down|over) (an? )?/, '')}`;
             btn.textContent = `${dir} ${x.how}`.trim();
             if (x.out) btn.classList.add('far');
             if (!btn.dataset.cmd) btn.disabled = true;
@@ -380,10 +381,10 @@ export function start(root: HTMLElement): void {
 
   // ---- Playing ---------------------------------------------------------------------------
 
-  function command(raw: string): void {
+  function command(raw: string, shown = raw): void {
     if (!session) return;
     const text = raw.trim();
-    add('p', 'oe-echo', `> ${text}`);
+    add('p', 'oe-echo', `> ${shown.trim()}`);
     if (text) {
       history.push(text);
       historyAt = history.length;
@@ -429,7 +430,7 @@ export function start(root: HTMLElement): void {
   log.addEventListener('click', (e) => {
     const b = (e.target as Element).closest<HTMLButtonElement>('.oe-exits button');
     if (!b || b.disabled || !b.dataset.cmd) return;
-    command(b.dataset.cmd);
+    command(b.dataset.cmd, b.dataset.say ?? b.dataset.cmd);
     if (fine.matches) input.focus({ preventScroll: true });
   });
 

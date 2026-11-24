@@ -537,7 +537,7 @@ function scoreOf(g: Game): { score: number; max: number; parts: string[] } {
   }
   const explore = 100 - max;
   const named = [...g.seen].filter((id) => g.town.spots[id].name).length;
-  const ex = Math.round(explore * Math.min(1, named / Math.max(10, Math.min(40, g.namedTotal))));
+  const ex = Math.round(explore * Math.min(1, named / Math.max(20, Math.min(90, g.namedTotal * 0.25))));
   score += ex;
   max += explore;
   parts.push(`${named} named places seen`);
@@ -664,8 +664,11 @@ function errandHere(g: Game, verb: string, words: string[]): Block[] | null {
     if (!nounHit || !verbHit) continue;
     if (e.done) return [{ k: 'p', text: 'You’ve already done that. It’s crossed off the list.' }];
     if (def.carry && !g.items.some((i) => i.id === def.carry!.id)) return [{ k: 'p', text: 'You don’t seem to have it any more.' }];
+    // The place you are in if it will do, otherwise any place at this stop.
     const inside = g.inside >= 0 ? g.town.spots[g.inside] : null;
-    const candidates = (inside ? [inside] : spotsHere(g)).filter((sp) => matches(def, sp));
+    const candidates = spotsHere(g)
+      .filter((sp) => matches(def, sp))
+      .sort((p, q) => Number(q.id === inside?.id) - Number(p.id === inside?.id));
     if (!candidates.length) {
       const what = def.tags.map((t) => t.split('=')[1].replace(/_/g, ' '));
       return [{ k: 'p', text: `You can’t do that here. You’ll need to find ${an(what[0] === 'post box' ? say('post box', 'mailbox') : what[0])}${what.length > 1 ? ' or similar' : ''}.` }];
@@ -708,7 +711,7 @@ function errandHere(g: Game, verb: string, words: string[]): Block[] | null {
 function treat(g: Game, verb: string, words: string[]): Block[] | null {
   const all = words.join(' ');
   const inside = g.inside >= 0 ? g.town.spots[g.inside] : null;
-  const here = inside ? [inside] : spotsHere(g);
+  const here = inside ? [inside, ...spotsHere(g).filter((sp) => sp.id !== inside.id)] : spotsHere(g);
   const want = (re: RegExp, tags: string[]) => re.test(all) && here.find((sp) => tags.includes(sp.kind.tag) && isOpen(g, sp));
   const coffee = want(/coffee|tea|latte|cappuccino|espresso|cake|bun/, ['amenity=cafe', 'shop=bakery']);
   if (coffee) {
@@ -795,6 +798,15 @@ const HELP = [
 
 /** Run one command. */
 export function run(g: Game, raw: string): Block[] {
+  // A tapped exit names its walk exactly, so two ways with the same street name can't be confused.
+  const tapped = /^#e(\d+)$/.exec(raw.trim());
+  if (tapped) {
+    const x = exitsOf(g.town, g.at).find((e) => e.edge === Number(tapped[1]));
+    if (x) {
+      g.moves++;
+      return walk(g, x);
+    }
+  }
   const text = normalise(raw);
   if (!text) return [{ k: 'p', text: 'Say again?' }];
   const words = text.split(' ').filter(Boolean);
@@ -860,7 +872,7 @@ export function run(g: Game, raw: string): Block[] {
       return [{ k: 'p', text: `Your watch says ${clockDigits(g.clock)}. The shops shut at ${clockDigits(g.close)}${g.clock < g.sky.sunset ? `, and the sun sets at ${clockDigits(g.sky.sunset)}` : ''}.` }];
     case 'z':
     case 'wait': {
-      if (g.meet && !g.meet.done && g.town.spots[g.meet.spot].at === g.at && g.clock < g.close && g.clock >= g.close - 25) {
+      if (g.meet && !g.meet.done && g.town.spots[g.meet.spot].at === g.at && g.clock < g.close) {
         const out: Block[] = [{ k: 'p', text: 'You find a seat and watch the door.' }, ...pass(g, g.close - g.clock)];
         return out.concat(meetCheck(g));
       }

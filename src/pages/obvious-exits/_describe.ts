@@ -73,11 +73,11 @@ export function exitsOf(town: Town, stop: number): Exit[] {
   for (const r of raw) {
     const want = sectorOf(r.bearing);
     let dir: number | null = null;
-    for (const d of [0, 1, -1, 2, -2]) {
+    for (const d of [0, 1, -1, 2, -2, 3, -3]) {
       const k = (want + d + 8) % 8;
       if (taken.has(k)) continue;
       const off = Math.abs(((r.bearing - k * 45 + 540) % 360) - 180);
-      if (off <= 80) {
+      if (off <= 115) {
         dir = k;
         break;
       }
