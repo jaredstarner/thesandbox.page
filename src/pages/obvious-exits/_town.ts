@@ -367,18 +367,19 @@ export function buildTown(c: Compact, begin?: string): Town {
   for (let i = 0; i < X.length; i++) {
     if (!key[i] || hubName.has(i)) continue;
     for (const sg of adj[i]) {
-      if (!ROADS.test(ways[sg.way][1].highway ?? '')) continue;
+      // Any two junctions this close are one place; road junctions merge from further apart.
+      const reach = ROADS.test(ways[sg.way][1].highway ?? '') ? MERGE : 4;
       let prev = i;
       let cur = sg.to;
       let run = Math.hypot(X[cur] - X[i], Y[cur] - Y[i]);
-      while (!key[cur] && run < MERGE) {
+      while (!key[cur] && run < reach) {
         const next = adj[cur].find((t) => t.to !== prev);
         if (!next) break;
         run += Math.hypot(X[next.to] - X[cur], Y[next.to] - Y[cur]);
         prev = cur;
         cur = next.to;
       }
-      if (!key[cur] || run >= MERGE || hubName.has(cur)) continue;
+      if (!key[cur] || run >= reach || hubName.has(cur)) continue;
       const a = find(i);
       const b = find(cur);
       if (a === b || groupSize[a] + groupSize[b] > 4) continue;
