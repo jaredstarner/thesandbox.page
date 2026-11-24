@@ -424,7 +424,7 @@ export const capital = (s: string): string => (s ? s[0].toUpperCase() + s.slice(
 export function nameOf(t: Tags): string | null {
   const name = t.name?.trim();
   if (!name) return null;
-  if (/[^\u0000-ɏḀ-ỿ -⁯’‘]/.test(name) && t['name:en']) return t['name:en'];
+  if (/[^\p{Script=Latin}\p{Script=Common}\p{Script=Inherited}]/u.test(name) && t['name:en']) return t['name:en'];
   return name;
 }
 
