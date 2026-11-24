@@ -368,7 +368,7 @@ export function buildTown(c: Compact, begin?: string): Town {
     if (!key[i] || hubName.has(i)) continue;
     for (const sg of adj[i]) {
       // Any two junctions this close are one place; road junctions merge from further apart.
-      const reach = ROADS.test(ways[sg.way][1].highway ?? '') ? MERGE : 4;
+      const reach = ROADS.test(ways[sg.way][1].highway ?? '') ? MERGE : 8;
       let prev = i;
       let cur = sg.to;
       let run = Math.hypot(X[cur] - X[i], Y[cur] - Y[i]);
