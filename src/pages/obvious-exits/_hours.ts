@@ -11,10 +11,11 @@ function daysIn(sel: string): number[] {
   for (const part of sel.split(',')) {
     const [a, b] = part.split('-').map((d) => DAYS.indexOf(d));
     if (b === undefined) out.push(a);
-    else for (let d = a; ; d = (d + 1) % 7) {
-      out.push(d);
-      if (d === b) break;
-    }
+    else
+      for (let d = a; ; d = (d + 1) % 7) {
+        out.push(d);
+        if (d === b) break;
+      }
   }
   return out;
 }

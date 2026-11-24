@@ -24,7 +24,8 @@ export interface Spot {
   at: number;
 }
 
-export type AreaKind = 'park' | 'garden' | 'cemetery' | 'water' | 'square' | 'wood' | 'grass' | 'playground' | 'allotments';
+export type AreaKind =
+  'park' | 'garden' | 'cemetery' | 'water' | 'square' | 'wood' | 'grass' | 'playground' | 'allotments';
 
 export interface Area {
   name: string | null;
@@ -202,7 +203,10 @@ function cut(pts: number[], at: number): [number[], number[]] {
       const t = l ? (at - run) / l : 0;
       const x = pts[i] + t * (pts[i + 2] - pts[i]);
       const y = pts[i + 1] + t * (pts[i + 3] - pts[i + 1]);
-      return [[...pts.slice(0, i + 2), x, y], [x, y, ...pts.slice(i + 2)]];
+      return [
+        [...pts.slice(0, i + 2), x, y],
+        [x, y, ...pts.slice(i + 2)],
+      ];
     }
     run += l;
   }
@@ -311,11 +315,12 @@ export function buildTown(c: Compact, begin?: string): Town {
   for (let pass = 0; pass < 3; pass++) {
     const grid = new Map<string, number[]>();
     const cell = (x: number, y: number) => `${Math.floor(x / SNAP)},${Math.floor(y / SNAP)}`;
-    for (let i = 0; i < X.length; i++) if (label[i] === mainId) {
-      const k = cell(X[i], Y[i]);
-      if (!grid.has(k)) grid.set(k, []);
-      grid.get(k)!.push(i);
-    }
+    for (let i = 0; i < X.length; i++)
+      if (label[i] === mainId) {
+        const k = cell(X[i], Y[i]);
+        if (!grid.has(k)) grid.set(k, []);
+        grid.get(k)!.push(i);
+      }
     const best = new Map<number, [number, number, number]>();
     for (let i = 0; i < X.length; i++) {
       const l = label[i];
@@ -468,12 +473,20 @@ export function buildTown(c: Compact, begin?: string): Town {
     }
     const hub = list.find((k) => hubName.has(k));
     const sq = hub !== undefined ? (hubName.get(hub) ?? 'Square') : null;
-    stopOf.set(g, newStop(hub !== undefined ? X[hub] : sx / list.length, hub !== undefined ? Y[hub] : sy / list.length, false, sq));
+    stopOf.set(
+      g,
+      newStop(hub !== undefined ? X[hub] : sx / list.length, hub !== undefined ? Y[hub] : sy / list.length, false, sq),
+    );
   }
 
   const edges: Edge[] = [];
   const seen = new Map<string, number>();
-  const addEdge = (a: number, b: number, pts: number[], proto: Omit<Edge, 'id' | 'a' | 'b' | 'pts' | 'len'>): number => {
+  const addEdge = (
+    a: number,
+    b: number,
+    pts: number[],
+    proto: Omit<Edge, 'id' | 'a' | 'b' | 'pts' | 'len'>,
+  ): number => {
     const id = edges.length;
     edges.push({ ...proto, id, a, b, pts, len: polyLength(pts) });
     stops[a].edges.push(id);
@@ -523,7 +536,11 @@ export function buildTown(c: Compact, begin?: string): Town {
     }
     for (const [w] of r.ways) {
       const bt = ways[w][1];
-      if (bt.bridge && bt.bridge !== 'no' && (bt['bridge:name'] || (bt.name && /bridge|ponte|pont|puente|bro\b|brücke/i.test(bt.name))))
+      if (
+        bt.bridge &&
+        bt.bridge !== 'no' &&
+        (bt['bridge:name'] || (bt.name && /bridge|ponte|pont|puente|bro\b|brücke/i.test(bt.name)))
+      )
         proto.bridgeName = bt['bridge:name'] ?? bt.name;
     }
     seen.set(k, addEdge(a, b, pts, proto));
@@ -543,7 +560,16 @@ export function buildTown(c: Compact, begin?: string): Town {
     let rest = e.pts;
     let from = e.a;
     const end = e.b;
-    const proto = { name: e.name, hw: e.hw, bridge: e.bridge, tunnel: e.tunnel, surface: e.surface, lit: e.lit, over: null, bridgeName: e.bridgeName };
+    const proto = {
+      name: e.name,
+      hw: e.hw,
+      bridge: e.bridge,
+      tunnel: e.tunnel,
+      surface: e.surface,
+      lit: e.lit,
+      over: null,
+      bridgeName: e.bridgeName,
+    };
     // Reuse the original edge for the first piece.
     stops[end].edges = stops[end].edges.filter((id) => id !== e.id);
     for (let p = 1; p < pieces; p++) {
@@ -569,7 +595,11 @@ export function buildTown(c: Compact, begin?: string): Town {
   for (const s of stops) {
     if (s.out || s.mid) continue;
     if (s.edges.length < 2) continue;
-    const d = Math.hypot(s.x, s.y) - (s.square && s.edges.length > 2 ? 30 : 0) - Math.min(s.edges.length, 5) * 6 - Math.min(s.spots.length, 8) * 3;
+    const d =
+      Math.hypot(s.x, s.y) -
+      (s.square && s.edges.length > 2 ? 30 : 0) -
+      Math.min(s.edges.length, 5) * 6 -
+      Math.min(s.spots.length, 8) * 3;
     if (d < best) {
       best = d;
       start = s.id;
@@ -693,7 +723,11 @@ export function buildTown(c: Compact, begin?: string): Town {
   let startScore = Infinity;
   for (const s of outStops) {
     if (s.out || s.mid || s.edges.length < 2) continue;
-    const d = Math.hypot(s.x, s.y) - (s.square && s.edges.length > 2 ? 30 : 0) - Math.min(s.edges.length, 5) * 6 - Math.min(s.spots.length, 8) * 4;
+    const d =
+      Math.hypot(s.x, s.y) -
+      (s.square && s.edges.length > 2 ? 30 : 0) -
+      Math.min(s.edges.length, 5) * 6 -
+      Math.min(s.spots.length, 8) * 4;
     if (d < startScore) {
       startScore = d;
       start = s.id;
@@ -704,7 +738,9 @@ export function buildTown(c: Compact, begin?: string): Town {
   for (const s of outStops) s.title = baseTitle(town, s);
   dedupeTitles(town);
   if (begin) {
-    const named = outStops.filter((s) => !s.out && s.title.startsWith(begin)).sort((p, q) => q.edges.length - p.edges.length);
+    const named = outStops
+      .filter((s) => !s.out && s.title.startsWith(begin))
+      .sort((p, q) => q.edges.length - p.edges.length);
     if (named.length) town.start = named[0].id;
   }
   return town;

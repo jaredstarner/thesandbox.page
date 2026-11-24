@@ -108,7 +108,12 @@ function defs(kin: string): Def[] {
       verbs: ['post', 'mail', 'send', 'drop', 'put', 'deliver'],
       nouns: ['letter', 'envelope', 'mail'],
       tags: ['amenity=post_box', 'amenity=post_office'],
-      carry: { id: 'letter', name: 'a stamped letter', desc: `An envelope addressed in your own hand to ${kin}, stamped and sealed.`, nouns: ['letter', 'envelope'] },
+      carry: {
+        id: 'letter',
+        name: 'a stamped letter',
+        desc: `An envelope addressed in your own hand to ${kin}, stamped and sealed.`,
+        nouns: ['letter', 'envelope'],
+      },
       minutes: 1,
       done: (sp) =>
         sp.kind.tag === 'amenity=post_box'
@@ -121,7 +126,12 @@ function defs(kin: string): Def[] {
       verbs: ['return', 'give', 'hand', 'drop', 'take'],
       nouns: ['book', 'library book', 'hardback'],
       tags: ['amenity=library'],
-      carry: { id: 'book', name: 'a library book', desc: 'A hardback in a plastic jacket, a history of the town’s drains, two weeks overdue.', nouns: ['book', 'hardback'] },
+      carry: {
+        id: 'book',
+        name: 'a library book',
+        desc: 'A hardback in a plastic jacket, a history of the town’s drains, two weeks overdue.',
+        nouns: ['book', 'hardback'],
+      },
       minutes: 4,
       done: () => 'The librarian scans the book, raises an eyebrow at the date stamp, and lets it go this once.',
     },
@@ -131,7 +141,12 @@ function defs(kin: string): Def[] {
       verbs: ['buy', 'get', 'purchase'],
       nouns: ['bread', 'loaf'],
       tags: ['shop=bakery', 'shop=supermarket', 'shop=convenience'],
-      gives: { id: 'bread', name: 'a loaf of bread', desc: 'Wrapped in paper and still faintly warm.', nouns: ['bread', 'loaf'] },
+      gives: {
+        id: 'bread',
+        name: 'a loaf of bread',
+        desc: 'Wrapped in paper and still faintly warm.',
+        nouns: ['bread', 'loaf'],
+      },
       minutes: 4,
       done: (sp) =>
         sp.kind.tag === 'shop=bakery'
@@ -154,7 +169,12 @@ function defs(kin: string): Def[] {
       verbs: ['collect', 'get', 'pick', 'fetch'],
       nouns: ['prescription', 'medicine', 'pills'],
       tags: ['amenity=pharmacy', 'healthcare=pharmacy', 'shop=chemist'],
-      gives: { id: 'medicine', name: say('a paper bag from the chemist’s', 'a paper bag from the pharmacy'), desc: 'Stapled shut, with your name on a label.', nouns: ['bag', 'prescription', 'medicine', 'pills'] },
+      gives: {
+        id: 'medicine',
+        name: say('a paper bag from the chemist’s', 'a paper bag from the pharmacy'),
+        desc: 'Stapled shut, with your name on a label.',
+        nouns: ['bag', 'prescription', 'medicine', 'pills'],
+      },
       minutes: 5,
       done: () => 'The pharmacist checks your name and date of birth, then hands over a paper bag stapled shut.',
     },
@@ -164,7 +184,12 @@ function defs(kin: string): Def[] {
       verbs: ['buy', 'get'],
       nouns: ['paper', 'newspaper'],
       tags: ['shop=newsagent', 'shop=newspaper', 'shop=kiosk', 'shop=convenience'],
-      gives: { id: 'paper', name: 'a newspaper', desc: 'Today’s, folded under your arm. The crossword is still blank.', nouns: ['paper', 'newspaper'] },
+      gives: {
+        id: 'paper',
+        name: 'a newspaper',
+        desc: 'Today’s, folded under your arm. The crossword is still blank.',
+        nouns: ['paper', 'newspaper'],
+      },
       minutes: 2,
       done: () => 'You take the last copy of today’s paper from the rack.',
     },
@@ -174,7 +199,12 @@ function defs(kin: string): Def[] {
       verbs: ['buy', 'get'],
       nouns: ['flowers', 'bunch', 'bouquet'],
       tags: ['shop=florist'],
-      gives: { id: 'flowers', name: 'a bunch of flowers', desc: 'Tulips, wrapped in brown paper.', nouns: ['flowers', 'bunch', 'tulips'] },
+      gives: {
+        id: 'flowers',
+        name: 'a bunch of flowers',
+        desc: 'Tulips, wrapped in brown paper.',
+        nouns: ['flowers', 'bunch', 'tulips'],
+      },
       minutes: 5,
       done: () => 'The florist wraps a bunch of tulips in brown paper and ties it with string.',
     },
@@ -184,7 +214,12 @@ function defs(kin: string): Def[] {
       verbs: ['get', 'cut', 'have', 'collect'],
       nouns: ['key', 'spare'],
       tags: ['shop=locksmith', 'shop=shoe_repair', 'craft=key_cutter'],
-      gives: { id: 'key', name: 'a newly cut key', desc: 'Bright brass, its edges still sharp from the machine.', nouns: ['key'] },
+      gives: {
+        id: 'key',
+        name: 'a newly cut key',
+        desc: 'Bright brass, its edges still sharp from the machine.',
+        nouns: ['key'],
+      },
       minutes: 6,
       done: () => 'The machine whines through a blank, and you are handed a bright new key, still warm.',
     },
@@ -194,7 +229,12 @@ function defs(kin: string): Def[] {
       verbs: ['collect', 'get', 'pick', 'fetch'],
       nouns: ['coat', 'cleaning'],
       tags: ['shop=dry_cleaning', 'shop=laundry'],
-      gives: { id: 'coat', name: 'your coat, in plastic', desc: 'Pressed, on a wire hanger, under a crackling plastic sheet.', nouns: ['coat'] },
+      gives: {
+        id: 'coat',
+        name: 'your coat, in plastic',
+        desc: 'Pressed, on a wire hanger, under a crackling plastic sheet.',
+        nouns: ['coat'],
+      },
       minutes: 3,
       done: () => 'The rail turns, and your coat comes round under its plastic sheet.',
     },
@@ -204,7 +244,12 @@ function defs(kin: string): Def[] {
       verbs: ['buy', 'get'],
       nouns: ['card', 'birthday card'],
       tags: ['shop=stationery', 'shop=gift', 'shop=books', 'shop=newsagent'],
-      gives: { id: 'card', name: 'a birthday card', desc: 'A card with a dog in a party hat on the front. It will do.', nouns: ['card'] },
+      gives: {
+        id: 'card',
+        name: 'a birthday card',
+        desc: 'A card with a dog in a party hat on the front. It will do.',
+        nouns: ['card'],
+      },
       minutes: 4,
       done: () => 'You spend longer than you meant to choosing, and settle on a dog in a party hat.',
     },
@@ -214,7 +259,12 @@ function defs(kin: string): Def[] {
       verbs: ['buy', 'get'],
       nouns: ['bulbs', 'bulb', 'light bulbs'],
       tags: ['shop=hardware', 'shop=doityourself', 'shop=variety_store'],
-      gives: { id: 'bulbs', name: 'a packet of light bulbs', desc: 'Two bulbs, the right fitting, you hope.', nouns: ['bulbs', 'bulb', 'packet'] },
+      gives: {
+        id: 'bulbs',
+        name: 'a packet of light bulbs',
+        desc: 'Two bulbs, the right fitting, you hope.',
+        nouns: ['bulbs', 'bulb', 'packet'],
+      },
       minutes: 4,
       done: () => 'The man in the brown coat asks which fitting. You guess, confidently.',
     },
@@ -224,7 +274,12 @@ function defs(kin: string): Def[] {
       verbs: ['buy', 'get'],
       nouns: ['cheese'],
       tags: ['shop=cheese', 'shop=deli'],
-      gives: { id: 'cheese', name: 'a wedge of cheese', desc: 'In waxed paper. It smells strongly through it.', nouns: ['cheese', 'wedge'] },
+      gives: {
+        id: 'cheese',
+        name: 'a wedge of cheese',
+        desc: 'In waxed paper. It smells strongly through it.',
+        nouns: ['cheese', 'wedge'],
+      },
       minutes: 4,
       done: () => 'You are given three things to taste and buy the first one.',
     },
@@ -234,7 +289,12 @@ function defs(kin: string): Def[] {
       verbs: ['buy', 'get'],
       nouns: ['apples', 'apple', 'fruit'],
       tags: ['shop=greengrocer', 'amenity=marketplace'],
-      gives: { id: 'apples', name: 'a bag of apples', desc: 'Six apples in a paper bag that is already giving at the bottom.', nouns: ['apples', 'apple', 'bag'] },
+      gives: {
+        id: 'apples',
+        name: 'a bag of apples',
+        desc: 'Six apples in a paper bag that is already giving at the bottom.',
+        nouns: ['apples', 'apple', 'bag'],
+      },
       minutes: 3,
       done: () => 'Six apples go into a paper bag, weighed on the brass scales.',
     },
@@ -244,7 +304,12 @@ function defs(kin: string): Def[] {
       verbs: ['collect', 'get', 'pick', 'fetch'],
       nouns: ['glasses', 'spectacles'],
       tags: ['shop=optician'],
-      gives: { id: 'glasses', name: 'your glasses, mended', desc: 'A new screw in the left hinge. Everything is sharper.', nouns: ['glasses', 'spectacles'] },
+      gives: {
+        id: 'glasses',
+        name: 'your glasses, mended',
+        desc: 'A new screw in the left hinge. Everything is sharper.',
+        nouns: ['glasses', 'spectacles'],
+      },
       minutes: 4,
       done: () => 'Your glasses come back with a new screw in the hinge and a little cloth.',
     },
@@ -254,7 +319,12 @@ function defs(kin: string): Def[] {
       verbs: ['buy', 'get'],
       nouns: ['wine', 'bottle'],
       tags: ['shop=wine', 'shop=alcohol'],
-      gives: { id: 'wine', name: 'a bottle of red', desc: 'Red, from somewhere warm. Recommended.', nouns: ['wine', 'bottle', 'red'] },
+      gives: {
+        id: 'wine',
+        name: 'a bottle of red',
+        desc: 'Red, from somewhere warm. Recommended.',
+        nouns: ['wine', 'bottle', 'red'],
+      },
       minutes: 4,
       done: () => 'Someone who knows about wine recommends a red, and you take it.',
     },
@@ -264,7 +334,12 @@ function defs(kin: string): Def[] {
       verbs: ['buy', 'get'],
       nouns: ['sausages', 'sausage', 'meat'],
       tags: ['shop=butcher'],
-      gives: { id: 'sausages', name: 'a string of sausages', desc: 'Wrapped in white paper.', nouns: ['sausages', 'sausage'] },
+      gives: {
+        id: 'sausages',
+        name: 'a string of sausages',
+        desc: 'Wrapped in white paper.',
+        nouns: ['sausages', 'sausage'],
+      },
       minutes: 4,
       done: () => 'The butcher wraps six sausages in white paper and writes the price on it in pencil.',
     },
@@ -274,7 +349,12 @@ function defs(kin: string): Def[] {
       verbs: ['buy', 'get'],
       nouns: ['fish'],
       tags: ['shop=seafood'],
-      gives: { id: 'fish', name: 'a parcel of fish', desc: 'Wrapped twice. It is still a parcel of fish.', nouns: ['fish', 'parcel'] },
+      gives: {
+        id: 'fish',
+        name: 'a parcel of fish',
+        desc: 'Wrapped twice. It is still a parcel of fish.',
+        nouns: ['fish', 'parcel'],
+      },
       minutes: 4,
       done: () => 'Two fillets, wrapped twice over.',
     },
@@ -327,7 +407,9 @@ export function newGame(town: Town, where: Where, sky: Sky, seed: number): { gam
   // Which errands this town can do, and how far away the nearest place for each is.
   const options = defs(kin)
     .map((def) => {
-      const where2 = town.spots.filter((sp) => reachable(sp) && matches(def, sp) && closesAfter(hoursOf(probe, sp), CLOSE - 40) !== null);
+      const where2 = town.spots.filter(
+        (sp) => reachable(sp) && matches(def, sp) && closesAfter(hoursOf(probe, sp), CLOSE - 40) !== null,
+      );
       const near = Math.min(...where2.map((sp) => fromStart[sp.at]));
       return { def, where: where2, near };
     })
@@ -349,7 +431,10 @@ export function newGame(town: Town, where: Where, sky: Sky, seed: number): { gam
   }
 
   // Somewhere to meet: a pub, or a bar, or a café, a fair walk from the start.
-  const meetKinds = where.english === 'gb' ? ['amenity=pub', 'amenity=bar', 'amenity=cafe'] : ['amenity=bar', 'amenity=pub', 'amenity=cafe'];
+  const meetKinds =
+    where.english === 'gb'
+      ? ['amenity=pub', 'amenity=bar', 'amenity=cafe']
+      : ['amenity=bar', 'amenity=pub', 'amenity=cafe'];
   let meetSpot = -1;
   for (const k of meetKinds) {
     const c = town.spots.filter((sp) => sp.kind.tag === k && sp.name && reachable(sp));
@@ -423,7 +508,20 @@ export function pubName(sp: Spot): string {
 }
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 
 function opening(g: Game): Block[] {
   const [y, m, d] = g.sky.date.split('-').map(Number);
@@ -443,7 +541,12 @@ function opening(g: Game): Block[] {
   const blocks: Block[] = [
     {
       k: 'banner',
-      lines: ['OBVIOUS EXITS', 'An interactive errand', `${g.where.name}, ${g.where.region}`, `Release 1 / Serial number ${serial}`],
+      lines: [
+        'OBVIOUS EXITS',
+        'An interactive errand',
+        `${g.where.name}, ${g.where.region}`,
+        `Release 1 / Serial number ${serial}`,
+      ],
     },
     {
       k: 'p',
@@ -452,7 +555,10 @@ function opening(g: Game): Block[] {
         (weather ? ` ${weather}` : '') +
         ` You have a list of errands in your pocket, and the shops shut at ${clockWords(g.close)}${meet}.`,
     },
-    { k: 'event', text: 'Type LIST to read your list, LOOK to look around, or a direction such as NORTH to walk. HELP if you get stuck.' },
+    {
+      k: 'event',
+      text: 'Type LIST to read your list, LOOK to look around, or a direction such as NORTH to walk. HELP if you get stuck.',
+    },
   ];
   return blocks.concat(arrive(g, false));
 }
@@ -482,7 +588,13 @@ function pass(g: Game, minutes: number): Block[] {
       out.push({ k: 'event', text });
     }
   };
-  once('sunset', g.sky.sunset, wetOf(g.sky.weather) === 'dry' ? 'The sun goes down behind the roofs.' : 'Somewhere behind the cloud, the sun has set.');
+  once(
+    'sunset',
+    g.sky.sunset,
+    wetOf(g.sky.weather) === 'dry'
+      ? 'The sun goes down behind the roofs.'
+      : 'Somewhere behind the cloud, the sun has set.',
+  );
   once('lamps', g.sky.sunset + 20, 'The street lamps come on, one after another, down the street.');
   once('warn', g.close - 15, `Your watch says ${clockWords(g.close - 15)}. The shops will be shutting soon.`);
   if (!g.flags.has('close') && crossed(g.close)) {
@@ -509,14 +621,20 @@ function meetCheck(g: Game): Block[] {
   if (!g.meet || g.meet.done || g.over) return [];
   const sp = g.town.spots[g.meet.spot];
   if (sp.at !== g.at) return [];
-  if (g.clock < g.close - 25) return [{ k: 'p', text: `This is where you’re meeting ${g.meet.friend}, at ${clockWords(g.close)}.` }];
+  if (g.clock < g.close - 25)
+    return [{ k: 'p', text: `This is where you’re meeting ${g.meet.friend}, at ${clockWords(g.close)}.` }];
   if (g.clock < g.close) {
     return [{ k: 'p', text: `You’re early. ${g.meet.friend} isn’t here yet. (WAIT to wait.)` }];
   }
   g.meet.done = true;
   g.meet.late = Math.max(0, Math.round(g.clock - g.close));
   const wet = wetOf(g.sky.weather);
-  const shake = wet === 'rain' || wet === 'drizzle' ? ', shaking rain off a coat' : wet === 'snow' ? ', stamping snow off their boots' : '';
+  const shake =
+    wet === 'rain' || wet === 'drizzle'
+      ? ', shaking rain off a coat'
+      : wet === 'snow'
+        ? ', stamping snow off their boots'
+        : '';
   const text =
     g.meet.late < 3
       ? `${g.meet.friend} comes in right behind you${shake}, and you find a table by the window.`
@@ -567,7 +685,10 @@ function finish(g: Game): Block[] {
       k: 'p',
       text: `In ${g.moves} moves you scored ${s.score} out of a possible ${s.max} (${list(s.parts)}), which earns you the rank of ${rank(s.score)}.`,
     },
-    { k: 'event', text: `The town is still here: wander as long as you like. Or type RESTART to try the afternoon again, or ELSEWHERE to go somewhere new.` },
+    {
+      k: 'event',
+      text: `The town is still here: wander as long as you like. Or type RESTART to try the afternoon again, or ELSEWHERE to go somewhere new.`,
+    },
   ];
 }
 
@@ -593,8 +714,40 @@ const DIRS: Record<string, Compass> = {
   southwest: 'sw',
   'south-west': 'sw',
 };
-const GO = new Set(['go', 'walk', 'head', 'run', 'move', 'travel', 'stroll', 'wander', 'take', 'follow', 'cross', 'climb', 'descend', 'g0']);
-const FILLER = new Set(['the', 'a', 'an', 'some', 'my', 'to', 'please', 'then', 'up', 'down', 'along', 'onto', 'into', 'in', 'on', 'at']);
+const GO = new Set([
+  'go',
+  'walk',
+  'head',
+  'run',
+  'move',
+  'travel',
+  'stroll',
+  'wander',
+  'take',
+  'follow',
+  'cross',
+  'climb',
+  'descend',
+  'g0',
+]);
+const FILLER = new Set([
+  'the',
+  'a',
+  'an',
+  'some',
+  'my',
+  'to',
+  'please',
+  'then',
+  'up',
+  'down',
+  'along',
+  'onto',
+  'into',
+  'in',
+  'on',
+  'at',
+]);
 
 function normalise(raw: string): string {
   return raw
@@ -608,9 +761,7 @@ function normalise(raw: string): string {
 /** Loose name matching: every word typed appears at the start of a word in the name. */
 function nameMatch(name: string, words: string[]): number {
   if (!words.length) return 0;
-  const n = normalise(name)
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '');
+  const n = normalise(name).normalize('NFD').replace(/\p{M}/gu, '');
   const parts = n.split(/[\s'-]+/);
   let hit = 0;
   for (const w of words) {
@@ -668,7 +819,8 @@ function errandHere(g: Game, verb: string, words: string[]): Block[] | null {
     const verbHit = def.verbs.includes(verb);
     if (!nounHit || !verbHit) continue;
     if (e.done) return [{ k: 'p', text: 'You’ve already done that. It’s crossed off the list.' }];
-    if (def.carry && !g.items.some((i) => i.id === def.carry!.id)) return [{ k: 'p', text: 'You don’t seem to have it any more.' }];
+    if (def.carry && !g.items.some((i) => i.id === def.carry!.id))
+      return [{ k: 'p', text: 'You don’t seem to have it any more.' }];
     // The place you are in if it will do, otherwise any place at this stop.
     const inside = g.inside >= 0 ? g.town.spots[g.inside] : null;
     const candidates = spotsHere(g)
@@ -676,7 +828,12 @@ function errandHere(g: Game, verb: string, words: string[]): Block[] | null {
       .sort((p, q) => Number(q.id === inside?.id) - Number(p.id === inside?.id));
     if (!candidates.length) {
       const what = def.tags.map((t) => t.split('=')[1].replace(/_/g, ' '));
-      return [{ k: 'p', text: `You can’t do that here. You’ll need to find ${an(what[0] === 'post box' ? say('post box', 'mailbox') : what[0])}${what.length > 1 ? ' or similar' : ''}.` }];
+      return [
+        {
+          k: 'p',
+          text: `You can’t do that here. You’ll need to find ${an(what[0] === 'post box' ? say('post box', 'mailbox') : what[0])}${what.length > 1 ? ' or similar' : ''}.`,
+        },
+      ];
     }
     const open = candidates.find((sp) => isOpen(g, sp));
     if (!open) {
@@ -691,7 +848,8 @@ function errandHere(g: Game, verb: string, words: string[]): Block[] | null {
       ];
     }
     const blocks: Block[] = [];
-    if (open.kind.enter && g.inside !== open.id) blocks.push({ k: 'p', text: `You go into ${open.name ?? `the ${open.kind.noun}`}.` });
+    if (open.kind.enter && g.inside !== open.id)
+      blocks.push({ k: 'p', text: `You go into ${open.name ?? `the ${open.kind.noun}`}.` });
     if (open.kind.enter) g.inside = open.id;
     blocks.push({ k: 'p', text: def.done(open) });
     if (def.carry) g.items = g.items.filter((i) => i.id !== def.carry!.id);
@@ -703,7 +861,10 @@ function errandHere(g: Game, verb: string, words: string[]): Block[] | null {
     if (g.errands.every((x) => x.done)) {
       blocks.push({
         k: 'event',
-        text: g.meet && !g.meet.done ? `That’s everything on the list. Now for ${pubName(g.town.spots[g.meet.spot])}.` : 'That’s everything on the list.',
+        text:
+          g.meet && !g.meet.done
+            ? `That’s everything on the list. Now for ${pubName(g.town.spots[g.meet.spot])}.`
+            : 'That’s everything on the list.',
       });
       if (!g.meet) blocks.push(...finish(g));
     }
@@ -717,27 +878,54 @@ function treat(g: Game, verb: string, words: string[]): Block[] | null {
   const all = words.join(' ');
   const inside = g.inside >= 0 ? g.town.spots[g.inside] : null;
   const here = inside ? [inside, ...spotsHere(g).filter((sp) => sp.id !== inside.id)] : spotsHere(g);
-  const want = (re: RegExp, tags: string[]) => re.test(all) && here.find((sp) => tags.includes(sp.kind.tag) && isOpen(g, sp));
-  const coffee = want(/coffee|tea|latte|cappuccino|espresso|cake|bun|bagel/, ['amenity=cafe', 'shop=bakery', 'amenity=fast_food', 'shop=coffee', 'shop=tea']);
+  const want = (re: RegExp, tags: string[]) =>
+    re.test(all) && here.find((sp) => tags.includes(sp.kind.tag) && isOpen(g, sp));
+  const coffee = want(/coffee|tea|latte|cappuccino|espresso|cake|bun|bagel/, [
+    'amenity=cafe',
+    'shop=bakery',
+    'amenity=fast_food',
+    'shop=coffee',
+    'shop=tea',
+  ]);
   if (coffee) {
-    return [{ k: 'p', text: `You ${verb === 'drink' ? 'drink' : 'buy'} ${/tea/.test(all) ? 'a pot of tea' : /cake|bun/.test(all) ? 'something sticky' : 'a coffee'} standing up at the counter at ${coffee.name ?? `the ${coffee.kind.noun}`}. It helps.` }, ...pass(g, 7)];
+    return [
+      {
+        k: 'p',
+        text: `You ${verb === 'drink' ? 'drink' : 'buy'} ${/tea/.test(all) ? 'a pot of tea' : /cake|bun/.test(all) ? 'something sticky' : 'a coffee'} standing up at the counter at ${coffee.name ?? `the ${coffee.kind.noun}`}. It helps.`,
+      },
+      ...pass(g, 7),
+    ];
   }
   const pint = want(/pint|beer|ale|drink|wine|whisky|cider/, ['amenity=pub', 'amenity=bar']);
   if (pint) {
     const meetHere = g.meet && g.town.spots[g.meet.spot].id === pint.id;
     return [
-      { k: 'p', text: `You have a quick one at ${pint.name ?? 'the bar'}.${meetHere ? '' : ' The clock over the bar seems to run fast.'}` },
+      {
+        k: 'p',
+        text: `You have a quick one at ${pint.name ?? 'the bar'}.${meetHere ? '' : ' The clock over the bar seems to run fast.'}`,
+      },
       ...pass(g, 15),
     ];
   }
   const chips = want(/chips|food|kebab|burger|pizza|fries|snack/, ['amenity=fast_food']);
-  if (chips) return [{ k: 'p', text: `You eat ${say('chips', 'fries')} out of the paper as you stand on the ${say('pavement', 'sidewalk')}.` }, ...pass(g, 6)];
+  if (chips)
+    return [
+      {
+        k: 'p',
+        text: `You eat ${say('chips', 'fries')} out of the paper as you stand on the ${say('pavement', 'sidewalk')}.`,
+      },
+      ...pass(g, 6),
+    ];
   return null;
 }
 
 function listBlock(g: Game): Block {
   const items = g.errands.map((e) => ({ text: e.def.line, done: e.done }));
-  if (g.meet) items.push({ text: `${g.meet.friend}, ${g.town.spots[g.meet.spot].name}, ${clockDigits(g.close)}`, done: g.meet.done });
+  if (g.meet)
+    items.push({
+      text: `${g.meet.friend}, ${g.town.spots[g.meet.spot].name}, ${clockDigits(g.close)}`,
+      done: g.meet.done,
+    });
   return { k: 'list', items };
 }
 
@@ -748,8 +936,16 @@ function examineSpot(g: Game, sp: Spot): Block[] {
   const real = !!spansOn(sp.tags.opening_hours, g.sky.weekday);
   const bits: string[] = [`${capital(spotPhrase(sp))}.`];
   if (sp.kind.group !== 'thing') {
-    if (until !== null) bits.push(real ? `A sign on the door says it is open today until ${clockDigits(until)}.` : `It looks open.`);
-    else bits.push(next !== null ? `It is shut until ${clockDigits(next)}.` : real ? 'The sign on the door says it is closed today.' : 'It looks shut.');
+    if (until !== null)
+      bits.push(real ? `A sign on the door says it is open today until ${clockDigits(until)}.` : `It looks open.`);
+    else
+      bits.push(
+        next !== null
+          ? `It is shut until ${clockDigits(next)}.`
+          : real
+            ? 'The sign on the door says it is closed today.'
+            : 'It looks shut.',
+      );
   }
   const useful = g.errands.filter((e) => !e.done && matches(e.def, sp)).map((e) => lower(e.def.line));
   if (useful.length) bits.push(`You could see to ${list(useful)} here.`);
@@ -770,7 +966,8 @@ function hint(g: Game): Block[] {
   let best: { e: Errand; sp: Spot; dist: number } | null = null;
   for (const e of pending)
     for (const sp of g.town.spots)
-      if (sp.at >= 0 && matches(e.def, sp) && isOpen(g, sp) && d[sp.at] < (best?.dist ?? Infinity)) best = { e, sp, dist: d[sp.at] };
+      if (sp.at >= 0 && matches(e.def, sp) && isOpen(g, sp) && d[sp.at] < (best?.dist ?? Infinity))
+        best = { e, sp, dist: d[sp.at] };
   if (!best) return [{ k: 'p', text: 'You rack your brains, but nothing comes to mind.' }];
   const seen = g.seen.has(best.sp.id);
   const name = best.sp.name ?? `the ${best.sp.kind.noun}`;
@@ -842,12 +1039,23 @@ export function run(g: Game, raw: string): Block[] {
         g.moves--;
         if (g.inside >= 0) {
           const sp = g.town.spots[g.inside];
-          return [{ k: 'title', text: sp.name ?? capital(sp.kind.noun) }, { k: 'p', text: insideLine(sp.kind, hash(sp.id)) }, { k: 'p', text: 'OUT takes you back onto the street.' }];
+          return [
+            { k: 'title', text: sp.name ?? capital(sp.kind.noun) },
+            { k: 'p', text: insideLine(sp.kind, hash(sp.id)) },
+            { k: 'p', text: 'OUT takes you back onto the street.' },
+          ];
         }
         const d = describe(g.town, g.at, { clock: g.clock, sky: g.sky }, false);
-        return [{ k: 'title', text: d.title }, ...d.paras.map((p): Block => ({ k: 'p', text: p })), { k: 'exits', exits: d.exits }];
+        return [
+          { k: 'title', text: d.title },
+          ...d.paras.map((p): Block => ({ k: 'p', text: p })),
+          { k: 'exits', exits: d.exits },
+        ];
       }
-      return examine(g, rest.filter((w) => w !== 'at'));
+      return examine(
+        g,
+        rest.filter((w) => w !== 'at'),
+      );
     case 'x':
     case 'examine':
     case 'read':
@@ -860,7 +1068,9 @@ export function run(g: Game, raw: string): Block[] {
     case 'inv':
     case 'inventory':
       g.moves--;
-      return [{ k: 'p', text: `You are carrying ${list(['your list', ...g.items.map((i) => i.name), 'your phone'])}.` }];
+      return [
+        { k: 'p', text: `You are carrying ${list(['your list', ...g.items.map((i) => i.name), 'your phone'])}.` },
+      ];
     case 'list':
     case 'errands':
       g.moves--;
@@ -868,13 +1078,20 @@ export function run(g: Game, raw: string): Block[] {
     case 'score': {
       g.moves--;
       const s = scoreOf(g);
-      return [{ k: 'p', text: `Your score is ${s.score} of a possible ${s.max} (${list(s.parts)}), in ${g.moves} moves.` }];
+      return [
+        { k: 'p', text: `Your score is ${s.score} of a possible ${s.max} (${list(s.parts)}), in ${g.moves} moves.` },
+      ];
     }
     case 'time':
     case 'watch':
     case 'clock':
       g.moves--;
-      return [{ k: 'p', text: `Your watch says ${clockDigits(g.clock)}. The shops shut at ${clockDigits(g.close)}${g.clock < g.sky.sunset ? `, and the sun sets at ${clockDigits(g.sky.sunset)}` : ''}.` }];
+      return [
+        {
+          k: 'p',
+          text: `Your watch says ${clockDigits(g.clock)}. The shops shut at ${clockDigits(g.close)}${g.clock < g.sky.sunset ? `, and the sun sets at ${clockDigits(g.sky.sunset)}` : ''}.`,
+        },
+      ];
     case 'z':
     case 'wait': {
       if (g.meet && !g.meet.done && g.town.spots[g.meet.spot].at === g.at && g.clock < g.close) {
@@ -895,7 +1112,10 @@ export function run(g: Game, raw: string): Block[] {
       if (g.inside >= 0) {
         const sp = g.town.spots[g.inside];
         g.inside = -1;
-        return [{ k: 'p', text: `You step out of ${sp.name ?? `the ${sp.kind.noun}`} and back onto the street.` }, ...pass(g, 1)];
+        return [
+          { k: 'p', text: `You step out of ${sp.name ?? `the ${sp.kind.noun}`} and back onto the street.` },
+          ...pass(g, 1),
+        ];
       }
       if (verb === 'exit' && !rest.length) return [{ k: 'p', text: exitsLine(exitsOf(g.town, g.at)) }];
       return [{ k: 'p', text: 'You are already outside.' }];
@@ -916,7 +1136,10 @@ export function run(g: Game, raw: string): Block[] {
       return hint(g);
     case 'map':
       g.moves--;
-      return [{ k: 'ui', action: 'map' }, { k: 'p', text: 'You check the map you have been keeping in pencil on squared paper.' }];
+      return [
+        { k: 'ui', action: 'map' },
+        { k: 'p', text: 'You check the map you have been keeping in pencil on squared paper.' },
+      ];
     case 'brief':
       g.moves--;
       g.verbose = false;
@@ -960,12 +1183,14 @@ export function run(g: Game, raw: string): Block[] {
     case 'call':
     case 'phone':
     case 'text':
-      if (g.meet) return [{ k: 'p', text: `You text ${g.meet.friend}: “On my way.” Three dots appear, then a thumbs-up.` }];
+      if (g.meet)
+        return [{ k: 'p', text: `You text ${g.meet.friend}: “On my way.” Three dots appear, then a thumbs-up.` }];
       return [{ k: 'p', text: 'Nobody needs calling.' }];
     case 'eat':
       if (rest.some((w) => w === 'bread' || w === 'loaf') && g.items.some((i) => i.id === 'bread'))
         return [{ k: 'p', text: 'You tear the end off the loaf. Nobody need know.' }];
-      if (rest.some((w) => w.startsWith('apple')) && g.items.some((i) => i.id === 'apples')) return [{ k: 'p', text: 'You eat an apple. It is a good apple.' }];
+      if (rest.some((w) => w.startsWith('apple')) && g.items.some((i) => i.id === 'apples'))
+        return [{ k: 'p', text: 'You eat an apple. It is a good apple.' }];
       break;
   }
 
@@ -976,7 +1201,11 @@ export function run(g: Game, raw: string): Block[] {
     let bs = 0;
     for (const x of exits) {
       const e = g.town.edges[x.edge];
-      const s = Math.max(e.name ? nameMatch(e.name, rest) : 0, e.bridgeName ? nameMatch(e.bridgeName, rest) : 0, nameMatch(x.how, rest) * 0.5);
+      const s = Math.max(
+        e.name ? nameMatch(e.name, rest) : 0,
+        e.bridgeName ? nameMatch(e.bridgeName, rest) : 0,
+        nameMatch(x.how, rest) * 0.5,
+      );
       if (s > bs) {
         bs = s;
         bx = x;
@@ -985,7 +1214,9 @@ export function run(g: Game, raw: string): Block[] {
     if (bx && bs > 0.5) return walk(g, bx);
     const sp = findSpot(g, rest);
     if (sp) return enter(g, rest);
-    return [{ k: 'p', text: 'You can’t see a way like that from here. Try a compass direction, or the name of a street.' }];
+    return [
+      { k: 'p', text: 'You can’t see a way like that from here. Try a compass direction, or the name of a street.' },
+    ];
   }
 
   const errand = errandHere(g, verb === 'pick' ? 'pick' : verb, rest);
@@ -1013,16 +1244,33 @@ function goBack(g: Game): Block[] {
 function enter(g: Game, words: string[]): Block[] {
   const here = spotsHere(g).filter((sp) => sp.kind.enter);
   const sp = words.length ? findSpot(g, words) : here.length === 1 ? here[0] : null;
-  if (!sp) return [{ k: 'p', text: here.length ? `Enter which? ${capital(list(here.slice(0, 5).map((s) => s.name ?? `the ${s.kind.noun}`)))}${here.length > 5 ? ', or another' : ''}?` : 'There’s nowhere to go in here.' }];
+  if (!sp)
+    return [
+      {
+        k: 'p',
+        text: here.length
+          ? `Enter which? ${capital(list(here.slice(0, 5).map((s) => s.name ?? `the ${s.kind.noun}`)))}${here.length > 5 ? ', or another' : ''}?`
+          : 'There’s nowhere to go in here.',
+      },
+    ];
   if (!sp.kind.enter) return [{ k: 'p', text: `You can’t go into ${sp.name ?? `the ${sp.kind.noun}`}.` }];
   if (!isOpen(g, sp)) {
     const next = opensAfter(hoursOf(g, sp), g.clock);
-    return [{ k: 'p', text: `${capital(sp.name ?? `the ${sp.kind.noun}`)} is shut${next !== null ? ` until ${clockDigits(next)}` : ' for the day'}. You peer through the glass.` }];
+    return [
+      {
+        k: 'p',
+        text: `${capital(sp.name ?? `the ${sp.kind.noun}`)} is shut${next !== null ? ` until ${clockDigits(next)}` : ' for the day'}. You peer through the glass.`,
+      },
+    ];
   }
   g.inside = sp.id;
-  const out: Block[] = [{ k: 'title', text: sp.name ?? capital(sp.kind.noun) }, { k: 'p', text: insideLine(sp.kind, hash(sp.id)) }];
+  const out: Block[] = [
+    { k: 'title', text: sp.name ?? capital(sp.kind.noun) },
+    { k: 'p', text: insideLine(sp.kind, hash(sp.id)) },
+  ];
   const useful = g.errands.filter((e) => !e.done && matches(e.def, sp));
-  if (useful.length) out.push({ k: 'event', text: `You can see to ${list(useful.map((e) => `“${lower(e.def.line)}”`))} here.` });
+  if (useful.length)
+    out.push({ k: 'event', text: `You can see to ${list(useful.map((e) => `“${lower(e.def.line)}”`))} here.` });
   out.push(...pass(g, 1));
   if (g.meet && g.meet.spot === sp.id) out.push(...meetCheck(g));
   return out;
@@ -1032,16 +1280,30 @@ function examine(g: Game, words: string[]): Block[] {
   if (!words.length) return [{ k: 'p', text: 'Look at what?' }];
   const all = words.join(' ');
   if (/^(list|note|errands|paper list)$/.test(all)) return [listBlock(g)];
-  if (/^(map|notebook|pencil)$/.test(all)) return [{ k: 'ui', action: 'map' }, { k: 'p', text: 'Your map, in pencil on squared paper, shows everywhere you have been.' }];
+  if (/^(map|notebook|pencil)$/.test(all))
+    return [
+      { k: 'ui', action: 'map' },
+      { k: 'p', text: 'Your map, in pencil on squared paper, shows everywhere you have been.' },
+    ];
   if (/^(sky|weather|clouds|sun|rain)$/.test(all)) {
     const w = weatherLine(g.sky.weather, lightAt(g.clock, g.sky.sunset));
-    const sun = g.clock < g.sky.sunset ? `The sun sets at ${clockDigits(g.sky.sunset)}.` : `The sun set at ${clockDigits(g.sky.sunset)}.`;
+    const sun =
+      g.clock < g.sky.sunset
+        ? `The sun sets at ${clockDigits(g.sky.sunset)}.`
+        : `The sun set at ${clockDigits(g.sky.sunset)}.`;
     return [{ k: 'p', text: `${w ?? 'You look up.'} ${sun}` }];
   }
   if (/^(watch|time|clock)$/.test(all)) return [{ k: 'p', text: `Your watch says ${clockDigits(g.clock)}.` }];
   if (/^(me|self|myself)$/.test(all)) return [{ k: 'p', text: 'You look like someone with a lot of errands.' }];
   if (/^(phone)$/.test(all))
-    return [{ k: 'p', text: g.meet ? `Your last message, from ${g.meet.friend}: “${g.town.spots[g.meet.spot].name}, ${clockDigits(g.close)}? Don’t be late.”` : 'No new messages.' }];
+    return [
+      {
+        k: 'p',
+        text: g.meet
+          ? `Your last message, from ${g.meet.friend}: “${g.town.spots[g.meet.spot].name}, ${clockDigits(g.close)}? Don’t be late.”`
+          : 'No new messages.',
+      },
+    ];
   if (/^(shops|places|buildings|around|everything|shop|street)$/.test(all)) {
     const here = spotsHere(g);
     if (!here.length) return [{ k: 'p', text: 'There’s nothing much here but the street itself.' }];
@@ -1049,12 +1311,14 @@ function examine(g: Game, words: string[]): Block[] {
   }
   const item = g.items.find((i) => i.nouns.some((n) => words.includes(n)));
   if (item) return [{ k: 'p', text: item.desc }];
-  const sp = g.inside >= 0 && nameMatch(g.town.spots[g.inside].name ?? '', words) ? g.town.spots[g.inside] : findSpot(g, words);
+  const sp =
+    g.inside >= 0 && nameMatch(g.town.spots[g.inside].name ?? '', words) ? g.town.spots[g.inside] : findSpot(g, words);
   if (sp) return examineSpot(g, sp);
   const exits = exitsOf(g.town, g.at);
   for (const x of exits) {
     const e = g.town.edges[x.edge];
-    if (e.name && nameMatch(e.name, words) > 0.5) return [{ k: 'p', text: `${e.name} leads ${x.dir ? COMPASS_WORD[x.dir] : 'away'} from here.` }];
+    if (e.name && nameMatch(e.name, words) > 0.5)
+      return [{ k: 'p', text: `${e.name} leads ${x.dir ? COMPASS_WORD[x.dir] : 'away'} from here.` }];
   }
   return [{ k: 'p', text: 'You can’t see any such thing.' }];
 }

@@ -13,10 +13,14 @@ const description =
   <Font cssVariable="--font-exits-hand" slot="head" />
   <main class="exits" data-phase="choose">
     <header class="mast">
-      <a class="home" href="/">thesandbox.page</a>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
       <h1 class="name">Obvious Exits</h1>
       <p class="status" data-status></p>
-      <button class="map-toggle" type="button" data-map-toggle aria-expanded="false">Map</button>
+      <button class="map-toggle" type="button" data-map-toggle aria-expanded="false">
+        Map
+      </button>
     </header>
 
     <div class="desk">
@@ -27,25 +31,25 @@ const description =
               <p class="kicker">A text adventure in a real town</p>
               <p class="big">Obvious Exits</p>
               <p class="lede">
-                An afternoon of errands, played by typing. The streets, squares, shops, and pubs are all real, read
-                from OpenStreetMap: walk them by compass, find what your list needs before the shutters come down, and
-                meet a friend as the lamps come on.
+                An afternoon of errands, played by typing. The streets, squares, shops, and pubs are all real, read from
+                OpenStreetMap: walk them by compass, find what your list needs before the shutters come down, and meet a
+                friend as the lamps come on.
               </p>
             </div>
-            <button class="resume" type="button" data-resume hidden>Carry on</button>
+            <button class="resume" type="button" data-resume hidden>
+              Carry on
+            </button>
             <p class="choose">Where will you spend the afternoon?</p>
             <ul class="towns">
-              {
-                PLACES.map((p) => (
-                  <li>
-                    <button type="button" data-place={p.id}>
-                      <span class="town">{p.name}</span>
-                      <span class="region">{p.region}</span>
-                      <span class="hint">{p.hint}</span>
-                    </button>
-                  </li>
-                ))
-              }
+              {PLACES.map((p) => (
+                <li>
+                  <button type="button" data-place={p.id}>
+                    <span class="town">{p.name}</span>
+                    <span class="region">{p.region}</span>
+                    <span class="hint">{p.hint}</span>
+                  </button>
+                </li>
+              ))}
             </ul>
             <form class="search" data-search>
               <label for="oe-town">Or anywhere else on Earth</label>
@@ -53,15 +57,21 @@ const description =
                 <input id="oe-town" name="town" placeholder="a town or city" autocomplete="off" />
                 <button type="submit">Go</button>
               </div>
-              <button class="here" type="button" data-here>Start where I am</button>
+              <button class="here" type="button" data-here>
+                Start where I am
+              </button>
               <p class="search-status" data-search-status role="status"></p>
             </form>
-            <noscript><p class="search-status">The adventure needs JavaScript to run.</p></noscript>
+            <noscript>
+              <p class="search-status">The adventure needs JavaScript to run.</p>
+            </noscript>
           </div>
           <div class="log" data-log aria-live="polite"></div>
         </div>
         <form class="prompt" data-prompt hidden>
-          <label for="oe-command" class="gt" aria-label="Command">&gt;</label>
+          <label for="oe-command" class="gt" aria-label="Command">
+            &gt;
+          </label>
           <input
             id="oe-command"
             data-command
@@ -702,9 +712,7 @@ const description =
     left: 18px;
     width: min(250px, 62%);
     padding: 16px 16px 12px;
-    background:
-      repeating-linear-gradient(180deg, transparent 0 25px, rgba(64, 104, 146, 0.22) 25px 26px),
-      #fffdf7;
+    background: repeating-linear-gradient(180deg, transparent 0 25px, rgba(64, 104, 146, 0.22) 25px 26px), #fffdf7;
     background-position: 0 30px;
     box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.35);
     transform: rotate(-1.6deg);

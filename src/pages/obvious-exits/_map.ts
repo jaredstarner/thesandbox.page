@@ -17,7 +17,11 @@ interface View {
   k: number;
 }
 
-function el<K extends keyof SVGElementTagNameMap>(name: K, attrs: Record<string, string | number>, parent?: Element): SVGElementTagNameMap[K] {
+function el<K extends keyof SVGElementTagNameMap>(
+  name: K,
+  attrs: Record<string, string | number>,
+  parent?: Element,
+): SVGElementTagNameMap[K] {
   const e = document.createElementNS(NS, name);
   for (const a in attrs) e.setAttribute(a, String(attrs[a]));
   parent?.appendChild(e);
@@ -143,7 +147,11 @@ export class PencilMap {
     const step = (t: number) => {
       const p = Math.min(1, (t - now) / 650);
       const e = p < 0.5 ? 2 * p * p : 1 - (-2 * p + 2) ** 2 / 2;
-      this.view = { cx: from.cx + (to.cx - from.cx) * e, cy: from.cy + (to.cy - from.cy) * e, k: from.k * (to.k / from.k) ** e };
+      this.view = {
+        cx: from.cx + (to.cx - from.cx) * e,
+        cy: from.cy + (to.cy - from.cy) * e,
+        k: from.k * (to.k / from.k) ** e,
+      };
       const drawing = this.draw(t);
       if (p < 1 || drawing) this.raf = requestAnimationFrame(step);
     };
@@ -167,7 +175,10 @@ export class PencilMap {
     }
     const pad = 64;
     const usableH = this.height - this.top;
-    const k = Math.max(0.42, Math.min(2.2, (this.width - pad * 2) / Math.max(x1 - x0, 240), (usableH - pad * 2) / Math.max(y1 - y0, 240)));
+    const k = Math.max(
+      0.42,
+      Math.min(2.2, (this.width - pad * 2) / Math.max(x1 - x0, 240), (usableH - pad * 2) / Math.max(y1 - y0, 240)),
+    );
     let cx = (x0 + x1) / 2;
     let cy = (y0 + y1) / 2;
     // When the whole walk won't fit, follow where you are.
@@ -194,7 +205,11 @@ export class PencilMap {
     const defs = el('defs', {}, svg);
     const f = el('filter', { id: 'oe-pencil', x: '-5%', y: '-5%', width: '110%', height: '110%' }, defs);
     el('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.9', numOctaves: 2, seed: 3, result: 'n' }, f);
-    el('feDisplacementMap', { in: 'SourceGraphic', in2: 'n', scale: 1.6, xChannelSelector: 'R', yChannelSelector: 'G' }, f);
+    el(
+      'feDisplacementMap',
+      { in: 'SourceGraphic', in2: 'n', scale: 1.6, xChannelSelector: 'R', yChannelSelector: 'G' },
+      f,
+    );
 
     const lines = el('g', { class: 'pencil', filter: 'url(#oe-pencil)' }, svg);
     const marks = el('g', { class: 'marks' }, svg);
@@ -221,7 +236,16 @@ export class PencilMap {
       }
       drawing = true;
       const len = Math.hypot(px(b.x) - px(a.x), py(b.y) - py(a.y)) * 1.06 + 6;
-      el('path', { d: path, class: 'walked', 'stroke-dasharray': `${len.toFixed(1)} ${len.toFixed(1)}`, 'stroke-dashoffset': (len * (1 - p * p * (3 - 2 * p))).toFixed(1) }, lines);
+      el(
+        'path',
+        {
+          d: path,
+          class: 'walked',
+          'stroke-dasharray': `${len.toFixed(1)} ${len.toFixed(1)}`,
+          'stroke-dashoffset': (len * (1 - p * p * (3 - 2 * p))).toFixed(1),
+        },
+        lines,
+      );
     }
     el('path', { d, class: 'walked' }, lines);
 
@@ -261,7 +285,8 @@ export class PencilMap {
       if (sp.at < 0) continue;
       for (const e of pending) if (e.def.tags.includes(sp.kind.tag)) flag(sp, sp.name ?? sp.kind.noun);
     }
-    if (g.meet && !g.meet.done && g.seen.has(g.meet.spot)) flag(town.spots[g.meet.spot], `${town.spots[g.meet.spot].name}`);
+    if (g.meet && !g.meet.done && g.seen.has(g.meet.spot))
+      flag(town.spots[g.meet.spot], `${town.spots[g.meet.spot].name}`);
 
     // Labels: where you are, flagged places, where you started, then as many others as fit.
     const placed: [number, number, number, number][] = [];
@@ -338,14 +363,24 @@ export class PencilMap {
     // Compass and scale, in the corners as you'd draw them.
     const cx = W - 34;
     const cy = 42;
-    el('path', { d: `${stroke(cx, cy + 16, cx, cy - 16, 11)}M${cx - 5} ${cy - 9}L${cx} ${cy - 17}L${cx + 5} ${cy - 9}`, class: 'compass' }, lines);
+    el(
+      'path',
+      {
+        d: `${stroke(cx, cy + 16, cx, cy - 16, 11)}M${cx - 5} ${cy - 9}L${cx} ${cy - 17}L${cx + 5} ${cy - 9}`,
+        class: 'compass',
+      },
+      lines,
+    );
     el('text', { x: cx - 4, y: cy - 21, class: 'lab n' }, labels).textContent = 'N';
     const metres = [20, 50, 100, 200, 500].find((m) => m * v.k > 60) ?? 500;
     const sx = 22;
     const sy = H - 22;
     el(
       'path',
-      { d: `${stroke(sx, sy, sx + metres * v.k, sy, 5)}M${sx} ${sy - 4}L${sx} ${sy + 4}M${(sx + metres * v.k).toFixed(1)} ${sy - 4}L${(sx + metres * v.k).toFixed(1)} ${sy + 4}`, class: 'scale' },
+      {
+        d: `${stroke(sx, sy, sx + metres * v.k, sy, 5)}M${sx} ${sy - 4}L${sx} ${sy + 4}M${(sx + metres * v.k).toFixed(1)} ${sy - 4}L${(sx + metres * v.k).toFixed(1)} ${sy + 4}`,
+        class: 'scale',
+      },
       lines,
     );
     el('text', { x: sx, y: sy - 8, class: 'lab' }, labels).textContent = `${metres} m`;

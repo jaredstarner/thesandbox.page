@@ -120,7 +120,9 @@ function howOf(town: Town, e: Edge, s: Stop): string {
     case 'footway':
     case 'path':
     case 'bridleway':
-      return area?.kind === 'park' || area?.kind === 'garden' || area?.kind === 'cemetery' ? 'on a path' : 'on a footpath';
+      return area?.kind === 'park' || area?.kind === 'garden' || area?.kind === 'cemetery'
+        ? 'on a path'
+        : 'on a footpath';
     default:
       return 'along an unnamed street';
   }
@@ -132,7 +134,13 @@ function theName(n: string): string {
 }
 const bare = (n: string) => n.replace(/^the /i, '');
 
-const COBBLED = new Set(['sett', 'cobblestone', 'unhewn_cobblestone', 'cobblestone:flattened', 'paving_stones:cobblestone']);
+const COBBLED = new Set([
+  'sett',
+  'cobblestone',
+  'unhewn_cobblestone',
+  'cobblestone:flattened',
+  'paving_stones:cobblestone',
+]);
 
 interface Paint {
   light: Light;
@@ -168,19 +176,49 @@ function streetLine(town: Town, s: Stop, p: Paint, h: number): string {
   if (area && (area.kind === 'park' || area.kind === 'garden') && !n) {
     const name = area.name ?? `the ${area.kind}`;
     return dark
-      ? pick([`The lawns of ${name} have gone grey in the dusk.`, `${capital(name)} is nearly empty at this hour; paths lead off between dark shrubs.`], h)
-      : pick([`Paths cross the lawns of ${name} under old trees.`, `You are in ${name}. Someone is walking a dog on the far side of the grass.`], h);
+      ? pick(
+          [
+            `The lawns of ${name} have gone grey in the dusk.`,
+            `${capital(name)} is nearly empty at this hour; paths lead off between dark shrubs.`,
+          ],
+          h,
+        )
+      : pick(
+          [
+            `Paths cross the lawns of ${name} under old trees.`,
+            `You are in ${name}. Someone is walking a dog on the far side of the grass.`,
+          ],
+          h,
+        );
   }
   if (area?.kind === 'cemetery') {
-    return pick([`Headstones lean among the yews of ${area.name ?? 'an old burial ground'}.`, `The path runs between rows of weathered gravestones.`], h);
+    return pick(
+      [
+        `Headstones lean among the yews of ${area.name ?? 'an old burial ground'}.`,
+        `The path runs between rows of weathered gravestones.`,
+      ],
+      h,
+    );
   }
   const cobbles = e?.surface && COBBLED.has(e.surface) ? ' The street is cobbled.' : '';
   switch (e?.hw) {
     case 'pedestrian':
       return (
         (dark
-          ? pick([`Shop windows still glow along ${n || 'this paved street'}, though the crowds have thinned.`, `${n || 'The street'} is closed to traffic, and at this hour your footsteps carry.`], h)
-          : pick([`${n || 'This street'} is paved from wall to wall and given over to people on foot.`, `Shoppers drift along ${n || 'the street'}, which is closed to traffic.`], h)) + cobbles
+          ? pick(
+              [
+                `Shop windows still glow along ${n || 'this paved street'}, though the crowds have thinned.`,
+                `${n || 'The street'} is closed to traffic, and at this hour your footsteps carry.`,
+              ],
+              h,
+            )
+          : pick(
+              [
+                `${n || 'This street'} is paved from wall to wall and given over to people on foot.`,
+                `Shoppers drift along ${n || 'the street'}, which is closed to traffic.`,
+              ],
+              h,
+            )) + cobbles
       );
     case 'primary':
     case 'primary_link':
@@ -200,7 +238,15 @@ function streetLine(town: Town, s: Stop, p: Paint, h: number): string {
     case 'tertiary_link':
     case 'unclassified':
     case 'road':
-      return pick([`${n || 'The street'} carries a steady trickle of cars.`, `A delivery van is parked half on the ${pave} along ${n || 'the street'}.`], h) + cobbles;
+      return (
+        pick(
+          [
+            `${n || 'The street'} carries a steady trickle of cars.`,
+            `A delivery van is parked half on the ${pave} along ${n || 'the street'}.`,
+          ],
+          h,
+        ) + cobbles
+      );
     case 'residential':
       return (
         pick(
@@ -215,23 +261,59 @@ function streetLine(town: Town, s: Stop, p: Paint, h: number): string {
     case 'living_street':
       return `${n || 'This'} is a shared street with no ${kerb}s, where the few cars creep.${cobbles}`;
     case 'steps':
-      return pick([`A flight of steps${n ? `, ${n},` : ''} worn hollow in the middle.`, `Steps${n ? ` (${n})` : ''} climb between high walls.`], h);
+      return pick(
+        [
+          `A flight of steps${n ? `, ${n},` : ''} worn hollow in the middle.`,
+          `Steps${n ? ` (${n})` : ''} climb between high walls.`,
+        ],
+        h,
+      );
     case 'service':
-      return pick([`${n || 'An alley'} barely wider than your shoulders runs between the buildings.`, `${n || 'A back lane'} of bins and back doors.`], h) + cobbles;
+      return (
+        pick(
+          [
+            `${n || 'An alley'} barely wider than your shoulders runs between the buildings.`,
+            `${n || 'A back lane'} of bins and back doors.`,
+          ],
+          h,
+        ) + cobbles
+      );
     case 'track':
       return `A rough track${n ? `, ${n},` : ''} rutted and puddled.`;
     case 'cycleway':
       return `A cycle path${n ? `, ${n}` : ''}; a bell rings behind you and someone sweeps past.`;
     default:
-      if (n) return pick([`${n} is narrow, more of a lane than a street.`, `${n} runs between old walls.`], h) + cobbles;
+      if (n)
+        return pick([`${n} is narrow, more of a lane than a street.`, `${n} runs between old walls.`], h) + cobbles;
       // In a dense old centre an unnamed path is a passage between buildings, not a field path.
       if (s.spots.length > 1 || town.stops.length > 900)
         return dark
-          ? pick(['A narrow passage between buildings, lit only from the windows.', 'A passage barely wider than your shoulders, dark between the walls.'], h)
-          : pick(['A narrow passage squeezes between the buildings.', 'A short passage runs between two walls of old brick.'], h);
+          ? pick(
+              [
+                'A narrow passage between buildings, lit only from the windows.',
+                'A passage barely wider than your shoulders, dark between the walls.',
+              ],
+              h,
+            )
+          : pick(
+              [
+                'A narrow passage squeezes between the buildings.',
+                'A short passage runs between two walls of old brick.',
+              ],
+              h,
+            );
       return dark
-        ? pick(['A narrow path runs between walls; it is dark along here.', 'A footpath, unlit, between fences and the backs of gardens.'], h)
-        : pick(['A narrow path squeezes between two walls.', 'A footpath runs between hedges and the backs of gardens.'], h);
+        ? pick(
+            [
+              'A narrow path runs between walls; it is dark along here.',
+              'A footpath, unlit, between fences and the backs of gardens.',
+            ],
+            h,
+          )
+        : pick(
+            ['A narrow path squeezes between two walls.', 'A footpath runs between hedges and the backs of gardens.'],
+            h,
+          );
   }
 }
 
@@ -254,7 +336,13 @@ function waterLine(town: Town, s: Stop, h: number): string | null {
     );
   }
   if (s.water)
-    return pick([`The ${bare(s.water)} runs close by beyond a low wall.`, `You can hear the ${bare(s.water)} lapping against stone.`], h);
+    return pick(
+      [
+        `The ${bare(s.water)} runs close by beyond a low wall.`,
+        `You can hear the ${bare(s.water)} lapping against stone.`,
+      ],
+      h,
+    );
   return null;
 }
 
@@ -263,11 +351,19 @@ function ambientLine(p: Paint, s: Stop, town: Town, h: number): string | null {
   const choices: string[] = [];
   if (p.wet === 'rain') choices.push('Rain bounces off the paving and runs in the gutters.', 'Umbrellas jostle past.');
   if (p.wet === 'drizzle') choices.push('A fine drizzle hangs in the air.', 'Everything is slick with drizzle.');
-  if (p.wet === 'snow') choices.push('Snow is settling on the window ledges.', 'Snowflakes turn in the light from the windows.');
-  if (p.wet === 'fog') choices.push('Fog blurs the far end of the street.', 'The tops of the buildings are lost in fog.');
-  if (p.light === 'low') choices.push('The low sun lays long shadows across the street.', 'Upper windows catch the last of the sun.');
-  if (p.light === 'dusk') choices.push('The sky over the roofs has gone a deep blue.', 'Lights are coming on in the windows.');
-  if (p.light === 'dark') choices.push(lit ? 'Street lamps throw pools of yellow light.' : 'It is properly dark now.', 'Your breath shows in the cold.');
+  if (p.wet === 'snow')
+    choices.push('Snow is settling on the window ledges.', 'Snowflakes turn in the light from the windows.');
+  if (p.wet === 'fog')
+    choices.push('Fog blurs the far end of the street.', 'The tops of the buildings are lost in fog.');
+  if (p.light === 'low')
+    choices.push('The low sun lays long shadows across the street.', 'Upper windows catch the last of the sun.');
+  if (p.light === 'dusk')
+    choices.push('The sky over the roofs has gone a deep blue.', 'Lights are coming on in the windows.');
+  if (p.light === 'dark')
+    choices.push(
+      lit ? 'Street lamps throw pools of yellow light.' : 'It is properly dark now.',
+      'Your breath shows in the cold.',
+    );
   if (!choices.length || h % 3 === 0) return null;
   return pick(choices, h >>> 3);
 }
@@ -290,12 +386,18 @@ function placesLines(town: Town, s: Stop, h: number, brief: boolean): string[] {
     if (shown.length === 1 && !brief) {
       out.push(
         pick(
-          [`Here stands ${spotPhrase(shown[0])}.`, `${capital(spotPhrase(shown[0]))}, is here.`, `Beside you is ${spotPhrase(shown[0])}.`],
+          [
+            `Here stands ${spotPhrase(shown[0])}.`,
+            `${capital(spotPhrase(shown[0]))}, is here.`,
+            `Beside you is ${spotPhrase(shown[0])}.`,
+          ],
           h,
         ),
       );
     } else if (brief) {
-      out.push(`${capital(list(shown.map((sp) => sp.name!)))}${rest ? `, and ${count(rest)} more,` : ''} ${shown.length + rest > 1 ? 'are' : 'is'} here.`);
+      out.push(
+        `${capital(list(shown.map((sp) => sp.name!)))}${rest ? `, and ${count(rest)} more,` : ''} ${shown.length + rest > 1 ? 'are' : 'is'} here.`,
+      );
     } else {
       const lead = pick(['Here are', 'Along here are', 'Around you are'], h);
       const items = shown.map(spotPhrase);
@@ -312,25 +414,28 @@ function placesLines(town: Town, s: Stop, h: number, brief: boolean): string[] {
       k.n++;
       kinds.set(t.kind.tag, k);
     }
-    const words = [...kinds.values()].map((k) => (k.n === 1 ? an(k.noun) : `${k.n > 3 ? 'several' : count(k.n)} ${k.plural}`));
+    const words = [...kinds.values()].map((k) =>
+      k.n === 1 ? an(k.noun) : `${k.n > 3 ? 'several' : count(k.n)} ${k.plural}`,
+    );
     out.push(`There ${words[0].startsWith('a') ? 'is' : 'are'} ${list(words)} here.`);
   }
   return out;
 }
 
 const VISIBLE = new Set(['faith', 'sight']);
-const FAR_TAGS = /historic=(castle|tower|monument|fort|palace|church)|amenity=(place_of_worship|townhall)|man_made=(tower|lighthouse)|tourism=(attraction|viewpoint)|railway=station/;
+const FAR_TAGS =
+  /historic=(castle|tower|monument|fort|palace|church)|amenity=(place_of_worship|townhall)|man_made=(tower|lighthouse)|tourism=(attraction|viewpoint)|railway=station/;
 
 /** Something tall or famous visible from here, or null. */
 function landmarkLine(town: Town, s: Stop, h: number): string | null {
   let best: Spot | null = null;
   let score = 0;
   for (const sp of town.spots) {
-    if (sp.at === s.id || !sp.name || !VISIBLE.has(sp.kind.group) && sp.kind.tag !== 'railway=station') continue;
+    if (sp.at === s.id || !sp.name || (!VISIBLE.has(sp.kind.group) && sp.kind.tag !== 'railway=station')) continue;
     if (!FAR_TAGS.test(sp.kind.tag)) continue;
     const d = Math.hypot(sp.x - s.x, sp.y - s.y);
     if (d < 40 || d > 320) continue;
-    const v = sp.kind.weight / (1 + d / 120) + ((hash(sp.id, s.id) % 7) / 40);
+    const v = sp.kind.weight / (1 + d / 120) + (hash(sp.id, s.id) % 7) / 40;
     if (v > score) {
       score = v;
       best = sp;
@@ -342,7 +447,13 @@ function landmarkLine(town: Town, s: Stop, h: number): string | null {
   const t = best.kind.tag;
   const name = best.name!;
   if (t.startsWith('amenity=place_of_worship') || t === 'historic=church')
-    return pick([`To the ${dir}, the tower of ${name} rises over the rooftops.`, `Off to the ${dir} you can see ${name} above the roofs.`], h);
+    return pick(
+      [
+        `To the ${dir}, the tower of ${name} rises over the rooftops.`,
+        `Off to the ${dir} you can see ${name} above the roofs.`,
+      ],
+      h,
+    );
   if (t === 'historic=castle' || t === 'historic=fort') return `${name} looms on its height to the ${dir}.`;
   if (t === 'railway=station') return `Trains rumble somewhere to the ${dir}, towards ${name}.`;
   return `To the ${dir} you can make out ${name}.`;
@@ -362,7 +473,12 @@ export function describe(town: Town, stop: number, w: Weathering, brief: boolean
   const exits = exitsOf(town, stop);
   const paras: string[] = [];
   if (!brief) {
-    const first = [streetLine(town, s, p, h), junctionLine(town, s), waterLine(town, s, h >>> 2), ambientLine(p, s, town, hash(stop, Math.floor(w.clock / 20)))]
+    const first = [
+      streetLine(town, s, p, h),
+      junctionLine(town, s),
+      waterLine(town, s, h >>> 2),
+      ambientLine(p, s, town, hash(stop, Math.floor(w.clock / 20))),
+    ]
       .filter(Boolean)
       .join(' ');
     paras.push(first);
@@ -398,15 +514,21 @@ export function walkLine(town: Town, x: Exit, w: Weathering): string {
   } else if (e.hw === 'steps') {
     parts.push(pick([`You take the steps, ${far}.`, `You go by the steps, counting them under your breath.`], h));
   } else if (e.tunnel) {
-    parts.push(e.name ? `You go through ${e.name}, a covered passage, your footsteps echoing.` : 'You go through a covered passage, your footsteps echoing.');
+    parts.push(
+      e.name
+        ? `You go through ${e.name}, a covered passage, your footsteps echoing.`
+        : 'You go through a covered passage, your footsteps echoing.',
+    );
   } else if (e.name) {
     parts.push(pick([`You walk ${far} ${dir} along ${e.name}.`, `You head ${dir} along ${e.name}, ${far}.`], h));
   } else {
     const what = e.hw === 'service' ? 'alley' : e.hw === 'track' ? 'track' : 'path';
     parts.push(pick([`You follow the ${what} ${dir}, ${far}.`, `You go ${dir} along the ${what}, ${far}.`], h));
   }
-  if ((p.light === 'dark' || p.light === 'dusk') && !e.lit && !e.name && len > 40) parts.push('It is dark along here; you keep to the middle.');
-  else if (p.wet === 'rain' && h % 4 === 0 && /^(primary|secondary|tertiary)/.test(e.hw)) parts.push('A bus throws up a sheet of spray.');
+  if ((p.light === 'dark' || p.light === 'dusk') && !e.lit && !e.name && len > 40)
+    parts.push('It is dark along here; you keep to the middle.');
+  else if (p.wet === 'rain' && h % 4 === 0 && /^(primary|secondary|tertiary)/.test(e.hw))
+    parts.push('A bus throws up a sheet of spray.');
   return parts.join(' ');
 }
 

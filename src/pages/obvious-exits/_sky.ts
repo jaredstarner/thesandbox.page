@@ -28,7 +28,11 @@ export function sunsetAt(lat: number, lon: number, date: Date, offsetMin: number
   const g = ((2 * Math.PI) / 365) * (day - 1 + 0.5);
   const eqt =
     229.18 *
-    (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g) - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));
+    (0.000075 +
+      0.001868 * Math.cos(g) -
+      0.032077 * Math.sin(g) -
+      0.014615 * Math.cos(2 * g) -
+      0.040849 * Math.sin(2 * g));
   const decl =
     0.006918 -
     0.399912 * Math.cos(g) +
@@ -113,7 +117,18 @@ export function wetOf(w: Weather | null): Wet {
 /** One sentence on the weather for the opening, or null. */
 export function weatherLine(w: Weather | null, light: Light): string | null {
   if (!w) return null;
-  const temp = w.temp < 1 ? 'bitterly cold' : w.temp < 7 ? 'cold' : w.temp < 13 ? 'chilly' : w.temp < 20 ? 'mild' : w.temp < 27 ? 'warm' : 'hot';
+  const temp =
+    w.temp < 1
+      ? 'bitterly cold'
+      : w.temp < 7
+        ? 'cold'
+        : w.temp < 13
+          ? 'chilly'
+          : w.temp < 20
+            ? 'mild'
+            : w.temp < 27
+              ? 'warm'
+              : 'hot';
   const windy = w.wind > 30 ? ' and blowing hard' : w.wind > 18 ? ' and breezy' : '';
   const wet = wetOf(w);
   const sky =
@@ -144,7 +159,9 @@ export function clockWords(min: number): string {
   const mm = m % 60;
   const five = Math.round(mm / 5) * 5;
   const hour = (k: number) =>
-    ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven'][((k % 12) + 12) % 12];
+    ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven'][
+      ((k % 12) + 12) % 12
+    ];
   if (five === 0 || five === 60) return `${hour(five === 60 ? h + 1 : h)} o’clock`;
   if (five === 30) return `half past ${hour(h)}`;
   if (five === 15) return `a quarter past ${hour(h)}`;

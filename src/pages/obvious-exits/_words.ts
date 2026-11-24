@@ -34,7 +34,12 @@ const TABLE: Record<string, Row | (() => Row)> = {
   'shop=butcher': () => [say('butcher’s', 'butcher shop'), say('butchers', 'butcher shops'), 'shop', 4],
   'shop=greengrocer': () => [say('greengrocer’s', 'produce store'), say('greengrocers', 'produce stores'), 'shop', 4],
   'shop=supermarket': ['supermarket', 'supermarkets', 'shop', 4],
-  'shop=convenience': () => [say('corner shop', 'convenience store'), say('corner shops', 'convenience stores'), 'shop', 3],
+  'shop=convenience': () => [
+    say('corner shop', 'convenience store'),
+    say('corner shops', 'convenience stores'),
+    'shop',
+    3,
+  ],
   'shop=newsagent': () => [say('newsagent’s', 'newsstand'), say('newsagents', 'newsstands'), 'shop', 3],
   'shop=kiosk': ['kiosk', 'kiosks', 'shop', 2],
   'shop=florist': () => [say('florist’s', 'florist'), 'florists', 'shop', 4],
@@ -46,26 +51,61 @@ const TABLE: Record<string, Row | (() => Row)> = {
   'shop=barber': () => [say('barber’s', 'barbershop'), say('barbers', 'barbershops'), 'service', 2],
   'shop=beauty': ['beauty salon', 'beauty salons', 'service', 1],
   'shop=charity': () => [say('charity shop', 'thrift store'), say('charity shops', 'thrift stores'), 'shop', 3],
-  'shop=second_hand': () => [say('second-hand shop', 'thrift store'), say('second-hand shops', 'thrift stores'), 'shop', 3],
+  'shop=second_hand': () => [
+    say('second-hand shop', 'thrift store'),
+    say('second-hand shops', 'thrift stores'),
+    'shop',
+    3,
+  ],
   'shop=antiques': () => [say('antiques shop', 'antiques store'), say('antiques shops', 'antiques stores'), 'shop', 4],
   'shop=hardware': () => [say('ironmonger’s', 'hardware store'), say('ironmongers', 'hardware stores'), 'shop', 4],
-  'shop=doityourself': () => [say('DIY shop', 'home improvement store'), say('DIY shops', 'home improvement stores'), 'shop', 3],
+  'shop=doityourself': () => [
+    say('DIY shop', 'home improvement store'),
+    say('DIY shops', 'home improvement stores'),
+    'shop',
+    3,
+  ],
   'shop=optician': () => [say('optician’s', 'optometrist'), say('opticians', 'optometrists'), 'service', 2],
   'shop=chemist': () => [say('chemist’s', 'drugstore'), say('chemists', 'drugstores'), 'shop', 3],
-  'shop=cosmetics': () => [say('cosmetics shop', 'cosmetics store'), say('cosmetics shops', 'cosmetics stores'), 'shop', 1],
+  'shop=cosmetics': () => [
+    say('cosmetics shop', 'cosmetics store'),
+    say('cosmetics shops', 'cosmetics stores'),
+    'shop',
+    1,
+  ],
   'shop=mobile_phone': () => [say('phone shop', 'phone store'), say('phone shops', 'phone stores'), 'shop', 1],
-  'shop=electronics': () => [say('electronics shop', 'electronics store'), say('electronics shops', 'electronics stores'), 'shop', 1],
+  'shop=electronics': () => [
+    say('electronics shop', 'electronics store'),
+    say('electronics shops', 'electronics stores'),
+    'shop',
+    1,
+  ],
   'shop=computer': () => [say('computer shop', 'computer store'), say('computer shops', 'computer stores'), 'shop', 1],
   'shop=gift': () => [say('gift shop', 'gift shop'), 'gift shops', 'shop', 2],
   'shop=toys': () => [say('toyshop', 'toy store'), say('toyshops', 'toy stores'), 'shop', 3],
-  'shop=sports': () => [say('sports shop', 'sporting goods store'), say('sports shops', 'sporting goods stores'), 'shop', 1],
+  'shop=sports': () => [
+    say('sports shop', 'sporting goods store'),
+    say('sports shops', 'sporting goods stores'),
+    'shop',
+    1,
+  ],
   'shop=outdoor': () => [say('outdoor shop', 'outdoor store'), say('outdoor shops', 'outdoor stores'), 'shop', 1],
   'shop=stationery': () => [say('stationer’s', 'stationery store'), say('stationers', 'stationery stores'), 'shop', 3],
   'shop=art': ['art shop', 'art shops', 'shop', 2],
   'shop=music': () => [say('record shop', 'record store'), say('record shops', 'record stores'), 'shop', 3],
   'shop=musical_instrument': ['instrument shop', 'instrument shops', 'shop', 3],
-  'shop=furniture': () => [say('furniture shop', 'furniture store'), say('furniture shops', 'furniture stores'), 'shop', 1],
-  'shop=houseware': () => [say('kitchen shop', 'housewares store'), say('kitchen shops', 'housewares stores'), 'shop', 1],
+  'shop=furniture': () => [
+    say('furniture shop', 'furniture store'),
+    say('furniture shops', 'furniture stores'),
+    'shop',
+    1,
+  ],
+  'shop=houseware': () => [
+    say('kitchen shop', 'housewares store'),
+    say('kitchen shops', 'housewares stores'),
+    'shop',
+    1,
+  ],
   'shop=kitchen': () => [say('kitchen shop', 'kitchen store'), say('kitchen shops', 'kitchen stores'), 'shop', 1],
   'shop=department_store': ['department store', 'department stores', 'shop', 4],
   'shop=deli': ['delicatessen', 'delicatessens', 'shop', 4],
@@ -88,7 +128,12 @@ const TABLE: Record<string, Row | (() => Row)> = {
   'shop=e-cigarette': ['vape shop', 'vape shops', 'shop', 0],
   'shop=bookmaker': () => [say('bookmaker’s', 'betting shop'), say('bookmakers', 'betting shops'), 'shop', 1],
   'shop=travel_agency': ['travel agent', 'travel agents', 'service', 1],
-  'shop=estate_agent': () => [say('estate agent’s', 'real estate office'), say('estate agents', 'real estate offices'), 'service', 0],
+  'shop=estate_agent': () => [
+    say('estate agent’s', 'real estate office'),
+    say('estate agents', 'real estate offices'),
+    'service',
+    0,
+  ],
   'shop=photo': () => [say('photo shop', 'photo store'), say('photo shops', 'photo stores'), 'shop', 2],
   'shop=frame': ['framer', 'framers', 'shop', 2],
   'shop=fabric': () => [say('fabric shop', 'fabric store'), say('fabric shops', 'fabric stores'), 'shop', 2],
@@ -96,7 +141,12 @@ const TABLE: Record<string, Row | (() => Row)> = {
   'shop=variety_store': () => [say('pound shop', 'dollar store'), say('pound shops', 'dollar stores'), 'shop', 1],
   'shop=general': ['general store', 'general stores', 'shop', 3],
   'shop=newspaper': () => [say('newsagent’s', 'newsstand'), say('newsagents', 'newsstands'), 'shop', 3],
-  'office=estate_agent': () => [say('estate agent’s', 'real estate office'), say('estate agents', 'real estate offices'), 'service', 0],
+  'office=estate_agent': () => [
+    say('estate agent’s', 'real estate office'),
+    say('estate agents', 'real estate offices'),
+    'service',
+    0,
+  ],
   'amenity=pub': () => [say('pub', 'bar'), say('pubs', 'bars'), 'drink', 6],
   'amenity=bar': ['bar', 'bars', 'drink', 4],
   'amenity=biergarten': ['beer garden', 'beer gardens', 'drink', 4],
@@ -123,12 +173,23 @@ const TABLE: Record<string, Row | (() => Row)> = {
   'amenity=college': ['college', 'colleges', 'civic', 3, false],
   'amenity=university': ['university building', 'university buildings', 'civic', 4, false],
   'amenity=kindergarten': ['nursery', 'nurseries', 'civic', 1, false],
-  'amenity=doctors': () => [say('doctor’s surgery', 'doctor’s office'), say('doctors’ surgeries', 'doctors’ offices'), 'service', 1],
+  'amenity=doctors': () => [
+    say('doctor’s surgery', 'doctor’s office'),
+    say('doctors’ surgeries', 'doctors’ offices'),
+    'service',
+    1,
+  ],
   'amenity=dentist': () => [say('dentist’s', 'dentist'), 'dentists', 'service', 1],
   'amenity=marketplace': ['market', 'markets', 'shop', 6],
   'amenity=fountain': ['fountain', 'fountains', 'thing', 4, false],
   'amenity=drinking_water': ['drinking fountain', 'drinking fountains', 'thing', 1, false],
-  'amenity=telephone': () => [say('telephone box', 'pay phone'), say('telephone boxes', 'pay phones'), 'thing', 2, false],
+  'amenity=telephone': () => [
+    say('telephone box', 'pay phone'),
+    say('telephone boxes', 'pay phones'),
+    'thing',
+    2,
+    false,
+  ],
   'amenity=clock': ['clock', 'clocks', 'thing', 3, false],
   'amenity=bench': ['bench', 'benches', 'thing', 0, false],
   'amenity=toilets': () => [say('public toilet', 'restroom'), say('public toilets', 'restrooms'), 'thing', 0, false],
@@ -174,12 +235,29 @@ const TABLE: Record<string, Row | (() => Row)> = {
   'railway=station': ['station', 'stations', 'transport', 7],
   'railway=halt': ['halt', 'halts', 'transport', 4],
   'railway=tram_stop': ['tram stop', 'tram stops', 'transport', 2, false],
-  'railway=subway_entrance': () => [say('Underground entrance', 'subway entrance'), say('Underground entrances', 'subway entrances'), 'transport', 2, false],
+  'railway=subway_entrance': () => [
+    say('Underground entrance', 'subway entrance'),
+    say('Underground entrances', 'subway entrances'),
+    'transport',
+    2,
+    false,
+  ],
 };
 
 /** Keys checked in order when a place carries several. */
 // Parks and gardens are areas (see _town.ts), and offices are left out: a row of them reads as noise.
-const ORDER = ['amenity', 'shop', 'healthcare', 'tourism', 'historic', 'railway', 'leisure', 'man_made', 'craft', 'office'];
+const ORDER = [
+  'amenity',
+  'shop',
+  'healthcare',
+  'tourism',
+  'historic',
+  'railway',
+  'leisure',
+  'man_made',
+  'craft',
+  'office',
+];
 
 const spaced = (v: string) => v.replace(/[_;]/g, ' ').replace(/\s+/g, ' ').trim();
 
@@ -203,7 +281,15 @@ export function classify(t: Tags): Kind | null {
       return { tag, noun, plural: `${spaced(value)} workshops`, group: 'service', weight: 2, enter: true };
     }
   }
-  if (t.shop === 'yes') return { tag: 'shop=yes', noun: say('shop', 'store'), plural: say('shops', 'stores'), group: 'shop', weight: 1, enter: true };
+  if (t.shop === 'yes')
+    return {
+      tag: 'shop=yes',
+      noun: say('shop', 'store'),
+      plural: say('shops', 'stores'),
+      group: 'shop',
+      weight: 1,
+      enter: true,
+    };
   return null;
 }
 
@@ -291,7 +377,9 @@ function refine(noun: string, t: Tags): string {
 /** A pub's name as you'd say it: "the King's Head" and "the Star Inn", but "The Three Pigeons" and "Pew's" as they are. */
 export function spoken(name: string, kind: Kind): string {
   if (kind.group !== 'drink' || /^the /i.test(name)) return name;
-  return /\b(Arms|Heads?|Inn|Tavern|Lion|Bell|Crown|Anchor|Swan|Hart|Bull|Plough|Oak|Star|Rose|George|Angel|Ship|Fox|Hounds?|Feathers|Castle|Horse|Horseshoe|Wheatsheaf|Mitre|Eagle|Boar|Cross|Lamb|Prince|Duke|Volunteer|Railway|Swan)$/.test(name)
+  return /\b(Arms|Heads?|Inn|Tavern|Lion|Bell|Crown|Anchor|Swan|Hart|Bull|Plough|Oak|Star|Rose|George|Angel|Ship|Fox|Hounds?|Feathers|Castle|Horse|Horseshoe|Wheatsheaf|Mitre|Eagle|Boar|Cross|Lamb|Prince|Duke|Volunteer|Railway|Swan)$/.test(
+    name,
+  )
     ? `the ${name}`
     : name;
 }
@@ -313,7 +401,21 @@ export function list(items: string[]): string {
   return `${items.slice(0, -1).join(', ')}${comma} and ${items[items.length - 1]}`;
 }
 
-const NUMBERS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+const NUMBERS = [
+  'no',
+  'one',
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine',
+  'ten',
+  'eleven',
+  'twelve',
+];
 export const count = (n: number): string => NUMBERS[n] ?? String(n);
 
 export const capital = (s: string): string => (s ? s[0].toUpperCase() + s.slice(1) : s);
@@ -344,9 +446,15 @@ const INSIDE: Record<string, string[]> = {
     'Shelves to the ceiling and a ladder on a rail. Someone is reading in the armchair by the window and has no intention of buying anything.',
   ],
   'shop=florist': ['Buckets of stems on the floor and the cold green smell of cut leaves.'],
-  'shop=charity': ['Racks of coats, a shelf of jigsaws with no promise of all their pieces, and a smell of other people’s houses.'],
-  'shop=hardware': ['Drawers of screws sold by weight, coils of chain, mops hung from the ceiling, and a man in a brown coat who knows where everything is.'],
-  'shop=butcher': ['Sawdust on the floor and a striped awning inside the window. The block has been scrubbed for the night.'],
+  'shop=charity': [
+    'Racks of coats, a shelf of jigsaws with no promise of all their pieces, and a smell of other people’s houses.',
+  ],
+  'shop=hardware': [
+    'Drawers of screws sold by weight, coils of chain, mops hung from the ceiling, and a man in a brown coat who knows where everything is.',
+  ],
+  'shop=butcher': [
+    'Sawdust on the floor and a striped awning inside the window. The block has been scrubbed for the night.',
+  ],
   'shop=greengrocer': ['Crates of apples tilted towards the street and a set of brass scales.'],
   'shop=clothes': ['Rails of coats, a long mirror, and an assistant folding jumpers who does not look up.'],
   'shop=deli': ['Hams hanging from hooks, wheels of cheese, olives in tubs, and a slicer whirring.'],
@@ -354,12 +462,20 @@ const INSIDE: Record<string, string[]> = {
   'shop=locksmith': ['Blanks hang on a pegboard wall and a cutting machine whines through a key.'],
   'shop=shoe_repair': ['Heels on a shelf awaiting their owners, and a smell of glue and leather.'],
   'shop=stationery': ['Pens in jars, reams of paper, and a carousel of greetings cards for every occasion.'],
-  'shop=optician': ['Frames on glass shelves under bright lights, and a chart with ever smaller letters on the far wall.'],
+  'shop=optician': [
+    'Frames on glass shelves under bright lights, and a chart with ever smaller letters on the far wall.',
+  ],
   'shop=department_store': ['Perfume counters, an escalator, and a store directory listing six floors.'],
-  'amenity=pharmacy': ['A bell rings as you open the door. Shelves of plasters and cough syrup, and a counter at the back for prescriptions.'],
-  'healthcare=pharmacy': ['A bell rings as you open the door. Shelves of plasters and cough syrup, and a counter at the back for prescriptions.'],
+  'amenity=pharmacy': [
+    'A bell rings as you open the door. Shelves of plasters and cough syrup, and a counter at the back for prescriptions.',
+  ],
+  'healthcare=pharmacy': [
+    'A bell rings as you open the door. Shelves of plasters and cough syrup, and a counter at the back for prescriptions.',
+  ],
   'amenity=post_office': ['A queue snakes between ropes towards three windows, one of them open.'],
-  'amenity=library': ['Quiet, warm, and carpeted. The returns desk is by the door, and someone is asleep over a newspaper.'],
+  'amenity=library': [
+    'Quiet, warm, and carpeted. The returns desk is by the door, and someone is asleep over a newspaper.',
+  ],
   'amenity=bank': ['Marble floor, roped queue, and a row of cash machines in the lobby.'],
   'amenity=pub': [
     'Low beams, a fire going, and a dog asleep beneath a table. The barman nods at you.',
@@ -370,7 +486,9 @@ const INSIDE: Record<string, string[]> = {
     'The milk steamer shrieks. A few people are bent over laptops, and the chairs are already going up on the tables at the back.',
     'Mismatched chairs, a chalkboard menu, and a cake under a glass dome.',
   ],
-  'amenity=restaurant': ['Tables laid for the evening, candles not yet lit. A waiter tells you the kitchen opens at six.'],
+  'amenity=restaurant': [
+    'Tables laid for the evening, candles not yet lit. A waiter tells you the kitchen opens at six.',
+  ],
   'amenity=fast_food': ['Bright lights, a menu over the counter, and a warm smell of frying.'],
   'amenity=place_of_worship': [
     'Cool, dim, and very quiet. Candles flicker on an iron stand, and your footsteps sound louder than they should.',
@@ -381,7 +499,9 @@ const INSIDE: Record<string, string[]> = {
   'tourism=hotel': ['A revolving door, a reception desk, and a porter who looks at your shopping.'],
   'railway=station': ['A departures board clicks through its list. Somebody is running for a train.'],
   'amenity=townhall': ['A wide staircase, oil paintings of former mayors, and a porter at a desk.'],
-  'amenity=marketplace': ['Stalls are packing up: awnings coming down, crates being stacked, the last apples going two for one.'],
+  'amenity=marketplace': [
+    'Stalls are packing up: awnings coming down, crates being stacked, the last apples going two for one.',
+  ],
 };
 
 const GROUP_INSIDE: Record<Group, string> = {
