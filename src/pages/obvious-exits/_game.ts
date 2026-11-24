@@ -18,7 +18,7 @@ import {
 import { closesAfter, opensAfter, spansOn } from './_hours';
 import { clockDigits, clockWords, lightAt, weatherLine, wetOf, type Sky } from './_sky';
 import { distances, type Spot, type Town } from './_town';
-import { an, capital, insideLine, list, say, setEnglish, type English } from './_words';
+import { an, capital, insideLine, list, say, setEnglish, spoken, type English } from './_words';
 
 export interface Item {
   id: string;
@@ -417,6 +417,11 @@ export function newGame(town: Town, where: Where, sky: Sky, seed: number): { gam
   return { game, blocks: opening(game) };
 }
 
+/** A pub's name as you'd say it: "the King's Head", but "The Three Pigeons" and "Pew's" as they are. */
+export function pubName(sp: Spot): string {
+  return sp.name ? spoken(sp.name, sp.kind) : `the ${sp.kind.noun}`;
+}
+
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -433,7 +438,7 @@ function opening(g: Game): Block[] {
           ? 'and the sun has just gone down'
           : `and it has been dark since ${clockWords(g.sky.sunset)}`;
   const part = d <= 10 ? 'early' : d <= 20 ? 'the middle of' : 'late';
-  const meet = g.meet ? `, ${g.meet.friend} to meet at ${g.town.spots[g.meet.spot].name} at ${clockWords(g.close)},` : '';
+  const meet = g.meet ? `; that’s when you’re meeting ${g.meet.friend} at ${pubName(g.town.spots[g.meet.spot])}` : '';
   const weather = weatherLine(g.sky.weather, lightAt(g.start, g.sky.sunset));
   const blocks: Block[] = [
     {
@@ -445,7 +450,7 @@ function opening(g: Game): Block[] {
       text:
         `It is ${clockWords(g.start)} on a ${WEEKDAYS[g.sky.weekday]} afternoon in ${part === 'the middle of' ? 'the middle of ' : `${part} `}${MONTHS[m - 1]}, ${light}.` +
         (weather ? ` ${weather}` : '') +
-        ` You have a list in your pocket${meet} and the shops shut at ${clockWords(g.close)}.`,
+        ` You have a list of errands in your pocket, and the shops shut at ${clockWords(g.close)}${meet}.`,
     },
     { k: 'event', text: 'Type LIST to read your list, LOOK to look around, or a direction such as NORTH to walk. HELP if you get stuck.' },
   ];
@@ -489,7 +494,7 @@ function pass(g: Game, minutes: number): Block[] {
     });
   }
   if (g.meet && !g.meet.done) {
-    const pub = g.town.spots[g.meet.spot].name;
+    const pub = pubName(g.town.spots[g.meet.spot]);
     once('buzz', g.close + 10, `Your phone buzzes. ${g.meet.friend}: “At ${pub}. Where are you?”`);
     if (!g.flags.has('gone') && crossed(g.close + 40)) {
       g.flags.add('gone');
@@ -518,7 +523,7 @@ function meetCheck(g: Game): Block[] {
       : g.meet.late < 15
         ? `${g.meet.friend} is at a table by the window and waves you over, already halfway down a drink.`
         : `${g.meet.friend} is at the bar, coat on, about to leave. You are forgiven, eventually.`;
-  return [{ k: 'p', text: `You go into ${sp.name}. ${text}` }, ...finish(g)];
+  return [{ k: 'p', text: `You go into ${pubName(sp)}. ${text}` }, ...finish(g)];
 }
 
 function scoreOf(g: Game): { score: number; max: number; parts: string[] } {
@@ -698,7 +703,7 @@ function errandHere(g: Game, verb: string, words: string[]): Block[] | null {
     if (g.errands.every((x) => x.done)) {
       blocks.push({
         k: 'event',
-        text: g.meet && !g.meet.done ? `That’s everything on the list. Now for ${g.town.spots[g.meet.spot].name}.` : 'That’s everything on the list.',
+        text: g.meet && !g.meet.done ? `That’s everything on the list. Now for ${pubName(g.town.spots[g.meet.spot])}.` : 'That’s everything on the list.',
       });
       if (!g.meet) blocks.push(...finish(g));
     }
@@ -757,7 +762,7 @@ function hint(g: Game): Block[] {
   if (!pending.length) {
     if (g.meet && !g.meet.done) {
       const sp = g.town.spots[g.meet.spot];
-      return [{ k: 'p', text: `Only ${g.meet.friend} left. ${sp.name} is ${direction(g, sp)}.` }];
+      return [{ k: 'p', text: `Only ${g.meet.friend} left. ${capital(pubName(sp))} is ${direction(g, sp)}.` }];
     }
     return [{ k: 'p', text: 'There’s nothing left to do but wander.' }];
   }

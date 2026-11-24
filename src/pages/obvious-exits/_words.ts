@@ -288,6 +288,14 @@ function refine(noun: string, t: Tags): string {
   return noun;
 }
 
+/** A pub's name as you'd say it: "the King's Head" and "the Star Inn", but "The Three Pigeons" and "Pew's" as they are. */
+export function spoken(name: string, kind: Kind): string {
+  if (kind.group !== 'drink' || /^the /i.test(name)) return name;
+  return /\b(Arms|Heads?|Inn|Tavern|Lion|Bell|Crown|Anchor|Swan|Hart|Bull|Plough|Oak|Star|Rose|George|Angel|Ship|Fox|Hounds?|Feathers|Castle|Horse|Horseshoe|Wheatsheaf|Mitre|Eagle|Boar|Cross|Lamb|Prince|Duke|Volunteer|Railway|Swan)$/.test(name)
+    ? `the ${name}`
+    : name;
+}
+
 /** "a" or "an" before a word. */
 export function an(word: string): string {
   const w = word.toLowerCase();

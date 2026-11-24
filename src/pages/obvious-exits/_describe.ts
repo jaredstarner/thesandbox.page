@@ -4,7 +4,7 @@
 
 import { lightAt, wetOf, type Light, type Sky, type Wet } from './_sky';
 import { leaving, rankOf, streetsAt, type Edge, type Spot, type Stop, type Town } from './_town';
-import { an, capital, count, list, say } from './_words';
+import { an, capital, count, list, say, spoken } from './_words';
 
 export type Compass = 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'nw';
 export const COMPASS: Compass[] = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'];
@@ -224,6 +224,11 @@ function streetLine(town: Town, s: Stop, p: Paint, h: number): string {
       return `A cycle path${n ? `, ${n}` : ''}; a bell rings behind you and someone sweeps past.`;
     default:
       if (n) return pick([`${n} is narrow, more of a lane than a street.`, `${n} runs between old walls.`], h) + cobbles;
+      // In a dense old centre an unnamed path is a passage between buildings, not a field path.
+      if (s.spots.length > 1 || town.stops.length > 900)
+        return dark
+          ? pick(['A narrow passage between buildings, lit only from the windows.', 'A passage barely wider than your shoulders, dark between the walls.'], h)
+          : pick(['A narrow passage squeezes between the buildings.', 'A short passage runs between two walls of old brick.'], h);
       return dark
         ? pick(['A narrow path runs between walls; it is dark along here.', 'A footpath, unlit, between fences and the backs of gardens.'], h)
         : pick(['A narrow path squeezes between two walls.', 'A footpath runs between hedges and the backs of gardens.'], h);
@@ -269,7 +274,7 @@ function ambientLine(p: Paint, s: Stop, town: Town, h: number): string | null {
 
 /** How a named place is introduced. */
 export function spotPhrase(sp: Spot): string {
-  if (sp.name) return `${sp.name}, ${an(sp.kind.noun)}`;
+  if (sp.name) return `${spoken(sp.name, sp.kind)}, ${an(sp.kind.noun)}`;
   return an(sp.kind.noun);
 }
 
