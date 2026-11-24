@@ -1,0 +1,825 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { PLACES } from './_places';
+
+const description =
+  'Any town on Earth as a text adventure, built from OpenStreetMap: walk its real streets by typing, get round the shops on your list before they shut, and keep a pencil map as you go.';
+---
+
+<Bare title="Obvious Exits" description={description}>
+  <Font cssVariable="--font-exits-story" slot="head" />
+  <Font cssVariable="--font-exits-type" slot="head" />
+  <Font cssVariable="--font-exits-hand" slot="head" />
+  <main class="exits" data-phase="choose">
+    <header class="mast">
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
+      <h1 class="name">Obvious Exits</h1>
+      <p class="status" data-status></p>
+      <button class="map-toggle" type="button" data-map-toggle aria-expanded="false">
+        Map
+      </button>
+    </header>
+
+    <div class="desk">
+      <section class="sheet" aria-label="The story">
+        <div class="story" data-story>
+          <div class="chooser" data-chooser>
+            <div class="intro">
+              <p class="kicker">A text adventure in a real town</p>
+              <p class="big">Obvious Exits</p>
+              <p class="lede">
+                An afternoon of errands, played by typing. The streets, squares, shops, and pubs are all real, read from
+                OpenStreetMap: walk them by compass, find what your list needs before the shutters come down, and meet a
+                friend as the lamps come on.
+              </p>
+            </div>
+            <button class="resume" type="button" data-resume hidden>
+              Carry on
+            </button>
+            <p class="choose">Where will you spend the afternoon?</p>
+            <ul class="towns">
+              {PLACES.map((p) => (
+                <li>
+                  <button type="button" data-place={p.id}>
+                    <span class="town">{p.name}</span>
+                    <span class="region">{p.region}</span>
+                    <span class="hint">{p.hint}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <form class="search" data-search>
+              <label for="oe-town">Or anywhere else on Earth</label>
+              <div class="row">
+                <input id="oe-town" name="town" placeholder="a town or city" autocomplete="off" />
+                <button type="submit">Go</button>
+              </div>
+              <button class="here" type="button" data-here>
+                Start where I am
+              </button>
+              <p class="here-note">
+                Your position goes to OpenStreetMap and Open-Meteo, to fetch the streets around you and the weather.
+              </p>
+              <p class="search-status" data-search-status role="status"></p>
+            </form>
+            <noscript>
+              <p class="search-status">The adventure needs JavaScript to run.</p>
+            </noscript>
+          </div>
+          <div class="log" data-log aria-live="polite"></div>
+        </div>
+        <form class="prompt" data-prompt hidden>
+          <label for="oe-command" class="gt" aria-label="Command">
+            &gt;
+          </label>
+          <input
+            id="oe-command"
+            data-command
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            enterkeyhint="go"
+            placeholder="type a command, or tap an exit"
+          />
+        </form>
+      </section>
+
+      <aside class="pad" data-pad aria-label="Your map">
+        <svg class="map" data-map role="img" aria-label="Your map"></svg>
+        <p class="pad-empty">Your map goes here, in pencil, as you walk.</p>
+        <div class="slip" data-slip-box hidden>
+          <p class="slip-head">List</p>
+          <ol data-slip></ol>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="colophon">
+      Streets, shops, and squares © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>.
+      Weather and place search by <a href="https://open-meteo.com/">Open-Meteo</a>.
+    </footer>
+  </main>
+</Bare>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('.exits');
+  if (root) start(root);
+</script>
+
+<style>
+  @property --oe-sky-top {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #24324f;
+  }
+  @property --oe-sky-bottom {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #8a5d6e;
+  }
+
+  :global(body:has(.exits)) {
+    margin: 0;
+    background: #141b2c;
+  }
+
+  .exits {
+    --paper: #f3ede0;
+    --paper-edge: #e6dccb;
+    --ink: #26221c;
+    --muted: #6e655a;
+    --red: #a8382a;
+    --lead: #3b3934;
+    --sky-ink: #f1e9da;
+    --oe-sky-top: #24324f;
+    --oe-sky-bottom: #8a5d6e;
+    box-sizing: border-box;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
+    background: linear-gradient(180deg, var(--oe-sky-top), var(--oe-sky-bottom));
+    transition:
+      --oe-sky-top 4s ease,
+      --oe-sky-bottom 4s ease;
+    color: var(--ink);
+    font-family: var(--font-exits-story);
+    overflow: hidden;
+  }
+  .exits *,
+  .exits *::before,
+  .exits *::after {
+    box-sizing: border-box;
+  }
+  .exits[data-light='day'] {
+    --oe-sky-top: #93b1c9;
+    --oe-sky-bottom: #e3d3b1;
+    --sky-ink: #26221c;
+  }
+  .exits[data-light='low'] {
+    --oe-sky-top: #5f7c9e;
+    --oe-sky-bottom: #e6a56f;
+    --sky-ink: #1f1b16;
+  }
+  .exits[data-light='dusk'] {
+    --oe-sky-top: #22304f;
+    --oe-sky-bottom: #95607a;
+  }
+  .exits[data-light='dark'] {
+    --oe-sky-top: #0b111f;
+    --oe-sky-bottom: #222a43;
+  }
+  .exits[data-wet='rain'],
+  .exits[data-wet='drizzle'],
+  .exits[data-wet='fog'] {
+    --oe-sky-bottom: color-mix(in oklab, #6b7280 45%, var(--oe-sky-bottom));
+  }
+  /* Stars come out over the desk once it is dark, and rain falls behind the paper when it rains. */
+  .exits {
+    position: relative;
+  }
+  .exits > * {
+    position: relative;
+    z-index: 1;
+  }
+  .exits::before,
+  .exits::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 4s ease;
+  }
+  .exits::before {
+    background-image:
+      radial-gradient(1.2px 1.2px at 7% 6%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 19% 3%, #fff 60%, transparent 61%),
+      radial-gradient(1.4px 1.4px at 33% 7%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 46% 2.5%, #fff 60%, transparent 61%),
+      radial-gradient(1.1px 1.1px at 58% 6.5%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 71% 3.5%, #fff 60%, transparent 61%),
+      radial-gradient(1.5px 1.5px at 84% 5%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 93% 2%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 1.2% 30%, #fff 60%, transparent 61%),
+      radial-gradient(1.2px 1.2px at 98.6% 24%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 52% 0.8%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 98.9% 46%, #fff 60%, transparent 61%),
+      radial-gradient(1px 1px at 0.8% 58%, #fff 60%, transparent 61%);
+    mask-image: linear-gradient(180deg, #000, transparent 75%);
+  }
+  .exits[data-light='dark']::before {
+    opacity: 0.75;
+  }
+  .exits::after {
+    background-image: repeating-linear-gradient(
+      104deg,
+      transparent 0 22px,
+      rgba(255, 255, 255, 0.07) 22px 23px,
+      transparent 23px 47px
+    );
+    background-size: 160px 220px;
+  }
+  .exits[data-wet='rain']::after,
+  .exits[data-wet='drizzle']::after,
+  .exits[data-wet='storm']::after {
+    opacity: 1;
+    animation: oe-rain 0.7s linear infinite;
+  }
+  .exits[data-wet='drizzle']::after {
+    opacity: 0.5;
+  }
+  @keyframes oe-rain {
+    to {
+      background-position: -60px 220px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .exits::after {
+      animation: none !important;
+    }
+  }
+
+  /* Masthead */
+  .mast {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: baseline;
+    gap: 16px;
+    padding: 14px 28px 12px;
+    color: var(--sky-ink);
+  }
+  .home {
+    justify-self: start;
+    font: 500 14px/1 var(--font-exits-type);
+    letter-spacing: 0.04em;
+    color: inherit;
+    opacity: 0.75;
+    text-decoration: none;
+  }
+  .home:hover {
+    opacity: 1;
+    text-decoration: underline;
+  }
+  .name {
+    margin: 0;
+    font: 800 15px/1 var(--font-exits-story);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+  .status {
+    justify-self: end;
+    margin: 0;
+    font: 500 14px/1 var(--font-exits-type);
+    letter-spacing: 0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+  .map-toggle {
+    display: none;
+  }
+
+  /* The desk: story sheet and notebook */
+  .desk {
+    display: grid;
+    grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr);
+    gap: 26px;
+    padding: 4px 28px 10px;
+    min-height: 0;
+  }
+  .sheet {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background:
+      radial-gradient(120% 90% at 20% 0%, rgba(255, 255, 255, 0.45), transparent 60%),
+      linear-gradient(180deg, var(--paper), var(--paper-edge));
+    border-radius: 3px;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.6) inset,
+      0 22px 46px -18px rgba(0, 0, 0, 0.55),
+      0 2px 6px rgba(0, 0, 0, 0.18);
+  }
+  .story {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 30px 40px 18px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(38, 34, 28, 0.25) transparent;
+  }
+  .log,
+  .chooser {
+    max-width: 62ch;
+    margin: 0 auto;
+    font-size: 18px;
+    line-height: 1.58;
+  }
+  .prompt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 40px 16px;
+    border-top: 1px solid rgba(38, 34, 28, 0.14);
+  }
+  .prompt[hidden],
+  .chooser[hidden],
+  .slip[hidden],
+  .resume[hidden] {
+    display: none;
+  }
+  .gt {
+    font: 700 19px/1 var(--font-exits-type);
+    color: var(--red);
+  }
+  .prompt input {
+    flex: 1;
+    min-width: 0;
+    font: 500 18px/1.4 var(--font-exits-type);
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    outline: none;
+    caret-color: var(--red);
+    padding: 4px 0;
+  }
+  .prompt input::placeholder {
+    color: rgba(38, 34, 28, 0.38);
+  }
+
+  /* Opening page */
+  .intro {
+    text-align: center;
+    padding: 6px 0 4px;
+  }
+  .kicker {
+    margin: 0;
+    font: italic 400 16px/1.3 var(--font-exits-story);
+    color: var(--muted);
+  }
+  .big {
+    margin: 6px 0 12px;
+    font: 800 clamp(30px, 4.4vw, 46px) / 1 var(--font-exits-story);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .lede {
+    margin: 0 auto 20px;
+    max-width: 52ch;
+    font-size: 17px;
+    color: #3d372f;
+  }
+  .choose {
+    margin: 22px 0 10px;
+    font: 700 16px/1.3 var(--font-exits-story);
+    letter-spacing: 0.04em;
+  }
+  .towns {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .towns button,
+  .resume {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    gap: 2px;
+    text-align: left;
+    padding: 11px 14px 12px;
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(38, 34, 28, 0.18);
+    border-radius: 2px;
+    color: var(--ink);
+    cursor: pointer;
+    font-family: var(--font-exits-story);
+    transition:
+      border-color 0.15s,
+      background 0.15s;
+  }
+  .towns button:hover,
+  .towns button:focus-visible,
+  .resume:hover,
+  .resume:focus-visible {
+    border-color: var(--red);
+    background: rgba(255, 255, 255, 0.7);
+    outline: none;
+  }
+  .town {
+    font: 700 18px/1.2 var(--font-exits-story);
+  }
+  .region {
+    font: italic 400 14px/1.3 var(--font-exits-story);
+    color: var(--muted);
+  }
+  .hint {
+    margin-top: 4px;
+    font-size: 14.5px;
+    line-height: 1.4;
+    color: #4a433a;
+  }
+  .resume {
+    display: block;
+    margin: 4px 0 0;
+    font: 700 16px/1.3 var(--font-exits-story);
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .search {
+    margin: 22px 0 6px;
+    display: grid;
+    gap: 8px;
+  }
+  .search label {
+    font: 700 16px/1.3 var(--font-exits-story);
+    letter-spacing: 0.04em;
+  }
+  .search .row {
+    display: flex;
+    gap: 8px;
+  }
+  .search input {
+    flex: 1;
+    min-width: 0;
+    font: 500 17px/1.3 var(--font-exits-type);
+    padding: 9px 12px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(38, 34, 28, 0.25);
+    border-radius: 2px;
+    color: var(--ink);
+  }
+  .search input:focus {
+    outline: 2px solid var(--red);
+    outline-offset: -1px;
+  }
+  .search button {
+    font: 700 15px/1 var(--font-exits-type);
+    letter-spacing: 0.06em;
+    padding: 0 16px;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .search .here {
+    justify-self: start;
+    padding: 8px 12px;
+    background: transparent;
+    color: var(--ink);
+    border: 1px dashed rgba(38, 34, 28, 0.45);
+  }
+  .search button:hover,
+  .search button:focus-visible {
+    border-color: var(--red);
+    outline: none;
+  }
+  .here-note {
+    margin: -2px 0 0;
+    font: italic 400 14px/1.4 var(--font-exits-story);
+    color: var(--muted);
+  }
+  .search-status {
+    min-height: 1.4em;
+    margin: 2px 0 0;
+    font: italic 400 15.5px/1.45 var(--font-exits-story);
+    color: var(--muted);
+  }
+  .exits.surveying .search-status::after {
+    content: '';
+    display: inline-block;
+    width: 0.6em;
+    height: 0.6em;
+    margin-left: 0.5em;
+    border: 2px solid var(--red);
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: oe-spin 0.9s linear infinite;
+  }
+  @keyframes oe-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+  /* The transcript, built by script */
+  .exits :global(.oe-banner) {
+    text-align: center;
+    margin: 4px 0 18px;
+  }
+  .exits :global(.oe-banner p) {
+    margin: 0;
+  }
+  .exits :global(.oe-banner-title) {
+    font: 800 26px/1.2 var(--font-exits-story);
+    letter-spacing: 0.24em;
+    margin-bottom: 4px !important;
+  }
+  .exits :global(.oe-banner-line) {
+    font: italic 400 15px/1.45 var(--font-exits-story);
+    color: var(--muted);
+  }
+  .exits :global(.oe-title) {
+    margin: 1.25em 0 0.2em;
+    font: 700 1.02em/1.35 var(--font-exits-story);
+    letter-spacing: 0.01em;
+  }
+  .exits :global(.oe-p) {
+    margin: 0 0 0.55em;
+  }
+  .exits :global(.oe-event) {
+    margin: 0.3em 0 0.6em;
+    font-style: italic;
+    color: var(--muted);
+  }
+  .exits :global(.oe-echo) {
+    margin: 1.15em 0 0.25em;
+    font: 600 0.93em/1.4 var(--font-exits-type);
+    color: var(--red);
+    overflow-wrap: anywhere;
+  }
+  .exits :global(.oe-end) {
+    margin: 1.4em 0 0.6em;
+    text-align: center;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+  }
+  .exits :global(.oe-exits) {
+    margin: 0.35em 0 0.4em;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 6px;
+  }
+  .exits :global(.oe-exits-lead) {
+    font: 600 0.84em/1.4 var(--font-exits-type);
+    color: var(--muted);
+    margin-right: 2px;
+  }
+  .exits :global(.oe-exits button) {
+    font: 500 0.82em/1.3 var(--font-exits-type);
+    padding: 3px 8px 3px;
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(38, 34, 28, 0.28);
+    border-radius: 2px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .exits :global(.oe-exits button::first-letter) {
+    text-transform: uppercase;
+  }
+  .exits :global(.oe-exits button.far) {
+    border-style: dashed;
+    color: var(--muted);
+  }
+  .exits :global(.oe-exits button:hover:not(:disabled)),
+  .exits :global(.oe-exits button:focus-visible) {
+    border-color: var(--red);
+    color: var(--red);
+    outline: none;
+  }
+  .exits :global(.oe-exits button:disabled) {
+    cursor: default;
+    opacity: 0.42;
+    background: transparent;
+  }
+  .exits :global(.oe-list) {
+    margin: 0.4em 0 0.7em;
+    padding: 0 0 0 0.2em;
+    list-style: none;
+    font: 400 1.18em/1.4 var(--font-exits-hand);
+  }
+  .exits :global(.oe-list li::before),
+  .exits :global(.slip li::before) {
+    content: '';
+    display: inline-block;
+    width: 0.62em;
+    height: 0.62em;
+    margin: 0 0.5em 0 0.1em;
+    border: 1.5px solid var(--lead);
+    border-radius: 1px;
+    vertical-align: 0.02em;
+    transform: rotate(-3deg);
+    text-decoration: none;
+  }
+  .exits :global(.oe-list li.done),
+  .exits :global(.slip li.done) {
+    text-decoration: line-through 2px var(--red);
+    color: var(--muted);
+  }
+  .exits :global(.oe-list li.done::before),
+  .exits :global(.slip li.done::before) {
+    background:
+      linear-gradient(45deg, transparent 44%, var(--red) 44% 58%, transparent 58%),
+      linear-gradient(-45deg, transparent 44%, var(--red) 44% 58%, transparent 58%);
+  }
+
+  /* The notebook */
+  .pad {
+    position: relative;
+    min-height: 0;
+    border-radius: 2px;
+    background-color: #f6f5ef;
+    background-image:
+      linear-gradient(rgba(64, 104, 146, 0.26) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(64, 104, 146, 0.26) 1px, transparent 1px),
+      linear-gradient(rgba(64, 104, 146, 0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(64, 104, 146, 0.12) 1px, transparent 1px);
+    background-size:
+      80px 80px,
+      80px 80px,
+      16px 16px,
+      16px 16px;
+    background-position: -1px -1px;
+    box-shadow:
+      0 22px 46px -18px rgba(0, 0, 0, 0.55),
+      0 2px 6px rgba(0, 0, 0, 0.18);
+    transform: rotate(0.45deg);
+    overflow: hidden;
+  }
+  .map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .pad-empty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 30px;
+    text-align: center;
+    font: 400 22px/1.3 var(--font-exits-hand);
+    color: rgba(59, 57, 52, 0.42);
+    pointer-events: none;
+  }
+  .exits[data-phase='play'] .pad-empty {
+    display: none;
+  }
+  .exits :global(.map .pencil path) {
+    fill: none;
+    stroke: var(--lead);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .exits :global(.map .walked) {
+    stroke-width: 1.8;
+    opacity: 0.85;
+  }
+  .exits :global(.map .stub) {
+    stroke-width: 1.3;
+    opacity: 0.55;
+  }
+  .exits :global(.map .box) {
+    stroke-width: 1.5;
+  }
+  .exits :global(.map .compass),
+  .exits :global(.map .scale) {
+    stroke-width: 1.4;
+    opacity: 0.8;
+  }
+  .exits :global(.map .here) {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+  .exits :global(.map .star) {
+    fill: var(--red);
+  }
+  .exits :global(.map .lab) {
+    font: 400 14px/1 var(--font-exits-hand);
+    fill: var(--lead);
+  }
+  .exits :global(.map .here-lab),
+  .exits :global(.map .flag) {
+    fill: var(--red);
+  }
+  .exits :global(.map .title) {
+    font-size: 19px;
+  }
+  .exits :global(.map .underline) {
+    stroke-width: 1.4;
+    opacity: 0.7;
+  }
+  .slip {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    width: min(250px, 62%);
+    padding: 16px 16px 12px;
+    background: repeating-linear-gradient(180deg, transparent 0 25px, rgba(64, 104, 146, 0.22) 25px 26px), #fffdf7;
+    background-position: 0 30px;
+    box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.35);
+    transform: rotate(-1.6deg);
+  }
+  .slip::before {
+    content: '';
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    width: 74px;
+    height: 20px;
+    transform: translateX(-50%) rotate(2deg);
+    background: rgba(236, 226, 196, 0.72);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  }
+  .slip-head {
+    margin: 0 0 2px;
+    font: 400 20px/1.2 var(--font-exits-hand);
+    color: var(--red);
+  }
+  .slip ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font: 400 16.5px/26px var(--font-exits-hand);
+    color: var(--lead);
+  }
+
+  .colophon {
+    padding: 6px 28px 12px;
+    font: 400 12.5px/1.4 var(--font-exits-story);
+    color: var(--sky-ink);
+    opacity: 0.72;
+    text-align: center;
+  }
+  .colophon a {
+    color: inherit;
+  }
+
+  /* Phones and narrow windows: the map folds away above the story */
+  @media (max-width: 820px) {
+    .mast {
+      grid-template-columns: 1fr auto auto;
+      padding: 10px 16px 8px;
+      gap: 10px;
+    }
+    .name {
+      display: none;
+    }
+    .status {
+      font-size: 13px;
+    }
+    .exits[data-phase='play'] .map-toggle {
+      display: inline-block;
+      font: 600 13px/1 var(--font-exits-type);
+      letter-spacing: 0.05em;
+      padding: 6px 10px;
+      color: var(--sky-ink);
+      background: transparent;
+      border: 1px solid currentColor;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    .desk {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 10px;
+      padding: 0 10px 6px;
+    }
+    .pad {
+      order: -1;
+      height: 0;
+      box-shadow: none;
+      transform: none;
+    }
+    .exits.map-open[data-phase='play'] .pad {
+      height: 34dvh;
+      box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.55);
+    }
+    /* On a phone the list stays in the story (LIST); the small map gets the whole page. */
+    .slip {
+      display: none;
+    }
+    .story {
+      padding: 20px 18px 12px;
+    }
+    .log,
+    .chooser {
+      font-size: 17px;
+    }
+    .prompt {
+      padding: 10px 16px 12px;
+    }
+    .towns {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .colophon {
+      padding: 2px 16px 8px;
+      font-size: 11.5px;
+    }
+  }
+</style>
