@@ -67,7 +67,15 @@ export class Chart {
     this.fitBack = el('rect', { x: lgX - 200, y: lgY - 12, width: 204, height: 17, fill: '#f3f2ee' }, this.fitLegend);
     el(
       'line',
-      { x1: lgX - 18, y1: lgY - 4, x2: lgX, y2: lgY - 4, stroke: '#d9432a', 'stroke-width': 1.4, 'stroke-dasharray': '5 3' },
+      {
+        x1: lgX - 18,
+        y1: lgY - 4,
+        x2: lgX,
+        y2: lgY - 4,
+        stroke: '#d9432a',
+        'stroke-width': 1.4,
+        'stroke-dasharray': '5 3',
+      },
       this.fitLegend,
     );
     this.fitLabel = el('text', { x: lgX - 24, y: lgY, fill: '#d9432a' }, this.fitLegend);
@@ -75,7 +83,14 @@ export class Chart {
     this.names = el('g', { 'font-size': 11.5, fill: '#1b2130' }, svg);
     this.empty = el(
       'text',
-      { x: L + (W - L - R) * 0.24, y: T + (H - T - B) * 0.28, 'text-anchor': 'middle', 'font-size': 14, 'font-style': 'italic', fill: '#565d6c' },
+      {
+        x: L + (W - L - R) * 0.24,
+        y: T + (H - T - B) * 0.28,
+        'text-anchor': 'middle',
+        'font-size': 14,
+        'font-style': 'italic',
+        fill: '#565d6c',
+      },
       svg,
     );
     this.empty.textContent = 'No replies yet.';
@@ -114,7 +129,14 @@ export class Chart {
     const ly = this.y(12500 / KM_PER_RTT_MS) + 13;
     const lt = el(
       'text',
-      { x: lx, y: ly, 'font-size': 11.5, 'font-style': 'italic', fill: '#565d6c', transform: `rotate(${ang} ${lx} ${ly})` },
+      {
+        x: lx,
+        y: ly,
+        'font-size': 11.5,
+        'font-style': 'italic',
+        fill: '#565d6c',
+        transform: `rotate(${ang} ${lx} ${ly})`,
+      },
       this.floor,
     );
     lt.textContent = 'faster than light in glass';
@@ -134,7 +156,11 @@ export class Chart {
       const t = el('text', { x: L - 7, y: y + 4, 'text-anchor': 'end', 'font-size': 11.5, fill: ink }, ax);
       t.textContent = String(ms);
     }
-    const xl = el('text', { x: W - R, y: H - 4, 'text-anchor': 'end', 'font-size': 12, 'font-style': 'italic', fill: '#565d6c' }, ax);
+    const xl = el(
+      'text',
+      { x: W - R, y: H - 4, 'text-anchor': 'end', 'font-size': 12, 'font-style': 'italic', fill: '#565d6c' },
+      ax,
+    );
     xl.textContent = 'distance from the marked spot, km';
     const yl = el('text', { x: L + 8, y: T + 4, 'font-size': 12, 'font-style': 'italic', fill: '#565d6c' }, ax);
     yl.textContent = 'round trip, ms';
@@ -156,9 +182,7 @@ export class Chart {
       this.fitLegend.setAttribute('visibility', 'hidden');
       return;
     }
-    const placed = points
-      .map((p, i) => ({ ...p, i, d: kmBetween(from, p.v) }))
-      .sort((a, b) => a.rtt - b.rtt);
+    const placed = points.map((p, i) => ({ ...p, i, d: kmBetween(from, p.v) })).sort((a, b) => a.rtt - b.rtt);
     const taken: [number, number, number][] = [];
     const dotsAt = placed.map((p) => [this.x(p.d), this.y(p.rtt)]);
     placed.forEach((p, rank) => {

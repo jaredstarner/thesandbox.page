@@ -164,8 +164,7 @@ export function start(root: HTMLElement): void {
     });
   }
 
-  const marks = (): Landmark[] =>
-    STATIONS.flatMap((_, i) => (rtt[i] > 0 ? [{ v: VECS[i], rtt: rtt[i] }] : []));
+  const marks = (): Landmark[] => STATIONS.flatMap((_, i) => (rtt[i] > 0 ? [{ v: VECS[i], rtt: rtt[i] }] : []));
   const points = (): Point[] =>
     STATIONS.flatMap((s, i) => (rtt[i] > 0 ? [{ name: s.name, v: VECS[i], rtt: rtt[i] }] : []));
 
@@ -175,7 +174,8 @@ export function start(root: HTMLElement): void {
     const t = rtt[i];
     li.querySelector('.rtt')!.textContent = t > 0 ? fmtMs(t) : mode === 'timing' ? '…' : 'no reply';
     const km = boundKm(t);
-    li.querySelector('.km')!.textContent = t <= 0 ? '' : km >= MAX_KM ? 'anywhere' : `≤ ${NUMBER.format(roundTo(km, 3))} km`;
+    li.querySelector('.km')!.textContent =
+      t <= 0 ? '' : km >= MAX_KM ? 'anywhere' : `≤ ${NUMBER.format(roundTo(km, 3))} km`;
   }
 
   function setButtons(busy: boolean): void {

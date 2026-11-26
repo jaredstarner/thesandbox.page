@@ -322,7 +322,11 @@ export class Globe {
   }
 
   setView(v: View): void {
-    this.view = { lat: Math.max(-85, Math.min(85, v.lat)), lon: ((((v.lon + 180) % 360) + 360) % 360) - 180, zoom: v.zoom };
+    this.view = {
+      lat: Math.max(-85, Math.min(85, v.lat)),
+      lon: ((((v.lon + 180) % 360) + 360) % 360) - 180,
+      zoom: v.zoom,
+    };
     this.m = viewMatrix(this.view.lat, this.view.lon);
   }
 

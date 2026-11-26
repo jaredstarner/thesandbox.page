@@ -15,18 +15,32 @@ import { STATIONS } from './_stations';
       <div class="stage">
         <canvas class="globe" aria-hidden="true"></canvas>
         <div class="labels" aria-hidden="true"></div>
-        <div class="marker best" aria-hidden="true" hidden><span>best fit</span></div>
+        <div class="marker best" aria-hidden="true" hidden>
+          <span>best fit</span>
+        </div>
         <div class="marker probe" aria-hidden="true" hidden></div>
-        <div class="marker truth" aria-hidden="true" hidden><span>Here</span></div>
+        <div class="marker truth" aria-hidden="true" hidden>
+          <span>Here</span>
+        </div>
         <p class="clock" aria-hidden="true" hidden>
-          <span class="clock-t"><i>t</i> = <b>0.0</b> ms</span>
-          <span class="clock-d">time for light to go <b>0</b> km and back</span>
+          <span class="clock-t">
+            <i>t</i> = <b>0.0</b> ms
+          </span>
+          <span class="clock-d">
+            time for light to go <b>0</b> km and back
+          </span>
         </p>
-        <p class="fallback" hidden>This figure needs WebGL 2, which this browser doesn't offer.</p>
+        <p class="fallback" hidden>
+          This figure needs WebGL 2, which this browser doesn't offer.
+        </p>
       </div>
       <div class="zoom" role="group" aria-label="Zoom">
-        <button type="button" data-zoom="in" aria-label="Zoom in">+</button>
-        <button type="button" data-zoom="out" aria-label="Zoom out">−</button>
+        <button type="button" data-zoom="in" aria-label="Zoom in">
+          +
+        </button>
+        <button type="button" data-zoom="out" aria-label="Zoom out">
+          −
+        </button>
       </div>
       <p class="caption">
         <b>Fig. 1.</b> The Earth, with each region’s limit drawn as its reply comes in. Drag to turn it.
@@ -35,7 +49,9 @@ import { STATIONS } from './_stations';
 
     <section class="text">
       <header>
-        <a class="home" href="/">thesandbox.page</a>
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
         <h1>As the light flies</h1>
         <p class="deck">
           Light in glass covers about 200 km a millisecond. A server that answers you in 20 ms, there and back, can’t be
@@ -45,8 +61,12 @@ import { STATIONS } from './_stations';
       </header>
 
       <div class="controls">
-        <button type="button" class="go">Time the replies</button>
-        <button type="button" class="pretend">Pretend you’re elsewhere</button>
+        <button type="button" class="go">
+          Time the replies
+        </button>
+        <button type="button" class="pretend">
+          Pretend you’re elsewhere
+        </button>
       </div>
 
       <div class="readout" aria-live="polite">
@@ -56,13 +76,21 @@ import { STATIONS } from './_stations';
           site does. The timings stay here.
         </p>
         <p class="actions" hidden>
-          <button type="button" class="again">Time them again</button>
-          <button type="button" class="locate">Check against where I am</button>
+          <button type="button" class="again">
+            Time them again
+          </button>
+          <button type="button" class="locate">
+            Check against where I am
+          </button>
         </p>
       </div>
 
       <figure class="chart">
-        <svg class="plot" viewBox="0 0 400 220" role="img" aria-label="Round trip against distance for every reply"
+        <svg
+          class="plot"
+          viewBox="0 0 400 220"
+          role="img"
+          aria-label="Round trip against distance for every reply"
         ></svg>
         <figcaption>
           <b>Fig. 2.</b> Each reply against its region’s distance from the marked spot. Nothing falls below the line of
@@ -78,10 +106,12 @@ import { STATIONS } from './_stations';
           <h3>Light in glass</h3>
           <p>
             Signals cross the world as light in optical fibre, which slows it to about two thirds of its speed in a
-            vacuum: roughly 200 km every millisecond. A round trip has to go there and back, so each millisecond of reply
-            allows at most 100 km between you and the server. Nothing in a reply can make it come back sooner.
+            vacuum: roughly 200 km every millisecond. A round trip has to go there and back, so each millisecond of
+            reply allows at most 100 km between you and the server. Nothing in a reply can make it come back sooner.
           </p>
-          <p class="eq"><i>d</i> ≤ ½ · <i>t</i> · ⅔<i>c</i> ≈ <i>t</i> × 100 km/ms</p>
+          <p class="eq">
+            <i>d</i> ≤ ½ · <i>t</i> · ⅔<i>c</i> ≈ <i>t</i> × 100 km/ms
+          </p>
         </div>
         <div>
           <h3>Circles that must overlap</h3>
@@ -95,10 +125,10 @@ import { STATIONS } from './_stations';
         <div>
           <h3>Slower than light</h3>
           <p>
-            Real replies are slower. Cables follow coasts and meet at exchanges, and part of every reply is spent at your
-            end: your Wi-Fi, your provider’s first hops, the server’s moment to answer. So for every spot on the globe the
-            page fits a line, a shared delay plus so many milliseconds per kilometre, and keeps the spot where the replies
-            sit closest along it, counting slow outliers for less, since a detour only ever adds time.
+            Real replies are slower. Cables follow coasts and meet at exchanges, and part of every reply is spent at
+            your end: your Wi-Fi, your provider’s first hops, the server’s moment to answer. So for every spot on the
+            globe the page fits a line, a shared delay plus so many milliseconds per kilometre, and keeps the spot where
+            the replies sit closest along it, counting slow outliers for less, since a detour only ever adds time.
           </p>
         </div>
         <div>
@@ -113,18 +143,16 @@ import { STATIONS } from './_stations';
 
       <h3 class="ledger-title">The replies</h3>
       <ol class="ledger">
-        {
-          STATIONS.map((s) => (
-            <li data-id={s.id}>
-              <span class="where">
-                {s.name}
-                <small>{s.where}</small>
-              </span>
-              <span class="rtt">–</span>
-              <span class="km">–</span>
-            </li>
-          ))
-        }
+        {STATIONS.map((s) => (
+          <li data-id={s.id}>
+            <span class="where">
+              {s.name}
+              <small>{s.where}</small>
+            </span>
+            <span class="rtt">–</span>
+            <span class="km">–</span>
+          </li>
+        ))}
       </ol>
       <p class="credits">
         Land from Natural Earth, through world-atlas. The regions answer a health check that Amazon keeps open to any
