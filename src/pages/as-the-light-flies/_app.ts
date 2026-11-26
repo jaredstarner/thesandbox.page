@@ -72,6 +72,7 @@ export function start(root: HTMLElement): void {
   const labelLayer = q<HTMLElement>('.labels');
   const probeEl = q<HTMLElement>('.probe');
   const truthEl = q<HTMLElement>('.truth');
+  const bestEl = q<HTMLElement>('.best');
   const clock = q<HTMLElement>('.clock');
   const clockT = q<HTMLElement>('.clock-t b');
   const clockD = q<HTMLElement>('.clock-d b');
@@ -347,13 +348,13 @@ export function start(root: HTMLElement): void {
     if (source === 'real') {
       const firstI = rtt.reduce((b, t, i) => (t > 0 && (b < 0 || t < rtt[b]) ? i : b), -1);
       lead.textContent = `Light puts you in the clear patch, ${area(sol.feasibleKm2)}. The replies line up best ${where}, give or take ${spread} km.`;
-      detail.textContent = `${STATIONS[firstI].name} answered first, in ${fmtMs(rtt[firstI])}. About ${Math.round(fit.a)} ms of every reply was spent at your end before distance counted at all; past that, the replies took ${stretch} times as long as light in glass would on a straight line.`;
+      detail.textContent = `${STATIONS[firstI].name} answered first, in ${fmtMs(rtt[firstI])}. About ${Math.round(fit.a)} ms of each reply was spent at your end; past that, replies took ${stretch} times as long as light in glass on a straight line.`;
     } else if (truth) {
       const err = kmBetween(truth, sol.best);
       const [tl, to] = toLatLon(truth);
       const inside = sol.feasible[rowCol(sol, tl, to)] === 1;
       lead.textContent = `Light puts them in the clear patch, ${area(sol.feasibleKm2)}. The replies line up best ${where}; they were standing ${NUMBER.format(roundTo(err))} km from there.`;
-      detail.textContent = `${inside ? 'They were inside the clear patch, as anyone always is.' : 'They were just outside the clear patch, where its edge is drawn coarser than the globe.'} The made-up replies carried ${Math.round(fit.a)} ms at their end, routes up to twice as long as straight lines, and the odd detour.`;
+      detail.textContent = `${inside ? 'They were inside the clear patch, as anyone must be: no reply outruns light.' : 'They were just outside the clear patch, where its edge is drawn coarser than the globe.'} The made-up replies carried ${Math.round(fit.a)} ms at their end, routes up to twice as long as straight lines, and the odd detour.`;
       truthEl.hidden = false;
       truthEl.querySelector('span')!.textContent = 'They stood here';
     }
@@ -488,21 +489,43 @@ export function start(root: HTMLElement): void {
       return ta - tb || a - b;
     });
     const { w, h } = globe.size;
+    const proj = VECS.map((v) => globe!.project(v));
+    // Every dot keeps a small clearing, so no label lands on another region, and so do the markers.
+    for (const p of proj) if (p.z > 0.12) boxes.push([p.x - 4, p.y - 4, 8, 8]);
+    const keepClear = (v: Vec3 | null, wide: number) => {
+      if (!v) return;
+      const p = globe!.project(v);
+      if (p.z > 0) boxes.push([p.x - 12, p.y - 12, wide, 34]);
+    };
+    if (sol && mode === 'done') {
+      const p = globe.project(sol.best);
+      if (p.z > 0) boxes.push([p.x - 72, p.y - 24, 84, 36]);
+    }
+    if (truth && !truthEl.hidden) keepClear(truth, 120);
     for (const i of order) {
       const { span, em } = labels[i];
-      const p = globe.project(VECS[i]);
+      const p = proj[i];
       const stopped = rtt[i] > 0 && (mode === 'done' || (mode === 'replay' && scene.grow >= rtt[i]));
       em.textContent = stopped ? fmtMs(rtt[i]) : '';
       const width = STATIONS[i].name.length * 7.4 + (stopped ? 46 : 0);
-      const x = p.x + 7;
-      const y = p.y - 7;
-      const box: [number, number, number, number] = [x - 2, y - 2, width + 4, 16];
-      const clash = boxes.some(([bx, by, bw, bh]) => x < bx + bw && bx < x + width && y < by + bh && by < y + 14);
-      const show = p.z > 0.12 && x > -20 && x < w && y > -10 && y < h && (!clash || i === scene.hot);
+      // Right of the dot if there's room, else left, above, or below.
+      const spots: [number, number][] = [
+        [p.x + 7, p.y - 6],
+        [p.x - 7 - width, p.y - 6],
+        [p.x - width / 2, p.y - 21],
+        [p.x - width / 2, p.y + 8],
+      ];
+      const free = (x: number, y: number) =>
+        !boxes.some(([bx, by, bw, bh]) => x < bx + bw && bx < x + width && y < by + bh && by < y + 13);
+      const inFrame = (x: number, y: number) => x > 2 && x + width < w - 2 && y > 2 && y + 14 < h - 2;
+      const spot = spots.find(([x, y]) => inFrame(x, y) && free(x, y)) ?? (i === scene.hot ? spots[0] : null);
+      const show = !!spot && p.z > 0.12 && p.x > -20 && p.x < w + 20 && p.y > -10 && p.y < h + 10;
       span.style.opacity = show ? (p.z < 0.3 ? String((p.z - 0.12) / 0.18) : '1') : '0';
-      span.style.setProperty('--x', `${x.toFixed(1)}px`);
-      span.style.setProperty('--y', `${(y - 6).toFixed(1)}px`);
-      if (show) boxes.push(box);
+      if (spot) {
+        span.style.setProperty('--x', `${spot[0].toFixed(1)}px`);
+        span.style.setProperty('--y', `${(spot[1] - 6).toFixed(1)}px`);
+      }
+      if (show && spot) boxes.push([spot[0] - 2, spot[1] - 2, width + 4, 16]);
     }
     const put = (el: HTMLElement, v: Vec3 | null) => {
       if (!v) return;
@@ -512,6 +535,8 @@ export function start(root: HTMLElement): void {
       el.style.opacity = p.z > 0 ? '1' : '0';
     };
     put(truthEl, truth);
+    bestEl.hidden = !(sol && mode === 'done');
+    put(bestEl, sol ? sol.best : null);
     probeEl.hidden = !(probe && mode === 'done' && !located);
     put(probeEl, probe);
   };
