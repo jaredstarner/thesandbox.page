@@ -345,6 +345,31 @@ export const TECHNIQUES: Record<string, Technique> = {
     webFeature: 'customizable-select',
     test: () => supports('appearance: base-select', 'appearance: base-select'),
   },
+  'exclusive-accordion': {
+    label: 'Exclusive accordions (<details name>)',
+    webFeature: 'details-name',
+    test: () =>
+      present(
+        typeof HTMLDetailsElement !== 'undefined' && 'name' in HTMLDetailsElement.prototype,
+        'details elements take a name',
+        'details elements ignore name; several can open at once',
+      ),
+  },
+  'field-sizing': {
+    label: 'field-sizing',
+    webFeature: 'field-sizing',
+    test: () => supports('field-sizing: content', 'field-sizing: content'),
+  },
+  'scroll-snap': {
+    label: 'Scroll snap',
+    webFeature: 'scroll-snap',
+    test: () => supports('scroll-snap-type: x mandatory', 'scroll-snap-type: x mandatory'),
+  },
+  'resize-observer': {
+    label: 'ResizeObserver',
+    webFeature: 'resize-observer',
+    test: () => present(typeof ResizeObserver === 'function', 'ResizeObserver present', 'ResizeObserver missing'),
+  },
   wasm: {
     label: 'WebAssembly',
     webFeature: 'wasm',
@@ -596,6 +621,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   'single-line-fonts': { label: 'Single-line fonts' },
   'text-parser': { label: 'Text parser' },
   'procedural-text': { label: 'Procedural text' },
+  'layout-physics': { label: 'Physics on the page layout' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

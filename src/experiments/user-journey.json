@@ -1,0 +1,20 @@
+{
+  "title": "User journey",
+  "summary": "A start-up's landing page with one tiny user walking down it from the hero to the sign-up form, standing on whatever the layout puts under their feet: drag the page narrower or wider, open the right question in the FAQ, ride a testimonial across the carousel, flip the pricing to yearly and back, and type a name long enough to cross.",
+  "date": "2026-11-25",
+  "tags": [
+    "css",
+    "container-queries",
+    "has",
+    "exclusive-accordion",
+    "field-sizing",
+    "scroll-snap",
+    "resize-observer",
+    "pointer-events",
+    "web-audio",
+    "game",
+    "layout-physics"
+  ],
+  "requires": ["container-queries"],
+  "plot": 55
+}

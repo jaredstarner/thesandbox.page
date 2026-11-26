@@ -1,0 +1,2055 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+
+const description =
+  'A landing page with one tiny user walking down it to the sign-up form: resize the page, open the FAQ, scroll the reviews, flip the pricing, and type a name to get them there.';
+
+const logos = [
+  { name: 'Gloamwork', mark: 'moon' },
+  { name: 'Bramblecast', mark: 'leaf' },
+  { name: 'Okrafold', mark: 'fold' },
+  { name: 'Lumenly', mark: 'sun' },
+  { name: 'Pebbleside', mark: 'pebble' },
+  { name: 'Kilnhaus', mark: 'arch' },
+  { name: 'Tidewell', mark: 'wave' },
+  { name: 'Marrowlight', mark: 'spark' },
+];
+
+// The FAQ zigzags down the page: L cards hang from the left edge, R cards from the right. Open, a card
+// stretches wall to wall, which is the only way across the two places where a step is missing.
+const faq = [
+  {
+    side: 'l',
+    q: 'What is Footpath?',
+    a: "A landing page that walks one user all the way from hello to signed up. They're standing on this question right now.",
+  },
+  {
+    side: 'r',
+    q: 'Does it work on every screen?',
+    a: 'Every width from 360 to 1120 pixels. Make the page narrower or wider and the whole thing reflows to fit.',
+  },
+  {
+    side: 'r',
+    q: 'Can I catch a user who falls?',
+    a: 'Yes. Open an answer and its card stretches the full width of the page, right under their feet.',
+  },
+  {
+    side: 'l',
+    q: 'Is there a free plan?',
+    a: "There is. It's called Starter, and it's a little further down the page.",
+  },
+  {
+    side: 'l',
+    q: 'Why does opening one answer close another?',
+    a: 'Only one answer stays open. Open the next and the last one shuts, and anyone standing on it steps down.',
+  },
+  {
+    side: 'r',
+    q: 'Do you keep my data?',
+    a: "We only ever ask for a name, and we forget it the moment you leave. That's the whole policy.",
+  },
+  {
+    side: 'l',
+    q: 'How do I cancel?',
+    a: 'Close the tab. No hard feelings, and no exit survey.',
+  },
+];
+
+const reviews = [
+  { q: 'I came for the hero section and stayed for the pricing table.', who: 'Dana R.', tone: 'coral' },
+  { q: 'Smoothest ride I have ever had on a carousel.', who: 'Theo M.', tone: 'lilac' },
+  { q: 'Honestly, I just kept walking and it all worked out.', who: 'Priya S.', tone: 'lime' },
+  { q: 'Fell off the FAQ twice. Third time, nailed it.', who: 'Sam K.', tone: 'ink' },
+  { q: 'Every button I stood on was a real button on a real page.', who: 'Lou A.', tone: 'coral' },
+  { q: 'The yearly plan really lifted me up.', who: 'Ines V.', tone: 'lilac' },
+  { q: "I didn't read a single word and I still signed up.", who: 'Max O.', tone: 'lime' },
+  { q: 'Ten out of ten. Would be scrolled again.', who: 'Ana B.', tone: 'ink' },
+];
+
+const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
+---
+
+<Bare title="User journey" description={description}>
+  <Font cssVariable="--font-uj-sans" slot="head" />
+  <Font cssVariable="--font-uj-mono" slot="head" />
+  <div class="uj" data-uj>
+    <header class="bar">
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
+      <span class="title">User journey</span>
+      <ol class="steps" data-steps aria-label="Progress">
+        {steps.map((s, i) => (
+          <li data-step={i + 1}>{s}</li>
+        ))}
+      </ol>
+      <div class="controls">
+        <label class="width">
+          <span class="width-label">Page width</span>
+          <input type="range" min="360" max="1120" step="1" value="1040" data-width aria-label="Page width" />
+          <output data-width-out>1040</output>
+        </label>
+        <button type="button" class="go" data-go aria-keyshortcuts="Space">
+          Go
+        </button>
+        <span class="falls" data-falls>
+          0 falls
+        </span>
+        <button type="button" class="icon" data-sound aria-pressed="true" title="Sound">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M3 8h3l4-3.5v11L6 12H3z"></path>
+            <path class="wave" d="M13 7.2a4 4 0 0 1 0 5.6M15.4 5a7 7 0 0 1 0 10"></path>
+          </svg>
+          <span class="sr">Sound</span>
+        </button>
+        <button type="button" class="icon about-btn" popovertarget="uj-about" title="How it works">
+          ?
+        </button>
+      </div>
+    </header>
+
+    <div class="about" id="uj-about" popover>
+      <h2>How it works</h2>
+      <p>
+        Everything the user stands on is part of the page: buttons, logos, answers, review cards, pricing plans, and a
+        form field, all laid out by your browser's own CSS. Many times a second the page asks the browser where each one
+        ended up, and the user walks on top of whatever is there.
+      </p>
+      <p>
+        They walk until they meet a wall, step up anything shorter than their knees, and fall off edges. A short drop is
+        fine; a long one isn't. So change the page under them: make it narrower or wider, open answers, scroll, flip the
+        switch, type.
+      </p>
+      <p class="keys">
+        <kbd>Space</kbd> goes and pauses. Drag either edge of the page, or use the width slider.
+      </p>
+      <button type="button" popovertarget="uj-about" popovertargetaction="hide">
+        Got it
+      </button>
+    </div>
+
+    <div class="stage" data-stage>
+      <div class="frame" data-frame>
+        <div class="handle left" data-handle="-1" aria-hidden="true">
+          <span></span>
+        </div>
+        <div class="handle right" data-handle="1" aria-hidden="true">
+          <span></span>
+        </div>
+        <div class="site" data-site>
+          <nav class="nav">
+            <span class="brand">
+              <svg viewBox="0 0 28 28" aria-hidden="true">
+                <ellipse cx="9.5" cy="16" rx="4.2" ry="6.4" transform="rotate(-12 9.5 16)"></ellipse>
+                <ellipse cx="18.5" cy="11" rx="4.2" ry="6.4" transform="rotate(12 18.5 11)"></ellipse>
+              </svg>
+              Footpath
+            </span>
+            <span class="links">
+              <span>Product</span>
+              <span>Customers</span>
+              <span>Pricing</span>
+              <span>Docs</span>
+            </span>
+            <span class="nav-end">
+              <span class="signin">Sign in</span>
+              <span class="nav-cta">Get started</span>
+            </span>
+          </nav>
+
+          <section class="hero" data-section="1">
+            <span class="pill">
+              <b>New</b> Works at every width
+            </span>
+            <h1>Get every user from hello to signed&nbsp;up.</h1>
+            <p class="lede">
+              Footpath fits every screen. Make this page narrower until the two buttons meet, then press Go.
+            </p>
+            <div class="cta-wrap">
+              <div class="cta">
+                <span class="btn primary" data-solid data-spawn="left">
+                  Start free
+                </span>
+                <span class="btn ghost" data-solid>
+                  Book a demo
+                </span>
+              </div>
+              <span class="chip hero-chip" data-solid>
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M3.5 8.5l3 3 6-7"></path>
+                </svg>{' '}
+                No card needed
+              </span>
+            </div>
+          </section>
+
+          <section class="logos" data-section="2">
+            <p class="eyebrow">Trusted by eight teams, as long as they all fit on one line</p>
+            <ul class="wall" data-spawn="right">
+              {logos.map((l) => (
+                <li data-solid class={`logo ${l.mark}`}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    {l.mark === 'moon' && <path d="M15 3a9 9 0 1 0 6 15A7.5 7.5 0 0 1 15 3z" />}
+                    {l.mark === 'leaf' && <path d="M4 20C4 9 11 4 20 4c0 9-5 16-16 16zm0 0l9-9" />}
+                    {l.mark === 'fold' && <path d="M3 6l9-3 9 3v12l-9 3-9-3zM12 3v18" />}
+                    {l.mark === 'sun' && <circle cx="12" cy="12" r="5" />}
+                    {l.mark === 'sun' && (
+                      <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" />
+                    )}
+                    {l.mark === 'pebble' && <ellipse cx="12" cy="13" rx="9" ry="7" />}
+                    {l.mark === 'arch' && <path d="M4 21V11a8 8 0 0 1 16 0v10h-5v-9a3 3 0 0 0-6 0v9z" />}
+                    {l.mark === 'wave' && (
+                      <path d="M2 9c3-3 5-3 8 0s5 3 8 0 4-2 4-2M2 16c3-3 5-3 8 0s5 3 8 0 4-2 4-2" />
+                    )}
+                    {l.mark === 'spark' && <path d="M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5z" />}
+                  </svg>
+                  <span>{l.name}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section class="faq" data-section="3">
+            <div class="faq-head">
+              <h2>Questions, answered.</h2>
+              <p>Open one to put a floor under a falling user.</p>
+            </div>
+            {faq.map((f, i) => (
+              <details name="faq" class={`q ${f.side}`} data-solid data-spawn={i === 0 ? 'left' : undefined}>
+                <summary>
+                  <span class="q-text">{f.q}</span>
+                  <span class="q-icon" aria-hidden="true" />
+                </summary>
+                <div class="a">
+                  <p>{f.a}</p>
+                </div>
+              </details>
+            ))}
+          </section>
+
+          <section class="love" data-section="4">
+            <div class="rating" data-solid>
+              <span class="stars" aria-hidden="true">
+                ★★★★★
+              </span>
+              <b>4.9</b>
+              <span class="rating-text">from users who made it this far. Scroll the reviews to give them a ride.</span>
+            </div>
+            <div class="carousel">
+              <button type="button" class="arrow prev" data-prev data-solid aria-label="Previous reviews">
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M12.5 4l-6 6 6 6"></path>
+                </svg>
+              </button>
+              <div class="track" data-track data-clip tabindex="0" aria-label="Reviews">
+                {reviews.map((r) => (
+                  <figure class={`card ${r.tone}`} data-solid>
+                    <blockquote>{r.q}</blockquote>
+                    <figcaption>
+                      <span class="avatar" aria-hidden="true">
+                        {r.who
+                          .split(' ')
+                          .map((p) => p[0])
+                          .join('')}
+                      </span>
+                      <span>
+                        {r.who}
+                        <small>Verified user</small>
+                      </span>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+              <button
+                type="button"
+                class="arrow next"
+                data-next
+                data-solid
+                data-spawn="right"
+                aria-label="Next reviews"
+              >
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M7.5 4l6 6-6 6"></path>
+                </svg>
+              </button>
+            </div>
+          </section>
+
+          <section class="pricing" data-section="5" data-pricing>
+            <div class="plans">
+              <div class="intro" data-solid data-spawn="left">
+                <p class="eyebrow">Pricing</p>
+                <h2>Some plans stand taller than others.</h2>
+                <label class="switch">
+                  <span class="m">Monthly</span>
+                  <input type="checkbox" role="switch" data-billing aria-label="Bill yearly" />
+                  <span class="y">
+                    Yearly <em>-20%</em>
+                  </span>
+                </label>
+              </div>
+              <article class="plan starter" data-solid>
+                <h3>Starter</h3>
+                <p class="price">
+                  <b>$0</b>
+                </p>
+                <p class="feat">One user. Just the one.</p>
+              </article>
+              <article class="plan pro" data-solid>
+                <span class="badge">Most popular</span>
+                <h3>Pro</h3>
+                <p class="price">
+                  <b class="mo">$12</b>
+                  <b class="yr">$10</b>
+                  <span>/mo</span>
+                </p>
+                <p class="feat">Every page, every width.</p>
+              </article>
+              <article class="plan team" data-solid>
+                <h3>Team</h3>
+                <p class="price">
+                  <b class="mo">$29</b>
+                  <b class="yr">$23</b>
+                  <span>/mo</span>
+                </p>
+                <p class="feat">Users who walk in groups.</p>
+                <p class="feat extra">Billed yearly, with onboarding, a shared FAQ, and a carousel of your own.</p>
+              </article>
+            </div>
+            <span class="chip price-chip" data-solid>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M3.5 8.5l3 3 6-7"></path>
+              </svg>{' '}
+              Cancel anytime
+            </span>
+          </section>
+
+          <section class="signup" data-section="6">
+            <div class="signup-head">
+              <h2>Ready when you are.</h2>
+              <p>What should we call you? Long names reach further.</p>
+            </div>
+            <div class="form">
+              <input
+                class="name"
+                data-name
+                data-solid
+                type="text"
+                maxlength="48"
+                placeholder="Name"
+                aria-label="Your name"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <span class="btn join" data-solid data-spawn="right">
+                Join
+              </span>
+            </div>
+            <div class="mat" data-solid data-goal>
+              <span>Welcome</span>
+            </div>
+          </section>
+
+          <footer class="foot">
+            <div class="foot-brand">
+              <b>Footpath</b>
+              <span>Made for one user at a time.</span>
+            </div>
+            <div class="foot-cols" aria-hidden="true">
+              <span>
+                <b>Product</b>Features
+                <br />
+                Pricing
+                <br />
+                Changelog
+              </span>
+              <span>
+                <b>Company</b>About
+                <br />
+                Careers
+                <br />
+                Press
+              </span>
+              <span>
+                <b>Legal</b>Privacy
+                <br />
+                Terms
+              </span>
+            </div>
+            <a class="foot-home" href="/">
+              Back to thesandbox.page
+            </a>
+          </footer>
+
+          <div class="walker" data-walker aria-hidden="true">
+            <svg viewBox="0 0 16 26" class="figure">
+              <ellipse class="shadow" cx="8" cy="25.9" rx="5.6" ry="1.3"></ellipse>
+              <g class="legs">
+                <path class="leg back" d="M8 18.5v7"></path>
+                <path class="leg front" d="M8 18.5v7"></path>
+              </g>
+              <path class="body" d="M2.2 19.2c0-4.6 2.6-7.4 5.8-7.4s5.8 2.8 5.8 7.4z"></path>
+              <circle class="head" cx="8" cy="6.6" r="4.4"></circle>
+            </svg>
+          </div>
+        </div>
+        <button type="button" class="bubble" data-bubble hidden>
+          <svg viewBox="0 0 12 12" aria-hidden="true">
+            <path d="M3 2l7 4-7 4z"></path>
+          </svg>
+          <span data-bubble-text>Go</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="finale" data-finale hidden>
+      <div class="finale-card">
+        <p class="eyebrow">Converted</p>
+        <h2 data-finale-title>Welcome aboard.</h2>
+        <dl>
+          <div>
+            <dt>Time on page</dt>
+            <dd data-stat-time>0:00</dd>
+          </div>
+          <div>
+            <dt>Falls</dt>
+            <dd data-stat-falls>0</dd>
+          </div>
+          <div>
+            <dt>Widths tried</dt>
+            <dd data-stat-widths>0</dd>
+          </div>
+        </dl>
+        <button type="button" class="again" data-again>
+          Walk it again
+        </button>
+      </div>
+    </div>
+  </div>
+</Bare>
+
+<style>
+  :global(body:has(.uj)) {
+    margin: 0;
+    background: #121216;
+  }
+
+  .uj {
+    --ink: #17161d;
+    --cream: #fbf8f1;
+    --paper: #ffffff;
+    --coral: #ff5b3a;
+    --coral-deep: #e8431f;
+    --lilac: #ece7ff;
+    --violet: #5b49e0;
+    --lime: #d9f46a;
+    --line: #e7e1d3;
+    --muted: #686574;
+    --chrome: #1c1c22;
+    --chrome-line: #2c2c35;
+    --chrome-text: #e9e8ee;
+    --chrome-dim: #8f8d9b;
+    font-family: var(--font-uj-sans);
+    color: var(--chrome-text);
+    min-height: 100vh;
+    background-color: #121216;
+    background-image: radial-gradient(circle at 1px 1px, #2b2b33 1px, transparent 1.2px);
+    background-size: 22px 22px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .uj *,
+  .uj *::before,
+  .uj *::after {
+    box-sizing: border-box;
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  /* The toolbar: the workbench around the page, not part of it. */
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    height: 56px;
+    padding: 0 16px;
+    background: rgb(28 28 34 / 0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--chrome-line);
+    font-size: 13px;
+  }
+
+  .home {
+    color: var(--chrome-dim);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .home:hover {
+    color: var(--chrome-text);
+  }
+
+  .home::before {
+    content: '← ';
+  }
+
+  .title {
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .steps {
+    display: flex;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .steps li {
+    counter-increment: step;
+    padding: 4px 9px;
+    border-radius: 99px;
+    color: var(--chrome-dim);
+    background: #24242b;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .steps li::before {
+    content: counter(step) ' ';
+    font-family: var(--font-uj-mono);
+    opacity: 0.7;
+  }
+
+  .steps li[data-state='done'] {
+    color: #b9b7c4;
+    background: #2a2a33;
+    text-decoration: line-through;
+    text-decoration-color: rgb(255 255 255 / 0.25);
+  }
+
+  .steps li[data-state='now'] {
+    color: var(--ink);
+    background: var(--lime);
+    font-weight: 700;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+  }
+
+  .width {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--chrome-dim);
+  }
+
+  .width input {
+    width: 150px;
+    accent-color: var(--lime);
+  }
+
+  .width output {
+    min-width: 6.2ch;
+    padding: 3px 7px;
+    border-radius: 6px;
+    background: #24242b;
+    color: var(--chrome-text);
+    font-family: var(--font-uj-mono);
+    font-size: 12px;
+    text-align: right;
+  }
+
+  .width output::after {
+    content: 'px';
+    margin-left: 2px;
+    color: var(--chrome-dim);
+  }
+
+  .go {
+    min-width: 76px;
+    height: 34px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 99px;
+    background: var(--coral);
+    color: #fff;
+    font: 700 13px var(--font-uj-sans);
+    cursor: pointer;
+  }
+
+  .go:hover {
+    background: var(--coral-deep);
+  }
+
+  .go[data-mode='pause'] {
+    background: #34343e;
+  }
+
+  .falls {
+    min-width: 7ch;
+    padding: 3px 6px;
+    border-radius: 6px;
+    color: var(--chrome-dim);
+    transition:
+      background 0.6s,
+      color 0.6s;
+    font-family: var(--font-uj-mono);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .falls[data-flash] {
+    background: var(--coral);
+    color: #fff;
+    transition: none;
+  }
+
+  .icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--chrome-line);
+    border-radius: 99px;
+    background: transparent;
+    color: var(--chrome-text);
+    font: 700 14px var(--font-uj-sans);
+    cursor: pointer;
+  }
+
+  .icon svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .icon svg path:first-child {
+    fill: currentColor;
+  }
+
+  .icon[aria-pressed='false'] .wave {
+    opacity: 0.2;
+  }
+
+  .about {
+    width: min(460px, calc(100% - 32px));
+    padding: 24px 26px 22px;
+    border: 1px solid var(--chrome-line);
+    border-radius: 18px;
+    background: var(--chrome);
+    color: var(--chrome-text);
+    font-size: 14px;
+    line-height: 1.6;
+    box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.6);
+  }
+
+  .about::backdrop {
+    background: rgb(10 10 14 / 0.5);
+  }
+
+  .about h2 {
+    margin: 0 0 10px;
+    font-size: 18px;
+  }
+
+  .about p {
+    margin: 0 0 12px;
+    color: #c9c7d3;
+  }
+
+  .about kbd {
+    padding: 1px 6px;
+    border: 1px solid var(--chrome-line);
+    border-radius: 5px;
+    font-family: var(--font-uj-mono);
+    font-size: 12px;
+  }
+
+  .about button {
+    margin-top: 4px;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 99px;
+    background: var(--lime);
+    color: var(--ink);
+    font: 700 13px var(--font-uj-sans);
+    cursor: pointer;
+  }
+
+  /* The stage holds the page at its own width, scaled down to fit when the window is narrower. */
+  .stage {
+    padding: 28px 24px 120px;
+    overflow: hidden;
+  }
+
+  .frame {
+    position: relative;
+    margin: 0 auto;
+  }
+
+  .handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 18px;
+    cursor: ew-resize;
+    touch-action: none;
+  }
+
+  .handle.left {
+    left: -20px;
+  }
+
+  .handle.right {
+    right: -20px;
+  }
+
+  .handle span {
+    position: sticky;
+    top: 45vh;
+    display: block;
+    width: 6px;
+    height: 56px;
+    margin: 0 auto;
+    border-radius: 99px;
+    background: #4a4a56;
+    transition: background 0.15s;
+  }
+
+  .handle:hover span,
+  .handle[data-drag] span {
+    background: var(--lime);
+  }
+
+  .site {
+    position: relative;
+    width: 1040px;
+    overflow: clip;
+    container: site / inline-size;
+    background: var(--cream);
+    color: var(--ink);
+    border-radius: 14px;
+    transform-origin: 0 0;
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.06),
+      0 40px 90px -30px rgb(0 0 0 / 0.7);
+  }
+
+  .site h1,
+  .site h2,
+  .site h3,
+  .site p {
+    margin: 0;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    height: 68px;
+    padding: 0 32px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink);
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .brand svg {
+    width: 26px;
+    height: 26px;
+    fill: var(--coral);
+  }
+
+  .links {
+    display: flex;
+    gap: 22px;
+  }
+
+  .nav-end {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-left: auto;
+  }
+
+  .nav-cta {
+    padding: 8px 14px;
+    border-radius: 99px;
+    background: var(--ink);
+    color: var(--cream);
+    font-weight: 600;
+  }
+
+  @container site (width < 760px) {
+    .links {
+      display: none;
+    }
+  }
+
+  @container site (width < 460px) {
+    .signin {
+      display: none;
+    }
+  }
+
+  /* 1. Hero. The two buttons sit at opposite ends of their row until the page is narrow enough for them to meet. */
+  .hero {
+    position: relative;
+    padding: 56px 40px 0;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: -40px -10% auto 30%;
+    height: 520px;
+    background:
+      radial-gradient(closest-side at 70% 40%, rgb(255 91 58 / 0.16), transparent),
+      radial-gradient(closest-side at 35% 60%, rgb(91 73 224 / 0.12), transparent);
+    pointer-events: none;
+  }
+
+  .pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px 5px 5px;
+    border-radius: 99px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .pill b {
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: var(--ink);
+    color: var(--lime);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    position: relative;
+    max-width: 13ch;
+    margin-top: 20px;
+    font-size: clamp(38px, 7cqi, 78px);
+    font-weight: 800;
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+  }
+
+  .lede {
+    position: relative;
+    max-width: 44ch;
+    margin-top: 30px;
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  .cta-wrap {
+    position: relative;
+    height: 52px;
+    margin: 64px -40px 0 0;
+  }
+
+  .cta {
+    display: flex;
+    justify-content: space-between;
+    margin-right: 96px;
+  }
+
+  .btn {
+    display: grid;
+    place-items: center;
+    flex: 0 1 176px;
+    min-width: 0;
+    height: 52px;
+    overflow: hidden;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .btn.primary {
+    background: var(--coral);
+    color: #fff;
+    box-shadow: 0 10px 24px -12px rgb(232 67 31 / 0.8);
+  }
+
+  .btn.ghost {
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+  }
+
+  .chip {
+    position: absolute;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 99px 0 0 99px;
+    background: var(--lime);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .chip svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .hero-chip {
+    top: 92px;
+    width: 168px;
+  }
+
+  /* 2. Logos. Eight tiles that grow to fill each row; wrapped onto two rows, the drop past them is too far. */
+  .logos {
+    padding: 84px 24px 0;
+  }
+
+  .eyebrow {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 20px;
+    text-transform: uppercase;
+  }
+
+  .logos .eyebrow {
+    height: 20px;
+    margin-bottom: 44px;
+    overflow: hidden;
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .wall {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 1 1 108px;
+    min-width: 0;
+    height: 56px;
+    padding: 0 4px;
+    overflow: hidden;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: var(--cream);
+    color: #4a4754;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .logo + .logo {
+    border-left: 1px solid var(--line);
+  }
+
+  .logo svg {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .logo.sun svg circle,
+  .logo.pebble svg ellipse,
+  .logo.spark svg path,
+  .logo.moon svg path {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .logo:nth-child(odd) {
+    font-family: var(--font-uj-mono);
+    font-weight: 500;
+    font-size: 12.5px;
+    letter-spacing: -0.05em;
+  }
+
+  /* 3. FAQ. Cards hang from alternate edges; an open card runs wall to wall. */
+  .faq {
+    position: relative;
+    padding-top: 68px;
+    interpolate-size: allow-keywords;
+  }
+
+  .faq-head {
+    position: absolute;
+    top: 48px;
+    right: 28px;
+    width: calc(38% - 56px);
+    text-align: right;
+  }
+
+  .faq-head h2 {
+    font-size: clamp(17px, 2.4cqi, 24px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .faq-head p {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  @container site (width < 620px) {
+    .faq-head p {
+      display: none;
+    }
+  }
+
+  .q {
+    width: 62%;
+    margin: 0 0 32px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    transition:
+      width 0.35s cubic-bezier(0.3, 0.7, 0.2, 1),
+      border-radius 0.35s;
+  }
+
+  .q.l {
+    margin-right: auto;
+    border-left: 0;
+    border-radius: 0 16px 16px 0;
+  }
+
+  .q.r {
+    margin-left: auto;
+    border-right: 0;
+    border-radius: 16px 0 0 16px;
+  }
+
+  .q[open] {
+    width: 100%;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    background: var(--lilac);
+    border-color: #d8d0fb;
+  }
+
+  .q summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 48px;
+    padding: 0 20px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .q summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .q.r summary {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+  }
+
+  .q-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .q-icon {
+    position: relative;
+    flex: none;
+    width: 22px;
+    height: 22px;
+    margin-left: auto;
+    border-radius: 99px;
+    background: var(--ink);
+  }
+
+  .q.r .q-icon {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  .q-icon::before,
+  .q-icon::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 6px;
+    width: 10px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--lime);
+    transition: transform 0.3s;
+  }
+
+  .q-icon::after {
+    transform: rotate(90deg);
+  }
+
+  .q[open] .q-icon::after {
+    transform: rotate(0deg);
+  }
+
+  .q::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 0.35s cubic-bezier(0.3, 0.7, 0.2, 1),
+      content-visibility 0.35s allow-discrete;
+  }
+
+  .q[open]::details-content {
+    block-size: auto;
+  }
+
+  .a {
+    height: 96px;
+    padding: 0 20px;
+    overflow: hidden;
+  }
+
+  .a p {
+    max-width: 60ch;
+    color: #3d3a48;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .q.r[open] .a p {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  /* 4. Reviews. The cards snap their right ends to the track's; the arrows are tall enough to stand on. */
+  .love {
+    padding-top: 28px;
+  }
+
+  .rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 44px;
+    margin: 0 40px 0 30%;
+    padding: 0 18px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: var(--ink);
+    color: var(--cream);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .stars {
+    color: var(--lime);
+    letter-spacing: 1px;
+  }
+
+  .rating-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #c9c6d2;
+  }
+
+  .carousel {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) 56px;
+    align-items: start;
+    margin: 26px 0 0 32px;
+  }
+
+  .arrow {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    padding: 0;
+    border: 0;
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+
+  .arrow:hover {
+    background: var(--lime);
+  }
+
+  .arrow svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .arrow.prev {
+    height: 56px;
+    margin-top: 94px;
+    border-radius: 99px;
+  }
+
+  .arrow.next {
+    height: 150px;
+    border-radius: 18px 0 0 18px;
+  }
+
+  .track {
+    display: flex;
+    gap: 24px;
+    height: 166px;
+    overflow: auto hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: #cfc8b8 transparent;
+    overscroll-behavior-x: contain;
+  }
+
+  .track:focus-visible {
+    outline: 2px solid var(--violet);
+    outline-offset: 4px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 0 0 300px;
+    height: 150px;
+    margin: 0;
+    padding: 18px 20px;
+    border-radius: 18px;
+    scroll-snap-align: end;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+
+  .card blockquote {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+  }
+
+  .card blockquote::before {
+    content: '“';
+  }
+
+  .card blockquote::after {
+    content: '”';
+  }
+
+  .card figcaption {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .card small {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .card.coral .avatar {
+    background: var(--coral);
+    color: #fff;
+  }
+
+  .card.lilac .avatar {
+    background: var(--violet);
+    color: #fff;
+  }
+
+  .card.lime .avatar {
+    background: var(--lime);
+    color: var(--ink);
+  }
+
+  .card.ink .avatar {
+    background: var(--ink);
+    color: var(--lime);
+  }
+
+  .card.ink {
+    background: var(--ink);
+    color: var(--cream);
+    box-shadow: none;
+  }
+
+  .card.ink small {
+    color: #a7a4b0;
+  }
+
+  /* 5. Pricing. Heights are set per billing period; the row's height is fixed so the floor never moves. */
+  .pricing {
+    position: relative;
+    height: 304px;
+    padding-top: 64px;
+  }
+
+  .plans {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr 1fr;
+    grid-template-rows: 200px;
+    align-items: end;
+    gap: 6px;
+    padding-right: 32px;
+  }
+
+  .intro,
+  .plan {
+    position: relative;
+    height: 110px;
+    padding: 13px 16px 11px;
+    overflow: hidden;
+    border-radius: 18px;
+    transition: height 0.3s cubic-bezier(0.3, 0.7, 0.2, 1);
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    height: 200px;
+    padding: 18px 18px 16px;
+    border-radius: 0 18px 18px 0;
+    background: var(--ink);
+    color: var(--cream);
+  }
+
+  .intro .eyebrow {
+    color: var(--lime);
+  }
+
+  .intro h2 {
+    margin-top: 8px;
+    font-size: clamp(16px, 2.1cqi, 22px);
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+  }
+
+  .switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .switch input {
+    position: relative;
+    flex: none;
+    width: 44px;
+    height: 26px;
+    margin: 0;
+    border-radius: 99px;
+    background: #3a3944;
+    appearance: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .switch input::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 99px;
+    background: var(--cream);
+    transition: transform 0.2s;
+  }
+
+  .switch input:checked {
+    background: var(--coral);
+  }
+
+  .switch input:checked::before {
+    transform: translateX(18px);
+  }
+
+  .switch input:focus-visible {
+    outline: 2px solid var(--lime);
+    outline-offset: 2px;
+  }
+
+  .switch em {
+    color: var(--lime);
+    font-style: normal;
+  }
+
+  .plan {
+    display: flex;
+    flex-direction: column;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+
+  .plan h3 {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .price {
+    margin-top: 6px !important;
+    font-size: clamp(22px, 3cqi, 32px);
+    letter-spacing: -0.04em;
+  }
+
+  .price b {
+    font-weight: 800;
+  }
+
+  .price span {
+    color: var(--muted);
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+
+  .price .yr {
+    display: none;
+  }
+
+  .feat {
+    margin-top: auto !important;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .feat.extra {
+    display: none;
+  }
+
+  .plan.pro {
+    height: 150px;
+    background: var(--lilac);
+    box-shadow: inset 0 0 0 1.5px var(--violet);
+  }
+
+  .badge {
+    align-self: flex-start;
+    margin-bottom: 10px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    background: var(--violet);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .pricing[data-billing='yearly'] .plan.pro {
+    height: 110px;
+  }
+
+  .pricing[data-billing='yearly'] .plan.pro .badge {
+    display: none;
+  }
+
+  .pricing[data-billing='yearly'] .plan.team {
+    height: 190px;
+    background: var(--ink);
+    color: var(--cream);
+    box-shadow: none;
+  }
+
+  .pricing[data-billing='yearly'] .plan.team .feat {
+    margin-top: 10px !important;
+    color: #b9b6c3;
+  }
+
+  .pricing[data-billing='yearly'] .plan.team .feat.extra {
+    display: block;
+    margin-top: auto !important;
+  }
+
+  .pricing[data-billing='yearly'] .price .mo {
+    display: none;
+  }
+
+  .pricing[data-billing='yearly'] .price .yr {
+    display: inline;
+  }
+
+  .price-chip {
+    top: 294px;
+    width: 160px;
+  }
+
+  @container site (width < 600px) {
+    .plans {
+      grid-template-columns: 1fr;
+      grid-template-rows: none;
+      padding-left: 24px;
+    }
+
+    .pricing {
+      height: auto;
+      padding-bottom: 80px;
+    }
+
+    .price-chip {
+      top: auto;
+      bottom: 20px;
+    }
+  }
+
+  /* 6. Sign up. The name field grows with what is typed until it reaches the button. */
+  .signup {
+    position: relative;
+    height: 300px;
+  }
+
+  .signup-head {
+    height: 100px;
+    padding: 10px 32px 0;
+    overflow: hidden;
+  }
+
+  .signup h2 {
+    font-size: clamp(28px, 4.6cqi, 48px);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+
+  .signup-head p {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .form {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    padding-left: 32px;
+  }
+
+  .name {
+    flex: 0 0 auto;
+    min-width: 3.5ch;
+    max-width: calc(100% - 180px);
+    height: 64px;
+    padding: 0 20px;
+    border: 1.5px solid var(--ink);
+    border-radius: 14px;
+    background: var(--paper);
+    color: var(--ink);
+    font: 700 30px var(--font-uj-sans);
+    letter-spacing: -0.03em;
+    field-sizing: content;
+    outline: none;
+  }
+
+  .name::placeholder {
+    color: #b6b1a6;
+  }
+
+  .name:focus-visible {
+    box-shadow: 0 0 0 4px rgb(91 73 224 / 0.25);
+  }
+
+  .btn.join {
+    flex: 0 0 180px;
+    height: 64px;
+    border-radius: 14px 0 0 14px;
+    background: var(--ink);
+    color: var(--lime);
+    font-size: 18px;
+  }
+
+  .mat {
+    position: absolute;
+    left: 0;
+    top: 210px;
+    display: grid;
+    place-items: center;
+    width: 132px;
+    height: 34px;
+    border-radius: 0 99px 99px 0;
+    background: var(--coral);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .foot {
+    display: grid;
+    grid-template-columns: 1.2fr 2fr;
+    gap: 24px 40px;
+    padding: 48px 40px 40px;
+    background: var(--ink);
+    color: #a9a6b3;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .foot-brand b {
+    display: block;
+    color: var(--cream);
+    font-size: 18px;
+    letter-spacing: -0.03em;
+  }
+
+  .foot-cols {
+    display: flex;
+    gap: 40px;
+  }
+
+  .foot-cols b {
+    display: block;
+    color: var(--cream);
+  }
+
+  .foot-home {
+    grid-column: 1 / -1;
+    color: var(--lime);
+    text-decoration: none;
+  }
+
+  .foot-home:hover {
+    text-decoration: underline;
+  }
+
+  @container site (width < 600px) {
+    .foot {
+      grid-template-columns: 1fr;
+    }
+
+    .foot-cols {
+      gap: 24px;
+    }
+  }
+
+  /* The user. */
+  .walker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    width: 16px;
+    height: 26px;
+    pointer-events: none;
+    transform-origin: 8px 13px;
+    will-change: transform;
+  }
+
+  .uj.instant *,
+  .uj.instant .q::details-content {
+    transition: none !important;
+  }
+
+  .figure {
+    width: 16px;
+    height: 26px;
+    overflow: visible;
+    transform-origin: 50% 100%;
+    filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.9)) drop-shadow(0 2px 3px rgb(23 22 29 / 0.25));
+  }
+
+  .head,
+  .body {
+    fill: #7b8292;
+  }
+
+  .shadow {
+    fill: rgb(23 22 29 / 0.2);
+    transition: opacity 0.15s;
+  }
+
+  .walker[data-mode='falling'] .shadow,
+  .walker[data-mode='splat'] .shadow {
+    opacity: 0;
+  }
+
+  .walker[data-mode='standing'] .leg.front,
+  .walker[data-mode='done'] .leg.front {
+    transform: rotate(-9deg);
+  }
+
+  .walker[data-mode='standing'] .leg.back,
+  .walker[data-mode='done'] .leg.back {
+    transform: rotate(9deg);
+  }
+
+  .leg {
+    stroke: #5d6372;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    transform-origin: 8px 18.5px;
+  }
+
+  .walker[data-mode='walking'] .leg.front {
+    animation: stride 0.46s ease-in-out infinite alternate;
+  }
+
+  .walker[data-mode='walking'] .leg.back {
+    animation: stride 0.46s ease-in-out infinite alternate-reverse;
+  }
+
+  .walker[data-mode='walking'] .figure {
+    animation: bob 0.23s ease-in-out infinite alternate;
+  }
+
+  .walker[data-mode='falling'] .leg.front {
+    transform: rotate(-24deg);
+  }
+
+  .walker[data-mode='falling'] .leg.back {
+    transform: rotate(18deg);
+  }
+
+  .walker[data-mode='splat'] .figure {
+    transform: scale(1.7, 0.28);
+    transition: transform 0.08s ease-out;
+  }
+
+  .walker[data-mode='splat'] .head,
+  .walker[data-mode='splat'] .body {
+    fill: #a2a7b2;
+  }
+
+  .walker[data-spawn]:not([data-mode='splat']) .figure {
+    animation: pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+
+  @keyframes stride {
+    from {
+      transform: rotate(-22deg);
+    }
+
+    to {
+      transform: rotate(22deg);
+    }
+  }
+
+  @keyframes bob {
+    from {
+      translate: 0 0;
+    }
+
+    to {
+      translate: 0 -0.8px;
+    }
+  }
+
+  @keyframes pop {
+    from {
+      transform: scale(0.2);
+      opacity: 0;
+    }
+
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .bubble {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 11px 6px 9px;
+    border: 0;
+    border-radius: 99px;
+    background: var(--ink);
+    color: var(--lime);
+    font: 700 12px var(--font-uj-sans);
+    white-space: nowrap;
+    cursor: pointer;
+    translate: 0 -50%;
+    box-shadow: 0 8px 20px -8px rgb(0 0 0 / 0.5);
+    animation: nudge 1.4s ease-in-out infinite;
+  }
+
+  .bubble[hidden] {
+    display: none;
+  }
+
+  .bubble[data-side='l'] {
+    translate: -100% -50%;
+    animation-name: nudge-l;
+  }
+
+  .bubble::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+    background: var(--ink);
+    rotate: 45deg;
+  }
+
+  .bubble[data-side='l']::after {
+    left: auto;
+    right: -3px;
+  }
+
+  .bubble svg {
+    width: 10px;
+    height: 10px;
+    fill: currentColor;
+  }
+
+  @keyframes nudge {
+    50% {
+      translate: 3px -50%;
+    }
+  }
+
+  @keyframes nudge-l {
+    50% {
+      translate: calc(-100% - 3px) -50%;
+    }
+  }
+
+  .finale {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: rgb(12 12 16 / 0.55);
+    backdrop-filter: blur(3px);
+  }
+
+  .finale[hidden] {
+    display: none;
+  }
+
+  .finale-card {
+    width: min(420px, 100%);
+    padding: 28px 30px 26px;
+    border-radius: 22px;
+    background: var(--cream);
+    color: var(--ink);
+    box-shadow: 0 40px 100px -30px rgb(0 0 0 / 0.7);
+    animation: rise 0.5s cubic-bezier(0.2, 1.2, 0.4, 1);
+  }
+
+  .finale-card .eyebrow {
+    color: var(--coral);
+  }
+
+  .finale-card h2 {
+    margin: 6px 0 18px;
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+    overflow-wrap: anywhere;
+  }
+
+  .finale-card dl {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 0 0 20px;
+  }
+
+  .finale-card dl div {
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+
+  .finale-card dt {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .finale-card dd {
+    margin: 2px 0 0;
+    font-family: var(--font-uj-mono);
+    font-size: 20px;
+  }
+
+  .again {
+    width: 100%;
+    height: 48px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--coral);
+    color: #fff;
+    font: 700 15px var(--font-uj-sans);
+    cursor: pointer;
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(30px) scale(0.96);
+      opacity: 0;
+    }
+  }
+
+  @media (width < 900px) {
+    .steps {
+      display: none;
+    }
+  }
+
+  @media (width < 640px) {
+    .bar {
+      gap: 8px;
+      padding: 0 10px;
+    }
+
+    .home {
+      font-size: 0;
+    }
+
+    .home::before {
+      content: '←';
+      font-size: 20px;
+    }
+
+    .title,
+    .width-label,
+    .falls {
+      display: none;
+    }
+
+    .controls {
+      flex: 1;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .width {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .width input {
+      flex: 1;
+      width: auto;
+      min-width: 0;
+    }
+
+    .go {
+      min-width: 62px;
+      padding: 0 12px;
+    }
+
+    .stage {
+      padding: 16px 12px 100px;
+    }
+
+    .handle {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bubble {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_main';
+
+  const root = document.querySelector<HTMLElement>('[data-uj]');
+  if (root) start(root);
+</script>
