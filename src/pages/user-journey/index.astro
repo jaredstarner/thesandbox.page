@@ -75,10 +75,14 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
   <Font cssVariable="--font-uj-mono" slot="head" />
   <div class="uj" data-uj>
     <header class="bar">
-      <a class="home" href="/">thesandbox.page</a>
+      <a class="home" href="/">
+        thesandbox.page
+      </a>
       <span class="title">User journey</span>
       <ol class="steps" data-steps aria-label="Progress">
-        {steps.map((s, i) => <li data-step={i + 1}>{s}</li>)}
+        {steps.map((s, i) => (
+          <li data-step={i + 1}>{s}</li>
+        ))}
       </ol>
       <div class="controls">
         <label class="width">
@@ -86,16 +90,22 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
           <input type="range" min="360" max="1120" step="1" value="1040" data-width aria-label="Page width" />
           <output data-width-out>1040</output>
         </label>
-        <button type="button" class="go" data-go aria-keyshortcuts="Space">Go</button>
-        <span class="falls" data-falls>0 falls</span>
+        <button type="button" class="go" data-go aria-keyshortcuts="Space">
+          Go
+        </button>
+        <span class="falls" data-falls>
+          0 falls
+        </span>
         <button type="button" class="icon" data-sound aria-pressed="true" title="Sound">
-          <svg viewBox="0 0 20 20" aria-hidden="true"
-            ><path d="M3 8h3l4-3.5v11L6 12H3z"></path><path class="wave" d="M13 7.2a4 4 0 0 1 0 5.6M15.4 5a7 7 0 0 1 0 10"
-            ></path></svg
-          >
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M3 8h3l4-3.5v11L6 12H3z"></path>
+            <path class="wave" d="M13 7.2a4 4 0 0 1 0 5.6M15.4 5a7 7 0 0 1 0 10"></path>
+          </svg>
           <span class="sr">Sound</span>
         </button>
-        <button type="button" class="icon about-btn" popovertarget="uj-about" title="How it works">?</button>
+        <button type="button" class="icon about-btn" popovertarget="uj-about" title="How it works">
+          ?
+        </button>
       </div>
     </header>
 
@@ -111,71 +121,92 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
         fine; a long one isn't. So change the page under them: make it narrower or wider, open answers, scroll, flip the
         switch, type.
       </p>
-      <p class="keys"><kbd>Space</kbd> goes and pauses. Drag either edge of the page, or use the width slider.</p>
-      <button type="button" popovertarget="uj-about" popovertargetaction="hide">Got it</button>
+      <p class="keys">
+        <kbd>Space</kbd> goes and pauses. Drag either edge of the page, or use the width slider.
+      </p>
+      <button type="button" popovertarget="uj-about" popovertargetaction="hide">
+        Got it
+      </button>
     </div>
 
     <div class="stage" data-stage>
       <div class="frame" data-frame>
-        <div class="handle left" data-handle="-1" aria-hidden="true"><span></span></div>
-        <div class="handle right" data-handle="1" aria-hidden="true"><span></span></div>
+        <div class="handle left" data-handle="-1" aria-hidden="true">
+          <span></span>
+        </div>
+        <div class="handle right" data-handle="1" aria-hidden="true">
+          <span></span>
+        </div>
         <div class="site" data-site>
           <nav class="nav">
             <span class="brand">
-              <svg viewBox="0 0 28 28" aria-hidden="true"
-                ><ellipse cx="9.5" cy="16" rx="4.2" ry="6.4" transform="rotate(-12 9.5 16)"></ellipse><ellipse
-                  cx="18.5"
-                  cy="11"
-                  rx="4.2"
-                  ry="6.4"
-                  transform="rotate(12 18.5 11)"></ellipse></svg
-              >
+              <svg viewBox="0 0 28 28" aria-hidden="true">
+                <ellipse cx="9.5" cy="16" rx="4.2" ry="6.4" transform="rotate(-12 9.5 16)"></ellipse>
+                <ellipse cx="18.5" cy="11" rx="4.2" ry="6.4" transform="rotate(12 18.5 11)"></ellipse>
+              </svg>
               Footpath
             </span>
-            <span class="links"><span>Product</span><span>Customers</span><span>Pricing</span><span>Docs</span></span>
-            <span class="nav-end"><span class="signin">Sign in</span><span class="nav-cta">Get started</span></span>
+            <span class="links">
+              <span>Product</span>
+              <span>Customers</span>
+              <span>Pricing</span>
+              <span>Docs</span>
+            </span>
+            <span class="nav-end">
+              <span class="signin">Sign in</span>
+              <span class="nav-cta">Get started</span>
+            </span>
           </nav>
 
           <section class="hero" data-section="1">
-            <span class="pill"><b>New</b> Works at every width</span>
+            <span class="pill">
+              <b>New</b> Works at every width
+            </span>
             <h1>Get every user from hello to signed&nbsp;up.</h1>
             <p class="lede">
               Footpath fits every screen. Make this page narrower until the two buttons meet, then press Go.
             </p>
             <div class="cta-wrap">
               <div class="cta">
-                <span class="btn primary" data-solid data-spawn="left">Start free</span>
-                <span class="btn ghost" data-solid>Book a demo</span>
+                <span class="btn primary" data-solid data-spawn="left">
+                  Start free
+                </span>
+                <span class="btn ghost" data-solid>
+                  Book a demo
+                </span>
               </div>
-              <span class="chip hero-chip" data-solid
-                ><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"></path></svg> No card needed</span
-              >
+              <span class="chip hero-chip" data-solid>
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M3.5 8.5l3 3 6-7"></path>
+                </svg>{' '}
+                No card needed
+              </span>
             </div>
           </section>
 
           <section class="logos" data-section="2">
             <p class="eyebrow">Trusted by eight teams, as long as they all fit on one line</p>
             <ul class="wall" data-spawn="right">
-              {
-                logos.map((l) => (
-                  <li data-solid class={`logo ${l.mark}`}>
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      {l.mark === 'moon' && <path d="M15 3a9 9 0 1 0 6 15A7.5 7.5 0 0 1 15 3z" />}
-                      {l.mark === 'leaf' && <path d="M4 20C4 9 11 4 20 4c0 9-5 16-16 16zm0 0l9-9" />}
-                      {l.mark === 'fold' && <path d="M3 6l9-3 9 3v12l-9 3-9-3zM12 3v18" />}
-                      {l.mark === 'sun' && <circle cx="12" cy="12" r="5" />}
-                      {l.mark === 'sun' && (
-                        <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" />
-                      )}
-                      {l.mark === 'pebble' && <ellipse cx="12" cy="13" rx="9" ry="7" />}
-                      {l.mark === 'arch' && <path d="M4 21V11a8 8 0 0 1 16 0v10h-5v-9a3 3 0 0 0-6 0v9z" />}
-                      {l.mark === 'wave' && <path d="M2 9c3-3 5-3 8 0s5 3 8 0 4-2 4-2M2 16c3-3 5-3 8 0s5 3 8 0 4-2 4-2" />}
-                      {l.mark === 'spark' && <path d="M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5z" />}
-                    </svg>
-                    <span>{l.name}</span>
-                  </li>
-                ))
-              }
+              {logos.map((l) => (
+                <li data-solid class={`logo ${l.mark}`}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    {l.mark === 'moon' && <path d="M15 3a9 9 0 1 0 6 15A7.5 7.5 0 0 1 15 3z" />}
+                    {l.mark === 'leaf' && <path d="M4 20C4 9 11 4 20 4c0 9-5 16-16 16zm0 0l9-9" />}
+                    {l.mark === 'fold' && <path d="M3 6l9-3 9 3v12l-9 3-9-3zM12 3v18" />}
+                    {l.mark === 'sun' && <circle cx="12" cy="12" r="5" />}
+                    {l.mark === 'sun' && (
+                      <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" />
+                    )}
+                    {l.mark === 'pebble' && <ellipse cx="12" cy="13" rx="9" ry="7" />}
+                    {l.mark === 'arch' && <path d="M4 21V11a8 8 0 0 1 16 0v10h-5v-9a3 3 0 0 0-6 0v9z" />}
+                    {l.mark === 'wave' && (
+                      <path d="M2 9c3-3 5-3 8 0s5 3 8 0 4-2 4-2M2 16c3-3 5-3 8 0s5 3 8 0 4-2 4-2" />
+                    )}
+                    {l.mark === 'spark' && <path d="M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5z" />}
+                  </svg>
+                  <span>{l.name}</span>
+                </li>
+              ))}
             </ul>
           </section>
 
@@ -184,54 +215,63 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
               <h2>Questions, answered.</h2>
               <p>Open one to put a floor under a falling user.</p>
             </div>
-            {
-              faq.map((f, i) => (
-                <details name="faq" class={`q ${f.side}`} data-solid data-spawn={i === 0 ? 'left' : undefined}>
-                  <summary>
-                    <span class="q-text">{f.q}</span>
-                    <span class="q-icon" aria-hidden="true" />
-                  </summary>
-                  <div class="a">
-                    <p>{f.a}</p>
-                  </div>
-                </details>
-              ))
-            }
+            {faq.map((f, i) => (
+              <details name="faq" class={`q ${f.side}`} data-solid data-spawn={i === 0 ? 'left' : undefined}>
+                <summary>
+                  <span class="q-text">{f.q}</span>
+                  <span class="q-icon" aria-hidden="true" />
+                </summary>
+                <div class="a">
+                  <p>{f.a}</p>
+                </div>
+              </details>
+            ))}
           </section>
 
           <section class="love" data-section="4">
             <div class="rating" data-solid>
-              <span class="stars" aria-hidden="true">★★★★★</span>
+              <span class="stars" aria-hidden="true">
+                ★★★★★
+              </span>
               <b>4.9</b>
               <span class="rating-text">from users who made it this far. Scroll the reviews to give them a ride.</span>
             </div>
             <div class="carousel">
               <button type="button" class="arrow prev" data-prev data-solid aria-label="Previous reviews">
-                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4l-6 6 6 6"></path></svg>
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M12.5 4l-6 6 6 6"></path>
+                </svg>
               </button>
               <div class="track" data-track data-clip tabindex="0" aria-label="Reviews">
-                {
-                  reviews.map((r) => (
-                    <figure class={`card ${r.tone}`} data-solid>
-                      <blockquote>{r.q}</blockquote>
-                      <figcaption>
-                        <span class="avatar" aria-hidden="true">
-                          {r.who
-                            .split(' ')
-                            .map((p) => p[0])
-                            .join('')}
-                        </span>
-                        <span>
-                          {r.who}
-                          <small>Verified user</small>
-                        </span>
-                      </figcaption>
-                    </figure>
-                  ))
-                }
+                {reviews.map((r) => (
+                  <figure class={`card ${r.tone}`} data-solid>
+                    <blockquote>{r.q}</blockquote>
+                    <figcaption>
+                      <span class="avatar" aria-hidden="true">
+                        {r.who
+                          .split(' ')
+                          .map((p) => p[0])
+                          .join('')}
+                      </span>
+                      <span>
+                        {r.who}
+                        <small>Verified user</small>
+                      </span>
+                    </figcaption>
+                  </figure>
+                ))}
               </div>
-              <button type="button" class="arrow next" data-next data-solid data-spawn="right" aria-label="Next reviews">
-                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4l6 6-6 6"></path></svg>
+              <button
+                type="button"
+                class="arrow next"
+                data-next
+                data-solid
+                data-spawn="right"
+                aria-label="Next reviews"
+              >
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M7.5 4l6 6-6 6"></path>
+                </svg>
               </button>
             </div>
           </section>
@@ -244,30 +284,45 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
                 <label class="switch">
                   <span class="m">Monthly</span>
                   <input type="checkbox" role="switch" data-billing aria-label="Bill yearly" />
-                  <span class="y">Yearly <em>-20%</em></span>
+                  <span class="y">
+                    Yearly <em>-20%</em>
+                  </span>
                 </label>
               </div>
               <article class="plan starter" data-solid>
                 <h3>Starter</h3>
-                <p class="price"><b>$0</b></p>
+                <p class="price">
+                  <b>$0</b>
+                </p>
                 <p class="feat">One user. Just the one.</p>
               </article>
               <article class="plan pro" data-solid>
                 <span class="badge">Most popular</span>
                 <h3>Pro</h3>
-                <p class="price"><b class="mo">$12</b><b class="yr">$10</b><span>/mo</span></p>
+                <p class="price">
+                  <b class="mo">$12</b>
+                  <b class="yr">$10</b>
+                  <span>/mo</span>
+                </p>
                 <p class="feat">Every page, every width.</p>
               </article>
               <article class="plan team" data-solid>
                 <h3>Team</h3>
-                <p class="price"><b class="mo">$29</b><b class="yr">$23</b><span>/mo</span></p>
+                <p class="price">
+                  <b class="mo">$29</b>
+                  <b class="yr">$23</b>
+                  <span>/mo</span>
+                </p>
                 <p class="feat">Users who walk in groups.</p>
                 <p class="feat extra">Billed yearly, with onboarding, a shared FAQ, and a carousel of your own.</p>
               </article>
             </div>
-            <span class="chip price-chip" data-solid
-              ><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"></path></svg> Cancel anytime</span
-            >
+            <span class="chip price-chip" data-solid>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M3.5 8.5l3 3 6-7"></path>
+              </svg>{' '}
+              Cancel anytime
+            </span>
           </section>
 
           <section class="signup" data-section="6">
@@ -287,9 +342,13 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
                 autocomplete="off"
                 spellcheck="false"
               />
-              <span class="btn join" data-solid data-spawn="right">Join</span>
+              <span class="btn join" data-solid data-spawn="right">
+                Join
+              </span>
             </div>
-            <div class="mat" data-solid data-goal><span>Welcome</span></div>
+            <div class="mat" data-solid data-goal>
+              <span>Welcome</span>
+            </div>
           </section>
 
           <footer class="foot">
@@ -298,11 +357,29 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
               <span>Made for one user at a time.</span>
             </div>
             <div class="foot-cols" aria-hidden="true">
-              <span><b>Product</b>Features<br />Pricing<br />Changelog</span>
-              <span><b>Company</b>About<br />Careers<br />Press</span>
-              <span><b>Legal</b>Privacy<br />Terms</span>
+              <span>
+                <b>Product</b>Features
+                <br />
+                Pricing
+                <br />
+                Changelog
+              </span>
+              <span>
+                <b>Company</b>About
+                <br />
+                Careers
+                <br />
+                Press
+              </span>
+              <span>
+                <b>Legal</b>Privacy
+                <br />
+                Terms
+              </span>
             </div>
-            <a class="foot-home" href="/">Back to thesandbox.page</a>
+            <a class="foot-home" href="/">
+              Back to thesandbox.page
+            </a>
           </footer>
 
           <div class="walker" data-walker aria-hidden="true">
@@ -318,7 +395,9 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
           </div>
         </div>
         <button type="button" class="bubble" data-bubble hidden>
-          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l7 4-7 4z"></path></svg>
+          <svg viewBox="0 0 12 12" aria-hidden="true">
+            <path d="M3 2l7 4-7 4z"></path>
+          </svg>
           <span data-bubble-text>Go</span>
         </button>
       </div>
@@ -329,11 +408,22 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
         <p class="eyebrow">Converted</p>
         <h2 data-finale-title>Welcome aboard.</h2>
         <dl>
-          <div><dt>Time on page</dt><dd data-stat-time>0:00</dd></div>
-          <div><dt>Falls</dt><dd data-stat-falls>0</dd></div>
-          <div><dt>Widths tried</dt><dd data-stat-widths>0</dd></div>
+          <div>
+            <dt>Time on page</dt>
+            <dd data-stat-time>0:00</dd>
+          </div>
+          <div>
+            <dt>Falls</dt>
+            <dd data-stat-falls>0</dd>
+          </div>
+          <div>
+            <dt>Widths tried</dt>
+            <dd data-stat-widths>0</dd>
+          </div>
         </dl>
-        <button type="button" class="again" data-again>Walk it again</button>
+        <button type="button" class="again" data-again>
+          Walk it again
+        </button>
       </div>
     </div>
   </div>
