@@ -4,10 +4,10 @@
 // is a splat.
 
 export const USER = {
-  /** Body width and height, in page pixels. */
+  /** The figure's width and height, in page pixels. */
   w: 16,
   h: 26,
-  /** Half-width of the feet: the part that needs something under it. */
+  /** Half-width of the feet: the part that needs something under it, and the part that bumps into walls. */
   foot: 5,
   /** The tallest ledge they step up without stopping. */
   step: 8,
@@ -86,8 +86,9 @@ export function makeUser(): User {
 
 const overlaps = (a: Box, b: Box, e = EPS) => a.l < b.r - e && a.r > b.l + e && a.t < b.b - e && a.b > b.t + e;
 
+// The body that collides is as narrow as the feet, so stepping off an edge never leaves it brushing the ledge.
 function body(u: User, x = u.x, y = u.y): Box {
-  return { l: x - USER.w / 2, r: x + USER.w / 2, t: y - USER.h, b: y };
+  return { l: x - USER.foot, r: x + USER.foot, t: y - USER.h, b: y };
 }
 
 function underFeet(s: Box, x: number) {
@@ -114,8 +115,8 @@ export function resolve(u: User, world: World): boolean {
     const me = body(u);
     const hit = world.solids.find((s) => overlaps(me, s));
     if (!hit) {
-      if (u.x - USER.w / 2 < 0) u.x = USER.w / 2;
-      if (u.x + USER.w / 2 > world.width) u.x = world.width - USER.w / 2;
+      if (u.x - USER.foot < 0) u.x = USER.foot;
+      if (u.x + USER.foot > world.width) u.x = world.width - USER.foot;
       return true;
     }
     const up = me.b - hit.t;
@@ -222,7 +223,7 @@ export function step(u: User, world: World, dt: number, out: Event[]) {
 
 function walk(u: User, world: World, dt: number, out: Event[]) {
   const nx = u.x + u.dir * USER.speed * dt;
-  if (nx - USER.w / 2 < 0 || nx + USER.w / 2 > world.width) {
+  if (nx - USER.foot < 0 || nx + USER.foot > world.width) {
     u.dir = u.dir === 1 ? -1 : 1;
     out.push({ type: 'turn' });
     return;

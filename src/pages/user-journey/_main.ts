@@ -73,8 +73,10 @@ export function start(root: HTMLElement) {
   const avail0 = available();
   setWidth(avail0 >= 600 ? Math.min(1040, avail0) : 720);
   widthsTried.clear();
-  new ResizeObserver(fit).observe(site);
-  new ResizeObserver(fit).observe(stage);
+  // Fitting changes the frame's size, so refit on the next frame rather than inside the observer.
+  const refit = new ResizeObserver(() => requestAnimationFrame(fit));
+  refit.observe(site);
+  refit.observe(stage);
   widthIn.addEventListener('input', () => setWidth(Number(widthIn.value)));
 
   for (const handle of root.querySelectorAll<HTMLElement>('[data-handle]')) {
