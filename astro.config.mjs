@@ -929,5 +929,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['ui-monospace', 'Consolas', 'monospace'],
     },
+    {
+      // The one face on /as-the-light-flies/: a journal's text and figure labels.
+      provider: fontProviders.fontsource(),
+      name: 'STIX Two Text',
+      cssVariable: '--font-alf',
+      weights: ['400 700'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Cambria', 'Georgia', 'serif'],
+    },
   ],
 });

@@ -622,6 +622,7 @@ export const TECHNIQUES: Record<string, Technique> = {
   'text-parser': { label: 'Text parser' },
   'procedural-text': { label: 'Procedural text' },
   'layout-physics': { label: 'Physics on the page layout' },
+  'constraint-based-geolocation': { label: 'Constraint-based geolocation' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
