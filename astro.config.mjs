@@ -910,5 +910,24 @@ export default defineConfig({
       subsets: ['latin', 'latin-ext'],
       fallbacks: ['Comic Sans MS', 'cursive'],
     },
+    // /user-journey/: a geometric grotesk of the kind start-up landing pages wear, and a mono for the page-width readout.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Plus Jakarta Sans',
+      cssVariable: '--font-uj-sans',
+      weights: ['200 800'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Arial', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'JetBrains Mono',
+      cssVariable: '--font-uj-mono',
+      weights: [500],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['ui-monospace', 'Consolas', 'monospace'],
+    },
   ],
 });
