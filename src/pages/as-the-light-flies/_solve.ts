@@ -146,7 +146,7 @@ export interface Solution {
 }
 
 /** How sharply the misfit separates places; matched to the scatter of real routes (see the bench). */
-const SIGMA = 0.02;
+export const SIGMA = 0.02;
 
 export function solve(marks: Landmark[], step = 0.5): Solution {
   const cols = Math.round(360 / step);
