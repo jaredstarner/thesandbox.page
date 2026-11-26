@@ -71,7 +71,8 @@ export function start(root: HTMLElement) {
   }
 
   const avail0 = available();
-  setWidth(avail0 >= 600 ? Math.min(1040, avail0) : 720);
+  // Open wide enough that the hero's two buttons are apart; on a phone, no wider than that, so it stays legible.
+  setWidth(avail0 >= 600 ? Math.min(1040, avail0) : 540);
   widthsTried.clear();
   // Fitting changes the frame's size, so refit on the next frame rather than inside the observer.
   const refit = new ResizeObserver(() => requestAnimationFrame(fit));
@@ -301,6 +302,31 @@ export function start(root: HTMLElement) {
     }
   }
 
+  function oof(x: number, y: number) {
+    const t = document.createElement('span');
+    t.textContent = 'Oof.';
+    Object.assign(t.style, {
+      position: 'absolute',
+      left: `${x}px`,
+      top: `${y - 34}px`,
+      translate: '-50% 0',
+      color: '#e8431f',
+      font: '800 13px var(--font-uj-sans)',
+      letterSpacing: '-0.02em',
+      pointerEvents: 'none',
+      zIndex: '6',
+    });
+    site.append(t);
+    t.animate(
+      [
+        { transform: 'translateY(6px)', opacity: 0 },
+        { transform: 'translateY(0)', opacity: 1, offset: 0.2 },
+        { transform: 'translateY(-14px)', opacity: 0 },
+      ],
+      { duration: 1000, easing: 'ease-out' },
+    ).onfinish = () => t.remove();
+  }
+
   function confetti(x: number, y: number) {
     const colours = ['#ff5b3a', '#d9f46a', '#5b49e0', '#17161d', '#ece7ff'];
     for (let i = 0; i < 70; i++) {
@@ -373,7 +399,11 @@ export function start(root: HTMLElement) {
       } else if (ev.type === 'splat') {
         setFalls(falls + 1);
         sound.splat();
-        dust(u.x, Math.min(u.y, site.offsetHeight - 4), 7, '#9aa0ab');
+        const y = Math.min(u.y, site.offsetHeight - 4);
+        dust(u.x, y, 7, '#9aa0ab');
+        oof(u.x, y);
+        fallsEl.dataset.flash = '';
+        setTimeout(() => delete fallsEl.dataset.flash, 120);
         splatTimer = RESPAWN_AFTER;
       } else if (ev.type === 'goal') {
         finish();

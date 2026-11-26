@@ -27,7 +27,7 @@ const faq = [
   {
     side: 'r',
     q: 'Does it work on every screen?',
-    a: 'Every width from 360 to 1120 pixels. Drag the edges of the page and the whole thing reflows to fit.',
+    a: 'Every width from 360 to 1120 pixels. Make the page narrower or wider and the whole thing reflows to fit.',
   },
   {
     side: 'r',
@@ -140,7 +140,7 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
             <span class="pill"><b>New</b> Works at every width</span>
             <h1>Get every user from hello to signed&nbsp;up.</h1>
             <p class="lede">
-              Footpath fits every screen. Drag either edge of this page until the two buttons meet, then press Go.
+              Footpath fits every screen. Make this page narrower until the two buttons meet, then press Go.
             </p>
             <div class="cta-wrap">
               <div class="cta">
@@ -307,6 +307,7 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
 
           <div class="walker" data-walker aria-hidden="true">
             <svg viewBox="0 0 16 26" class="figure">
+              <ellipse class="shadow" cx="8" cy="25.9" rx="5.6" ry="1.3"></ellipse>
               <g class="legs">
                 <path class="leg back" d="M8 18.5v7"></path>
                 <path class="leg front" d="M8 18.5v7"></path>
@@ -513,10 +514,21 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
 
   .falls {
     min-width: 7ch;
+    padding: 3px 6px;
+    border-radius: 6px;
     color: var(--chrome-dim);
+    transition:
+      background 0.6s,
+      color 0.6s;
     font-family: var(--font-uj-mono);
     font-size: 12px;
     white-space: nowrap;
+  }
+
+  .falls[data-flash] {
+    background: var(--coral);
+    color: #fff;
+    transition: none;
   }
 
   .icon {
@@ -781,7 +793,7 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
   .cta-wrap {
     position: relative;
     height: 52px;
-    margin: 34px -40px 0 0;
+    margin: 64px -40px 0 0;
   }
 
   .cta {
@@ -935,7 +947,7 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
 
   .faq-head {
     position: absolute;
-    top: 66px;
+    top: 48px;
     right: 28px;
     width: calc(38% - 56px);
     text-align: right;
@@ -1637,11 +1649,31 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
 
   .head,
   .body {
-    fill: #8d93a0;
+    fill: #7b8292;
+  }
+
+  .shadow {
+    fill: rgb(23 22 29 / 0.2);
+    transition: opacity 0.15s;
+  }
+
+  .walker[data-mode='falling'] .shadow,
+  .walker[data-mode='splat'] .shadow {
+    opacity: 0;
+  }
+
+  .walker[data-mode='standing'] .leg.front,
+  .walker[data-mode='done'] .leg.front {
+    transform: rotate(-9deg);
+  }
+
+  .walker[data-mode='standing'] .leg.back,
+  .walker[data-mode='done'] .leg.back {
+    transform: rotate(9deg);
   }
 
   .leg {
-    stroke: #6e7481;
+    stroke: #5d6372;
     stroke-width: 2.6;
     stroke-linecap: round;
     transform-origin: 8px 18.5px;
@@ -1677,7 +1709,7 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
     fill: #a2a7b2;
   }
 
-  .walker[data-spawn] .figure {
+  .walker[data-spawn]:not([data-mode='splat']) .figure {
     animation: pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
   }
 
@@ -1852,8 +1884,17 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
 
   @media (width < 640px) {
     .bar {
-      gap: 10px;
+      gap: 8px;
       padding: 0 10px;
+    }
+
+    .home {
+      font-size: 0;
+    }
+
+    .home::before {
+      content: '←';
+      font-size: 20px;
     }
 
     .title,
@@ -1862,8 +1903,26 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
       display: none;
     }
 
+    .controls {
+      flex: 1;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .width {
+      flex: 1;
+      min-width: 0;
+    }
+
     .width input {
-      width: 96px;
+      flex: 1;
+      width: auto;
+      min-width: 0;
+    }
+
+    .go {
+      min-width: 62px;
+      padding: 0 12px;
     }
 
     .stage {
