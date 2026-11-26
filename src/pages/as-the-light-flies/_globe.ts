@@ -117,6 +117,8 @@ void main() {
   float hotRing = 0.0;
   float dots = 0.0;
   float n = 0.0;
+  // Surface distance per pixel, taken outside the loop: derivatives inside it aren't reliable.
+  float fw = length(fwidth(p)) * EARTH_MM;
   for (int i = 0; i < ${MAX_STATIONS}; i++) {
     if (i >= uN) break;
     float d = acos(clamp(dot(p, uSta[i]), -1.0, 1.0)) * EARTH_MM;
@@ -129,10 +131,9 @@ void main() {
     slack = min(slack, t - d * S0);
     float reach = min(uGrow, t) * KPM_MM;
     if (reach >= MAX_MM) continue;
-    float fw = fwidth(d);
     float growing = step(uGrow, t);
     inside += step(d, reach);
-    float r = line(d - reach, fw, (growing > 0.5 ? 0.9 : 0.55) * uDpr);
+    float r = line(d - reach, fw, (growing > 0.5 ? 0.7 : 0.55) * uDpr);
     rings = max(rings, r * (growing > 0.5 ? 0.0 : 1.0));
     front = max(front, r * growing);
     // A soft wake behind the moving front.
@@ -145,7 +146,7 @@ void main() {
   // Everywhere light rules out goes behind a veil.
   float sFw = fwidth(slack);
   float out_ = smoothstep(sFw, -sFw, slack) * step(0.5, n);
-  col = mix(col, PAPER * 0.985, out_ * uFog * 0.62);
+  col = mix(col, PAPER * 0.985, out_ * uFog * 0.72);
 
   // The fit: for this spot, the line t = a + s d along the bottom of the replies.
   if (uFit > 0.0 && n > 1.5) {
@@ -190,7 +191,7 @@ void main() {
   }
 
   col = mix(col, COBALT, rings * mix(0.55, 0.38, uFog));
-  col = mix(col, COBALT, front * 0.9);
+  col = mix(col, COBALT, front * 0.85);
   col = mix(col, INK, hotRing * 0.85);
   // Where light last allows: the edge of the clear patch.
   col = mix(col, COBALT, line(slack, sFw, 0.8 * uDpr) * uFog * step(0.5, n));

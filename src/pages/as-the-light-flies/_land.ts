@@ -86,5 +86,23 @@ export function landMask(width = 2048): HTMLCanvasElement {
     }
     ctx.fill('evenodd');
   }
+  // A slight blur turns the hard edge into a ramp, so the shader's threshold finds the coast
+  // between texels instead of stepping along them.
+  // Wrap a margin around first, so the blur runs across the antimeridian instead of fading there.
+  const pad = 8;
+  const wrapped = document.createElement('canvas');
+  wrapped.width = canvas.width + pad * 2;
+  wrapped.height = canvas.height;
+  const wctx = wrapped.getContext('2d')!;
+  for (const dx of [-canvas.width, 0, canvas.width]) wctx.drawImage(canvas, pad + dx, 0);
+  const blurred = document.createElement('canvas');
+  blurred.width = wrapped.width;
+  blurred.height = wrapped.height;
+  const bctx = blurred.getContext('2d')!;
+  bctx.fillStyle = '#000';
+  bctx.fillRect(0, 0, blurred.width, blurred.height);
+  bctx.filter = 'blur(1.2px)';
+  bctx.drawImage(wrapped, 0, 0);
+  ctx.drawImage(blurred, -pad, 0);
   return canvas;
 }
