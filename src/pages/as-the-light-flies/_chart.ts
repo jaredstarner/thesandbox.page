@@ -5,7 +5,7 @@ import { KM_PER_RTT_MS, MAX_KM, kmBetween, type Fit, type Vec3 } from './_solve'
 
 const NS = 'http://www.w3.org/2000/svg';
 const W = 400;
-const H = 250;
+const H = 220;
 const L = 46;
 const R = 14;
 const T = 12;
@@ -30,13 +30,15 @@ export interface Point {
 }
 
 export class Chart {
-  private yMax = 300;
+  private yMax = 250;
   private axes: SVGGElement;
   private floor: SVGGElement;
   private dots: SVGGElement;
   private names: SVGGElement;
   private fitLine: SVGLineElement;
   private fitLabel: SVGTextElement;
+  private fitLegend: SVGGElement;
+  private fitBack: SVGRectElement;
   private empty: SVGTextElement;
   onHover: (index: number) => void = () => {};
   /** Says whose end the fitted line's shared delay belongs to. */
@@ -57,12 +59,23 @@ export class Chart {
       { stroke: '#d9432a', 'stroke-width': 1.4, 'stroke-dasharray': '5 3', visibility: 'hidden' },
       svg,
     );
-    this.fitLabel = el('text', { class: 'fit-label', 'font-size': 12, fill: '#d9432a', visibility: 'hidden' }, svg);
+    // The legend sits in the one place no reply can ever be: under the floor, bottom right.
+    const lgX = W - R - 4;
+    const lgY = H - B - 10;
+    const lg = el('g', { 'font-size': 11.5, fill: '#565d6c', 'text-anchor': 'end' }, svg);
+    this.fitLegend = el('g', { visibility: 'hidden' }, lg);
+    this.fitBack = el('rect', { x: lgX - 200, y: lgY - 12, width: 204, height: 17, fill: '#f3f2ee' }, this.fitLegend);
+    el(
+      'line',
+      { x1: lgX - 18, y1: lgY - 4, x2: lgX, y2: lgY - 4, stroke: '#d9432a', 'stroke-width': 1.4, 'stroke-dasharray': '5 3' },
+      this.fitLegend,
+    );
+    this.fitLabel = el('text', { x: lgX - 24, y: lgY, fill: '#d9432a' }, this.fitLegend);
     this.dots = el('g', {}, svg);
     this.names = el('g', { 'font-size': 11.5, fill: '#1b2130' }, svg);
     this.empty = el(
       'text',
-      { x: (L + W - R) / 2, y: T + (H - T - B) * 0.42, 'text-anchor': 'middle', 'font-size': 14, 'font-style': 'italic', fill: '#565d6c' },
+      { x: L + (W - L - R) * 0.24, y: T + (H - T - B) * 0.28, 'text-anchor': 'middle', 'font-size': 14, 'font-style': 'italic', fill: '#565d6c' },
       svg,
     );
     this.empty.textContent = 'No replies yet.';
@@ -123,13 +136,13 @@ export class Chart {
     }
     const xl = el('text', { x: W - R, y: H - 4, 'text-anchor': 'end', 'font-size': 12, 'font-style': 'italic', fill: '#565d6c' }, ax);
     xl.textContent = 'distance from the marked spot, km';
-    const yl = el('text', { x: L + 6, y: T + 4, 'font-size': 12, 'font-style': 'italic', fill: '#565d6c' }, ax);
+    const yl = el('text', { x: L + 8, y: T + 4, 'font-size': 12, 'font-style': 'italic', fill: '#565d6c' }, ax);
     yl.textContent = 'round trip, ms';
   }
 
   /** Redraw the points as seen from `from`, with the fit there if one is given. */
   update(points: Point[], from: Vec3 | null, fit: Fit | null, hot = -1): void {
-    const top = Math.max(60, ...points.map((p) => p.rtt));
+    const top = Math.max(230, ...points.map((p) => p.rtt));
     const yMax = Math.ceil((top * 1.08) / 50) * 50;
     if (yMax !== this.yMax) {
       this.yMax = yMax;
@@ -140,13 +153,14 @@ export class Chart {
     this.names.replaceChildren();
     if (!from) {
       this.fitLine.setAttribute('visibility', 'hidden');
-      this.fitLabel.setAttribute('visibility', 'hidden');
+      this.fitLegend.setAttribute('visibility', 'hidden');
       return;
     }
     const placed = points
       .map((p, i) => ({ ...p, i, d: kmBetween(from, p.v) }))
       .sort((a, b) => a.rtt - b.rtt);
     const taken: [number, number, number][] = [];
+    const dotsAt = placed.map((p) => [this.x(p.d), this.y(p.rtt)]);
     placed.forEach((p, rank) => {
       const cx = this.x(p.d);
       const cy = this.y(p.rtt);
@@ -170,7 +184,9 @@ export class Chart {
         const tx = cx + 6;
         const ty = cy - 5;
         const wide = p.name.length * 6.2;
-        const clash = taken.some(([x, y, w]) => tx < x + w && x < tx + wide && Math.abs(ty - y) < 12);
+        const clash =
+          taken.some(([x, y, w]) => tx < x + w && x < tx + wide && Math.abs(ty - y) < 12) ||
+          dotsAt.some(([x, y], k) => k !== rank && x > tx - 3 && x < tx + wide + 3 && y > ty - 13 && y < ty + 4);
         if (!clash || isHot) {
           const t = el('text', { x: tx, y: ty }, this.names);
           t.textContent = p.name;
@@ -191,13 +207,14 @@ export class Chart {
         this.fitLine.setAttribute('y2', String(this.y(this.yMax)));
       }
       this.fitLine.setAttribute('visibility', 'visible');
-      this.fitLabel.setAttribute('x', String(L + 6));
-      this.fitLabel.setAttribute('y', String(this.y(fit.a) - 6));
-      this.fitLabel.textContent = `${fit.a.toFixed(0)} ms ${this.endLabel}`;
-      this.fitLabel.setAttribute('visibility', 'visible');
+      this.fitLabel.textContent = `best line: ${fit.a.toFixed(0)} ms ${this.endLabel}, then ${(fit.s * KM_PER_RTT_MS).toFixed(1)}× light`;
+      this.fitLegend.setAttribute('visibility', 'visible');
+      const tw = this.fitLabel.getComputedTextLength() + 30;
+      this.fitBack.setAttribute('x', String(W - R - tw));
+      this.fitBack.setAttribute('width', String(tw + 2));
     } else {
       this.fitLine.setAttribute('visibility', 'hidden');
-      this.fitLabel.setAttribute('visibility', 'hidden');
+      this.fitLegend.setAttribute('visibility', 'hidden');
     }
   }
 }
