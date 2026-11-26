@@ -354,7 +354,7 @@ export function start(root: HTMLElement): void {
       const [tl, to] = toLatLon(truth);
       const inside = sol.feasible[rowCol(sol, tl, to)] === 1;
       lead.textContent = `Light puts them in the clear patch, ${area(sol.feasibleKm2)}. The replies line up best ${where}; they were standing ${NUMBER.format(roundTo(err))} km from there.`;
-      detail.textContent = `${inside ? 'They were inside the clear patch, as anyone must be: no reply outruns light.' : 'They were just outside the clear patch, where its edge is drawn coarser than the globe.'} The made-up replies carried ${Math.round(fit.a)} ms at their end, routes up to twice as long as straight lines, and the odd detour.`;
+      detail.textContent = `${inside ? 'They were inside the clear patch, as anyone must be: no reply outruns light.' : 'They were just outside the clear patch, where its edge is drawn coarser than the globe.'} The fit put ${Math.round(fit.a)} ms at their end; the made-up routes ran 1.35 to 2.25 times longer than straight lines, now and then with a long detour.`;
       truthEl.hidden = false;
       truthEl.querySelector('span')!.textContent = 'They stood here';
     }
