@@ -1761,7 +1761,7 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
     font: 700 12px var(--font-uj-sans);
     white-space: nowrap;
     cursor: pointer;
-    translate: -50% -100%;
+    translate: 0 -50%;
     box-shadow: 0 8px 20px -8px rgb(0 0 0 / 0.5);
     animation: nudge 1.4s ease-in-out infinite;
   }
@@ -1770,16 +1770,26 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
     display: none;
   }
 
+  .bubble[data-side='l'] {
+    translate: -100% -50%;
+    animation-name: nudge-l;
+  }
+
   .bubble::after {
     content: '';
     position: absolute;
-    left: 50%;
-    bottom: -4px;
+    top: 50%;
+    left: -3px;
     width: 8px;
     height: 8px;
-    margin-left: -4px;
+    margin-top: -4px;
     background: var(--ink);
     rotate: 45deg;
+  }
+
+  .bubble[data-side='l']::after {
+    left: auto;
+    right: -3px;
   }
 
   .bubble svg {
@@ -1790,7 +1800,13 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
 
   @keyframes nudge {
     50% {
-      translate: -50% calc(-100% - 3px);
+      translate: 3px -50%;
+    }
+  }
+
+  @keyframes nudge-l {
+    50% {
+      translate: calc(-100% - 3px) -50%;
     }
   }
 

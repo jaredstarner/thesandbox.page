@@ -254,10 +254,10 @@ export function start(root: HTMLElement) {
 
   goBtn.addEventListener('click', toggleGo);
   bubble.addEventListener('click', toggleGo);
-  root.addEventListener('keydown', (e) => {
-    if (e.code !== 'Space' || e.repeat) return;
+  addEventListener('keydown', (e) => {
+    if (e.code !== 'Space' || e.repeat || !finale.hidden) return;
     const t = e.target as HTMLElement;
-    if (t.closest('input, textarea, button, summary, select, a, [contenteditable]')) return;
+    if (t.closest?.('input, textarea, button, summary, select, a, [contenteditable], [popover]')) return;
     e.preventDefault();
     toggleGo();
   });
@@ -462,8 +462,11 @@ export function start(root: HTMLElement) {
     bubble.hidden = !showBubble;
     if (showBubble) {
       bubbleText.textContent = u.paused ? 'Paused' : everWent ? 'Go' : 'Press Go';
-      bubble.style.left = `${u.x * scale}px`;
-      bubble.style.top = `${(u.y - USER.h - 8) * scale}px`;
+      // Beside the user rather than above, so it never covers the copy over their head.
+      const right = u.x < W - 150;
+      bubble.dataset.side = right ? 'r' : 'l';
+      bubble.style.left = `${(u.x + (right ? 13 : -13)) * scale}px`;
+      bubble.style.top = `${(u.y - 17) * scale}px`;
     }
     const label = running() ? 'Pause' : 'Go';
     if (goBtn.textContent !== label) goBtn.textContent = label;
