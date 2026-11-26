@@ -1,0 +1,8 @@
+{
+  "title": "As the light flies",
+  "summary": "Your browser times a reply from each of thirty-four cloud data centres, and the speed of light in glass turns every reply into a circle you must be inside: watch them grow and stop, see where they all overlap, and find out how close that comes to where you are.",
+  "date": "2026-11-26",
+  "tags": ["webgl2", "live-data", "pointer-events", "svg", "geolocation", "constraint-based-geolocation"],
+  "requires": ["webgl2"],
+  "plot": 56
+}
