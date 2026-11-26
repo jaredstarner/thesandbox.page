@@ -37,7 +37,7 @@ export function start(root: HTMLElement) {
   const nameIn = q<HTMLInputElement>('[data-name]');
   const finale = q<HTMLElement>('[data-finale]');
   const params = new URLSearchParams(location.search);
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches || params.has('instant');
   const sound = makeSound();
 
   if (params.has('instant')) root.classList.add('instant');
