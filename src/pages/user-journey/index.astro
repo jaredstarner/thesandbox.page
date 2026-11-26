@@ -282,7 +282,7 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
                 data-solid
                 type="text"
                 maxlength="48"
-                placeholder="Your name"
+                placeholder="Name"
                 aria-label="Your name"
                 autocomplete="off"
                 spellcheck="false"
@@ -880,14 +880,17 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
+    gap: 6px;
     flex: 1 1 108px;
+    min-width: 0;
     height: 56px;
+    padding: 0 4px;
+    overflow: hidden;
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
     background: var(--cream);
     color: #4a4754;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     letter-spacing: -0.02em;
     white-space: nowrap;
@@ -919,8 +922,8 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
   .logo:nth-child(odd) {
     font-family: var(--font-uj-mono);
     font-weight: 500;
-    font-size: 13px;
-    letter-spacing: -0.04em;
+    font-size: 12.5px;
+    letter-spacing: -0.05em;
   }
 
   /* 3. FAQ. Cards hang from alternate edges; an open card runs wall to wall. */
@@ -1510,7 +1513,7 @@ const steps = ['Hero', 'Logos', 'FAQ', 'Reviews', 'Pricing', 'Sign up'];
 
   .name {
     flex: 0 0 auto;
-    min-width: 7.5ch;
+    min-width: 3.5ch;
     max-width: calc(100% - 180px);
     height: 64px;
     padding: 0 20px;
