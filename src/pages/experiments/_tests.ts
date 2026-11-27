@@ -623,6 +623,9 @@ export const TECHNIQUES: Record<string, Technique> = {
   'procedural-text': { label: 'Procedural text' },
   'layout-physics': { label: 'Physics on the page layout' },
   'constraint-based-geolocation': { label: 'Constraint-based geolocation' },
+  mokuhanga: { label: 'Mokuhanga (woodblock printing)' },
+  'open-meteo': { label: 'Open-Meteo forecasts' },
+  'lunar-ephemeris': { label: 'Sun and Moon positions' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */
