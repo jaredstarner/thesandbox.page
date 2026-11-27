@@ -2,18 +2,7 @@
 // The image is 1000 x 1500 units, a vertical sheet with the sky above a lake or the sea.
 
 import { moonIllumination, moonPosition, sunPosition, type MoonLight, type SkyPos } from './_sky';
-import {
-  clamp,
-  css,
-  fbm1,
-  hashString,
-  lerp,
-  mix,
-  mulberry32,
-  smoothstep,
-  type RGB,
-  type Rng,
-} from './_util';
+import { clamp, css, fbm1, hashString, lerp, mix, mulberry32, smoothstep, type RGB, type Rng } from './_util';
 import { describe, type Forecast, type Hour, type Kind } from './_weather';
 
 export const IW = 1000;
@@ -246,8 +235,8 @@ export function makeScene(key: string, elevation: number): Scene {
     const fy = tree.top;
     const limbs = 3 + Math.floor(rng() * 2);
     for (let i = 0; i < limbs; i++) {
-      const a = -Math.PI / 2 + ((i / (limbs - 1)) - 0.5) * 1.9 + (rng() - 0.5) * 0.25 + dir * 0.12;
-      const len = 150 + rng() * 90 - Math.abs((i / (limbs - 1)) - 0.5) * 60;
+      const a = -Math.PI / 2 + (i / (limbs - 1) - 0.5) * 1.9 + (rng() - 0.5) * 0.25 + dir * 0.12;
+      const len = 150 + rng() * 90 - Math.abs(i / (limbs - 1) - 0.5) * 60;
       const x0 = fx + (rng() - 0.5) * 10;
       const y0 = fy + 8;
       const x1 = x0 + Math.cos(a) * len;
@@ -264,7 +253,11 @@ export function makeScene(key: string, elevation: number): Scene {
   const path = { x0: pathX0, w0: 230, x1: pathX1, w1: 26, y1: at(ground, pathX1) + 8, bend: (rng() - 0.5) * 160 };
   const fy = lerp(path.y1, IH, 0.42);
   const fu = (fy - path.y1) / (IH - path.y1);
-  const figure = { x: lerp(path.x1, path.x0, fu) + path.bend * Math.sin(fu * Math.PI) * 0.5, y: fy, s: 0.95 + fu * 0.8 };
+  const figure = {
+    x: lerp(path.x1, path.x0, fu) + path.bend * Math.sin(fu * Math.PI) * 0.5,
+    y: fy,
+    s: 0.95 + fu * 0.8,
+  };
 
   const boat = sea ? { x: mx(520 + rng() * 260), y: horizon + 110 + rng() * 120, s: 1.1 + rng() * 0.5 } : null;
 
@@ -397,7 +390,8 @@ export function makeCond(f: Forecast, hour: Hour): Cond {
   const north = lat >= 0;
   const m = local.month;
   const s = north ? m : (m + 6) % 12;
-  const season: Season = s >= 2 && s <= 4 ? 'spring' : s >= 5 && s <= 7 ? 'summer' : s >= 8 && s <= 10 ? 'autumn' : 'winter';
+  const season: Season =
+    s >= 2 && s <= 4 ? 'spring' : s >= 5 && s <= 7 ? 'summer' : s >= 8 && s <= 10 ? 'autumn' : 'winter';
   const facing = north ? 180 : 0;
   const toward = ((hour.windFrom + 180) * Math.PI) / 180;
   const rel = toward - (facing * Math.PI) / 180;
@@ -748,7 +742,12 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
   if (c.glow > 0.05) {
     blocks.push({
       id: 'glow',
-      name: c.sun.alt > 2 && c.localHour >= 10 && c.localHour <= 14 ? 'Low sun gold' : c.dawn ? 'Dawn yellow' : 'Sunset rose',
+      name:
+        c.sun.alt > 2 && c.localHour >= 10 && c.localHour <= 14
+          ? 'Low sun gold'
+          : c.dawn
+            ? 'Dawn yellow'
+            : 'Sunset rose',
       pigment: tint(glowCol),
       strength: clamp(c.glow * 1.1),
       grain: 0.25,
@@ -1295,7 +1294,8 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
         ctx.moveTo(x - l / 2, y);
         // A low swell along each line, steeper and curling in a wind on the open sea.
         ctx.bezierCurveTo(x - l / 6, y - swell * (0.4 + u), x + l / 6, y + swell * 0.5, x + l / 2, y - swell * 0.2);
-        if (s.sea && c.breeze > 0.4 && i % 4 === 0) ctx.quadraticCurveTo(x + l / 2 + 6, y - 7 * c.breeze, x + l / 2 - 2, y - 9 * c.breeze);
+        if (s.sea && c.breeze > 0.4 && i % 4 === 0)
+          ctx.quadraticCurveTo(x + l / 2 + 6, y - 7 * c.breeze, x + l / 2 - 2, y - 9 * c.breeze);
         ctx.stroke();
       }
       ctx.globalAlpha = 1;
@@ -1520,7 +1520,10 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
     windX: c.windX * (0.15 + c.breeze),
     night,
     reserve: reserveFor(s, place, c),
-    margin: [`${c.localDay} ${MONTH_NAMES[c.localMonth]} ${c.localYear}, ${clockWords(c.localHour)}`, 'thesandbox.page'],
+    margin: [
+      `${c.localDay} ${MONTH_NAMES[c.localMonth]} ${c.localYear}, ${clockWords(c.localHour)}`,
+      'thesandbox.page',
+    ],
   };
 }
 

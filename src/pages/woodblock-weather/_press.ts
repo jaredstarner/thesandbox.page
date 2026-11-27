@@ -59,7 +59,7 @@ function makePaper(w: number, h: number, seed: number): { paper: HTMLCanvasEleme
   const fibres = makeCanvas(w, h);
   const fc = ctxOf(fibres);
   const k = w / SW;
-  const count = Math.round(1800 * (w * h) / (1000 * 1460));
+  const count = Math.round((1800 * (w * h)) / (1000 * 1460));
   for (let i = 0; i < count; i++) {
     const x = rng() * w;
     const y = rng() * h;
@@ -106,12 +106,12 @@ function makeGrain(w: number, h: number, seed: number): HTMLCanvasElement {
       // Growth rings, bent around knots and bunched or spread as the plank's grain wanders.
       const yy =
         y +
-        (warp(x * 0.0018 / k, y * 0.005 / k) - 0.5) * 160 * k +
-        (warp2(x * 0.007 / k, y * 0.02 / k) - 0.5) * 18 * k;
-      const ring = 0.5 + 0.5 * Math.cos((yy / spacing) * Math.PI * 2 * (0.8 + 0.5 * tone(x * 0.0015 / k, 3.1)));
-      const show = Math.max(0, patch(x * 0.0024 / k, y * 0.004 / k) - 0.38) / 0.62;
-      const lines = ring ** 14 * show * (0.4 + 0.6 * tone(x * 0.012 / k, y * 0.05 / k));
-      const m = mottle(x * 0.004 / k, y * 0.004 / k);
+        (warp((x * 0.0018) / k, (y * 0.005) / k) - 0.5) * 160 * k +
+        (warp2((x * 0.007) / k, (y * 0.02) / k) - 0.5) * 18 * k;
+      const ring = 0.5 + 0.5 * Math.cos((yy / spacing) * Math.PI * 2 * (0.8 + 0.5 * tone((x * 0.0015) / k, 3.1)));
+      const show = Math.max(0, patch((x * 0.0024) / k, (y * 0.004) / k) - 0.38) / 0.62;
+      const lines = ring ** 14 * show * (0.4 + 0.6 * tone((x * 0.012) / k, (y * 0.05) / k));
+      const m = mottle((x * 0.004) / k, (y * 0.004) / k);
       const speck = rng() < 0.0012 ? 0.6 : 0;
       const a = clamp(lines * 0.85 + Math.max(0, m - 0.58) * 0.8 + speck + rng() * 0.04);
       img.data[(y * hw + x) * 4 + 3] = a * 255;
@@ -407,4 +407,3 @@ export class Press {
     return true;
   }
 }
-

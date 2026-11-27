@@ -133,7 +133,9 @@ export function start(root: HTMLElement): void {
       `${Math.round(h.cloud)}% cloud.`,
     ];
     if (h.snowDepth >= 0.01)
-      bits.push(`Snow lying ${usUnits ? `${Math.round(h.snowDepth * 39.37)} in` : `${Math.round(h.snowDepth * 100)} cm`}.`);
+      bits.push(
+        `Snow lying ${usUnits ? `${Math.round(h.snowDepth * 39.37)} in` : `${Math.round(h.snowDepth * 100)} cm`}.`,
+      );
     let lead = '';
     if (forecast.stored)
       lead = `<span class="stored">The weather service didn’t answer, so this is a week kept from Bergen in late November 2026.</span> `;

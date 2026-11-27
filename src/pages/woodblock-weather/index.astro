@@ -19,11 +19,13 @@ import Bare from '../../layouts/Bare.astro';
 
     <section class="text">
       <header>
-        <a class="home" href="/">thesandbox.page</a>
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
         <h1>Woodblock weather</h1>
         <p class="deck">
-          The sky over a place, cut into blocks of cherry wood and printed one colour at a time: Prussian blue wiped
-          to nothing at the horizon, rain in fine lines, snow left as bare paper. It reprints itself as the weather
+          The sky over a place, cut into blocks of cherry wood and printed one colour at a time: Prussian blue wiped to
+          nothing at the horizon, rain in fine lines, snow left as bare paper. It reprints itself as the weather
           changes.
         </p>
       </header>
@@ -46,7 +48,9 @@ import Bare from '../../layouts/Bare.astro';
         </div>
       </form>
 
-      <p class="reading" aria-live="polite">Finding the weather…</p>
+      <p class="reading" aria-live="polite">
+        Finding the weather…
+      </p>
 
       <div class="blocks">
         <h2>The blocks</h2>
@@ -57,8 +61,8 @@ import Bare from '../../layouts/Bare.astro';
       <p class="hint">Move across the print to tilt it under the lamp: the mica and the embossing catch the light.</p>
 
       <p class="credit">
-        Weather from <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0).
-        Place names from <a href="https://www.geonames.org/">GeoNames</a>.
+        Weather from <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0). Place names from{' '}
+        <a href="https://www.geonames.org/">GeoNames</a>.
       </p>
     </section>
 
@@ -75,9 +79,13 @@ import Bare from '../../layouts/Bare.astro';
         <canvas class="sky" aria-hidden="true"></canvas>
         <div class="days" aria-hidden="true"></div>
         <div class="now-mark" aria-hidden="true" hidden></div>
-        <div class="cursor" aria-hidden="true" hidden><span></span></div>
+        <div class="cursor" aria-hidden="true" hidden>
+          <span></span>
+        </div>
       </div>
-      <button type="button" class="to-now" hidden>Back to now</button>
+      <button type="button" class="to-now" hidden>
+        Back to now
+      </button>
     </section>
 
     <noscript>
@@ -124,8 +132,7 @@ import Bare from '../../layouts/Bare.astro';
     font-size: 15px;
     line-height: 1.55;
     background:
-      radial-gradient(ellipse 60% 70% at var(--lx) var(--ly), rgb(255 236 200 / 0.07), transparent 70%),
-      var(--wall);
+      radial-gradient(ellipse 60% 70% at var(--lx) var(--ly), rgb(255 236 200 / 0.07), transparent 70%), var(--wall);
   }
 
   .wbw *,

@@ -83,9 +83,7 @@ export function moonIllumination(t: number): MoonLight {
   const s = sunCoords(d);
   const m = moonCoords(d);
   const sdist = 149598000;
-  const phi = Math.acos(
-    Math.sin(s.dec) * Math.sin(m.dec) + Math.cos(s.dec) * Math.cos(m.dec) * Math.cos(s.ra - m.ra),
-  );
+  const phi = Math.acos(Math.sin(s.dec) * Math.sin(m.dec) + Math.cos(s.dec) * Math.cos(m.dec) * Math.cos(s.ra - m.ra));
   const inc = Math.atan2(sdist * Math.sin(phi), m.dist - sdist * Math.cos(phi));
   const angle = Math.atan2(
     Math.cos(s.dec) * Math.sin(s.ra - m.ra),

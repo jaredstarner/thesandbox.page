@@ -63,7 +63,10 @@ export class Finish {
     this.drops = Array.from({ length: n }, () => ({
       x: rng() * IW * 1.4 - IW * 0.2,
       y: rng() * IH,
-      len: fall === 'snow' ? 1.6 + rng() ** 2 * 3.4 : (fall === 'drizzle' ? 26 : 60) + rng() * (fall === 'drizzle' ? 40 : 120),
+      len:
+        fall === 'snow'
+          ? 1.6 + rng() ** 2 * 3.4
+          : (fall === 'drizzle' ? 26 : 60) + rng() * (fall === 'drizzle' ? 40 : 120),
       v: fall === 'snow' ? 45 + rng() * 70 : (fall === 'drizzle' ? 900 : 1500) + rng() * 700,
       phase: rng() * Math.PI * 2,
     }));
