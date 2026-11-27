@@ -168,8 +168,8 @@ export class Finish {
       for (const [x, y, a] of p.mica) {
         const toward = Math.atan2(this.lamp.y - y, this.lamp.x - x);
         const b = Math.cos(a - toward);
-        if (b < 0.93) continue;
-        const v = ((b - 0.93) / 0.07) ** 2;
+        if (b < 0.97) continue;
+        const v = ((b - 0.97) / 0.03) ** 2;
         c.fillStyle = `rgba(255, 250, 236, ${(0.25 + v * 0.75).toFixed(3)})`;
         const r = (0.7 + v * 1.4) * s;
         c.fillRect(x * s - r, y * s - r * 0.25, r * 2, r * 0.5);
@@ -184,7 +184,8 @@ export class Finish {
       c.translate(MARGIN * s, MARGIN * s);
       c.beginPath();
       c.rect(0, 0, IW * s, IH * s);
-      c.clip();
+      for (const [x, y, w, h] of p.reserve) c.rect(x * s, (y + h) * s, w * s, -h * s);
+      c.clip('evenodd');
       const t = this.still ? 0 : dt;
       const slant = clamp(p.windX, -1, 1) * 0.45;
       if (p.fall === 'snow' || p.fall === 'hail') {
