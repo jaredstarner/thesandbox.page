@@ -104,18 +104,20 @@ import Bare from '../../layouts/Bare.astro';
     --ly: 18%;
     --week-h: 96px;
     --pad: 28px;
+    --sheet-h: calc(100dvh - var(--week-h) - var(--pad) - 18px);
 
     box-sizing: border-box;
     position: relative;
     isolation: isolate;
     min-height: 100dvh;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+    grid-template-columns: minmax(0, calc(var(--sheet-h) * 1092 / 1592)) minmax(300px, 400px);
     grid-template-rows: minmax(0, 1fr) var(--week-h);
     grid-template-areas:
       'bench text'
       'week week';
-    gap: 0 40px;
+    justify-content: center;
+    gap: 0 56px;
     padding: var(--pad) 44px 18px var(--pad);
     color: var(--ink);
     font-family: var(--serif);
@@ -142,7 +144,7 @@ import Bare from '../../layouts/Bare.astro';
     display: grid;
     place-items: center;
     min-height: 0;
-    height: calc(100dvh - var(--week-h) - var(--pad) - 18px);
+    height: var(--sheet-h);
   }
 
   .wbw .sheet {
@@ -297,7 +299,7 @@ import Bare from '../../layouts/Bare.astro';
 
   .wbw .block-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
     gap: 10px 8px;
     margin: 0 0 18px;
     padding: 0;

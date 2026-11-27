@@ -15,6 +15,7 @@ import {
   searchPlaces,
   type FoundPlace,
   type Forecast,
+  type Hour,
   type Place,
 } from './_weather';
 
@@ -124,8 +125,9 @@ export function start(root: HTMLElement): void {
     if (!forecast) return;
     const h = forecast.hours[i];
     const k = describe(h.code);
+    const when = whenText(i, true);
     const bits = [
-      `<b>${escapeHtml(whenText(i, true))}.</b>`,
+      `<b>${escapeHtml(when)}</b>${when.endsWith('.') ? '' : '.'}`,
       `${escapeHtml(k.words)}, ${tempText(h.temp)}.`,
       h.wind >= 2 ? `Wind ${windText(h.wind)} from the ${compass(h.windFrom)}.` : 'Still air.',
       `${Math.round(h.cloud)}% cloud.`,
@@ -513,6 +515,17 @@ export function start(root: HTMLElement): void {
         show(i, 'render');
       },
       load: (p: Place) => load(p, 'render'),
+      force: (patch: Partial<Hour>, key?: string, elevation = 100) => {
+        if (!forecast || !scene) return null;
+        if (key) scene = makeScene(key, elevation);
+        const h = { ...forecast.hours[index], ...patch };
+        plate = makePlate(scene, makeCond(forecast, h), placeLabel());
+        press.render(plate, proof ?? undefined);
+        finish.setPlate(plate, press.relief, still);
+        buildList(plate);
+        wake();
+        return { title: plate.title, blocks: plate.blocks.map((b) => b.id), sea: scene.sea, pine: scene.tree.pine };
+      },
       image: { IW, IH },
     };
   }
