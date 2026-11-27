@@ -205,7 +205,7 @@ export function makeScene(key: string, elevation: number): Scene {
   };
   const trunkAt = (y: number) => {
     const u = (tree.base - y) / (tree.base - top);
-    return tx + tree.lean * u * u + 14 * Math.sin(u * 5 + seed);
+    return tx + tree.lean * u * u + 14 * Math.sin(u * 5 + seed) + 4 * Math.sin(u * 7 + seed * 2);
   };
   if (pine) {
     const nb = 5 + Math.floor(rng() * 3);
@@ -256,6 +256,7 @@ export function makeScene(key: string, elevation: number): Scene {
       clump(x1, y1 - 10, 82 + rng() * 34);
       clump(lerp(x0, x1, 0.55), lerp(y0, y1, 0.55) - 14, 56 + rng() * 20);
     }
+    clump(fx, fy - 22, 72);
   }
 
   const pathX0 = mx(560 + rng() * 120);
@@ -288,10 +289,10 @@ export function makeScene(key: string, elevation: number): Scene {
   for (let i = 0; i < 150; i++) stars.push([rng() * IW, rng() * (horizon - 120), 0.9 + rng() ** 3 * 2.4]);
 
   const ripples: [number, number, number][] = [];
-  for (let i = 0; i < 220; i++) {
-    const u = rng();
-    const y = horizon + 8 + u * u * (1190 - horizon);
-    ripples.push([rng() * IW, y, 10 + u * 60 * (0.5 + rng())]);
+  for (let i = 0; i < 170; i++) {
+    const u = rng() ** 1.5;
+    const y = horizon + 6 + u * (1180 - horizon);
+    ripples.push([rng() * IW, y, (14 + u * 110) * (0.45 + rng() * 0.8)]);
   }
 
   const tufts: [number, number, number][] = [];
@@ -611,8 +612,8 @@ function treeTrunk(ctx: CanvasRenderingContext2D, s: Scene, limbs = true) {
   for (let i = 0; i <= steps; i++) {
     const u = i / steps;
     const y = lerp(t.base, t.top, u);
-    const x = t.x + t.lean * u * u + 14 * Math.sin(u * 5 + s.seed);
-    pts.push([x, y, lerp(t.pine ? 30 : 34, 6, u)]);
+    const x = t.x + t.lean * u * u + 14 * Math.sin(u * 5 + s.seed) + 4 * Math.sin(u * 7 + s.seed * 2);
+    pts.push([x, y, lerp(t.pine ? 28 : 24, t.pine ? 6 : 8, u)]);
   }
   ctx.beginPath();
   ctx.moveTo(pts[0][0] - pts[0][2], pts[0][1]);
@@ -1093,7 +1094,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
       eachHouse(ctx, s, roofs);
       treeTrunk(ctx, s);
       ctx.fill();
-      if (leaf && !(c.season === 'spring' && !s.tree.pine)) {
+      if (leaf) {
         // The limbs disappear into the foliage.
         ctx.globalCompositeOperation = 'destination-out';
         pads(ctx, s, 6);
@@ -1270,18 +1271,32 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
         ctx.globalAlpha = 1;
       }
       // Ripples, more and longer in wind.
-      const n = Math.round(lerp(22, s.ripples.length, c.breeze ** 0.8));
-      ctx.lineWidth = 1.5;
+      ctx.save();
       ctx.beginPath();
+      ctx.rect(-10, s.horizon, IW + 20, IH);
+      ctx.clip();
+      ctx.globalCompositeOperation = 'source-over';
+      const n = Math.round(lerp(24, s.ripples.length, c.breeze ** 0.8));
+      const swell = (s.sea ? 2.2 : 1.2) + c.breeze * 3;
       for (let i = 0; i < n; i++) {
         const [x, y, len] = s.ripples[i];
-        const l = len * (0.6 + c.breeze * 0.9);
+        const u = (y - s.horizon) / (1180 - s.horizon);
+        const l = len * (0.7 + c.breeze * 0.6);
+        ctx.globalAlpha = 0.35 + u * 0.55;
+        ctx.lineWidth = 0.9 + u * 1.1;
+        ctx.beginPath();
         ctx.moveTo(x - l / 2, y);
-        if (s.sea && c.breeze > 0.35 && i % 3 === 0) {
-          ctx.quadraticCurveTo(x, y - 6 - c.breeze * 6, x + l / 2, y);
-        } else ctx.lineTo(x + l / 2, y);
+        // A low swell along each line, steeper and curling in a wind on the open sea.
+        ctx.bezierCurveTo(x - l / 6, y - swell * (0.4 + u), x + l / 6, y + swell * 0.5, x + l / 2, y - swell * 0.2);
+        if (s.sea && c.breeze > 0.4 && i % 4 === 0) ctx.quadraticCurveTo(x + l / 2 + 6, y - 7 * c.breeze, x + l / 2 - 2, y - 9 * c.breeze);
+        ctx.stroke();
       }
-      ctx.stroke();
+      ctx.globalAlpha = 1;
+      // Nothing of the water shows on the bank.
+      ctx.globalCompositeOperation = 'destination-out';
+      groundPath(ctx, s);
+      ctx.fill();
+      ctx.restore();
       // The bank's edge and tufts of grass.
       ctx.lineWidth = 2.2;
       ctx.beginPath();
@@ -1301,6 +1316,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
         ctx.quadraticCurveTo(x + 7, y - h * 0.5, x + 10 + lean, y - h * 0.65);
       }
       ctx.stroke();
+      ctx.globalAlpha = 1;
       // Houses.
       ctx.lineWidth = 2;
       eachHouse(ctx, s, (h) => {
@@ -1336,7 +1352,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
       }
       // The tree: trunk, bark, and the scalloped undersides of pine needles.
       ctx.lineWidth = 2.2;
-      const leafy = !!leaf && !(c.season === 'spring' && !s.tree.pine);
+      const leafy = !!leaf;
       treeTrunk(ctx, s, !leafy);
       ctx.stroke();
       if (leafy) {
@@ -1448,7 +1464,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
 
   // 16. Mica, dusted on a dark sky and dark water.
   const mica: [number, number, number][] = [];
-  if (night || storm > 0.5) {
+  if (night) {
     const rng = mulberry32(s.seed + 53);
     for (let i = 0; i < 900; i++) {
       const sky = rng() < 0.6;
