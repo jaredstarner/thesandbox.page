@@ -748,7 +748,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
   if (c.glow > 0.05) {
     blocks.push({
       id: 'glow',
-      name: c.dawn ? 'Dawn yellow' : 'Sunset rose',
+      name: c.sun.alt > 2 && c.localHour >= 10 && c.localHour <= 14 ? 'Low sun gold' : c.dawn ? 'Dawn yellow' : 'Sunset rose',
       pigment: tint(glowCol),
       strength: clamp(c.glow * 1.1),
       grain: 0.25,
@@ -813,7 +813,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
       id: 'cloud',
       name: night ? 'Night cloud' : storm > 0.4 ? 'Storm grey' : 'Cloud shadow',
       pigment: tint(cloudCol),
-      strength: c.kind.fog ? 0.3 : night ? 0.7 : 0.55 + oc * 0.35,
+      strength: c.kind.fog ? 0.3 : night ? 0.9 : 0.55 + oc * 0.35,
       grain: 0.2,
       carve: (ctx, k) => {
         if (oc > 0.55) {
@@ -834,9 +834,16 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
         k.blur(12);
         ctx.beginPath();
         for (const { cl, x } of shown) {
-          // A grey belly along each cloud's base.
-          ctx.moveTo(x + cl.w * 0.42, cl.y + 4);
-          ctx.ellipse(x, cl.y + 4, cl.w * 0.42, 15, 0, 0, Math.PI * 2);
+          if (night) {
+            // By night the whole cloud is dim; only its rim, a little thinner here, stays pale.
+            cloudShape(ctx, cl, x, -6, -10);
+            ctx.moveTo(x + cl.w * 0.46, cl.y + 6);
+            ctx.ellipse(x, cl.y + 6, cl.w * 0.46, 11, 0, 0, Math.PI * 2);
+          } else {
+            // A grey belly along each cloud's base.
+            ctx.moveTo(x + cl.w * 0.42, cl.y + 4);
+            ctx.ellipse(x, cl.y + 4, cl.w * 0.42, 15, 0, 0, Math.PI * 2);
+          }
         }
         ctx.fill();
         k.blur(0);
