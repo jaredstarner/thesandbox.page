@@ -106,7 +106,7 @@ export class Finish {
     const l = Math.hypot(lx, ly) || 1;
     lx /= l;
     ly /= l;
-    const d = 1.6 * this.scale;
+    const d = 0.6 * this.scale;
     for (const [cv, sign] of [
       [this.hi, 1],
       [this.lo, -1],
@@ -151,9 +151,9 @@ export class Finish {
     // Blind embossing, lit from the lamp's side.
     if (this.relief) {
       this.emboss();
-      c.globalAlpha = 0.85;
-      c.drawImage(this.hi, 0, 0, W, H);
       c.globalAlpha = 0.5;
+      c.drawImage(this.hi, 0, 0, W, H);
+      c.globalAlpha = 0.34;
       c.drawImage(this.lo, 0, 0, W, H);
       c.globalAlpha = 1;
     }

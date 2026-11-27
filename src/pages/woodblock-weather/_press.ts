@@ -3,7 +3,7 @@
 // its edges, wipes it where the mist lies, lets the wood grain through, nudges it a hair off
 // register, and prints it by multiplying, the way transparent water-based colour builds up.
 
-import { IH, IW, MARGIN, SW, type Block, type Plate, type Tools } from './_scene';
+import { IH, IW, MARGIN, SW, getFont, type Block, type Plate, type Tools } from './_scene';
 import { clamp, hashString, mulberry32, noise2 } from './_util';
 
 const FILTERS = typeof CanvasRenderingContext2D !== 'undefined' && 'filter' in CanvasRenderingContext2D.prototype;
@@ -68,7 +68,7 @@ function makePaper(w: number, h: number, seed: number): { paper: HTMLCanvasEleme
     const bend = (rng() - 0.5) * len * 0.8;
     const dark = rng() < 0.18;
     const target = dark ? pc : fc;
-    target.strokeStyle = dark ? 'rgba(140, 120, 90, 0.10)' : `rgba(255, 252, 242, ${0.25 + rng() * 0.3})`;
+    target.strokeStyle = dark ? 'rgba(140, 120, 90, 0.08)' : `rgba(255, 252, 242, ${0.16 + rng() * 0.2})`;
     target.lineWidth = (0.5 + rng() * 0.9) * k * 1.4;
     target.beginPath();
     target.moveTo(x, y);
@@ -80,7 +80,7 @@ function makePaper(w: number, h: number, seed: number): { paper: HTMLCanvasEleme
     );
     target.stroke();
   }
-  pc.globalAlpha = 0.6;
+  pc.globalAlpha = 0.5;
   pc.drawImage(fibres, 0, 0);
   pc.globalAlpha = 1;
   return { paper, fibres };
@@ -94,19 +94,26 @@ function makeGrain(w: number, h: number, seed: number): HTMLCanvasElement {
   const hc = ctxOf(half);
   const img = hc.createImageData(hw, hh);
   const warp = noise2(seed + 11);
+  const warp2 = noise2(seed + 15);
   const tone = noise2(seed + 12);
   const mottle = noise2(seed + 13);
+  const patch = noise2(seed + 16);
   const rng = mulberry32(seed + 14);
   const k = (hw * 2) / (SW * 1.3);
-  const spacing = 5.5 * k;
+  const spacing = 7 * k;
   for (let y = 0; y < hh; y++) {
     for (let x = 0; x < hw; x++) {
-      const yy = y + (warp(x * 0.0035 / k, y * 0.012 / k) - 0.5) * 70 * k;
-      const ring = 0.5 + 0.5 * Math.cos((yy / spacing) * Math.PI * 2);
-      const lines = ring ** 10 * (0.35 + 0.65 * tone(x * 0.01 / k, y * 0.05 / k));
+      // Growth rings, bent around knots and bunched or spread as the plank's grain wanders.
+      const yy =
+        y +
+        (warp(x * 0.0018 / k, y * 0.005 / k) - 0.5) * 160 * k +
+        (warp2(x * 0.007 / k, y * 0.02 / k) - 0.5) * 18 * k;
+      const ring = 0.5 + 0.5 * Math.cos((yy / spacing) * Math.PI * 2 * (0.8 + 0.5 * tone(x * 0.0015 / k, 3.1)));
+      const show = Math.max(0, patch(x * 0.0024 / k, y * 0.004 / k) - 0.38) / 0.62;
+      const lines = ring ** 14 * show * (0.4 + 0.6 * tone(x * 0.012 / k, y * 0.05 / k));
       const m = mottle(x * 0.004 / k, y * 0.004 / k);
-      const speck = rng() < 0.0015 ? 0.7 : 0;
-      const a = clamp(lines * 0.75 + Math.max(0, m - 0.55) * 0.9 + speck + rng() * 0.05);
+      const speck = rng() < 0.0012 ? 0.6 : 0;
+      const a = clamp(lines * 0.85 + Math.max(0, m - 0.58) * 0.8 + speck + rng() * 0.04);
       img.data[(y * hw + x) * 4 + 3] = a * 255;
     }
   }
@@ -215,6 +222,12 @@ export class Press {
     const jy = (r() - 0.5) * 1.6;
     this.carveInto(c, b, s, (MARGIN + jx) * s, (MARGIN + jy) * s);
     reset(c);
+    if (!b.keep && plate.reserve.length) {
+      c.setTransform(s, 0, 0, s, MARGIN * s, MARGIN * s);
+      c.globalCompositeOperation = 'destination-out';
+      for (const [x, y, w, h] of plate.reserve) c.fillRect(x, y, w, h);
+      reset(c);
+    }
     if (b.mode === 'blind' || b.mode === 'mica') return this.blk;
 
     if (b.pool && FILTERS) {
@@ -271,7 +284,7 @@ export class Press {
     if (b.mode === 'blind') {
       const r = ctxOf(this.relief);
       reset(r);
-      if (FILTERS) r.filter = `blur(${(2.6 * this.scale).toFixed(2)}px)`;
+      if (FILTERS) r.filter = `blur(${(1.4 * this.scale).toFixed(2)}px)`;
       r.drawImage(src, 0, 0);
       reset(r);
       return;
@@ -283,11 +296,22 @@ export class Press {
     target.globalCompositeOperation = 'source-over';
   }
 
-  private finishSheet(target: CanvasRenderingContext2D) {
+  private finishSheet(target: CanvasRenderingContext2D, plate?: Plate) {
     reset(target);
-    target.globalAlpha = 0.45;
+    target.globalAlpha = 0.16;
     target.drawImage(this.fibres, 0, 0);
     target.globalAlpha = 1;
+    if (!plate) return;
+    // Pencil in the bottom margin.
+    const s = this.scale;
+    target.fillStyle = 'rgba(92, 90, 86, 0.72)';
+    target.font = `400 ${(17 * s).toFixed(1)}px ${getFont()}`;
+    target.textBaseline = 'middle';
+    const y = (MARGIN + IH + MARGIN / 2) * s;
+    target.textAlign = 'left';
+    target.fillText(plate.margin[0], (MARGIN + 4) * s, y);
+    target.textAlign = 'right';
+    target.fillText(plate.margin[1], (MARGIN + IW - 4) * s, y);
   }
 
   /** Print every block at once. `only` pulls a single proof. */
@@ -300,7 +324,7 @@ export class Press {
       if (only && b.id !== only) continue;
       this.printOnto(d, b, this.impression(b, plate));
     }
-    this.finishSheet(d);
+    this.finishSheet(d, only ? undefined : plate);
     reset(this.vctx);
     this.vctx.drawImage(this.done, 0, 0);
   }
@@ -377,7 +401,7 @@ export class Press {
       }
       this.printOnto(d, b, src);
     }
-    this.finishSheet(d);
+    this.finishSheet(d, plate);
     reset(v);
     v.drawImage(this.done, 0, 0);
     return true;
