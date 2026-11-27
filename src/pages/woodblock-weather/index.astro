@@ -417,6 +417,12 @@ import Bare from '../../layouts/Bare.astro';
     border-left: 1px solid var(--rule);
   }
 
+  .wbw .days b,
+  .wbw .days i {
+    font-weight: 400;
+    font-style: normal;
+  }
+
   .wbw .now-mark {
     position: absolute;
     top: -9px;
@@ -518,6 +524,12 @@ import Bare from '../../layouts/Bare.astro';
 
     .wbw h1 {
       font-size: 30px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .wbw .days i {
+      display: none;
     }
   }
 </style>

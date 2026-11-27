@@ -152,7 +152,11 @@ export class Strip {
         }
         if (local.hour === 0 || local.hour < 12) {
           const span = document.createElement('span');
-          span.textContent = `${DAYS[local.weekday]} ${local.day}`;
+          const wd = document.createElement('b');
+          wd.textContent = DAYS[local.weekday];
+          const dn = document.createElement('i');
+          dn.textContent = ` ${local.day}`;
+          span.append(wd, dn);
           span.style.left = `${(i / this.n) * 100}%`;
           this.days.append(span);
         }
