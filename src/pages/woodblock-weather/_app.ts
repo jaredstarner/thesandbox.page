@@ -391,6 +391,10 @@ export function start(root: HTMLElement): void {
       e.preventDefault();
       active = (active + (e.key === 'ArrowDown' ? 1 : -1) + found.length) % found.length;
       renderSuggest();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const p = found[active >= 0 ? active : 0];
+      if (p) choose(p);
     } else if (e.key === 'Escape') {
       closeSuggest();
       input.value = place.name;

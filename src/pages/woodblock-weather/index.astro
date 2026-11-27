@@ -57,8 +57,8 @@ import Bare from '../../layouts/Bare.astro';
       <p class="hint">Move across the print to tilt it under the lamp: the mica and the embossing catch the light.</p>
 
       <p class="credit">
-        Weather from <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0). Place names from
-        <a href="https://www.geonames.org/">GeoNames</a>.
+        Weather from <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0).
+        Place names from <a href="https://www.geonames.org/">GeoNames</a>.
       </p>
     </section>
 
@@ -109,7 +109,7 @@ import Bare from '../../layouts/Bare.astro';
     box-sizing: border-box;
     position: relative;
     isolation: isolate;
-    min-height: 100dvh;
+    height: 100dvh;
     display: grid;
     grid-template-columns: minmax(0, calc(var(--sheet-h) * 1092 / 1592)) minmax(300px, 400px);
     grid-template-rows: minmax(0, 1fr) var(--week-h);
@@ -492,7 +492,7 @@ import Bare from '../../layouts/Bare.astro';
         'week'
         'text';
       padding: 16px 16px 28px;
-      min-height: 0;
+      height: auto;
     }
 
     .wbw .bench {
