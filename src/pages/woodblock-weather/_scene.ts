@@ -176,14 +176,14 @@ export function makeScene(key: string, elevation: number): Scene {
 
   const houses: House[] = [];
   const hn = 2 + Math.floor(rng() * 2);
-  let hx = 600 + rng() * 40;
+  let hx = 560 + rng() * 50;
   for (let i = 0; i < hn; i++) {
-    const w = 105 + rng() * 55 - i * 8;
+    const w = 150 + rng() * 60 - i * 14;
     const x = mx(hx) - (mirror ? w : 0);
-    const y = at(ground, x + w / 2) + 26 + i * 6;
+    const y = at(ground, x + w / 2) + 60 + (i % 2) * 34 + rng() * 14;
     houses.push(makeHouse(rng, x, y, w));
-    hx += w * (0.68 + rng() * 0.25);
-    if (hx > 940) break;
+    hx += w * (0.62 + rng() * 0.22);
+    if (hx > 900) break;
   }
   // Back to front, so nearer houses draw over farther ones.
   houses.sort((a, b) => a.y - b.y);
@@ -191,13 +191,15 @@ export function makeScene(key: string, elevation: number): Scene {
   const pine = rng() < 0.5;
   const tx = mx(110 + rng() * 60);
   const dir = mirror ? -1 : 1;
-  const top = 360 + rng() * 140;
+  const crown = 360 + rng() * 140;
+  const base = at(ground, tx) + 150;
+  const top = pine ? crown : lerp(base, crown, 0.6);
   const tree: Tree = {
     pine,
     x: tx,
-    base: at(ground, tx) + 150,
+    base,
     top,
-    lean: dir * (40 + rng() * 60),
+    lean: dir * (pine ? 40 + rng() * 60 : 15 + rng() * 25),
     branches: [],
     pads: [],
   };
@@ -216,31 +218,43 @@ export function makeScene(key: string, elevation: number): Scene {
       const y1 = y0 - 30 - rng() * 50;
       tree.branches.push({ x0, y0, x1, y1, w: 12 - u * 7 });
       const pw = Math.abs(reach) * 0.55 + 50;
-      tree.pads.push({ dx: x1, dy: y1 - 6, rx: pw, ry: 22 + rng() * 10 });
-      if (Math.abs(reach) > 90) tree.pads.push({ dx: (x0 + x1) / 2, dy: (y0 + y1) / 2 - 12, rx: pw * 0.6, ry: 18 });
+      // Each pad a cloud of needle tufts lying along the branch.
+      const tufts = 3 + Math.floor(rng() * 2);
+      for (let k = 0; k < tufts; k++) {
+        const u2 = k / (tufts - 1) - 0.5;
+        tree.pads.push({
+          dx: x1 + u2 * pw * 1.1 + (rng() - 0.5) * 10,
+          dy: y1 - 8 + Math.abs(u2) * 14 + (rng() - 0.5) * 6,
+          rx: pw * (0.36 + rng() * 0.12) * (1 - Math.abs(u2) * 0.5),
+          ry: 17 + rng() * 9 - Math.abs(u2) * 6,
+        });
+      }
     }
-    tree.pads.push({ dx: trunkAt(top) + dir * 10, dy: top - 8, rx: 70, ry: 26 });
+    for (let k = 0; k < 3; k++)
+      tree.pads.push({ dx: trunkAt(top) + dir * 10 + (k - 1) * 40, dy: top - 8 - (k === 1 ? 10 : 0), rx: 42, ry: 22 });
   } else {
-    const limbs = 4 + Math.floor(rng() * 2);
+    // A broadleaf: the trunk forks into a fan of limbs, each carrying rounded masses of leaves.
+    const clump = (cx: number, cy: number, r: number) => {
+      for (let k = 0; k < 15; k++) {
+        const a = rng() * Math.PI * 2;
+        const d = Math.sqrt(rng()) * r * 0.72;
+        const pr = r * (0.26 + rng() * 0.2);
+        tree.pads.push({ dx: cx + Math.cos(a) * d * 1.25, dy: cy + Math.sin(a) * d * 0.75, rx: pr, ry: pr * 0.86 });
+      }
+    };
+    const fx = trunkAt(tree.top);
+    const fy = tree.top;
+    const limbs = 3 + Math.floor(rng() * 2);
     for (let i = 0; i < limbs; i++) {
-      const u = 0.45 + rng() * 0.4;
-      const y0 = lerp(tree.base, top, u);
-      const x0 = trunkAt(y0);
-      const a = -Math.PI / 2 + (rng() - 0.5) * 1.9 + dir * 0.25;
-      const len = 110 + rng() * 120;
-      tree.branches.push({ x0, y0, x1: x0 + Math.cos(a) * len, y1: y0 + Math.sin(a) * len, w: 9 - u * 4 });
-    }
-    const ccx = trunkAt(top) + dir * 30;
-    const ccy = top + 70;
-    for (let i = 0; i < 34; i++) {
-      const a = rng() * Math.PI * 2;
-      const r = Math.sqrt(rng());
-      tree.pads.push({
-        dx: ccx + Math.cos(a) * r * 190,
-        dy: ccy + Math.sin(a) * r * 130,
-        rx: 34 + rng() * 34,
-        ry: 30 + rng() * 26,
-      });
+      const a = -Math.PI / 2 + ((i / (limbs - 1)) - 0.5) * 1.9 + (rng() - 0.5) * 0.25 + dir * 0.12;
+      const len = 150 + rng() * 90 - Math.abs((i / (limbs - 1)) - 0.5) * 60;
+      const x0 = fx + (rng() - 0.5) * 10;
+      const y0 = fy + 8;
+      const x1 = x0 + Math.cos(a) * len;
+      const y1 = y0 + Math.sin(a) * len;
+      tree.branches.push({ x0, y0, x1, y1, w: 9 + rng() * 3 });
+      clump(x1, y1 - 10, 82 + rng() * 34);
+      clump(lerp(x0, x1, 0.55), lerp(y0, y1, 0.55) - 14, 56 + rng() * 20);
     }
   }
 
@@ -249,9 +263,9 @@ export function makeScene(key: string, elevation: number): Scene {
   const path = { x0: pathX0, w0: 230, x1: pathX1, w1: 26, y1: at(ground, pathX1) + 8, bend: (rng() - 0.5) * 160 };
   const fy = lerp(path.y1, IH, 0.42);
   const fu = (fy - path.y1) / (IH - path.y1);
-  const figure = { x: lerp(path.x1, path.x0, fu) + path.bend * Math.sin(fu * Math.PI) * 0.5, y: fy, s: 0.6 + fu * 0.7 };
+  const figure = { x: lerp(path.x1, path.x0, fu) + path.bend * Math.sin(fu * Math.PI) * 0.5, y: fy, s: 0.95 + fu * 0.8 };
 
-  const boat = sea ? { x: mx(560 + rng() * 260), y: horizon + 90 + rng() * 140, s: 0.7 + rng() * 0.5 } : null;
+  const boat = sea ? { x: mx(520 + rng() * 260), y: horizon + 110 + rng() * 120, s: 1.1 + rng() * 0.5 } : null;
 
   const clouds: Cloud[] = [];
   for (let i = 0; i < 16; i++) {
@@ -281,9 +295,9 @@ export function makeScene(key: string, elevation: number): Scene {
   }
 
   const tufts: [number, number, number][] = [];
-  for (let i = 0; i < 70; i++) {
+  for (let i = 0; i < 46; i++) {
     const x = rng() * IW;
-    tufts.push([x, at(ground, x) + 14 + rng() ** 1.5 * (IH - at(ground, x) - 20), 6 + rng() * 10]);
+    tufts.push([x, at(ground, x) + 16 + rng() ** 1.3 * (IH - at(ground, x) - 24), 9 + rng() * 14]);
   }
 
   const flakes: [number, number, number][] = [];
@@ -346,11 +360,18 @@ export interface Cond {
   localHour: number;
   localDay: number;
   localMonth: number;
+  localYear: number;
 }
 
 export function localParts(t: number, utcOffset: number) {
   const d = new Date(t + utcOffset * 1000);
-  return { hour: d.getUTCHours(), day: d.getUTCDate(), month: d.getUTCMonth(), weekday: d.getUTCDay() };
+  return {
+    hour: d.getUTCHours(),
+    day: d.getUTCDate(),
+    month: d.getUTCMonth(),
+    year: d.getUTCFullYear(),
+    weekday: d.getUTCDay(),
+  };
 }
 
 export function makeCond(f: Forecast, hour: Hour): Cond {
@@ -402,6 +423,7 @@ export function makeCond(f: Forecast, hour: Hour): Cond {
     localHour: local.hour,
     localDay: local.day,
     localMonth: local.month,
+    localYear: local.year,
   };
 }
 
@@ -409,9 +431,10 @@ export function makeCond(f: Forecast, hour: Hour): Cond {
 export function skyPoint(scene: Scene, p: SkyPos, facing: number, pad = 60): [number, number] | null {
   let d = p.bearing - facing;
   d = ((((d + 180) % 360) + 360) % 360) - 180;
-  const fov = 70;
-  const x = IW / 2 + (d / fov) * IW;
-  const y = scene.horizon - (p.alt / 52) * scene.horizon;
+  if (Math.abs(d) > 90) return null;
+  // The whole half of the sky you face is pressed into the sheet, as a print may.
+  const x = IW / 2 + Math.sin((d * Math.PI) / 180) * IW * 0.46;
+  const y = scene.horizon - (p.alt / 68) * scene.horizon;
   if (x < -pad || x > IW + pad || y < -pad) return null;
   return [x, y];
 }
@@ -465,6 +488,8 @@ export interface Block {
   misted?: boolean;
   /** 'ink' prints by multiplying; 'white' lays opaque shell white; 'blind' embosses; 'mica' glints. */
   mode?: 'ink' | 'white' | 'blind' | 'mica';
+  /** Prints inside the cartouche and seal, which every other block leaves bare. */
+  keep?: boolean;
 }
 
 export interface Plate {
@@ -480,7 +505,14 @@ export interface Plate {
   thunder: boolean;
   windX: number;
   night: boolean;
+  /** Rectangles left as bare paper: the cartouche and the seal. */
+  reserve: [number, number, number, number][];
+  /** Pencilled in the bottom margin, left and right. */
+  margin: [string, string];
 }
+
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const clockWords = (h: number) => (h === 0 ? 'midnight' : h === 12 ? 'noon' : `${h % 12} ${h < 12 ? 'a.m.' : 'p.m.'}`);
 
 const tint = (c: RGB) => css(c);
 
@@ -559,7 +591,20 @@ function figureShape(ctx: CanvasRenderingContext2D, s: Scene, umbrella: boolean)
   }
 }
 
-function treeTrunk(ctx: CanvasRenderingContext2D, s: Scene) {
+/** Paths each near house back to front, first hiding whatever this block printed behind it. */
+function eachHouse(ctx: CanvasRenderingContext2D, s: Scene, draw: (h: House) => void) {
+  for (const h of s.houses) {
+    const op = ctx.globalCompositeOperation;
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    houseOutline(ctx, h);
+    ctx.fill();
+    ctx.globalCompositeOperation = op;
+    draw(h);
+  }
+}
+
+function treeTrunk(ctx: CanvasRenderingContext2D, s: Scene, limbs = true) {
   const t = s.tree;
   const steps = 24;
   const pts: [number, number, number][] = [];
@@ -574,6 +619,7 @@ function treeTrunk(ctx: CanvasRenderingContext2D, s: Scene) {
   for (const [x, y, w] of pts) ctx.lineTo(x - w, y);
   for (let i = pts.length - 1; i >= 0; i--) ctx.lineTo(pts[i][0] + pts[i][2], pts[i][1]);
   ctx.closePath();
+  if (!limbs) return;
   for (const b of t.branches) {
     const nx = -(b.y1 - b.y0);
     const ny = b.x1 - b.x0;
@@ -650,8 +696,9 @@ function seasonFoliage(s: Season, pine: boolean): string | null {
 export function skyColors(c: Cond): { top: RGB; glow: RGB } {
   const storm = clamp(c.wet * 0.6 + (c.kind.thunder ? 0.4 : 0));
   const day = mix(mix('#2f63a0', '#8b929a', c.overcast), '#5d646d', storm * 0.8);
-  const night = mix('#1f2a4a', '#2a2e38', c.overcast);
-  const top = mix(mix(night, day, c.day), c.dawn ? '#47507e' : '#3c3a68', c.glow * 0.7);
+  const night = mix('#17234a', '#262b37', c.overcast);
+  let top = mix(mix(night, day, c.day), c.dawn ? '#47507e' : '#3c3a68', c.glow * 0.7);
+  if (c.kind.fog) top = mix(top, mix('#30343c', '#a4a9ad', c.day), 0.75);
   const glow = c.dawn ? mix('#f0c47a', '#e9a06a', 0.4) : mix('#e8935c', '#d8664a', 0.35);
   return { top, glow };
 }
@@ -659,7 +706,8 @@ export function skyColors(c: Cond): { top: RGB; glow: RGB } {
 /** The blocks for one hour, light colours first and the key block near the end. */
 export function makePlate(s: Scene, c: Cond, place: string): Plate {
   const night = c.sun.alt < -6;
-  const D = c.day;
+  // Land keeps its colour into twilight; the sky's own colour follows the Sun more closely.
+  const L = smoothstep(-12, 3, c.sun.alt);
   const oc = c.overcast;
   const wet = c.wet;
   const storm = clamp(wet * 0.6 + (c.kind.thunder ? 0.4 : 0));
@@ -672,7 +720,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
   const sunXY = c.sun.alt > -1.5 && c.sun.alt < 9 ? skyPoint(s, c.sun, c.facing, -50) : null;
   const sunFor = skyPoint(s, c.sun, c.facing, 4000) ?? [IW / 2, s.horizon + 400];
   const moonVisible = moonXY && night && c.hour.cloud < 85 && !c.kind.fog;
-  const moonR = 30;
+  const moonR = 36;
   const moonTilt = moonXY ? Math.atan2(sunFor[1] - moonXY[1], sunFor[0] - moonXY[0]) : 0;
 
   // Clouds: how many of the place's pool show, drifting with the wind hour by hour.
@@ -687,7 +735,9 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
 
   // Mist bands: across the base of the hills, and over the water when it's thick.
   const mist: [number, number, number][] = [];
-  if (c.mist > 0.05) {
+  if (c.kind.fog) {
+    mist.push([s.horizon - 30, 150, 0.97], [s.horizon + 110, 130, 0.85], [s.horizon - 260, 160, 0.8]);
+  } else if (c.mist > 0.05) {
     mist.push([s.horizon - 16, 46 + c.mist * 50, c.mist]);
     if (c.mist > 0.35) mist.push([s.horizon - 150 - lowCloud * 60, 40 + c.mist * 40, (c.mist - 0.3) * 1.1]);
     if (c.mist > 0.6) mist.push([s.horizon + 120, 70, (c.mist - 0.55) * 1.6]);
@@ -733,9 +783,14 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
       ctx.fillRect(-10, -10, IW + 20, s.horizon + 30);
       ctx.globalCompositeOperation = 'destination-out';
       if (oc < 0.85) {
-        k.blur(10 + oc * 18);
+        k.blur(8 + oc * 18);
         ctx.beginPath();
-        for (const { cl, x } of shown) cloudShape(ctx, cl, x);
+        for (const { cl, x } of shown) {
+          // Cumulus: heaped tops on a long, flat base.
+          cloudShape(ctx, cl, x, 0, -10);
+          ctx.moveTo(x + cl.w * 0.5, cl.y + 6);
+          ctx.ellipse(x, cl.y + 6, cl.w * 0.5, 13, 0, 0, Math.PI * 2);
+        }
         ctx.fill();
         k.blur(0);
       }
@@ -746,7 +801,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
     },
     bokashi: [
       [0, 1],
-      [s.horizon - 40, oc > 0.6 ? 0.55 : night ? 0.55 : 0.1 + c.glow * 0.1],
+      [s.horizon - 40, c.kind.fog ? 0.15 : oc > 0.6 ? 0.55 : night ? 0.8 : 0.1 + c.glow * 0.1],
     ],
   });
 
@@ -757,7 +812,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
       id: 'cloud',
       name: night ? 'Night cloud' : storm > 0.4 ? 'Storm grey' : 'Cloud shadow',
       pigment: tint(cloudCol),
-      strength: night ? 0.7 : 0.55 + oc * 0.35,
+      strength: c.kind.fog ? 0.3 : night ? 0.7 : 0.55 + oc * 0.35,
       grain: 0.2,
       carve: (ctx, k) => {
         if (oc > 0.55) {
@@ -775,9 +830,13 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
           ctx.fill();
           k.blur(0);
         }
-        k.blur(14);
+        k.blur(12);
         ctx.beginPath();
-        for (const { cl, x } of shown) cloudShape(ctx, cl, x, -8, 12);
+        for (const { cl, x } of shown) {
+          // A grey belly along each cloud's base.
+          ctx.moveTo(x + cl.w * 0.42, cl.y + 4);
+          ctx.ellipse(x, cl.y + 4, cl.w * 0.42, 15, 0, 0, Math.PI * 2);
+        }
         ctx.fill();
         k.blur(0);
         if (moonVisible && moonXY) {
@@ -794,7 +853,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
   }
 
   // 4. The far range, wiped toward its foot; snow caps left as paper.
-  const farCol = mix(mix(mix('#8fa3bd', '#9ca3aa', oc), '#c9d1db', snowy * 0.4), '#323c57', 1 - D);
+  const farCol = mix(mix(mix('#8fa3bd', '#9ca3aa', oc), '#c9d1db', snowy * 0.4), '#28335a', 1 - L);
   blocks.push({
     id: 'far',
     name: 'Distant blue',
@@ -806,19 +865,20 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
     carve: (ctx, k) => {
       ridge(ctx, s.far, s.horizon + 40);
       ctx.fill();
-      const cold = c.hour.temp < 3 || snowy > 0.2;
+      const peak = Math.min(...s.far);
+      const cold = (c.hour.temp < 3 || snowy > 0.2) && s.horizon - peak > 170;
       if (cold) {
+        // Snow above a ragged line, reaching down the gullies.
         ctx.globalCompositeOperation = 'destination-out';
-        k.blur(3);
-        const line = Math.min(...s.far) + 40 + clamp(c.hour.temp, -10, 8) * 6;
+        k.blur(2.5);
+        const line = peak + 45 + clamp(c.hour.temp + 4, 0, 12) * 5 + (snowy > 0.2 ? 30 : 0);
+        const gully = fbm1(s.seed + 21, 3);
         ctx.beginPath();
-        ctx.moveTo(-10, -10);
-        for (let i = 0; i < N; i++) {
-          const y = s.far[i];
-          const jag = Math.sin(i * 1.7 + s.seed) * 9;
-          ctx.lineTo(i * 10, Math.max(y, Math.min(line + jag, y + 50)));
+        for (let i = 0; i < N; i++) ctx.lineTo(i * 10, s.far[i] - 1);
+        for (let i = N - 1; i >= 0; i--) {
+          const snowline = line + (gully(i * 0.21) - 0.5) * 70 + Math.max(0, Math.sin(i * 0.9 + s.seed) * 18);
+          ctx.lineTo(i * 10, Math.max(s.far[i] - 1, snowline));
         }
-        ctx.lineTo(IW + 10, -10);
         ctx.closePath();
         ctx.fill();
         k.blur(0);
@@ -831,7 +891,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
   });
 
   // 5. The nearer hills, and on a lake the grove along the far shore.
-  const hillCol = mix(mix(mix('#5f7d9b', '#7b858f', oc), '#aab6c4', snowy * 0.5), '#26304a', 1 - D);
+  const hillCol = mix(mix(mix('#5f7d9b', '#7b858f', oc), '#aab6c4', snowy * 0.5), '#1c2644', 1 - L);
   blocks.push({
     id: 'hills',
     name: 'Hill blue',
@@ -857,7 +917,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
       autumn: '#86683b',
       winter: '#55615f',
     };
-    const groveCol = mix(mix(groveDay[c.season], '#8e9aa4', snowy * 0.6), '#1d2733', 1 - D);
+    const groveCol = mix(mix(groveDay[c.season], '#8e9aa4', snowy * 0.6), '#1d2733', 1 - L);
     blocks.push({
       id: 'grove',
       name: c.season === 'autumn' ? 'Grove ochre' : 'Grove green',
@@ -885,7 +945,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
   }
 
   // 6. Water: darker under the far shore and toward you; the moon's path left as paper.
-  const waterCol = mix(mix(mix('#3d73a8', '#6f8797', oc), '#56656f', storm * 0.7), '#1c2843', 1 - D);
+  const waterCol = mix(mix(mix('#3d73a8', '#6f8797', oc), '#56656f', storm * 0.7), '#131e3d', 1 - L);
   blocks.push({
     id: 'water',
     name: night ? 'Night water' : 'Water blue',
@@ -897,6 +957,8 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
     carve: (ctx) => {
       ctx.fillRect(-10, s.horizon, IW + 20, 1260 - s.horizon);
       ctx.globalCompositeOperation = 'destination-out';
+      groundPath(ctx, s);
+      ctx.fill();
       if (moonVisible && moonXY && c.moon.alt > 0) {
         const rng = mulberry32(s.seed + 9);
         const spread = 10 + c.breeze * 40;
@@ -934,7 +996,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
     autumn: '#ad8f52',
     winter: '#9f9171',
   };
-  const earthCol = mix(mix(earthDay[c.season], '#b8c4d2', snowy), '#2a2f37', 1 - D);
+  const earthCol = mix(mix(earthDay[c.season], '#b8c4d2', snowy), '#2a2f37', 1 - L);
   blocks.push({
     id: 'earth',
     name: snowy > 0.5 ? 'Snow shadow' : c.season === 'autumn' || c.season === 'winter' ? 'Earth ochre' : 'Grass green',
@@ -958,7 +1020,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
   });
 
   // 8. Ochre: plaster walls, the path, and the cartouche's ground.
-  const ochre = mix('#e2cb97', '#4a443d', 1 - D);
+  const ochre = mix('#e2cb97', '#4a443d', 1 - L);
   blocks.push({
     id: 'ochre',
     name: 'Pale ochre',
@@ -967,20 +1029,33 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
     grain: 0.25,
     carve: (ctx) => {
       ctx.beginPath();
-      for (const h of [...s.houses, ...s.farHouses]) houseWall(ctx, h);
+      for (const h of s.farHouses) houseWall(ctx, h);
       ctx.fill();
+      eachHouse(ctx, s, (h) => {
+        ctx.beginPath();
+        houseWall(ctx, h);
+        ctx.fill();
+      });
       if (snowy < 0.5) {
         ctx.globalAlpha = 0.75;
         pathShape(ctx, s);
         ctx.fill();
         ctx.globalAlpha = 1;
       }
-      cartoucheField(ctx, s, place, c);
+      if (s.boat) {
+        const { x, y, s: k } = s.boat;
+        ctx.beginPath();
+        ctx.moveTo(x + 1.5 * k, y - 82 * k);
+        ctx.lineTo(x + 40 * k, y - 14 * k);
+        ctx.lineTo(x + 1.5 * k, y - 14 * k);
+        ctx.closePath();
+        ctx.fill();
+      }
     },
   });
 
   // 9. Slate: roofs, bark, the walker's coat, the boat.
-  const slate = mix('#4b5563', '#1d2129', 1 - D);
+  const slate = mix('#4b5563', '#1d2129', 1 - L);
   blocks.push({
     id: 'slate',
     name: 'Slate grey',
@@ -989,38 +1064,42 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
     grain: 0.25,
     pool: 0.18,
     carve: (ctx) => {
-      ctx.beginPath();
-      for (const h of [...s.houses, ...s.farHouses]) {
+      const roofs = (h: House) => {
+        ctx.beginPath();
         houseRoof(ctx, h);
         if (h.chimney) {
           const [cx, cw, chh] = h.chimney;
           ctx.rect(cx, h.y - h.h - chh, cw, chh * 0.9);
         }
-      }
-      ctx.fill();
-      if (snowy > 0.3) {
-        // Snow on the roofs: all but the eaves left as paper.
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.beginPath();
-        for (const h of [...s.houses, ...s.farHouses]) {
+        ctx.fill();
+        if (snowy > 0.3) {
+          // Snow on the roof: all but the eaves left as paper.
+          ctx.globalCompositeOperation = 'destination-out';
           ctx.save();
           ctx.translate(0, -h.rh * 0.12);
+          ctx.beginPath();
           houseRoof(ctx, h);
+          ctx.fill();
           ctx.restore();
+          ctx.globalCompositeOperation = 'source-over';
         }
+        // Windows and doors, dark by day.
+        ctx.beginPath();
+        if (!night) for (const [x, y, w, hh] of h.windows) ctx.rect(x, y, w, hh);
+        if (h.door) ctx.rect(...h.door);
+        ctx.fill();
+      };
+      for (const h of s.farHouses) roofs(h);
+      eachHouse(ctx, s, roofs);
+      treeTrunk(ctx, s);
+      ctx.fill();
+      if (leaf && !(c.season === 'spring' && !s.tree.pine)) {
+        // The limbs disappear into the foliage.
+        ctx.globalCompositeOperation = 'destination-out';
+        pads(ctx, s, 6);
         ctx.fill();
         ctx.globalCompositeOperation = 'source-over';
       }
-      // Windows and doors, dark by day.
-      ctx.beginPath();
-      for (const h of s.houses) {
-        if (!night) for (const [x, y, w, hh] of h.windows) ctx.rect(x, y, w, hh);
-        if (h.door) ctx.rect(...h.door);
-      }
-      if (!night) for (const h of s.farHouses) for (const [x, y, w, hh] of h.windows) ctx.rect(x, y, w, hh);
-      ctx.fill();
-      treeTrunk(ctx, s);
-      ctx.fill();
       figureShape(ctx, s, false);
       ctx.fill();
       if (s.boat) {
@@ -1049,13 +1128,28 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
           : c.season === 'spring'
             ? 'Blossom pink'
             : 'Leaf green',
-      pigment: tint(mix(leaf, '#1b2620', (1 - D) * 0.75)),
+      pigment: tint(mix(leaf, '#1b2620', (1 - L) * 0.75)),
       strength: 1,
       grain: 0.28,
       pool: 0.2,
+      bokashi: [
+        [s.tree.top - 120, 0.72],
+        [s.tree.top + 260, 1],
+      ],
       carve: (ctx) => {
         pads(ctx, s);
         ctx.fill();
+        if (c.season === 'autumn' && !s.tree.pine) {
+          const rng = mulberry32(s.seed + 61);
+          ctx.beginPath();
+          for (let i = 0; i < 70; i++) {
+            const x = s.tree.x + (rng() - 0.5) * 380;
+            const y = at(s.ground, x) + 20 + rng() ** 2 * 200;
+            ctx.moveTo(x + 4, y);
+            ctx.ellipse(x, y, 4 + rng() * 3, 2 + rng() * 1.5, rng() * 3, 0, Math.PI * 2);
+          }
+          ctx.fill();
+        }
         if (snowy > 0.3) {
           ctx.globalCompositeOperation = 'destination-out';
           ctx.beginPath();
@@ -1070,7 +1164,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
   }
 
   // 11. Lamp yellow: lit windows and their reflections, the walker's lantern.
-  const lit = night || (D < 0.5 && oc > 0.5);
+  const lit = night || (c.day < 0.5 && oc > 0.5);
   if (lit) {
     blocks.push({
       id: 'lamp',
@@ -1080,10 +1174,13 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
       grain: 0.15,
       carve: (ctx) => {
         const rng = mulberry32(s.seed + 31);
-        ctx.beginPath();
-        for (const h of [...s.houses, ...s.farHouses])
-          for (const w of h.windows) if (rng() < 0.75 || h === s.houses[0]) ctx.rect(...w);
-        ctx.fill();
+        const lights = (h: House) => {
+          ctx.beginPath();
+          for (const w of h.windows) if (rng() < 0.75 || h === s.houses[s.houses.length - 1]) ctx.rect(...w);
+          ctx.fill();
+        };
+        for (const h of s.farHouses) lights(h);
+        eachHouse(ctx, s, lights);
         if (!s.sea) {
           for (const h of s.farHouses) {
             for (let y = s.horizon + 8; y < s.horizon + 70; y += 6 + rng() * 6) {
@@ -1103,6 +1200,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
   const umbrella = c.kind.fall !== 'none' && c.kind.fall !== 'snow' ? true : c.kind.fall === 'snow' && wet > 0.5;
   blocks.push({
     id: 'red',
+    keep: true,
     name: 'Vermilion',
     pigment: '#cc4a30',
     strength: 1,
@@ -1142,9 +1240,10 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
   });
 
   // 13. The key block: every line, and the lettering.
-  const keyCol = mix('#283041', '#0e1117', 1 - D);
+  const keyCol = mix('#283041', '#0e1117', 1 - L);
   blocks.push({
     id: 'key',
+    keep: true,
     name: 'Key block',
     pigment: tint(keyCol),
     strength: 1,
@@ -1171,7 +1270,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
         ctx.globalAlpha = 1;
       }
       // Ripples, more and longer in wind.
-      const n = Math.round(lerp(40, s.ripples.length, c.breeze));
+      const n = Math.round(lerp(22, s.ripples.length, c.breeze ** 0.8));
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       for (let i = 0; i < n; i++) {
@@ -1190,23 +1289,27 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
       for (let i = 0; i < N; i++) ctx.lineTo(i * 10, s.ground[i]);
       ctx.stroke();
       ctx.lineWidth = 1.6;
+      ctx.globalAlpha = 0.6;
       ctx.beginPath();
       for (const [x, y, h] of s.tufts) {
+        const lean = c.windX * h * 0.25;
+        ctx.moveTo(x - 4, y);
+        ctx.quadraticCurveTo(x - 6, y - h * 0.6, x - 9 + lean, y - h * 0.8);
         ctx.moveTo(x, y);
-        ctx.lineTo(x - h * 0.35, y - h);
-        ctx.moveTo(x + 3, y);
-        ctx.lineTo(x + 3 + h * 0.2, y - h * 0.8);
+        ctx.quadraticCurveTo(x + 1, y - h * 0.7, x + 2 + lean, y - h);
+        ctx.moveTo(x + 4, y);
+        ctx.quadraticCurveTo(x + 7, y - h * 0.5, x + 10 + lean, y - h * 0.65);
       }
       ctx.stroke();
       // Houses.
       ctx.lineWidth = 2;
-      for (const h of s.houses) {
+      eachHouse(ctx, s, (h) => {
         ctx.beginPath();
         houseOutline(ctx, h);
         for (const w of h.windows) ctx.rect(...w);
         if (h.door) ctx.rect(...h.door);
         ctx.stroke();
-      }
+      });
       ctx.lineWidth = 1;
       ctx.beginPath();
       for (const h of s.farHouses) houseOutline(ctx, h);
@@ -1233,9 +1336,15 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
       }
       // The tree: trunk, bark, and the scalloped undersides of pine needles.
       ctx.lineWidth = 2.2;
-      treeTrunk(ctx, s);
+      const leafy = !!leaf && !(c.season === 'spring' && !s.tree.pine);
+      treeTrunk(ctx, s, !leafy);
       ctx.stroke();
-      if (!leaf) bareTwigs(ctx, s);
+      if (leafy) {
+        ctx.globalCompositeOperation = 'destination-out';
+        pads(ctx, s, 3);
+        ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+      } else bareTwigs(ctx, s);
       if (s.tree.pine && leaf) {
         ctx.lineWidth = 1.6;
         for (const p of s.tree.pads) {
@@ -1246,7 +1355,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
             const x = p.dx + Math.cos(a) * p.rx * 0.92;
             const y = p.dy + Math.sin(a) * p.ry * 0.85;
             ctx.moveTo(x, y);
-            ctx.lineTo(x + (p.dx - x) * 0.18, y - p.ry * 0.5);
+            ctx.lineTo(x + (p.dx - x) * 0.12, y - p.ry * 0.32);
           }
           ctx.stroke();
         }
@@ -1275,15 +1384,18 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
         ctx.lineTo(b.x + 34 * b.s, b.y + 4 * b.s);
         ctx.lineTo(b.x - 36 * b.s, b.y + 4 * b.s);
         ctx.closePath();
+        ctx.moveTo(b.x + 1.5 * b.s, b.y - 82 * b.s);
+        ctx.lineTo(b.x + 40 * b.s, b.y - 14 * b.s);
+        ctx.lineTo(b.x + 1.5 * b.s, b.y - 14 * b.s);
         ctx.stroke();
       }
       cartoucheLines(ctx, s, place, c);
     },
   });
 
-  // 14. Shell white: stars on a clear night, and snow on the branches.
+  // 14. Shell white: stars on a clear night.
   const starry = night && c.hour.cloud < 60 && !c.kind.fog;
-  if (starry || snowy > 0.3) {
+  if (starry) {
     blocks.push({
       id: 'gofun',
       name: 'Shell white',
@@ -1303,18 +1415,6 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
           }
           ctx.fill();
         }
-        if (snowy > 0.3) {
-          ctx.globalAlpha = 0.9;
-          ctx.beginPath();
-          for (const b of s.tree.branches) {
-            ctx.moveTo(b.x0, b.y0 - b.w);
-            ctx.lineTo(b.x1, b.y1 - 2);
-          }
-          ctx.lineWidth = 5;
-          ctx.lineCap = 'round';
-          ctx.stroke();
-          ctx.globalAlpha = 1;
-        }
       },
     });
   }
@@ -1322,6 +1422,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
   // 15. Blind printing: snow and the cartouche's border pressed into the paper without ink.
   blocks.push({
     id: 'blind',
+    keep: true,
     name: 'Blind (no ink)',
     pigment: '#ffffff',
     mode: 'blind',
@@ -1334,15 +1435,6 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
           ctx.translate(0, -h.rh * 0.12);
           houseRoof(ctx, h);
           ctx.restore();
-        }
-        ctx.fill();
-        const rng = mulberry32(s.seed + 41);
-        ctx.beginPath();
-        for (let i = 0; i < 14; i++) {
-          const x = rng() * IW;
-          const y = at(s.ground, x) + 30 + rng() * (IH - at(s.ground, x) - 40);
-          ctx.moveTo(x + 90, y);
-          ctx.ellipse(x, y, 60 + rng() * 80, 10 + rng() * 10, 0, 0, Math.PI * 2);
         }
         ctx.fill();
       }
@@ -1393,6 +1485,8 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
     thunder: c.kind.thunder,
     windX: c.windX * (0.15 + c.breeze),
     night,
+    reserve: reserveFor(s, place, c),
+    margin: [`${c.localDay} ${MONTH_NAMES[c.localMonth]} ${c.localYear}, ${clockWords(c.localHour)}`, 'thesandbox.page'],
   };
 }
 
@@ -1403,8 +1497,14 @@ export function setFont(family: string): void {
   fontFamily = family;
 }
 
-function cartoucheBox(ctx: CanvasRenderingContext2D, s: Scene, place: string, c: Cond) {
+export const getFont = () => fontFamily;
+
+let measurer: CanvasRenderingContext2D | null = null;
+
+function cartoucheBox(s: Scene, place: string, c: Cond) {
   const title = titleFor(c);
+  measurer ??= document.createElement('canvas').getContext('2d');
+  const ctx = measurer!;
   ctx.save();
   ctx.font = `700 33px ${fontFamily}`;
   const w1 = ctx.measureText(title).width;
@@ -1418,25 +1518,31 @@ function cartoucheBox(ctx: CanvasRenderingContext2D, s: Scene, place: string, c:
   return { x, y: 44, w, h, title, left };
 }
 
-function cartoucheField(ctx: CanvasRenderingContext2D, s: Scene, place: string, c: Cond) {
-  const b = cartoucheBox(ctx, s, place, c);
-  ctx.save();
-  ctx.globalAlpha = 0.9;
-  ctx.fillRect(b.x, b.y, b.w, b.h);
-  ctx.restore();
+function reserveFor(s: Scene, place: string, c: Cond): [number, number, number, number][] {
+  const b = cartoucheBox(s, place, c);
+  const sl = sealBox(b);
+  return [
+    [b.x - 14, b.y - 14, b.w + 28, b.h + 28],
+    [sl.x - 4, sl.y - 4, sl.size + 8, sl.size + 8],
+  ];
+}
+
+function sealBox(b: ReturnType<typeof cartoucheBox>) {
+  const size = 70;
+  return { x: b.left ? b.x + b.w - size : b.x, y: b.y + b.h + 24, size };
 }
 
 function cartoucheFrame(ctx: CanvasRenderingContext2D, s: Scene, place: string, c: Cond) {
-  const b = cartoucheBox(ctx, s, place, c);
+  const b = cartoucheBox(s, place, c);
   ctx.save();
-  ctx.lineWidth = 7;
+  ctx.lineWidth = 4;
   ctx.strokeStyle = ctx.fillStyle;
   ctx.strokeRect(b.x - 9, b.y - 9, b.w + 18, b.h + 18);
   ctx.restore();
 }
 
 function cartoucheLines(ctx: CanvasRenderingContext2D, s: Scene, place: string, c: Cond) {
-  const b = cartoucheBox(ctx, s, place, c);
+  const b = cartoucheBox(s, place, c);
   ctx.save();
   ctx.lineWidth = 2.4;
   ctx.strokeRect(b.x, b.y, b.w, b.h);
@@ -1452,10 +1558,7 @@ function cartoucheLines(ctx: CanvasRenderingContext2D, s: Scene, place: string, 
 }
 
 function seal(ctx: CanvasRenderingContext2D, s: Scene, c: Cond, place: string) {
-  const b = cartoucheBox(ctx, s, place, c);
-  const size = 70;
-  const x = b.left ? b.x + b.w - size : b.x;
-  const y = b.y + b.h + 22;
+  const { x, y, size } = sealBox(cartoucheBox(s, place, c));
   ctx.save();
   ctx.fillRect(x, y, size, size);
   ctx.globalCompositeOperation = 'destination-out';
