@@ -25,6 +25,8 @@ function reset(c: CanvasRenderingContext2D) {
   c.setTransform(1, 0, 0, 1, 0, 0);
   c.globalCompositeOperation = 'source-over';
   c.globalAlpha = 1;
+  // An opaque fill, so an erase isn't weakened by the last block's graded wipe.
+  c.fillStyle = '#000';
   if (FILTERS) c.filter = 'none';
 }
 
