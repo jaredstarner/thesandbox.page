@@ -939,5 +939,15 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Cambria', 'Georgia', 'serif'],
     },
+    {
+      // The one face on /woodblock-weather/: the print's cartouche and the page around it.
+      provider: fontProviders.fontsource(),
+      name: 'Shippori Mincho',
+      cssVariable: '--font-wbw',
+      weights: [400, 700],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
   ],
 });

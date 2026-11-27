@@ -1,0 +1,549 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+---
+
+<Bare
+  title="Woodblock weather"
+  description="The weather where you are, cut into blocks and printed one colour at a time, hour by hour through the week."
+>
+  <Font cssVariable="--font-wbw" slot="head" />
+
+  <main class="wbw" data-state="loading">
+    <section class="bench" aria-label="The print">
+      <div class="sheet">
+        <canvas class="print" role="img" aria-label="A woodblock print of the weather, being printed."></canvas>
+        <canvas class="finish" aria-hidden="true"></canvas>
+      </div>
+    </section>
+
+    <section class="text">
+      <header>
+        <a class="home" href="/">
+          thesandbox.page
+        </a>
+        <h1>Woodblock weather</h1>
+        <p class="deck">
+          The sky over a place, cut into blocks of cherry wood and printed one colour at a time: Prussian blue wiped to
+          nothing at the horizon, rain in fine lines, snow left as bare paper. It reprints itself as the weather
+          changes.
+        </p>
+      </header>
+
+      <form class="place" role="search" autocomplete="off">
+        <label for="wbw-place">Printed for</label>
+        <div class="field">
+          <input
+            id="wbw-place"
+            name="place"
+            type="text"
+            spellcheck="false"
+            placeholder="Any town or city"
+            role="combobox"
+            aria-expanded="false"
+            aria-controls="wbw-suggest"
+            aria-autocomplete="list"
+          />
+          <ul id="wbw-suggest" class="suggest" role="listbox" hidden></ul>
+        </div>
+      </form>
+
+      <p class="reading" aria-live="polite">
+        Finding the weather…
+      </p>
+
+      <div class="blocks">
+        <h2>The blocks</h2>
+        <p class="blocks-note">Carved in reverse, inked, and pulled in this order. Choose one to see its proof.</p>
+        <ol class="block-list"></ol>
+      </div>
+
+      <p class="hint">Move across the print to tilt it under the lamp: the mica and the embossing catch the light.</p>
+
+      <p class="credit">
+        Weather from <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0). Place names from{' '}
+        <a href="https://www.geonames.org/">GeoNames</a>.
+      </p>
+    </section>
+
+    <section class="week" aria-label="The week">
+      <div
+        class="strip"
+        role="slider"
+        tabindex="0"
+        aria-label="Hour to print"
+        aria-valuemin="0"
+        aria-valuemax="0"
+        aria-valuenow="0"
+      >
+        <canvas class="sky" aria-hidden="true"></canvas>
+        <div class="days" aria-hidden="true"></div>
+        <div class="now-mark" aria-hidden="true" hidden></div>
+        <div class="cursor" aria-hidden="true" hidden>
+          <span></span>
+        </div>
+      </div>
+      <button type="button" class="to-now" hidden>
+        Back to now
+      </button>
+    </section>
+
+    <noscript>
+      <p class="noscript">This print is cut and pulled by JavaScript, which is turned off here.</p>
+    </noscript>
+  </main>
+</Bare>
+
+<style is:global>
+  body:has(.wbw) {
+    margin: 0;
+    background: #17181b;
+  }
+
+  .wbw {
+    --wall: #17181b;
+    --ink: #ece4d2;
+    --ink-2: #b3aa98;
+    --ink-3: #7d766a;
+    --rule: #34332f;
+    --vermilion: #d4553a;
+    --serif: var(--font-wbw), Georgia, serif;
+    --lx: 30%;
+    --ly: 18%;
+    --week-h: 96px;
+    --pad: 28px;
+    --sheet-h: calc(100dvh - var(--week-h) - var(--pad) - 18px);
+
+    box-sizing: border-box;
+    position: relative;
+    isolation: isolate;
+    height: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(0, calc(var(--sheet-h) * 1092 / 1592)) minmax(300px, 400px);
+    grid-template-rows: minmax(0, 1fr) var(--week-h);
+    grid-template-areas:
+      'bench text'
+      'week week';
+    justify-content: center;
+    gap: 0 56px;
+    padding: var(--pad) 44px 18px var(--pad);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.55;
+    background:
+      radial-gradient(ellipse 60% 70% at var(--lx) var(--ly), rgb(255 236 200 / 0.07), transparent 70%), var(--wall);
+  }
+
+  .wbw *,
+  .wbw *::before,
+  .wbw *::after {
+    box-sizing: border-box;
+  }
+
+  .wbw [hidden] {
+    display: none !important;
+  }
+
+  .wbw .bench {
+    grid-area: bench;
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    height: var(--sheet-h);
+  }
+
+  .wbw .sheet {
+    position: relative;
+    height: 100%;
+    max-width: 100%;
+    aspect-ratio: 1092 / 1592;
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.06),
+      0 18px 40px -12px rgb(0 0 0 / 0.7),
+      0 4px 10px rgb(0 0 0 / 0.35);
+    background: #e9e0cb;
+    touch-action: none;
+  }
+
+  .wbw .sheet canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .wbw .finish {
+    pointer-events: none;
+  }
+
+  .wbw .text {
+    grid-area: text;
+    min-height: 0;
+    overflow: auto;
+    padding: 6px 2px 12px 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+  }
+
+  .wbw .home {
+    color: var(--ink-3);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+
+  .wbw .home:hover,
+  .wbw .home:focus-visible {
+    color: var(--ink);
+  }
+
+  .wbw h1 {
+    margin: 10px 0 10px;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+  }
+
+  .wbw .deck {
+    margin: 0 0 22px;
+    color: var(--ink-2);
+  }
+
+  .wbw .place label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--ink-3);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+
+  .wbw .field {
+    position: relative;
+  }
+
+  .wbw .place input {
+    width: 100%;
+    padding: 6px 0 7px;
+    border: 0;
+    border-bottom: 1px solid var(--ink-3);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font: 700 21px/1.2 var(--serif);
+    outline: none;
+  }
+
+  .wbw .place input:focus {
+    border-bottom-color: var(--vermilion);
+  }
+
+  .wbw .place input::placeholder {
+    color: var(--ink-3);
+    font-weight: 400;
+  }
+
+  .wbw .suggest {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    background: #24252a;
+    border: 1px solid var(--rule);
+    box-shadow: 0 12px 28px rgb(0 0 0 / 0.45);
+  }
+
+  .wbw .suggest li {
+    padding: 6px 12px;
+    cursor: pointer;
+    color: var(--ink-2);
+  }
+
+  .wbw .suggest li b {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .wbw .suggest li[aria-selected='true'],
+  .wbw .suggest li:hover {
+    background: #303137;
+    color: var(--ink);
+  }
+
+  .wbw .reading {
+    margin: 14px 0 22px;
+    min-height: 3.1em;
+    color: var(--ink-2);
+    font-size: 14px;
+  }
+
+  .wbw .reading b {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .wbw h2 {
+    margin: 0 0 2px;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .wbw .blocks-note {
+    margin: 0 0 10px;
+    color: var(--ink-3);
+    font-size: 13px;
+  }
+
+  .wbw .block-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
+    gap: 10px 8px;
+    margin: 0 0 18px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .wbw .block-list button {
+    display: grid;
+    gap: 4px;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-2);
+    font: 12px/1.25 var(--serif);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .wbw .block-list canvas {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    display: block;
+    outline: 1px solid transparent;
+    outline-offset: 2px;
+    transition:
+      outline-color 0.15s,
+      opacity 0.3s;
+  }
+
+  .wbw .block-list li[data-pending] canvas {
+    opacity: 0.35;
+  }
+
+  .wbw .block-list li[data-current] canvas {
+    outline-color: var(--ink-3);
+  }
+
+  .wbw .block-list button[aria-pressed='true'] canvas,
+  .wbw .block-list button:focus-visible canvas {
+    outline-color: var(--vermilion);
+  }
+
+  .wbw .block-list button[aria-pressed='true'] {
+    color: var(--ink);
+  }
+
+  .wbw .block-list .swatch {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 5px;
+    border-radius: 50%;
+    vertical-align: 0;
+  }
+
+  .wbw .hint,
+  .wbw .credit {
+    margin: 0 0 10px;
+    color: var(--ink-3);
+    font-size: 13px;
+  }
+
+  .wbw .credit a {
+    color: var(--ink-2);
+  }
+
+  .wbw .week {
+    grid-area: week;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding-top: 14px;
+  }
+
+  .wbw .strip {
+    position: relative;
+    flex: 1;
+    height: 66px;
+    cursor: ew-resize;
+    outline: none;
+    touch-action: none;
+  }
+
+  .wbw .strip .sky {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 40px;
+    display: block;
+  }
+
+  .wbw .strip:focus-visible .sky {
+    outline: 1px solid var(--vermilion);
+    outline-offset: 3px;
+  }
+
+  .wbw .days {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 44px;
+    height: 20px;
+    color: var(--ink-3);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .wbw .days span {
+    position: absolute;
+    top: 0;
+    padding-left: 5px;
+    border-left: 1px solid var(--rule);
+  }
+
+  .wbw .days b,
+  .wbw .days i {
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .wbw .now-mark {
+    position: absolute;
+    top: -9px;
+    width: 0;
+    height: 0;
+    margin-left: -5px;
+    border: 5px solid transparent;
+    border-top: 6px solid var(--vermilion);
+  }
+
+  .wbw .cursor {
+    position: absolute;
+    top: -3px;
+    height: 46px;
+    width: 9px;
+    margin-left: -4.5px;
+    border: 1.5px solid var(--ink);
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.5);
+    pointer-events: none;
+  }
+
+  .wbw .cursor span {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    translate: -50% 0;
+    padding: 1px 7px 2px;
+    background: var(--ink);
+    color: #17181b;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .wbw .to-now {
+    flex: none;
+    margin-top: 6px;
+    padding: 5px 12px 6px;
+    border: 1px solid var(--ink-3);
+    background: transparent;
+    color: var(--ink);
+    font: 13px var(--serif);
+    cursor: pointer;
+  }
+
+  .wbw .to-now:hover,
+  .wbw .to-now:focus-visible {
+    border-color: var(--vermilion);
+    outline: none;
+  }
+
+  .wbw .noscript {
+    position: absolute;
+    left: var(--pad);
+    bottom: 120px;
+    color: var(--ink-2);
+  }
+
+  @media (max-width: 860px) {
+    .wbw {
+      --pad: 16px;
+
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto auto;
+      grid-template-areas:
+        'bench'
+        'week'
+        'text';
+      padding: 16px 16px 28px;
+      height: auto;
+    }
+
+    .wbw .bench {
+      height: auto;
+    }
+
+    .wbw .sheet {
+      width: 100%;
+      height: auto;
+    }
+
+    .wbw .week {
+      padding-top: 26px;
+      flex-wrap: wrap;
+    }
+
+    .wbw .strip {
+      flex-basis: 100%;
+    }
+
+    .wbw .to-now {
+      margin-top: 0;
+    }
+
+    .wbw .text {
+      overflow: visible;
+      padding-top: 18px;
+    }
+
+    .wbw h1 {
+      font-size: 30px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .wbw .days i {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { start } from './_app';
+
+  const root = document.querySelector<HTMLElement>('.wbw');
+  if (root) start(root);
+</script>

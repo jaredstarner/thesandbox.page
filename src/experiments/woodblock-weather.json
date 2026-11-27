@@ -1,0 +1,8 @@
+{
+  "title": "Woodblock weather",
+  "summary": "The weather where you are, cut into blocks and printed one colour at a time like a Japanese woodblock print: a graded Prussian-blue sky, rain in fine lines, snow left as bare embossed paper, and mica that glints as you move; drag along the week to print the forecast hour by hour.",
+  "date": "2026-11-27",
+  "tags": ["canvas", "live-data", "pointer-events", "mokuhanga", "open-meteo", "lunar-ephemeris"],
+  "requires": ["canvas"],
+  "plot": 57
+}
