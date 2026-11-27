@@ -807,7 +807,7 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
   });
 
   // 3. Cloud: the undersides of the clouds, or the whole low ceiling when it's overcast.
-  if (c.hour.cloud > 12) {
+  if (c.hour.cloud > 12 || (night && shown.length > 0)) {
     const cloudCol = night ? mix('#585d6b', '#3a3e48', oc) : mix(mix('#b9bcc0', '#8b9096', oc), '#6c7178', storm);
     blocks.push({
       id: 'cloud',
@@ -1435,6 +1435,17 @@ export function makePlate(s: Scene, c: Cond, place: string): Plate {
             if (y > Math.min(at(s.far, x), at(s.far2, x)) - 10) continue;
             ctx.moveTo(x + r, y);
             ctx.arc(x, y, r, 0, Math.PI * 2);
+          }
+          ctx.fill();
+          // None in front of the tree or the clouds.
+          ctx.globalCompositeOperation = 'destination-out';
+          pads(ctx, s, -4);
+          ctx.fill();
+          ctx.beginPath();
+          for (const { cl, x } of shown) {
+            cloudShape(ctx, cl, x, 10, -10);
+            ctx.moveTo(x + cl.w * 0.55, cl.y + 6);
+            ctx.ellipse(x, cl.y + 6, cl.w * 0.55, 22, 0, 0, Math.PI * 2);
           }
           ctx.fill();
         }
