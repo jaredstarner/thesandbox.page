@@ -69,6 +69,8 @@ export interface FloorScene {
 }
 
 const OCHRE = 'rgba(164, 72, 40, ';
+/** The finished bar's width in world units, matching the raised window. */
+export const BAR_WIDTH = 0.1;
 
 export class Floor {
   private ctx: CanvasRenderingContext2D;
@@ -118,7 +120,17 @@ export class Floor {
       incise(ctx, (c) => tracePrim(c, vw, d.prim), 1.15, fresh);
     }
 
-    // Members cut deep.
+    // Members settled as stone: a wash the width of the finished bar, then the line cut deep.
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(132, 104, 76, 0.13)';
+    ctx.lineWidth = Math.max(4, BAR_WIDTH * vw.s);
+    ctx.beginPath();
+    for (const p of sc.cut) tracePiece(ctx, vw, p);
+    for (const p of sc.chiselled) tracePiece(ctx, vw, p);
+    ctx.stroke();
+    ctx.restore();
     for (const p of sc.cut) incise(ctx, (c) => tracePiece(c, vw, p), 2.3, 1, true);
     for (const p of sc.chiselled) incise(ctx, (c) => tracePiece(c, vw, p), 2.3, 1, true);
     if (sc.hover) {

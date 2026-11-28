@@ -84,6 +84,7 @@ export function start(): void {
   const chiselBtn = q<HTMLButtonElement>('.tools [data-tool="chisel"]');
   const raised = q<HTMLElement>('.raised');
   const commissionBtns = [...root.querySelectorAll<HTMLButtonElement>('.commissions button')];
+  const briefToggle = q<HTMLButtonElement>('.brief-toggle');
 
   const floor = new Floor(canvas);
   const windowView = new WindowView(q<HTMLCanvasElement>('.window'));
@@ -181,8 +182,10 @@ export function start(): void {
     floor.ensurePlaster(ci + 3);
     const narrow = w < 760;
     const toolsH = tools.offsetHeight;
+    // On a phone the brief folds away over the floor, so fit below the folded card.
+    const unfolded = card.classList.contains('folded') ? 0 : briefText.offsetHeight + hintText.offsetHeight;
     const pad = narrow
-      ? { l: 16, r: 16, t: card.offsetHeight + 14, b: toolsH + 14 }
+      ? { l: 16, r: 16, t: card.offsetHeight - unfolded + 14, b: toolsH + 14 }
       : { l: card.offsetLeft + card.offsetWidth + 30, r: 40, t: 30, b: toolsH + 40 };
     view = fitView(com.view, w, h, pad);
   };
@@ -306,9 +309,15 @@ export function start(): void {
     render();
   };
 
+  const fold = (on: boolean): void => {
+    card.classList.toggle('folded', on);
+    briefToggle.setAttribute('aria-expanded', on ? 'false' : 'true');
+  };
+
   const go = (i: number): void => {
     ci = Math.max(0, Math.min(COMMISSIONS.length - 1, i));
     com = COMMISSIONS[ci];
+    fold(false);
     setHint(null);
     span = null;
     drag = null;
@@ -372,6 +381,7 @@ export function start(): void {
     }
     const { x, y } = at(e);
     pointerXY = { x, y };
+    if (canvas.clientWidth < 760 && !card.classList.contains('folded')) fold(true);
     if (tool === 'chisel') {
       const sp = nearestSpan(x, y, e.pointerType === 'touch' ? 18 : 10);
       if (sp) toggleMark(sp);
@@ -606,7 +616,13 @@ export function start(): void {
   });
   undoBtn.addEventListener('click', undo);
   brushBtn.addEventListener('click', brush);
-  askBtn.addEventListener('click', ask);
+  askBtn.addEventListener('click', () => {
+    fold(false);
+    ask();
+  });
+  briefToggle.addEventListener('click', () => {
+    if (canvas.clientWidth < 760) fold(!card.classList.contains('folded'));
+  });
   raiseBtn.addEventListener('click', raise);
   commissionBtns.forEach((b, i) => b.addEventListener('click', () => go(i)));
   q<HTMLButtonElement>('.back').addEventListener('click', lower);

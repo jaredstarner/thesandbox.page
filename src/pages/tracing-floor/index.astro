@@ -38,7 +38,11 @@ import { COMMISSIONS } from './_commissions';
       </ol>
 
       <section class="brief" aria-live="polite">
-        <h2><span class="numeral"></span> <span class="title"></span></h2>
+        <h2>
+          <button type="button" class="brief-toggle" aria-expanded="true">
+            <span class="numeral"></span> <span class="title"></span>
+          </button>
+        </h2>
         <div class="text"></div>
         <p class="tally"></p>
         <p class="hint-text" hidden></p>
@@ -273,6 +277,16 @@ import { COMMISSIONS } from './_commissions';
 
   .tracing .brief .numeral {
     color: var(--ochre);
+  }
+
+  .tracing .brief-toggle {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: default;
   }
 
   .tracing .brief .text p {
@@ -524,6 +538,30 @@ import { COMMISSIONS } from './_commissions';
     .tracing .brief h2 {
       font-size: 1.08rem;
       margin-bottom: 4px;
+    }
+
+    .tracing .brief-toggle {
+      cursor: pointer;
+    }
+
+    .tracing .brief-toggle::after {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin: 0 0 3px 8px;
+      border-right: 1.5px solid var(--ink-soft);
+      border-bottom: 1.5px solid var(--ink-soft);
+      transform: rotate(-135deg);
+    }
+
+    .tracing .card.folded .brief-toggle::after {
+      transform: rotate(45deg);
+    }
+
+    .tracing .card.folded .brief .text,
+    .tracing .card.folded .hint-text {
+      display: none;
     }
 
     .tracing .brief .text p {
