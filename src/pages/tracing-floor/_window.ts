@@ -2,6 +2,7 @@
 // and the whole is seen from inside against daylight or from outside in sun.
 
 import type { Glazing } from './_commissions';
+import { BAR_WIDTH } from './_floor';
 import { rng, type Piece, type Rect } from './_geom';
 
 type RGB = [number, number, number];
@@ -35,7 +36,7 @@ interface Pane {
 }
 
 /** World units. */
-const BAR = 0.1;
+const BAR = BAR_WIDTH;
 const LEAD = 0.013;
 /** The inner splay, lit by the glass. */
 const SPLAY = 0.34;
@@ -322,6 +323,13 @@ export class WindowView {
       dGlass[i] = Math.sqrt(dGlass[i]);
       dStone[i] = Math.sqrt(dStone[i]);
     }
+    // Outside the opening, measure from the outline instead, so the splay, reveal, and hood run smooth
+    // past places where the tracery thickens against the arch.
+    const dEdge = new Float32Array(n);
+    for (let i = 0; i < n; i++) dEdge[i] = label[i] === -2 ? 1e12 : 0;
+    edt(dEdge, w, h);
+    const half = (BAR * px) / 2;
+    for (let i = 0; i < n; i++) if (label[i] === -2) dGlass[i] = Math.sqrt(dEdge[i]) + half;
 
     this.built = {
       w,
@@ -604,9 +612,9 @@ export class WindowView {
           if (outside && this.isJoint(b, x, y)) s *= 0.5;
           const amb = 0.42 + 0.3 * room;
           const sg = outside ? grain * grain : 1;
-          r = STONE_IN[0] * grain * amb + gr * (facing * 0.85 + 0.05 + s * 0.25) + s * 0.12 * 0.98 * sg;
-          gg = STONE_IN[1] * grain * amb + gG * (facing * 0.85 + 0.05 + s * 0.25) + s * 0.12 * 0.93 * sg;
-          bl = STONE_IN[2] * grain * amb + gB * (facing * 0.85 + 0.05 + s * 0.25) + s * 0.12 * 0.84 * sg;
+          r = STONE_IN[0] * grain * amb + gr * (facing * 0.85 + 0.05 + s * 0.25) + s * 0.1 * 0.98 * sg;
+          gg = STONE_IN[1] * grain * amb + gG * (facing * 0.85 + 0.05 + s * 0.25) + s * 0.1 * 0.93 * sg;
+          bl = STONE_IN[2] * grain * amb + gB * (facing * 0.85 + 0.05 + s * 0.25) + s * 0.1 * 0.84 * sg;
           if (outside) {
             alpha = Math.min(1, Math.max(0, band - dg + 0.5));
             // A pale arris where the splay meets the wall.
