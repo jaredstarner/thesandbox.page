@@ -163,10 +163,7 @@ const roseTargets: Target[] = [
     const out = (p: Vec, r: number): Vec => v(p.x * r, p.y * r);
     return {
       prim: line(a, b),
-      pieces: [
-        { kind: 'seg', p: a, q: out(a, OUTER) } as Piece,
-        { kind: 'seg', p: b, q: out(b, OUTER) } as Piece,
-      ],
+      pieces: [{ kind: 'seg', p: a, q: out(a, OUTER) } as Piece, { kind: 'seg', p: b, q: out(b, OUTER) } as Piece],
     };
   }),
 ];

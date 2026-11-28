@@ -619,8 +619,7 @@ export class WindowView {
         ny /= nl;
         nz /= nl;
         const grain =
-          0.88 +
-          0.24 * noise(x / (0.04 * px), y / (0.04 * px)) * (0.6 + 0.4 * noise(x / (0.35 * px), y / (0.35 * px)));
+          0.88 + 0.24 * noise(x / (0.04 * px), y / (0.04 * px)) * (0.6 + 0.4 * noise(x / (0.35 * px), y / (0.35 * px)));
         let r: number;
         let gg: number;
         let bl: number;
@@ -788,7 +787,16 @@ export class WindowView {
   }
 
   /** Coursed ashlar, laid from the springing line so the courses run through behind the window. */
-  private drawWall(side: Side, W: number, H: number, left: number, top: number, S: number, b: Built, glow: number): void {
+  private drawWall(
+    side: Side,
+    W: number,
+    H: number,
+    left: number,
+    top: number,
+    S: number,
+    b: Built,
+    glow: number,
+  ): void {
     const { ctx } = this;
     const inside = side === 'inside';
     const course = COURSE * S;

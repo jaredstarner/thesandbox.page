@@ -539,7 +539,14 @@ function makeGrain(): HTMLCanvasElement {
 }
 
 /** Smooth noise: a small random grid drawn up with bilinear smoothing. */
-function blotch(g: CanvasRenderingContext2D, w: number, h: number, cells: number, r: () => number, alpha: number): void {
+function blotch(
+  g: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  cells: number,
+  r: () => number,
+  alpha: number,
+): void {
   const cw = Math.max(2, Math.round((w / Math.max(w, h)) * cells));
   const ch = Math.max(2, Math.round((h / Math.max(w, h)) * cells));
   const t = document.createElement('canvas');
@@ -586,7 +593,8 @@ function makePlaster(w: number, h: number, dpr: number, seed: number, grain: HTM
     const len = 60 + r() * 220;
     const a = r() * Math.PI;
     const bend = (r() - 0.5) * len * 0.5;
-    g.strokeStyle = r() < 0.5 ? `rgba(255, 252, 244, ${0.05 + r() * 0.07})` : `rgba(110, 96, 78, ${0.025 + r() * 0.04})`;
+    g.strokeStyle =
+      r() < 0.5 ? `rgba(255, 252, 244, ${0.05 + r() * 0.07})` : `rgba(110, 96, 78, ${0.025 + r() * 0.04})`;
     g.lineWidth = 18 + r() * 50;
     g.beginPath();
     g.moveTo(x - Math.cos(a) * len, y - Math.sin(a) * len);

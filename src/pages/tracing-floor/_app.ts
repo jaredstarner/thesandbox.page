@@ -580,9 +580,7 @@ export function start(): void {
   // Raising the window.
 
   const stoneNow = (): Piece[] =>
-    com.glazing === 'open'
-      ? [...com.stone, ...chiselled()]
-      : [...com.stone, ...com.targets.flatMap((t) => t.pieces)];
+    com.glazing === 'open' ? [...com.stone, ...chiselled()] : [...com.stone, ...com.targets.flatMap((t) => t.pieces)];
 
   const raise = (): void => {
     const s = state();
