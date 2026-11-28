@@ -167,6 +167,8 @@ interface Built {
   dGlass: Float32Array;
   dStone: Float32Array;
   glass: Record<Side, HTMLCanvasElement | null>;
+  /** The bare opening before it is glazed: daylight from inside, the dark church from outside. */
+  opening: Record<Side, HTMLCanvasElement | null>;
   stone: Record<Side, HTMLCanvasElement | null>;
   glow: HTMLCanvasElement | null;
   /** Average transmitted colour, for the light on the wall. */
@@ -341,6 +343,7 @@ export class WindowView {
       dGlass,
       dStone,
       glass: { inside: null, outside: null },
+      opening: { inside: null, outside: null },
       stone: { inside: null, outside: null },
       glow: null,
       tint: [0, 0, 0],
@@ -351,6 +354,11 @@ export class WindowView {
     this.paintGlass('inside');
     this.paintGlow();
     this.paintStone('inside');
+    if (this.side === 'outside') {
+      this.paintGlass('outside');
+      this.paintStone('outside');
+    }
+    this.paintOpening();
     return true;
   }
 
@@ -502,6 +510,30 @@ export class WindowView {
     g.putImageData(img, 0, 0);
     b.glass[side] = c;
     if (side === 'inside' && count) b.tint = [sumT[0] / count, sumT[1] / count, sumT[2] / count];
+  }
+
+  private paintOpening(): void {
+    const b = this.built;
+    if (!b) return;
+    for (const side of ['inside', 'outside'] as Side[]) {
+      const c = document.createElement('canvas');
+      c.width = b.w;
+      c.height = b.h;
+      const g = c.getContext('2d');
+      if (!g) continue;
+      const img = g.createImageData(b.w, b.h);
+      for (let i = 0; i < b.w * b.h; i++) {
+        if (b.label[i] < 0) continue;
+        const y = Math.floor(i / b.w) / b.h;
+        const v = side === 'inside' ? 0.78 + 0.18 * (1 - y) : 0.012;
+        img.data[i * 4] = toByte(v * (side === 'inside' ? 0.92 : 1));
+        img.data[i * 4 + 1] = toByte(v * 0.96);
+        img.data[i * 4 + 2] = toByte(v);
+        img.data[i * 4 + 3] = 255;
+      }
+      g.putImageData(img, 0, 0);
+      b.opening[side] = c;
+    }
   }
 
   /** The light the glass throws: a heavily blurred copy at a sixth of the size. */
@@ -723,10 +755,14 @@ export class WindowView {
 
     this.drawWall(side, W, H, left, top, S, b, pGlow);
 
+    if (!b.glass[side]) this.paintGlass(side);
+    if (!b.stone[side]) this.paintStone(side);
     const glass = b.glass[side];
     const stone = b.stone[side];
+    const opening = b.opening[side];
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
+    if (opening && pGlass < 1) ctx.drawImage(opening, left, top, fw * S, fh * S);
     if (glass && pGlass > 0) {
       ctx.save();
       // Glazed from the sill upwards.
