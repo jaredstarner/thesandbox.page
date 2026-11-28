@@ -376,10 +376,12 @@ function drawCompass(ctx: CanvasRenderingContext2D, c: Vec, p: Vec, dividers: bo
   // Shadow: the tips touch the floor, the hinge throws its shadow down and to the right.
   ctx.save();
   ctx.fillStyle = 'rgba(46, 34, 24, 0.22)';
-  legShape(ctx, hx + lift * 0.7, hy + lift * 0.45, c, 7, 1.2);
+  ctx.filter = 'blur(2px)';
+  legShape(ctx, hx + lift * 0.7, hy + lift * 0.45, c, 9, 1.4);
   ctx.fill();
-  legShape(ctx, hx + lift * 0.7, hy + lift * 0.45, p, 7, 1.2);
+  legShape(ctx, hx + lift * 0.7, hy + lift * 0.45, p, 9, 1.4);
   ctx.fill();
+  ctx.filter = 'none';
   ctx.restore();
 
   for (const tip of [c, p]) {
@@ -388,10 +390,17 @@ function drawCompass(ctx: CanvasRenderingContext2D, c: Vec, p: Vec, dividers: bo
     g.addColorStop(0.45, '#4d4a46');
     g.addColorStop(1, '#2a2826');
     ctx.fillStyle = g;
-    legShape(ctx, hx, hy, tip, 6.5, 1.1);
+    legShape(ctx, hx, hy, tip, 9, 1.4);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(20, 18, 16, 0.6)';
-    ctx.lineWidth = 0.6;
+    ctx.strokeStyle = 'rgba(20, 18, 16, 0.7)';
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+    // A worn bright edge down the leg.
+    ctx.strokeStyle = 'rgba(230, 226, 218, 0.45)';
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(hx - 2, hy - 1);
+    ctx.lineTo(tip.x - 0.4, tip.y - 0.3);
     ctx.stroke();
   }
   // Point tips.
@@ -550,11 +559,28 @@ function makePlaster(w: number, h: number, dpr: number, seed: number, grain: HTM
   g.scale(dpr, dpr);
   const r = rng(seed * 7919 + 13);
 
-  g.fillStyle = '#e4dccd';
+  g.fillStyle = '#e8e0cf';
   g.fillRect(0, 0, w, h);
-  blotch(g, w, h, 7, r, 0.22);
-  blotch(g, w, h, 19, r, 0.16);
-  blotch(g, w, h, 48, r, 0.1);
+  blotch(g, w, h, 6, r, 0.1);
+  blotch(g, w, h, 17, r, 0.09);
+  blotch(g, w, h, 46, r, 0.08);
+  blotch(g, w, h, 130, r, 0.07);
+
+  // Trowel sweeps from when the layer was laid.
+  g.lineCap = 'round';
+  for (let i = 0; i < 70; i++) {
+    const x = r() * w;
+    const y = r() * h;
+    const len = 60 + r() * 220;
+    const a = r() * Math.PI;
+    const bend = (r() - 0.5) * len * 0.5;
+    g.strokeStyle = r() < 0.5 ? `rgba(255, 252, 244, ${0.05 + r() * 0.07})` : `rgba(110, 96, 78, ${0.025 + r() * 0.04})`;
+    g.lineWidth = 18 + r() * 50;
+    g.beginPath();
+    g.moveTo(x - Math.cos(a) * len, y - Math.sin(a) * len);
+    g.quadraticCurveTo(x - Math.sin(a) * bend, y + Math.cos(a) * bend, x + Math.cos(a) * len, y + Math.sin(a) * len);
+    g.stroke();
+  }
 
   // Where feet have gone: wide grey smudges.
   for (let i = 0; i < 9; i++) {
@@ -562,7 +588,7 @@ function makePlaster(w: number, h: number, dpr: number, seed: number, grain: HTM
     const y = r() * h;
     const rad = (0.08 + r() * 0.22) * Math.max(w, h);
     const rg = g.createRadialGradient(x, y, 0, x, y, rad);
-    rg.addColorStop(0, `rgba(120, 108, 92, ${0.05 + r() * 0.06})`);
+    rg.addColorStop(0, `rgba(120, 108, 92, ${0.03 + r() * 0.05})`);
     rg.addColorStop(1, 'rgba(120, 108, 92, 0)');
     g.fillStyle = rg;
     g.fillRect(0, 0, w, h);
@@ -571,8 +597,8 @@ function makePlaster(w: number, h: number, dpr: number, seed: number, grain: HTM
   // Older drawings, brushed over: lines and arcs with no connection to one another.
   const unit = Math.min(w, h);
   g.lineCap = 'round';
-  for (let i = 0; i < 46; i++) {
-    const worn = 0.05 + r() * 0.14;
+  for (let i = 0; i < 54; i++) {
+    const worn = 0.08 + r() * 0.18;
     const dash = [10 + r() * 90, 4 + r() * 30, 2 + r() * 40, 6 + r() * 20];
     g.setLineDash(dash);
     g.lineDashOffset = r() * 100;
@@ -622,9 +648,9 @@ function makePlaster(w: number, h: number, dpr: number, seed: number, grain: HTM
   g.save();
   g.globalCompositeOperation = 'soft-light';
   const lg = g.createLinearGradient(0, 0, w, h);
-  lg.addColorStop(0, 'rgba(255, 246, 222, 0.9)');
-  lg.addColorStop(0.55, 'rgba(255, 246, 222, 0.15)');
-  lg.addColorStop(1, 'rgba(40, 30, 20, 0.7)');
+  lg.addColorStop(0, 'rgba(255, 246, 222, 0.85)');
+  lg.addColorStop(0.5, 'rgba(255, 246, 222, 0.2)');
+  lg.addColorStop(1, 'rgba(40, 30, 20, 0.55)');
   g.fillStyle = lg;
   g.fillRect(0, 0, w, h);
   g.restore();
@@ -633,7 +659,7 @@ function makePlaster(w: number, h: number, dpr: number, seed: number, grain: HTM
   g.globalCompositeOperation = 'multiply';
   const vg = g.createRadialGradient(w * 0.38, h * 0.36, unit * 0.2, w * 0.5, h * 0.5, Math.max(w, h) * 0.85);
   vg.addColorStop(0, 'rgba(255, 255, 255, 1)');
-  vg.addColorStop(1, 'rgba(150, 132, 112, 1)');
+  vg.addColorStop(1, 'rgba(176, 158, 134, 1)');
   g.fillStyle = vg;
   g.fillRect(0, 0, w, h);
   g.restore();

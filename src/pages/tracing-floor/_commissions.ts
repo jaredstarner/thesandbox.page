@@ -92,7 +92,7 @@ const baseStone: Piece[] = [
 
 const windowView: Rect = { x0: -1.55, y0: -3.25, x1: 1.55, y1: 2.05 };
 const windowBounds: Rect = { x0: -3.4, y0: -4.2, x1: 3.4, y1: 3.4 };
-const windowFrame: Rect = { x0: -1.42, y0: -3.38, x1: 1.42, y1: 2.12 };
+const windowFrame: Rect = { x0: -1.5, y0: -3.46, x1: 1.5, y1: 2.24 };
 
 const lancetTargets: Target[] = [
   { prim: greatL, pieces: [arcPts(S2, 2, apex, S1)] },
@@ -325,7 +325,7 @@ export const COMMISSIONS: Commission[] = [
     solution: roseSolution,
     view: { x0: -1.4, y0: -1.4, x1: 1.4, y1: 1.4 },
     bounds: { x0: -2.6, y0: -2.6, x1: 2.6, y1: 2.6 },
-    frame: { x0: -1.36, y0: -1.36, x1: 1.36, y1: 1.36 },
+    frame: { x0: -1.66, y0: -1.66, x1: 1.66, y1: 1.66 },
     glazing: 'rose',
     window: 'A rose of six petals',
   },
