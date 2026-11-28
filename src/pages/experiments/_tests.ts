@@ -626,6 +626,8 @@ export const TECHNIQUES: Record<string, Technique> = {
   mokuhanga: { label: 'Mokuhanga (woodblock printing)' },
   'open-meteo': { label: 'Open-Meteo forecasts' },
   'lunar-ephemeris': { label: 'Sun and Moon positions' },
+  'compass-and-straightedge': { label: 'Compass-and-straightedge construction' },
+  'gothic-tracery': { label: 'Gothic tracery' },
 };
 
 /** Query a permission without ever prompting; null when the browser will not say. */

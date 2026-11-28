@@ -1,0 +1,8 @@
+{
+  "title": "Tracing floor",
+  "summary": "A master mason's plaster floor, a pair of compasses, and a straightedge: set out gothic windows from nothing but arcs and lines, from a single lancet through two lights, a circle, and four foils to a rose of six petals, then watch each one cut in stone, glazed, and lit from behind.",
+  "date": "2026-11-28",
+  "tags": ["canvas", "pointer-events", "game", "compass-and-straightedge", "gothic-tracery", "distance-transform"],
+  "requires": ["canvas"],
+  "plot": 58
+}
