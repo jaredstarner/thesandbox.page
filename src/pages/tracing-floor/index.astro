@@ -1,0 +1,584 @@
+---
+import { Font } from 'astro:assets';
+import Bare from '../../layouts/Bare.astro';
+import { COMMISSIONS } from './_commissions';
+---
+
+<Bare
+  title="Tracing floor"
+  description="A master mason's plaster floor and a pair of compasses: set out gothic windows from nothing but arcs and straight lines, then see each one cut in stone, glazed, and lit."
+>
+  <Font cssVariable="--font-tracing" slot="head" />
+  <Font cssVariable="--font-tracing-sc" slot="head" />
+
+  <main class="tracing" data-tool="compass" data-mode="floor">
+    <canvas class="floor" aria-label="The plaster floor, with the window being set out on it."></canvas>
+
+    <aside class="card">
+      <header>
+        <a class="home" href="/">thesandbox.page</a>
+        <h1>Tracing floor</h1>
+        <p class="intro">
+          The plaster floor of a masons’ drawing loft. Windows were drawn out here at full size with compasses and a
+          straightedge, and templates cut from the lines in thin board or sheet metal guided the carving of every
+          stone. York Minster and Wells Cathedral still have theirs.
+        </p>
+      </header>
+
+      <ol class="commissions" aria-label="Commissions">
+        {
+          COMMISSIONS.map((c, i) => (
+            <li>
+              <button type="button" data-commission={i} title={c.title} aria-label={`${c.numeral}. ${c.title}`}>
+                {c.numeral}
+              </button>
+            </li>
+          ))
+        }
+      </ol>
+
+      <section class="brief" aria-live="polite">
+        <h2><span class="numeral"></span> <span class="title"></span></h2>
+        <div class="text"></div>
+        <p class="tally"></p>
+        <p class="hint-text" hidden></p>
+      </section>
+
+      <div class="actions">
+        <button type="button" class="ask">Ask the master</button>
+        <button type="button" class="raise" disabled>Raise the window</button>
+      </div>
+    </aside>
+
+    <nav class="tools" aria-label="Tools">
+      <button type="button" data-tool="compass" aria-pressed="true" title="Compasses (C)">
+        <svg viewBox="0 0 32 32" aria-hidden="true"
+          ><circle cx="16" cy="6" r="3"></circle><path d="M14.6 8.4 8 28M17.4 8.4 24 28"></path></svg
+        >
+        <span>Compasses</span>
+      </button>
+      <button type="button" data-tool="dividers" aria-pressed="false" title="Dividers (D)">
+        <svg viewBox="0 0 32 32" aria-hidden="true"
+          ><circle cx="16" cy="6" r="2.4"></circle><path d="M15 8 10 28M17 8l5 20M11.5 22h9"></path></svg
+        >
+        <span>Dividers</span>
+      </button>
+      <button type="button" data-tool="rule" aria-pressed="false" title="Rule (R)">
+        <svg viewBox="0 0 32 32" aria-hidden="true"
+          ><path d="m4 22 20-16 4 4-20 16z"></path><path d="m10 21 2 2M14 18l2 2M18 14l2 2M22 11l2 2"></path></svg
+        >
+        <span>Rule</span>
+      </button>
+      <button type="button" data-tool="chisel" aria-pressed="false" title="Chisel (S)" hidden>
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M20 4h5v12l-5 0zM20 16h5l-1 4h-3z"></path><path d="M22.5 20 8 28"></path></svg>
+        <span>Chisel</span>
+      </button>
+      <span class="sep" aria-hidden="true"></span>
+      <button type="button" class="undo" title="Undo (Ctrl+Z)">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 9 5 14l5 5"></path><path d="M5 14h13a7 7 0 0 1 0 14h-4"></path></svg>
+        <span>Undo</span>
+      </button>
+      <button type="button" class="brush" title="Brush the floor clean">
+        <svg viewBox="0 0 32 32" aria-hidden="true"
+          ><path d="M18 4 12 16"></path><path d="M8 16h10l2 12H6z"></path><path d="M10 22v6M13 22v6M16 22v6"></path></svg
+        >
+        <span>Brush</span>
+      </button>
+    </nav>
+
+    <section class="raised" hidden aria-label="The window, raised">
+      <canvas class="window" role="img" aria-label="The window cut in stone and glazed."></canvas>
+      <div class="plaque">
+        <p class="plaque-kicker"></p>
+        <h2 class="plaque-title"></h2>
+        <p class="plaque-note"></p>
+        <div class="side" role="group" aria-label="Seen from">
+          <button type="button" data-side="inside" aria-pressed="true">Inside</button>
+          <button type="button" data-side="outside" aria-pressed="false">Outside</button>
+        </div>
+        <div class="plaque-actions">
+          <button type="button" class="back">Back to the floor</button>
+          <button type="button" class="next">Next commission</button>
+        </div>
+      </div>
+    </section>
+
+    <noscript>
+      <p class="noscript">The floor needs JavaScript to strike its arcs.</p>
+    </noscript>
+  </main>
+</Bare>
+
+<script>
+  import { start } from './_app';
+  start();
+</script>
+
+<style is:global>
+  body:has(.tracing) {
+    margin: 0;
+    background: #17130f;
+    overflow: hidden;
+  }
+
+  .tracing {
+    --paper: #f2ead9;
+    --ink: #2b2118;
+    --ink-soft: #5d4a39;
+    --ochre: #a4482a;
+    --brass: #c9a45c;
+    position: fixed;
+    inset: 0;
+    font-family: var(--font-tracing), Georgia, serif;
+    color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tracing button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .tracing .floor,
+  .tracing .window {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+  }
+
+  .tracing .floor {
+    cursor: crosshair;
+  }
+
+  /* The commission slip, pinned to the floor. */
+  .tracing .card {
+    position: absolute;
+    top: 22px;
+    left: 22px;
+    width: 336px;
+    max-height: calc(100% - 132px);
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 18px 22px 20px;
+    background:
+      radial-gradient(120% 80% at 20% 0%, rgba(255, 255, 255, 0.55), transparent 60%),
+      linear-gradient(176deg, #f6efe0, #ece2cd);
+    border-radius: 2px;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.6) inset,
+      6px 10px 22px rgba(30, 20, 10, 0.32),
+      2px 3px 4px rgba(30, 20, 10, 0.18);
+    transform: rotate(-0.6deg);
+  }
+
+  .tracing .card::before {
+    content: '';
+    position: absolute;
+    top: 9px;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    margin-left: -4.5px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #d9d4cb, #6d6760 60%, #3a3632);
+    box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.35);
+  }
+
+  .tracing .home {
+    display: inline-block;
+    margin-top: 6px;
+    font-family: var(--font-tracing-sc), Georgia, serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+
+  .tracing .home:hover,
+  .tracing .home:focus-visible {
+    color: var(--ochre);
+  }
+
+  .tracing h1 {
+    margin: 2px 0 6px;
+    font-family: var(--font-tracing-sc), Georgia, serif;
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .tracing .intro {
+    margin: 0 0 14px;
+    font-size: 0.93rem;
+    line-height: 1.42;
+    color: var(--ink-soft);
+  }
+
+  .tracing .commissions {
+    display: flex;
+    gap: 6px;
+    margin: 0 0 14px;
+    padding: 0 0 12px;
+    list-style: none;
+    border-bottom: 1px solid rgba(80, 60, 40, 0.22);
+  }
+
+  .tracing .commissions button {
+    position: relative;
+    min-width: 36px;
+    height: 34px;
+    padding: 0 6px;
+    border: 1px solid rgba(80, 60, 40, 0.35);
+    border-radius: 2px;
+    background: transparent;
+    font-family: var(--font-tracing-sc), Georgia, serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .tracing .commissions button[aria-current='true'] {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .tracing .commissions button.done::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: -4px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--ochre);
+    box-shadow: 0 0 0 2px #f2ead9;
+  }
+
+  .tracing .brief h2 {
+    margin: 0 0 8px;
+    font-family: var(--font-tracing-sc), Georgia, serif;
+    font-size: 1.28rem;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .tracing .brief .numeral {
+    color: var(--ochre);
+  }
+
+  .tracing .brief .text p {
+    margin: 0 0 8px;
+    font-size: 0.98rem;
+    line-height: 1.45;
+  }
+
+  .tracing .tally {
+    margin: 10px 0 0;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+  }
+
+  .tracing .tally strong {
+    font-style: normal;
+    color: var(--ink);
+  }
+
+  .tracing .hint-text {
+    margin: 8px 0 0;
+    padding-left: 10px;
+    border-left: 2px solid var(--ochre);
+    font-size: 0.93rem;
+    line-height: 1.4;
+    color: #7a3420;
+  }
+
+  .tracing .actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .tracing .actions button,
+  .tracing .plaque-actions button {
+    flex: 1;
+    min-height: 40px;
+    padding: 6px 10px;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    background: transparent;
+    font-size: 0.98rem;
+  }
+
+  .tracing .actions .raise:not(:disabled) {
+    background: var(--ink);
+    color: var(--paper);
+    animation: tracing-ready 1.6s ease-in-out 2;
+  }
+
+  .tracing .actions button:disabled {
+    opacity: 0.38;
+    cursor: default;
+  }
+
+  @keyframes tracing-ready {
+    50% {
+      box-shadow: 0 0 0 5px rgba(164, 72, 42, 0.35);
+    }
+  }
+
+  /* The tool tray. */
+  .tracing .tools {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    padding: 6px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, #3d2f23, #2a2018);
+    border-radius: 4px;
+    box-shadow:
+      0 1px 0 rgba(255, 230, 190, 0.15) inset,
+      0 8px 20px rgba(20, 12, 6, 0.45);
+  }
+
+  .tracing .tools button {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    min-width: 70px;
+    padding: 6px 8px 5px;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: #e9dcc4;
+    font-size: 0.82rem;
+  }
+
+  .tracing .tools svg {
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .tracing .tools button[aria-pressed='true'] {
+    background: rgba(201, 164, 92, 0.2);
+    color: #f3d79c;
+    box-shadow: 0 -2px 0 var(--brass) inset;
+  }
+
+  .tracing .tools button:hover {
+    background: rgba(255, 240, 210, 0.08);
+  }
+
+  .tracing .tools .sep {
+    width: 1px;
+    margin: 6px 4px;
+    background: rgba(233, 220, 196, 0.2);
+  }
+
+  .tracing:not([data-commission='open']) .tools .brush {
+    display: none;
+  }
+
+  /* The raised window. */
+  .tracing .raised {
+    position: absolute;
+    inset: 0;
+    background: #120f0c;
+  }
+
+  .tracing .plaque {
+    position: absolute;
+    left: 26px;
+    bottom: 26px;
+    width: 300px;
+    box-sizing: border-box;
+    padding: 14px 18px 16px;
+    background: linear-gradient(176deg, #f3ecdc, #e6dbc4);
+    border-radius: 2px;
+    box-shadow: 4px 8px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .tracing .plaque-kicker {
+    margin: 0;
+    font-family: var(--font-tracing-sc), Georgia, serif;
+    font-size: 0.86rem;
+    letter-spacing: 0.05em;
+    color: var(--ochre);
+  }
+
+  .tracing .plaque-title {
+    margin: 2px 0 6px;
+    font-family: var(--font-tracing-sc), Georgia, serif;
+    font-size: 1.35rem;
+    line-height: 1.15;
+  }
+
+  .tracing .plaque-note {
+    margin: 0 0 10px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
+  }
+
+  .tracing .side {
+    display: flex;
+    margin-bottom: 10px;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+  }
+
+  .tracing .side button {
+    flex: 1;
+    min-height: 34px;
+    border: 0;
+    background: transparent;
+  }
+
+  .tracing .side button[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .tracing .plaque-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .tracing .noscript {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    text-align: center;
+    color: #e9dcc4;
+  }
+
+  @media (max-width: 760px) {
+    .tracing .card {
+      top: 0;
+      left: 0;
+      right: 0;
+      width: auto;
+      max-height: 46%;
+      padding: 10px 14px 10px;
+      transform: none;
+      border-radius: 0;
+    }
+
+    .tracing .card::before {
+      display: none;
+    }
+
+    .tracing header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-direction: row-reverse;
+    }
+
+    .tracing .home {
+      margin: 0;
+      font-size: 0.78rem;
+    }
+
+    .tracing h1 {
+      font-size: 1.45rem;
+      margin: 0 0 6px;
+    }
+
+    .tracing .intro {
+      display: none;
+    }
+
+    .tracing .commissions {
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+    }
+
+    .tracing .commissions button {
+      flex: 1;
+      min-width: 0;
+      height: 30px;
+    }
+
+    .tracing .commissions li {
+      flex: 1;
+    }
+
+    .tracing .brief h2 {
+      font-size: 1.08rem;
+      margin-bottom: 4px;
+    }
+
+    .tracing .brief .text p {
+      font-size: 0.9rem;
+      line-height: 1.36;
+      margin-bottom: 4px;
+    }
+
+    .tracing .tally {
+      margin-top: 4px;
+      font-size: 0.88rem;
+    }
+
+    .tracing .actions {
+      margin-top: 8px;
+    }
+
+    .tracing .actions button {
+      min-height: 36px;
+      font-size: 0.92rem;
+    }
+
+    .tracing .tools {
+      left: 0;
+      right: 0;
+      bottom: 0;
+      justify-content: space-between;
+      transform: none;
+      border-radius: 0;
+      padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
+    }
+
+    .tracing .tools button {
+      min-width: 0;
+      flex: 1;
+      padding: 5px 2px 4px;
+      font-size: 0.72rem;
+    }
+
+    .tracing .tools svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .tracing .tools .sep {
+      margin: 6px 1px;
+    }
+
+    .tracing .plaque {
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      width: auto;
+      padding: 10px 14px 12px;
+    }
+
+    .tracing .plaque-note {
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+    }
+  }
+</style>

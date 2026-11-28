@@ -949,5 +949,24 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['Georgia', 'serif'],
     },
+    {
+      // /tracing-floor/: the master's slip and the window's plaque.
+      provider: fontProviders.fontsource(),
+      name: 'Alegreya',
+      cssVariable: '--font-tracing',
+      weights: ['400 700'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Alegreya SC',
+      cssVariable: '--font-tracing-sc',
+      weights: [700],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+    },
   ],
 });
